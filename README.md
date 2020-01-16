@@ -1,6 +1,6 @@
-# Komunitin (komunitin)
+# komunitin
 
-open source platform featuring
+Open System for Exchange Communities
 
 ## Install the dependencies
 ```bash
