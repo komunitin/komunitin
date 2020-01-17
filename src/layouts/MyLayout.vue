@@ -43,7 +43,7 @@
       content-class="bg-grey-2"
     >
       <q-list>
-        <q-item-label header>Menu</q-item-label>
+        <q-item-label header>{{ $t('Menu') }}</q-item-label>
         <q-item
           clickable
           tag="a"
@@ -53,8 +53,8 @@
             <q-icon name="account_circle" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Login</q-item-label>
-            <q-item-label caption>login</q-item-label>
+            <q-item-label>{{ $t('Login') }}</q-item-label>
+            <q-item-label caption>{{ $t('Log in') }}</q-item-label>
           </q-item-section>
         </q-item>
 
@@ -68,7 +68,7 @@
             <q-icon name="help" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Help</q-item-label>
+            <q-item-label>{{ $t('Help') }}</q-item-label>
             <q-item-label caption>github.com/komunitin</q-item-label>
           </q-item-section>
         </q-item>
@@ -83,8 +83,8 @@
             <q-icon name="help" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>New Exchange</q-item-label>
-            <q-item-label caption>github.com/komunitin</q-item-label>
+            <q-item-label>{{ $t('new_exchange') }}</q-item-label>
+            <q-item-label caption>{{ $t('create a new exchange') }}</q-item-label>
           </q-item-section>
         </q-item>
 
