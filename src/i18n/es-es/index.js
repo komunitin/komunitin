@@ -2,10 +2,10 @@
 // so you can safely delete all default props below
 
 export default {
-  home: "Home",
-  welcome_to: "Welcome to",
-  failed: "Action failed",
-  success: "Action was successful",
+  home: "Inico",
+  welcome_to: "Benvingut/da a",
+  failed: "Error en proceso",
+  success: "Proceso concluido",
   komuniti_is: "Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d'intercanvi.",
   new_in_komunitin: "Nou/ nova a komunitin?",
   find_exchange: "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social",
