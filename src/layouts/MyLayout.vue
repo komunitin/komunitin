@@ -43,12 +43,11 @@
       content-class="bg-grey-2"
     >
       <q-list>
-        <q-item-label header>Essential Links</q-item-label>
+        <q-item-label header>Menu</q-item-label>
         <q-item
           clickable
           tag="a"
-          target="_blank"
-          href="https://quasar.dev"
+          href="/login"
         >
           <q-item-section avatar>
             <q-icon name="account_circle" />
@@ -58,10 +57,12 @@
             <q-item-label caption>login</q-item-label>
           </q-item-section>
         </q-item>
+
         <q-item
           clickable
           tag="a"
-          href="/login"
+          target="_blank"
+          href="https://github.com/komunitin/komunitin"
         >
           <q-item-section avatar>
             <q-icon name="help" />
@@ -71,62 +72,22 @@
             <q-item-label caption>github.com/komunitin</q-item-label>
           </q-item-section>
         </q-item>
+
         <q-item
           clickable
           tag="a"
           target="_blank"
-          href="https://chat.quasar.dev"
+          href="https://github.com/komunitin/komunitin"
         >
           <q-item-section avatar>
-            <q-icon name="chat" />
+            <q-icon name="help" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Discord Chat Channel</q-item-label>
-            <q-item-label caption>chat.quasar.dev</q-item-label>
+            <q-item-label>New Exchange</q-item-label>
+            <q-item-label caption>github.com/komunitin</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://forum.quasar.dev"
-        >
-          <q-item-section avatar>
-            <q-icon name="record_voice_over" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Forum</q-item-label>
-            <q-item-label caption>forum.quasar.dev</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://twitter.quasar.dev"
-        >
-          <q-item-section avatar>
-            <q-icon name="rss_feed" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Twitter</q-item-label>
-            <q-item-label caption>@quasarframework</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://facebook.quasar.dev"
-        >
-          <q-item-section avatar>
-            <q-icon name="public" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Facebook</q-item-label>
-            <q-item-label caption>@QuasarFramework</q-item-label>
-          </q-item-section>
-        </q-item>
+
       </q-list>
     </q-drawer>
 
