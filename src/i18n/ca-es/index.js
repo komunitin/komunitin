@@ -3,7 +3,7 @@
 
 export default {
   home: "Inici",
-  "Log in": "Log in",
+  "Log in": "Registra't",
   'Create a new exchange': "Crear una nova comunitat",
   menu: "Menú",
   welcome_to: "Benvingut/da a",
@@ -16,11 +16,12 @@ export default {
     "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social.",
   use_location: "Utilitza localització",
   or_select: "o selecciona un país per trobar-la.",
-  select_country: "Select a country",
+  select_country: "Selecciona un país",
   find_comunnity: "Troba la teva comunitat i comença a participar.",
   if_not_have_community:
     "Si no tens una comunitat a prop teu sempre pots crear-la i començar una nova",
+  new_exchange: "Nova ecoxarxa",
+  help: "Ajuda",
   need_help: "Necessites ajuda?",
-  new_exchange: "New Exchange",
-  help: "Ajuda"
+  "create a new exchange": "Crear una nova ecoxarxa"
 };
