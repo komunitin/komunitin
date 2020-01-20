@@ -9,14 +9,16 @@ export default {
   welcome_to: "Welcome to",
   failed: "Action failed",
   success: "Action was successful",
-  komuniti_is: "Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d'intercanvi.",
-  new_in_komunitin: "Nou/ nova a komunitin?",
-  find_exchange: "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social",
+  komuniti_is: "Komunitin is an open source platform that offers social currency management for exchange communities.",
+  new_in_komunitin: "New to komunitin?",
+  find_exchange: "Find an exchange network near you and start using social currency",
   use_location: "Use location",
-  or_select: "o selecciona un país per trobar-la.",
+  or_select: "or select a country to find it",
   select_country: "Select a country",
-  find_comunnity: "Troba la teva comunitat i comença a participar.",
-  if_not_have_community: "Si no tens una comunitat a prop teu sempre pots crear-la i començar una nova",
+  find_comunnity: "Find your community and start participating.",
+  if_not_have_community: "If you don't have a community near you, you can always create one and start a new one",
   new_exchange: "New Exchange",
-  need_help: "Necessites ajuda?"
+  help: "Help",
+  need_help: "You need help?",
+  "create a new exchange": "Create a new exchange"
 };

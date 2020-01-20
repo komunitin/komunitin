@@ -16,6 +16,22 @@
         </q-toolbar-title>
 
         <div>
+
+        <q-select 
+           flat
+           dense
+           round
+           outlined
+           v-model='locale'
+           @input="setLocale"
+           emit-value
+           :options="[
+           { label: 'English', value: 'en-us' },
+           { label: 'Catatà' , value: 'ca-es' },
+           { label: 'Español', value: 'es-es' },
+           ]"
+         />
+
           <q-btn
             flat
             dense
@@ -68,7 +84,7 @@
             <q-icon name="help" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>{{ $t('Help') }}</q-item-label>
+            <q-item-label>{{ $t('help') }}</q-item-label>
             <q-item-label caption>github.com/komunitin</q-item-label>
           </q-item-section>
         </q-item>
@@ -103,8 +119,27 @@ export default {
 
   data () {
     return {
-      leftDrawerOpen: false
+      leftDrawerOpen: false,
+      locale: this.$q.lang.isoName
+    }
+
+
+
+
+  },
+  methods: {
+    // @todo Mantener idioma en sesión.
+    // @todo Devolver label de idioma y value.
+    setLocale (locale) {
+      // cambiamos Vue-i18n locale 
+      this.$i18n.locale = locale
+      // Cargar el pack de idioma de Quasar de forma dinámica
+      import(`quasar/lang/${locale}`).then(({ default: messages }) => {
+        this.$q.lang.set(messages)
+      })
     }
   }
+
+
 }
 </script>

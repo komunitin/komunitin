@@ -86,7 +86,7 @@
       <q-btn
         color="primary"
         text-color="white"
-        :label="$t('Help')"
+        :label="$t('help')"
       />
     </div>
 
