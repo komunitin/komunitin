@@ -3,9 +3,10 @@
 
 export default {
   home: "Inici",
-  "Log in": "Registra't",
-  'Create a new exchange': "Crear una nova comunitat",
-  menu: "Menú",
+  Login: "",
+  "Log in": "Inicia sessió",
+  "Create a new exchange": "Crear una nova comunitat",
+  Menu: "Menú",
   welcome_to: "Benvingut/da a",
   failed: "Error",
   success: "Acció processada",
