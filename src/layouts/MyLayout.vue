@@ -25,11 +25,8 @@
            v-model='locale'
            @input="setLocale"
            emit-value
-           :options="[
-           { label: 'English', value: 'en-us' },
-           { label: 'Catatà' , value: 'ca-es' },
-           { label: 'Español', value: 'es-es' },
-           ]"
+           map-options
+           :options="langs"
          />
 
           <q-btn
@@ -120,16 +117,25 @@ export default {
   data () {
     return {
       leftDrawerOpen: false,
-      locale: this.$q.lang.isoName
+      locale: this.$q.lang.isoName,
+      langs: [
+        {
+          label: 'Es',
+          value: 'es-es'
+        },
+        {
+          label: 'Ca',
+          value: 'ca-es'
+        },
+        {
+          label: 'En',
+          value: 'en-us'
+        }
+      ]
     }
-
-
-
-
   },
   methods: {
     // @todo Mantener idioma en sesión.
-    // @todo Devolver label de idioma y value.
     setLocale (locale) {
       // cambiamos Vue-i18n locale 
       this.$i18n.locale = locale

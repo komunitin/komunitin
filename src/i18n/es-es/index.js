@@ -3,24 +3,26 @@
 
 export default {
   home: "Inico",
-  Login: "Log in",
+  Login: "Login",
   "Log in": "Inicia sesión",
   "Create a new exchange": "Crear una nueva comunidad",
   Menu: "Menú",
-  welcome_to: "Benvingut/da a",
+  welcome_to: "Bienvenido/da a",
   failed: "Error en proceso",
   success: "Proceso concluido",
   komuniti_is:
-    "Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d'intercanvi.",
-  new_in_komunitin: "Nou/ nova a komunitin?",
-  use_location: "Use location",
+    "Komunitin es una plataforma de código abierto que ofrece la gestión de moneda social para las comunidades de intercambio",
+  new_in_komunitin: "¿Nuevo / nueva en komunitin?",
+  use_location: "Utilizar localización",
   find_exchange:
-    "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social",
-  or_select: "o selecciona un país per trobar-la.",
-  select_country: "Select a country",
+    "Encuentra una red de intercambio cerca de ti y comienza a utilizar moneda social",
+  or_select: "o selecciona un país para encontrarla.",
+  select_country: "Selecciona un país",
   find_comunnity: "Troba la teva comunitat i comença a participar.",
   if_not_have_community:
-    "Si no tens una comunitat a prop teu sempre pots crear-la i començar una nova",
-  new_exchange: "New Exchange",
-  need_help: "Necessites ajuda?"
+    "Si no tienes una comunidad cerca de usted siempre puedes crearla y empezar una nueva",
+  new_exchange: "Nueva ecored",
+  help: "Ayuda",
+  need_help: "¿Necesitas ayuda?",
+  "create a new exchange": "Crear una nova ecoxarxa"
 };
