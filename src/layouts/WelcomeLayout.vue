@@ -112,7 +112,7 @@
 
 <script>
 export default {
-  name: 'MyLayout',
+  name: 'WelcomeLayout',
 
   data () {
     return {

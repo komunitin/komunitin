@@ -3,7 +3,7 @@
 
 export default {
   home: "Inici",
-  Login: "",
+  Login: "Login",
   "Log in": "Inicia sessió",
   "Create a new exchange": "Crear una nova comunitat",
   Menu: "Menú",
