@@ -3,12 +3,15 @@
   "version": "0.0.1",
   "description": "open source platform featuring",
   "productName": "Komunitin",
-  "cordovaId": "org.cordova.quasar.app",
+  "cordovaId": "org.komunitin.movil.app",
   "capacitorId": "",
-  "author": "edumag <edu@lesolivex.com>",
+  "author": "komunitin <team@komunitin.com>",
   "private": true,
   "scripts": {
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "echo \"No test specified\" && exit 0",
+    "dev": "quasar dev",
+    "build": "quasar build",
+    "build:pwa": "quasar build -m pwa"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
