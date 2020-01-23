@@ -4,9 +4,16 @@ import messages from 'src/i18n'
 
 Vue.use(VueI18n)
 
+// Idioma por defecto.
+var lang = 'en-us';
+
+if ( localStorage.getItem('lang') ) {
+  lang = localStorage.getItem('lang');
+}
+
 const i18n = new VueI18n({
-  locale: 'en-us',
-  fallbackLocale: 'en-us',
+  locale: lang,
+  fallbackLocale: lang,
   messages
 })
 

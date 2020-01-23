@@ -111,13 +111,15 @@
 </template>
 
 <script>
+
 export default {
   name: 'WelcomeLayout',
 
   data () {
     return {
       leftDrawerOpen: false,
-      locale: this.$q.lang.isoName,
+      // locale: this.$q.lang.isoName,
+      locale: localStorage.getItem('lang'),
       langs: [
         {
           label: 'Es',
@@ -139,10 +141,14 @@ export default {
     setLocale (locale) {
       // cambiamos Vue-i18n locale 
       this.$i18n.locale = locale
-      // Cargar el pack de idioma de Quasar de forma dinámica
-      import(`quasar/lang/${locale}`).then(({ default: messages }) => {
-        this.$q.lang.set(messages)
-      })
+      localStorage.setItem('lang', locale)
+
+      // @todo Cargar el pack de idioma de Quasar de forma dinámica
+      // import(`quasar/lang/${locale}`).then(({ default: messages }) => {
+      //   this.$q.lang.set(messages)
+      // })
+      // console.log(localStorage)
+
     }
   }
 
