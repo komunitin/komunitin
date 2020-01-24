@@ -119,7 +119,7 @@ export default {
     return {
       leftDrawerOpen: false,
       // locale: this.$q.lang.isoName,
-      locale: localStorage.getItem('lang'),
+      locale: this.$i18n.locale,
       langs: [
         {
           label: 'Es',
@@ -137,7 +137,6 @@ export default {
     }
   },
   methods: {
-    // @todo Mantener idioma en sesión.
     setLocale (locale) {
       // cambiamos Vue-i18n locale 
       this.$i18n.locale = locale

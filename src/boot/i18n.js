@@ -7,9 +7,12 @@ Vue.use(VueI18n)
 // Idioma por defecto.
 var lang = 'en-us';
 
+// Si tenemos idioma en localStorage lo recofemos.
 if ( localStorage.getItem('lang') ) {
   lang = localStorage.getItem('lang');
 }
+
+console.log({localStorage: localStorage});
 
 const i18n = new VueI18n({
   locale: lang,
