@@ -17,17 +17,17 @@
 
         <div>
 
-        <q-select 
-           flat
-           dense
-           round
-           outlined
-           v-model='locale'
-           @input="setLocale"
-           emit-value
-           map-options
-           :options="langs"
-         />
+          <q-select
+            flat
+            dense
+            round
+            outlined
+            v-model='locale'
+            @input="setLocale"
+            emit-value
+            map-options
+            :options="langs"
+          />
 
           <q-btn
             flat
@@ -123,11 +123,11 @@ export default {
       langs: [
         {
           label: 'Es',
-          value: 'es-es'
+          value: 'es'
         },
         {
           label: 'Ca',
-          value: 'ca-es'
+          value: 'ca'
         },
         {
           label: 'En',
@@ -143,10 +143,10 @@ export default {
       localStorage.setItem('lang', locale)
 
       // @todo Cargar el pack de idioma de Quasar de forma dinámica
-      // import(`quasar/lang/${locale}`).then(({ default: messages }) => {
-      //   this.$q.lang.set(messages)
-      // })
-      // console.log(localStorage)
+      import(`quasar/lang/${locale}`).then(({ default: messages }) => {
+        this.$q.lang.set(messages)
+      })
+      console.log(localStorage)
 
     }
   }
