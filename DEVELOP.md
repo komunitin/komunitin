@@ -17,4 +17,4 @@ qasar dev -m pwa
 
 ### Preparando Visual Studio
 
-<https://quasar.dev/start/vs-code-configuration>
+https://quasar.dev/start/vs-code-configuration
