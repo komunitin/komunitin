@@ -101,7 +101,7 @@
         <q-item
           clickable
           tag="a"
-          href="/new-exchange"
+          :to="{ name: 'NewExchangePage' }"
         >
           <q-item-section avatar>
             <q-icon name="help" />
@@ -152,7 +152,7 @@ export default {
       this.$i18n.locale = locale
       localStorage.setItem('lang', locale)
 
-      // @todo Cargar el pack de idioma de Quasar de forma dinámica
+      // Cargar el pack de idioma de Quasar de forma dinámica
       import(`quasar/lang/${locale}`).then(({ default: messages }) => {
         this.$q.lang.set(messages)
       })

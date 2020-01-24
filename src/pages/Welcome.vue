@@ -75,6 +75,7 @@
         color="primary"
         text-color="white"
         :label="$t('new_exchange')"
+        :to="{ name: 'NewExchangePage' }"
       />
 
     </div>
