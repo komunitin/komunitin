@@ -3,6 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn
+          v-if="$router.currentRoute.path == '/'"
           flat
           dense
           round
@@ -10,6 +11,17 @@
           icon="menu"
           aria-label="Menu"
         />
+
+        <q-btn
+          v-else
+          flat
+          dense
+          round
+          icon="arrow_back"
+          aria-label="Home"
+          @click="$router.back()"
+        />
+
 
         <q-toolbar-title>
           Komunitin
@@ -89,8 +101,7 @@
         <q-item
           clickable
           tag="a"
-          target="_blank"
-          href="https://github.com/komunitin/komunitin"
+          href="/new-exchange"
         >
           <q-item-section avatar>
             <q-icon name="help" />
@@ -111,9 +122,8 @@
 </template>
 
 <script>
-
 export default {
-  name: 'WelcomeLayout',
+  name: 'BaseLayout',
 
   data () {
     return {
@@ -146,7 +156,7 @@ export default {
       import(`quasar/lang/${locale}`).then(({ default: messages }) => {
         this.$q.lang.set(messages)
       })
-      console.log(localStorage)
+      console.log(this.$router.currentRoute.path)
 
     }
   }
