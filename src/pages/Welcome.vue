@@ -10,85 +10,111 @@
     </div>
     <p>{{ $t('komuniti_is') }}</p>
 
-    <div class="box-section-main">
-      <h6>{{ $t('new_in_komunitin') }}</h6>
-      <p>
-        {{ $t('find_exchange') }}
-      </p>
-      <q-btn
-        color="primary"
-        text-color="white"
-        :label="$t('use_location')"
-      />
-      <p>
-        {{ $t('or_select') }}
-      </p>
-
-      <div>
-        <q-btn-dropdown
-          class="col1"
-          color="primary"
-          :label="$t('select_country')"
-        >
-          <q-list>
-            <q-item
-              clickable
-              v-close-popup
-            >
-              <q-item-section>
-                <q-item-label>Spain</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-close-popup
-            >
-              <q-item-section>
-                <q-item-label>France</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-close-popup
-            >
-              <q-item-section>
-                <q-item-label>Italy</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-      </div>
-
-    </div>
-
     <div class="highlights box-section-main">
       <p>{{ $t('find_comunnity') }}</p>
     </div>
 
-    <div class="box-section-main">
+    <div class="q-pa-md row items-start q-gutter-md">
 
-      <p>{{ $t('if_not_have_community') }}</p>
+      <q-card class="welcome-card col-xs-12 col-sm-5 col-md-3">
+        <q-card-section>
+          <div class="text-h6">{{ $t('new_in_komunitin') }}</div>
+          <div class="text-subtitle2">{{ $t('find_exchange') }}</div>
+        </q-card-section>
 
-      <q-btn
-        color="primary"
-        text-color="white"
-        :label="$t('new_exchange')"
-        :to="{ name: 'NewExchangePage' }"
-      />
+        <q-card-section class="q-pt-none">
 
-    </div>
+          <q-btn
+            color="primary"
+            text-color="white"
+            :label="$t('use_location')"
+          />
+          <p>
+            {{ $t('or_select') }}
+          </p>
 
-    <div class="box-section-main">
+          <div>
+            <q-btn-dropdown
+              class="col1"
+              color="primary"
+              :label="$t('select_country')"
+            >
+              <q-list>
+                <q-item
+                  clickable
+                  v-close-popup
+                >
+                  <q-item-section>
+                    <q-item-label>Spain</q-item-label>
+                  </q-item-section>
+                </q-item>
 
-      <p>{{ $t('need_help') }}</p>
+                <q-item
+                  clickable
+                  v-close-popup
+                >
+                  <q-item-section>
+                    <q-item-label>France</q-item-label>
+                  </q-item-section>
+                </q-item>
 
-      <q-btn
-        color="primary"
-        text-color="white"
-        :label="$t('help')"
-      />
+                <q-item
+                  clickable
+                  v-close-popup
+                >
+                  <q-item-section>
+                    <q-item-label>Italy</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
+          </div>
+        </q-card-section>
+      </q-card>
+
+      <q-card class="welcome-card col-xs-12 col-sm-5 col-md-3">
+        <q-card-section>
+          <div class="text-h6">{{ $t('Crear nueva ecoxarxa') }}</div>
+          <div class="text-subtitle2">{{ $t('if_not_have_community') }}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+
+          <div class="box-section-main">
+
+            <q-btn
+              color="primary"
+              text-color="white"
+              :label="$t('new_exchange')"
+              :to="{ name: 'NewExchangePage' }"
+            />
+
+          </div>
+
+        </q-card-section>
+      </q-card>
+
+      <q-card class="welcome-card col-xs-12 col-sm-5 col-md-3">
+        <q-card-section>
+          <div class="text-h6">{{ $t('need_help') }}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+
+          <div class="box-section-main">
+
+            <p>{{ $t('need_help') }}</p>
+
+            <q-btn
+              color="primary"
+              text-color="white"
+              :label="$t('help')"
+            />
+          </div>
+
+        </q-card-section>
+      </q-card>
+
     </div>
 
   </q-page>
@@ -99,3 +125,9 @@ export default {
   name: 'PageIndex'
 }
 </script>
+<style>
+.welcome-card {
+  margin-bottom: 4px;
+}
+</style>
+
