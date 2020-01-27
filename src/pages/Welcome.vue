@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-pa-md main-page">
-    <h6>{{ $t('welcome_to') }}</h6>
+    <h6>{{ $t('Welcome to') }}</h6>
     <div class="main-logo">
       <img
         alt="logo"
@@ -8,18 +8,18 @@
         src="~assets/komunitin-logo.svg"
       >
     </div>
-    <p>{{ $t('komuniti_is') }}</p>
+    <p>{{ $t('Komunitin is') }}</p>
 
     <div class="highlights box-section-main">
-      <p>{{ $t('find_comunnity') }}</p>
+      <p>{{ $t('Find Comunnity') }}</p>
     </div>
 
     <div class="q-pa-md row items-start q-gutter-md">
 
       <q-card class="welcome-card col-xs-12 col-sm-5 col-md-3">
         <q-card-section>
-          <div class="text-h6">{{ $t('new_in_komunitin') }}</div>
-          <div class="text-subtitle2">{{ $t('find_exchange') }}</div>
+          <div class="text-h6">{{ $t('New in komunitin') }}</div>
+          <div class="text-subtitle2">{{ $t('Find exchange nearby') }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -27,17 +27,17 @@
           <q-btn
             color="primary"
             text-color="white"
-            :label="$t('use_location')"
+            :label="$t('Use location')"
           />
           <p>
-            {{ $t('or_select') }}
+            {{ $t('or select country') }}
           </p>
 
           <div>
             <q-btn-dropdown
               class="col1"
               color="primary"
-              :label="$t('select_country')"
+              :label="$t('Select conuntry')"
             >
               <q-list>
                 <q-item
@@ -75,7 +75,7 @@
       <q-card class="welcome-card col-xs-12 col-sm-5 col-md-3">
         <q-card-section>
           <div class="text-h6">{{ $t('Crear nueva ecoxarxa') }}</div>
-          <div class="text-subtitle2">{{ $t('if_not_have_community') }}</div>
+          <div class="text-subtitle2">{{ $t('"If not have community"') }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -85,7 +85,7 @@
             <q-btn
               color="primary"
               text-color="white"
-              :label="$t('new_exchange')"
+              :label="$t('New exchange')"
               :to="{ name: 'NewExchangePage' }"
             />
 
@@ -96,14 +96,14 @@
 
       <q-card class="welcome-card col-xs-12 col-sm-5 col-md-3">
         <q-card-section>
-          <div class="text-h6">{{ $t('need_help') }}</div>
+          <div class="text-h6">{{ $t('Need help') }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
 
           <div class="box-section-main">
 
-            <p>{{ $t('need_help') }}</p>
+            <p>{{ $t('Need help') }}</p>
 
             <q-btn
               color="primary"

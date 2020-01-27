@@ -9,28 +9,29 @@ export default {
   "Log in": "Inicia sessió",
   "Create a new exchange": "Crear una nova comunitat",
   Menu: "Menú",
-  welcome_to: "Benvingut/da a",
+  "Welcome to": "Benvingut/da a",
   failed: "Error",
   success: "Acció processada",
-  komuniti_is:
+  "Komunitin is":
     "Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d'intercanvi.",
-  new_in_komunitin: "Nou/ nova a komunitin?",
-  find_exchange:
+  "New in komunitin": "Nou/ nova a komunitin?",
+  "Find exchange nearby":
     "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social.",
-  use_location: "Utilitza localització",
-  or_select: "o selecciona un país per trobar-la.",
-  select_country: "Selecciona un país",
-  find_comunnity: "Troba la teva comunitat i comença a participar.",
-  if_not_have_community:
+  "Use location": "Utilitza localització",
+  "or select country": "o selecciona un país per trobar-la.",
+  "Select conuntry": "Selecciona un país",
+  "Find Comunnity": "Troba la teva comunitat i comença a participar.",
+  "If not have community":
     "Si no tens una comunitat a prop teu sempre pots crear-la i començar una nova",
-  new_exchange: "Nova ecoxarxa",
+  "New exchange": "Nova ecoxarxa",
   help: "Ajuda",
-  need_help: "Necessites ajuda?",
+  "Need help": "Necessites ajuda?",
   new_exchange_page: {
     "create a new exchange": "Crear una nova ecoxarxa",
     "To open a new network":
       "To open a new network on this server, carefully read and follow the directions below. ",
-    "Do you really want to open a new network": "Do you really want to open a new network?",  
+    "Do you really want to open a new network":
+      "Do you really want to open a new network?",
     "If you want":
       "If you want to just create an account on a network within the system, go to https://www.komunitin.com and select your country.",
     "If you want to try":

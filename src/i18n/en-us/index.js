@@ -7,29 +7,30 @@ export default {
   "Log in": "Log in",
   Menu: "Menu",
   "Create a new exchange": "Create a new exchange",
-  welcome_to: "Welcome to",
+  "Welcome to": "Welcome to",
   failed: "Action failed",
   success: "Action was successful",
-  komuniti_is:
+  "Komunitin is":
     "Komunitin is an open source platform that offers social currency management for exchange communities.",
-  new_in_komunitin: "New to komunitin?",
-  find_exchange:
+  "New in komunitin": "New to komunitin?",
+  "Find exchange nearby":
     "Find an exchange network near you and start using social currency",
-  use_location: "Use location",
-  or_select: "or select a country to find it",
-  select_country: "Select a country",
-  find_comunnity: "Find your community and start participating.",
-  if_not_have_community:
+  "Use location": "Use location",
+  "or select country": "or select a country to find it",
+  "Select conuntry": "Select a country",
+  "Find Comunnity": "Find your community and start participating.",
+  "If not have community":
     "If you don't have a community near you, you can always create one and start a new one",
-  new_exchange: "New Exchange",
+  "New exchange": "New Exchange",
   help: "Help",
-  need_help: "You need help?",
+  "Need help": "You need help?",
   "create a new exchange": "Create a new exchange",
   new_exchange_page: {
     "create a new exchange": "Crear una nova ecoxarxa",
     "To open a new network":
       "To open a new network on this server, carefully read and follow the directions below. ",
-    "Do you really want to open a new network": "Do you really want to open a new network?",  
+    "Do you really want to open a new network":
+      "Do you really want to open a new network?",
     "If you want":
       "If you want to just create an account on a network within the system, go to https://www.komunitin.com and select your country.",
     "If you want to try":
