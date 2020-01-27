@@ -45,6 +45,7 @@
 </template>
 
 <script>
+// Información legal para crear nueva red.
 export default {
   name: 'NewExchangePage'
 }

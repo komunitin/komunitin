@@ -121,6 +121,9 @@
 </template>
 
 <script>
+/**
+ * Layout base con menú lateral.
+ */
 export default {
   name: 'BaseLayout',
 
@@ -129,6 +132,7 @@ export default {
       leftDrawerOpen: false,
       // locale: this.$q.lang.isoName,
       locale: this.$i18n.locale,
+      // Idiomas disponibles.
       langs: [
         {
           label: 'Es',
@@ -146,6 +150,9 @@ export default {
     }
   },
   methods: {
+    // Define idioma seleccionado por el usuario y lo
+    // guardamos en el LocalStorage.
+    // @args locale: Idioma seleccionado.
     setLocale (locale) {
       // cambiamos Vue-i18n locale 
       this.$i18n.locale = locale

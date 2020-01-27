@@ -121,6 +121,7 @@
 </template>
 
 <script>
+// Pagina de bienvenida.
 export default {
   name: 'PageIndex'
 }
