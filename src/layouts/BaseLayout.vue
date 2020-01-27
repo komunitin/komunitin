@@ -22,7 +22,6 @@
           @click="$router.back()"
         />
 
-
         <q-toolbar-title>
           Komunitin
         </q-toolbar-title>
@@ -107,7 +106,7 @@
             <q-icon name="help" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>{{ $t('new_exchange') }}</q-item-label>
+            <q-item-label>{{ $t('New exchange') }}</q-item-label>
             <q-item-label caption>{{ $t('create a new exchange') }}</q-item-label>
           </q-item-section>
         </q-item>

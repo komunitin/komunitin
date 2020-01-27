@@ -7,29 +7,30 @@ export default {
   "Log in": "Inicia sesión",
   "Create a new exchange": "Crear una nueva comunidad",
   Menu: "Menú",
-  welcome_to: "Bienvenido/da a",
+  "Welcome to": "Bienvenido/da a",
   failed: "Error en proceso",
   success: "Proceso concluido",
-  komuniti_is:
+  "Komunitin is":
     "Komunitin es una plataforma de código abierto que ofrece la gestión de moneda social para las comunidades de intercambio",
-  new_in_komunitin: "¿Nuevo / nueva en komunitin?",
-  use_location: "Utilizar localización",
-  find_exchange:
+  "New in komunitin": "¿Nuevo / nueva en komunitin?",
+  "Use location": "Utilizar localización",
+  "Find exchange nearby":
     "Encuentra una red de intercambio cerca de ti y comienza a utilizar moneda social",
-  or_select: "o selecciona un país para encontrarla.",
-  select_country: "Selecciona un país",
-  find_comunnity: "Troba la teva comunitat i comença a participar.",
-  if_not_have_community:
+  "or select country": "o selecciona un país para encontrarla.",
+  "Select conuntry": "Selecciona un país",
+  "Find Comunnity": "Troba la teva comunitat i comença a participar.",
+  "If not have community":
     "Si no tienes una comunidad cerca de usted siempre puedes crearla y empezar una nueva",
-  new_exchange: "Nueva ecored",
+  "New exchange": "Nueva ecored",
   help: "Ayuda",
-  need_help: "¿Necesitas ayuda?",
+  "Need help": "¿Necesitas ayuda?",
   "create a new exchange": "Crear una nova ecoxarxa",
   new_exchange_page: {
     "create a new exchange": "Crear una nova ecoxarxa",
     "To open a new network":
       "To open a new network on this server, carefully read and follow the directions below. ",
-    "Do you really want to open a new network": "Do you really want to open a new network?",  
+    "Do you really want to open a new network":
+      "Do you really want to open a new network?",
     "If you want":
       "If you want to just create an account on a network within the system, go to https://www.komunitin.com and select your country.",
     "If you want to try":
