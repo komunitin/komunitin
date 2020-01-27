@@ -1,0 +1,85 @@
+.main-page #logo {
+  max-width: 90%;
+}
+
+.main-page h6 {
+  font-size: 1.85rem;
+  font-weight: 500;
+  line-height: 2rem;
+  letter-spacing: 0.0125em;
+  color: #000;
+  opacity: 0.6;
+  margin: 10px 0;
+}
+
+.main-page .q-page-container {
+  padding: 50px 10px 4px 10px;
+}
+
+.main-page p {
+  color: #000;
+  opacity: 0.6;
+  margin: 8px;
+}
+
+.main-page a {
+  color: #98C725;
+}
+
+.main-page .highlights {
+  font-weight: bold;
+  width: 100%;
+}
+
+.main-page .main-logo {
+  display: block;
+  width: 100%;
+}
+
+.main-page .box-section-main {
+  width: 100%;
+  margin: 20px 0 0 0;
+}
+
+.main-page .q-btn {
+  max-width: 98%;
+  width: 300px;
+}
+
+#q-app .q-field__append.q-field__marginal.row.no-wrap.items-center.q-anchor--skip {
+  padding: 0;
+  margin: 0;
+  height: auto;
+  width: auto;
+  font-size: 25px;
+  color: white;
+}
+
+#q-app .q-field__native.row.items-center {
+  color: white;
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+  height: auto;
+  min-height: 12px;
+  font-weight: normal;
+}
+
+#q-app .q-field__control.relative-position.row.no-wrap {
+  min-height: auto;
+}
+
+#q-app .q-field.row.no-wrap.items-start.q-select.q-field--auto-height.q-select--without-input.q-field--outlined.q-field--float.q-field--dense {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+}
+
+#q-app .q-field--outlined .q-field__control::before {
+  border: 0;
+}
+
+#q-app .q-field {
+  font-size: 16px;
+}
+/*# sourceMappingURL=app.css.map */

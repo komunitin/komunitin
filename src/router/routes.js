@@ -2,9 +2,10 @@
 const routes = [
   {
     path: '/',
-    component: () => import('layouts/WelcomeLayout.vue'),
+    component: () => import('layouts/BaseLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Index.vue') }
+      { path: '', component: () => import('pages/Welcome.vue') },
+      { path: '/new-exchange/', name: 'NewExchangePage', component: () => import('pages/NewExchangePage.vue') }
     ]
   }
 ]

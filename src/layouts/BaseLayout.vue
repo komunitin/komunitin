@@ -3,12 +3,23 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn
+          v-if="$router.currentRoute.path == '/'"
           flat
           dense
           round
           @click="leftDrawerOpen = !leftDrawerOpen"
           icon="menu"
           aria-label="Menu"
+        />
+
+        <q-btn
+          v-else
+          flat
+          dense
+          round
+          icon="arrow_back"
+          aria-label="Home"
+          @click="$router.back()"
         />
 
         <q-toolbar-title>
@@ -89,14 +100,13 @@
         <q-item
           clickable
           tag="a"
-          target="_blank"
-          href="https://github.com/komunitin/komunitin"
+          :to="{ name: 'NewExchangePage' }"
         >
           <q-item-section avatar>
             <q-icon name="help" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>{{ $t('new_exchange') }}</q-item-label>
+            <q-item-label>{{ $t('New exchange') }}</q-item-label>
             <q-item-label caption>{{ $t('create a new exchange') }}</q-item-label>
           </q-item-section>
         </q-item>
@@ -111,15 +121,18 @@
 </template>
 
 <script>
-
+/**
+ * Layout base con menú lateral.
+ */
 export default {
-  name: 'WelcomeLayout',
+  name: 'BaseLayout',
 
   data () {
     return {
       leftDrawerOpen: false,
       // locale: this.$q.lang.isoName,
       locale: this.$i18n.locale,
+      // Idiomas disponibles.
       langs: [
         {
           label: 'Es',
@@ -137,16 +150,19 @@ export default {
     }
   },
   methods: {
+    // Define idioma seleccionado por el usuario y lo
+    // guardamos en el LocalStorage.
+    // @args locale: Idioma seleccionado.
     setLocale (locale) {
       // cambiamos Vue-i18n locale 
       this.$i18n.locale = locale
       localStorage.setItem('lang', locale)
 
-      // @todo Cargar el pack de idioma de Quasar de forma dinámica
+      // Cargar el pack de idioma de Quasar de forma dinámica
       import(`quasar/lang/${locale}`).then(({ default: messages }) => {
         this.$q.lang.set(messages)
       })
-      console.log(localStorage)
+      console.log(this.$router.currentRoute.path)
 
     }
   }
