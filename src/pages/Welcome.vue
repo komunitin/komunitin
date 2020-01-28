@@ -2,11 +2,7 @@
   <q-page class="q-pa-md main-page">
     <h6>{{ $t('Welcome to') }}</h6>
     <div class="main-logo">
-      <img
-        alt="logo"
-        id="logo"
-        src="~assets/komunitin-logo.svg"
-      >
+      <img alt="logo" id="logo" src="~assets/komunitin-logo.svg" />
     </div>
     <p>{{ $t('Komunitin is') }}</p>
 
@@ -15,7 +11,6 @@
     </div>
 
     <div class="q-pa-md row items-start q-gutter-md">
-
       <q-card class="welcome-card col-xs-12 col-sm-5 col-md-3">
         <q-card-section>
           <div class="text-h6">{{ $t('New in komunitin') }}</div>
@@ -23,7 +18,6 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-
           <q-btn
             color="primary"
             text-color="white"
@@ -40,28 +34,19 @@
               :label="$t('Select conuntry')"
             >
               <q-list>
-                <q-item
-                  clickable
-                  v-close-popup
-                >
+                <q-item clickable v-close-popup>
                   <q-item-section>
                     <q-item-label>Spain</q-item-label>
                   </q-item-section>
                 </q-item>
 
-                <q-item
-                  clickable
-                  v-close-popup
-                >
+                <q-item clickable v-close-popup>
                   <q-item-section>
                     <q-item-label>France</q-item-label>
                   </q-item-section>
                 </q-item>
 
-                <q-item
-                  clickable
-                  v-close-popup
-                >
+                <q-item clickable v-close-popup>
                   <q-item-section>
                     <q-item-label>Italy</q-item-label>
                   </q-item-section>
@@ -79,18 +64,14 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-
           <div class="box-section-main">
-
             <q-btn
               color="primary"
               text-color="white"
               :label="$t('New exchange')"
               :to="{ name: 'NewExchangePage' }"
             />
-
           </div>
-
         </q-card-section>
       </q-card>
 
@@ -100,35 +81,27 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-
           <div class="box-section-main">
-
             <p>{{ $t('Need help') }}</p>
 
-            <q-btn
-              color="primary"
-              text-color="white"
-              :label="$t('help')"
-            />
+            <q-btn color="primary" text-color="white" :label="$t('help')" />
           </div>
-
         </q-card-section>
       </q-card>
-
     </div>
-
   </q-page>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
+import Component from 'vue-class-component';
+
 // Pagina de bienvenida.
-export default {
-  name: 'PageIndex'
-}
+@Component
+export default class PageIndex extends Vue {}
 </script>
 <style>
 .welcome-card {
   margin-bottom: 4px;
 }
 </style>
-

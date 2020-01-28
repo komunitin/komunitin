@@ -120,14 +120,16 @@
   </q-layout>
 </template>
 
-<script>
+<script lang="ts">
 /**
  * Layout base con menú lateral.
  */
-export default {
+import Vue from 'vue';
+
+export default Vue.extend({
   name: 'BaseLayout',
 
-  data () {
+  data() {
     return {
       leftDrawerOpen: false,
       // locale: this.$q.lang.isoName,
@@ -147,26 +149,23 @@ export default {
           value: 'en-us'
         }
       ]
-    }
+    };
   },
   methods: {
     // Define idioma seleccionado por el usuario y lo
     // guardamos en el LocalStorage.
     // @args locale: Idioma seleccionado.
-    setLocale (locale) {
-      // cambiamos Vue-i18n locale 
-      this.$i18n.locale = locale
-      localStorage.setItem('lang', locale)
+    setLocale(locale: string) {
+      // cambiamos Vue-i18n locale
+      this.$i18n.locale = locale;
+      localStorage.setItem('lang', locale);
 
       // Cargar el pack de idioma de Quasar de forma dinámica
       import(`quasar/lang/${locale}`).then(({ default: messages }) => {
-        this.$q.lang.set(messages)
-      })
-      console.log(this.$router.currentRoute.path)
-
+        this.$q.lang.set(messages);
+      });
+      console.log(this.$router.currentRoute.path);
     }
   }
-
-
-}
+});
 </script>

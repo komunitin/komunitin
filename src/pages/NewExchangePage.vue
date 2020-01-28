@@ -44,9 +44,11 @@
   </q-page>
 </template>
 
-<script>
+<script lang="ts">
 // Información legal para crear nueva red.
-export default {
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'NewExchangePage'
-}
+})
 </script>
