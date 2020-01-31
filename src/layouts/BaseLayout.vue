@@ -121,11 +121,11 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
+
 /**
  * Layout base con menú lateral.
  */
-import Vue from 'vue';
-
 export default Vue.extend({
   name: 'BaseLayout',
 
