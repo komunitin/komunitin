@@ -4,10 +4,13 @@ import messages from 'src/i18n';
 
 Vue.use(VueI18n);
 
-// Idioma por defecto.
+/**
+ * Idioma por defecto.
+ * @todo Recoger idioma definido en el dispositivo.
+ */
 var lang = 'en-us';
 
-// Si tenemos idioma en localStorage lo recogemos.
+/// Si tenemos idioma en localStorage lo recogemos.
 if (localStorage.getItem('lang')) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
