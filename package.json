@@ -13,7 +13,7 @@
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
     "lint": "eslint --ext .js,.ts,.vue --ignore-path .gitignore ./",
-    "doc": "typedoc --out docs src"
+    "doc": "typedoc --out docs --tsconfig tsconfig.json src"
   },
   "dependencies": {
     "@quasar/extras": "^1.5.0",
