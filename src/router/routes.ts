@@ -6,7 +6,9 @@ const routes: RouteConfig[] = [
     component: () => import('layouts/BaseLayout.vue'),
     children: [
       { path: '', component: () => import('pages/Welcome.vue') },
-      { path: '/new-exchange/', name: 'NewExchangePage', component: () => import('pages/NewExchangePage.vue') }
+      // { path: '/exchanges/', name: 'ListExchanges', component: () => import('pages/exchanges/ListExchanges.vue') },
+      { path: '/exchanges/', name: 'ExchangesPage', component: () => import('pages/exchanges/Exchange.vue') }
+
     ]
   }
 ]
@@ -20,3 +22,4 @@ if (process.env.MODE !== 'ssr') {
 }
 
 export default routes
+
