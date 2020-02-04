@@ -1,11 +1,11 @@
 {
   "name": "komunitin",
   "version": "0.0.1",
-  "description": "open source platform featuring",
+  "description": "Open System for Exchange Communities",
   "productName": "Komunitin",
-  "cordovaId": "org.komunitin.movil.app",
+  "cordovaId": "org.komunitin.app",
   "capacitorId": "",
-  "author": "komunitin <team@komunitin.com>",
+  "author": "komunitin <komunitinbox@gmail.com>",
   "private": true,
   "scripts": {
     "test": "echo \"No test specified\" && exit 0",
