@@ -1,4 +1,4 @@
-import { RouteConfig } from 'vue-router'
+import { RouteConfig } from 'vue-router';
 
 const routes: RouteConfig[] = [
   {
@@ -6,20 +6,27 @@ const routes: RouteConfig[] = [
     component: () => import('layouts/BaseLayout.vue'),
     children: [
       { path: '', component: () => import('pages/Welcome.vue') },
-      // { path: '/exchanges/', name: 'ListExchanges', component: () => import('pages/exchanges/ListExchanges.vue') },
-      { path: '/exchanges/', name: 'ExchangesPage', component: () => import('pages/exchanges/Exchange.vue') }
-
+      {
+        path: '/exchanges/:id',
+        props: true,
+        name: 'ExchangePage',
+        component: () => import('pages/exchanges/Exchange.vue')
+      },
+      {
+        path: '/exchanges/',
+        name: 'ExchangesListPage',
+        component: () => import('pages/exchanges/ExchangesList.vue')
+      }
     ]
   }
-]
+];
 
 // Always leave this as last one
 if (process.env.MODE !== 'ssr') {
   routes.push({
     path: '*',
     component: () => import('pages/Error404.vue')
-  })
+  });
 }
 
-export default routes
-
+export default routes;

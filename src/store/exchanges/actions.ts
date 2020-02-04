@@ -1,10 +1,13 @@
 // import axios from 'axios';
 import { IExchange } from './model';
-import { mockExchanges } from './mockData';
+import { mockExchange } from './mockData';
 
-export function getAllExchanges ( {commit}) {
+export function getAllExchanges({ commit }: any) {
+  // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
+  commit('collectExchanges', mockExchange);
+}
 
-    // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
-    commit('collectExchanges', mockExchanges);
-
+export function getExchange({ commit }: any, id: Number) {
+  // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
+  commit('getExchange', mockExchange[id]);
 }
