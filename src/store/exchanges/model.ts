@@ -1,11 +1,14 @@
+/**
+ * Modelo para Exchanges.
+ *
+ * @todo Gestión de localizaciones.
+ */
 export interface IExchange {
-    id: number;
-    name: string;
-    description: string;
-    accounts: number;
-    /**
-     * @todo Gestión de localizaciones.
-     */
-    location: string;
-    logo: string;
-  };
+  id: number;
+  name: string;
+  description: string;
+  accounts: number;
+  location: string;
+  logo: string;
+  code: string;
+}

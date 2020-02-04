@@ -12,28 +12,17 @@
           aria-label="Menu"
         />
 
-        <q-btn
-          v-else
-          flat
-          dense
-          round
-          icon="arrow_back"
-          aria-label="Home"
-          @click="$router.back()"
-        />
+        <q-btn v-else flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
 
-        <q-toolbar-title>
-          Komunitin
-        </q-toolbar-title>
+        <q-toolbar-title>Komunitin</q-toolbar-title>
 
         <div>
-
           <q-select
             flat
             dense
             round
             outlined
-            v-model='locale'
+            v-model="locale"
             @input="setLocale"
             emit-value
             map-options
@@ -60,19 +49,10 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      content-class="bg-grey-2"
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered content-class="bg-grey-2">
       <q-list>
         <q-item-label header>{{ $t('Menu') }}</q-item-label>
-        <q-item
-          clickable
-          tag="a"
-          href="/login"
-        >
+        <q-item clickable tag="a" href="/login">
           <q-item-section avatar>
             <q-icon name="account_circle" />
           </q-item-section>
@@ -82,12 +62,7 @@
           </q-item-section>
         </q-item>
 
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://github.com/komunitin/komunitin"
-        >
+        <q-item clickable tag="a" target="_blank" href="https://github.com/komunitin/komunitin">
           <q-item-section avatar>
             <q-icon name="help" />
           </q-item-section>
@@ -97,11 +72,7 @@
           </q-item-section>
         </q-item>
 
-        <q-item
-          clickable
-          tag="a"
-          :to="{ name: 'NewExchangePage' }"
-        >
+        <q-item clickable tag="a">
           <q-item-section avatar>
             <q-icon name="help" />
           </q-item-section>
@@ -110,7 +81,6 @@
             <q-item-label caption>{{ $t('create a new exchange') }}</q-item-label>
           </q-item-section>
         </q-item>
-
       </q-list>
     </q-drawer>
 

@@ -19,7 +19,7 @@
 
         <q-card-section class="q-pt-none">
           <q-btn
-            :to="{ name: 'ExchangesPage' }"
+            :to="{ name: 'ExchangesListPage' }"
             color="primary"
             text-color="white"
             :label="$t('Use location')"
