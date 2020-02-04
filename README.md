@@ -1,6 +1,7 @@
 # komunitin
-
 Open System for Exchange Communities
+
+![build status](https://github.com/komunitin/komunitin/workflows/Build/badge.svg)
 
 ## Install the dependencies
 ```bash
