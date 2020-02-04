@@ -14,7 +14,7 @@ jobs:
       run: docker build . --file Dockerfile --tag komunitin-app
     
     - name: Run
-      run: docker run -d -p 80:80 komunitin-app --rm
+      run: docker run -d -p 80:80 --rm komunitin-app
       
     - name: Test
       run: wget http://localhost/
