@@ -12,7 +12,7 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
-    "lint": "eslint --ext .js,.ts,.vue --ignore-path .gitignore ./",
+    "lint": "eslint --ext .js,.ts,.vue --ignore-path .gitignore ./src/",
     "doc": "typedoc --out docs --tsconfig tsconfig.json src"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^2.2.4",
     "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-vue": "^6.1.2",
     "typescript": "^3.3.3"
   },
   "engines": {
