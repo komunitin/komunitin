@@ -16,7 +16,7 @@
           <q-item-label>{{ exchange.name }}</q-item-label>
           <q-item-label caption>{{ exchange.code }}</q-item-label>
         </q-item-section>
-        <!-- @todo Compartir ecoxarxa. -->
+        <!-- @todo Share exchange. -->
         <q-btn flat dense round icon="share" aria-label="Share" />
       </q-item>
 

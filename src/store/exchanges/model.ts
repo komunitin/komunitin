@@ -1,9 +1,9 @@
 /**
- * Modelo para Exchanges.
+ * Modelo para Exchange.
  *
  * @todo Gestión de localizaciones.
  */
-export interface IExchange {
+export interface ExchangeModel {
   id: number;
   name: string;
   description: string;
