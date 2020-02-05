@@ -5,14 +5,14 @@ import { Quasar } from 'quasar';
 
 export default async () => {
   // Idioma por defecto.
-  var current_language = 'en-us';
+  var currentLanguage = 'en-us';
 
   // Si tenemos idioma en localStorage lo recofemos.
   if (localStorage.getItem('lang')) {
-    current_language = localStorage.getItem('lang');
+    currentLanguage = localStorage.getItem('lang');
   }
 
-  const langIso = current_language;
+  const langIso = currentLanguage;
 
   try {
     await import(

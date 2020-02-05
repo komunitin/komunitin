@@ -7,7 +7,7 @@ export function getAllExchanges({ commit }: any) {
   commit('collectExchanges', mockExchange);
 }
 
-export function getExchange({ commit }: any, id: Number) {
+export function getExchange({ commit }: any, id: number) {
   // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
   commit('getExchange', mockExchange[id]);
 }
