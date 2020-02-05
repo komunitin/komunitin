@@ -8,7 +8,7 @@ Vue.use(VueI18n);
  * Idioma por defecto.
  * @todo Recoger idioma definido en el dispositivo.
  */
-var lang = 'en-us';
+let lang = 'en-us';
 
 /// Si tenemos idioma en localStorage lo recogemos.
 if (localStorage.getItem('lang')) {

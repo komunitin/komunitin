@@ -1,6 +1,6 @@
-import { IExchange } from './model';
+import { ExchangeModel } from './model';
 
-export const mockExchange: IExchange[] = [
+export const mockExchange: ExchangeModel[] = [
   {
     id: 1,
     name: 'Echange 1',

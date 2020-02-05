@@ -1,5 +1,4 @@
 // import axios from 'axios';
-import { IExchange } from './model';
 import { mockExchange } from './mockData';
 
 export function getAllExchanges({ commit }: any) {
