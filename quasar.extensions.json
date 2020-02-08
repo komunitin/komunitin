@@ -4,48 +4,5 @@
     "rename": true,
     "vscode": true,
     "prettier": true
-  },
-  "@quasar/testing": {
-    "harnesses": [
-      "unit-jest",
-      "unit-ava",
-      "e2e-cypress",
-      "e2e-webdriver",
-      "quality",
-      "security",
-      "security-antivuln"
-    ]
-  },
-  "@quasar/testing-unit-jest": {
-    "babel": "babelrc",
-    "options": [
-      "scripts"
-    ]
-  },
-  "@quasar/testing-unit-ava": {
-    "babel": "babelrc",
-    "options": [
-      "scripts"
-    ]
-  },
-  "@quasar/testing-e2e-cypress": {
-    "options": [
-      "scripts"
-    ]
-  },
-  "@quasar/testing-e2e-webdriver": {
-    "options": [
-      "scripts"
-    ]
-  },
-  "@quasar/testing-quality": {
-    "options": [
-      "scripts"
-    ]
-  },
-  "@quasar/testing-security": {
-    "options": [],
-    "zapbrowser": "Firefox"
-  },
-  "@quasar/testing-security-antivuln": {}
+  }
 }
