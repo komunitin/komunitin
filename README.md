@@ -3,21 +3,12 @@ Open System for Exchange Communities
 
 ![build status](https://github.com/komunitin/komunitin/workflows/Build/badge.svg)
 
-## Install the dependencies
+## Develop
+Read the [developer](DEVELOP.md) readme.
+
+## Build and run with Docker
 ```bash
-npm install
+docker build . --file Dockerfile --tag komunitin-app
+docker run -d -p 80:80 --rm komunitin-app
 ```
-
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
-```bash
-quasar dev
-```
-
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
+And see the result at http://localhost/.
