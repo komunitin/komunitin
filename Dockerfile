@@ -18,14 +18,14 @@ COPY . .
 # Use the image created in develop stage.
 FROM komunitin-app-develop as komunitin-app-build
 RUN yarn
-RUN quasar build
+RUN quasar build -m pwa
 
 # Production stage
 
 # Use the latest stable Nginx HTTP server over Alpine Linux.
 FROM nginx:stable-alpine
 # Copy the built application from Build stage to nginx HTML folder.
-COPY --from=komunitin-app-build /app/dist/spa /usr/share/nginx/html
+COPY --from=komunitin-app-build /app/dist/pwa /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 

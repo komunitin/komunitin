@@ -10,11 +10,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build
-      run: docker build . --file Dockerfile --tag komunitin-app
+    - name: Build app
+      run: docker build --target komunitin-app-build --tag komunitin-app-build .
+
+    - name: Unit tests
+      run: docker run --rm komunitin-app-build quasar test --unit jest
     
-    - name: Run
+    - name: Build production
+      run: docker build --tag komunitin-app .
+    
+    - name: Run production
       run: docker run -d -p 80:80 --rm komunitin-app
       
-    - name: Test
+    - name: Test production
       run: wget http://localhost/
