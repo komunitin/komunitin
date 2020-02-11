@@ -8,7 +8,7 @@
   "author": "komunitin <komunitinbox@gmail.com>",
   "private": true,
   "scripts": {
-    "test": "echo \"No test specified\" && exit 0",
+    "test": "quasar test --unit jest",
     "dev": "quasar dev",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
