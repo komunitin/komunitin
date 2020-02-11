@@ -4,5 +4,14 @@
     "rename": true,
     "vscode": true,
     "prettier": true
+  },
+  "@quasar/testing": {
+    "harnesses": []
+  },
+  "@quasar/testing-unit-jest": {
+    "babel": "babelrc",
+    "options": [
+      "SFC"
+    ]
   }
 }

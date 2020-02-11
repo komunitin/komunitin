@@ -16,23 +16,26 @@
     "doc": "typedoc --out docs --tsconfig tsconfig.json src"
   },
   "dependencies": {
-    "@quasar/extras": "^1.5.0",
+    "@quasar/extras": "^1.5.1",
     "eslint": "^6.8.0",
-    "quasar": "^1.8.3",
+    "quasar": "^1.8.5",
     "typedoc": "^0.16.9",
     "vue-i18n": "^8.0.0"
   },
   "devDependencies": {
-    "@quasar/app": "^1.5.2",
+    "@quasar/app": "^1.5.3",
+    "@quasar/quasar-app-extension-testing": "^1.0.0",
+    "@quasar/quasar-app-extension-testing-unit-jest": "^1.0.0",
     "@quasar/quasar-app-extension-typescript": "^1.0.0-beta.2",
     "@types/node": "11.9.5",
     "@typescript-eslint/eslint-plugin": "^1.12.0",
     "@typescript-eslint/parser": "^1.12.0",
     "devtron": "^1.4.0",
-    "electron": "^7.1.10",
+    "electron": "^7.1.12",
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^2.2.4",
     "eslint-config-prettier": "^6.0.0",
+    "ts-jest": "^25.2.0",
     "typescript": "^3.3.3"
   },
   "engines": {
