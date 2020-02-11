@@ -20,6 +20,6 @@ We use the de development IDE Visual Studio Code. [Follow this page](https://qua
 ### Test
 Launch the [Jest](https://jestjs.io/) testing framework for unit testing with:
 ```bash
-quasar test --unit test
+quasar test --unit jest
 ```
 When developing new Vue components or pages, always create their unit test file under the `__test__` folder.
