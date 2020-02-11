@@ -37,3 +37,5 @@ yarn-error.log*
 .magtrabajos
 /docs
 
+# Test reports
+/test/jest/coverage
