@@ -2,31 +2,28 @@
   <div id="login-mail">
     <form @submit.prevent="submit">
       <q-input
-        v-model="email"
+        v-model="mail"
         type="email"
+        placeholder="example@example.com"
         label="E-mail"
-        :error-message="mensaError('email')"
-        :error="$v.email.$invalid"
+        :error="$v.mail.$invalid"
         counter
         color="white"
         labelColor="white"
         text-color="white"
         maxlength="30"
       />
-
       <q-input
         v-model="pass"
         type="password"
         label="Contraseña"
         color="white"
-        :error-message="mensaError('pass')"
         :error="$v.pass.$invalid"
         counter
         maxlength="10"
         labelColor="white"
         text-color="white"
       />
-
       <q-btn
         outline
         color="transparent"
@@ -43,20 +40,27 @@
 <script lang="ts">
 import Vue from 'vue';
 import { required, email, minLength } from 'vuelidate/lib/validators';
+import { validationMixin } from 'vuelidate';
 
 // Login mail.
 export default Vue.extend({
   name: 'LoginMail',
   data() {
     return {
-      email: '',
+      mail: '',
       pass: '',
-      submitStatus: null
+      submitStatus: ''
     };
   },
   validations: {
-    email: { required, email },
-    pass: { required, minLength: minLength(4) }
+    mail: {
+      required,
+      email
+    },
+    pass: {
+      required,
+      minLength: minLength(10)
+    }
   },
   methods: {
     submit() {
@@ -64,23 +68,18 @@ export default Vue.extend({
       this.$v.$touch();
       if (this.$v.$invalid) {
         this.submitStatus = 'ERROR';
+        console.log(this.$v);
+        this.$q.notify({
+          type: 'negative',
+          message: `No se ha podido validar el formulario.`
+        });
       } else {
         // @todo do your submit logic here
         this.submitStatus = 'PENDING';
         setTimeout(() => {
-          console.log({ validate: true, email: this.email, pass: this.pass });
+          console.log({ validate: true, mail: this.mail, pass: this.pass });
           this.submitStatus = 'OK';
         }, 500);
-      }
-    },
-    mensaError(campo) {
-      if (campo === 'email') {
-        if (!this.$v.email.email) return 'Debe ser un email';
-        if (!this.$v.email.required) return 'Campo requerido';
-      }
-      if (campo === 'pass') {
-        if (!this.$v.pass.minLength) return 'Tamaño minimo 4 caracteres';
-        if (!this.$v.pass.required) return 'Campo requerido';
       }
     }
   }
@@ -91,7 +90,8 @@ export default Vue.extend({
   width: 300px;
   display: inline-block;
 }
+
 input {
-    color: white !important;
+  color: white !important;
 }
 </style>
