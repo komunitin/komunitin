@@ -29,11 +29,11 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import Component from 'vue-class-component';
 
 // Login.
-export default Vue.extend({
-  name: 'Login'
-});
+@Component
+export default class LoginPage extends Vue {}
 </script>
 <style>
 .home h1 {
