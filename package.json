@@ -17,14 +17,15 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.5.1",
+    "@types/vuelidate": "^0.7.10",
     "eslint": "^6.8.0",
-    "quasar": "^1.8.5",
-    "typedoc": "^0.16.9",
+    "quasar": "^1.9.3",
+    "typedoc": "^0.16.10",
     "vue-i18n": "^8.0.0",
     "vuelidate": "^0.7.5"
   },
   "devDependencies": {
-    "@quasar/app": "^1.5.3",
+    "@quasar/app": "^1.5.8",
     "@quasar/quasar-app-extension-testing": "^1.0.0",
     "@quasar/quasar-app-extension-testing-unit-jest": "^1.0.0",
     "@quasar/quasar-app-extension-typescript": "^1.0.0-beta.2",
