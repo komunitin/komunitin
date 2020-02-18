@@ -5,7 +5,19 @@ const routes: RouteConfig[] = [
     path: '/',
     component: () => import('layouts/HomeLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/login/LoginPage.vue') }
+      { path: '', component: () => import('pages/login/LoginPage.vue') },
+      {
+        path: '/login-select/',
+        props: false,
+        name: 'LoginSelect',
+        component: () => import('pages/login/LoginSelect.vue')
+      },
+      {
+        path: '/login-mail/',
+        props: false,
+        name: 'LoginMail',
+        component: () => import('pages/login/LoginMail.vue')
+      }
     ]
 
     // component: () => import('layouts/BaseLayout.vue'),
