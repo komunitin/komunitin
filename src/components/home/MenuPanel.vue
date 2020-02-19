@@ -1,4 +1,4 @@
-  <template>
+<template>
   <q-list>
     <q-item-label header>{{ $t('Menu') }}</q-item-label>
     <q-item clickable tag="a" href="/login">
@@ -11,7 +11,12 @@
       </q-item-section>
     </q-item>
 
-    <q-item clickable tag="a" target="_blank" href="https://github.com/komunitin/komunitin">
+    <q-item
+      clickable
+      tag="a"
+      target="_blank"
+      href="https://github.com/komunitin/komunitin"
+    >
       <q-item-section avatar>
         <q-icon name="help" />
       </q-item-section>
@@ -36,6 +41,6 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'MenuPanel'
+  name: 'menuPanel'
 });
 </script>
