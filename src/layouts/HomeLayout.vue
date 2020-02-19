@@ -53,7 +53,7 @@ export default Vue.extend({
   name: 'HomeLayout',
   data() {
     return {
-      tab: 'mails'
+      tab: 'languages'
     };
   }
 });

@@ -14,13 +14,13 @@ describe('LoginPage.vue', () => {
   const wrapper = shallowMount(LoginPage, {
     // Avoid error with translations.
     mocks: {
-      $t: () => 'some specific text'
+      $t: () => 'Mock text'
     },
     localVue
   });
 
   // @todo Cuando tengamos los enlaces comprobar sobre ellos.
-  test('Renders message', () => {
+  test('Find links', () => {
     // expect(wrapper.html()).toContain('<span>Komunitin</span>');
     expect(wrapper.html()).toContain('icon="account_circle"');
   });
