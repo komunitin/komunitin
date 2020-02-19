@@ -1,8 +1,21 @@
 <template>
   <q-layout view="lHh Lpr lFf">
+    <q-toolbar v-if="$router.currentRoute.path !== '/'">
+      <q-btn
+        flat
+        dense
+        round
+        color="white"
+        icon="arrow_back"
+        aria-label="Home"
+        @click="$router.back()"
+      />
+      <q-toolbar-title class="text-white">Komunitin</q-toolbar-title>
+    </q-toolbar>
+
     <q-page-container>
       <div class="home main">
-        <div class="home-title">
+        <div v-if="$router.currentRoute.path == '/'" class="home-title">
           <h1>
             Wellcome to
             <br />
@@ -62,7 +75,7 @@ body {
     url('~assets/home_background-700.jpg');
 }
 .home-title {
-  margin: 70px 0;
+  margin: 30px 0;
 }
 .home-title h1 {
   font-family: roboto;

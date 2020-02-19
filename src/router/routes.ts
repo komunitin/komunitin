@@ -31,22 +31,23 @@ const routes: RouteConfig[] = [
         component: () => import('pages/login/Contribute.vue')
       }
     ]
-
-    // component: () => import('layouts/BaseLayout.vue'),
-    // children: [
-    // { path: '', component: () => import('pages/Welcome.vue') },
-    //   {
-    //     path: '/exchanges/:id',
-    //     props: true,
-    //     name: 'ExchangePage',
-    //     component: () => import('pages/exchanges/Exchange.vue')
-    //   },
-    //   {
-    //     path: '/exchanges/',
-    //     name: 'ExchangesListPage',
-    //     component: () => import('pages/exchanges/ExchangesList.vue')
-    //   }
-    // ]
+  },
+  {
+    path: '/exchanges/',
+    component: () => import('layouts/BaseLayout.vue'),
+    children: [
+      {
+        path: '/exchanges/',
+        name: 'ExchangesListPage',
+        component: () => import('pages/exchanges/ExchangesList.vue')
+      },
+      {
+        path: '/exchanges/:id',
+        props: true,
+        name: 'ExchangePage',
+        component: () => import('pages/exchanges/Exchange.vue')
+      }
+    ]
   }
 ];
 
