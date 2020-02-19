@@ -7,6 +7,7 @@ export default {
   home: 'Inici',
   Login: 'Login',
   'Log in': 'Inicia sessió',
+  'Find your local exchange': 'Cerqueu la vostra xarxa',
   'Create a new exchange': 'Crear una nova comunitat',
   Menu: 'Menú',
   'Welcome to': 'Benvingut/da a',

@@ -52,3 +52,8 @@ export default Vue.extend({
   name: 'Help'
 });
 </script>
+<style lang="stylus">
+h6 {
+  margin: 0px;
+}
+</style>

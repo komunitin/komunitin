@@ -5,6 +5,7 @@
       text-color="white"
       :label="$t('Find your local exchange')"
       icon="explore"
+      :to="{ name: 'ExchangesListPage' }"
     />
     <p>Already registered to a local exchange?</p>
 
@@ -27,10 +28,7 @@ import Vue from 'vue';
  *
  * @todo Flecha atras.
  * @todo Botón de idiomas.
- * @todo Botón Help.
- * @todo Boton Contribute.
  * @todo Link to exchanges.
- * @todo Formato web para Home.
  * @todo Formulario login con mail.
  * @todo Login con google o facebook.
  */
