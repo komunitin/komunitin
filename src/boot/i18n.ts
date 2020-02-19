@@ -1,7 +1,10 @@
+// for when you don't specify quasar.conf.js > framework: 'all'
+// import { Quasar } from 'quasar';
+// OTHERWISE:
+import Quasar from 'quasar';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import messages from 'src/i18n';
-import Quasar from 'quasar';
 
 Vue.use(VueI18n);
 
