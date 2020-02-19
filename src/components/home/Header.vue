@@ -1,4 +1,4 @@
- <template>
+<template>
   <q-toolbar>
     <slot name="header">
       <q-btn
@@ -11,7 +11,15 @@
         aria-label="Menu"
       />
 
-      <q-btn v-else flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
+      <q-btn
+        v-else
+        flat
+        dense
+        round
+        icon="arrow_back"
+        aria-label="Home"
+        @click="$router.back()"
+      />
 
       <q-toolbar-title>Komunitin</q-toolbar-title>
 
@@ -52,7 +60,7 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'Header',
+  name: 'headerApp',
   data() {
     return {
       leftDrawerOpen: false,
