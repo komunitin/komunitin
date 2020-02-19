@@ -1,6 +1,6 @@
-// for when you don't specify quasar.conf.js > framework: 'all'
-// import { Quasar } from 'quasar';
-// OTHERWISE:
+// @bug Why does typescript fail?
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
 import Quasar from 'quasar';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
