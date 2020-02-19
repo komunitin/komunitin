@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <header />
+      <headerApp />
     </q-header>
 
     <q-drawer
