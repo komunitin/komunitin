@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
-      <div class="home">
+      <div class="home main">
         <div class="home-title">
           <h1>
             Wellcome to
@@ -12,6 +12,20 @@
         </div>
         <router-view />
       </div>
+
+      <footer class="bg-transparent text-primary">
+        <q-tabs
+          no-caps
+          active-color="primary"
+          indicator-color="transparent"
+          class="text-grey"
+          v-model="tab"
+        >
+          <q-route-tab to="/languages" name="languages" label="Languages" />
+          <q-route-tab to="/help" name="help" label="Help" />
+          <q-route-tab to="contribute" name="contribute" label="Contribute" />
+        </q-tabs>
+      </footer>
     </q-page-container>
   </q-layout>
 </template>
@@ -23,7 +37,12 @@ import Vue from 'vue';
  * Layout base con menú lateral.
  */
 export default Vue.extend({
-  name: 'HomeLayout'
+  name: 'HomeLayout',
+  data() {
+    return {
+      tab: 'mails'
+    };
+  }
 });
 </script>
 <style scope>
@@ -86,5 +105,13 @@ body {
 
   color: rgba(255, 255, 255, 0.74);
   mix-blend-mode: normal;
+}
+footer {
+  color: rgba(255, 255, 255, 0.74);
+  padding-top: 20px;
+  text-align: center;
+}
+.q-tab__label {
+  font-weight: normal;
 }
 </style>

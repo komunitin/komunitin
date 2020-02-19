@@ -17,6 +17,18 @@ const routes: RouteConfig[] = [
         props: false,
         name: 'LoginMail',
         component: () => import('pages/login/LoginMail.vue')
+      },
+      {
+        path: '/help/',
+        props: false,
+        name: 'Help',
+        component: () => import('pages/login/Help.vue')
+      },
+      {
+        path: '/contribute/',
+        props: false,
+        name: 'Contribute',
+        component: () => import('pages/login/Contribute.vue')
       }
     ]
 
