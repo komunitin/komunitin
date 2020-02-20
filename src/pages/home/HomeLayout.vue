@@ -83,23 +83,7 @@ footer {
   padding-top: 20px;
   text-align: center;
 }
-.home-body .q-btn {
-  width: 300px;
-  margin: 10px 0;
-  margin-left: auto;
-  margin-right: auto;
-  mix-blend-mode: normal;
-  display: block;
-}
-.home-body p {
-  margin-top: 24px;
-  text-align: left;
-  width: 300px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 0;
-  mix-blend-mode: normal;
-}
+
 .q-page-container {
   min-height: 400px;
 }
