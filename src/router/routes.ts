@@ -3,38 +3,38 @@ import { RouteConfig } from 'vue-router';
 const routes: RouteConfig[] = [
   {
     path: '/',
-    component: () => import('layouts/HomeLayout.vue'),
+    component: () => import('pages/home/HomeLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/login/LoginPage.vue') },
+      { path: '', component: () => import('pages/home/LoginPage.vue') },
       {
         path: '/login-select/',
         props: false,
         name: 'LoginSelect',
-        component: () => import('pages/login/LoginSelect.vue')
+        component: () => import('pages/home/LoginSelect.vue')
       },
       {
         path: '/login-mail/',
         props: false,
         name: 'LoginMail',
-        component: () => import('pages/login/LoginMail.vue')
+        component: () => import('pages/home/LoginMail.vue')
       },
       {
         path: '/help/',
         props: false,
         name: 'Help',
-        component: () => import('pages/login/Help.vue')
+        component: () => import('pages/home/Help.vue')
       },
       {
         path: '/contribute/',
         props: false,
         name: 'Contribute',
-        component: () => import('pages/login/Contribute.vue')
+        component: () => import('pages/home/Contribute.vue')
       }
     ]
   },
   {
     path: '/exchanges/',
-    component: () => import('layouts/BaseLayout.vue'),
+    component: () => import('pages/exchanges/ExchangesLayout.vue'),
     children: [
       {
         path: '/exchanges/',

@@ -1,5 +1,6 @@
 <template>
   <div class="home-body">
+  <div class="home-center">
     <div class="home-title">
       <h1>
         Wellcome to
@@ -27,6 +28,7 @@
         icon="account_circle"
       />
     </div>
+  </div>
   </div>
 </template>
 
@@ -69,6 +71,9 @@ export default Vue.extend({
   text-align: center;
   font-size: 11px;
   margin: 0;
+}
+.q-btn {
+    width: 300px;
 }
 </style>
 

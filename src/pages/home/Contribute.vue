@@ -13,6 +13,7 @@
       <q-toolbar-title class="text-white">Contribute</q-toolbar-title>
     </q-toolbar>
     <div class="home-body">
+    <div class="home-center">
       <h6>Lorem ipsum dolor</h6>
       <p>
         Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aut nihil
@@ -43,6 +44,7 @@
         consequatur dolores eligendi, suscipit nesciunt molestiae architecto
         quisquam nulla.
       </p>
+    </div>
     </div>
   </div>
 </template>

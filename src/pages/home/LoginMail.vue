@@ -1,5 +1,5 @@
 <template>
-  <div class="home-body">
+  <div>
     <q-toolbar>
       <q-btn
         flat
@@ -100,12 +100,18 @@ export default Vue.extend({
 });
 </script>
 <style scope>
-#login-mail {
-  width: 300px;
-  display: inline-block;
-}
-
 input {
   color: white !important;
+}
+
+.home-body {
+  /*IMPORTANTE*/
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.home-body form {
+  width: 300px;
 }
 </style>

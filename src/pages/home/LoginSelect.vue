@@ -13,6 +13,7 @@
       <q-toolbar-title class="text-white">Komunitin</q-toolbar-title>
     </q-toolbar>
     <div class="home-body">
+      <div class="home-center">
       <q-btn color="white" text-color="black">
         <q-avatar size="18px">
           <img src="~assets/icons/google.png" />
@@ -31,6 +32,7 @@
         </q-avatar>
         <div>{{ $t('Login width mail') }}</div>
       </q-btn>
+      </div>
     </div>
   </div>
 </template>
@@ -44,6 +46,12 @@ export default Vue.extend({
 });
 </script>
 <style scope>
+.home-center .q-btn {
+
+    width: 300px;
+    margin: 5px;
+
+}
 #login-select {
   width: 300px;
   display: inline-block;
