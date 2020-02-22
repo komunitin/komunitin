@@ -5,5 +5,6 @@ export function collectExchanges(state: any, exchanges: ExchangeModel) {
 }
 
 export function getExchange(state: any, exchange: ExchangeModel) {
+  console.log({ 'MUTATIONS:': exchange });
   state.exchange = exchange;
 }

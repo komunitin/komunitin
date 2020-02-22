@@ -1,12 +1,13 @@
 // import axios from 'axios';
-import { mockExchange } from './mockData';
+import { mockExchange, mockExchangesList } from './mockData';
 
 export function getAllExchanges({ commit }: any) {
   // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
-  commit('collectExchanges', mockExchange);
+  commit('collectExchanges', mockExchangesList);
 }
 
 export function getExchange({ commit }: any, id: number) {
   // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
-  commit('getExchange', mockExchange[id]);
+  console.log({ 'ACTION:': mockExchange[0] });
+  commit('getExchange', mockExchange[0].data);
 }

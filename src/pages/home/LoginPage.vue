@@ -3,11 +3,11 @@
   <div class="home-center">
     <div class="home-title">
       <h1>
-        Wellcome to
+        {{ $t('Welcome to') }}
         <br />
         <span>Komunitin</span>
       </h1>
-      <h6>Open System for Exchange Communities</h6>
+      <h6>{{ $t('Open System for Exchange Communities') }}</h6>
     </div>
     <div id="login-home">
       <q-btn
@@ -17,7 +17,7 @@
         icon="explore"
         :to="{ name: 'ExchangesListPage' }"
       />
-      <p class="gray-kn">Already registered to a local exchange?</p>
+      <p class="gray-kn">{{ $t('Already registered to a local exchange?') }}</p>
 
       <q-btn
         outline
@@ -72,7 +72,7 @@ export default Vue.extend({
   font-size: 11px;
   margin: 0;
 }
-.q-btn {
+.home-body .q-btn {
     width: 300px;
 }
 </style>

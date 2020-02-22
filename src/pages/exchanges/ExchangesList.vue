@@ -1,9 +1,9 @@
 <template>
-  <div class="q-pa-md row items-start q-gutter-md">
+  <div class="row items-start q-gutter-md col-kn">
     <q-card
       v-for="exchange of exchanges"
       :key="exchange.id"
-      class="welcome-card col-xs-12 col-sm-5 col-md-3"
+      class="card-kn col-xs-12 col-sm-5 col-md-3"
     >
       <q-item>
         <q-item-section avatar>
@@ -53,3 +53,14 @@ export default Vue.extend({
   }
 });
 </script>
+<style>
+.card-kn { max-width: 94%; justify-content: center;}
+.col-kn {
+  display: flex;
+  width: 94%;
+  margin-left: -4px;
+  }
+.container-kn {
+  margin: 16px 0 0 0;
+}
+</style>
