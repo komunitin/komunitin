@@ -7,7 +7,7 @@
             class="absolute-bottom text-subtitle1 text-center"
           >{{ exchange['attributes']['name'] }}</div>
         </q-img>
-        <h6>{{ code}}</h6>
+        <h6>{{ exchange['attributes']['code'] }}</h6>
         <div>{{ exchange['attributes']['description']}}</div>
       </q-card-section>
     </q-card>
@@ -50,7 +50,10 @@ export default Vue.extend({
   props: {
     id: String
   },
-  mounted: function() {
+  created: function() {
+    if (process.env.DEV) {
+      console.log("I'm on a development build");
+    }
     this.getExchange(this.id);
   },
   // created: function() {
