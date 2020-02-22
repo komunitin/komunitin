@@ -6,6 +6,8 @@ export default {
   Login: 'Login',
   'Log in': 'Log in',
   Menu: 'Menu',
+  'Find your local exchange': 'Find your local exchange',
+  'Open System for Exchange Communities': 'Open System for Exchange Communities',
   'Create a new exchange': 'Create a new exchange',
   'Welcome to': 'Welcome to',
   failed: 'Action failed',
