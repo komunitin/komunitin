@@ -14,10 +14,10 @@ export default {
   failed: 'Error',
   success: 'Acció processada',
   'Komunitin is':
-    "Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d'intercanvi.",
+    'Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d\'intercanvi.',
   'New in komunitin': 'Nou/ nova a komunitin?',
   'Find exchange nearby':
-    "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social.",
+    'Troba una xarxa d\'intercanvi prop de tu i comença a utilitzar moneda social.',
   'Use location': 'Utilitza localització',
   'or select country': 'o selecciona un país per trobar-la.',
   'Select conuntry': 'Selecciona un país',

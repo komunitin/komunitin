@@ -52,7 +52,7 @@ export default Vue.extend({
   },
   created: function() {
     if (process.env.DEV) {
-      console.log("I'm on a development build");
+      console.log('I\'m on a development build');
     }
     this.getExchange(this.id);
   },
