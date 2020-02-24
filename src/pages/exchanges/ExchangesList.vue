@@ -45,17 +45,8 @@ export default Vue.extend({
   name: 'ExchangeListPage',
   mounted: function() {
     this.getAllExchanges();
-    // if (this.lastError) {
-    //   this.$q.notify({
-    //     color: 'negative',
-    //     position: 'top',
-    //     message: this.lastError,
-    //     icon: 'report_problem'
-    //   });
-    // }
-    console.log({ EchangesList: this.lastError });
-    console.log({ PROCESS: process.env });
     if (this.lastError.message) {
+      console.log(this.lastError.message);
       this.$q.notify({
         color: 'negative',
         position: 'top',
