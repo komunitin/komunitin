@@ -33,6 +33,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
+import { clearLastError } from '../../store/exchanges/actions';
 
 /**
  * Listado de exhanges.
@@ -53,6 +54,7 @@ export default Vue.extend({
     //   });
     // }
     console.log({ EchangesList: this.lastError });
+    console.log({ PROCESS: process.env });
     if (this.lastError.message) {
       this.$q.notify({
         color: 'negative',
@@ -60,13 +62,14 @@ export default Vue.extend({
         message: this.lastError.message,
         icon: 'report_problem'
       });
+      this.clearLastError;
     }
   },
   computed: {
     ...mapState('exchanges', ['exchanges', 'lastError'])
   },
   methods: {
-    ...mapActions('exchanges', ['getAllExchanges'])
+    ...mapActions('exchanges', ['getAllExchanges', 'clearLastError'])
   }
 });
 </script>
