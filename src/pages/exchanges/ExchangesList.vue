@@ -44,9 +44,26 @@ export default Vue.extend({
   name: 'ExchangeListPage',
   mounted: function() {
     this.getAllExchanges();
+    // if (this.lastError) {
+    //   this.$q.notify({
+    //     color: 'negative',
+    //     position: 'top',
+    //     message: this.lastError,
+    //     icon: 'report_problem'
+    //   });
+    // }
+    console.log({ EchangesList: this.lastError });
+    if (this.lastError.message) {
+      this.$q.notify({
+        color: 'negative',
+        position: 'top',
+        message: this.lastError.message,
+        icon: 'report_problem'
+      });
+    }
   },
   computed: {
-    ...mapState('exchanges', ['exchanges'])
+    ...mapState('exchanges', ['exchanges', 'lastError'])
   },
   methods: {
     ...mapActions('exchanges', ['getAllExchanges'])
@@ -54,12 +71,15 @@ export default Vue.extend({
 });
 </script>
 <style>
-.card-kn { max-width: 94%; justify-content: center;}
+.card-kn {
+  max-width: 94%;
+  justify-content: center;
+}
 .col-kn {
   display: flex;
   width: 94%;
   margin-left: -4px;
-  }
+}
 .container-kn {
   margin: 16px 0 0 0;
 }

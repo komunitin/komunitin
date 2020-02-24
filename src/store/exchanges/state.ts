@@ -1,6 +1,7 @@
 export default function() {
   return {
     exchanges: [],
-    exchange: []
+    exchange: [],
+    lastError: false as boolean | string
   };
 }
