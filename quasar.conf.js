@@ -2,14 +2,13 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
 const envparser = require('./src/envparser.js');
-console.error(envparser());
 
 module.exports = function(ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
-    boot: ['i18n', 'quasar-lang-pack', 'vuelidate'],
+    boot: ['i18n', 'quasar-lang-pack', 'vuelidate', 'mirage'],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: ['app.sass'],
