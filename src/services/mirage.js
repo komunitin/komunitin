@@ -1,26 +1,27 @@
-import { Server, Model } from 'miragejs';
+import { Server } from 'miragejs';
 
-export function makeServer({ environment = 'development' } = {}) {
-  let server = new Server({
-    environment,
+console.log('Mirage activated');
 
-    models: {
-      user: Model
-    },
-
-    seeds(server) {
-      server.create('user', { name: 'Bob' });
-      server.create('user', { name: 'Alice' });
-    },
-
-    routes() {
-      this.namespace = 'api';
-
-      this.get('/users', schema => {
-        return schema.users.all();
-      });
-    }
-  });
-
-  return server;
-}
+const server = new Server({
+  timing: 2000,
+  logging: true,
+  // urlPrefix: 'https://integralces.net/api',
+  routes() {
+    this.get('https://integralces.net/api/exchages/0/20', () => [
+      {
+        id: 1,
+        title: 'Mocking an API with axios',
+        author: 'asantos00',
+        createdAt: 1557937282,
+        body: 'Lorem ipsum dolor sit amet, consectetur.'
+      },
+      {
+        id: 2,
+        title: 'Forget axios interceptors. @miragejs/server',
+        author: 'asantos00',
+        createdAt: 758851200,
+        body: 'Lorem ipsum dolor sit amet, consectetur.'
+      }
+    ]);
+  }
+});
