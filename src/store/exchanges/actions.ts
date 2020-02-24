@@ -2,6 +2,10 @@
 // import { mockExchange, mockExchangesList } from './mockData';
 import api from '../../services/ICESApi';
 
+export function clearLastError({ commit }: any) {
+  commit('setLastError', false);
+}
+
 export function getAllExchanges({ commit }: any) {
   // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
   api

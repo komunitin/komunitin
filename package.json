@@ -10,6 +10,7 @@
   "scripts": {
     "test": "quasar test --unit jest",
     "dev": "quasar dev",
+    "dev:mirage": "quasar dev --env.USE_MIRAGE true",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
     "lint": "eslint --ext .js,.ts,.vue --ignore-path .gitignore ./src",
@@ -19,6 +20,7 @@
     "@quasar/extras": "^1.5.1",
     "@types/vuelidate": "^0.7.10",
     "axios": "^0.19.2",
+    "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "quasar": "^1.9.3",
     "typedoc": "^0.16.10",

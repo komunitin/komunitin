@@ -1,6 +1,9 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
+const envparser = require('./src/envparser.js');
+console.error(envparser());
+
 module.exports = function(ctx) {
   return {
     // app boot file (/src/boot)
@@ -55,6 +58,7 @@ module.exports = function(ctx) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
+      env: envparser(),
       scopeHoisting: true,
       vueRouterMode: 'history', // available values: 'hash', 'history'
       showProgress: true,
