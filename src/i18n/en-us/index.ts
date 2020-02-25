@@ -6,6 +6,8 @@ export default {
   Login: 'Login',
   'Log in': 'Log in',
   Menu: 'Menu',
+  'Find your local exchange': 'Find your local exchange',
+  'Open System for Exchange Communities': 'Open System for Exchange Communities',
   'Create a new exchange': 'Create a new exchange',
   'Welcome to': 'Welcome to',
   failed: 'Action failed',
@@ -20,7 +22,7 @@ export default {
   'Select conuntry': 'Select a country',
   'Find Comunnity': 'Find your community and start participating.',
   'If not have community':
-    "If you don't have a community near you, you can always create one and start a new one",
+    'If you don\'t have a community near you, you can always create one and start a new one',
   'New exchange': 'New Exchange',
   help: 'Help',
   'Need help': 'You need help?',
