@@ -1,9 +1,9 @@
 <template>
-  <div class="q-pa-md row items-start q-gutter-md">
+  <div class="row items-start q-gutter-md col-kn">
     <q-card
       v-for="exchange of exchanges"
       :key="exchange.id"
-      class="welcome-card col-xs-12 col-sm-5 col-md-3"
+      class="card-kn col-xs-12 col-sm-5 col-md-3"
     >
       <q-item>
         <q-item-section avatar>
@@ -33,6 +33,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
+import { clearLastError } from '../../store/exchanges/actions';
 
 /**
  * Listado de exhanges.
@@ -44,12 +45,36 @@ export default Vue.extend({
   name: 'ExchangeListPage',
   mounted: function() {
     this.getAllExchanges();
+    if (this.lastError.message) {
+      console.log(this.lastError.message);
+      this.$q.notify({
+        color: 'negative',
+        position: 'top',
+        message: this.lastError.message,
+        icon: 'report_problem'
+      });
+      this.clearLastError;
+    }
   },
   computed: {
-    ...mapState('exchanges', ['exchanges'])
+    ...mapState('exchanges', ['exchanges', 'lastError'])
   },
   methods: {
-    ...mapActions('exchanges', ['getAllExchanges'])
+    ...mapActions('exchanges', ['getAllExchanges', 'clearLastError'])
   }
 });
 </script>
+<style>
+.card-kn {
+  max-width: 94%;
+  justify-content: center;
+}
+.col-kn {
+  display: flex;
+  width: 94%;
+  margin-left: -4px;
+}
+.container-kn {
+  margin: 16px 0 0 0;
+}
+</style>
