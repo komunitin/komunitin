@@ -8,7 +8,7 @@
           >{{ exchange['attributes']['name'] }}</div>
         </q-img>
         <h6>{{ exchange['attributes']['code'] }}</h6>
-        <div>{{ exchange['attributes']['description']}}</div>
+        <div v-html="exchange['attributes']['description']"></div>
       </q-card-section>
     </q-card>
     <q-card>
@@ -29,51 +29,31 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
+import { clearLastError } from '../../store/exchanges/actions';
 
 export default Vue.extend({
   name: 'ExchangePage',
-  data() {
-    return {
-      // name: '',
-      // code: '',
-      // image: '',
-      // description: '',
-      // accountCount: '',
-      // localtion: [],
-      // link: '',
-      // offersCount: 0 as number,
-      // wantsCount: 0 as number,
-      // offersCategiries: [],
-      // wantsCategories: []
-    };
-  },
   props: {
     id: String
   },
-  created: function() {
-    if (process.env.DEV) {
-      console.log('I\'m on a development build');
-    }
+  mounted: function() {
     this.getExchange(this.id);
+    if (this.lastError.message) {
+      console.log(this.lastError.message);
+      this.$q.notify({
+        color: 'negative',
+        position: 'top',
+        message: this.lastError.message,
+        icon: 'report_problem'
+      });
+      this.clearLastError;
+    }
   },
-  // created: function() {
-  //   this.name = exchange['attributes']['name']
-  //   this.code = exchange['attributes']['code']
-  //   this.image = exchange['attributes']['imgage']
-  //   this.description = exchange['attributes']['description']
-  //   this.accountCount = exchange['relatinships']['members']['meta']['count']
-  //   this.localtion = exchange['attributes']['location']
-  //   this.link = ''
-  //   this.offersCount = 0
-  //   this.wantsCount = 0
-  //   this.offersCategiries = []
-  //   this.wantsCategories = [];
-  // },
   computed: {
-    ...mapState('exchanges', ['exchange'])
+    ...mapState('exchanges', ['exchange'], ['lastError'])
   },
   methods: {
-    ...mapActions('exchanges', ['getExchange'])
+    ...mapActions('exchanges', ['getExchange'], ['clearLastError'])
   }
 });
 </script>
