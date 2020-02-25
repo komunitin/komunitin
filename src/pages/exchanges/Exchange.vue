@@ -29,7 +29,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
-import { clearLastError } from '../../store/exchanges/actions';
 
 export default Vue.extend({
   name: 'ExchangePage',
