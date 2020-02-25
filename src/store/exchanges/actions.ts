@@ -1,12 +1,29 @@
-// import axios from 'axios';
-import { mockExchange } from './mockData';
+import api from '../../services/ICESApi';
+
+export function clearLastError({ commit }: any) {
+  commit('setLastError', false);
+}
 
 export function getAllExchanges({ commit }: any) {
-  // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
-  commit('collectExchanges', mockExchange);
+  api
+    .getExchangesList()
+    .then(response => {
+      commit('collectExchanges', response.data);
+    })
+    .catch(function(error) {
+      commit('setLastError', error);
+      // throw error;
+    });
 }
 
 export function getExchange({ commit }: any, id: number) {
-  // @todo llamada a la API o devolvemos Mock dependiendo de la configuración.
-  commit('getExchange', mockExchange[id]);
+  api
+    .getExchange(id)
+    .then(response => {
+      commit('getExchange', response.data);
+    })
+    .catch(function(error) {
+      commit('setLastError', error);
+      // throw error;
+    });
 }
