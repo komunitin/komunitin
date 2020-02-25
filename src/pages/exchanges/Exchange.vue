@@ -49,10 +49,10 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('exchanges', ['exchange'], ['lastError'])
+    ...mapState('exchanges', ['exchange', 'lastError'])
   },
   methods: {
-    ...mapActions('exchanges', ['getExchange'], ['clearLastError'])
+    ...mapActions('exchanges', ['getExchange', 'clearLastError'])
   }
 });
 </script>
