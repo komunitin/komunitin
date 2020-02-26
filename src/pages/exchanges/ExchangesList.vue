@@ -32,7 +32,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState, mapActions } from 'vuex';
+// import { mapState, mapActions } from 'vuex';
+import api from '../../services/ICESApi';
 
 /**
  * Listado de exhanges.
@@ -42,25 +43,39 @@ import { mapState, mapActions } from 'vuex';
  */
 export default Vue.extend({
   name: 'ExchangeListPage',
+  data() {
+    return {
+      exchanges: [] as any[]
+    };
+  },
+  beforeMount: function() {
+    this.$q.loading.show();
+  },
   mounted: function() {
-    this.getAllExchanges();
-    if (this.lastError.message) {
-      console.log({ ExchangesList: this.lastError.message });
-      this.$q.notify({
-        color: 'negative',
-        position: 'top',
-        message: this.lastError.message,
-        icon: 'report_problem'
-      });
-      this.clearLastError;
+    api.getExchangesList().then(response => {
+      this.exchanges = response.data;
+      this.$q.loading.hide();
+    });
+    // @ts-ignore
+    let errors = this.$errorsManagement.getErrors();
+    if (errors) {
+      for (var error in errors) {
+        // console.log(errors[error]);
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: errors[error],
+          icon: 'report_problem'
+        });
+      }
     }
-  },
-  computed: {
-    ...mapState('exchanges', ['exchanges', 'lastError'])
-  },
-  methods: {
-    ...mapActions('exchanges', ['getAllExchanges', 'clearLastError'])
   }
+  // computed: {
+  //   ...mapState('exchanges', ['exchanges', 'lastError'])
+  // },
+  // methods: {
+  //   ...mapActions('exchanges', ['getAllExchanges', 'clearLastError'])
+  // }
 });
 </script>
 <style>

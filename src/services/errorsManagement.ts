@@ -17,8 +17,8 @@ class ErrorsManagement {
     if (localStorage.getItem('lastErrors')) {
       // @ts-ignore
       const le = JSON.parse(localStorage.getItem('lastErrors'));
-      localStorage.removeItem('lastErrors');
       console.error({ ErrorManagement: le });
+      localStorage.removeItem('lastErrors');
       // alert(le);
       return le;
     }

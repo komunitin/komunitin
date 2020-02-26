@@ -16,7 +16,7 @@ export function getAllExchanges({ commit }: any) {
     });
 }
 
-export function getExchange({ commit }: any, id: number) {
+export function getExchange({ commit }: any, id: string) {
   api
     .getExchange(id)
     .then(response => {
