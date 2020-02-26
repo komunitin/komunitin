@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div v-if="exchange" class="row">
     <q-card class="my-card">
       <q-card-section>
         <q-img :src="exchange['attributes']['image']" style="max-width: 400px; height: 200px;">
@@ -17,13 +17,10 @@
           Accounts:
           <b>{{ exchange['relatinships']['members']['meta']['count'] }}</b>
         </p>
-        <p>
-          Location:
-          <b>{{ exchange['attributes']['localtion']}}</b>
-        </p>
       </q-card-section>
     </q-card>
   </div>
+  <div v-else class="loadnig">Loading....</div>
 </template>
 
 <script lang="ts">
@@ -35,24 +32,33 @@ export default Vue.extend({
   props: {
     id: String
   },
+  beforeMount: function() {
+    this.$q.loading.show({
+      delay: 400 // ms
+    });
+  },
   mounted: function() {
+    this.$q.loading.hide();
     this.getExchange(this.id);
-    if (this.lastError.message) {
-      console.log(this.lastError.message);
-      this.$q.notify({
-        color: 'negative',
-        position: 'top',
-        message: this.lastError.message,
-        icon: 'report_problem'
-      });
-      this.clearLastError;
+    // @ts-ignore
+    let errors = this.$errorsManagement.getErrors();
+    if (errors) {
+      for (var error in errors) {
+        // console.log(errors[error]);
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: errors[error],
+          icon: 'report_problem'
+        });
+      }
     }
   },
   computed: {
-    ...mapState('exchanges', ['exchange', 'lastError'])
+    ...mapState('exchanges', ['exchange'])
   },
   methods: {
-    ...mapActions('exchanges', ['getExchange', 'clearLastError'])
+    ...mapActions('exchanges', ['getExchange'])
   }
 });
 </script>
