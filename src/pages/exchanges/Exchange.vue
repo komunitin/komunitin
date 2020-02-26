@@ -20,26 +20,31 @@
       </q-card-section>
     </q-card>
   </div>
-  <div v-else class="loadnig">Loading....</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState, mapActions } from 'vuex';
+// import { mapState, mapActions } from 'vuex';
+import api from '../../services/ICESApi';
 
 export default Vue.extend({
   name: 'ExchangePage',
+  data() {
+    return {
+      exchange: [] as any[]
+    };
+  },
   props: {
     id: String
   },
   beforeMount: function() {
-    this.$q.loading.show({
-      delay: 400 // ms
-    });
+    this.$q.loading.show();
   },
   mounted: function() {
-    this.$q.loading.hide();
-    this.getExchange(this.id);
+    api.getExchange(this.id).then(response => {
+      this.exchange = response.data;
+      this.$q.loading.hide();
+    });
     // @ts-ignore
     let errors = this.$errorsManagement.getErrors();
     if (errors) {
@@ -53,13 +58,13 @@ export default Vue.extend({
         });
       }
     }
-  },
-  computed: {
-    ...mapState('exchanges', ['exchange'])
-  },
-  methods: {
-    ...mapActions('exchanges', ['getExchange'])
   }
+  // computed: {
+  //   ...mapState('exchanges', ['exchange'])
+  // },
+  // methods: {
+  //   ...mapActions('exchanges', ['getExchange'])
+  // }
 });
 </script>
 <style>
