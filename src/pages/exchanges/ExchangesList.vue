@@ -52,10 +52,18 @@ export default Vue.extend({
     this.$q.loading.show();
   },
   mounted: function() {
-    api.getExchangesList().then(response => {
-      this.exchanges = response.data;
-      this.$q.loading.hide();
-    });
+    api
+      .getExchangesList()
+      .then(response => {
+        this.exchanges = response.data;
+        this.$q.loading.hide();
+      })
+      .catch(e => {
+        this.$q.loading.hide();
+        // @todo Use localstorage cache.
+        // @ts-ignore
+        this.$errorsManagement.newError(e, 'ExchangesList');
+      });
     // @ts-ignore
     let errors = this.$errorsManagement.getErrors();
     if (errors) {

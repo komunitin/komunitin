@@ -42,7 +42,7 @@ export default Vue.extend({
   }
 });
 </script>
-<style>
+<style scope>
 body {
   background-color: rgb(255, 255, 255, 1) !important;
   color: black !important;

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ExchangesListModel, ExchangeModel } from '../pages/exchanges/model';
 
 const apliClient = axios.create({
   baseURL: 'https://integralces.net/api/',
@@ -13,6 +14,14 @@ const apliClient = axios.create({
     'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
   }
 });
+
+// export async function getExchangesList(
+//   pag: number,
+//   perpage: number
+// ): Promise<ExchangesListModel> | any {
+//   const response = await apliClient.get(`exchanges/${pag}/${perpage}`);
+//   return response;
+// }
 
 export default {
   getExchangesList(pag = 1 as number, perpage = 20 as number) {

@@ -58,7 +58,7 @@ export default Vue.extend({
   }
 });
 </script>
-<style>
+<style scope>
 body {
   background: rgba(221, 75, 57, 0.3) url('~assets/home_background-700.jpg')
     no-repeat center center fixed;
