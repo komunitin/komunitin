@@ -12,7 +12,15 @@
           aria-label="Menu"
         />
 
-        <q-btn v-else flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
+        <q-btn
+          v-else
+          flat
+          dense
+          round
+          icon="arrow_back"
+          aria-label="Home"
+          @click="$router.back()"
+        />
 
         <q-toolbar-title>Komunitin</q-toolbar-title>
 
@@ -30,6 +38,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+
 /**
  * Layout base con menú lateral.
  */

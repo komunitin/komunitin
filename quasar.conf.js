@@ -50,7 +50,7 @@ module.exports = function(ctx) {
       directives: [],
 
       // Quasar plugins
-      plugins: ['Notify', 'Loading'],
+      plugins: ['Notify'],
       config: {
         notify: {
           /* Notify defaults */
