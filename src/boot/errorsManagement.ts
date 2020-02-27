@@ -6,5 +6,5 @@ const errorsManagement = new ErrorsManagement();
 Vue.prototype.$errorsManagement = errorsManagement;
 
 Vue.config.errorHandler = function(err, vm, info) {
-  errorsManagement.newError(err, vm, info);
+  errorsManagement.newError(err, info, vm);
 };

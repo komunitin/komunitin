@@ -3,8 +3,15 @@ import { debug } from 'util';
 class ErrorsManagement {
   // public lastErrors: string[] = null;
 
-  public newError(err: any, vm: any, info: string): void {
+  public newError(err: any, info: string, vm?: any): void {
     let lastErrors = [];
+    console.error({
+      ErrorManagement: {
+        err: err,
+        vm: vm,
+        info: info
+      }
+    });
     if (localStorage.getItem('lastErrors')) {
       // @ts-ignore
       lastErrors = JSON.parse(localStorage.getItem('lastErrors'));
