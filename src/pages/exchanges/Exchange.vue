@@ -1,17 +1,20 @@
 <template>
-  <div v-if="exchange" class="row">
-    <q-card class="my-card">
+  <div class="row" style="min-height: 400px;">
+    <q-card v-if="exchange" class="my-card">
       <q-card-section>
-        <q-img :src="exchange['attributes']['image']" style="max-width: 400px; height: 200px;">
-          <div
-            class="absolute-bottom text-subtitle1 text-center"
-          >{{ exchange['attributes']['name'] }}</div>
+        <q-img
+          :src="exchange['attributes']['image']"
+          style="max-width: 400px; height: 200px;"
+        >
+          <div class="absolute-bottom text-subtitle1 text-center">
+            {{ exchange['attributes']['name'] }}
+          </div>
         </q-img>
         <h6>{{ exchange['attributes']['code'] }}</h6>
         <div v-html="exchange['attributes']['description']"></div>
       </q-card-section>
     </q-card>
-    <q-card>
+    <q-card v-if="exchange">
       <q-card-section>
         <p>
           Accounts:
@@ -19,36 +22,42 @@
         </p>
       </q-card-section>
     </q-card>
+    <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-// import { mapState, mapActions } from 'vuex';
 import api from '../../services/ICESApi';
+// @ts-ignore
+import VueElementLoading from 'vue-element-loading';
 
 export default Vue.extend({
   name: 'ExchangePage',
   data() {
     return {
-      exchange: false as any[] | boolean
+      exchange: false as any[] | boolean,
+      isLoading: true as boolean
     };
+  },
+  components: {
+    VueElementLoading
   },
   props: {
     id: String
   },
   beforeMount: function() {
-    this.$q.loading.show();
+    this.isLoading = true;
   },
   mounted: function() {
     api
       .getExchange(this.id)
       .then(response => {
         this.exchange = response.data;
-        this.$q.loading.hide();
+        this.isLoading = false;
       })
       .catch(e => {
-        this.$q.loading.hide();
+        this.isLoading = false;
         // @todo Use localstorage cache.
         // @ts-ignore
         this.$errorsManagement.newError(e, 'ExchangesList');
@@ -67,12 +76,6 @@ export default Vue.extend({
       }
     }
   }
-  // computed: {
-  //   ...mapState('exchanges', ['exchange'])
-  // },
-  // methods: {
-  //   ...mapActions('exchanges', ['getExchange'])
-  // }
 });
 </script>
 <style>
