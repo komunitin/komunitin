@@ -4,7 +4,7 @@ import { mockExchange, mockExchangesList } from '../store/exchanges/mockData';
 console.log('Mirage activated');
 
 const server = new Server({
-  timing: 1000,
+  timing: 6000,
   logging: true,
   // urlPrefix: 'https://integralces.net/api',
   routes() {
