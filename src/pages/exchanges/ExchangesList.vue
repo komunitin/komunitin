@@ -1,5 +1,5 @@
 <template>
-  <div class="row items-start q-gutter-md col-kn">
+  <div class="row items-start q-gutter-md col-kn" style="min-height: 300px;">
     <q-card
       v-for="exchange of exchanges"
       :key="exchange.id"
@@ -21,19 +21,23 @@
       </q-item>
 
       <img src="~assets/nomapa.png" />
-      <q-card-section>{{ exchange.description}}</q-card-section>
+      <q-card-section>{{ exchange.description }}</q-card-section>
       <q-card-actions>
-        <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
+        <q-btn :to="`exchanges/${exchange.id}`" flat color="primary"
+          >Explora</q-btn
+        >
         <q-btn flat color="primary">Registra't</q-btn>
       </q-card-actions>
     </q-card>
+    <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-// import { mapState, mapActions } from 'vuex';
 import api from '../../services/ICESApi';
+// @ts-ignore
+import VueElementLoading from 'vue-element-loading';
 
 /**
  * Listado de exhanges.
@@ -45,21 +49,25 @@ export default Vue.extend({
   name: 'ExchangeListPage',
   data() {
     return {
-      exchanges: [] as any[]
+      exchanges: [] as any[],
+      isLoading: false as boolean
     };
   },
+  components: {
+    VueElementLoading
+  },
   beforeMount: function() {
-    this.$q.loading.show();
+    this.isLoading = true;
   },
   mounted: function() {
     api
       .getExchangesList()
       .then(response => {
         this.exchanges = response.data;
-        this.$q.loading.hide();
+        this.isLoading = false;
       })
       .catch(e => {
-        this.$q.loading.hide();
+        this.isLoading = false;
         // @todo Use localstorage cache.
         // @ts-ignore
         this.$errorsManagement.newError(e, 'ExchangesList');
@@ -78,12 +86,6 @@ export default Vue.extend({
       }
     }
   }
-  // computed: {
-  //   ...mapState('exchanges', ['exchanges', 'lastError'])
-  // },
-  // methods: {
-  //   ...mapActions('exchanges', ['getAllExchanges', 'clearLastError'])
-  // }
 });
 </script>
 <style>
