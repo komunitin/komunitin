@@ -31,7 +31,7 @@ export default Vue.extend({
   name: 'ExchangePage',
   data() {
     return {
-      exchange: [] as any[]
+      exchange: false as any[] | boolean
     };
   },
   props: {
