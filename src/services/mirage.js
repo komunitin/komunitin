@@ -24,6 +24,7 @@ const server = new Server({
         let pag = request.params.pag;
         let perPag = request.params.perPag;
 
+        // @dev
         console.log({
           Mirage: { pag: pag, perPag: perPag, lat: lat, lng: lng }
         });
@@ -36,6 +37,8 @@ const server = new Server({
      */
     this.get('https://integralces.net/api/exchange/:id', (schema, request) => {
       let id = request.params.id;
+
+      // @dev
       console.log({
         Mirage: { id: id }
       });
