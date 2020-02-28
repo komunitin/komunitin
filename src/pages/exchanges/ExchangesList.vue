@@ -49,7 +49,11 @@ export default Vue.extend({
     return {
       exchanges: [] as any[],
       isLoading: false as boolean,
-      haveUserLocation: false as boolean
+      haveUserLocation: false as boolean,
+      lng: '' as string,
+      lat: '' as string,
+      pag: 1 as number,
+      perPag: 10 as number
     };
   },
   components: {
@@ -77,11 +81,11 @@ export default Vue.extend({
       }
     },
     displayLocationInfo(position: any) {
-      const lng = position.coords.longitude;
-      const lat = position.coords.latitude;
+      this.lng = position.coords.longitude;
+      this.lat = position.coords.latitude;
 
-      console.log(`longitude: ${lng} | latitude: ${lat}`);
-      this.getExchanges();
+      console.log(`longitude: ${this.lng} | latitude: ${this.lat}`);
+      this.getExchanges(this.pag, this.perPag, this.lng, this.lat);
     },
     handleLocationError(error: any) {
       switch (error.code) {
@@ -107,7 +111,7 @@ export default Vue.extend({
           // ...user said no ☹️
           console.log('user said no ☹️');
       }
-      this.getExchanges();
+      this.getExchanges(this.pag, this.perPag);
     },
     getUserLocation() {
       navigator.geolocation.getCurrentPosition(
@@ -116,9 +120,9 @@ export default Vue.extend({
         { maximumAge: 1500000, timeout: 100000 }
       );
     },
-    getExchanges() {
+    getExchanges(pag: number, perPag: number, lat?: string, lng?: string) {
       api
-        .getExchangesList()
+        .getExchangesList(pag, perPag, lat, lng)
         .then(response => {
           this.exchanges = response.data;
           this.isLoading = false;
