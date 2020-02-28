@@ -18,17 +18,18 @@ const apliClient = axios.create({
   }
 });
 
-// export async function getExchangesList(
-//   pag: number,
-//   perpage: number
-// ): Promise<ExchangesListModel> | any {
-//   const response = await apliClient.get(`exchanges/${pag}/${perpage}`);
-//   return response;
-// }
-
 export default {
-  getExchangesList(pag = 1 as number, perpage = 20 as number) {
-    return apliClient.get('exchages/' + perpage * (pag - 1) + '/' + perpage);
+  getExchangesList(
+    pag: number,
+    perPag: number,
+    lat?: string | boolean,
+    lng?: string | boolean
+  ) {
+    let url = 'exchages/' + pag + '/' + perPag;
+    if (lat) {
+      url = url + '/' + lat + '/' + lng;
+    }
+    return apliClient.get(url);
   },
   getExchange(id: string) {
     return apliClient.get('/exchange/' + id);
