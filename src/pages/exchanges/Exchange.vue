@@ -2,13 +2,10 @@
   <div class="row" style="min-height: 400px;">
     <q-card v-if="exchange" class="my-card">
       <q-card-section>
-        <q-img
-          :src="exchange['attributes']['image']"
-          style="max-width: 400px; height: 200px;"
-        >
-          <div class="absolute-bottom text-subtitle1 text-center">
-            {{ exchange['attributes']['name'] }}
-          </div>
+        <q-img :src="exchange['attributes']['image']" style="max-width: 400px; height: 200px;">
+          <div
+            class="absolute-bottom text-subtitle1 text-center"
+          >{{ exchange['attributes']['name'] }}</div>
         </q-img>
         <h6>{{ exchange['attributes']['code'] }}</h6>
         <div v-html="exchange['attributes']['description']"></div>
@@ -61,18 +58,22 @@ export default Vue.extend({
         // @todo Use localstorage cache.
         // @ts-ignore
         this.$errorsManagement.newError(e, 'ExchangesList');
+        this.displayErrors();
       });
-    // @ts-ignore
-    let errors = this.$errorsManagement.getErrors();
-    if (errors) {
-      for (var error in errors) {
-        // console.log(errors[error]);
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: errors[error],
-          icon: 'report_problem'
-        });
+  },
+  methods: {
+    displayErrors(): void {
+      // @ts-ignore
+      let errors = this.$errorsManagement.getErrors();
+      if (errors) {
+        for (var error in errors) {
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: errors[error],
+            icon: 'report_problem'
+          });
+        }
       }
     }
   }
