@@ -23,9 +23,7 @@
       <img src="~assets/nomapa.png" />
       <q-card-section>{{ exchange.description }}</q-card-section>
       <q-card-actions>
-        <q-btn :to="`exchanges/${exchange.id}`" flat color="primary"
-          >Explora</q-btn
-        >
+        <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
         <q-btn flat color="primary">Registra't</q-btn>
       </q-card-actions>
     </q-card>
@@ -71,18 +69,22 @@ export default Vue.extend({
         // @todo Use localstorage cache.
         // @ts-ignore
         this.$errorsManagement.newError(e, 'ExchangesList');
+        this.displayErrors();
       });
-    // @ts-ignore
-    let errors = this.$errorsManagement.getErrors();
-    if (errors) {
-      for (var error in errors) {
-        // console.log(errors[error]);
-        this.$q.notify({
-          color: 'negative',
-          position: 'top',
-          message: errors[error],
-          icon: 'report_problem'
-        });
+  },
+  methods: {
+    displayErrors(): void {
+      // @ts-ignore
+      let errors = this.$errorsManagement.getErrors();
+      if (errors) {
+        for (var error in errors) {
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: errors[error],
+            icon: 'report_problem'
+          });
+        }
       }
     }
   }
