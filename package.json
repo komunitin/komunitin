@@ -24,6 +24,7 @@
     "eslint": "^6.8.0",
     "quasar": "^1.9.3",
     "typedoc": "^0.16.10",
+    "vue-element-loading": "^1.1.5",
     "vue-i18n": "^8.0.0",
     "vuelidate": "^0.7.5"
   },

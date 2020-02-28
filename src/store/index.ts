@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import exchanges from './exchanges'
+// import exchanges from './exchanges'
 
 Vue.use(Vuex);
 
@@ -16,7 +16,7 @@ Vue.use(Vuex);
 export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      exchanges
+      // exchanges
     },
 
     // enable strict mode (adds overhead!)

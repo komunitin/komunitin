@@ -1,5 +1,5 @@
 <template>
-  <div class="row items-start q-gutter-md col-kn">
+  <div class="row items-start q-gutter-md col-kn" style="min-height: 300px;">
     <q-card
       v-for="exchange of exchanges"
       :key="exchange.id"
@@ -21,19 +21,21 @@
       </q-item>
 
       <img src="~assets/nomapa.png" />
-      <q-card-section>{{ exchange.description}}</q-card-section>
+      <q-card-section>{{ exchange.description }}</q-card-section>
       <q-card-actions>
         <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
         <q-btn flat color="primary">Registra't</q-btn>
       </q-card-actions>
     </q-card>
+    <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState, mapActions } from 'vuex';
-import { clearLastError } from '../../store/exchanges/actions';
+import api from '../../services/ICESApi';
+// @ts-ignore
+import VueElementLoading from 'vue-element-loading';
 
 /**
  * Listado de exhanges.
@@ -43,24 +45,92 @@ import { clearLastError } from '../../store/exchanges/actions';
  */
 export default Vue.extend({
   name: 'ExchangeListPage',
-  mounted: function() {
-    this.getAllExchanges();
-    if (this.lastError.message) {
-      console.log(this.lastError.message);
-      this.$q.notify({
-        color: 'negative',
-        position: 'top',
-        message: this.lastError.message,
-        icon: 'report_problem'
-      });
-      this.clearLastError;
-    }
+  data() {
+    return {
+      exchanges: [] as any[],
+      isLoading: false as boolean,
+      haveUserLocation: false as boolean
+    };
   },
-  computed: {
-    ...mapState('exchanges', ['exchanges', 'lastError'])
+  components: {
+    VueElementLoading
+  },
+  beforeMount: function() {
+    this.isLoading = true;
+  },
+  mounted: function() {
+    this.getUserLocation();
   },
   methods: {
-    ...mapActions('exchanges', ['getAllExchanges', 'clearLastError'])
+    displayErrors(): void {
+      // @ts-ignore
+      let errors = this.$errorsManagement.getErrors();
+      if (errors) {
+        for (var error in errors) {
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: errors[error],
+            icon: 'report_problem'
+          });
+        }
+      }
+    },
+    displayLocationInfo(position: any) {
+      const lng = position.coords.longitude;
+      const lat = position.coords.latitude;
+
+      console.log(`longitude: ${lng} | latitude: ${lat}`);
+      this.getExchanges();
+    },
+    handleLocationError(error: any) {
+      switch (error.code) {
+        case 3:
+          // timeout was hit, meaning nothing's in the cache
+          // let's provide a default location:
+          // this.displayLocationInfo({
+          //   coords: { longitude: 33.631839, latitude: 27.380583 }
+          // });
+
+          // now let's make a non-cached request to get the actual position
+          // navigator.geolocation.getCurrentPosition(
+          //   this.displayLocationInfo,
+          //   this.handleLocationError
+          // );
+          console.log('Timeout was hit');
+          break;
+        case 2:
+          // ...device can't get data
+          console.log("device can't get data");
+          break;
+        case 1:
+          // ...user said no ☹️
+          console.log('user said no ☹️');
+      }
+      this.getExchanges();
+    },
+    getUserLocation() {
+      navigator.geolocation.getCurrentPosition(
+        this.displayLocationInfo,
+        this.handleLocationError,
+        { maximumAge: 1500000, timeout: 100000 }
+      );
+    },
+    getExchanges() {
+      api
+        .getExchangesList()
+        .then(response => {
+          this.exchanges = response.data;
+          this.isLoading = false;
+        })
+        .catch(e => {
+          this.isLoading = false;
+          // @todo Use localstorage cache.
+          // @ts-ignore
+          this.$errorsManagement.newError(e, 'ExchangesList');
+          this.displayErrors();
+        });
+    }
   }
 });
 </script>
