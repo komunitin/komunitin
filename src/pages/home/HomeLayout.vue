@@ -6,6 +6,7 @@
 
     <footer reveal elevated class="bg-transparent gray-kn">
       <q-tabs
+        dense
         no-caps
         active-color="primary"
         indicator-color="transparent"
@@ -104,5 +105,8 @@ footer {
 }
 .q-item--active {
   color: gray !important;
+}
+.q-tab__content.self-stretch.flex-center.relative-position.q-anchor--skip.non-selectable.column {
+  text-transform: uppercase;
 }
 </style>
