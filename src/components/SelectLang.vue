@@ -5,13 +5,16 @@
     dense
     round
     outlined
-    v-model="locale"
     @input="setLocale"
+    v-model="locale"
+    display-value="Languages"
     emit-value
     map-options
     :options="langs"
   />
 </template>
+<!--
+-->
 <script lang="ts">
 import Vue from 'vue';
 
