@@ -38,10 +38,6 @@ import Vue from 'vue';
 /**
  * Login select.
  *
- * @todo Flecha atras.
- * @todo Botón de idiomas.
- * @todo Link to exchanges.
- * @todo Formulario login con mail.
  * @todo Login con google o facebook.
  */
 export default Vue.extend({
