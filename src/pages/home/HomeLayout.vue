@@ -6,6 +6,7 @@
 
     <footer reveal elevated class="bg-transparent gray-kn">
       <q-tabs
+        dense
         no-caps
         active-color="primary"
         indicator-color="transparent"
@@ -58,8 +59,8 @@ export default Vue.extend({
   }
 });
 </script>
-<style>
-body {
+<style scope>
+.home {
   background: rgba(221, 75, 57, 0.3) url('~assets/home_background-700.jpg')
     no-repeat center center fixed;
   background-size: cover;
@@ -104,5 +105,8 @@ footer {
 }
 .q-item--active {
   color: gray !important;
+}
+.q-tab__content.self-stretch.flex-center.relative-position.q-anchor--skip.non-selectable.column {
+  text-transform: uppercase;
 }
 </style>

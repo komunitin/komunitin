@@ -1,6 +1,6 @@
 <template>
-  <div class="row">
-    <q-card class="my-card">
+  <div class="row" style="min-height: 400px;">
+    <q-card v-if="exchange" class="my-card">
       <q-card-section>
         <q-img :src="exchange['attributes']['image']" style="max-width: 400px; height: 200px;">
           <div
@@ -11,49 +11,71 @@
         <div v-html="exchange['attributes']['description']"></div>
       </q-card-section>
     </q-card>
-    <q-card>
+    <q-card v-if="exchange">
       <q-card-section>
         <p>
           Accounts:
           <b>{{ exchange['relatinships']['members']['meta']['count'] }}</b>
         </p>
-        <p>
-          Location:
-          <b>{{ exchange['attributes']['localtion']}}</b>
-        </p>
       </q-card-section>
     </q-card>
+    <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState, mapActions } from 'vuex';
-import { clearLastError } from '../../store/exchanges/actions';
+import api from '../../services/ICESApi';
+// @ts-ignore
+import VueElementLoading from 'vue-element-loading';
 
 export default Vue.extend({
   name: 'ExchangePage',
+  data() {
+    return {
+      exchange: false as any[] | boolean,
+      isLoading: true as boolean
+    };
+  },
+  components: {
+    VueElementLoading
+  },
   props: {
     id: String
   },
-  mounted: function() {
-    this.getExchange(this.id);
-    if (this.lastError.message) {
-      console.log(this.lastError.message);
-      this.$q.notify({
-        color: 'negative',
-        position: 'top',
-        message: this.lastError.message,
-        icon: 'report_problem'
-      });
-      this.clearLastError;
-    }
+  beforeMount: function() {
+    this.isLoading = true;
   },
-  computed: {
-    ...mapState('exchanges', ['exchange'], ['lastError'])
+  mounted: function() {
+    api
+      .getExchange(this.id)
+      .then(response => {
+        this.exchange = response.data;
+        this.isLoading = false;
+      })
+      .catch(e => {
+        this.isLoading = false;
+        // @todo Use localstorage cache.
+        // @ts-ignore
+        this.$errorsManagement.newError(e, 'ExchangesList');
+        this.displayErrors();
+      });
   },
   methods: {
-    ...mapActions('exchanges', ['getExchange'], ['clearLastError'])
+    displayErrors(): void {
+      // @ts-ignore
+      let errors = this.$errorsManagement.getErrors();
+      if (errors) {
+        for (var error in errors) {
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: errors[error],
+            icon: 'report_problem'
+          });
+        }
+      }
+    }
   }
 });
 </script>
