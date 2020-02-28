@@ -1,5 +1,8 @@
 import axios from 'axios';
-import { ExchangesListModel, ExchangeModel } from '../pages/exchanges/model';
+import {
+  ExchangesListModel,
+  ExchangeModel
+} from '../pages/exchanges/models/model';
 
 const apliClient = axios.create({
   baseURL: 'https://integralces.net/api/',
