@@ -48,7 +48,8 @@ export default Vue.extend({
   data() {
     return {
       exchanges: [] as any[],
-      isLoading: false as boolean
+      isLoading: false as boolean,
+      haveUserLocation: false as boolean
     };
   },
   components: {
@@ -58,19 +59,7 @@ export default Vue.extend({
     this.isLoading = true;
   },
   mounted: function() {
-    api
-      .getExchangesList()
-      .then(response => {
-        this.exchanges = response.data;
-        this.isLoading = false;
-      })
-      .catch(e => {
-        this.isLoading = false;
-        // @todo Use localstorage cache.
-        // @ts-ignore
-        this.$errorsManagement.newError(e, 'ExchangesList');
-        this.displayErrors();
-      });
+    this.getUserLocation();
   },
   methods: {
     displayErrors(): void {
@@ -86,6 +75,61 @@ export default Vue.extend({
           });
         }
       }
+    },
+    displayLocationInfo(position: any) {
+      const lng = position.coords.longitude;
+      const lat = position.coords.latitude;
+
+      console.log(`longitude: ${lng} | latitude: ${lat}`);
+      this.getExchanges();
+    },
+    handleLocationError(error: any) {
+      switch (error.code) {
+        case 3:
+          // timeout was hit, meaning nothing's in the cache
+          // let's provide a default location:
+          // this.displayLocationInfo({
+          //   coords: { longitude: 33.631839, latitude: 27.380583 }
+          // });
+
+          // now let's make a non-cached request to get the actual position
+          // navigator.geolocation.getCurrentPosition(
+          //   this.displayLocationInfo,
+          //   this.handleLocationError
+          // );
+          console.log('Timeout was hit');
+          break;
+        case 2:
+          // ...device can't get data
+          console.log("device can't get data");
+          break;
+        case 1:
+          // ...user said no ☹️
+          console.log('user said no ☹️');
+      }
+      this.getExchanges();
+    },
+    getUserLocation() {
+      navigator.geolocation.getCurrentPosition(
+        this.displayLocationInfo,
+        this.handleLocationError,
+        { maximumAge: 1500000, timeout: 100000 }
+      );
+    },
+    getExchanges() {
+      api
+        .getExchangesList()
+        .then(response => {
+          this.exchanges = response.data;
+          this.isLoading = false;
+        })
+        .catch(e => {
+          this.isLoading = false;
+          // @todo Use localstorage cache.
+          // @ts-ignore
+          this.$errorsManagement.newError(e, 'ExchangesList');
+          this.displayErrors();
+        });
     }
   }
 });
