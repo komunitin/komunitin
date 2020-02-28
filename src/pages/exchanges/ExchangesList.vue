@@ -1,34 +1,58 @@
 <template>
-  <div class="row items-start q-gutter-md col-kn" style="min-height: 300px;">
-    <q-card
-      v-for="exchange of exchanges"
-      :key="exchange.id"
-      class="card-kn col-xs-12 col-sm-5 col-md-3"
-    >
-      <q-item>
-        <q-item-section avatar>
-          <q-avatar>
-            <img :src="exchange.logo" />
-          </q-avatar>
-        </q-item-section>
+  <q-page-container class="container-kn">
+    <q-header reveal elevated>
+      <q-toolbar>
+        <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
 
-        <q-item-section>
-          <q-item-label>{{ exchange.name }}</q-item-label>
-          <q-item-label caption>{{ exchange.code }}</q-item-label>
-        </q-item-section>
-        <!-- @todo Share exchange. -->
-        <q-btn flat dense round icon="share" aria-label="Share" />
-      </q-item>
+        <q-toolbar-title>{{ $t('Groups near you')}}</q-toolbar-title>
 
-      <img src="~assets/nomapa.png" />
-      <q-card-section>{{ exchange.description }}</q-card-section>
-      <q-card-actions>
-        <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
-        <q-btn flat color="primary">Registra't</q-btn>
-      </q-card-actions>
-    </q-card>
-    <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
-  </div>
+        <q-input
+          v-if="viewSearch === true"
+          class="search-kn"
+          dark
+          v-model="search"
+          dense
+          autofocus
+        />
+        <q-icon
+          v-if="viewSearch === false"
+          name="search"
+          size="24px"
+          v-on:click="viewSearch = true"
+        />
+      </q-toolbar>
+    </q-header>
+    <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
+      <q-card
+        v-for="exchange of exchanges"
+        :key="exchange.id"
+        class="card-kn col-xs-12 col-sm-5 col-md-3"
+      >
+        <q-item>
+          <q-item-section avatar>
+            <q-avatar>
+              <img :src="exchange.logo" />
+            </q-avatar>
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>{{ exchange.name }}</q-item-label>
+            <q-item-label caption>{{ exchange.code }}</q-item-label>
+          </q-item-section>
+          <!-- @todo Share exchange. -->
+          <q-btn flat dense round icon="share" aria-label="Share" />
+        </q-item>
+
+        <img src="~assets/nomapa.png" />
+        <q-card-section>{{ exchange.description }}</q-card-section>
+        <q-card-actions>
+          <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
+          <q-btn flat color="primary">Registra't</q-btn>
+        </q-card-actions>
+      </q-card>
+      <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
+    </div>
+  </q-page-container>
 </template>
 
 <script lang="ts">
@@ -53,7 +77,9 @@ export default Vue.extend({
       lng: '' as string,
       lat: '' as string,
       pag: 1 as number,
-      perPag: 10 as number
+      perPag: 10 as number,
+      search: '' as string,
+      viewSearch: false as boolean
     };
   },
   components: {
@@ -139,16 +165,10 @@ export default Vue.extend({
 });
 </script>
 <style>
-.card-kn {
-  max-width: 94%;
-  justify-content: center;
-}
-.col-kn {
-  display: flex;
-  width: 94%;
-  margin-left: -4px;
-}
-.container-kn {
-  margin: 16px 0 0 0;
+.search-kn {
+  /* width: 30px; */
+
+  font-size: 20px;
+  font-style: oblique;
 }
 </style>
