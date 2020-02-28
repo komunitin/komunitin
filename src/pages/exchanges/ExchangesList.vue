@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
 
-        <q-toolbar-title>{{ $t('Groups near you')}}</q-toolbar-title>
+        <q-toolbar-title v-if="viewSearch !== true">{{ $t('Groups near you')}}</q-toolbar-title>
 
         <q-input
           v-if="viewSearch === true"
@@ -14,12 +14,7 @@
           dense
           autofocus
         />
-        <q-icon
-          v-if="viewSearch === false"
-          name="search"
-          size="24px"
-          v-on:click="viewSearch = true"
-        />
+        <q-btn flat v-on:click="searchBox()" icon="search" />
       </q-toolbar>
     </q-header>
     <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
@@ -79,7 +74,8 @@ export default Vue.extend({
       pag: 1 as number,
       perPag: 10 as number,
       search: '' as string,
-      viewSearch: false as boolean
+      viewSearch: false as boolean,
+      searchBoxStep: 0 as number
     };
   },
   components: {
@@ -92,6 +88,17 @@ export default Vue.extend({
     this.getUserLocation();
   },
   methods: {
+    /**
+     * - One click open input.
+     * - Second click launch search.
+     */
+    searchBox() {
+      if (this.search !== '') {
+        // Launch search.
+      } else {
+        this.viewSearch = !this.viewSearch;
+      }
+    },
     displayErrors(): void {
       // @ts-ignore
       let errors = this.$errorsManagement.getErrors();
