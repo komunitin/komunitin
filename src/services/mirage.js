@@ -1,5 +1,8 @@
 import { Server } from 'miragejs';
-import { mockExchange, mockExchangesList } from '../pages/exchanges/mockData';
+import {
+  mockExchange,
+  mockExchangesList
+} from '../pages/exchanges/models/mockData';
 
 console.log('Mirage activated');
 
