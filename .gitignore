@@ -37,6 +37,7 @@ yarn-error.log*
 .magtrabajos
 /docs
 .env
+*.swp
 
 
 # Test reports
