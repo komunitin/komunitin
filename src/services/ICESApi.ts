@@ -1,8 +1,4 @@
 import axios from 'axios';
-import {
-  ExchangesListModel,
-  ExchangeModel
-} from '../pages/exchanges/models/model';
 
 const apliClient = axios.create({
   baseURL: 'https://integralces.net/api/',
@@ -25,8 +21,8 @@ export default {
   getExchangesList(
     pag: number,
     perPag: number,
-    lat?: string | boolean,
-    lng?: string | boolean
+    lat?: number | null,
+    lng?: number | null
   ) {
     let url = 'exchanges/' + pag + '/' + perPag;
     if (lat) {
