@@ -55,6 +55,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import api from '../../services/ICESApi';
+import { ExchangesListModel } from './models/model';
+
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
 
@@ -68,11 +70,11 @@ export default Vue.extend({
   name: 'ExchangeListPage',
   data() {
     return {
-      exchanges: [] as any[],
+      exchanges: [] as ExchangesListModel[],
       isLoading: false as boolean,
       haveUserLocation: false as boolean,
-      lng: '' as string,
-      lat: '' as string,
+      lng: null as number | null,
+      lat: null as number | null,
       pag: 1 as number,
       perPag: 10 as number,
       search: '' as string,
@@ -117,14 +119,14 @@ export default Vue.extend({
         }
       }
     },
-    displayLocationInfo(position: any) {
+    displayLocationInfo(position: Position) {
       this.lng = position.coords.longitude;
       this.lat = position.coords.latitude;
 
       console.log(`longitude: ${this.lng} | latitude: ${this.lat}`);
       this.getExchanges(this.pag, this.perPag, this.lng, this.lat);
     },
-    handleLocationError(error: any) {
+    handleLocationError(error: PositionError) {
       switch (error.code) {
         case 3:
           // timeout was hit, meaning nothing's in the cache
@@ -142,6 +144,7 @@ export default Vue.extend({
           break;
         case 2:
           // ...device can't get data
+          // eslint-disable-next-line quotes
           console.log("device can't get data");
           break;
         case 1:
@@ -157,7 +160,7 @@ export default Vue.extend({
         { maximumAge: 1500000, timeout: 100000 }
       );
     },
-    getExchanges(pag: number, perPag: number, lat?: string, lng?: string) {
+    getExchanges(pag: number, perPag: number, lat?: number, lng?: number) {
       api
         .getExchangesList(pag, perPag, lat, lng)
         .then(response => {
@@ -197,6 +200,6 @@ export default Vue.extend({
   font-style: oblique;
 }
 .velmld-spinner[data-v-1a4f1fc2] {
-    top: 70px !important;
+  top: 70px !important;
 }
 </style>

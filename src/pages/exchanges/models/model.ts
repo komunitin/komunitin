@@ -32,13 +32,13 @@ export interface ExchangeModel {
       location: {
         name: string;
         type: string;
-        bbox: any[];
-        coordinates: any[];
+        bbox: number[];
+        coordinates: [number, number][][];
       };
     };
     relatinships: {
       contacts: {
-        data: any[];
+        data: object[];
       };
       members: {
         links: {
@@ -89,5 +89,5 @@ export interface ExchangeModel {
       updated: string;
     };
   };
-  included: any[];
+  included: object | null;
 }

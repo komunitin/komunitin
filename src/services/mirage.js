@@ -6,6 +6,7 @@ import {
 
 console.log('Mirage activated');
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const server = new Server({
   timing: 6000,
   logging: true,
