@@ -8,16 +8,19 @@
 
         <q-input
           v-if="viewSearch === true"
+          @keyup.enter="searchBox()"
           class="search-kn"
           dark
           v-model="search"
           dense
           autofocus
+          right
         />
-        <q-btn flat v-on:click="searchBox()" icon="search" />
+        <q-btn right flat v-on:click="searchBox()" icon="search" />
       </q-toolbar>
     </q-header>
     <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
+      <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
       <q-card
         v-for="exchange of exchanges"
         :key="exchange.id"
@@ -45,7 +48,6 @@
           <q-btn flat color="primary">Registra't</q-btn>
         </q-card-actions>
       </q-card>
-      <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
     </div>
   </q-page-container>
 </template>
@@ -95,6 +97,8 @@ export default Vue.extend({
     searchBox() {
       if (this.search !== '') {
         // Launch search.
+        this.isLoading = true;
+        this.getExchangesListFilter(this.search);
       } else {
         this.viewSearch = !this.viewSearch;
       }
@@ -157,15 +161,30 @@ export default Vue.extend({
       api
         .getExchangesList(pag, perPag, lat, lng)
         .then(response => {
-          this.exchanges = response.data;
           this.isLoading = false;
+          this.exchanges = response.data;
         })
         .catch(e => {
+          // @todo Use localstorage cache.
+          // @ts-ignore
+          this.$errorsManagement.newError(e, 'ExchangesList');
           this.isLoading = false;
+          this.displayErrors();
+        });
+    },
+    getExchangesListFilter(filter: string) {
+      api
+        .getExchangesListFilter(filter)
+        .then(response => {
+          this.isLoading = false;
+          this.exchanges = response.data;
+        })
+        .catch(e => {
           // @todo Use localstorage cache.
           // @ts-ignore
           this.$errorsManagement.newError(e, 'ExchangesList');
           this.displayErrors();
+          this.isLoading = false;
         });
     }
   }
@@ -173,9 +192,11 @@ export default Vue.extend({
 </script>
 <style>
 .search-kn {
-  /* width: 30px; */
-
+  width: 100%;
   font-size: 20px;
   font-style: oblique;
+}
+.velmld-spinner[data-v-1a4f1fc2] {
+    top: 70px !important;
 }
 </style>
