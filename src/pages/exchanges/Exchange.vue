@@ -3,20 +3,9 @@
     <q-header reveal elevated>
       <q-toolbar>
         <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
-
-        <q-toolbar-title v-if="viewSearch !== true">{{ $t('Groups near you')}}</q-toolbar-title>
-
-        <q-input
-          v-if="viewSearch === true"
-          @keyup.enter="searchBox()"
-          class="search-kn"
-          dark
-          v-model="search"
-          dense
-          autofocus
-          right
-        />
-        <q-btn right flat v-on:click="searchBox()" icon="search" />
+        <q-toolbar-title>{{ $t('Groups near you')}}</q-toolbar-title>
+        <q-btn right flat icon="message" />
+        <q-btn right flat icon="share" />
       </q-toolbar>
     </q-header>
     <div class="row" style="min-height: 400px;">
@@ -52,6 +41,11 @@ import { ExchangeModel } from './models/model';
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
 
+/**
+ * ExchangePage.
+ *
+ * @todo Share and Message buttons.
+ */
 export default Vue.extend({
   name: 'ExchangePage',
   data() {

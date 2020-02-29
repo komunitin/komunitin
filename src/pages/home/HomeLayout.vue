@@ -4,7 +4,7 @@
       <router-view />
     </q-page-container>
 
-    <footer reveal elevated class="bg-transparent gray-kn">
+    <q-footer reveal elevated class="bg-transparent gray-kn">
       <q-tabs
         dense
         no-caps
@@ -19,7 +19,7 @@
         <q-route-tab to="/help" name="help" label="Help" />
         <q-route-tab to="contribute" name="contribute" label="Contribute" />
       </q-tabs>
-    </footer>
+    </q-footer>
   </q-layout>
 </template>
 
