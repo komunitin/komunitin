@@ -54,6 +54,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { required, email, minLength } from 'vuelidate/lib/validators';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { validationMixin } from 'vuelidate';
 
 // Login mail.
