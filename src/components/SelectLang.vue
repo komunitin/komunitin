@@ -23,22 +23,10 @@ export default Vue.extend({
   data() {
     return {
       locale: this.$i18n.locale,
-      // Idiomas disponibles.
-      // @todo Add in global setting.
-      langs: [
-        {
-          label: 'Es',
-          value: 'es'
-        },
-        {
-          label: 'Ca',
-          value: 'ca'
-        },
-        {
-          label: 'En',
-          value: 'en-us'
-        }
-      ]
+      // Available languages.
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      langs: this.$Koptions.langs as any
     };
   },
   methods: {
