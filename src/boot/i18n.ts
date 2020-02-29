@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { Quasar } from 'quasar';
+import Quasar from 'quasar';
 import VueI18n from 'vue-i18n';
 import messages from 'src/i18n';
 
@@ -15,6 +15,7 @@ if (localStorage.getItem('lang')) {
   // @ts-ignore
   lang = localStorage.getItem('lang');
 } else {
+  // @ts-ignore
   switch (Quasar.lang.getLocale()) {
     case 'ca': {
       lang = 'ca';
