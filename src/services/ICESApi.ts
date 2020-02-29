@@ -19,13 +19,16 @@ const apliClient = axios.create({
 });
 
 export default {
+  getExchangesListFilter(filter: string) {
+    return apliClient.get('/exchanges/filter/' + filter);
+  },
   getExchangesList(
     pag: number,
     perPag: number,
     lat?: string | boolean,
     lng?: string | boolean
   ) {
-    let url = 'exchages/' + pag + '/' + perPag;
+    let url = 'exchanges/' + pag + '/' + perPag;
     if (lat) {
       url = url + '/' + lat + '/' + lng;
     }
