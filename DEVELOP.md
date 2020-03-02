@@ -38,6 +38,18 @@ When developing new Vue components or pages, always create their unit test file 
 npm run dev:mirage
 ```
 
+or 
+
+```bash
+quasar dev --env.USE_MIRAGE [TIMING]
+```
+
 ### Sending environment variables
 
 Added the possibility of passing environment variables in command line.
+
+Example:
+
+```bash
+quasar dev --env.USE_MIRAGE 1000
+```

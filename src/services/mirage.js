@@ -8,12 +8,15 @@ console.log('Mirage activated');
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const server = new Server({
-  timing: 6000,
+  timing: 500,
   logging: true,
   // urlPrefix: 'https://integralces.net/api',
   // namespace: 'exchanges',
 
   routes() {
+    if (process.env.USE_MIRAGE) {
+      this.timing = parseInt(process.env.USE_MIRAGE);
+    }
     /**
      * List of exchanges.
      */
@@ -43,8 +46,15 @@ const server = new Server({
         let perPag = request.params.perPag;
 
         // @dev
-        console.log({
-          Mirage: { pag: pag, perPag: perPag, lat: lat, lng: lng }
+        console.debug({
+          Mirage: {
+            class: this,
+            timing: this.timing,
+            pag: pag,
+            perPag: perPag,
+            lat: lat,
+            lng: lng
+          }
         });
         return mockExchangesList;
       }
@@ -71,10 +81,6 @@ const server = new Server({
     this.get('https://integralces.net/api/exchange/:id', (schema, request) => {
       let id = request.params.id;
 
-      // @dev
-      console.log({
-        Mirage: { id: id }
-      });
       console.log(mockExchange);
       return mockExchange[0].data;
     });
