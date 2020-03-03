@@ -8,9 +8,9 @@ export interface ExchangesListModel {
   name: string;
   description: string;
   accounts: number;
-  location: string;
   logo: string;
   code: string;
+  attributes: {};
 }
 
 /**

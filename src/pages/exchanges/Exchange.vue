@@ -3,28 +3,29 @@
     <q-header reveal elevated>
       <q-toolbar>
         <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
-        <q-toolbar-title>{{ $t('Groups near you')}}</q-toolbar-title>
+        <q-toolbar-title>{{ $t('Groups near you') }}</q-toolbar-title>
         <q-btn right flat icon="message" />
         <q-btn right flat icon="share" />
       </q-toolbar>
     </q-header>
     <div class="row" style="min-height: 400px;">
-      <q-card v-if="exchange" class="my-card">
+      <q-card v-if="group.data" class="my-card">
         <q-card-section>
-          <q-img :src="exchange['attributes']['image']" style="max-width: 400px; height: 200px;">
-            <div
-              class="absolute-bottom text-subtitle1 text-center"
-            >{{ exchange['attributes']['name'] }}</div>
+          <q-img :src="group.data.attributes.image" style="max-width: 400px; height: 200px;">
+            <div class="absolute-bottom text-subtitle1 text-center">{{ group.data.attributes.name }}</div>
           </q-img>
-          <h6>{{ exchange['attributes']['code'] }}</h6>
-          <div v-html="exchange['attributes']['description']"></div>
+          <h6>{{ group.data.attributes.code }}</h6>
+          <div v-html="group.data.attributes.description"></div>
+        </q-card-section>
+        <q-card-section>
+          <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
         </q-card-section>
       </q-card>
-      <q-card v-if="exchange">
+      <q-card v-if="group.data">
         <q-card-section>
           <p>
             Accounts:
-            <b>{{ exchange['relatinships']['members']['meta']['count'] }}</b>
+            <b>{{ group.data.relatinships.members.meta.count }}</b>
           </p>
         </q-card-section>
       </q-card>
@@ -36,10 +37,11 @@
 <script lang="ts">
 import Vue from 'vue';
 import api from '../../services/ICESApi';
-import { ExchangeModel } from './models/model';
+// import { ExchangeModel } from './models/model';
 
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
+import SimpleMap from '../../components/SimpleMap';
 
 /**
  * ExchangePage.
@@ -50,12 +52,14 @@ export default Vue.extend({
   name: 'ExchangePage',
   data() {
     return {
-      exchange: false as ExchangeModel | boolean,
+      // exchange: {} as ExchangeModel,
+      group: {},
       isLoading: true as boolean
     };
   },
   components: {
-    VueElementLoading
+    VueElementLoading,
+    SimpleMap
   },
   props: {
     id: String
@@ -67,8 +71,9 @@ export default Vue.extend({
     api
       .getExchange(this.id)
       .then(response => {
-        this.exchange = response.data;
+        this.group = response.data;
         this.isLoading = false;
+        console.log(this.group); // @dev
       })
       .catch(e => {
         this.isLoading = false;
@@ -77,6 +82,7 @@ export default Vue.extend({
         this.$errorsManagement.newError(e, 'ExchangesList');
         this.displayErrors();
       });
+    this.displayErrors();
   },
   methods: {
     displayErrors(): void {
@@ -93,12 +99,31 @@ export default Vue.extend({
         }
       }
     }
+  },
+  computed: {
+    center: function() {
+      return [
+        this.group.data.attributes.location.coordinates[0][0][0],
+        this.group.data.attributes.location.coordinates[0][0][1]
+      ];
+    },
+    markerLatLng: function() {
+      return [
+        this.group.data.attributes.location.coordinates[0][0][0],
+        this.group.data.attributes.location.coordinates[0][0][1]
+      ];
+    }
   }
 });
 </script>
-<style>
+<style scope>
 .q-card {
   width: 300px;
   box-shadow: none;
+}
+.simple-map {
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 </style>
