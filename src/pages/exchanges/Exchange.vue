@@ -37,11 +37,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import api from '../../services/ICESApi';
-// import { ExchangeModel } from './models/model';
+// @ts-ignore
+import SimpleMap from '../../components/SimpleMap';
+import { GroupModel } from './models/model';
 
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
-import SimpleMap from '../../components/SimpleMap';
 
 /**
  * ExchangePage.
@@ -52,8 +53,7 @@ export default Vue.extend({
   name: 'ExchangePage',
   data() {
     return {
-      // exchange: {} as ExchangeModel,
-      group: {},
+      group: {} as GroupModel,
       isLoading: true as boolean
     };
   },
@@ -64,10 +64,10 @@ export default Vue.extend({
   props: {
     id: String
   },
-  beforeMount: function() {
+  beforeMount: function(): void {
     this.isLoading = true;
   },
-  mounted: function() {
+  mounted: function(): void {
     api
       .getExchange(this.id)
       .then(response => {
@@ -101,13 +101,13 @@ export default Vue.extend({
     }
   },
   computed: {
-    center: function() {
+    center: function(): [number, number] {
       return [
         this.group.data.attributes.location.coordinates[0][0][0],
         this.group.data.attributes.location.coordinates[0][0][1]
       ];
     },
-    markerLatLng: function() {
+    markerLatLng: function(): [number, number] {
       return [
         this.group.data.attributes.location.coordinates[0][0][0],
         this.group.data.attributes.location.coordinates[0][0][1]
