@@ -5,7 +5,15 @@
         <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
         <q-toolbar-title>{{ $t('Groups near you') }}</q-toolbar-title>
         <q-btn right flat icon="message" />
-        <q-btn right flat icon="share" />
+        <navigator-share
+          v-bind:on-error="onError"
+          v-bind:on-success="onSuccess"
+          v-bind:url="url"
+          v-bind:title="title"
+          text="Komunitin group"
+        >
+          <q-btn slot="clickable" right flat outline icon="share" />
+        </navigator-share>
       </q-toolbar>
     </q-header>
     <div class="row" style="min-height: 400px;">
@@ -43,6 +51,11 @@ import { GroupModel } from './models/model';
 
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
+// @todo Aún pocos navegadores soportan esto, hay que
+// añadir una alternativa por si falla.
+// @see vue-share-social
+// @ts-ignore
+import NavigatorShare from 'vue-navigator-share';
 
 /**
  * ExchangePage.
@@ -59,7 +72,8 @@ export default Vue.extend({
   },
   components: {
     VueElementLoading,
-    SimpleMap
+    SimpleMap,
+    NavigatorShare
   },
   props: {
     id: String
@@ -98,6 +112,13 @@ export default Vue.extend({
           });
         }
       }
+    },
+    onError(err: string) {
+      alert(err);
+      console.log(err);
+    },
+    onSuccess(err: string) {
+      console.log(err);
     }
   },
   computed: {
@@ -112,6 +133,12 @@ export default Vue.extend({
         this.group.data.attributes.location.coordinates[0][0][0],
         this.group.data.attributes.location.coordinates[0][0][1]
       ];
+    },
+    url() {
+      return window.location.href;
+    },
+    title() {
+      return document.title;
     }
   }
 });
@@ -125,5 +152,8 @@ export default Vue.extend({
   width: 100%;
   margin: 0;
   padding: 0;
+}
+.q-btn__wrapper.col.row.q-anchor--skip {
+  padding: 0 4px;
 }
 </style>

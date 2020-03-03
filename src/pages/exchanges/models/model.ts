@@ -5,12 +5,21 @@
  */
 export interface GroupsListModel {
   id: number;
-  name: string;
-  description: string;
-  accounts: number;
-  logo: string;
-  code: string;
-  attributes: {};
+  data: {
+    attributes: {
+      code: string;
+      name: string;
+      description: string;
+      image: string;
+      website: string;
+      access: string;
+      location: {
+        name: string;
+        type: string;
+        coordinates: [];
+      };
+    };
+  };
 }
 
 /**
