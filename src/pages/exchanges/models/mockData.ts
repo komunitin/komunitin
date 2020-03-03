@@ -1,6 +1,6 @@
-import { ExchangesListModel, ExchangeModel } from './model';
+import { GroupsListModel, GroupModel } from './model';
 
-export const mockExchangesList: ExchangesListModel[] = [
+export const mockGroupsList: GroupsListModel[] = [
   {
     id: 1,
     name: 'Echange 1',
@@ -79,7 +79,7 @@ export const mockExchangesList: ExchangesListModel[] = [
   }
 ];
 
-export const mockExchange: ExchangeModel[] = [
+export const mockGroup: GroupModel[] = [
   {
     data: {
       id: '84278843-50d5-4358-bbf7-a833ea5cde07',

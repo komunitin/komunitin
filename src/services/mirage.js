@@ -1,8 +1,5 @@
 import { Server } from 'miragejs';
-import {
-  mockExchange,
-  mockExchangesList
-} from '../pages/exchanges/models/mockData';
+import { mockGroup, mockGroupsList } from '../pages/exchanges/models/mockData';
 
 console.log('Mirage activated');
 
@@ -30,7 +27,7 @@ const server = new Server({
         console.log({
           Mirage: { pag: pag, perPag: perPag }
         });
-        return mockExchangesList;
+        return mockGroupsList;
       }
     );
 
@@ -56,7 +53,7 @@ const server = new Server({
             lng: lng
           }
         });
-        return mockExchangesList;
+        return mockGroupsList;
       }
     );
 
@@ -71,7 +68,7 @@ const server = new Server({
         console.log({
           Mirage: { search: search }
         });
-        return mockExchangesList;
+        return mockGroupsList;
       }
     );
 
@@ -81,7 +78,7 @@ const server = new Server({
     this.get('https://integralces.net/api/exchange/:id', (schema, request) => {
       let id = request.params.id;
       id = 0;
-      return mockExchange[id];
+      return mockGroup[id];
     });
   }
 });
