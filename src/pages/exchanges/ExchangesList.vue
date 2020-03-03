@@ -4,7 +4,11 @@
       <q-toolbar>
         <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
 
-        <q-toolbar-title v-if="viewSearch !== true">{{ $t('Groups near you')}}</q-toolbar-title>
+        <q-toolbar-title v-if="viewSearch !== true">
+          {{
+          $t('Groups near you')
+          }}
+        </q-toolbar-title>
 
         <q-input
           v-if="viewSearch === true"
@@ -41,7 +45,14 @@
           <q-btn flat dense round icon="share" aria-label="Share" />
         </q-item>
 
-        <img src="~assets/nomapa.png" />
+        <!-- <img src="~assets/nomapa.png" /> -->
+        <q-card-section class="simple-map">
+          <simple-map
+            :center="exchange.attributes.location.coordinates"
+            :markerLatLng="exchange.attributes.location.coordinates"
+          />
+        </q-card-section>
+
         <q-card-section>{{ exchange.description }}</q-card-section>
         <q-card-actions>
           <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
@@ -59,6 +70,8 @@ import { ExchangesListModel } from './models/model';
 
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
+
+import SimpleMap from '../../components/SimpleMap';
 
 /**
  * Listado de exhanges.
@@ -83,7 +96,8 @@ export default Vue.extend({
     };
   },
   components: {
-    VueElementLoading
+    VueElementLoading,
+    SimpleMap
   },
   beforeMount: function() {
     this.isLoading = true;
@@ -193,7 +207,7 @@ export default Vue.extend({
   }
 });
 </script>
-<style>
+<style scope>
 .search-kn {
   width: 100%;
   font-size: 20px;
@@ -201,5 +215,10 @@ export default Vue.extend({
 }
 .velmld-spinner[data-v-1a4f1fc2] {
   top: 70px !important;
+}
+.simple-map {
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 </style>
