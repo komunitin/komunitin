@@ -9,9 +9,15 @@ export const mockExchangesList: ExchangesListModel[] = [
       Aliqua sint adipisicing cillum deserunt quis. Consequat magna dolor eiusmod ea fugiat duis cupidatat. Quis nulla amet magna dolore et irure excepteur.    
     `,
     accounts: 120,
-    location: 'location 1',
     logo:
-      'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/mystic-mountain-300x300.png'
+      'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/mystic-mountain-300x300.png',
+    attributes: {
+      location: {
+        name: 'Cremallera de Montserrat',
+        type: 'Point',
+        coordinates: [41.5922793, 1.8342942]
+      }
+    }
   },
   {
     id: 2,
@@ -25,7 +31,13 @@ export const mockExchangesList: ExchangesListModel[] = [
       Dolore commodo proident anim anim eiusmod sint. Elit laboris irure enim duis laborum culpa ea excepteur excepteur. Amet occaecat incididunt Lorem in mollit excepteur do aliquip. Id sint reprehenderit ut aliquip anim irure. Eu reprehenderit laborum cupidatat commodo pariatur anim aliqua excepteur ad in excepteur exercitation.
     `,
     accounts: 150,
-    location: 'location 2',
+    attributes: {
+      location: {
+        name: 'Torre Eiffel',
+        type: 'Point',
+        coordinates: [48.8583736, 2.2922873]
+      }
+    },
     logo:
       'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/colorpro.png'
   },
@@ -37,7 +49,13 @@ export const mockExchangesList: ExchangesListModel[] = [
       Aliqua sint adipisicing cillum deserunt quis. Consequat magna dolor eiusmod ea fugiat duis cupidatat. Quis nulla amet magna dolore et irure excepteur.    
     `,
     accounts: 620,
-    location: 'location 3',
+    attributes: {
+      location: {
+        name: 'Les Olives',
+        type: 'Point',
+        coordinates: [42.1050622, 3.0157955]
+      }
+    },
     logo:
       'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/femme-foto-300x300.png'
   },
@@ -49,7 +67,13 @@ export const mockExchangesList: ExchangesListModel[] = [
       Aliqua sint adipisicing cillum deserunt quis. Consequat magna dolor eiusmod ea fugiat duis cupidatat. Quis nulla amet magna dolore et irure excepteur.    
     `,
     accounts: 120,
-    location: 'location 4',
+    attributes: {
+      location: {
+        name: 'Playa de La Concha',
+        type: 'Point',
+        coordinates: [43.3178579, -1.9882534]
+      }
+    },
     logo:
       'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/whatcom.png'
   }
@@ -80,7 +104,7 @@ export const mockExchange: ExchangeModel[] = [
           ],
           coordinates: [
             [
-              [-109.3798828125, -27.054233808785824],
+              [41.8667, 2.6667],
               [-109.44236755371094, -27.201510867989075],
               [-109.23294067382812, -27.108033801463105],
               [-109.3798828125, -27.054233808785824]

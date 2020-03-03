@@ -80,9 +80,8 @@ const server = new Server({
      */
     this.get('https://integralces.net/api/exchange/:id', (schema, request) => {
       let id = request.params.id;
-
-      console.log(mockExchange);
-      return mockExchange[0].data;
+      id = 0;
+      return mockExchange[id];
     });
   }
 });
