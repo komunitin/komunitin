@@ -66,11 +66,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import api from '../../services/ICESApi';
-import { ExchangesListModel } from './models/model';
+import { GroupsListModel } from './models/model';
 
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
 
+// @ts-ignore
 import SimpleMap from '../../components/SimpleMap';
 
 /**
@@ -83,7 +84,7 @@ export default Vue.extend({
   name: 'ExchangeListPage',
   data() {
     return {
-      exchanges: [] as ExchangesListModel[],
+      exchanges: [] as GroupsListModel[],
       isLoading: false as boolean,
       haveUserLocation: false as boolean,
       lng: null as number | null,

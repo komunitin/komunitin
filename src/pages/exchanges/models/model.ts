@@ -3,7 +3,7 @@
  *
  * @todo Gestión de localizaciones.
  */
-export interface ExchangesListModel {
+export interface GroupsListModel {
   id: number;
   name: string;
   description: string;
@@ -18,7 +18,7 @@ export interface ExchangesListModel {
  *
  * @todo Gestión de localizaciones.
  */
-export interface ExchangeModel {
+export interface GroupModel {
   data: {
     id: string;
     type: string;

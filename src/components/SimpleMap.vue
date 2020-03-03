@@ -39,6 +39,7 @@ export default {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       zoom: 3,
       greenIcon: new LeafIcon({
+        // eslint-disable-next-line no-undef
         iconUrl: require('../assets/icons/marker.png'),
         shadowUrl: 'http://leafletjs.com/examples/custom-icons/leaf-shadow.png'
       })
