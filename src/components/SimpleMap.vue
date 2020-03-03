@@ -44,10 +44,6 @@ export default {
         shadowUrl: 'http://leafletjs.com/examples/custom-icons/leaf-shadow.png'
       })
     };
-  },
-  mounted: function() {
-    console.log({ Center: this.center });
-    console.log({ MarkerLatLng: this.markerLatLng });
   }
 };
 </script>

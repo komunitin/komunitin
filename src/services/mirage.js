@@ -22,12 +22,7 @@ const server = new Server({
       (schema, request) => {
         let pag = request.params.pag;
         let perPag = request.params.perPag;
-
-        // @dev
-        console.log({
-          Mirage: { pag: pag, perPag: perPag }
-        });
-        return mockGroupsList;
+        return mockGroupsList();
       }
     );
 
@@ -53,7 +48,7 @@ const server = new Server({
             lng: lng
           }
         });
-        return mockGroupsList;
+        return mockGroupsList();
       }
     );
 
@@ -64,11 +59,7 @@ const server = new Server({
       'https://integralces.net/api/exchanges/filter/:search',
       (schema, request) => {
         let search = request.params.search;
-        // @dev
-        console.log({
-          Mirage: { search: search }
-        });
-        return mockGroupsList;
+        return mockGroupsList();
       }
     );
 

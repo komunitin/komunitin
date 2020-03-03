@@ -33,13 +33,13 @@
         <q-item>
           <q-item-section avatar>
             <q-avatar>
-              <img :src="exchange.logo" />
+              <img :src="exchange.data.attributes.image" />
             </q-avatar>
           </q-item-section>
 
           <q-item-section>
-            <q-item-label>{{ exchange.name }}</q-item-label>
-            <q-item-label caption>{{ exchange.code }}</q-item-label>
+            <q-item-label>{{ exchange.data.attributes.name }}</q-item-label>
+            <q-item-label caption>{{ exchange.data.attributes.code }}</q-item-label>
           </q-item-section>
           <!-- @todo Share exchange. -->
           <q-btn flat dense round icon="share" aria-label="Share" />
@@ -48,12 +48,12 @@
         <!-- <img src="~assets/nomapa.png" /> -->
         <q-card-section class="simple-map">
           <simple-map
-            :center="exchange.attributes.location.coordinates"
-            :markerLatLng="exchange.attributes.location.coordinates"
+            :center="exchange.data.attributes.location.coordinates"
+            :markerLatLng="exchange.data.attributes.location.coordinates"
           />
         </q-card-section>
 
-        <q-card-section>{{ exchange.description }}</q-card-section>
+        <q-card-section>{{ exchange.data.attributes.description | subStr }}</q-card-section>
         <q-card-actions>
           <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
           <q-btn flat color="primary">Registra't</q-btn>
@@ -105,6 +105,14 @@ export default Vue.extend({
   },
   mounted: function() {
     this.getUserLocation();
+  },
+  filters: {
+    subStr: function(string: string): string {
+      if (string.length > 400) {
+        return string.substring(0, 400) + '...';
+      }
+      return string;
+    }
   },
   methods: {
     /**
