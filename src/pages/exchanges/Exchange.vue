@@ -16,28 +16,104 @@
         </navigator-share>
       </q-toolbar>
     </q-header>
-    <div class="row" style="min-height: 400px;">
-      <q-card v-if="group.data" class="my-card">
+    <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
+    <div
+      v-if="group.data"
+      class="group-detail q-pa-md row items-start q-gutter-md"
+      style="min-height: 300px;"
+    >
+      <q-card class="card-header">
         <q-card-section>
           <q-img :src="group.data.attributes.image" style="max-width: 400px; height: 200px;">
             <div class="absolute-bottom text-subtitle1 text-center">{{ group.data.attributes.name }}</div>
           </q-img>
-          <h6>{{ group.data.attributes.code }}</h6>
+          <h6 class="code-group">{{ group.data.attributes.code }}</h6>
           <div v-html="group.data.attributes.description"></div>
         </q-card-section>
+        <q-separator />
+        <q-card-actions>
+          <q-icon size="18px" flat round name="link" />
+          <q-btn
+            type="a"
+            flat
+            class="group-website"
+            :href="group.data.attributes.website"
+            target="_blank"
+          >{{ group.data.attributes.website | link }}</q-btn>
+        </q-card-actions>
+      </q-card>
+
+      <q-card>
         <q-card-section>
-          <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
+          <div class="text-overline group-title-section">
+            <q-icon name="local_offer" />Offers
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section horizontal>
+          <q-card-section class="col-4 group-count-box">
+            <h2 class="group-count">{{ group.data.relatinships.members.meta.count }}</h2>
+            <q-btn
+              :to="`exchanges/${group.data.relatinships.members.links.related}`"
+              flat
+              color="primary"
+            >Explora</q-btn>
+          </q-card-section>
+
+          <q-separator vertical />
+
+          <q-card-section class="col-8">
+            <ul>
+              <li>53 Alimentació</li>
+              <li>44 Serveis professionals</li>
+              <li>38 Salut i higiene</li>
+              <li>32 Arts i cultura</li>
+              <li>i més categories</li>
+            </ul>
+          </q-card-section>
         </q-card-section>
       </q-card>
-      <q-card v-if="group.data">
+
+      <q-card>
         <q-card-section>
           <p>
-            Accounts:
+            Demandas:
             <b>{{ group.data.relatinships.members.meta.count }}</b>
           </p>
         </q-card-section>
       </q-card>
-      <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
+      <q-card>
+        <q-card-section>
+          <p>
+            Members:
+            <b>{{ group.data.relatinships.members.meta.count }}</b>
+          </p>
+        </q-card-section>
+      </q-card>
+      <q-card>
+        <q-card-section>
+          <p>
+            Moneda:
+            <b>{{ group.data.relatinships.members.meta.count }}</b>
+          </p>
+        </q-card-section>
+      </q-card>
+      <q-card>
+        Location:
+        <q-card-section>
+          <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
+        </q-card-section>
+      </q-card>
+      <q-card>
+        <q-card-section>
+          <p>
+            Contacts:
+            <b>{{ group.data.relatinships.members.meta.count }}</b>
+          </p>
+        </q-card-section>
+      </q-card>
     </div>
   </q-page-container>
 </template>
@@ -71,6 +147,11 @@ export default Vue.extend({
       isLoading: true as boolean
     };
   },
+  filters: {
+    link(link: string): string {
+      return link.replace(/(https|http):\/\//, '');
+    }
+  },
   components: {
     VueElementLoading,
     SimpleMap,
@@ -88,7 +169,7 @@ export default Vue.extend({
       .then(response => {
         this.group = response.data;
         this.isLoading = false;
-        console.log(this.group); // @dev
+        console.debug(this.group); // @dev
       })
       .catch(e => {
         this.isLoading = false;
@@ -145,9 +226,24 @@ export default Vue.extend({
 });
 </script>
 <style scope>
-.q-card {
-  width: 300px;
+.card-header {
   box-shadow: none;
+  max-width: 100% !important;
+  width: 100%;
+}
+.group-website {
+  text-transform: none;
+  margin-left: 4px;
+}
+.group-detail .q-card {
+  width: 100%;
+  max-width: 350px;
+}
+.group-detail .q-card__section {
+  padding: 0;
+}
+.code-group {
+  margin: 0 0 5px 0;
 }
 .simple-map {
   width: 100%;
@@ -156,5 +252,25 @@ export default Vue.extend({
 }
 .q-btn__wrapper.col.row.q-anchor--skip {
   padding: 0 4px;
+}
+.group-title-section {
+  font-size: 17px;
+  color: rgba(0, 0, 0, 0.63);
+  margin: 8px;
+}
+.material-icons.q-icon.notranslate {
+  margin: 0 10px 0 0;
+}
+.q-card:not(.card-header) hr {
+  background: transparent;
+}
+.group-count {
+  margin: 18px 0;
+}
+.group-detail li {
+  list-style: none;
+}
+.group-count-box {
+  padding: 0 0 0 15px;
 }
 </style>
