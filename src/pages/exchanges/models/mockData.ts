@@ -1,20 +1,64 @@
 import { GroupsListModel, GroupModel } from './model';
-import { LoremIpsum } from 'lorem-ipsum';
+import { LoremIpsum, ILoremIpsumParams } from 'lorem-ipsum';
 
-const lorem = new LoremIpsum({
-  sentencesPerParagraph: {
-    max: 8,
-    min: 4
-  },
-  wordsPerSentence: {
-    max: 16,
-    min: 4
-  }
-});
+const loremOptions: ILoremIpsumParams = {
+  format: 'html' // "plain" or "html"
+  // paragraphLowerBound: 3, // Min. number of sentences per paragraph.
+  // paragraphUpperBound: 7, // Max. number of sentences per paragarph.
+  // sentenceLowerBound: 5, // Min. number of words per sentence.
+  // sentenceUpperBound: 15, // Max. number of words per sentence.
+  // suffix: '\n' // Line ending, defaults to "\n" or "\r\n" (win32)
+};
+
+const lorem = new LoremIpsum(loremOptions);
 
 // lorem.generateWords(1);
 // lorem.generateSentences(5);
 // lorem.generateParagraphs(7);
+
+// Images.
+const testImages = [
+  'https://cdn.pixabay.com/photo/2019/12/12/13/42/castle-4690710__340.jpg',
+  'https://cdn.pixabay.com/photo/2019/12/26/05/10/pink-4719682__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/02/07/19/05/galaxy-4828098__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/02/06/15/31/tiger-4824663__340.png',
+  'https://cdn.pixabay.com/photo/2020/01/20/05/54/one-4779562__340.jpg',
+  'https://cdn.pixabay.com/photo/2019/12/06/14/01/sea-4677421__340.jpg',
+  'https://cdn.pixabay.com/photo/2019/07/30/17/38/koala-4373467__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/03/01/19/28/heart-4893891__340.png',
+  'https://cdn.pixabay.com/photo/2020/02/29/17/14/wallpaper-4890663__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/03/02/04/52/people-4894818__340.png',
+  'https://cdn.pixabay.com/photo/2020/02/26/23/25/ancient-4882999__340.jpg'
+];
+
+// Locations.
+const testLocations = [
+  {
+    name: 'Cremallera de Montserrat',
+    type: 'Point',
+    coordinates: [41.5922793, 1.8342942]
+  },
+  {
+    name: 'Torre Eiffel',
+    type: 'Point',
+    coordinates: [48.8583736, 2.2922873]
+  },
+  {
+    name: 'Les Olives',
+    type: 'Point',
+    coordinates: [42.1050622, 3.0157955]
+  },
+  {
+    name: 'Playa de La Concha',
+    type: 'Point',
+    coordinates: [43.3178579, -1.9882534]
+  },
+  {
+    name: 'Cremallera de Montserrat',
+    type: 'Point',
+    coordinates: [41.5922793, 1.8342942]
+  }
+];
 
 export function mockGroupsList(): GroupsListModel[] {
   const list = [];
@@ -29,14 +73,11 @@ export function mockGroupsList(): GroupsListModel[] {
           description: lorem.generateParagraphs(
             Math.round(Math.random() * 4) + 1
           ),
-          image:
-            'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/mystic-mountain-300x300.png',
+          image: testImages[Math.round(Math.random() * testImages.length)],
           website: 'https://easterislandexchange.org',
           access: 'public',
           location: {
-            name: 'Cremallera de Montserrat',
-            type: 'Point',
-            coordinates: [41.5922793, 1.8342942]
+            ...testLocations[Math.round(Math.random() * testLocations.length)]
           }
         }
       }
