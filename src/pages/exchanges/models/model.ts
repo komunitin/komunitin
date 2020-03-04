@@ -1,7 +1,5 @@
 /**
- * Modelo para Exchange.
- *
- * @todo Gestión de localizaciones.
+ * Groups Model.
  */
 export interface GroupsListModel {
   id: number;
@@ -23,9 +21,7 @@ export interface GroupsListModel {
 }
 
 /**
- * Modelo para ExchangesList
- *
- * @todo Gestión de localizaciones.
+ * Group model.
  */
 export interface GroupModel {
   data: {

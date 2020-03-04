@@ -13,7 +13,7 @@
     "dev:mirage": "quasar dev --env.USE_MIRAGE 1000",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
-    "lint": "eslint --ext .js,.ts,.vue --ignore-path .gitignore ./src",
+    "lint": "eslint --ext .ts,.vue --ignore-path .gitignore ./src",
     "doc": "typedoc --out docs --tsconfig tsconfig.json src",
     "todo": "egrep -r '@todo|@bug|@dev' src/"
   },
