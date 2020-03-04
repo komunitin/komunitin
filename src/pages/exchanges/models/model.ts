@@ -1,24 +1,29 @@
 /**
- * Modelo para Exchange.
- *
- * @todo Gestión de localizaciones.
+ * Groups Model.
  */
-export interface ExchangesListModel {
+export interface GroupsListModel {
   id: number;
-  name: string;
-  description: string;
-  accounts: number;
-  location: string;
-  logo: string;
-  code: string;
+  data: {
+    attributes: {
+      code: string;
+      name: string;
+      description: string;
+      image: string;
+      website: string;
+      access: string;
+      location: {
+        name: string;
+        type: string;
+        coordinates: [];
+      };
+    };
+  };
 }
 
 /**
- * Modelo para ExchangesList
- *
- * @todo Gestión de localizaciones.
+ * Group model.
  */
-export interface ExchangeModel {
+export interface GroupModel {
   data: {
     id: string;
     type: string;
@@ -32,13 +37,13 @@ export interface ExchangeModel {
       location: {
         name: string;
         type: string;
-        bbox: any[];
-        coordinates: any[];
+        bbox: number[];
+        coordinates: [number, number][][];
       };
     };
     relatinships: {
       contacts: {
-        data: any[];
+        data: object[];
       };
       members: {
         links: {
@@ -89,5 +94,5 @@ export interface ExchangeModel {
       updated: string;
     };
   };
-  included: any[];
+  included: object | null;
 }

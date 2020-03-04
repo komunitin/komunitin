@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { ExchangesListModel, ExchangeModel } from '../pages/exchanges/model';
 
 const apliClient = axios.create({
   baseURL: 'https://integralces.net/api/',
@@ -15,17 +14,21 @@ const apliClient = axios.create({
   }
 });
 
-// export async function getExchangesList(
-//   pag: number,
-//   perpage: number
-// ): Promise<ExchangesListModel> | any {
-//   const response = await apliClient.get(`exchanges/${pag}/${perpage}`);
-//   return response;
-// }
-
 export default {
-  getExchangesList(pag = 1 as number, perpage = 20 as number) {
-    return apliClient.get('exchages/' + perpage * (pag - 1) + '/' + perpage);
+  getExchangesListFilter(filter: string) {
+    return apliClient.get('/exchanges/filter/' + filter);
+  },
+  getExchangesList(
+    pag: number,
+    perPag: number,
+    lat?: number | null,
+    lng?: number | null
+  ) {
+    let url = 'exchanges/' + pag + '/' + perPag;
+    if (lat) {
+      url = url + '/' + lat + '/' + lng;
+    }
+    return apliClient.get(url);
   },
   getExchange(id: string) {
     return apliClient.get('/exchange/' + id);
