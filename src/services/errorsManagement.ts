@@ -1,9 +1,7 @@
-import { debug } from 'util';
-
 class ErrorsManagement {
   // public lastErrors: string[] = null;
 
-  public newError(err: any, info: string, vm?: any): void {
+  public newError(err: Error, info: string, vm?: Vue): void {
     let lastErrors = [];
     console.error({
       ErrorManagement: {

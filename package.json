@@ -10,22 +10,28 @@
   "scripts": {
     "test": "quasar test --unit jest",
     "dev": "quasar dev",
-    "dev:mirage": "quasar dev --env.USE_MIRAGE true",
+    "dev:mirage": "quasar dev --env.USE_MIRAGE 1000",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
-    "lint": "eslint --ext .js,.ts,.vue --ignore-path .gitignore ./src",
-    "doc": "typedoc --out docs --tsconfig tsconfig.json src"
+    "lint": "eslint --ext .ts,.vue --ignore-path .gitignore ./src",
+    "doc": "typedoc --out docs --tsconfig tsconfig.json src",
+    "todo": "egrep -r '@todo|@bug|@dev' src/"
   },
   "dependencies": {
     "@quasar/extras": "^1.5.1",
+    "@types/dotenv": "^8.2.0",
+    "@types/leaflet": "^1.5.9",
     "@types/vuelidate": "^0.7.10",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
+    "leaflet": "^1.6.0",
     "quasar": "^1.9.3",
     "typedoc": "^0.16.10",
     "vue-element-loading": "^1.1.5",
     "vue-i18n": "^8.0.0",
+    "vue-navigator-share": "^1.0.3",
+    "vue2-leaflet": "^2.5.2",
     "vuelidate": "^0.7.5"
   },
   "devDependencies": {
@@ -42,6 +48,7 @@
     "electron-devtools-installer": "^2.2.4",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-vue": "^6.2.1",
+    "lorem-ipsum": "^2.0.3",
     "miragejs": "^0.1.35",
     "ts-jest": "^25.2.0",
     "typescript": "^3.3.3"

@@ -1,0 +1,16 @@
+{
+  "langs": [
+    {
+      "label": "Es",
+      "value": "es"
+    },
+    {
+      "label": "Ca",
+      "value": "ca"
+    },
+    {
+      "label": "En",
+      "value": "en-us"
+    }
+  ]
+}
