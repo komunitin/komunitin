@@ -38,17 +38,6 @@ const server = new Server({
         let pag = request.params.pag;
         let perPag = request.params.perPag;
 
-        // @dev
-        console.debug({
-          Mirage: {
-            class: this,
-            timing: this.timing,
-            pag: pag,
-            perPag: perPag,
-            lat: lat,
-            lng: lng
-          }
-        });
         return mockGroupsList();
       }
     );
