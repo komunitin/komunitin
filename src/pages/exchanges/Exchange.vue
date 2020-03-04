@@ -66,6 +66,7 @@ export default Vue.extend({
   name: 'ExchangePage',
   data() {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       group: {} as GroupModel,
       isLoading: true as boolean
     };

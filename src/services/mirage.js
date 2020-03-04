@@ -22,6 +22,7 @@ const server = new Server({
       (schema, request) => {
         let pag = request.params.pag;
         let perPag = request.params.perPag;
+        console.debug({ ListGroupsGet: { pag: pag, perPag: perPag } });
         return mockGroupsList();
       }
     );
@@ -59,6 +60,7 @@ const server = new Server({
       'https://integralces.net/api/exchanges/filter/:search',
       (schema, request) => {
         let search = request.params.search;
+        console.debug({ Search: search });
         return mockGroupsList();
       }
     );
