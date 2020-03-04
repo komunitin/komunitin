@@ -1,24 +1,21 @@
-// @bug Why does typescript fail?
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
-import Quasar from 'quasar';
 import Vue from 'vue';
+import Quasar from 'quasar';
 import VueI18n from 'vue-i18n';
 import messages from 'src/i18n';
 
 Vue.use(VueI18n);
 
 /**
- * Idioma por defecto.
+ * Default language.
  */
-let lang = 'en-us';
+let lang = 'en-us' as string;
 
-/// Si tenemos idioma en localStorage lo recogemos.
+// If there is language in localStorage it is used.
 if (localStorage.getItem('lang')) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   lang = localStorage.getItem('lang');
 } else {
+  // @ts-ignore
   switch (Quasar.lang.getLocale()) {
     case 'ca': {
       lang = 'ca';

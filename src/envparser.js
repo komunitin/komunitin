@@ -9,13 +9,13 @@ process.argv.forEach((v, k) => {
 });
 
 module.exports = function() {
-  for (let key in parsedEnv) {
+  for (const key in parsedEnv) {
     if (typeof parsedEnv[key] === 'string') {
       parsedEnv[key] = JSON.stringify(parsedEnv[key]);
     }
   }
 
-  for (let key in argEnv) {
+  for (const key in argEnv) {
     if (JSON.stringify(argEnv[key]) === '"true"') {
       parsedEnv[key] = true;
     } else if (JSON.stringify(argEnv[key]) === '"false"') {

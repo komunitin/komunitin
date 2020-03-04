@@ -1,61 +1,94 @@
-import { ExchangesListModel, ExchangeModel } from './model';
+import { GroupsListModel, GroupModel } from './model';
+import { LoremIpsum, ILoremIpsumParams } from 'lorem-ipsum';
 
-export const mockExchangesList: ExchangesListModel[] = [
+const loremOptions: ILoremIpsumParams = {
+  format: 'html' // "plain" or "html"
+  // paragraphLowerBound: 3, // Min. number of sentences per paragraph.
+  // paragraphUpperBound: 7, // Max. number of sentences per paragarph.
+  // sentenceLowerBound: 5, // Min. number of words per sentence.
+  // sentenceUpperBound: 15, // Max. number of words per sentence.
+  // suffix: '\n' // Line ending, defaults to "\n" or "\r\n" (win32)
+};
+
+const lorem = new LoremIpsum(loremOptions);
+
+// lorem.generateWords(1);
+// lorem.generateSentences(5);
+// lorem.generateParagraphs(7);
+
+// Images.
+const testImages = [
+  'https://cdn.pixabay.com/photo/2019/12/12/13/42/castle-4690710__340.jpg',
+  'https://cdn.pixabay.com/photo/2019/12/26/05/10/pink-4719682__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/02/07/19/05/galaxy-4828098__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/02/06/15/31/tiger-4824663__340.png',
+  'https://cdn.pixabay.com/photo/2020/01/20/05/54/one-4779562__340.jpg',
+  'https://cdn.pixabay.com/photo/2019/12/06/14/01/sea-4677421__340.jpg',
+  'https://cdn.pixabay.com/photo/2019/07/30/17/38/koala-4373467__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/03/01/19/28/heart-4893891__340.png',
+  'https://cdn.pixabay.com/photo/2020/02/29/17/14/wallpaper-4890663__340.jpg',
+  'https://cdn.pixabay.com/photo/2020/03/02/04/52/people-4894818__340.png',
+  'https://cdn.pixabay.com/photo/2020/02/26/23/25/ancient-4882999__340.jpg'
+];
+
+// Locations.
+const testLocations = [
   {
-    id: 1,
-    name: 'Echange 1',
-    code: 'EXEM',
-    description: `
-      Aliqua sint adipisicing cillum deserunt quis. Consequat magna dolor eiusmod ea fugiat duis cupidatat. Quis nulla amet magna dolore et irure excepteur.    
-    `,
-    accounts: 120,
-    location: 'location 1',
-    logo:
-      'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/mystic-mountain-300x300.png'
+    name: 'Cremallera de Montserrat',
+    type: 'Point',
+    coordinates: [41.5922793, 1.8342942]
   },
   {
-    id: 2,
-    name: 'Echange 2',
-    code: 'EXE2',
-    description: `
-      Ut proident sit sint anim exercitation veniam duis occaecat fugiat exercitation exercitation qui ea eiusmod. Veniam dolor reprehenderit dolore culpa duis laboris tempor ad enim aliquip eu id ut ex. Eiusmod ad sit veniam mollit reprehenderit sint quis dolore qui ullamco sunt qui et. Aute esse officia excepteur exercitation duis aliquip aute ex in aute. Cillum excepteur eu deserunt consectetur adipisicing. Ipsum ex cupidatat pariatur dolore cupidatat commodo ut.
-
-      Do voluptate aliquip nisi nisi et. Cillum magna do ea officia enim consectetur. In occaecat aliqua dolore elit.
-
-      Dolore commodo proident anim anim eiusmod sint. Elit laboris irure enim duis laborum culpa ea excepteur excepteur. Amet occaecat incididunt Lorem in mollit excepteur do aliquip. Id sint reprehenderit ut aliquip anim irure. Eu reprehenderit laborum cupidatat commodo pariatur anim aliqua excepteur ad in excepteur exercitation.
-    `,
-    accounts: 150,
-    location: 'location 2',
-    logo:
-      'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/colorpro.png'
+    name: 'Torre Eiffel',
+    type: 'Point',
+    coordinates: [48.8583736, 2.2922873]
   },
   {
-    id: 3,
-    name: 'Echange 3',
-    code: 'EXE3',
-    description: `
-      Aliqua sint adipisicing cillum deserunt quis. Consequat magna dolor eiusmod ea fugiat duis cupidatat. Quis nulla amet magna dolore et irure excepteur.    
-    `,
-    accounts: 620,
-    location: 'location 3',
-    logo:
-      'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/femme-foto-300x300.png'
+    name: 'Les Olives',
+    type: 'Point',
+    coordinates: [42.1050622, 3.0157955]
   },
   {
-    id: 4,
-    name: 'Echange 4',
-    code: 'EXE4',
-    description: `
-      Aliqua sint adipisicing cillum deserunt quis. Consequat magna dolor eiusmod ea fugiat duis cupidatat. Quis nulla amet magna dolore et irure excepteur.    
-    `,
-    accounts: 120,
-    location: 'location 4',
-    logo:
-      'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/whatcom.png'
+    name: 'Playa de La Concha',
+    type: 'Point',
+    coordinates: [43.3178579, -1.9882534]
+  },
+  {
+    name: 'Cremallera de Montserrat',
+    type: 'Point',
+    coordinates: [41.5922793, 1.8342942]
   }
 ];
 
-export const mockExchange: ExchangeModel[] = [
+export function mockGroupsList(): GroupsListModel[] {
+  const list = [];
+
+  for (let index = 0; index < 11; index++) {
+    list.push({
+      id: index,
+      data: {
+        attributes: {
+          code: 'COD' + index,
+          name: lorem.generateWords(Math.round(Math.random() * 2) + 1),
+          description: lorem.generateParagraphs(
+            Math.round(Math.random() * 4) + 1
+          ),
+          image: testImages[Math.round(Math.random() * testImages.length)],
+          website: 'https://easterislandexchange.org',
+          access: 'public',
+          location: {
+            ...testLocations[Math.round(Math.random() * testLocations.length)]
+          }
+        }
+      }
+    });
+  }
+  console.log(list);
+  // @ts-ignore
+  return list;
+}
+
+export const mockGroup: GroupModel[] = [
   {
     data: {
       id: '84278843-50d5-4358-bbf7-a833ea5cde07',
@@ -80,7 +113,7 @@ export const mockExchange: ExchangeModel[] = [
           ],
           coordinates: [
             [
-              [-109.3798828125, -27.054233808785824],
+              [41.8667, 2.6667],
               [-109.44236755371094, -27.201510867989075],
               [-109.23294067382812, -27.108033801463105],
               [-109.3798828125, -27.054233808785824]
