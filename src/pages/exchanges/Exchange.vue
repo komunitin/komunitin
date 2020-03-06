@@ -3,8 +3,17 @@
     <q-header reveal elevated>
       <q-toolbar>
         <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
-        <q-toolbar-title>{{ $t('Groups near you') }}</q-toolbar-title>
-        <q-btn v-if="group.data" type="a" :href="`mailto:${group.data.attributes.mail}`" right flat icon="message" />
+        <q-toolbar-title v-if="group.data">{{ group.data.attributes.name }}</q-toolbar-title>
+        <q-toolbar-title v-else>{{ $t('Groups near you') }}</q-toolbar-title>
+
+        <q-btn
+          v-if="group.data"
+          type="a"
+          :href="`mailto:${group.data.attributes.mail}`"
+          right
+          flat
+          icon="message"
+        />
         <navigator-share
           v-bind:on-error="onError"
           v-bind:on-success="onSuccess"
@@ -193,7 +202,17 @@
           </q-item-section>
 
           <q-item-section>
-            <q-item-label>{{contactGroup.data.attributes.name}}</q-item-label>
+            <q-item-label v-if="contactGroup.data.attributes.type === 'phone'">
+              <a
+                :href="`tel:${contactGroup.data.attributes.name}`"
+              >{{contactGroup.data.attributes.name}}</a>
+            </q-item-label>
+            <q-item-label v-else-if="contactGroup.data.attributes.type === 'email'">
+              <a
+                :href="`mailto:${contactGroup.data.attributes.name}`"
+              >{{contactGroup.data.attributes.name}}</a>
+            </q-item-label>
+            <q-item-label v-else>{{contactGroup.data.attributes.name}}</q-item-label>
             <q-item-label caption>{{ contactGroup.data.attributes.type }}</q-item-label>
           </q-item-section>
         </q-item>
@@ -368,5 +387,9 @@ export default Vue.extend({
 .group-footer-card {
   font-size: 12px;
   color: rgba(0, 0, 0, 0.63);
+}
+.group-detail a {
+  color: black;
+  text-decoration: none;
 }
 </style>
