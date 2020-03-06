@@ -94,5 +94,5 @@ export interface GroupModel {
       updated: string;
     };
   };
-  included: object | null;
+  included: object[];
 }

@@ -54,6 +54,72 @@
 
         <q-card-section horizontal>
           <q-card-section class="col-4 group-count-box">
+            <h2 class="group-count">{{ group.data.relatinships.offers.meta.count }}</h2>
+            <q-btn
+              :to="`exchanges/${group.data.relatinships.offers.links.related}`"
+              flat
+              color="primary"
+            >Explora</q-btn>
+          </q-card-section>
+
+          <q-separator vertical />
+
+          <q-card-section class="col-8">
+            <ul>
+              <li>53 Alimentació</li>
+              <li>44 Serveis professionals</li>
+              <li>38 Salut i higiene</li>
+              <li>32 Arts i cultura</li>
+              <li>i més categories</li>
+            </ul>
+          </q-card-section>
+        </q-card-section>
+      </q-card>
+
+      <q-card>
+        <q-card-section>
+          <div class="text-overline group-title-section">
+            <q-icon name="loyalty" />Needs
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section horizontal>
+          <q-card-section class="col-4 group-count-box">
+            <h2 class="group-count">{{ group.data.relatinships.needs.meta.count }}</h2>
+            <q-btn
+              :to="`exchanges/${group.data.relatinships.needs.links.related}`"
+              flat
+              color="primary"
+            >Explora</q-btn>
+          </q-card-section>
+
+          <q-separator vertical />
+
+          <q-card-section class="col-8">
+            <ul>
+              <li>53 Alimentació</li>
+              <li>44 Serveis professionals</li>
+              <li>38 Salut i higiene</li>
+              <li>32 Arts i cultura</li>
+              <li>i més categories</li>
+            </ul>
+          </q-card-section>
+        </q-card-section>
+      </q-card>
+
+      <q-card>
+        <q-card-section>
+          <div class="text-overline group-title-section">
+            <q-icon name="account_circle" />Members
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section horizontal>
+          <q-card-section class="col-4 group-count-box">
             <h2 class="group-count">{{ group.data.relatinships.members.meta.count }}</h2>
             <q-btn
               :to="`exchanges/${group.data.relatinships.members.links.related}`"
@@ -78,41 +144,59 @@
 
       <q-card>
         <q-card-section>
-          <p>
-            Demandas:
-            <b>{{ group.data.relatinships.members.meta.count }}</b>
-          </p>
+          <div class="text-overline group-title-section">
+            <q-icon name="monetization_on" />Currency
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section horizontal>
+          <q-card-section class="col-4 group-count-box">
+            <h2 class="group-count">@</h2>
+            <p>Vent</p>
+
+            <q-btn
+              :to="`exchanges/${group.data.relatinships.needs.links.related}`"
+              flat
+              color="primary"
+            >Explora</q-btn>
+          </q-card-section>
+
+          <q-separator vertical />
+
+          <q-card-section class="col-8">
+            <ul>
+              <li>53 Alimentació</li>
+              <li>44 Serveis professionals</li>
+              <li>38 Salut i higiene</li>
+              <li>32 Arts i cultura</li>
+              <li>i més categories</li>
+            </ul>
+          </q-card-section>
         </q-card-section>
       </q-card>
+
       <q-card>
-        <q-card-section>
-          <p>
-            Members:
-            <b>{{ group.data.relatinships.members.meta.count }}</b>
-          </p>
-        </q-card-section>
-      </q-card>
-      <q-card>
-        <q-card-section>
-          <p>
-            Moneda:
-            <b>{{ group.data.relatinships.members.meta.count }}</b>
-          </p>
-        </q-card-section>
-      </q-card>
-      <q-card>
-        Location:
         <q-card-section>
           <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
         </q-card-section>
+        <q-card-section class="group-footer-card">{{ group.data.attributes.location.name }}</q-card-section>
       </q-card>
-      <q-card>
-        <q-card-section>
-          <p>
-            Contacts:
-            <b>{{ group.data.relatinships.members.meta.count }}</b>
-          </p>
-        </q-card-section>
+
+      <q-card v-if="group.included.length">
+        <q-item v-for="(contactGroup) in group.included" :key="contactGroup.data.id ">
+          <q-item-section avatar>
+            <q-avatar>
+              <q-icon :name="typeBringIcon(contactGroup.data.attributes.type)" />
+            </q-avatar>
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label>{{contactGroup.data.attributes.name}}</q-item-label>
+            <q-item-label caption>{{ contactGroup.data.attributes.type }}</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-card>
     </div>
   </q-page-container>
@@ -201,6 +285,14 @@ export default Vue.extend({
     },
     onSuccess(err: string) {
       console.log(err);
+    },
+    typeBringIcon(typeContact: string): string {
+      const icons = {
+        email: 'mail' as string,
+        phone: 'call' as string
+      };
+      // @ts-ignore
+      return icons[typeContact];
     }
   },
   computed: {
@@ -271,6 +363,10 @@ export default Vue.extend({
   list-style: none;
 }
 .group-count-box {
-  padding: 0 0 0 15px;
+  padding: 0 0 0 15px !important;
+}
+.group-footer-card {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.63);
 }
 </style>
