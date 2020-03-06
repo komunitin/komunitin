@@ -33,6 +33,7 @@ export interface GroupModel {
       description: string;
       image: string;
       website: string;
+      mail: string;
       access: string;
       location: {
         name: string;
