@@ -96,8 +96,7 @@ export const mockGroup: GroupModel[] = [
       attributes: {
         code: 'EITE',
         name: 'Easter Island Talent Exchange',
-        description:
-          `
+        description: `
           <p>Here at <strong>Easter Island</strong> it makes a lot of sense to
           have a local currency because Mauris et accumsan urna. Phasellus
           dictum dolor non nulla placerat porta. In sed egestas nibh. Aenean
@@ -111,6 +110,7 @@ export const mockGroup: GroupModel[] = [
         image:
           'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/mystic-mountain-300x300.png',
         website: 'https://easterislandexchange.org',
+        mail: 'mailadmingroup@dom.com',
         access: 'public',
         location: {
           name: 'Easter Island',
