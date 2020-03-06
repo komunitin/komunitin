@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
         <q-toolbar-title>{{ $t('Groups near you') }}</q-toolbar-title>
-        <q-btn right flat icon="message" />
+        <q-btn v-if="group.data" type="a" :href="`mailto:${group.data.attributes.mail}`" right flat icon="message" />
         <navigator-share
           v-bind:on-error="onError"
           v-bind:on-success="onSuccess"
