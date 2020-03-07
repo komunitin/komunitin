@@ -1,27 +1,7 @@
 <template>
   <q-page-container class="container-kn">
     <q-header reveal elevated>
-      <q-toolbar>
-        <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
-
-        <q-toolbar-title v-if="viewSearch !== true">
-          {{
-          $t('Groups near you')
-          }}
-        </q-toolbar-title>
-
-        <q-input
-          v-if="viewSearch === true"
-          @keyup.enter="searchBox()"
-          class="search-kn"
-          dark
-          v-model="search"
-          dense
-          autofocus
-          right
-        />
-        <q-btn right flat v-on:click="searchBox()" icon="search" />
-      </q-toolbar>
+      <search-bar @newSearch="getExchangesListFilter" title="Groups near you" :backButton="true" />
     </q-header>
     <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
       <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
@@ -41,7 +21,6 @@
             <q-item-label>{{ exchange.data.attributes.name }}</q-item-label>
             <q-item-label caption>{{ exchange.data.attributes.code }}</q-item-label>
           </q-item-section>
-          <!-- @todo Share exchange. -->
           <q-btn flat dense round icon="share" aria-label="Share" />
         </q-item>
 
@@ -73,11 +52,12 @@ import VueElementLoading from 'vue-element-loading';
 
 // @ts-ignore
 import SimpleMap from '../../components/SimpleMap';
+// @ts-ignore
+import SearchBar from '../../components/SearchBar';
 
 /**
  * Listado de exhanges.
  *
- * @todo Recibir localización para mostrar las más cercanas primero.
  * @todo Se podría añadir la distancia de cada ecoxarxa respecto a la del usuario.
  */
 export default Vue.extend({
@@ -90,15 +70,15 @@ export default Vue.extend({
       lng: null as number | null,
       lat: null as number | null,
       pag: 1 as number,
-      perPag: 10 as number,
-      search: '' as string,
-      viewSearch: false as boolean,
-      searchBoxStep: 0 as number
+      perPag: 10 as number
+      // search: '' as string,
+      // viewSearch: false as boolean
     };
   },
   components: {
     VueElementLoading,
-    SimpleMap
+    SimpleMap,
+    SearchBar
   },
   beforeMount: function() {
     this.isLoading = true;
@@ -115,19 +95,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    /**
-     * - One click open input.
-     * - Second click launch search.
-     */
-    searchBox() {
-      if (this.search !== '') {
-        // Launch search.
-        this.isLoading = true;
-        this.getExchangesListFilter(this.search);
-      } else {
-        this.viewSearch = !this.viewSearch;
-      }
-    },
     displayErrors(): void {
       // @ts-ignore
       let errors = this.$errorsManagement.getErrors();
@@ -191,7 +158,6 @@ export default Vue.extend({
           this.exchanges = response.data;
         })
         .catch(e => {
-          // @todo Use localstorage cache.
           // @ts-ignore
           this.$errorsManagement.newError(e, 'ExchangesList');
           this.isLoading = false;
@@ -199,6 +165,7 @@ export default Vue.extend({
         });
     },
     getExchangesListFilter(filter: string) {
+      this.isLoading = true;
       api
         .getExchangesListFilter(filter)
         .then(response => {
@@ -206,7 +173,6 @@ export default Vue.extend({
           this.exchanges = response.data;
         })
         .catch(e => {
-          // @todo Use localstorage cache.
           // @ts-ignore
           this.$errorsManagement.newError(e, 'ExchangesList');
           this.displayErrors();
