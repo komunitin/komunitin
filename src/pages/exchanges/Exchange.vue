@@ -238,8 +238,6 @@ import NavigatorShare from 'vue-navigator-share';
 
 /**
  * ExchangePage.
- *
- * @todo Share and Message buttons.
  */
 export default Vue.extend({
   name: 'ExchangePage',
@@ -276,7 +274,6 @@ export default Vue.extend({
       })
       .catch(e => {
         this.isLoading = false;
-        // @todo Use localstorage cache.
         // @ts-ignore
         this.$errorsManagement.newError(e, 'ExchangesList');
         this.displayErrors();
