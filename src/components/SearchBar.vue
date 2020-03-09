@@ -17,6 +17,7 @@
     </q-toolbar-title>
 
     <q-input
+      id="input_search"
       v-if="viewSearch === true"
       @keyup.enter="searchBox()"
       class="search-kn"
@@ -26,7 +27,7 @@
       autofocus
       right
     />
-    <q-btn right flat v-on:click="searchBox()" icon="search" />
+    <q-btn id="button_search" right flat v-on:click="searchBox()" icon="search" />
   </q-toolbar>
 </template>
 <script lang="ts">
