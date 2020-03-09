@@ -18,19 +18,19 @@
           <q-avatar size="18px">
             <img src="~assets/icons/google.png" />
           </q-avatar>
-          <div class="label_abatar">{{ $t('Login width google') }}</div>
+          <div class="label_abatar">{{ $t('Login with Google') }}</div>
         </q-btn>
         <q-btn color="white" text-color="black">
           <q-avatar left size="18px">
             <img src="~assets/icons/facebook.png" />
           </q-avatar>
-          <div class="label_abatar">{{ $t('Login width facebook') }}</div>
+          <div class="label_abatar">{{ $t('Login with Facebook') }}</div>
         </q-btn>
         <q-btn color="white" text-color="black" :to="{ name: 'LoginMail' }">
           <q-avatar left size="18px">
             <img src="https://img.icons8.com/material-sharp/24/000000/important-mail.png" />
           </q-avatar>
-          <div class="label_abatar">{{ $t('Login width mail') }}</div>
+          <div class="label_abatar">{{ $t('Login with mail') }}</div>
         </q-btn>
       </div>
     </div>
