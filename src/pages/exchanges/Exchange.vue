@@ -222,6 +222,14 @@
 </template>
 
 <script lang="ts">
+/**
+ * @todo Test de componentes y página.
+ * @todo Crear componente para la caja de contacto y reutilizarlo en el botón del header.
+ * @todo Enlaces a WhatsApp y Telegram.
+ * @todo Hacer que si hay espacio el logo pase a la izquierda.
+ * @todo Faltan los colores de los iconos de contacto.
+ * @todo Acabar de definir diseño de los títulos de secciones (General, Explora, Localización, Contacto)
+ */
 import Vue from 'vue';
 import api from '../../services/ICESApi';
 // @ts-ignore
