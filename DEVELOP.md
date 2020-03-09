@@ -1,13 +1,19 @@
 ## Developer readme
 
 Follow these steps to start hacking with the komunitin app.
-
+### Download
+Get the code
+```bash
+git clone https://github.com/komunitin/komunitin.git
+cd komunitin
+```
 ### Install
 
 Install the [Quasar framework](https://quasar.dev/), a develompent framework built over [Vue.js](https://vuejs.org/).
 
 ```bash
 npm install -g @quasar/cli
+npm install
 ```
 
 ### Launch
