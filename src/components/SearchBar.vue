@@ -48,7 +48,6 @@ export default Vue.extend({
      * - Second click launch search.
      */
     searchBox() {
-      console.debug({ searchBox: this.search });
       if (this.search !== '') {
         // Launch search.
         // this.getExchangesListFilter(this.search);

@@ -1,8 +1,8 @@
-import { createLocalVue, shallowMount, Wrapper } from '@vue/test-utils';
+import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import SearchBar from '../SearchBar.vue';
 import { Quasar, QBtn, QToolbar, QToolbarTitle, QInput } from 'quasar';
 
-describe('SearchBox.vue', () => {
+describe('SearchBox', () => {
   let title: string;
   let backButton: boolean;
   // @ts-ignore
@@ -16,15 +16,11 @@ describe('SearchBox.vue', () => {
     components: { QBtn, QToolbar, QToolbarTitle, QInput }
   });
 
-  // Montamos el componente con los props necesarios antes de cada test.
   beforeEach(() => {
     title = 'Test Title';
     backButton = false;
-    // newSearch = (e: string) => {
-    //   console.debug(e);
-    // };
-    const onClick = jest.fn();
-    wrapper = shallowMount(SearchBar, {
+
+    wrapper = mount(SearchBar, {
       propsData: {
         title: title,
         backButton: backButton
@@ -33,10 +29,7 @@ describe('SearchBox.vue', () => {
       mocks: {
         $t: () => 'Title Mock Text'
       },
-      localVue,
-      listeners: {
-        click: onClick
-      }
+      localVue
     });
   });
 
@@ -45,19 +38,15 @@ describe('SearchBox.vue', () => {
     expect(wrapper.vm.$data.viewSearch).toBe(false);
   });
 
-  it('should have a prop viewSearch', () => {
-    wrapper.vm
-      .$nextTick()
-      .then(() => {
-        const button = wrapper.find('#button_search');
-        button.trigger('click');
-      })
-      .then(() => {
-        expect(wrapper.vm.$data.viewSearch).toBe(true);
-        const input = wrapper.find('input');
-        input.setValue('Search text');
-        input.trigger('keyup.enter');
-        expect(wrapper.emitted().newSearch).toBeTruthy();
-      });
+  it('should have a prop viewSearch', async () => {
+    const button = wrapper.find('#button_search');
+    button.trigger('click');
+    await wrapper.vm.$nextTick();
+    // console.log({ viewSearch: wrapper.vm.$data.viewSearch });
+    // console.log({ Html: wrapper.html() });
+    const input = wrapper.find('input');
+    input.setValue('Search text');
+    input.trigger('keyup.enter');
+    expect(wrapper.emitted().newSearch).toBeTruthy();
   });
 });
