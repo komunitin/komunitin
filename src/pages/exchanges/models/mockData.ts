@@ -215,10 +215,38 @@ export const mockGroup: GroupModel[] = [
         },
         data: {
           type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb',
+          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffw',
           attributes: {
             type: 'email',
             name: 'exhange@easterisland.com'
+          }
+        }
+      },
+      {
+        links: {
+          self:
+            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+        },
+        data: {
+          type: 'contacts',
+          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb',
+          attributes: {
+            type: 'whatsapp',
+            name: '+34 666 66 66 66'
+          }
+        }
+      },
+      {
+        links: {
+          self:
+            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+        },
+        data: {
+          type: 'contacts',
+          id: '193e98b4-a27d-4e8a-9a47-sdsdsdsdsdsd',
+          attributes: {
+            type: 'telegram',
+            name: '@telegramUser'
           }
         }
       }
