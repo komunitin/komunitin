@@ -1,15 +1,15 @@
 {
   "langs": [
     {
-      "label": "Es",
+      "label": "Español",
       "value": "es"
     },
     {
-      "label": "Ca",
+      "label": "Català",
       "value": "ca"
     },
     {
-      "label": "En",
+      "label": "English",
       "value": "en-us"
     }
   ]
