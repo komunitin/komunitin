@@ -1,17 +1,14 @@
 <template>
-  <q-select
-    class="gray-kn"
-    flat
-    dense
-    round
-    outlined
-    @input="setLocale"
-    v-model="locale"
-    display-value="Languages"
-    emit-value
-    map-options
-    :options="langs"
-  />
+  <q-btn-dropdown label="Language">
+    <q-list>
+       <q-item v-for="lang in langs" :key="lang.value" clickable v-close-popup @click="setLocale">
+          <q-item-section>
+            <q-item-label>{{ lang.label }}</q-item-label>
+          </q-item-section>
+        </q-item>
+       </q-item>
+    </q-list>
+  </q-btn-dropdown>
 </template>
 <!--
 -->
