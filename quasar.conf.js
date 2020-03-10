@@ -75,7 +75,10 @@ module.exports = function(ctx) {
       // extractCSS: false,
 
       // https://quasar.dev/quasar-cli/cli-documentation/handling-webpack
-      extendWebpack(cfg) {}
+      extendWebpack(cfg) {},
+      // Create complete source maps to enable debugging from VSCode.
+      // https://quasar.dev/start/vs-code-configuration#Debugging-a-Quasar-project-in-VS-Code
+      devtool: 'source-map'
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
