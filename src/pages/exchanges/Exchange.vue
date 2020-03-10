@@ -193,30 +193,8 @@
         <q-card-section class="group-footer-card">{{ group.data.attributes.location.name }}</q-card-section>
       </q-card>
 
-      <q-card v-if="group.included.length">
-        <q-item v-for="(contactGroup) in group.included" :key="contactGroup.data.id ">
-          <q-item-section avatar>
-            <q-avatar>
-              <q-icon :name="typeBringIcon(contactGroup.data.attributes.type)" />
-            </q-avatar>
-          </q-item-section>
-
-          <q-item-section>
-            <q-item-label v-if="contactGroup.data.attributes.type === 'phone'">
-              <a
-                :href="`tel:${contactGroup.data.attributes.name}`"
-              >{{contactGroup.data.attributes.name}}</a>
-            </q-item-label>
-            <q-item-label v-else-if="contactGroup.data.attributes.type === 'email'">
-              <a
-                :href="`mailto:${contactGroup.data.attributes.name}`"
-              >{{contactGroup.data.attributes.name}}</a>
-            </q-item-label>
-            <q-item-label v-else>{{contactGroup.data.attributes.name}}</q-item-label>
-            <q-item-label caption>{{ contactGroup.data.attributes.type }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-card>
+      <contact-card :waysContact="group.included" />
+    
     </div>
   </q-page-container>
 </template>
@@ -234,6 +212,8 @@ import Vue from 'vue';
 import api from '../../services/ICESApi';
 // @ts-ignore
 import SimpleMap from '../../components/SimpleMap';
+// @ts-ignore
+import ContactCard from '../../components/ContactCard';
 import { GroupModel } from './models/model';
 
 // @ts-ignore
@@ -264,7 +244,8 @@ export default Vue.extend({
   components: {
     VueElementLoading,
     SimpleMap,
-    NavigatorShare
+    NavigatorShare,
+    ContactCard
   },
   props: {
     id: String
@@ -310,14 +291,6 @@ export default Vue.extend({
     onSuccess(err: string) {
       console.log(err);
     },
-    typeBringIcon(typeContact: string): string {
-      const icons = {
-        email: 'mail' as string,
-        phone: 'call' as string
-      };
-      // @ts-ignore
-      return icons[typeContact];
-    }
   },
   computed: {
     center: function(): [number, number] {

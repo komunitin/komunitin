@@ -14,10 +14,12 @@ module.exports = {
   collectCoverage: false,
   coverageDirectory: '<rootDir>/test/jest/coverage',
   collectCoverageFrom: [
-    '<rootDir>/src/modules/**/*.vue',
+    '<rootDir>/src/components/**/*.vue',
     '<rootDir>/src/pages/**/*.vue',
+    '<rootDir>/src/pages/*/*/*.vue',
     '<rootDir>/src/services/**/*.ts',
-    '<rootDir>/src/store/**/*.ts'
+    '<rootDir>/src/store/**/*.ts',
+    '<rootDir>/src/store/*/*/*.ts'
   ],
   coverageThreshold: {
     global: {
@@ -41,7 +43,7 @@ module.exports = {
     '^quasar$': '<rootDir>/node_modules/quasar/dist/quasar.common.js',
     '^~/(.*)$': '<rootDir>/$1',
     '^src/(.*)$': '<rootDir>/src/$1',
-    '.*css$': '<rootDir>/test/jest/utils/stub.css'
+    '.*css$': '<rootDir>/__mocks__/mock.css'
   },
   transform: {
     '.*\\.vue$': 'vue-jest',
@@ -55,5 +57,6 @@ module.exports = {
     // '.*\\.js$': '<rootDir>/node_modules/@quasar/quasar-app-extension-testing-unit-jest/node_modules/babel-jest'
   },
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!quasar/lang)'],
-  snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue']
+  snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue'],
+  moduleDirectories: ['<rootDir>/node_modules']
 };
