@@ -4,21 +4,10 @@
       <router-view />
     </q-page-container>
 
-    <q-footer reveal elevated class="bg-transparent gray-kn">
-      <q-tabs
-        dense
-        no-caps
-        active-color="primary"
-        indicator-color="transparent"
-        class="gray-kn"
-        v-model="tab"
-      >
-        <q-tab to="/languages" name="languages">
-          <selectLang @setLocale="setLocale" />
-        </q-tab>
-        <q-route-tab to="/help" name="help" label="Help" />
-        <q-route-tab to="contribute" name="contribute" label="Contribute" />
-      </q-tabs>
+    <q-footer reveal class="bg-transparent q-my-md">
+        <selectLang @setLocale="setLocale" />
+        <q-btn type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
+        <q-btn type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
     </q-footer>
   </q-layout>
 </template>
