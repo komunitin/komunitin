@@ -47,3 +47,8 @@ export default {
   }
 };
 </script>
+<style scoped>
+.leaflet-bottom.leaflet-right {
+  display: none;
+}
+</style>
