@@ -6,8 +6,8 @@
 
     <q-footer reveal class="bg-transparent q-my-md">
         <selectLang @setLocale="setLocale" />
-        <q-btn type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
-        <q-btn type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
+        <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
+        <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
     </q-footer>
   </q-layout>
 </template>
@@ -48,10 +48,9 @@ export default Vue.extend({
   }
 });
 </script>
-<style scope>
+<style lang="scss" scope>
 .home {
-  background: rgba(221, 75, 57, 0.3) url('~assets/home_background-700.jpg')
-    no-repeat center center fixed;
+  background: rgba(221, 75, 57, 0.3) url('~assets/home_background-700.jpg') no-repeat center center fixed;
   background-size: cover;
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -63,15 +62,15 @@ export default Vue.extend({
       rgba(0, 0, 0, 0.5) 100%
     ),
     url('~assets/home_background-700.jpg');
-  color: white !important;
+    color: $onprimary;
 }
-.gray-kn {
-  color: rgba(255, 255, 255, 0.74);
-}
+
 footer {
-  color: rgba(255, 255, 255, 0.74);
   padding-top: 20px;
   text-align: center;
+}
+footer .q-btn {
+    color: $onprimary-medium;
 }
 
 .q-page-container {
@@ -87,7 +86,7 @@ footer {
 
 #q-app .q-field__native.row.items-center,
 .q-select__dropdown-icon.material-icons.q-icon.notranslate {
-  color: rgba(255, 255, 255, 0.74);
+  color: $onprimary;
 }
 .q-item {
   color: black;
