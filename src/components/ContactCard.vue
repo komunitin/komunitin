@@ -1,9 +1,9 @@
-      <template>
-  <q-card v-if="waysContact.length">
+<template>
+  <q-card id="contact-card" v-if="waysContact.length">
     <q-item v-for="(contactGroup) in waysContact" :key="contactGroup.data.id ">
       <q-item-section avatar>
         <q-avatar>
-          <q-icon :name="typeBringIcon(contactGroup.data.attributes.type)" />
+          <q-icon :name="`img:statics/icons/contacts/${contactGroup.data.attributes.type}.svg`" />
         </q-avatar>
       </q-item-section>
 
@@ -36,20 +36,15 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
+
 export default Vue.extend({
   name: 'contact-card',
-  props: ['waysContact'],
-  methods: {
-    typeBringIcon(typeContact: string): string {
-      const icons = {
-        email: 'mail' as string,
-        whatsapp: 'whatsapp' as string,
-        telegram: 'telegram' as string,
-        phone: 'call' as string
-      };
-      // @ts-ignore
-      return icons[typeContact];
-    }
-  }
+  props: ['waysContact']
 });
 </script>
+<style scoped>
+#contact-card .q-icon.notranslate {
+  width: 38px;
+  height: auto;
+}
+</style>
