@@ -32,7 +32,6 @@
     "typedoc": "^0.16.10",
     "vue-element-loading": "^1.1.5",
     "vue-i18n": "^8.0.0",
-    "vue-navigator-share": "^1.0.3",
     "vue2-leaflet": "^2.5.2",
     "vuelidate": "^0.7.5"
   },
@@ -52,7 +51,7 @@
     "eslint-plugin-vue": "^6.2.1",
     "lorem-ipsum": "^2.0.3",
     "miragejs": "^0.1.35",
-    "ts-jest": "^25.2.0",
+    "ts-jest": "^25.2.1",
     "typescript": "^3.3.3"
   },
   "engines": {

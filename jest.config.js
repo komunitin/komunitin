@@ -47,6 +47,7 @@ module.exports = {
   },
   transform: {
     '.*\\.vue$': 'vue-jest',
+    '<rootDir>/node_modules/vue-navigator-share/*vue': 'vue-jest',
     '.*\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$':
       'jest-transform-stub',
@@ -56,7 +57,10 @@ module.exports = {
     // '.*\\.vue$': '<rootDir>/node_modules/@quasar/quasar-app-extension-testing-unit-jest/node_modules/vue-jest',
     // '.*\\.js$': '<rootDir>/node_modules/@quasar/quasar-app-extension-testing-unit-jest/node_modules/babel-jest'
   },
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!quasar/lang)'],
+  transformIgnorePatterns: [
+    '<rootDir>/node_modules/(?!quasar/lang)',
+    '<rootDir>/node_modules/(?!vue-navigator-share)'
+  ],
   snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue'],
   moduleDirectories: ['<rootDir>/node_modules']
 };
