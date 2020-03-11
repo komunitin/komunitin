@@ -1,7 +1,7 @@
 import { Server } from 'miragejs';
 import { mockGroup, mockGroupsList } from '../pages/exchanges/models/mockData';
 
-console.log('Mirage activated');
+console.debug('Mirage activated');
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const server = new Server({
