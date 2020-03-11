@@ -29,18 +29,19 @@
           <contact-card :waysContact="group.included" />
         </q-dialog>
 
-        <q-card class="card-header">
-          <q-card-section>
-            <q-img :src="group.data.attributes.image" style="max-width: 400px; height: 200px;">
+        <q-card class="card-header row justify-between">
+          <q-card-section class="col-sm-4 col-xs-12">
+            <q-img :src="group.data.attributes.image">
               <div
                 class="absolute-bottom text-subtitle1 text-center"
               >{{ group.data.attributes.name }}</div>
             </q-img>
+          </q-card-section>
+          <!--<q-separator />-->
+          <q-card-section class="group-description col-sm-8 col-xs-12">
             <h6 class="code-group">{{ group.data.attributes.code }}</h6>
             <div v-html="group.data.attributes.description"></div>
-          </q-card-section>
-          <q-separator />
-          <q-card-actions>
+            <q-separator />
             <q-icon size="18px" flat round name="link" />
             <q-btn
               type="a"
@@ -49,7 +50,7 @@
               :href="group.data.attributes.website"
               target="_blank"
             >{{ group.data.attributes.website | link }}</q-btn>
-          </q-card-actions>
+          </q-card-section>
         </q-card>
 
         <q-card>
@@ -366,7 +367,13 @@ export default Vue.extend({
   color: black;
   text-decoration: none;
 }
-.group-detail .leaflet-control-attribution.leaflet-control {
+.group-detail .leaflet-control-attribuittion.leaflet-control {
   display: none !important;
+}
+.group-description {
+  padding: 10px 0 0 8px !important;
+}
+.card-header .q-img.overflow-hidden {
+  height: auto;
 }
 </style>
