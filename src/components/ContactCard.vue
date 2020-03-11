@@ -1,5 +1,5 @@
 <template>
-  <q-card id="contact-card" v-if="waysContact.length">
+  <q-card class="contact-card" v-if="waysContact.length">
     <q-item v-for="(contactGroup) in waysContact" :key="contactGroup.data.id ">
       <q-item-section avatar>
         <q-avatar>
@@ -43,8 +43,12 @@ export default Vue.extend({
 });
 </script>
 <style scoped>
-#contact-card .q-icon.notranslate {
+.contact-card .q-icon.notranslate {
   width: 38px;
   height: auto;
+}
+.contact-card a {
+  color: black;
+  text-decoration: none;
 }
 </style>
