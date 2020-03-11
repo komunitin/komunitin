@@ -96,7 +96,7 @@ describe('Exchange.vue', () => {
   // });
 
   it('Check lists', () => {
-    console.log({ errorsList: errorsList });
-    console.log({ notifyList: notifyList });
+    // console.log({ errorsList: errorsList });
+    // console.log({ notifyList: notifyList });
   });
 });
