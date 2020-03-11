@@ -7,14 +7,7 @@
           <q-toolbar-title v-if="group.data">{{ group.data.attributes.name }}</q-toolbar-title>
           <q-toolbar-title v-else>{{ $t('Groups near you') }}</q-toolbar-title>
 
-          <q-btn
-            v-if="group.data"
-            type="a"
-            :href="`mailto:${group.data.attributes.mail}`"
-            right
-            flat
-            icon="message"
-          />
+          <q-btn v-if="group.data" right flat icon="message" @click="carousel = true" />
           <navigator-share
             v-bind:on-error="onError"
             v-bind:on-success="onSuccess"
@@ -32,6 +25,10 @@
         class="group-detail q-pa-md row items-start q-gutter-md"
         style="min-height: 300px;"
       >
+        <q-dialog v-model="carousel">
+          <contact-card :waysContact="group.included" />
+        </q-dialog>
+
         <q-card class="card-header">
           <q-card-section>
             <q-img :src="group.data.attributes.image" style="max-width: 400px; height: 200px;">
@@ -232,7 +229,8 @@ export default Vue.extend({
     return {
       // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       group: {} as GroupModel,
-      isLoading: true as boolean
+      isLoading: true as boolean,
+      carousel: false
     };
   },
   filters: {
