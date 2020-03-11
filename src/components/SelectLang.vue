@@ -28,7 +28,7 @@ export default Vue.extend({
   methods: {
     // Define language selected by the user and save in LocalStorage.
     // @args locale: Select language.
-    setLocale(locale: any) {
+    setLocale(locale: string) {
       this.$emit('setLocale', locale);
     }
   }
