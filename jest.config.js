@@ -33,6 +33,7 @@ module.exports = {
     '<rootDir>/test/jest/__tests__/**/*.spec.ts',
     '<rootDir>/test/jest/__tests__/**/*.test.ts',
     '<rootDir>/src/**/__tests__/*.spec.ts',
+    '<rootDir>/src/**/__tests__/*.spec.js',
     '<rootDir>/src/**/__tests__/*.test.ts'
   ],
   moduleFileExtensions: ['vue', 'js', 'jsx', 'json', 'ts', 'tsx'],

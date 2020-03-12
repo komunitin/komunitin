@@ -201,11 +201,6 @@
 </template>
 
 <script lang="ts">
-/**
- * @todo Test de componentes y página.
- * @todo Hacer que si hay espacio el logo pase a la izquierda.
- * @todo Acabar de definir diseño de los títulos de secciones (General, Explora, Localización, Contacto)
- */
 import Vue from 'vue';
 import api from '../../services/ICESApi';
 // @ts-ignore
