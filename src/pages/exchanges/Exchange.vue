@@ -247,21 +247,24 @@ export default Vue.extend({
     this.isLoading = true;
   },
   mounted: function(): void {
-    api
-      .getExchange(this.id)
-      .then(response => {
-        this.group = response.data;
-        this.isLoading = false;
-      })
-      .catch(e => {
-        this.isLoading = false;
-        // @ts-ignore
-        this.$errorsManagement.newError(e, 'ExchangesList');
-        this.displayErrors();
-      });
+    this.collectExchange(this.id);
     this.displayErrors();
   },
   methods: {
+    async collectExchange(id: string) {
+      await api
+        .getExchange(id)
+        .then(response => {
+          this.group = response.data;
+          this.isLoading = false;
+        })
+        .catch(e => {
+          this.isLoading = false;
+          // @ts-ignore
+          this.$errorsManagement.newError(e, 'ExchangesList');
+          this.displayErrors();
+        });
+    },
     displayErrors(): void {
       // @ts-ignore
       let errors = this.$errorsManagement.getErrors();
