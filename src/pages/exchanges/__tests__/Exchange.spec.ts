@@ -16,7 +16,6 @@ import {
  * Problems with mount does not allow me to do tests, for now I
  * leave it that way until I find a solution.
  *
- * @todo Check error display.
  * @todo Check contact list.
  * @todo share button.
  * @todo button send message.
@@ -95,8 +94,8 @@ describe('Exchange.vue', () => {
   // expect(wrapper.vm.$data.isLoading).toBe(false);
   // });
 
-  it('Check lists', () => {
-    // console.log({ errorsList: errorsList });
-    // console.log({ notifyList: notifyList });
-  });
+  // it('Check error display', () => {
+  //   console.log({ errorsList: errorsList });
+  //   console.log({ notifyList: notifyList });
+  // }
 });

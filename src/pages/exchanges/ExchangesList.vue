@@ -56,9 +56,7 @@ import SimpleMap from '../../components/SimpleMap';
 import SearchBar from '../../components/SearchBar';
 
 /**
- * Listado de exhanges.
- *
- * @todo Se podría añadir la distancia de cada ecoxarxa respecto a la del usuario.
+ * Groups's list.
  */
 export default Vue.extend({
   name: 'ExchangeListPage',
@@ -113,7 +111,7 @@ export default Vue.extend({
       this.lng = position.coords.longitude;
       this.lat = position.coords.latitude;
 
-      console.log(`longitude: ${this.lng} | latitude: ${this.lat}`);
+      console.debug(`longitude: ${this.lng} | latitude: ${this.lat}`);
       this.getExchanges(this.pag, this.perPag, this.lng, this.lat);
     },
     handleLocationError(error: PositionError) {
@@ -130,16 +128,16 @@ export default Vue.extend({
           //   this.displayLocationInfo,
           //   this.handleLocationError
           // );
-          console.log('Timeout was hit');
+          console.debug('Timeout was hit');
           break;
         case 2:
           // ...device can't get data
           // eslint-disable-next-line quotes
-          console.log("device can't get data");
+          console.debug("device can't get data");
           break;
         case 1:
           // ...user said no ☹️
-          console.log('user said no ☹️');
+          console.debug('user said no ☹️');
       }
       this.getExchanges(this.pag, this.perPag);
     },
@@ -150,8 +148,8 @@ export default Vue.extend({
         { maximumAge: 1500000, timeout: 100000 }
       );
     },
-    getExchanges(pag: number, perPag: number, lat?: number, lng?: number) {
-      api
+    async getExchanges(pag: number, perPag: number, lat?: number, lng?: number) {
+      await api
         .getExchangesList(pag, perPag, lat, lng)
         .then(response => {
           this.isLoading = false;
