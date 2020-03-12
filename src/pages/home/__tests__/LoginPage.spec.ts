@@ -8,20 +8,19 @@ describe('LoginPage.vue', () => {
 
   // We need to explicitely include the components to be used.
   localVue.use(Quasar, { components: { QBtn } });
-
+  
   // Shallow Mount means that the child components are not mounted,
   // but placeholder components are used instead.
   const wrapper = shallowMount(LoginPage, {
-    // Avoid error with translations.
+    localVue,
     mocks: {
-      $t: () => 'Mock text'
-    },
-    localVue
+      // Mocking translate function since I was unable to properly 
+      // use the 'vue-i18n' module here.
+      $t: (id: string) => id
+    }
   });
 
-  // @todo Cuando tengamos los enlaces comprobar sobre ellos.
   test('Find links', () => {
-    // expect(wrapper.html()).toContain('<span>Komunitin</span>');
     expect(wrapper.html()).toContain('icon="account_circle"');
   });
 });
