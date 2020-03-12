@@ -63,7 +63,7 @@ const testLocations = [
 export function mockGroupsList(): GroupsListModel[] {
   const list = [];
 
-  for (let index = 0; index < 11; index++) {
+  for (let index = 0; index < 10; index++) {
     list.push({
       id: index,
       data: {
@@ -83,7 +83,6 @@ export function mockGroupsList(): GroupsListModel[] {
       }
     });
   }
-  console.log(list);
   // @ts-ignore
   return list;
 }
