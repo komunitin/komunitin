@@ -3,8 +3,7 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-
-    <q-footer reveal class="bg-transparent q-my-md">
+    <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
         <selectLang @setLocale="setLocale" />
         <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
         <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
@@ -50,51 +49,9 @@ export default Vue.extend({
 </script>
 <style lang="scss" scope>
 .home {
-  background: rgba(221, 75, 57, 0.3) url('~assets/home_background-700.jpg') no-repeat center center fixed;
+  background: $outside url('~assets/home_background-700.jpg') center top no-repeat fixed;
   background-size: cover;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  background-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.5) 0%,
-      rgba(0, 0, 0, 0.5) 100%
-    ),
-    url('~assets/home_background-700.jpg');
-    color: $onprimary;
 }
 
-footer {
-  padding-top: 20px;
-  text-align: center;
-}
-footer .q-btn {
-    color: $onprimary-medium;
-}
 
-.q-page-container {
-  min-height: 400px;
-}
-.q-tab__label {
-  font-weight: normal;
-}
-.q-field--auto-height.q-field--dense.q-field--labeled
-  .q-field__control-container {
-  padding-top: 0;
-}
-
-#q-app .q-field__native.row.items-center,
-.q-select__dropdown-icon.material-icons.q-icon.notranslate {
-  color: $onprimary;
-}
-.q-item {
-  color: black;
-}
-.q-item--active {
-  color: gray !important;
-}
-.q-tab__content.self-stretch.flex-center.relative-position.q-anchor--skip.non-selectable.column {
-  text-transform: uppercase;
-}
 </style>
