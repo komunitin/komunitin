@@ -1,16 +1,16 @@
 {
   "langs": [
     {
-      "label": "Es",
-      "value": "es"
-    },
-    {
-      "label": "Ca",
+      "label": "Català",
       "value": "ca"
     },
     {
-      "label": "En",
+      "label": "English",
       "value": "en-us"
+    },
+    {
+      "label": "Español",
+      "value": "es"
     }
   ]
 }
