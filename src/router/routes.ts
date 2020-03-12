@@ -5,7 +5,9 @@ const routes: RouteConfig[] = [
     path: '/',
     component: () => import('pages/home/HomeLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/home/LoginPage.vue') },
+      { 
+        path: '',
+        component: () => import('pages/home/LoginPage.vue') },
       {
         path: '/login-select/',
         props: false,
@@ -18,18 +20,6 @@ const routes: RouteConfig[] = [
         name: 'LoginMail',
         component: () => import('pages/home/LoginMail.vue')
       },
-      {
-        path: '/help/',
-        props: false,
-        name: 'Help',
-        component: () => import('pages/home/Help.vue')
-      },
-      {
-        path: '/contribute/',
-        props: false,
-        name: 'Contribute',
-        component: () => import('pages/home/Contribute.vue')
-      }
     ]
   },
   {

@@ -12,17 +12,16 @@
     <div id="login-home">
       <q-btn
         color="primary"
-        text-color="white"
+        text-color="onprimary"
         :label="$t('Find your local exchange')"
         icon="explore"
         :to="{ name: 'ExchangesListPage' }"
       />
-      <p class="gray-kn">{{ $t('Already registered to a local exchange?') }}</p>
-
+      <p class="home-text">{{ $t('Already registered to a local exchange?') }}</p>
       <q-btn
         outline
         color="transparent"
-        text-color="white"
+        text-color="onprimary"
         :label="$t('Login')"
         :to="{ name: 'LoginSelect' }"
         icon="account_circle"
@@ -44,13 +43,12 @@ export default Vue.extend({
   name: 'LoginPage'
 });
 </script>
-<style scope>
+<style lang="scss" scope>
 .home-title {
   margin: 30px 0;
 }
 .home-title h1 {
   font-family: roboto;
-  color: white;
   font-size: 40px;
   text-align: center;
   margin: 35px 0 0 0;
@@ -63,13 +61,16 @@ export default Vue.extend({
 .home-title h6 {
   font-family: roboto;
   font-style: italic;
-  color: white;
   text-align: center;
   font-size: 11px;
   margin: 0;
 }
 .home-body .q-btn {
-    width: 300px;
+  width: 300px;
+}
+.home-text {
+  color: $onprimary-medium;
+  margin: 16px 0 4px 0;
 }
 </style>
 
