@@ -9,17 +9,14 @@ import {
   QBtn,
   QToolbar,
   QToolbarTitle,
-  QInput
+  QInput,
+  QDialog,
+  QImg,
+  QCard,
+  QCardSection,
+  QIcon,
+  QSeparator
 } from 'quasar';
-
-/**
- * Problems with mount does not allow me to do tests, for now I
- * leave it that way until I find a solution.
- *
- * @todo Check contact list.
- * @todo share button.
- * @todo button send message.
- */
 
 describe('Exchange.vue', () => {
   let id: string;
@@ -42,14 +39,20 @@ describe('Exchange.vue', () => {
       QBtn,
       QToolbar,
       QToolbarTitle,
-      QInput
+      QInput,
+      QDialog,
+      QImg,
+      QCard,
+      QCardSection,
+      QIcon,
+      QSeparator
     }
   });
 
   beforeEach(() => {
     id = '1';
     notifyList = [{}];
-    errorsList;
+    errorsList = [new Error(), 'Init'];
 
     require('../../../services/mirage.js');
 
@@ -82,20 +85,11 @@ describe('Exchange.vue', () => {
     });
   });
 
-  it('Check isLoading true', () => {
+  it('check receive data', async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
+    // @ts-ignore
+    await wrapper.vm.collectExchange('1');
+    expect(wrapper.vm.$data.isLoading).toBe(false);
+    expect(wrapper.vm.$data.group).toBeTruthy();
   });
-
-  // it('Check isLoading false', async () => {
-  // wrapper.vm.$data.isLoading = true;
-  // await wrapper.vm.$nextTick();
-  // console.log({ Html: wrapper.html() });
-  // console.log({ Data: wrapper.vm.$data.group });
-  // expect(wrapper.vm.$data.isLoading).toBe(false);
-  // });
-
-  // it('Check error display', () => {
-  //   console.log({ errorsList: errorsList });
-  //   console.log({ notifyList: notifyList });
-  // }
 });

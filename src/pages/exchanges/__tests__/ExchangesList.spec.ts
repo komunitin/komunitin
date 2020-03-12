@@ -101,12 +101,8 @@ describe('ExchangesList.vue', () => {
     });
   });
 
-  it('Check isLoading true', () => {
-    // console.log({ Groups: wrapper.vm.$data.exchanges });
-    expect(wrapper.vm.$data.isLoading).toBe(true);
-  });
-
   it('Check isLoading false', async () => {
+    expect(wrapper.vm.$data.isLoading).toBe(true);
     await wrapper.vm.getExchanges(1, 10);
     expect(wrapper.vm.$data.isLoading).toBe(false);
   });
