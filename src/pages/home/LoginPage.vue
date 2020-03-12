@@ -48,23 +48,24 @@ export default Vue.extend({
 </script>
 <style lang="scss" scope>
 
+// Adjust the size of 'Welcome to' text so it is full-width.
 #welcome-to {
   font-weight: 300;
   font-size: 4.1rem;
   line-height: 4.1rem;
 }
-
+// Adjust the size of 'Komunitin' text so it is full-width and bold.
 #komunitin {
   font-weight: 500;
   font-size: 4.65rem;
   line-height: 4.65rem;
 }
-
+// Adjust the size of slogan text so it is full-width.
 #slogan {
   font-style: italic;
   font-size: 1.09rem;
 }
-
+// Wider non-standard button.
 #explore {
   height: 48px;
 }
