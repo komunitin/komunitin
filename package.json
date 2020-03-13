@@ -20,6 +20,7 @@
     "todo": "egrep -r '@todo|@bug|@dev' src/"
   },
   "dependencies": {
+    "@alexlit/vue-yandex-share": "^1.0.1",
     "@quasar/extras": "^1.5.1",
     "@types/dotenv": "^8.2.0",
     "@types/leaflet": "^1.5.9",

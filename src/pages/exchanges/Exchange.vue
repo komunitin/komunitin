@@ -4,10 +4,14 @@
       <q-header reveal elevated>
         <q-toolbar>
           <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
-          <q-toolbar-title v-if="group.data">{{ group.data.attributes.name }}</q-toolbar-title>
+          <q-toolbar-title v-if="group.data">
+            {{
+            group.data.attributes.name
+            }}
+          </q-toolbar-title>
           <q-toolbar-title v-else>{{ $t('Groups near you') }}</q-toolbar-title>
 
-          <q-btn v-if="group.data" right flat icon="message" @click="carousel = true" />
+          <q-btn v-if="group.data" right flat icon="message" @click="contactsView = true" />
           <navigator-share
             v-bind:on-error="onError"
             v-bind:on-success="onSuccess"
@@ -25,8 +29,12 @@
         class="group-detail q-pa-md row items-start q-gutter-md"
         style="min-height: 300px;"
       >
-        <q-dialog v-model="carousel">
+        <q-dialog v-model="contactsView">
           <contact-card :waysContact="group.included" />
+        </q-dialog>
+
+        <q-dialog v-model="socialButtonsView">
+          <social-buttons v-bind:url="url" v-bind:title="title" />
         </q-dialog>
 
         <q-card class="card-header row justify-between">
@@ -66,7 +74,9 @@
             <q-card-section class="col-4 group-count-box">
               <h2 class="group-count">{{ group.data.relatinships.offers.meta.count }}</h2>
               <q-btn
-                :to="`exchanges/${group.data.relatinships.offers.links.related}`"
+                :to="
+                  `exchanges/${group.data.relatinships.offers.links.related}`
+                "
                 flat
                 color="primary"
               >Explora</q-btn>
@@ -132,7 +142,9 @@
             <q-card-section class="col-4 group-count-box">
               <h2 class="group-count">{{ group.data.relatinships.members.meta.count }}</h2>
               <q-btn
-                :to="`exchanges/${group.data.relatinships.members.links.related}`"
+                :to="
+                  `exchanges/${group.data.relatinships.members.links.related}`
+                "
                 flat
                 color="primary"
               >Explora</q-btn>
@@ -191,7 +203,11 @@
           <q-card-section>
             <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
           </q-card-section>
-          <q-card-section class="group-footer-card">{{ group.data.attributes.location.name }}</q-card-section>
+          <q-card-section class="group-footer-card">
+            {{
+            group.data.attributes.location.name
+            }}
+          </q-card-section>
         </q-card>
 
         <contact-card :waysContact="group.included" />
@@ -210,11 +226,10 @@ import ContactCard from '../../components/ContactCard';
 import { GroupModel } from './models/model';
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
-// @todo Aún pocos navegadores soportan esto, hay que
-// añadir una alternativa por si falla.
-// @see vue-share-social
 // @ts-ignore
 import NavigatorShare from '../../components/NavigatorShare';
+// @ts-ignore
+import SocialButtons from '../../components/SocialButtons';
 
 /**
  * ExchangePage.
@@ -226,7 +241,8 @@ export default Vue.extend({
       // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       group: {} as GroupModel,
       isLoading: true as boolean,
-      carousel: false
+      contactsView: false,
+      socialButtonsView: false
     };
   },
   filters: {
@@ -238,7 +254,8 @@ export default Vue.extend({
     VueElementLoading,
     SimpleMap,
     NavigatorShare,
-    ContactCard
+    ContactCard,
+    SocialButtons
   },
   props: {
     id: String
@@ -280,8 +297,10 @@ export default Vue.extend({
       }
     },
     onError(err: string) {
-      alert(err);
+      // alert(err);
       console.log(err);
+      this.contactsView = false;
+      this.socialButtonsView = true;
     },
     onSuccess(err: string) {
       console.log(err);
