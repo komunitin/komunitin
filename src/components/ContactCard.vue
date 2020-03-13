@@ -10,21 +10,25 @@
       <q-item-section>
         <q-item-label v-if="contactGroup.data.attributes.type === 'phone'">
           <a
+            target="_blank"
             :href="`tel:${contactGroup.data.attributes.name}`"
           >{{contactGroup.data.attributes.name}}</a>
         </q-item-label>
         <q-item-label v-else-if="contactGroup.data.attributes.type === 'email'">
           <a
+            target="_blank"
             :href="`mailto:${contactGroup.data.attributes.name}`"
           >{{contactGroup.data.attributes.name}}</a>
         </q-item-label>
         <q-item-label v-else-if="contactGroup.data.attributes.type === 'telegram'">
           <a
-            :href="`tg://user?id=${contactGroup.data.attributes.name}`"
+            target="_blank"
+            :href="`https://t.me/${contactGroup.data.attributes.name}`"
           >{{contactGroup.data.attributes.name}}</a>
         </q-item-label>
         <q-item-label v-else-if="contactGroup.data.attributes.type === 'whatsapp'">
           <a
+            target="_blank"
             :href="`https://api.whatsapp.com/send?phone=${contactGroup.data.attributes.name}`"
           >{{contactGroup.data.attributes.name}}</a>
         </q-item-label>
