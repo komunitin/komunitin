@@ -63,7 +63,7 @@ const testLocations = [
 export function mockGroupsList(): GroupsListModel[] {
   const list = [];
 
-  for (let index = 0; index < 11; index++) {
+  for (let index = 0; index < 10; index++) {
     list.push({
       id: index,
       data: {
@@ -83,7 +83,6 @@ export function mockGroupsList(): GroupsListModel[] {
       }
     });
   }
-  console.log(list);
   // @ts-ignore
   return list;
 }
@@ -96,11 +95,21 @@ export const mockGroup: GroupModel[] = [
       attributes: {
         code: 'EITE',
         name: 'Easter Island Talent Exchange',
-        description:
-          '<p>Here at <strong>Easter Island</strong> it makes a lot of sense to have a local currency because bla bla bla...',
+        description: `
+          <p>Here at <strong>Easter Island</strong> it makes a lot of sense to
+          have a local currency because Mauris et accumsan urna. Phasellus
+          dictum dolor non nulla placerat porta. In sed egestas nibh. Aenean
+          sit amet nunc quis risus varius consequat. Integer posuere auctor
+          ipsum. Maecenas vehicula tellus non sapien lobortis aliquam.</p>
+            
+          <p>Morbi pharetra ultrices tempus. Donec volutpat lorem in justo
+          molestie, vel lacinia odio rutrum. Nulla a libero tempus, fermentum
+          arcu at, tempus urna. Pellentesque sit amet venenatis mauris.</p>
+          `,
         image:
           'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/mystic-mountain-300x300.png',
         website: 'https://easterislandexchange.org',
+        mail: 'mailadmingroup@dom.com',
         access: 'public',
         location: {
           name: 'Easter Island',
@@ -205,10 +214,38 @@ export const mockGroup: GroupModel[] = [
         },
         data: {
           type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb',
+          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffw',
           attributes: {
             type: 'email',
             name: 'exhange@easterisland.com'
+          }
+        }
+      },
+      {
+        links: {
+          self:
+            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+        },
+        data: {
+          type: 'contacts',
+          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb',
+          attributes: {
+            type: 'whatsapp',
+            name: '+34 666 66 66 66'
+          }
+        }
+      },
+      {
+        links: {
+          self:
+            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+        },
+        data: {
+          type: 'contacts',
+          id: '193e98b4-a27d-4e8a-9a47-sdsdsdsdsdsd',
+          attributes: {
+            type: 'telegram',
+            name: 'telegramUser'
           }
         }
       }

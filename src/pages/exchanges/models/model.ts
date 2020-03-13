@@ -33,6 +33,7 @@ export interface GroupModel {
       description: string;
       image: string;
       website: string;
+      mail: string;
       access: string;
       location: {
         name: string;
@@ -94,5 +95,5 @@ export interface GroupModel {
       updated: string;
     };
   };
-  included: object | null;
+  included: object[];
 }
