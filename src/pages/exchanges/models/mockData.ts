@@ -245,7 +245,7 @@ export const mockGroup: GroupModel[] = [
           id: '193e98b4-a27d-4e8a-9a47-sdsdsdsdsdsd',
           attributes: {
             type: 'telegram',
-            name: '@telegramUser'
+            name: 'telegramUser'
           }
         }
       }
