@@ -37,6 +37,7 @@ yarn-error.log*
 /docs
 .env
 *.swp
+pre-push.sh
 
 
 # Test reports

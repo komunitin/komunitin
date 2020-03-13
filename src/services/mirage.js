@@ -1,7 +1,7 @@
 import { Server } from 'miragejs';
 import { mockGroup, mockGroupsList } from '../pages/exchanges/models/mockData';
 
-console.log('Mirage activated');
+console.debug('Mirage activated');
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const server = new Server({
@@ -22,7 +22,7 @@ const server = new Server({
       (schema, request) => {
         let pag = request.params.pag;
         let perPag = request.params.perPag;
-        console.debug({ ListGroupsGet: { pag: pag, perPag: perPag } });
+        // console.debug({ ListGroupsGet: { pag: pag, perPag: perPag } });
         return mockGroupsList();
       }
     );
@@ -38,17 +38,6 @@ const server = new Server({
         let pag = request.params.pag;
         let perPag = request.params.perPag;
 
-        // @dev
-        console.debug({
-          Mirage: {
-            class: this,
-            timing: this.timing,
-            pag: pag,
-            perPag: perPag,
-            lat: lat,
-            lng: lng
-          }
-        });
         return mockGroupsList();
       }
     );
@@ -60,7 +49,7 @@ const server = new Server({
       'https://integralces.net/api/exchanges/filter/:search',
       (schema, request) => {
         let search = request.params.search;
-        console.debug({ Search: search });
+        // console.debug({ Search: search });
         return mockGroupsList();
       }
     );
