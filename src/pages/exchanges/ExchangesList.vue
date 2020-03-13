@@ -1,45 +1,43 @@
 <template>
-  <q-page-container class="container-kn">
-    <q-header reveal elevated>
-      <search-bar @newSearch="getExchangesListFilter" title="Groups near you" :backButton="true" />
-    </q-header>
-    <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
-      <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
-      <q-card
-        v-for="exchange of exchanges"
-        :key="exchange.id"
-        class="card-kn col-xs-12 col-sm-5 col-md-3"
-      >
-        <q-item>
-          <q-item-section avatar>
-            <q-avatar>
-              <img :src="exchange.data.attributes.image" />
-            </q-avatar>
-          </q-item-section>
+  <q-layout class="list-groups">
+    <q-page-container class="container-kn">
+      <q-header reveal elevated>
+        <search-bar @newSearch="getExchangesListFilter" title="Groups near you" :backButton="true" />
+      </q-header>
+      <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
+        <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
+        <q-card v-for="exchange of exchanges" :key="exchange.id" class="card-kn col">
+          <q-item>
+            <q-item-section avatar>
+              <q-avatar>
+                <img :src="exchange.data.attributes.image" />
+              </q-avatar>
+            </q-item-section>
 
-          <q-item-section>
-            <q-item-label>{{ exchange.data.attributes.name }}</q-item-label>
-            <q-item-label caption>{{ exchange.data.attributes.code }}</q-item-label>
-          </q-item-section>
-          <q-btn flat dense round icon="share" aria-label="Share" />
-        </q-item>
+            <q-item-section>
+              <q-item-label>{{ exchange.data.attributes.name }}</q-item-label>
+              <q-item-label caption>{{ exchange.data.attributes.code }}</q-item-label>
+            </q-item-section>
+            <q-btn flat dense round icon="share" aria-label="Share" />
+          </q-item>
 
-        <!-- <img src="~assets/nomapa.png" /> -->
-        <q-card-section class="simple-map">
-          <simple-map
-            :center="exchange.data.attributes.location.coordinates"
-            :markerLatLng="exchange.data.attributes.location.coordinates"
-          />
-        </q-card-section>
+          <!-- <img src="~assets/nomapa.png" /> -->
+          <q-card-section class="simple-map">
+            <simple-map
+              :center="exchange.data.attributes.location.coordinates"
+              :markerLatLng="exchange.data.attributes.location.coordinates"
+            />
+          </q-card-section>
 
-        <q-card-section>{{ exchange.data.attributes.description | subStr }}</q-card-section>
-        <q-card-actions>
-          <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
-          <q-btn flat color="primary">Registra't</q-btn>
-        </q-card-actions>
-      </q-card>
-    </div>
-  </q-page-container>
+          <q-card-section>{{ exchange.data.attributes.description | subStr }}</q-card-section>
+          <q-card-actions>
+            <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
+            <q-btn flat color="primary">Registra't</q-btn>
+          </q-card-actions>
+        </q-card>
+      </div>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script lang="ts">
@@ -148,7 +146,12 @@ export default Vue.extend({
         { maximumAge: 1500000, timeout: 100000 }
       );
     },
-    async getExchanges(pag: number, perPag: number, lat?: number, lng?: number) {
+    async getExchanges(
+      pag: number,
+      perPag: number,
+      lat?: number,
+      lng?: number
+    ) {
       await api
         .getExchangesList(pag, perPag, lat, lng)
         .then(response => {
@@ -181,6 +184,9 @@ export default Vue.extend({
 });
 </script>
 <style scope>
+.list-groups .card-kn {
+  min-width: 300px !important;
+}
 .search-kn {
   width: 100%;
   font-size: 20px;
