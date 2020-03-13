@@ -1,12 +1,33 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="home">
+  <q-layout view="hhh lpr fff" class="home column justify-start items-center">
+    <q-header class="bg-transparent">
+      <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          color="white"
+          icon="arrow_back"
+          aria-label="Home"
+          @click="$router.back()"
+          :class="$route.path === '/' ? 'invisible' : ''"
+        />
+      </q-toolbar>
+    </q-header>
     <q-page-container>
+      <div class="text-onoutside q-mt-md q-mb-xl">
+        <h1 class="q-mb-xs q-mt-none text-center">
+          <div id="welcome-to">{{ $t('Welcome to') }}</div>
+          <div id="komunitin">Komunitin</div>
+        </h1>
+        <p id="slogan" class="text-subtitle1">{{ $t('Open System for Exchange Communities') }}</p>
+      </div>
       <router-view />
     </q-page-container>
     <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
-        <selectLang @setLocale="setLocale" />
-        <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
-        <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
+      <selectLang @setLocale="setLocale" />
+      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
+      <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
     </q-footer>
   </q-layout>
 </template>
@@ -52,6 +73,24 @@ export default Vue.extend({
 .home {
   background: $outside url('~assets/home_background-700.jpg') center top no-repeat fixed;
   background-size: cover;
+}
+
+// Adjust the size of 'Welcome to' text so it is full-width.
+#welcome-to {
+  font-weight: 300;
+  font-size: 4.1rem;
+  line-height: 4.1rem;
+}
+// Adjust the size of 'Komunitin' text so it is full-width and bold.
+#komunitin {
+  font-weight: 500;
+  font-size: 4.65rem;
+  line-height: 4.65rem;
+}
+// Adjust the size of slogan text so it is full-width.
+#slogan {
+  font-style: italic;
+  font-size: 1.09rem;
 }
 
 
