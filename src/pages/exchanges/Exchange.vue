@@ -61,7 +61,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="local_offer" />Offers
@@ -96,7 +96,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="loyalty" />Needs
@@ -129,7 +129,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="account_circle" />Members
@@ -164,7 +164,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="monetization_on" />Currency
@@ -199,7 +199,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
           </q-card-section>
@@ -339,8 +339,8 @@ export default Vue.extend({
   margin-left: 4px;
 }
 .group-detail .q-card {
-  width: 100%;
-  max-width: 350px;
+  min-width: 232px !important;
+  max-width: 456px;
 }
 .group-detail .q-card__section {
   padding: 0;
