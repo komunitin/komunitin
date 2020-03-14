@@ -186,6 +186,7 @@ export default Vue.extend({
 <style scope>
 .list-groups .card-kn {
   min-width: 300px !important;
+  max-width: 456px;
 }
 .search-kn {
   width: 100%;
