@@ -37,8 +37,8 @@
           <social-buttons v-bind:url="url" v-bind:title="title" />
         </q-dialog>
 
-        <q-card class="card-header row justify-between">
-          <q-card-section class="col-sm-4 col-xs-12">
+        <q-card class="card-header row">
+          <q-card-section class="group-header-img col">
             <q-img :src="group.data.attributes.image">
               <div
                 class="absolute-bottom text-subtitle1 text-center"
@@ -46,18 +46,20 @@
             </q-img>
           </q-card-section>
           <!--<q-separator />-->
-          <q-card-section class="group-description col-sm-8 col-xs-12">
+          <q-card-section class="group-description col">
             <h6 class="code-group">{{ group.data.attributes.code }}</h6>
-            <div v-html="group.data.attributes.description"></div>
-            <q-separator />
-            <q-icon size="18px" flat round name="link" />
-            <q-btn
-              type="a"
-              flat
-              class="group-website"
-              :href="group.data.attributes.website"
-              target="_blank"
-            >{{ group.data.attributes.website | link }}</q-btn>
+            <div class="group-description-detail" v-html="group.data.attributes.description"></div>
+            <div>
+              <q-separator />
+              <q-icon size="18px" flat round name="link" />
+              <q-btn
+                type="a"
+                flat
+                class="group-website"
+                :href="group.data.attributes.website"
+                target="_blank"
+              >{{ group.data.attributes.website | link }}</q-btn>
+            </div>
           </q-card-section>
         </q-card>
 
@@ -334,12 +336,29 @@ export default Vue.extend({
   max-width: 100% !important;
   width: 100%;
 }
+.group-header-img {
+  min-width: 300px !important;
+  max-width: 400px !important;
+}
+.group-description {
+  min-width: 300px !important;
+  display: flex;
+  flex-direction: column;
+}
+.group-description-detail {
+  flex-grow: 1;
+  /*
+display: flex;
+flex-wrap: wrap;
+justify-content: start;
+*/
+}
 .group-website {
   text-transform: none;
   margin-left: 4px;
 }
 .group-detail .q-card {
-  min-width: 232px !important;
+  min-width: 300px !important;
   max-width: 456px;
 }
 .group-detail .q-card__section {
