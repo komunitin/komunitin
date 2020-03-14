@@ -37,16 +37,16 @@ describe('SelectLang', () => {
     langs = {
       langs: [
         {
-          label: 'Es',
-          value: 'es'
-        },
-        {
-          label: 'Ca',
+          label: 'Català',
           value: 'ca'
         },
         {
-          label: 'En',
+          label: 'English',
           value: 'en-us'
+        },
+        {
+          label: 'Español',
+          value: 'es'
         }
       ]
     };
@@ -63,19 +63,10 @@ describe('SelectLang', () => {
     });
   });
 
-  it('Check that it emits the selected language', async () => {
-    // wrapper.setData({ langs: langs });
-    // console.debug({ Test: wrapper.html() });
-    // const select = wrapper.find('input');
-    // New lang.
-    const newLang = wrapper.vm.$data.langs[1].value;
-    wrapper.setData({ locale: newLang });
-    // select.setValue(newLang);
-    // console.debug({ Test: wrapper.html() });
+  it('Check that it emits the selected language', () => {
+    const newLang = wrapper.vm.$data.langs[0].value;
     wrapper.vm.$emit('setLocale');
     wrapper.vm.$emit('setLocale', newLang);
-    await wrapper.vm.$nextTick();
     expect(wrapper.emitted().setLocale).toBeTruthy();
-    expect(wrapper.vm.$data.locale).toBe(newLang);
   });
 });
