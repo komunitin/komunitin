@@ -9,8 +9,6 @@
     </q-list>
   </q-btn-dropdown>
 </template>
-<!--
--->
 <script lang="ts">
 import Vue from 'vue';
 
