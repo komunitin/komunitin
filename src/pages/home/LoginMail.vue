@@ -1,42 +1,37 @@
 <template>
-  <div>
-    <q-toolbar>
-      <q-btn
-        flat
-        dense
-        round
-        color="white"
-        icon="arrow_back"
-        aria-label="Home"
-        @click="$router.back()"
-      />
-      <q-toolbar-title class="text-white">Komunitin</q-toolbar-title>
-    </q-toolbar>
-    <div id="login-mail" class="home-body">
-      <form @submit.prevent="submit">
+      <form @submit.prevent="submit" class="column q-gutter-md">
         <q-input
-          v-model="mail"
+          outlined dark
+          v-model="email"
           type="email"
           placeholder="example@example.com"
-          label="E-mail"
-          :error="$v.mail.$invalid"
-          counter
-          color="white"
-          labelColor="white"
-          text-color="white"
+          :label="$t('Email')"
           maxlength="30"
-        />
+          :rules="[val => !$v.email.$invalid || $t('Invalid email')]"
+          lazy-rules
+        >
+          <template v-slot:append>
+            <q-icon name="mail"/>
+          </template>
+        </q-input>
         <q-input
+          outlined dark
           v-model="pass"
-          type="password"
-          label="Contraseña"
-          color="white"
-          :error="$v.pass.$invalid"
-          counter
-          maxlength="10"
-          labelColor="white"
-          text-color="white"
-        />
+          :type="isPwd ? 'password' : 'text'"
+          :label="$t('Password')"
+          maxlength="30"
+          :rules="[val => !$v.pass.$invalid || $t('Invalid password')]"
+          lazy-rules
+        >
+          <template v-slot:append>
+            <q-icon
+              :name="isPwd ? 'visibility_off' : 'visibility'"
+              class="cursor-pointer"
+              @click="isPwd = !isPwd"
+            />
+          </template>
+        </q-input>
+        
         <q-btn
           outline
           color="transparent"
@@ -47,8 +42,6 @@
           type="submit"
         />
       </form>
-    </div>
-  </div>
 </template>
 
 <script lang="ts">
@@ -62,24 +55,25 @@ export default Vue.extend({
   name: 'LoginMail',
   data() {
     return {
-      mail: '',
+      email: '',
       pass: '',
-      submitStatus: ''
+      submitStatus: '',
+      isPwd: true,
     };
   },
   validations: {
-    mail: {
+    email: {
       required,
       email
     },
     pass: {
       required,
-      minLength: minLength(10)
+      minLength: minLength(8)
     }
   },
   methods: {
     submit() {
-      console.log({ submit: true, submitStatus: this.submitStatus });
+      // Validate.
       this.$v.$touch();
       if (this.$v.$invalid) {
         this.submitStatus = 'ERROR';
@@ -92,7 +86,7 @@ export default Vue.extend({
         // @todo do your submit logic here
         this.submitStatus = 'PENDING';
         setTimeout(() => {
-          console.log({ validate: true, mail: this.mail, pass: this.pass });
+          console.log({ validate: true, email: this.email, pass: this.pass });
           this.submitStatus = 'OK';
         }, 500);
       }
@@ -101,18 +95,4 @@ export default Vue.extend({
 });
 </script>
 <style scope>
-input {
-  color: white !important;
-}
-
-.home-body {
-  /*IMPORTANTE*/
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.home-body form {
-  width: 300px;
-}
 </style>
