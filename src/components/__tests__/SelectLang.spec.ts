@@ -10,9 +10,12 @@ import {
   QList
 } from 'quasar';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Koptions = require('src/komunitin.json');
+
 describe('SelectLang', () => {
   let locale: string;
-  let langs: {};
+  // let langs: {};
   // @ts-ignore
   let wrapper: Wrapper<SelectLang>;
 
@@ -34,22 +37,7 @@ describe('SelectLang', () => {
   // Montamos el componente con los props necesarios antes de cada test.
   beforeEach(() => {
     locale = 'en-us';
-    langs = {
-      langs: [
-        {
-          label: 'Català',
-          value: 'ca'
-        },
-        {
-          label: 'English',
-          value: 'en-us'
-        },
-        {
-          label: 'Español',
-          value: 'es'
-        }
-      ]
-    };
+    // langs = Koptions.langs;
     wrapper = mount(SelectLang, {
       // Avoid error with translations.
       mocks: {
@@ -57,7 +45,7 @@ describe('SelectLang', () => {
         $i18n: {
           locale: locale
         },
-        $Koptions: langs
+        $Koptions: Koptions
       },
       localVue
     });
@@ -68,5 +56,11 @@ describe('SelectLang', () => {
     wrapper.vm.$emit('setLocale');
     wrapper.vm.$emit('setLocale', newLang);
     expect(wrapper.emitted().setLocale).toBeTruthy();
+  });
+
+  it('Check that it emits the "ca" language', () => {
+    wrapper.vm.$emit('setLocale', 'ca');
+    // prettier-ignore
+    expect(wrapper.emitted().setLocale.length).toBe(1);
   });
 });

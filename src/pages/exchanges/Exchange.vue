@@ -46,7 +46,7 @@
             </q-img>
           </q-card-section>
           <!--<q-separator />-->
-          <q-card-section class="group-description col">
+          <q-card-section class="group-description col row column">
             <h6 class="code-group">{{ group.data.attributes.code }}</h6>
             <div class="group-description-detail" v-html="group.data.attributes.description"></div>
             <div>
@@ -342,16 +342,9 @@ export default Vue.extend({
 }
 .group-description {
   min-width: 300px !important;
-  display: flex;
-  flex-direction: column;
 }
 .group-description-detail {
   flex-grow: 1;
-  /*
-display: flex;
-flex-wrap: wrap;
-justify-content: start;
-*/
 }
 .group-website {
   text-transform: none;
