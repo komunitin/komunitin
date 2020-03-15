@@ -60,7 +60,6 @@ describe('SelectLang', () => {
 
   it('Check that it emits the "ca" language', () => {
     wrapper.vm.$emit('setLocale', 'ca');
-    // prettier-ignore
     expect(wrapper.emitted().setLocale.length).toBe(1);
   });
 });
