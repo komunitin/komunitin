@@ -37,8 +37,8 @@
           <social-buttons v-bind:url="url" v-bind:title="title" />
         </q-dialog>
 
-        <q-card class="card-header row justify-between">
-          <q-card-section class="col-sm-4 col-xs-12">
+        <q-card class="card-header row">
+          <q-card-section class="group-header-img col">
             <q-img :src="group.data.attributes.image">
               <div
                 class="absolute-bottom text-subtitle1 text-center"
@@ -46,22 +46,24 @@
             </q-img>
           </q-card-section>
           <!--<q-separator />-->
-          <q-card-section class="group-description col-sm-8 col-xs-12">
+          <q-card-section class="group-description col row column">
             <h6 class="code-group">{{ group.data.attributes.code }}</h6>
-            <div v-html="group.data.attributes.description"></div>
-            <q-separator />
-            <q-icon size="18px" flat round name="link" />
-            <q-btn
-              type="a"
-              flat
-              class="group-website"
-              :href="group.data.attributes.website"
-              target="_blank"
-            >{{ group.data.attributes.website | link }}</q-btn>
+            <div class="group-description-detail" v-html="group.data.attributes.description"></div>
+            <div>
+              <q-separator />
+              <q-icon size="18px" flat round name="link" />
+              <q-btn
+                type="a"
+                flat
+                class="group-website"
+                :href="group.data.attributes.website"
+                target="_blank"
+              >{{ group.data.attributes.website | link }}</q-btn>
+            </div>
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="local_offer" />Offers
@@ -96,7 +98,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="loyalty" />Needs
@@ -129,7 +131,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="account_circle" />Members
@@ -164,7 +166,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <div class="text-overline group-title-section">
               <q-icon name="monetization_on" />Currency
@@ -199,7 +201,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card>
+        <q-card class="col">
           <q-card-section>
             <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
           </q-card-section>
@@ -334,13 +336,23 @@ export default Vue.extend({
   max-width: 100% !important;
   width: 100%;
 }
+.group-header-img {
+  min-width: 300px !important;
+  max-width: 400px !important;
+}
+.group-description {
+  min-width: 300px !important;
+}
+.group-description-detail {
+  flex-grow: 1;
+}
 .group-website {
   text-transform: none;
   margin-left: 4px;
 }
 .group-detail .q-card {
-  width: 100%;
-  max-width: 350px;
+  min-width: 300px !important;
+  max-width: 456px;
 }
 .group-detail .q-card__section {
   padding: 0;
