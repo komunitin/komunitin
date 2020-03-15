@@ -24,4 +24,3 @@ export default Vue.extend({
   name: 'LoginSelect'
 });
 </script>
-<style scope></style>

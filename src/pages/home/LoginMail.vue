@@ -94,5 +94,3 @@ export default Vue.extend({
   }
 });
 </script>
-<style scope>
-</style>
