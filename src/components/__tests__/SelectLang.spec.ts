@@ -10,9 +10,12 @@ import {
   QList
 } from 'quasar';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Koptions = require('src/komunitin.json');
+
 describe('SelectLang', () => {
   let locale: string;
-  let langs: {};
+  // let langs: {};
   // @ts-ignore
   let wrapper: Wrapper<SelectLang>;
 
@@ -34,22 +37,7 @@ describe('SelectLang', () => {
   // Montamos el componente con los props necesarios antes de cada test.
   beforeEach(() => {
     locale = 'en-us';
-    langs = {
-      langs: [
-        {
-          label: 'Es',
-          value: 'es'
-        },
-        {
-          label: 'Ca',
-          value: 'ca'
-        },
-        {
-          label: 'En',
-          value: 'en-us'
-        }
-      ]
-    };
+    // langs = Koptions.langs;
     wrapper = mount(SelectLang, {
       // Avoid error with translations.
       mocks: {
@@ -57,25 +45,21 @@ describe('SelectLang', () => {
         $i18n: {
           locale: locale
         },
-        $Koptions: langs
+        $Koptions: Koptions
       },
       localVue
     });
   });
 
-  it('Check that it emits the selected language', async () => {
-    // wrapper.setData({ langs: langs });
-    // console.debug({ Test: wrapper.html() });
-    // const select = wrapper.find('input');
-    // New lang.
-    const newLang = wrapper.vm.$data.langs[1].value;
-    wrapper.setData({ locale: newLang });
-    // select.setValue(newLang);
-    // console.debug({ Test: wrapper.html() });
+  it('Check that it emits the selected language', () => {
+    const newLang = wrapper.vm.$data.langs[0].value;
     wrapper.vm.$emit('setLocale');
     wrapper.vm.$emit('setLocale', newLang);
-    await wrapper.vm.$nextTick();
     expect(wrapper.emitted().setLocale).toBeTruthy();
-    expect(wrapper.vm.$data.locale).toBe(newLang);
+  });
+
+  it('Check that it emits the "ca" language', () => {
+    wrapper.vm.$emit('setLocale', 'ca');
+    expect(wrapper.emitted().setLocale?.length).toBe(1);
   });
 });
