@@ -60,6 +60,6 @@ describe('SelectLang', () => {
 
   it('Check that it emits the "ca" language', () => {
     wrapper.vm.$emit('setLocale', 'ca');
-    expect(wrapper.emitted().setLocale.length).toBe(1);
+    expect(wrapper.emitted().setLocale?.length).toBe(1);
   });
 });
