@@ -1,13 +1,33 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="home">
+  <q-layout view="hhh lpr fff" class="home column justify-start items-center">
+    <q-header class="bg-transparent">
+      <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          color="white"
+          icon="arrow_back"
+          aria-label="Home"
+          @click="$router.back()"
+          :class="$route.path === '/' ? 'invisible' : ''"
+        />
+      </q-toolbar>
+    </q-header>
     <q-page-container>
+      <div class="text-onoutside q-mt-md q-mb-xl">
+        <h1 class="q-mb-xs q-mt-none text-center">
+          <div id="welcome-to">{{ $t('Welcome to') }}</div>
+          <div id="komunitin">Komunitin</div>
+        </h1>
+        <p id="slogan" class="text-subtitle1">{{ $t('Open System for Exchange Communities') }}</p>
+      </div>
       <router-view />
     </q-page-container>
-
-    <q-footer reveal class="bg-transparent q-my-md">
-        <selectLang @setLocale="setLocale" />
-        <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
-        <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
+    <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
+      <selectLang @setLocale="setLocale" />
+      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
+      <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
     </q-footer>
   </q-layout>
 </template>
@@ -49,52 +69,29 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scope>
+// Set the background image for home page
 .home {
-  background: rgba(221, 75, 57, 0.3) url('~assets/home_background-700.jpg') no-repeat center center fixed;
+  background: $outside url('~assets/home_background-700.jpg') center top no-repeat fixed;
   background-size: cover;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  background-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.5) 0%,
-      rgba(0, 0, 0, 0.5) 100%
-    ),
-    url('~assets/home_background-700.jpg');
-    color: $onprimary;
 }
 
-footer {
-  padding-top: 20px;
-  text-align: center;
+// Adjust the size of 'Welcome to' text so it is full-width.
+#welcome-to {
+  font-weight: 300;
+  font-size: 4.1rem;
+  line-height: 4.1rem;
 }
-footer .q-btn {
-    color: $onprimary-medium;
+// Adjust the size of 'Komunitin' text so it is full-width and bold.
+#komunitin {
+  font-weight: 500;
+  font-size: 4.65rem;
+  line-height: 4.65rem;
+}
+// Adjust the size of slogan text so it is full-width.
+#slogan {
+  font-style: italic;
+  font-size: 1.09rem;
 }
 
-.q-page-container {
-  min-height: 400px;
-}
-.q-tab__label {
-  font-weight: normal;
-}
-.q-field--auto-height.q-field--dense.q-field--labeled
-  .q-field__control-container {
-  padding-top: 0;
-}
 
-#q-app .q-field__native.row.items-center,
-.q-select__dropdown-icon.material-icons.q-icon.notranslate {
-  color: $onprimary;
-}
-.q-item {
-  color: black;
-}
-.q-item--active {
-  color: gray !important;
-}
-.q-tab__content.self-stretch.flex-center.relative-position.q-anchor--skip.non-selectable.column {
-  text-transform: uppercase;
-}
 </style>
