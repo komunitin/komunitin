@@ -1,5 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import ExchangesList from '../ExchangesList.vue';
+import GroupsList from '../GroupsList.vue';
 
 import {
   Quasar,
@@ -19,10 +19,10 @@ import {
   QAvatar
 } from 'quasar';
 
-describe('ExchangesList.vue', () => {
+describe('GroupsList.vue', () => {
   // let isLoading: boolean;
   // @ts-ignore
-  let wrapper: Wrapper<ExchangesList>;
+  let wrapper: Wrapper<GroupsList>;
   // let wrapper;
   let errorsList: [Error, string];
   let notifyList: [{}];
@@ -76,7 +76,7 @@ describe('ExchangesList.vue', () => {
     notifyList = [{}];
 
     require('../../../services/mirage.js');
-    wrapper = shallowMount(ExchangesList, {
+    wrapper = shallowMount(GroupsList, {
       // Avoid error with translations.
       mocks: {
         $t: () => 'Mock text',
@@ -103,12 +103,12 @@ describe('ExchangesList.vue', () => {
 
   it('Check isLoading false', async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
-    await wrapper.vm.getExchanges(1, 10);
+    await wrapper.vm.getGroups(1, 10);
     expect(wrapper.vm.$data.isLoading).toBe(false);
   });
 
   it('Check data', async () => {
-    await wrapper.vm.getExchanges(1, 10);
-    expect(wrapper.vm.$data.exchanges).toHaveLength(10);
+    await wrapper.vm.getGroups(1, 10);
+    expect(wrapper.vm.$data.groups).toHaveLength(10);
   });
 });

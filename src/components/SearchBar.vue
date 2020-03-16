@@ -50,7 +50,7 @@ export default Vue.extend({
     searchBox() {
       if (this.search !== '') {
         // Launch search.
-        // this.getExchangesListFilter(this.search);
+        // this.getGroupsListFilter(this.search);
         this.$emit('newSearch', this.search);
       } else {
         this.viewSearch = !this.viewSearch;

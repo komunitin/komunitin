@@ -11,7 +11,7 @@ import Vue from 'vue';
  * Layout base con menú lateral.
  */
 export default Vue.extend({
-  name: 'ExchangesLayout',
+  name: 'GroupsLayout',
   data() {
     return {
       leftDrawerOpen: false
