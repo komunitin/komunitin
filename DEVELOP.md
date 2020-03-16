@@ -63,3 +63,13 @@ Example:
 ```bash
 quasar dev --env.USE_MIRAGE 1000
 ```
+
+### Test local with docker
+
+    docker build --tag komunitin-local .
+
+Launch application in port 9999:
+
+    docker run -p 9999:80 --name komunitinApp komunitin-local
+
+Open browser in <http://localhost:9999>
