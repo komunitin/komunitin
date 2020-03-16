@@ -20,14 +20,20 @@
           <div id="welcome-to">{{ $t('Welcome to') }}</div>
           <div id="komunitin">Komunitin</div>
         </h1>
-        <p id="slogan" class="text-subtitle1">{{ $t('Open System for Exchange Communities') }}</p>
+        <p id="slogan" class="text-subtitle1">{{ $t('Open System for Group Communities') }}</p>
       </div>
       <router-view />
     </q-page-container>
     <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
       <selectLang @setLocale="setLocale" />
-      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
-      <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
+      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help" />
+      <q-btn
+        flat
+        type="a"
+        href="https://github.com/komunitin/komunitin"
+        target="__blank"
+        label="Contribute"
+      />
     </q-footer>
   </q-layout>
 </template>
@@ -71,7 +77,8 @@ export default Vue.extend({
 <style lang="scss" scope>
 // Set the background image for home page
 .home {
-  background: $outside url('~assets/home_background-700.jpg') center top no-repeat fixed;
+  background: $outside url('~assets/home_background-700.jpg') center top
+    no-repeat fixed;
   background-size: cover;
 }
 
@@ -92,6 +99,4 @@ export default Vue.extend({
   font-style: italic;
   font-size: 1.09rem;
 }
-
-
 </style>
