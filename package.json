@@ -28,7 +28,7 @@
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
-    "jest": "^25.1.0",
+    "jest": "^24.9.0",
     "leaflet": "^1.6.0",
     "quasar": "^1.9.10",
     "typedoc": "^0.16.11",
@@ -53,7 +53,8 @@
     "lorem-ipsum": "^2.0.3",
     "miragejs": "^0.1.35",
     "ts-jest": "^25.2.1",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "vue-jest": "^3.0.5"
   },
   "engines": {
     "node": ">= 10.18.1",
