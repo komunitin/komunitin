@@ -2,21 +2,25 @@
   <q-layout class="list-groups">
     <q-page-container class="container-kn">
       <q-header reveal elevated>
-        <search-bar @newSearch="getExchangesListFilter" title="Groups near you" :backButton="true" />
+        <search-bar @newSearch="getGroupsListFilter" title="Groups near you" :backButton="true" />
       </q-header>
       <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
         <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
-        <q-card v-for="exchange of exchanges" :key="exchange.id" class="card-kn col">
+        <q-card v-for="group of groups" :key="group.id" class="card-kn col">
           <q-item>
             <q-item-section avatar>
               <q-avatar>
-                <img :src="exchange.data.attributes.image" />
+                <img :src="group.data.attributes.image" />
               </q-avatar>
             </q-item-section>
 
             <q-item-section>
-              <q-item-label>{{ exchange.data.attributes.name }}</q-item-label>
-              <q-item-label caption>{{ exchange.data.attributes.code }}</q-item-label>
+              <q-item-label>{{ group.data.attributes.name }}</q-item-label>
+              <q-item-label caption>
+                {{
+                group.data.attributes.code
+                }}
+              </q-item-label>
             </q-item-section>
             <q-btn flat dense round icon="share" aria-label="Share" />
           </q-item>
@@ -24,14 +28,18 @@
           <!-- <img src="~assets/nomapa.png" /> -->
           <q-card-section class="simple-map">
             <simple-map
-              :center="exchange.data.attributes.location.coordinates"
-              :markerLatLng="exchange.data.attributes.location.coordinates"
+              :center="group.data.attributes.location.coordinates"
+              :markerLatLng="group.data.attributes.location.coordinates"
             />
           </q-card-section>
 
-          <q-card-section>{{ exchange.data.attributes.description | subStr }}</q-card-section>
+          <q-card-section>
+            {{
+            group.data.attributes.description | subStr
+            }}
+          </q-card-section>
           <q-card-actions>
-            <q-btn :to="`exchanges/${exchange.id}`" flat color="primary">Explora</q-btn>
+            <q-btn :to="`groups/${group.id}`" flat color="primary">Explora</q-btn>
             <q-btn flat color="primary">Registra't</q-btn>
           </q-card-actions>
         </q-card>
@@ -57,10 +65,10 @@ import SearchBar from '../../components/SearchBar';
  * Groups's list.
  */
 export default Vue.extend({
-  name: 'ExchangeListPage',
+  name: 'GroupListPage',
   data() {
     return {
-      exchanges: [] as GroupsListModel[],
+      groups: [] as GroupsListModel[],
       isLoading: false as boolean,
       haveUserLocation: false as boolean,
       lng: null as number | null,
@@ -110,7 +118,7 @@ export default Vue.extend({
       this.lat = position.coords.latitude;
 
       console.debug(`longitude: ${this.lng} | latitude: ${this.lat}`);
-      this.getExchanges(this.pag, this.perPag, this.lng, this.lat);
+      this.getGroups(this.pag, this.perPag, this.lng, this.lat);
     },
     handleLocationError(error: PositionError) {
       switch (error.code) {
@@ -137,7 +145,7 @@ export default Vue.extend({
           // ...user said no ☹️
           console.debug('user said no ☹️');
       }
-      this.getExchanges(this.pag, this.perPag);
+      this.getGroups(this.pag, this.perPag);
     },
     getUserLocation() {
       navigator.geolocation.getCurrentPosition(
@@ -146,36 +154,31 @@ export default Vue.extend({
         { maximumAge: 1500000, timeout: 100000 }
       );
     },
-    async getExchanges(
-      pag: number,
-      perPag: number,
-      lat?: number,
-      lng?: number
-    ) {
+    async getGroups(pag: number, perPag: number, lat?: number, lng?: number) {
       await api
-        .getExchangesList(pag, perPag, lat, lng)
+        .getGroupsList(pag, perPag, lat, lng)
         .then(response => {
           this.isLoading = false;
-          this.exchanges = response.data;
+          this.groups = response.data;
         })
         .catch(e => {
           // @ts-ignore
-          this.$errorsManagement.newError(e, 'ExchangesList');
+          this.$errorsManagement.newError(e, 'GroupsList');
           this.isLoading = false;
           this.displayErrors();
         });
     },
-    getExchangesListFilter(filter: string) {
+    getGroupsListFilter(filter: string) {
       this.isLoading = true;
       api
-        .getExchangesListFilter(filter)
+        .getGroupsListFilter(filter)
         .then(response => {
           this.isLoading = false;
-          this.exchanges = response.data;
+          this.groups = response.data;
         })
         .catch(e => {
           // @ts-ignore
-          this.$errorsManagement.newError(e, 'ExchangesList');
+          this.$errorsManagement.newError(e, 'GroupsList');
           this.displayErrors();
           this.isLoading = false;
         });

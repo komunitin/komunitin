@@ -1,5 +1,5 @@
 import { createLocalVue, shallowMount, Wrapper } from '@vue/test-utils';
-import Exchange from '../Exchange.vue';
+import Group from '../Group.vue';
 
 import {
   Quasar,
@@ -18,12 +18,12 @@ import {
   QSeparator
 } from 'quasar';
 
-describe('Exchange.vue', () => {
+describe('Group.vue', () => {
   let id: string;
   // let group: object;
   // let isLoading: boolean;
   // @ts-ignore
-  let wrapper: Wrapper<Exchange>;
+  let wrapper: Wrapper<Group>;
   let errorsList: [Error, string];
   let notifyList: [{}];
 
@@ -56,7 +56,7 @@ describe('Exchange.vue', () => {
 
     require('../../../services/mirage.js');
 
-    wrapper = shallowMount(Exchange, {
+    wrapper = shallowMount(Group, {
       propsData: {
         id: id
       },
@@ -88,7 +88,7 @@ describe('Exchange.vue', () => {
   it('check receive data', async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
     // @ts-ignore
-    await wrapper.vm.collectExchange('1');
+    await wrapper.vm.collectGroup('1');
     expect(wrapper.vm.$data.isLoading).toBe(false);
     expect(wrapper.vm.$data.group).toBeTruthy();
   });

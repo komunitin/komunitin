@@ -1,5 +1,5 @@
 import { Server } from 'miragejs';
-import { mockGroup, mockGroupsList } from '../pages/exchanges/models/mockData';
+import { mockGroup, mockGroupsList } from '../pages/groups/models/mockData';
 
 console.debug('Mirage activated');
 
@@ -8,56 +8,58 @@ const server = new Server({
   timing: 500,
   logging: true,
   // urlPrefix: 'https://integralces.net/api',
-  // namespace: 'exchanges',
+  // namespace: 'groups',
 
   routes() {
     if (process.env.USE_MIRAGE) {
       this.timing = parseInt(process.env.USE_MIRAGE);
     }
     /**
-     * List of exchanges.
+     * List of groups.
      */
     this.get(
-      'https://integralces.net/api/exchanges/:pag/:perPag',
+      'https://integralces.net/api/groups/:pag/:perPag',
       (schema, request) => {
-        let pag = request.params.pag;
-        let perPag = request.params.perPag;
-        // console.debug({ ListGroupsGet: { pag: pag, perPag: perPag } });
+        const pag = request.params.pag;
+        const perPag = request.params.perPag;
+        console.debug({ ListGroupsGet: { pag: pag, perPag: perPag } });
         return mockGroupsList();
       }
     );
 
     /**
-     * List of exchanges width location.
+     * List of groups width location.
      */
     this.get(
-      'https://integralces.net/api/exchanges/:pag/:perPag/:lat/:lng',
+      'https://integralces.net/api/groups/:pag/:perPag/:lat/:lng',
       (schema, request) => {
-        let lat = request.params.lat;
-        let lng = request.params.lng;
-        let pag = request.params.pag;
-        let perPag = request.params.perPag;
+        const lat = request.params.lat;
+        const lng = request.params.lng;
+        const pag = request.params.pag;
+        const perPag = request.params.perPag;
+
+        console.debug({ Mirage: [pag, perPag, lat, lng] });
 
         return mockGroupsList();
       }
     );
 
     /**
-     * List of exchanges width filter.
+     * List of groups width filter.
      */
     this.get(
-      'https://integralces.net/api/exchanges/filter/:search',
+      'https://integralces.net/api/groups/filter/:search',
       (schema, request) => {
-        let search = request.params.search;
-        // console.debug({ Search: search });
+        const search = request.params.search;
+        console.debug({ Search: search });
         return mockGroupsList();
       }
     );
 
     /**
-     * Exchange.
+     * Group.
      */
-    this.get('https://integralces.net/api/exchange/:id', (schema, request) => {
+    this.get('https://integralces.net/api/group/:id', (schema, request) => {
       let id = request.params.id;
       id = 0;
       return mockGroup[id];
