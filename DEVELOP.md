@@ -73,3 +73,4 @@ Launch application in port 9999:
     docker run -p 9999:80 --name komunitinApp komunitin-local
 
 Open browser in <http://localhost:9999>
+
