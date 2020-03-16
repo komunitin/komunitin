@@ -74,7 +74,7 @@ export function mockGroupsList(): GroupsListModel[] {
             Math.round(Math.random() * 4) + 1
           ),
           image: testImages[Math.round(Math.random() * testImages.length)],
-          website: 'https://easterislandexchange.org',
+          website: 'https://easterislandgroup.org',
           access: 'public',
           location: {
             ...testLocations[Math.round(Math.random() * testLocations.length)]
@@ -91,10 +91,10 @@ export const mockGroup: GroupModel[] = [
   {
     data: {
       id: '84278843-50d5-4358-bbf7-a833ea5cde07',
-      type: 'exchanges',
+      type: 'groups',
       attributes: {
         code: 'EITE',
-        name: 'Easter Island Talent Exchange',
+        name: 'Easter Island Talent Group',
         description: `
           <p>Here at <strong>Easter Island</strong> it makes a lot of sense to
           have a local currency because Mauris et accumsan urna. Phasellus
@@ -108,7 +108,7 @@ export const mockGroup: GroupModel[] = [
           `,
         image:
           'https://www.deluxe.com/sites/www.deluxe.com/files/logo_design/logo/mystic-mountain-300x300.png',
-        website: 'https://easterislandexchange.org',
+        website: 'https://easterislandgroup.org',
         mail: 'mailadmingroup@dom.com',
         access: 'public',
         location: {
