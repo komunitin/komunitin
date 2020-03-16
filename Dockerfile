@@ -9,7 +9,7 @@ FROM node:alpine as komunitin-app-develop
 WORKDIR /app
 COPY package*.json ./
 # Install quasar framework
-RUN yarn global add @quasar/cli
+# RUN yarn global add @quasar/cli
 COPY . .
 
 
@@ -17,7 +17,9 @@ COPY . .
 
 # Use the image created in develop stage.
 FROM komunitin-app-develop as komunitin-app-build
-RUN yarn
+RUN npm install -g @quasar/cli
+RUN npm install --no-optional
+
 RUN quasar build -m pwa
 
 # Production stage
