@@ -59,3 +59,9 @@ Example:
 ```bash
 quasar dev --env.USE_MIRAGE 1000
 ```
+
+### Launch local test with docker
+
+```bash
+docker build . --file Dockerfile --tag komunitin-app
+```
