@@ -5,9 +5,10 @@ const routes: RouteConfig[] = [
     path: '/',
     component: () => import('pages/home/HomeLayout.vue'),
     children: [
-      { 
+      {
         path: '',
-        component: () => import('pages/home/LoginPage.vue') },
+        component: () => import('pages/home/LoginPage.vue')
+      },
       {
         path: '/login-select/',
         props: false,
@@ -19,23 +20,23 @@ const routes: RouteConfig[] = [
         props: false,
         name: 'LoginMail',
         component: () => import('pages/home/LoginMail.vue')
-      },
+      }
     ]
   },
   {
-    path: '/exchanges/',
-    component: () => import('pages/exchanges/ExchangesLayout.vue'),
+    path: '/groups/',
+    component: () => import('pages/groups/GroupsLayout.vue'),
     children: [
       {
-        path: '/exchanges/',
-        name: 'ExchangesListPage',
-        component: () => import('pages/exchanges/ExchangesList.vue')
+        path: '/groups/',
+        name: 'GroupsListPage',
+        component: () => import('pages/groups/GroupsList.vue')
       },
       {
-        path: '/exchanges/:id',
+        path: '/groups/:id',
         props: true,
-        name: 'ExchangePage',
-        component: () => import('pages/exchanges/Exchange.vue')
+        name: 'GroupPage',
+        component: () => import('pages/groups/Group.vue')
       }
     ]
   }
