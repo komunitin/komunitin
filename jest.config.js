@@ -14,12 +14,10 @@ module.exports = {
   collectCoverage: false,
   coverageDirectory: '<rootDir>/test/jest/coverage',
   collectCoverageFrom: [
-    '<rootDir>/src/components/**/*.vue',
-    '<rootDir>/src/pages/**/*.vue',
-    '<rootDir>/src/pages/*/*/*.vue',
-    '<rootDir>/src/services/**/*.ts',
-    '<rootDir>/src/store/**/*.ts',
-    '<rootDir>/src/store/*/*/*.ts'
+    '<rootDir>/src/components/**/*.{ts,vue}',
+    '<rootDir>/src/pages/*/*/*.{ts,vue}',
+    '<rootDir>/src/services/**/*.{ts,vue}',
+    '<rootDir>/src/store/*/*/*.{ts,vue}'
   ],
   coverageThreshold: {
     global: {
