@@ -240,7 +240,6 @@ export default Vue.extend({
   name: 'ExchangePage',
   data() {
     return {
-      // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       group: {} as GroupModel,
       isLoading: true as boolean,
       contactsView: false,
@@ -286,9 +285,9 @@ export default Vue.extend({
     },
     displayErrors(): void {
       // @ts-ignore
-      let errors = this.$errorsManagement.getErrors();
+      const errors = this.$errorsManagement.getErrors();
       if (errors) {
-        for (var error in errors) {
+        for (const error in errors) {
           this.$q.notify({
             color: 'negative',
             position: 'top',

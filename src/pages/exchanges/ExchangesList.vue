@@ -93,9 +93,9 @@ export default Vue.extend({
   methods: {
     displayErrors(): void {
       // @ts-ignore
-      let errors = this.$errorsManagement.getErrors();
+      const errors = this.$errorsManagement.getErrors();
       if (errors) {
-        for (var error in errors) {
+        for (const error in errors) {
           this.$q.notify({
             color: 'negative',
             position: 'top',
