@@ -22,7 +22,6 @@ describe('Group.vue', () => {
   let id: string;
   // let group: object;
   // let isLoading: boolean;
-  // @ts-ignore
   let wrapper: Wrapper<Group>;
   let errorsList: [Error, string];
   let notifyList: [{}];
@@ -87,8 +86,8 @@ describe('Group.vue', () => {
 
   it('check receive data', async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
-    // @ts-ignore
-    await wrapper.vm.collectGroup('1');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (wrapper.vm as any).collectGroup('1');
     expect(wrapper.vm.$data.isLoading).toBe(false);
     expect(wrapper.vm.$data.group).toBeTruthy();
   });

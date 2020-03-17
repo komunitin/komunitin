@@ -1,5 +1,6 @@
 import Vue from 'vue';
-import Quasar from 'quasar';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Quasar, QVueGlobals } from 'quasar';
 import VueI18n from 'vue-i18n';
 import messages from 'src/i18n';
 
@@ -11,11 +12,10 @@ Vue.use(VueI18n);
 let lang = 'en-us' as string;
 
 // If there is language in localStorage it is used.
-if (localStorage.getItem('lang')) {
-  // @ts-ignore
-  lang = localStorage.getItem('lang');
+const langLocalStorage = localStorage.getItem('lang');
+if (langLocalStorage) {
+  lang = langLocalStorage;
 } else {
-  // @ts-ignore
   switch (Quasar.lang.getLocale()) {
     case 'ca': {
       lang = 'ca';

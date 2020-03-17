@@ -5,7 +5,6 @@ import { Quasar } from 'quasar';
 describe('SimpleMap', () => {
   let center: [number, number];
   let markerLatLng: [number, number];
-  // @ts-ignore
   let wrapper: Wrapper<SimpleMap>;
 
   // We use createLocalVue in order not to pollute the global scope.

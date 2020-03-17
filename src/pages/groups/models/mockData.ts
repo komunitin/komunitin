@@ -1,4 +1,4 @@
-import { GroupsListModel, GroupModel } from './model';
+import { GroupsListModel, GroupModel, GroupsListModelLocation } from './model';
 import { LoremIpsum, ILoremIpsumParams } from 'lorem-ipsum';
 
 const loremOptions: ILoremIpsumParams = {
@@ -32,7 +32,7 @@ const testImages = [
 ];
 
 // Locations.
-const testLocations = [
+const testLocations: GroupsListModelLocation[] = [
   {
     name: 'Cremallera de Montserrat',
     type: 'Point',
@@ -61,9 +61,9 @@ const testLocations = [
 ];
 
 export function mockGroupsList(): GroupsListModel[] {
-  const list = [];
+  const list = [] as GroupsListModel[];
 
-  for (let index = 0; index < 10; index++) {
+  for (let index = 1; index < 11; index++) {
     list.push({
       id: index,
       data: {
@@ -83,7 +83,6 @@ export function mockGroupsList(): GroupsListModel[] {
       }
     });
   }
-  // @ts-ignore
   return list;
 }
 

@@ -209,17 +209,15 @@
 <script lang="ts">
 import Vue from 'vue';
 import api from '../../services/ICESApi';
-// @ts-ignore
-import SimpleMap from '../../components/SimpleMap';
-// @ts-ignore
-import ContactCard from '../../components/ContactCard';
+import SimpleMap from '../../components/SimpleMap.vue';
+import ContactCard from '../../components/ContactCard.vue';
 import { GroupModel } from './models/model';
+// This module has no declarations.
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
-// @ts-ignore
-import NavigatorShare from '../../components/NavigatorShare';
-// @ts-ignore
-import SocialButtons from '../../components/SocialButtons';
+import NavigatorShare from '../../components/NavigatorShare.vue';
+import SocialButtons from '../../components/SocialButtons.vue';
 
 /**
  * GroupPage.
@@ -266,13 +264,11 @@ export default Vue.extend({
         })
         .catch(e => {
           this.isLoading = false;
-          // @ts-ignore
           this.$errorsManagement.newError(e, 'GroupsList');
           this.displayErrors();
         });
     },
     displayErrors(): void {
-      // @ts-ignore
       const errors = this.$errorsManagement.getErrors();
       if (errors) {
         for (const error in errors) {

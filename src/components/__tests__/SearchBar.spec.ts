@@ -5,7 +5,6 @@ import { Quasar, QBtn, QToolbar, QToolbarTitle, QInput } from 'quasar';
 describe('SearchBox', () => {
   let title: string;
   let backButton: boolean;
-  // @ts-ignore
   let wrapper: Wrapper<SearchBar>;
 
   // We use createLocalVue in order not to pollute the global scope.
