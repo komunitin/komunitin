@@ -10,7 +10,11 @@
     "baseUrl": ".",
     "types": ["quasar", "node", "jest"],
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "components/": ["src/components/"]
+    }
   },
   "exclude": ["node_modules"]
 }

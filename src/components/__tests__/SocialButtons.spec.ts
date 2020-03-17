@@ -5,7 +5,6 @@ import { Quasar } from 'quasar';
 describe('SocialButtons', () => {
   let url: string;
   let title: string;
-  // @ts-ignore
   let wrapper: Wrapper<SocialButtons>;
 
   // We use createLocalVue in order not to pollute the global scope.

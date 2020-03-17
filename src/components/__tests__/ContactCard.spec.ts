@@ -24,7 +24,6 @@ describe('ContactCard', () => {
       };
     };
   }[];
-  // @ts-ignore
   let wrapper: Wrapper<ContactCard>;
 
   // We use createLocalVue in order not to pollute the global scope.

@@ -1,4 +1,12 @@
 /**
+ * Groups Model Location.
+ */
+export interface GroupsListModelLocation {
+  name: string;
+  type: string;
+  coordinates: [number, number];
+}
+/**
  * Groups Model.
  */
 export interface GroupsListModel {
@@ -11,11 +19,7 @@ export interface GroupsListModel {
       image: string;
       website: string;
       access: string;
-      location: {
-        name: string;
-        type: string;
-        coordinates: [];
-      };
+      location: GroupsListModelLocation;
     };
   };
 }

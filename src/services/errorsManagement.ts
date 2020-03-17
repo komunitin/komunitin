@@ -3,6 +3,7 @@ class ErrorsManagement {
 
   public newError(err: Error, info: string, vm?: Vue): void {
     let lastErrors = [];
+    const jLastError = localStorage.getItem('lastErrors') as string | null;
     console.error({
       ErrorManagement: {
         err: err,
@@ -10,18 +11,18 @@ class ErrorsManagement {
         info: info
       }
     });
-    if (localStorage.getItem('lastErrors')) {
-      // @ts-ignore
-      lastErrors = JSON.parse(localStorage.getItem('lastErrors'));
+
+    if (jLastError) {
+      lastErrors = JSON.parse(jLastError);
     }
     lastErrors.push(err.message);
     localStorage.setItem('lastErrors', JSON.stringify(lastErrors));
   }
 
   public getErrors(): string[] | undefined {
-    if (localStorage.getItem('lastErrors')) {
-      // @ts-ignore
-      const le = JSON.parse(localStorage.getItem('lastErrors'));
+    const jLastError = localStorage.getItem('lastErrors') as string | null;
+    if (jLastError) {
+      const le = JSON.parse(jLastError);
       console.error({ ErrorManagement: le });
       localStorage.removeItem('lastErrors');
       // alert(le);
