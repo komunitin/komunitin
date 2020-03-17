@@ -15,22 +15,22 @@ const apliClient = axios.create({
 });
 
 export default {
-  getExchangesListFilter(filter: string) {
-    return apliClient.get('/exchanges/filter/' + filter);
+  getGroupsListFilter(filter: string) {
+    return apliClient.get('/groups/filter/' + filter);
   },
-  getExchangesList(
+  getGroupsList(
     pag: number,
     perPag: number,
     lat?: number | null,
     lng?: number | null
   ) {
-    let url = 'exchanges/' + pag + '/' + perPag;
+    let url = 'groups/' + pag + '/' + perPag;
     if (lat) {
       url = url + '/' + lat + '/' + lng;
     }
     return apliClient.get(url);
   },
-  getExchange(id: string) {
-    return apliClient.get('/exchange/' + id);
+  getGroup(id: string) {
+    return apliClient.get('/group/' + id);
   }
 };

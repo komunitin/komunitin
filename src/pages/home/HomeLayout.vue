@@ -26,8 +26,14 @@
     </q-page-container>
     <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
       <selectLang @setLocale="setLocale" />
-      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help"/>
-      <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" label="Contribute"/>
+      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help" />
+      <q-btn
+        flat
+        type="a"
+        href="https://github.com/komunitin/komunitin"
+        target="__blank"
+        label="Contribute"
+      />
     </q-footer>
   </q-layout>
 </template>
@@ -73,7 +79,8 @@ export default Vue.extend({
 <style lang="scss" scope>
 // Set the background image for home page
 .home {
-  background: $outside url('~assets/home_background-700.jpg') center top no-repeat fixed;
+  background: $outside url('~assets/home_background-700.jpg') center top
+    no-repeat fixed;
   background-size: cover;
 }
 // Set teh width of "Welcom to..." div so text can fit in it using the 'vue-resize-text' module.
@@ -94,6 +101,4 @@ export default Vue.extend({
 #slogan {
   font-style: italic;
 }
-
-
 </style>
