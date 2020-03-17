@@ -16,7 +16,6 @@ const Koptions = require('src/komunitin.json');
 describe('SelectLang', () => {
   let locale: string;
   // let langs: {};
-  // @ts-ignore
   let wrapper: Wrapper<SelectLang>;
 
   // We use createLocalVue in order not to pollute the global scope.

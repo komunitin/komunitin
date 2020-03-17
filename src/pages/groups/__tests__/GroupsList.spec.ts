@@ -1,4 +1,14 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    interface Global {
+      navigator: {
+        geolocation: {};
+      };
+    }
+  }
+}
+import { createLocalVue, shallowMount, Wrapper } from '@vue/test-utils';
 import GroupsList from '../GroupsList.vue';
 
 import {
@@ -21,7 +31,6 @@ import {
 
 describe('GroupsList.vue', () => {
   // let isLoading: boolean;
-  // @ts-ignore
   let wrapper: Wrapper<GroupsList>;
   // let wrapper;
   let errorsList: [Error, string];
@@ -45,7 +54,6 @@ describe('GroupsList.vue', () => {
       )
     )
   };
-  // @ts-ignore
   global.navigator.geolocation = mockGeolocation;
 
   // We use createLocalVue in order not to pollute the global scope.
@@ -103,12 +111,14 @@ describe('GroupsList.vue', () => {
 
   it('Check isLoading false', async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
-    await wrapper.vm.getGroups(1, 10);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (wrapper.vm as any).getGroups(1, 10);
     expect(wrapper.vm.$data.isLoading).toBe(false);
   });
 
   it('Check data', async () => {
-    await wrapper.vm.getGroups(1, 10);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (wrapper.vm as any).getGroups(1, 10);
     expect(wrapper.vm.$data.groups).toHaveLength(10);
   });
 });

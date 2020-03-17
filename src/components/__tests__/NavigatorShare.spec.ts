@@ -6,7 +6,6 @@ describe('NavigatorShare', () => {
   let url: string;
   let title: string;
   let onError: Function;
-  // @ts-ignore
   let wrapper: Wrapper<NavigatorShare>;
 
   // We use createLocalVue in order not to pollute the global scope.

@@ -53,13 +53,13 @@ import Vue from 'vue';
 import api from '../../services/ICESApi';
 import { GroupsListModel } from './models/model';
 
+// This module has no declarations.
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import VueElementLoading from 'vue-element-loading';
 
-// @ts-ignore
-import SimpleMap from '../../components/SimpleMap';
-// @ts-ignore
-import SearchBar from '../../components/SearchBar';
+import SimpleMap from '../../components/SimpleMap.vue';
+import SearchBar from '../../components/SearchBar.vue';
 
 /**
  * Groups's list.
@@ -100,7 +100,6 @@ export default Vue.extend({
   },
   methods: {
     displayErrors(): void {
-      // @ts-ignore
       const errors = this.$errorsManagement.getErrors();
       if (errors) {
         for (const error in errors) {
@@ -162,7 +161,6 @@ export default Vue.extend({
           this.groups = response.data;
         })
         .catch(e => {
-          // @ts-ignore
           this.$errorsManagement.newError(e, 'GroupsList');
           this.isLoading = false;
           this.displayErrors();
@@ -177,7 +175,6 @@ export default Vue.extend({
           this.groups = response.data;
         })
         .catch(e => {
-          // @ts-ignore
           this.$errorsManagement.newError(e, 'GroupsList');
           this.displayErrors();
           this.isLoading = false;
