@@ -1,12 +1,16 @@
 ## Developer readme
 
 Follow these steps to start hacking with the komunitin app.
+
 ### Download
+
 Get the code
+
 ```bash
 git clone https://github.com/komunitin/komunitin.git
 cd komunitin
 ```
+
 ### Install
 
 Install the [Quasar framework](https://quasar.dev/), a develompent framework built over [Vue.js](https://vuejs.org/).
@@ -44,7 +48,7 @@ When developing new Vue components or pages, always create their unit test file 
 npm run dev:mirage
 ```
 
-or 
+or
 
 ```bash
 quasar dev --env.USE_MIRAGE [TIMING]
@@ -59,3 +63,14 @@ Example:
 ```bash
 quasar dev --env.USE_MIRAGE 1000
 ```
+
+### Test local with docker
+
+    docker build --tag komunitin-local .
+
+Launch application in port 9999:
+
+    docker run -p 9999:80 --name komunitinApp komunitin-local
+
+Open browser in <http://localhost:9999>
+

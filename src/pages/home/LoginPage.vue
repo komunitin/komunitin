@@ -6,7 +6,7 @@
       text-color="onprimary"
       :label="$t('Find your local group')"
       icon="explore"
-      :to="{ name: 'ExchangesListPage' }"
+      :to="{ name: 'GroupsListPage' }"
       class="full-width"
       id="explore"
     />
@@ -36,7 +36,6 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scope>
-
 // Wider non-standard button.
 #explore {
   height: 48px;

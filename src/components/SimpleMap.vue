@@ -16,7 +16,7 @@ import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-var LeafIcon = L.Icon.extend({
+const LeafIcon = L.Icon.extend({
   options: {
     iconSize: [50, 50],
     iconAnchor: [25, 40],

@@ -4,11 +4,7 @@
       <q-header reveal elevated>
         <q-toolbar>
           <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
-          <q-toolbar-title v-if="group.data">
-            {{
-            group.data.attributes.name
-            }}
-          </q-toolbar-title>
+          <q-toolbar-title v-if="group.data">{{ group.data.attributes.name }}</q-toolbar-title>
           <q-toolbar-title v-else>{{ $t('Groups near you') }}</q-toolbar-title>
 
           <q-btn v-if="group.data" right flat icon="message" @click="contactsView = true" />
@@ -76,9 +72,7 @@
             <q-card-section class="col-4 group-count-box">
               <h2 class="group-count">{{ group.data.relatinships.offers.meta.count }}</h2>
               <q-btn
-                :to="
-                  `exchanges/${group.data.relatinships.offers.links.related}`
-                "
+                :to="`groups/${group.data.relatinships.offers.links.related}`"
                 flat
                 color="primary"
               >Explora</q-btn>
@@ -111,7 +105,7 @@
             <q-card-section class="col-4 group-count-box">
               <h2 class="group-count">{{ group.data.relatinships.needs.meta.count }}</h2>
               <q-btn
-                :to="`exchanges/${group.data.relatinships.needs.links.related}`"
+                :to="`groups/${group.data.relatinships.needs.links.related}`"
                 flat
                 color="primary"
               >Explora</q-btn>
@@ -144,9 +138,7 @@
             <q-card-section class="col-4 group-count-box">
               <h2 class="group-count">{{ group.data.relatinships.members.meta.count }}</h2>
               <q-btn
-                :to="
-                  `exchanges/${group.data.relatinships.members.links.related}`
-                "
+                :to="`groups/${group.data.relatinships.members.links.related}`"
                 flat
                 color="primary"
               >Explora</q-btn>
@@ -181,7 +173,7 @@
               <p>Vent</p>
 
               <q-btn
-                :to="`exchanges/${group.data.relatinships.needs.links.related}`"
+                :to="`groups/${group.data.relatinships.needs.links.related}`"
                 flat
                 color="primary"
               >Explora</q-btn>
@@ -205,11 +197,7 @@
           <q-card-section>
             <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
           </q-card-section>
-          <q-card-section class="group-footer-card">
-            {{
-            group.data.attributes.location.name
-            }}
-          </q-card-section>
+          <q-card-section class="group-footer-card">{{ group.data.attributes.location.name }}</q-card-section>
         </q-card>
 
         <contact-card :waysContact="group.included" />
@@ -234,13 +222,12 @@ import NavigatorShare from '../../components/NavigatorShare';
 import SocialButtons from '../../components/SocialButtons';
 
 /**
- * ExchangePage.
+ * GroupPage.
  */
 export default Vue.extend({
-  name: 'ExchangePage',
+  name: 'GroupPage',
   data() {
     return {
-      // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
       group: {} as GroupModel,
       isLoading: true as boolean,
       contactsView: false,
@@ -266,13 +253,13 @@ export default Vue.extend({
     this.isLoading = true;
   },
   mounted: function(): void {
-    this.collectExchange(this.id);
+    this.collectGroup(this.id);
     this.displayErrors();
   },
   methods: {
-    async collectExchange(id: string) {
+    async collectGroup(id: string) {
       await api
-        .getExchange(id)
+        .getGroup(id)
         .then(response => {
           this.group = response.data;
           this.isLoading = false;
@@ -280,15 +267,15 @@ export default Vue.extend({
         .catch(e => {
           this.isLoading = false;
           // @ts-ignore
-          this.$errorsManagement.newError(e, 'ExchangesList');
+          this.$errorsManagement.newError(e, 'GroupsList');
           this.displayErrors();
         });
     },
     displayErrors(): void {
       // @ts-ignore
-      let errors = this.$errorsManagement.getErrors();
+      const errors = this.$errorsManagement.getErrors();
       if (errors) {
-        for (var error in errors) {
+        for (const error in errors) {
           this.$q.notify({
             color: 'negative',
             position: 'top',
