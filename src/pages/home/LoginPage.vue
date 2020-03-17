@@ -40,6 +40,5 @@ export default Vue.extend({
 #explore {
   height: 48px;
 }
+
 </style>
-
-
