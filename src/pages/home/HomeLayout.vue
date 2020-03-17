@@ -15,12 +15,12 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <div class="text-onoutside q-mt-md q-mb-xl">
+      <div id="title" class="text-onoutside q-mt-md q-mb-xl">
         <h1 class="q-mb-xs q-mt-none text-center">
-          <div id="welcome-to">{{ $t('Welcome to') }}</div>
-          <div id="komunitin">Komunitin</div>
+          <div id="welcome-to"><fit-text>{{ $t('Welcome to') }}</fit-text></div>
+          <div id="komunitin"><fit-text>Komunitin</fit-text></div>
         </h1>
-        <p id="slogan" class="text-subtitle1">{{ $t('Open System for Group Communities') }}</p>
+        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('Open System for Exchange Communities') }}</fit-text></p>
       </div>
       <router-view />
     </q-page-container>
@@ -40,6 +40,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import FitText from 'components/FitText.vue';
 import selectLang from 'components/SelectLang.vue';
 
 /**
@@ -48,7 +49,8 @@ import selectLang from 'components/SelectLang.vue';
 export default Vue.extend({
   name: 'HomeLayout',
   components: {
-    selectLang
+    selectLang,
+    FitText
   },
   data() {
     return {
@@ -81,22 +83,22 @@ export default Vue.extend({
     no-repeat fixed;
   background-size: cover;
 }
-
+// Set teh width of "Welcom to..." div so text can fit in it using the 'vue-resize-text' module.
+#title {
+  width: 328px;
+}
 // Adjust the size of 'Welcome to' text so it is full-width.
 #welcome-to {
   font-weight: 300;
-  font-size: 4.1rem;
-  line-height: 4.1rem;
+  line-height: 72px; 
 }
 // Adjust the size of 'Komunitin' text so it is full-width and bold.
 #komunitin {
   font-weight: 500;
-  font-size: 4.65rem;
-  line-height: 4.65rem;
+  line-height: 72px;
 }
 // Adjust the size of slogan text so it is full-width.
 #slogan {
   font-style: italic;
-  font-size: 1.09rem;
 }
 </style>
