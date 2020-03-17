@@ -4,13 +4,13 @@
       unelevated
       color="primary"
       text-color="onprimary"
-      :label="$t('Find your local exchange')"
+      :label="$t('Find your local group')"
       icon="explore"
       :to="{ name: 'ExchangesListPage' }"
       class="full-width"
       id="explore"
     />
-    <p class="text-onoutside-m q-mt-md q-mb-xs">{{ $t('Already registered to a local exchange?') }}</p>
+    <p class="text-onoutside-m q-mt-md q-mb-xs">{{ $t('Already registered to a local group?') }}</p>
     <q-btn
       outline
       color="transparent"
@@ -43,5 +43,3 @@ export default Vue.extend({
 }
 
 </style>
-
-
