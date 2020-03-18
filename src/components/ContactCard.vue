@@ -1,5 +1,5 @@
 <template>
-  <q-card v-if="waysContact.length" class="contact-card">
+  <q-card class="contact-card" v-if="waysContact.length">
     <q-item v-for="(contactGroup) in waysContact" :key="contactGroup.data.id ">
       <q-item-section avatar>
         <q-avatar>
@@ -42,7 +42,7 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'ContactCard',
+  name: 'contact-card',
   props: ['waysContact']
 });
 </script>

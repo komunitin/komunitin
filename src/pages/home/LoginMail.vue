@@ -1,8 +1,8 @@
 <template>
-      <form class="column q-gutter-md" @submit.prevent="submit">
+      <form @submit.prevent="submit" class="column q-gutter-md">
         <q-input
-          v-model="email" outlined
-          dark
+          outlined dark
+          v-model="email"
           type="email"
           placeholder="example@example.com"
           :label="$t('Email')"
@@ -15,8 +15,8 @@
           </template>
         </q-input>
         <q-input
-          v-model="pass" outlined
-          dark
+          outlined dark
+          v-model="pass"
           :type="isPwd ? 'password' : 'text'"
           :label="$t('Password')"
           maxlength="30"
