@@ -1,5 +1,5 @@
 <template>
-  <q-card flat bordered v-ripple tabindex="0" @click="this.$router.push(href)">
+  <q-card v-ripple flat bordered tabindex="0" @click="this.$router.push(href)">
     <q-card-section class="q-pb-none q-pt-sm">
       <div class="text-overline text-onsurface-m">
         <q-icon :name="icon" size="xs" color="icon-dark"/>
@@ -44,11 +44,11 @@ import Vue from 'vue';
  * 
  */
 export default Vue.extend({
-  name: 'group-stats',
+  name: 'GroupStats',
+  props: ['icon', 'title', 'content', 'items', 'href'],
   data() {
     return {};
   },
-  props: ['icon', 'title', 'content', 'items', 'href'],
 
 });
 </script>
