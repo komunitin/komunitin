@@ -1,6 +1,6 @@
 <template>
   <q-list>
-    <q-item v-for="(contactGroup) in waysContact" :key="contactGroup.data.id" clickable @click="contact(contactGroup.data.attributes.type, contactGroup.data.attributes.name)" :ref="contactGroup.data.attributes.type">
+    <q-item v-for="(contactGroup) in waysContact" :key="contactGroup.data.id" :ref="contactGroup.data.attributes.type" clickable @click="contact(contactGroup.data.attributes.type, contactGroup.data.attributes.name)">
       <q-item-section avatar>
         <q-avatar size="lg">
           <img :src="`statics/icons/contacts/${contactGroup.data.attributes.type}.svg`" />
@@ -17,7 +17,7 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'contact-list',
+  name: 'ContactList',
   props: ['waysContact'],
   methods: {
     /**

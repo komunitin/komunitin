@@ -17,10 +17,12 @@
     "build:pwa": "quasar build -m pwa",
     "lint": "eslint --ext .ts,.vue --ignore-path .gitignore ./src",
     "doc": "typedoc --out docs --tsconfig tsconfig.json src",
-    "todo": "egrep -r '@todo|@bug|@dev' src/"
+    "todo": "egrep -r '@todo|@bug|@dev' src/",
+    "testAll": "tsc -p tsconfig.json --noEmit && npm run test && npm run lint"
   },
   "dependencies": {
     "@alexlit/vue-yandex-share": "^1.0.1",
+    "@electron/typescript-definitions": "^8.6.6",
     "@quasar/extras": "^1.6.0",
     "@types/dotenv": "^8.2.0",
     "@types/leaflet": "^1.5.11",
@@ -28,7 +30,6 @@
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
-    "jest": "^24.9.0",
     "leaflet": "^1.6.0",
     "quasar": "^1.9.10",
     "typedoc": "^0.16.11",
@@ -42,6 +43,7 @@
     "@quasar/quasar-app-extension-testing": "^1.0.0",
     "@quasar/quasar-app-extension-testing-unit-jest": "^1.0.0",
     "@quasar/quasar-app-extension-typescript": "^1.0.0-beta.2",
+    "@types/node": "^12.12.30",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
     "devtron": "^1.4.0",
@@ -50,6 +52,7 @@
     "electron-devtools-installer": "^2.2.4",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-vue": "^6.2.2",
+    "jest": "^24.9.0",
     "lorem-ipsum": "^2.0.3",
     "miragejs": "^0.1.35",
     "ts-jest": "^25.2.1",

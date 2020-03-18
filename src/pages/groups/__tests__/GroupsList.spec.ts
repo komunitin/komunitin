@@ -1,5 +1,15 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import GroupsList from '../GroupsList.vue';
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    interface Global {
+      navigator: {
+        geolocation: {};
+      };
+    }
+  }
+}
+import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
+import GroupsList from "../GroupsList.vue";
 
 import {
   Quasar,
@@ -18,9 +28,9 @@ import {
   QItemSection,
   QAvatar,
   QInnerLoading
-} from 'quasar';
+} from "quasar";
 
-describe('GroupsList.vue', () => {
+describe("GroupsList.vue", () => {
   // let isLoading: boolean;
   // @ts-ignore
   let wrapper: Wrapper<GroupsList>;
@@ -46,7 +56,6 @@ describe('GroupsList.vue', () => {
       )
     )
   };
-  // @ts-ignore
   global.navigator.geolocation = mockGeolocation;
 
   // We use createLocalVue in order not to pollute the global scope.
@@ -74,18 +83,18 @@ describe('GroupsList.vue', () => {
   });
 
   beforeEach(() => {
-    errorsList = [new Error(), 'Init'];
+    errorsList = [new Error(), "Init"];
     notifyList = [{}];
 
-    require('../../../services/mirage.js');
+    require("../../../services/mirage.js");
     wrapper = shallowMount(GroupsList, {
       // Avoid error with translations.
       mocks: {
-        $t: () => 'Mock text',
+        $t: () => "Mock text",
         $errorsManagement: {
           getErrors() {
             return {
-              message: 'MockErrorMessage'
+              message: "MockErrorMessage"
             };
           },
           // newError (e: Error, area: string) {
@@ -103,14 +112,16 @@ describe('GroupsList.vue', () => {
     });
   });
 
-  it('Check isLoading false', async () => {
+  it("Check isLoading false", async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
-    await wrapper.vm.getGroups(1, 10);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (wrapper.vm as any).getGroups(1, 10);
     expect(wrapper.vm.$data.isLoading).toBe(false);
   });
 
-  it('Check data', async () => {
-    await wrapper.vm.getGroups(1, 10);
+  it("Check data", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (wrapper.vm as any).getGroups(1, 10);
     expect(wrapper.vm.$data.groups).toHaveLength(10);
   });
 });

@@ -12,7 +12,6 @@
 
 <script>
 import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
-// @ts-ignore
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -27,7 +26,7 @@ const LeafIcon = L.Icon.extend({
 });
 
 export default {
-  name: 'simple-map',
+  name: 'SimpleMap',
   components: {
     LMap,
     LTileLayer,

@@ -1,14 +1,14 @@
 <template>
   <div>
     <search-bar
-      @newSearch="getGroupsListFilter"
       title="Groups near you"
-      :backButton="true"
+      :back-button="true"
+      @newSearch="getGroupsListFilter"
     />
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
-        <div class="col-12 col-sm-6 col-md-4" v-for="group of groups" :key="group.id">
+        <div v-for="group of groups" :key="group.id" class="col-12 col-sm-6 col-md-4">
           <q-card>
             <!-- Header with group avatar, name and short code -->
             <q-item>
@@ -30,7 +30,7 @@
             <q-card-section class="simple-map">
               <simple-map
                 :center="group.data.attributes.location.coordinates"
-                :markerLatLng="group.data.attributes.location.coordinates"
+                :marker-lat-lng="group.data.attributes.location.coordinates"
               />
             </q-card-section>
             <!-- Group description -->
@@ -54,16 +54,26 @@ import Vue from 'vue';
 import api from '../../services/ICESApi';
 import { GroupsListModel } from './models/model';
 
-// @ts-ignore
-import SimpleMap from '../../components/SimpleMap';
-// @ts-ignore
-import SearchBar from '../../components/SearchBar';
+import SimpleMap from '../../components/SimpleMap.vue';
+import SearchBar from '../../components/SearchBar.vue';
 
 /**
  * Groups's list.
  */
 export default Vue.extend({
   name: 'GroupListPage',
+  components: {
+    SimpleMap,
+    SearchBar
+  },
+  filters: {
+    subStr: function(string: string): string {
+      if (string.length > 400) {
+        return string.substring(0, 400) + '...';
+      }
+      return string;
+    }
+  },
   data() {
     return {
       groups: [] as GroupsListModel[],
@@ -77,27 +87,14 @@ export default Vue.extend({
       // viewSearch: false as boolean
     };
   },
-  components: {
-    SimpleMap,
-    SearchBar
-  },
   beforeMount: function() {
     this.isLoading = true;
   },
   mounted: function() {
     this.getUserLocation();
   },
-  filters: {
-    subStr: function(string: string): string {
-      if (string.length > 400) {
-        return string.substring(0, 400) + '...';
-      }
-      return string;
-    }
-  },
   methods: {
     displayErrors(): void {
-      // @ts-ignore
       const errors = this.$errorsManagement.getErrors();
       if (errors) {
         for (const error in errors) {
@@ -159,7 +156,6 @@ export default Vue.extend({
           this.groups = response.data;
         })
         .catch(e => {
-          // @ts-ignore
           this.$errorsManagement.newError(e, 'GroupsList');
           this.isLoading = false;
           this.displayErrors();
@@ -174,7 +170,6 @@ export default Vue.extend({
           this.groups = response.data;
         })
         .catch(e => {
-          // @ts-ignore
           this.$errorsManagement.newError(e, 'GroupsList');
           this.displayErrors();
           this.isLoading = false;

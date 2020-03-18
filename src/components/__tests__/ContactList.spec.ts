@@ -9,9 +9,9 @@ import {
   QItemSection,
   QItemLabel,
   QList
-} from 'quasar';
+} from "quasar";
 
-describe('ContactList', () => {
+describe("ContactList", () => {
   let waysContact: {
     links: {
       self: string;
@@ -42,70 +42,70 @@ describe('ContactList', () => {
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/7ceb75eb-9da0-4746-bb61-a34e0be49112'
+            "https://komunitin.org/EITE/contacts/7ceb75eb-9da0-4746-bb61-a34e0be49112"
         },
         data: {
-          type: 'contacts',
-          id: '7ceb75eb-9da0-4746-bb61-a34e0be49112',
+          type: "contacts",
+          id: "7ceb75eb-9da0-4746-bb61-a34e0be49112",
           attributes: {
-            type: 'phone',
-            name: '+34 666 77 88 99'
+            type: "phone",
+            name: "+34 666 77 88 99"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffq',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffq",
           attributes: {
-            type: 'email',
-            name: 'exhange@easterisland.com'
+            type: "email",
+            name: "exhange@easterisland.com"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffw',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffw",
           attributes: {
-            type: 'whatsapp',
-            name: '+34 666 66 66 66'
+            type: "whatsapp",
+            name: "+34 666 66 66 66"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb",
           attributes: {
-            type: 'telegram',
-            name: '@example'
+            type: "telegram",
+            name: "@example"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffs',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffs",
           attributes: {
-            type: 'Undefined',
-            name: 'undefinedNameOfContact'
+            type: "Undefined",
+            name: "undefinedNameOfContact"
           }
         }
       }
@@ -119,18 +119,18 @@ describe('ContactList', () => {
     });
   });
 
-  it('Html generated', async () => {
+  it("Html generated", async () => {
     // Test rendering.
-    expect(wrapper.text()).toContain('+34 666 77 88 99');
+    expect(wrapper.text()).toContain("+34 666 77 88 99");
   });
 
-  it('Contact click', async () => {
+  it("Contact click", async () => {
     // Mock window.open function.
     delete window.open;
     window.open = jest.fn();
-    wrapper.find({ref: 'phone'}).trigger('click');
+    wrapper.find({ref: 'phone'}).trigger("click");
     // Wait for event to be handled.
     await wrapper.vm.$nextTick();
-    expect(window.open).toHaveBeenCalledWith('tel:'+encodeURIComponent('+34 666 77 88 99'), '_blank');
+    expect(window.open).toHaveBeenCalledWith("tel:"+encodeURIComponent("+34 666 77 88 99"), "_blank");
   });
 });
