@@ -1,13 +1,10 @@
 <template>
-  <q-layout>
-    <q-page-container class="container-kn">
-      <q-header reveal elevated>
-        <q-toolbar>
-          <q-btn flat dense round icon="arrow_back" aria-label="Home" @click="$router.back()" />
-          <q-toolbar-title v-if="group.data">{{ group.data.attributes.name }}</q-toolbar-title>
-          <q-toolbar-title v-else>{{ $t('Groups near you') }}</q-toolbar-title>
+  <div>
+        <q-toolbar class="bg-primary text-onprimary">
+          <q-btn flat round icon="arrow_back" aria-label="Home" @click="$router.back()" />
+          <q-toolbar-title>{{ group.data ? group.data.attributes.name : ''}}</q-toolbar-title>
 
-          <q-btn v-if="group.data" right flat icon="message" @click="contactsView = true" />
+          <q-btn v-if="group.data" right flat round icon="message" @click="contactsView = true" />
           <navigator-share
             v-bind:on-error="onError"
             v-bind:on-success="onSuccess"
@@ -15,195 +12,109 @@
             v-bind:title="title"
             text="Komunitin group"
           >
-            <q-btn slot="clickable" right flat outline icon="share" />
+            <q-btn slot="clickable" right flat round icon="share" />
           </navigator-share>
         </q-toolbar>
-      </q-header>
-      <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
-      <div
-        v-if="group.data"
-        class="group-detail q-pa-md row items-start q-gutter-md"
-        style="min-height: 300px;"
-      >
+
+        <!-- Modal Dialogs -->
+        
         <q-dialog v-model="contactsView">
-          <contact-card :waysContact="group.included" />
+          <q-card>
+            <q-card-section>
+              <div class="text-h6">{{$t('Contact')}}</div>
+            </q-card-section>
+            <q-card-section class="q-pt-none">
+              <contact-list :waysContact="group.included" />
+            </q-card-section>
+          </q-card>
         </q-dialog>
 
         <q-dialog v-model="socialButtonsView">
           <social-buttons v-bind:url="url" v-bind:title="title" />
         </q-dialog>
 
-        <q-card class="card-header row">
-          <q-card-section class="group-header-img col">
-            <q-img :src="group.data.attributes.image">
-              <div
-                class="absolute-bottom text-subtitle1 text-center"
-              >{{ group.data.attributes.name }}</div>
-            </q-img>
-          </q-card-section>
-          <!--<q-separator />-->
-          <q-card-section class="group-description col row column">
-            <h6 class="code-group">{{ group.data.attributes.code }}</h6>
-            <div class="group-description-detail" v-html="group.data.attributes.description"></div>
-            <div>
-              <q-separator />
-              <q-icon size="18px" flat round name="link" />
-              <q-btn
-                type="a"
-                flat
-                class="group-website"
-                :href="group.data.attributes.website"
-                target="_blank"
-              >{{ group.data.attributes.website | link }}</q-btn>
+        <div class="q-pa-md">
+          <!-- Loading spinner -->
+          <q-inner-loading :showing="isLoading" color="icon-dark" />
+          <!-- Group view -->
+
+          <div v-if="group.data" class="row q-col-gutter-md">
+            <!-- image -->
+            <div class="col-12 col-sm-6 col-md-4">
+              <q-img :src="group.data.attributes.image"/>
             </div>
-          </q-card-section>
-        </q-card>
-
-        <q-card class="col">
-          <q-card-section>
-            <div class="text-overline group-title-section">
-              <q-icon name="local_offer" />Offers
+            <!-- description -->
+            <div class="col-12 col-sm-6 col-md-8">
+              <div class="text-h6">{{ group.data.attributes.code }}</div>
+              <div v-html="group.data.attributes.description" class="text-onsurface-m"></div>
+              <q-separator spaced/>
+              <div class="k-inset-actions-md">
+                <q-btn
+                  type="a"
+                  flat
+                  no-caps
+                  :href="group.data.attributes.website"
+                  target="_blank"
+                  icon="link"
+                  :label="group.data.attributes.website | link"
+                  color="onsurface-m"
+                />
+              </div>
             </div>
-          </q-card-section>
-
-          <q-separator />
-
-          <q-card-section horizontal>
-            <q-card-section class="col-4 group-count-box">
-              <h2 class="group-count">{{ group.data.relatinships.offers.meta.count }}</h2>
-              <q-btn
-                :to="`groups/${group.data.relatinships.offers.links.related}`"
-                flat
-                color="primary"
-              >Explora</q-btn>
-            </q-card-section>
-
-            <q-separator vertical />
-
-            <q-card-section class="col-8">
-              <ul>
-                <li>53 Alimentació</li>
-                <li>44 Serveis professionals</li>
-                <li>38 Salut i higiene</li>
-                <li>32 Arts i cultura</li>
-                <li>i més categories</li>
-              </ul>
-            </q-card-section>
-          </q-card-section>
-        </q-card>
-
-        <q-card class="col">
-          <q-card-section>
-            <div class="text-overline group-title-section">
-              <q-icon name="loyalty" />Needs
+            <!-- explore -->
+            <div class="col-12 col-sm-6">
+              <group-stats 
+                :title="$t('Offers')"
+                icon="local_offer"
+                :content="group.data.relatinships.offers.meta.count"
+                :href="`groups/${group.data.relatinships.offers.links.related}`"
+                :items="['53 Alimentació','44 Serveis professionals','38 Salut i higiene','32 Arts i cultura','i més categories']"
+              />
             </div>
-          </q-card-section>
 
-          <q-separator />
-
-          <q-card-section horizontal>
-            <q-card-section class="col-4 group-count-box">
-              <h2 class="group-count">{{ group.data.relatinships.needs.meta.count }}</h2>
-              <q-btn
-                :to="`groups/${group.data.relatinships.needs.links.related}`"
-                flat
-                color="primary"
-              >Explora</q-btn>
-            </q-card-section>
-
-            <q-separator vertical />
-
-            <q-card-section class="col-8">
-              <ul>
-                <li>53 Alimentació</li>
-                <li>44 Serveis professionals</li>
-                <li>38 Salut i higiene</li>
-                <li>32 Arts i cultura</li>
-                <li>i més categories</li>
-              </ul>
-            </q-card-section>
-          </q-card-section>
-        </q-card>
-
-        <q-card class="col">
-          <q-card-section>
-            <div class="text-overline group-title-section">
-              <q-icon name="account_circle" />Members
+            <div class="col-12 col-sm-6">
+              <group-stats 
+                :title="$t('Needs')"
+                icon="loyalty"
+                :content="group.data.relatinships.needs.meta.count"
+                :href="`groups/${group.data.relatinships.needs.links.related}`"
+                :items="['53 Alimentació','44 Serveis professionals','38 Salut i higiene','32 Arts i cultura','i més categories']"
+              />
             </div>
-          </q-card-section>
 
-          <q-separator />
-
-          <q-card-section horizontal>
-            <q-card-section class="col-4 group-count-box">
-              <h2 class="group-count">{{ group.data.relatinships.members.meta.count }}</h2>
-              <q-btn
-                :to="`groups/${group.data.relatinships.members.links.related}`"
-                flat
-                color="primary"
-              >Explora</q-btn>
-            </q-card-section>
-
-            <q-separator vertical />
-
-            <q-card-section class="col-8">
-              <ul>
-                <li>53 Alimentació</li>
-                <li>44 Serveis professionals</li>
-                <li>38 Salut i higiene</li>
-                <li>32 Arts i cultura</li>
-                <li>i més categories</li>
-              </ul>
-            </q-card-section>
-          </q-card-section>
-        </q-card>
-
-        <q-card class="col">
-          <q-card-section>
-            <div class="text-overline group-title-section">
-              <q-icon name="monetization_on" />Currency
+            <div class="col-12 col-sm-6">
+              <group-stats 
+                :title="$t('Members')"
+                icon="account_circle"
+                :content="group.data.relatinships.members.meta.count"
+                :href="`groups/${group.data.relatinships.members.links.related}`"
+                :items="['13 Empreses', '8 Organitzacions', '40 Personals','4 Públics']"
+              />
             </div>
-          </q-card-section>
 
-          <q-separator />
-
-          <q-card-section horizontal>
-            <q-card-section class="col-4 group-count-box">
-              <h2 class="group-count">@</h2>
-              <p>Vent</p>
-
-              <q-btn
-                :to="`groups/${group.data.relatinships.needs.links.related}`"
-                flat
-                color="primary"
-              >Explora</q-btn>
-            </q-card-section>
-
-            <q-separator vertical />
-
-            <q-card-section class="col-8">
-              <ul>
-                <li>53 Alimentació</li>
-                <li>44 Serveis professionals</li>
-                <li>38 Salut i higiene</li>
-                <li>32 Arts i cultura</li>
-                <li>i més categories</li>
-              </ul>
-            </q-card-section>
-          </q-card-section>
-        </q-card>
-
-        <q-card class="col">
-          <q-card-section>
-            <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
-          </q-card-section>
-          <q-card-section class="group-footer-card">{{ group.data.attributes.location.name }}</q-card-section>
-        </q-card>
-
-        <contact-card :waysContact="group.included" />
+            <div class="col-12 col-sm-6">
+              <group-stats 
+                :title="$t('Currency')"
+                icon="monetization_on"
+                content="ℏ"
+                href=""
+                :items="['7.201 transaccions / any','89.500 intercanviats / any','6.500 en circulació','1 ECO = 1 EÇ = 0,1 ℏ = 1 tk']"
+              />
+            </div>
+            <div class="col-12 col-sm-6 col-lg-8">
+              <q-card square flat>
+                <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
+                <q-card-section class="group-footer-card text-onsurface-m">
+                  <q-icon name="place"/>
+                  {{ group.data.attributes.location.name }}</q-card-section>
+              </q-card>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+              <contact-list :waysContact="group.included" />
+            </div>
       </div>
-    </q-page-container>
-  </q-layout>
+    </div>
+    </div>
 </template>
 
 <script lang="ts">
@@ -212,14 +123,14 @@ import api from '../../services/ICESApi';
 // @ts-ignore
 import SimpleMap from '../../components/SimpleMap';
 // @ts-ignore
-import ContactCard from '../../components/ContactCard';
+import ContactList from '../../components/ContactList';
 import { GroupModel } from './models/model';
-// @ts-ignore
-import VueElementLoading from 'vue-element-loading';
 // @ts-ignore
 import NavigatorShare from '../../components/NavigatorShare';
 // @ts-ignore
 import SocialButtons from '../../components/SocialButtons';
+// @ts-ignore
+import GroupStats from '../../components/GroupStats';
 
 /**
  * GroupPage.
@@ -240,11 +151,11 @@ export default Vue.extend({
     }
   },
   components: {
-    VueElementLoading,
     SimpleMap,
     NavigatorShare,
-    ContactCard,
-    SocialButtons
+    ContactList,
+    SocialButtons,
+    GroupStats
   },
   props: {
     id: String
@@ -317,79 +228,3 @@ export default Vue.extend({
   }
 });
 </script>
-<style scope>
-.card-header {
-  box-shadow: none;
-  max-width: 100% !important;
-  width: 100%;
-}
-.group-header-img {
-  min-width: 300px !important;
-  max-width: 400px !important;
-}
-.group-description {
-  min-width: 300px !important;
-}
-.group-description-detail {
-  flex-grow: 1;
-}
-.group-website {
-  text-transform: none;
-  margin-left: 4px;
-}
-.group-detail .q-card {
-  min-width: 300px !important;
-  max-width: 456px;
-}
-.group-detail .q-card__section {
-  padding: 0;
-}
-.code-group {
-  margin: 0 0 5px 0;
-}
-.simple-map {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-.q-btn__wrapper.col.row.q-anchor--skip {
-  padding: 0 4px;
-}
-.group-title-section {
-  font-size: 17px;
-  color: rgba(0, 0, 0, 0.63);
-  margin: 8px;
-}
-.material-icons.q-icon.notranslate {
-  margin: 0 10px 0 0;
-}
-.q-card:not(.card-header) hr {
-  background: transparent;
-}
-.group-count {
-  margin: 18px 0;
-}
-.group-detail li {
-  list-style: none;
-}
-.group-count-box {
-  padding: 0 0 0 15px !important;
-}
-.group-footer-card {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.63);
-}
-.group-detail a {
-  color: black;
-  text-decoration: none;
-}
-.group-detail .leaflet-control-attribuittion.leaflet-control {
-  display: none !important;
-}
-.group-description {
-  padding: 10px 0 0 8px !important;
-}
-.card-header .q-img.overflow-hidden {
-  height: auto;
-}
-</style>
