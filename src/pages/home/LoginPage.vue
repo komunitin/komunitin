@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-btn
+      id="explore"
       unelevated
       color="primary"
       text-color="onprimary"
@@ -8,7 +9,6 @@
       icon="explore"
       :to="{ name: 'GroupsListPage' }"
       class="full-width"
-      id="explore"
     />
     <p class="text-onoutside-m q-mt-md q-mb-xs">{{ $t('Already registered to a local group?') }}</p>
     <q-btn

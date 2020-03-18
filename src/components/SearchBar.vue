@@ -17,31 +17,31 @@
     </q-toolbar-title>
 
     <q-input
-      id="input_search"
       v-if="viewSearch === true"
-      @keyup.enter="searchBox()"
+      id="input_search"
+      v-model="search"
       class="search-kn"
       dark
-      v-model="search"
       dense
       autofocus
       right
+      @keyup.enter="searchBox()"
     />
-    <q-btn id="button_search" right flat v-on:click="searchBox()" icon="search" />
+    <q-btn id="button_search" right flat icon="search" @click="searchBox()" />
   </q-toolbar>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'Search-Bar',
+  name: 'SearchBar',
+  props: ['title', 'backButton'],
   data() {
     return {
       search: '',
       viewSearch: false as boolean
     };
   },
-  props: ['title', 'backButton'],
   methods: {
     /**
      * - One click open input.
