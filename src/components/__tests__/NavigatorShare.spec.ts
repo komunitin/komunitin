@@ -1,8 +1,8 @@
-import { createLocalVue, shallowMount, Wrapper } from '@vue/test-utils';
-import NavigatorShare from '../NavigatorShare.vue';
-import { Quasar } from 'quasar';
+import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
+import NavigatorShare from "../NavigatorShare.vue";
+import { Quasar } from "quasar";
 
-describe('NavigatorShare', () => {
+describe("NavigatorShare", () => {
   let url: string;
   let title: string;
   let onError: Function;
@@ -21,8 +21,8 @@ describe('NavigatorShare', () => {
 
   // Montamos el componente con los props necesarios antes de cada test.
   beforeEach(() => {
-    url = 'https://example.com';
-    title = 'Example Title';
+    url = "https://example.com";
+    title = "Example Title";
     onError = function(e: string) {
       // console.log(e);
       ErrorText = e;
@@ -37,14 +37,14 @@ describe('NavigatorShare', () => {
     });
   });
 
-  it('Html generated', () => {
+  it("Html generated", () => {
     // console.debug({ Test: wrapper.html() });
-    expect(wrapper.html()).toContain('<p>Share</p>');
+    expect(wrapper.html()).toContain("<p>Share</p>");
   });
 
-  it('Generate error', () => {
-    wrapper.find('p').trigger('click');
+  it("Generate error", () => {
+    wrapper.find("p").trigger("click");
     // console.debug({ Test: ErrorText });
-    expect(ErrorText).toEqual('method not supported');
+    expect(ErrorText).toEqual("method not supported");
   });
 });

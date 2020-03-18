@@ -13,7 +13,7 @@ import Vue from 'vue';
  * @displayName Fit Text
  */
 export default Vue.extend({
-  name: 'fit-text',
+  name: 'FitText',
   mounted: function() {
     // Call the fit function after the children has been rendered too.
     this.$nextTick(this.fit);

@@ -6,10 +6,10 @@
 
           <q-btn v-if="group.data" right flat round icon="message" @click="contactsView = true" />
           <navigator-share
-            v-bind:on-error="onError"
-            v-bind:on-success="onSuccess"
-            v-bind:url="url"
-            v-bind:title="title"
+            :on-error="onError"
+            :on-success="onSuccess"
+            :url="url"
+            :title="title"
             text="Komunitin group"
           >
             <q-btn slot="clickable" right flat round icon="share" />
@@ -24,13 +24,13 @@
               <div class="text-h6">{{$t('Contact')}}</div>
             </q-card-section>
             <q-card-section class="q-pt-none">
-              <contact-list :waysContact="group.included" />
+              <contact-list :ways-contact="group.included" />
             </q-card-section>
           </q-card>
         </q-dialog>
 
         <q-dialog v-model="socialButtonsView">
-          <social-buttons v-bind:url="url" v-bind:title="title" />
+          <social-buttons :url="url" :title="title" />
         </q-dialog>
 
         <div class="q-pa-md">
@@ -46,7 +46,7 @@
             <!-- description -->
             <div class="col-12 col-sm-6 col-md-8">
               <div class="text-h6">{{ group.data.attributes.code }}</div>
-              <div v-html="group.data.attributes.description" class="text-onsurface-m"></div>
+              <div class="text-onsurface-m" v-html="group.data.attributes.description"></div>
               <q-separator spaced/>
               <div class="k-inset-actions-md">
                 <q-btn
@@ -103,14 +103,14 @@
             </div>
             <div class="col-12 col-sm-6 col-lg-8">
               <q-card square flat>
-                <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
+                <simple-map class="simple-map" :center="center" :marker-lat-lng="markerLatLng" />
                 <q-card-section class="group-footer-card text-onsurface-m">
                   <q-icon name="place"/>
                   {{ group.data.attributes.location.name }}</q-card-section>
               </q-card>
             </div>
             <div class="col-12 col-sm-6 col-lg-4">
-              <contact-list :waysContact="group.included" />
+              <contact-list :ways-contact="group.included" />
             </div>
       </div>
     </div>
@@ -120,31 +120,18 @@
 <script lang="ts">
 import Vue from 'vue';
 import api from '../../services/ICESApi';
-// @ts-ignore
-import SimpleMap from '../../components/SimpleMap';
-// @ts-ignore
-import ContactList from '../../components/ContactList';
+import SimpleMap from '../../components/SimpleMap.vue';
+import ContactList from '../../components/ContactList.vue';
 import { GroupModel } from './models/model';
-// @ts-ignore
-import NavigatorShare from '../../components/NavigatorShare';
-// @ts-ignore
-import SocialButtons from '../../components/SocialButtons';
-// @ts-ignore
-import GroupStats from '../../components/GroupStats';
+import NavigatorShare from '../../components/NavigatorShare.vue';
+import SocialButtons from '../../components/SocialButtons.vue';
+import GroupStats from '../../components/GroupStats.vue';
 
 /**
  * GroupPage.
  */
 export default Vue.extend({
   name: 'GroupPage',
-  data() {
-    return {
-      group: {} as GroupModel,
-      isLoading: true as boolean,
-      contactsView: false,
-      socialButtonsView: false
-    };
-  },
   filters: {
     link(link: string): string {
       return link.replace(/(https|http):\/\//, '');
@@ -159,6 +146,34 @@ export default Vue.extend({
   },
   props: {
     id: String
+  },
+  data() {
+    return {
+      group: {} as GroupModel,
+      isLoading: true as boolean,
+      contactsView: false,
+      socialButtonsView: false
+    };
+  },
+  computed: {
+    center: function(): [number, number] {
+      return [
+        this.group.data.attributes.location.coordinates[0][0][0],
+        this.group.data.attributes.location.coordinates[0][0][1]
+      ];
+    },
+    markerLatLng: function(): [number, number] {
+      return [
+        this.group.data.attributes.location.coordinates[0][0][0],
+        this.group.data.attributes.location.coordinates[0][0][1]
+      ];
+    },
+    url() {
+      return window.location.href;
+    },
+    title() {
+      return document.title;
+    }
   },
   beforeMount: function(): void {
     this.isLoading = true;
@@ -177,13 +192,11 @@ export default Vue.extend({
         })
         .catch(e => {
           this.isLoading = false;
-          // @ts-ignore
           this.$errorsManagement.newError(e, 'GroupsList');
           this.displayErrors();
         });
     },
     displayErrors(): void {
-      // @ts-ignore
       const errors = this.$errorsManagement.getErrors();
       if (errors) {
         for (const error in errors) {
@@ -204,26 +217,6 @@ export default Vue.extend({
     },
     onSuccess(err: string) {
       console.log(err);
-    }
-  },
-  computed: {
-    center: function(): [number, number] {
-      return [
-        this.group.data.attributes.location.coordinates[0][0][0],
-        this.group.data.attributes.location.coordinates[0][0][1]
-      ];
-    },
-    markerLatLng: function(): [number, number] {
-      return [
-        this.group.data.attributes.location.coordinates[0][0][0],
-        this.group.data.attributes.location.coordinates[0][0][1]
-      ];
-    },
-    url() {
-      return window.location.href;
-    },
-    title() {
-      return document.title;
     }
   }
 });

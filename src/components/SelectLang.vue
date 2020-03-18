@@ -1,11 +1,17 @@
 <template>
   <q-btn-dropdown flat label="Language">
     <q-list>
-       <q-item v-for="lang in langs" :key="lang.value" clickable v-close-popup @click="setLocale(lang.value)">
-          <q-item-section>
-            <q-item-label>{{ lang.label }}</q-item-label>
-          </q-item-section>
-        </q-item>
+      <q-item
+        v-for="lang in langs"
+        :key="lang.value"
+        v-close-popup
+        clickable
+        @click="setLocale(lang.value)"
+      >
+        <q-item-section>
+          <q-item-label>{{ lang.label }}</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-list>
   </q-btn-dropdown>
 </template>
@@ -13,14 +19,12 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'selectLang',
+  name: 'SelectLang',
   data() {
     return {
       locale: this.$i18n.locale,
       // Available languages.
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      langs: this.$Koptions.langs as any
+      langs: this.$Koptions.langs as []
     };
   },
   methods: {
