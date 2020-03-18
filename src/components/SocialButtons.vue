@@ -4,7 +4,6 @@ import VueYandexShare from '@alexlit/vue-yandex-share';
 export default {
   name: 'SocialButtons',
   components: { VueYandexShare },
-  props: ['url', 'title'],
 
   data() {
     return {
@@ -57,6 +56,7 @@ export default {
       }
     };
   },
+  props: ['url', 'title'],
   mounted: function() {
     this.options.url = this.url;
     this.options.title = this.title;

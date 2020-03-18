@@ -26,7 +26,7 @@ const LeafIcon = L.Icon.extend({
 });
 
 export default {
-  name: 'SimpleMap',
+  name: 'simple-map',
   components: {
     LMap,
     LTileLayer,
