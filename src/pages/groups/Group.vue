@@ -9,10 +9,10 @@
 
           <q-btn v-if="group.data" right flat icon="message" @click="contactsView = true" />
           <navigator-share
-            :on-error="onError"
-            :on-success="onSuccess"
-            :url="url"
-            :title="title"
+            v-bind:on-error="onError"
+            v-bind:on-success="onSuccess"
+            v-bind:url="url"
+            v-bind:title="title"
             text="Komunitin group"
           >
             <q-btn slot="clickable" right flat outline icon="share" />
@@ -26,11 +26,11 @@
         style="min-height: 300px;"
       >
         <q-dialog v-model="contactsView">
-          <contact-card :ways-contact="group.included" />
+          <contact-card :waysContact="group.included" />
         </q-dialog>
 
         <q-dialog v-model="socialButtonsView">
-          <social-buttons :url="url" :title="title" />
+          <social-buttons v-bind:url="url" v-bind:title="title" />
         </q-dialog>
 
         <q-card class="card-header row">
@@ -195,12 +195,12 @@
 
         <q-card class="col">
           <q-card-section>
-            <simple-map class="simple-map" :center="center" :marker-lat-lng="markerLatLng" />
+            <simple-map class="simple-map" :center="center" :markerLatLng="markerLatLng" />
           </q-card-section>
           <q-card-section class="group-footer-card">{{ group.data.attributes.location.name }}</q-card-section>
         </q-card>
 
-        <contact-card :ways-contact="group.included" />
+        <contact-card :waysContact="group.included" />
       </div>
     </q-page-container>
   </q-layout>
@@ -224,6 +224,14 @@ import SocialButtons from '../../components/SocialButtons.vue';
  */
 export default Vue.extend({
   name: 'GroupPage',
+  data() {
+    return {
+      group: {} as GroupModel,
+      isLoading: true as boolean,
+      contactsView: false,
+      socialButtonsView: false
+    };
+  },
   filters: {
     link(link: string): string {
       return link.replace(/(https|http):\/\//, '');
@@ -238,34 +246,6 @@ export default Vue.extend({
   },
   props: {
     id: String
-  },
-  data() {
-    return {
-      group: {} as GroupModel,
-      isLoading: true as boolean,
-      contactsView: false,
-      socialButtonsView: false
-    };
-  },
-  computed: {
-    center: function(): [number, number] {
-      return [
-        this.group.data.attributes.location.coordinates[0][0][0],
-        this.group.data.attributes.location.coordinates[0][0][1]
-      ];
-    },
-    markerLatLng: function(): [number, number] {
-      return [
-        this.group.data.attributes.location.coordinates[0][0][0],
-        this.group.data.attributes.location.coordinates[0][0][1]
-      ];
-    },
-    url() {
-      return window.location.href;
-    },
-    title() {
-      return document.title;
-    }
   },
   beforeMount: function(): void {
     this.isLoading = true;
@@ -309,6 +289,26 @@ export default Vue.extend({
     },
     onSuccess(err: string) {
       console.log(err);
+    }
+  },
+  computed: {
+    center: function(): [number, number] {
+      return [
+        this.group.data.attributes.location.coordinates[0][0][0],
+        this.group.data.attributes.location.coordinates[0][0][1]
+      ];
+    },
+    markerLatLng: function(): [number, number] {
+      return [
+        this.group.data.attributes.location.coordinates[0][0][0],
+        this.group.data.attributes.location.coordinates[0][0][1]
+      ];
+    },
+    url() {
+      return window.location.href;
+    },
+    title() {
+      return document.title;
     }
   }
 });

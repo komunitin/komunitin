@@ -9,8 +9,8 @@
           color="white"
           icon="arrow_back"
           aria-label="Home"
-          :class="$route.path === '/' ? 'invisible' : ''"
           @click="$router.back()"
+          :class="$route.path === '/' ? 'invisible' : ''"
         />
       </q-toolbar>
     </q-header>
