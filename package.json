@@ -17,7 +17,8 @@
     "build:pwa": "quasar build -m pwa",
     "lint": "eslint --ext .ts,.vue --ignore-path .gitignore ./src",
     "doc": "typedoc --out docs --tsconfig tsconfig.json src",
-    "todo": "egrep -r '@todo|@bug|@dev' src/"
+    "todo": "egrep -r '@todo|@bug|@dev' src/",
+    "testAll": "tsc -p tsconfig.json --noEmit && npm run test && npm run lint"
   },
   "dependencies": {
     "@alexlit/vue-yandex-share": "^1.0.1",
