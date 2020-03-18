@@ -8,7 +8,7 @@
       // Configuration from https://quasar.dev/start/vs-code-configuration#Debugging-a-Quasar-project-in-VS-Code
       "type": "chrome",
       "request": "launch",
-      "name": "Komunitin: chrome",
+      "name": "Chrome",
       "url": "http://localhost:8080",
       "webRoot": "${workspaceFolder}/src",
       "breakOnLoad": true,
@@ -44,3 +44,4 @@
     }
   ]
 }
+

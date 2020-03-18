@@ -26,7 +26,8 @@ import {
   QItem,
   QItemLabel,
   QItemSection,
-  QAvatar
+  QAvatar,
+  QInnerLoading
 } from "quasar";
 
 describe("GroupsList.vue", () => {
@@ -76,7 +77,8 @@ describe("GroupsList.vue", () => {
       QItem,
       QItemLabel,
       QItemSection,
-      QAvatar
+      QAvatar,
+      QInnerLoading
     }
   });
 
