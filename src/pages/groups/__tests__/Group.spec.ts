@@ -15,7 +15,10 @@ import {
   QCard,
   QCardSection,
   QIcon,
-  QSeparator
+  QSeparator,
+  QInnerLoading,
+  QList,
+  QItem,
 } from 'quasar';
 
 describe('Group.vue', () => {
@@ -45,7 +48,10 @@ describe('Group.vue', () => {
       QCard,
       QCardSection,
       QIcon,
-      QSeparator
+      QSeparator,
+      QInnerLoading,
+      QList,
+      QItem
     }
   });
 

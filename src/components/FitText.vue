@@ -17,10 +17,14 @@ export default Vue.extend({
   mounted: function() {
     // Call the fit function after the children has been rendered too.
     this.$nextTick(this.fit);
+
     // Call it also after fonts have been loaded. We don't check this 
     // condition before calling since this way the first call already 
     // does some adjustment and therefore the text does not do a big 
     // jump once fonts are loaded.
+
+    // Experimental API `fonts` is not (yet) included in Document interface.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (document as any).fonts?.ready.then(this.fit);
   },
   updated: function() {
