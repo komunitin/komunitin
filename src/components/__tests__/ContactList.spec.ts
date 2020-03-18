@@ -1,5 +1,5 @@
-import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
-import ContactCard from "../ContactCard.vue";
+import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
+import ContactList from '../ContactList.vue';
 import {
   Quasar,
   QCard,
@@ -7,10 +7,11 @@ import {
   QAvatar,
   QIcon,
   QItemSection,
-  QItemLabel
+  QItemLabel,
+  QList
 } from "quasar";
 
-describe("ContactCard", () => {
+describe("ContactList", () => {
   let waysContact: {
     links: {
       self: string;
@@ -25,14 +26,14 @@ describe("ContactCard", () => {
     };
   }[];
   // @ts-ignore
-  let wrapper: Wrapper<ContactCard>;
+  let wrapper: Wrapper<ContactList>;
 
   // We use createLocalVue in order not to pollute the global scope.
   const localVue = createLocalVue();
 
   // We need to explicitely include the components to be used.
   localVue.use(Quasar, {
-    components: { QCard, QItem, QAvatar, QIcon, QItemSection, QItemLabel }
+    components: { QCard, QItem, QAvatar, QIcon, QItemSection, QItemLabel, QList}
   });
 
   // Montamos el componente con los props necesarios antes de cada test.
@@ -110,7 +111,7 @@ describe("ContactCard", () => {
       }
     ];
 
-    wrapper = shallowMount(ContactCard, {
+    wrapper = mount(ContactList, {
       propsData: {
         waysContact: waysContact
       },
@@ -118,13 +119,18 @@ describe("ContactCard", () => {
     });
   });
 
-  // it('should match snapshot', () => {
-  //   expect(wrapper).toMatchSnapshot();
-  // });
-
   it("Html generated", async () => {
-    // await wrapper.vm.$nextTick();
-    // console.debug({ Test: wrapper.html() });
-    expect(wrapper.html()).toContain("tel:");
+    // Test rendering.
+    expect(wrapper.text()).toContain("+34 666 77 88 99");
+  });
+
+  it("Contact click", async () => {
+    // Mock window.open function.
+    delete window.open;
+    window.open = jest.fn();
+    wrapper.find({ref: 'phone'}).trigger("click");
+    // Wait for event to be handled.
+    await wrapper.vm.$nextTick();
+    expect(window.open).toHaveBeenCalledWith("tel:"+encodeURIComponent("+34 666 77 88 99"), "_blank");
   });
 });
