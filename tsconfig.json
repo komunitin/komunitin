@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // "allowJs": true,
+    "allowJs": true,
     "sourceMap": true,
     "target": "es6",
     "strict": true,
@@ -10,7 +10,12 @@
     "baseUrl": ".",
     "types": ["quasar", "node", "jest"],
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "components/": ["src/components/"]
+    }
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "extends": "@quasar/app/tsconfig-preset"
 }

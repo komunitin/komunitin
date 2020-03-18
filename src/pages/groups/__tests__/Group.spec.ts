@@ -1,5 +1,5 @@
-import { createLocalVue, shallowMount, Wrapper } from '@vue/test-utils';
-import Group from '../Group.vue';
+import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
+import Group from "../Group.vue";
 
 import {
   Quasar,
@@ -19,9 +19,9 @@ import {
   QInnerLoading,
   QList,
   QItem,
-} from 'quasar';
+} from "quasar";
 
-describe('Group.vue', () => {
+describe("Group.vue", () => {
   let id: string;
   // let group: object;
   // let isLoading: boolean;
@@ -56,11 +56,11 @@ describe('Group.vue', () => {
   });
 
   beforeEach(() => {
-    id = '1';
+    id = "1";
     notifyList = [{}];
-    errorsList = [new Error(), 'Init'];
+    errorsList = [new Error(), "Init"];
 
-    require('../../../services/mirage.js');
+    require("../../../services/mirage.js");
 
     wrapper = shallowMount(Group, {
       propsData: {
@@ -68,11 +68,11 @@ describe('Group.vue', () => {
       },
       mocks: {
         // Avoid error with translations.
-        $t: () => 'Title Mock Text',
+        $t: () => "Title Mock Text",
         $errorsManagement: {
           getErrors() {
             return {
-              message: 'MockErrorMessage'
+              message: "MockErrorMessage"
             };
           },
           newError(e: Error, area: string) {
@@ -91,10 +91,10 @@ describe('Group.vue', () => {
     });
   });
 
-  it('check receive data', async () => {
+  it("check receive data", async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
-    // @ts-ignore
-    await wrapper.vm.collectGroup('1');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (wrapper.vm as any).collectGroup("1");
     expect(wrapper.vm.$data.isLoading).toBe(false);
     expect(wrapper.vm.$data.group).toBeTruthy();
   });
