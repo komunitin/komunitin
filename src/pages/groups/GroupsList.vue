@@ -2,7 +2,7 @@
   <q-layout class="list-groups">
     <q-page-container class="container-kn">
       <q-header reveal elevated>
-        <search-bar @newSearch="getGroupsListFilter" title="Groups near you" :backButton="true" />
+        <search-bar title="Groups near you" :back-button="true" @newSearch="getGroupsListFilter" />
       </q-header>
       <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
         <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
@@ -29,7 +29,7 @@
           <q-card-section class="simple-map">
             <simple-map
               :center="group.data.attributes.location.coordinates"
-              :markerLatLng="group.data.attributes.location.coordinates"
+              :marker-lat-lng="group.data.attributes.location.coordinates"
             />
           </q-card-section>
 
@@ -66,6 +66,19 @@ import SearchBar from '../../components/SearchBar.vue';
  */
 export default Vue.extend({
   name: 'GroupListPage',
+  components: {
+    VueElementLoading,
+    SimpleMap,
+    SearchBar
+  },
+  filters: {
+    subStr: function(string: string): string {
+      if (string.length > 400) {
+        return string.substring(0, 400) + '...';
+      }
+      return string;
+    }
+  },
   data() {
     return {
       groups: [] as GroupsListModel[],
@@ -79,24 +92,11 @@ export default Vue.extend({
       // viewSearch: false as boolean
     };
   },
-  components: {
-    VueElementLoading,
-    SimpleMap,
-    SearchBar
-  },
   beforeMount: function() {
     this.isLoading = true;
   },
   mounted: function() {
     this.getUserLocation();
-  },
-  filters: {
-    subStr: function(string: string): string {
-      if (string.length > 400) {
-        return string.substring(0, 400) + '...';
-      }
-      return string;
-    }
   },
   methods: {
     displayErrors(): void {

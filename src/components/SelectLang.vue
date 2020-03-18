@@ -4,8 +4,8 @@
       <q-item
         v-for="lang in langs"
         :key="lang.value"
-        clickable
         v-close-popup
+        clickable
         @click="setLocale(lang.value)"
       >
         <q-item-section>
@@ -19,7 +19,7 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'selectLang',
+  name: 'SelectLang',
   data() {
     return {
       locale: this.$i18n.locale,
