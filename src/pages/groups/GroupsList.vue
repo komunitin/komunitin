@@ -1,60 +1,58 @@
 <template>
-  <q-layout class="list-groups">
-    <q-page-container class="container-kn">
-      <q-header reveal elevated>
-        <search-bar @newSearch="getGroupsListFilter" title="Groups near you" :backButton="true" />
-      </q-header>
-      <div class="q-pa-md row items-start q-gutter-md" style="min-height: 300px;">
-        <vue-element-loading :active="isLoading" spinner="ring" color="#666" />
-        <q-card v-for="group of groups" :key="group.id" class="card-kn col">
-          <q-item>
-            <q-item-section avatar>
-              <q-avatar>
-                <img :src="group.data.attributes.image" />
-              </q-avatar>
-            </q-item-section>
+  <div>
+    <search-bar
+      @newSearch="getGroupsListFilter"
+      title="Groups near you"
+      :backButton="true"
+    />
+    <div class="q-pa-md">
+      <q-inner-loading :showing="isLoading" color="icon-dark" />
+      <div class="row q-col-gutter-md">
+        <div class="col-12 col-sm-6 col-md-4" v-for="group of groups" :key="group.id">
+          <q-card>
+            <!-- Header with group avatar, name and short code -->
+            <q-item>
+              <q-item-section avatar>
+                <q-avatar>
+                  <img :src="group.data.attributes.image" />
+                </q-avatar>
+              </q-item-section>
 
-            <q-item-section>
-              <q-item-label>{{ group.data.attributes.name }}</q-item-label>
-              <q-item-label caption>
-                {{
-                group.data.attributes.code
-                }}
-              </q-item-label>
-            </q-item-section>
-            <q-btn flat dense round icon="share" aria-label="Share" />
-          </q-item>
-
-          <!-- <img src="~assets/nomapa.png" /> -->
-          <q-card-section class="simple-map">
-            <simple-map
-              :center="group.data.attributes.location.coordinates"
-              :markerLatLng="group.data.attributes.location.coordinates"
-            />
-          </q-card-section>
-
-          <q-card-section>
-            {{
-            group.data.attributes.description | subStr
-            }}
-          </q-card-section>
-          <q-card-actions>
-            <q-btn :to="`groups/${group.id}`" flat color="primary">Explora</q-btn>
-            <q-btn flat color="primary">Registra't</q-btn>
-          </q-card-actions>
-        </q-card>
+              <q-item-section>
+                <q-item-label>{{ group.data.attributes.name }}</q-item-label>
+                <q-item-label caption>
+                  {{ group.data.attributes.code }}
+                </q-item-label>
+              </q-item-section>
+              <q-btn flat round icon="share" aria-label="Share" color="icon-dark"/>
+            </q-item>
+            <!-- Group position map -->
+            <q-card-section class="simple-map">
+              <simple-map
+                :center="group.data.attributes.location.coordinates"
+                :markerLatLng="group.data.attributes.location.coordinates"
+              />
+            </q-card-section>
+            <!-- Group description -->
+            <q-card-section>
+              {{ group.data.attributes.description | subStr }}
+            </q-card-section>
+            <!-- group actions -->
+            <q-card-actions>
+              <q-btn :to="`groups/${group.id}`" flat color="primary">{{$t('Explore')}}</q-btn>
+              <q-btn flat color="primary">{{$t('Sign Up')}}</q-btn>
+            </q-card-actions>
+          </q-card>
+        </div>
       </div>
-    </q-page-container>
-  </q-layout>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import api from '../../services/ICESApi';
 import { GroupsListModel } from './models/model';
-
-// @ts-ignore
-import VueElementLoading from 'vue-element-loading';
 
 // @ts-ignore
 import SimpleMap from '../../components/SimpleMap';
@@ -80,7 +78,6 @@ export default Vue.extend({
     };
   },
   components: {
-    VueElementLoading,
     SimpleMap,
     SearchBar
   },
@@ -186,22 +183,3 @@ export default Vue.extend({
   }
 });
 </script>
-<style scope>
-.list-groups .card-kn {
-  min-width: 300px !important;
-  max-width: 456px;
-}
-.search-kn {
-  width: 100%;
-  font-size: 20px;
-  font-style: oblique;
-}
-.velmld-spinner[data-v-1a4f1fc2] {
-  top: 70px !important;
-}
-.simple-map {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-</style>
