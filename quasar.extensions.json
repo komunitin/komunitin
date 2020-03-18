@@ -4,12 +4,5 @@
     "rename": true,
     "vscode": true,
     "prettier": true
-  },
-  "@quasar/testing": {
-    "harnesses": ["unit-jest"]
-  },
-  "@quasar/testing-unit-jest": {
-    "babel": "babelrc",
-    "options": []
   }
 }

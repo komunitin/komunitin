@@ -1,10 +1,11 @@
-import { createLocalVue, shallowMount, Wrapper } from '@vue/test-utils';
-import SimpleMap from '../SimpleMap.vue';
-import { Quasar } from 'quasar';
+import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
+import SimpleMap from "../SimpleMap.vue";
+import { Quasar } from "quasar";
 
-describe('SimpleMap', () => {
+describe("SimpleMap", () => {
   let center: [number, number];
   let markerLatLng: [number, number];
+  // @ts-ignore
   let wrapper: Wrapper<SimpleMap>;
 
   // We use createLocalVue in order not to pollute the global scope.
@@ -28,9 +29,9 @@ describe('SimpleMap', () => {
     });
   });
 
-  it('Html generated', async () => {
+  it("Html generated", async () => {
     await wrapper.vm.$nextTick();
     // console.debug({ Test: wrapper.html() });
-    expect(wrapper.html()).toContain('l-map-stub');
+    expect(wrapper.html()).toContain("l-map-stub");
   });
 });

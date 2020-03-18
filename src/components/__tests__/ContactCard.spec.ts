@@ -1,5 +1,5 @@
-import { createLocalVue, shallowMount, Wrapper } from '@vue/test-utils';
-import ContactCard from '../ContactCard.vue';
+import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
+import ContactCard from "../ContactCard.vue";
 import {
   Quasar,
   QCard,
@@ -8,9 +8,9 @@ import {
   QIcon,
   QItemSection,
   QItemLabel
-} from 'quasar';
+} from "quasar";
 
-describe('ContactCard', () => {
+describe("ContactCard", () => {
   let waysContact: {
     links: {
       self: string;
@@ -24,6 +24,7 @@ describe('ContactCard', () => {
       };
     };
   }[];
+  // @ts-ignore
   let wrapper: Wrapper<ContactCard>;
 
   // We use createLocalVue in order not to pollute the global scope.
@@ -40,70 +41,70 @@ describe('ContactCard', () => {
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/7ceb75eb-9da0-4746-bb61-a34e0be49112'
+            "https://komunitin.org/EITE/contacts/7ceb75eb-9da0-4746-bb61-a34e0be49112"
         },
         data: {
-          type: 'contacts',
-          id: '7ceb75eb-9da0-4746-bb61-a34e0be49112',
+          type: "contacts",
+          id: "7ceb75eb-9da0-4746-bb61-a34e0be49112",
           attributes: {
-            type: 'phone',
-            name: '+34 666 77 88 99'
+            type: "phone",
+            name: "+34 666 77 88 99"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffq',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffq",
           attributes: {
-            type: 'email',
-            name: 'exhange@easterisland.com'
+            type: "email",
+            name: "exhange@easterisland.com"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffw',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffw",
           attributes: {
-            type: 'whatsapp',
-            name: '+34 666 66 66 66'
+            type: "whatsapp",
+            name: "+34 666 66 66 66"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb",
           attributes: {
-            type: 'telegram',
-            name: '@example'
+            type: "telegram",
+            name: "@example"
           }
         }
       },
       {
         links: {
           self:
-            'https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb'
+            "https://komunitin.org/EITE/contacts/193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb"
         },
         data: {
-          type: 'contacts',
-          id: '193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffs',
+          type: "contacts",
+          id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffs",
           attributes: {
-            type: 'Undefined',
-            name: 'undefinedNameOfContact'
+            type: "Undefined",
+            name: "undefinedNameOfContact"
           }
         }
       }
@@ -121,9 +122,9 @@ describe('ContactCard', () => {
   //   expect(wrapper).toMatchSnapshot();
   // });
 
-  it('Html generated', async () => {
+  it("Html generated", async () => {
     // await wrapper.vm.$nextTick();
     // console.debug({ Test: wrapper.html() });
-    expect(wrapper.html()).toContain('tel:');
+    expect(wrapper.html()).toContain("tel:");
   });
 });
