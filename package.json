@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@alexlit/vue-yandex-share": "^1.0.1",
+    "@electron/typescript-definitions": "^8.6.6",
     "@quasar/extras": "^1.6.0",
     "@types/dotenv": "^8.2.0",
     "@types/leaflet": "^1.5.11",
@@ -42,6 +43,7 @@
     "@quasar/quasar-app-extension-testing": "^1.0.0",
     "@quasar/quasar-app-extension-testing-unit-jest": "^1.0.0",
     "@quasar/quasar-app-extension-typescript": "^1.0.0-beta.2",
+    "@types/node": "^12.12.30",
     "@typescript-eslint/eslint-plugin": "^2.23.0",
     "@typescript-eslint/parser": "^2.23.0",
     "devtron": "^1.4.0",
