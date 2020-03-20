@@ -24,7 +24,11 @@
                   {{ group.data.attributes.code }}
                 </q-item-label>
               </q-item-section>
-              <q-btn flat round icon="share" aria-label="Share" color="icon-dark"/>
+              <share-button v-if="group.data" class="text-icon-dark"
+                :text="$t('Check the exchange community {group}', {group: group.data.attributes.name})" 
+                :title="group.data.attributes.name"
+                :url="groupUrl(group.id)"
+              />
             </q-item>
             <!-- Group position map -->
             <q-card-section class="simple-map">
@@ -56,6 +60,7 @@ import { GroupsListModel } from './models/model';
 
 import SimpleMap from '../../components/SimpleMap.vue';
 import SearchBar from '../../components/SearchBar.vue';
+import ShareButton from '../../components/ShareButton.vue';
 
 /**
  * Groups's list.
@@ -64,7 +69,8 @@ export default Vue.extend({
   name: 'GroupListPage',
   components: {
     SimpleMap,
-    SearchBar
+    SearchBar,
+    ShareButton
   },
   filters: {
     subStr: function(string: string): string {
@@ -174,6 +180,10 @@ export default Vue.extend({
           this.displayErrors();
           this.isLoading = false;
         });
+    },
+    groupUrl(id: string) : string {
+      const base = window?.location.origin ?? '';
+      return base + this.$router.resolve('groups/'+id).href;
     }
   }
 });
