@@ -1,0 +1,31 @@
+{
+    "phone": {
+        "contact": "tel:{name}",
+        "label": "Phone",
+        "translateLabel": true
+    },
+    "email": {
+        "contact": "mailto:{name}",
+        "share": "mailto:?subject={title}&body={text}",
+        "label": "Email",
+        "translateLabel": true
+    },
+    "telegram": {
+        "contact": "https://t.me/{name}",
+        "share": "https://t.me/share/url?url={url}&text={text}",
+        "label": "Telegram"
+    },
+    "whatsapp": {
+        "contact": "https://api.whatsapp.com/send?phone={name}",
+        "share": "https://api.whatsapp.com/send?text={text}",
+        "label": "WhatsApp"
+    },
+    "twitter": {
+        "share": "https://twitter.com/intent/tweet?url={url}&text={title}",
+        "label": "Twitter"
+    },
+    "facebook": {
+        "share": "https://www.facebook.com/sharer/sharer.php?u={url}&title={title}&description={text}",
+        "label": "Facebook"
+    }
+}
