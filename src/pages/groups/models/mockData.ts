@@ -129,7 +129,7 @@ export const mockGroup: GroupModel[] = [
           ]
         }
       },
-      relatinships: {
+      relationships: {
         contacts: {
           data: [
             {

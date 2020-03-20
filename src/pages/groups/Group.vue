@@ -5,32 +5,25 @@
           <q-toolbar-title>{{ group.data ? group.data.attributes.name : ''}}</q-toolbar-title>
 
           <q-btn v-if="group.data" right flat round icon="message" @click="contactsView = true" />
-          <navigator-share
-            :on-error="onError"
-            :on-success="onSuccess"
-            :url="url"
-            :title="title"
-            text="Komunitin group"
-          >
-            <q-btn slot="clickable" right flat round icon="share" />
-          </navigator-share>
+          <share-button v-if="group.data"
+            :text="$t('Check the exchange community {group}', {group: group.data.attributes.name})" 
+            :title="group.data.attributes.name"
+          />
         </q-toolbar>
 
-        <!-- Modal Dialogs -->
-        
-        <q-dialog v-model="contactsView">
+        <!-- Message Dialog -->
+        <q-dialog v-if="group.data" v-model="contactsView">
           <q-card>
-            <q-card-section>
+            <q-card-section class="q-pb-none">
               <div class="text-h6">{{$t('Contact')}}</div>
             </q-card-section>
-            <q-card-section class="q-pt-none">
-              <contact-list :ways-contact="group.included" />
+            <q-card-section>
+              <social-network-list 
+                type="contact"
+                :networks="groupContacts"
+              />
             </q-card-section>
           </q-card>
-        </q-dialog>
-
-        <q-dialog v-model="socialButtonsView">
-          <social-buttons :url="url" :title="title" />
         </q-dialog>
 
         <div class="q-pa-md">
@@ -66,8 +59,8 @@
               <group-stats 
                 :title="$t('Offers')"
                 icon="local_offer"
-                :content="group.data.relatinships.offers.meta.count"
-                :href="`groups/${group.data.relatinships.offers.links.related}`"
+                :content="group.data.relationships.offers.meta.count"
+                :href="`groups/${group.data.relationships.offers.links.related}`"
                 :items="['53 Alimentació','44 Serveis professionals','38 Salut i higiene','32 Arts i cultura','i més categories']"
               />
             </div>
@@ -76,8 +69,8 @@
               <group-stats 
                 :title="$t('Needs')"
                 icon="loyalty"
-                :content="group.data.relatinships.needs.meta.count"
-                :href="`groups/${group.data.relatinships.needs.links.related}`"
+                :content="group.data.relationships.needs.meta.count"
+                :href="`groups/${group.data.relationships.needs.links.related}`"
                 :items="['53 Alimentació','44 Serveis professionals','38 Salut i higiene','32 Arts i cultura','i més categories']"
               />
             </div>
@@ -86,8 +79,8 @@
               <group-stats 
                 :title="$t('Members')"
                 icon="account_circle"
-                :content="group.data.relatinships.members.meta.count"
-                :href="`groups/${group.data.relatinships.members.links.related}`"
+                :content="group.data.relationships.members.meta.count"
+                :href="`groups/${group.data.relationships.members.links.related}`"
                 :items="['13 Empreses', '8 Organitzacions', '40 Personals','4 Públics']"
               />
             </div>
@@ -110,7 +103,10 @@
               </q-card>
             </div>
             <div class="col-12 col-sm-6 col-lg-4">
-              <contact-list :ways-contact="group.included" />
+              <social-network-list 
+                type="contact"
+                :networks="groupContacts"
+              />
             </div>
       </div>
     </div>
@@ -121,12 +117,16 @@
 import Vue from 'vue';
 import api from '../../services/ICESApi';
 import SimpleMap from '../../components/SimpleMap.vue';
-import ContactList from '../../components/ContactList.vue';
-import { GroupModel } from './models/model';
-import NavigatorShare from '../../components/NavigatorShare.vue';
-import SocialButtons from '../../components/SocialButtons.vue';
+import { GroupModel, Contact, ResourceObject } from './models/model';
 import GroupStats from '../../components/GroupStats.vue';
+import ShareButton from '../../components/ShareButton.vue';
+import SocialNetworkList from '../../components/SocialNetworkList.vue';
 
+interface ContactNames {
+  [key: string] : {
+    name: string
+  }
+}
 /**
  * GroupPage.
  */
@@ -139,40 +139,57 @@ export default Vue.extend({
   },
   components: {
     SimpleMap,
-    NavigatorShare,
-    ContactList,
-    SocialButtons,
-    GroupStats
+    ShareButton,
+    GroupStats,
+    SocialNetworkList
   },
   props: {
-    id: String
+    id: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {
       group: {} as GroupModel,
-      isLoading: true as boolean,
+      isLoading: true,
       contactsView: false,
       socialButtonsView: false
     };
   },
   computed: {
     center: function(): [number, number] {
-      return [
-        this.group.data.attributes.location.coordinates[0][0][0],
-        this.group.data.attributes.location.coordinates[0][0][1]
-      ];
+      return this.group.data.attributes.location.coordinates[0][0]
     },
     markerLatLng: function(): [number, number] {
-      return [
-        this.group.data.attributes.location.coordinates[0][0][0],
-        this.group.data.attributes.location.coordinates[0][0][1]
-      ];
+      return this.group.data.attributes.location.coordinates[0][0]
     },
-    url() {
+    url(): string {
       return window.location.href;
     },
-    title() {
+    title(): string {
       return document.title;
+    },
+    groupContacts() : ContactNames {
+      const contactIds = this.group.data.relationships.contacts.data.reduce(
+        (accum: string[], resourceId) => { 
+          accum.push(resourceId.id)
+          return accum; 
+        }, [] as string[]);
+
+      const contacts = this.group.included
+        .filter(function(resource) {
+          const contact = resource as ResourceObject;
+          return contact.data.type == "contacts" && contactIds.includes(contact.data.id);
+        }).reduce(function (contacts: ContactNames, resource) {
+          const contact = resource as Contact;
+          contacts[contact.data.attributes.type ] = {
+            name: contact.data.attributes.name
+          }
+          return contacts;
+        }, {} as ContactNames);
+
+      return contacts;
     }
   },
   beforeMount: function(): void {

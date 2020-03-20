@@ -25,6 +25,30 @@ export interface GroupsListModel {
 }
 
 /**
+ * See https://jsonapi.org/format/#document-resource-identifier-objects
+ * 
+ */
+export interface ResourceIdentifierObject {
+  type: string,
+  id: string
+}
+
+export interface ResourceObject {
+  data: ResourceIdentifierObject
+}
+
+export type Contact = ResourceObject & {
+  data: {
+    attributes: {
+      type: string,
+      name: string,
+      created: string,
+      updated: string
+    }
+  }
+}
+
+/**
  * Group model.
  */
 export interface GroupModel {
@@ -46,9 +70,9 @@ export interface GroupModel {
         coordinates: [number, number][][];
       };
     };
-    relatinships: {
+    relationships: {
       contacts: {
-        data: object[];
+        data: ResourceIdentifierObject[];
       };
       members: {
         links: {
