@@ -31,10 +31,7 @@ import {
 } from "quasar";
 
 describe("GroupsList.vue", () => {
-  // let isLoading: boolean;
-  // @ts-ignore
-  let wrapper: Wrapper<GroupsList>;
-  // let wrapper;
+  let wrapper: Wrapper<Vue>;
   let errorsList: [Error, string];
   let notifyList: [{}];
 
@@ -105,6 +102,13 @@ describe("GroupsList.vue", () => {
         $q: {
           notify(options: object) {
             notifyList.push(options);
+          }
+        },
+        $router: {
+          resolve(path: string) {
+            return {
+              href: "/" + path
+            }
           }
         }
       },

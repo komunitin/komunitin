@@ -13,8 +13,9 @@ import {
 
 describe("SocialNetworkList", () => {
   let contacts : {[key: string]: { name: string }};
-  let contact: Wrapper<SocialNetworkList>;
-  let share: Wrapper<SocialNetworkList>;
+
+  let contact: Wrapper<Vue>;
+  let share: Wrapper<Vue>;
 
   // We use createLocalVue in order not to pollute the global scope.
   const localVue = createLocalVue();
@@ -24,7 +25,7 @@ describe("SocialNetworkList", () => {
     components: { QCard, QItem, QAvatar, QIcon, QItemSection, QItemLabel, QList}
   });
 
-  async function checkClick(wrapper: Wrapper<SocialNetworkList>, ref: string, url: string) {
+  async function checkClick(wrapper: Wrapper<Vue>, ref: string, url: string) {
     // Mock window.open function.
     delete window.open;
     window.open = jest.fn();
