@@ -25,7 +25,7 @@
       <router-view />
     </q-page-container>
     <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
-      <selectLang @setLocale="setLocale" />
+      <select-lang />
       <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help" />
       <q-btn
         flat
@@ -59,21 +59,6 @@ export default Vue.extend({
       locale: this.$i18n.locale
     };
   },
-  methods: {
-    // Define language selected by the user and save in LocalStorage.
-    // @args locale: Select language.
-    setLocale(locale: string): void {
-      // Change Vue-i18n locale
-      this.$i18n.locale = locale;
-      localStorage.setItem('lang', locale);
-
-      // Load lang of Quasar.
-      import(`quasar/lang/${locale}`).then(({ default: messages }) => {
-        this.$q.lang.set(messages);
-      });
-      console.log(this.$router.currentRoute.path);
-    }
-  }
 });
 </script>
 <style lang="scss" scope>
