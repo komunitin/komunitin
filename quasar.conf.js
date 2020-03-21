@@ -11,7 +11,6 @@ module.exports = function(ctx) {
     boot: [
       "komunitin",
       "i18n",
-      "quasar-lang-pack",
       "vuelidate",
       "mirage",
       "errorsManagement"
