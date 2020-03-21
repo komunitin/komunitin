@@ -1,13 +1,7 @@
 <template>
   <q-btn-dropdown flat label="Language">
     <q-list>
-      <q-item
-        v-for="lang in langs"
-        :key="lang.value"
-        v-close-popup
-        clickable
-        @click="setLocale(lang.value)"
-      >
+      <q-item v-for="lang in langs" :key="lang.value" :ref="lang.value" v-close-popup clickable @click="changeLanguage(lang.value)" >
         <q-item-section>
           <q-item-label>{{ lang.label }}</q-item-label>
         </q-item-section>
@@ -17,6 +11,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import {setLocale} from '../boot/i18n';
 
 export default Vue.extend({
   name: 'SelectLang',
@@ -24,14 +19,17 @@ export default Vue.extend({
     return {
       locale: this.$i18n.locale,
       // Available languages.
-      langs: this.$Koptions.langs as []
+      langs: this.$Koptions.langs
     };
   },
   methods: {
-    // Define language selected by the user and save in LocalStorage.
-    // @args locale: Select language.
-    setLocale(locale: string) {
-      this.$emit('setLocale', locale);
+    /** 
+     * Define language selected by the user and save in LocalStorage.
+     * @arg locale: Selected language key.
+     */
+    async changeLanguage(locale: string) {
+      await setLocale(locale);
+      this.$emit('language-change', locale);
     }
   }
 });
