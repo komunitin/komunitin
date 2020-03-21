@@ -51,11 +51,10 @@ module.exports = {
     '.*\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$':
       'jest-transform-stub',
-    '^.+\\.tsx?$': 'ts-jest'
+    '^.+\\.tsx?$': 'ts-jest',
   },
   transformIgnorePatterns: [
-    '<rootDir>/node_modules/(?!quasar/lang)',
-    '<rootDir>/node_modules/(?!vue-navigator-share)'
+    '<rootDir>/node_modules/(?!quasar/lang.*)',
   ],
   snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue'],
   moduleDirectories: ['<rootDir>/node_modules']
