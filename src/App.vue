@@ -7,7 +7,7 @@
 import Vue from 'vue';
 
 /**
- * Se inicia la aplicación.
+ * App main component.
  */
 export default class App extends Vue {}
 </script>

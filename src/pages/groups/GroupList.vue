@@ -66,7 +66,7 @@ import ShareButton from '../../components/ShareButton.vue';
  * Groups's list.
  */
 export default Vue.extend({
-  name: 'GroupListPage',
+  name: 'GroupList',
   components: {
     SimpleMap,
     SearchBar,
