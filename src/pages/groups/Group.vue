@@ -128,10 +128,10 @@ interface ContactNames {
   }
 }
 /**
- * GroupPage.
+ * Page for Group details.
  */
 export default Vue.extend({
-  name: 'GroupPage',
+  name: 'Group',
   filters: {
     link(link: string): string {
       return link.replace(/(https|http):\/\//, '');

@@ -1,8 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import LoginPage from '../LoginPage.vue';
+import Login from '../Login.vue';
 import { Quasar, QBtn } from 'quasar';
 
-describe('LoginPage.vue', () => {
+describe('Login.vue', () => {
   // We use createLocalVue in order not to pollute the global scope.
   const localVue = createLocalVue();
 
@@ -11,7 +11,7 @@ describe('LoginPage.vue', () => {
   
   // Shallow Mount means that the child components are not mounted,
   // but placeholder components are used instead.
-  const wrapper = shallowMount(LoginPage, {
+  const wrapper = shallowMount(Login, {
     localVue,
     mocks: {
       // Mocking translate function since I was unable to properly 
