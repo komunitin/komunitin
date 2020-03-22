@@ -3,11 +3,11 @@ import { RouteConfig } from 'vue-router';
 const routes: RouteConfig[] = [
   {
     path: '/',
-    component: () => import('pages/home/HomeLayout.vue'),
+    component: () => import('layouts/Front.vue'),
     children: [
       {
         path: '',
-        component: () => import('pages/home/LoginPage.vue')
+        component: () => import('pages/home/Login.vue')
       },
       {
         path: '/login-select/',
@@ -25,17 +25,17 @@ const routes: RouteConfig[] = [
   },
   {
     path: '/groups/',
-    component: () => import('pages/groups/GroupsLayout.vue'),
+    component: () => import('layouts/Guest.vue'),
     children: [
       {
         path: '/groups/',
-        name: 'GroupsListPage',
-        component: () => import('pages/groups/GroupsList.vue')
+        name: 'GroupList',
+        component: () => import('pages/groups/GroupList.vue')
       },
       {
         path: '/groups/:id',
         props: true,
-        name: 'GroupPage',
+        name: 'Group',
         component: () => import('pages/groups/Group.vue')
       }
     ]

@@ -7,7 +7,7 @@
       text-color="onprimary"
       :label="$t('Find your local group')"
       icon="explore"
-      :to="{ name: 'GroupsListPage' }"
+      :to="{ name: 'GroupList' }"
       class="full-width"
     />
     <p class="text-onoutside-m q-mt-md q-mb-xs">{{ $t('Already registered to a local group?') }}</p>
@@ -32,7 +32,7 @@ import Vue from 'vue';
  * @todo Login con google o facebook.
  */
 export default Vue.extend({
-  name: 'LoginPage'
+  name: 'Login'
 });
 </script>
 <style lang="scss" scope>

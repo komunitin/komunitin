@@ -9,7 +9,7 @@ declare global {
   }
 }
 import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
-import GroupsList from "../GroupsList.vue";
+import GroupList from "../GroupList.vue";
 
 import {
   Quasar,
@@ -84,7 +84,7 @@ describe("GroupsList.vue", () => {
     notifyList = [{}];
 
     require("../../../services/mirage.js");
-    wrapper = shallowMount(GroupsList, {
+    wrapper = shallowMount(GroupList, {
       // Avoid error with translations.
       mocks: {
         $t: () => "Mock text",
