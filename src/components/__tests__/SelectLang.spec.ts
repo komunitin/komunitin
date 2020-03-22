@@ -1,5 +1,12 @@
-import { createLocalVue, mount, Wrapper } from "@vue/test-utils";
-import SelectLang from "../SelectLang.vue";
+import { mount, Wrapper } from "@vue/test-utils";
+
+// Install Komunitin global at Vue.prototype, since boot scripts are not run.
+import "../../boot/komunitin";
+
+// Set global i18n instance.
+import {i18n} from "../../boot/i18n";
+
+import Vue from 'vue';
 import {
   Quasar,
   QSelect,
@@ -10,20 +17,18 @@ import {
   QList
 } from "quasar";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Koptions = require("src/komunitin.json");
+import SelectLang from "../SelectLang.vue";
 
+/**
+ * This test uses the global Vue variable in order to properly interact 
+ * with boot functions and i18n plugin. It does not just tet the component 
+ * but also the language logic.
+ * **/
 describe("SelectLang", () => {
-  let locale: string;
-  // let langs: {};
-  // @ts-ignore
-  let wrapper: Wrapper<SelectLang>;
+  let wrapper: Wrapper<Vue>;
 
-  // We use createLocalVue in order not to pollute the global scope.
-  const localVue = createLocalVue();
-
-  // We need to explicitely include the components to be used.
-  localVue.use(Quasar, {
+  // Using global Vue instance.
+  Vue.use(Quasar, {
     components: {
       QSelect,
       QItem,
@@ -34,32 +39,19 @@ describe("SelectLang", () => {
     }
   });
 
-  // Montamos el componente con los props necesarios antes de cada test.
   beforeEach(() => {
-    locale = "en-us";
-    // langs = Koptions.langs;
-    wrapper = mount(SelectLang, {
-      // Avoid error with translations.
-      mocks: {
-        $t: () => "Title Mock Text",
-        $i18n: {
-          locale: locale
-        },
-        $Koptions: Koptions
-      },
-      localVue
-    });
+    wrapper = mount(SelectLang, { i18n });
   });
 
-  it("Check that it emits the selected language", () => {
-    const newLang = wrapper.vm.$data.langs[0].value;
-    wrapper.vm.$emit("setLocale");
-    wrapper.vm.$emit("setLocale", newLang);
-    expect(wrapper.emitted().setLocale).toBeTruthy();
-  });
-
-  it('Check that it emits the "ca" language', () => {
-    wrapper.vm.$emit("setLocale", "ca");
-    expect(wrapper.emitted().setLocale?.length).toBe(1);
+  it("Check language change", async () => {
+    expect(wrapper.text()).toContain("Language");
+    // Don't know how to simulate the click on the menu item,
+    // so invocking the method directly.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (wrapper.vm as any).changeLanguage("ca");
+    // Check language changed on i18n plugin.
+    expect(i18n.locale).toBe("ca");
+    // Check language changed on quasar.
+    expect(wrapper.vm.$q.lang.isoName).toBe("ca");
   });
 });
