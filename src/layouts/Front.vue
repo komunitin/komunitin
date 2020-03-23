@@ -2,13 +2,7 @@
   <q-layout view="hhh lpr fff" class="home column justify-start items-center">
     <q-header class="bg-transparent">
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          color="white"
-          icon="arrow_back"
-          aria-label="Home"
+        <q-btn flat dense round color="onoutside" icon="arrow_back" aria-label="Back"
           :class="$route.path === '/' ? 'invisible' : ''"
           @click="$router.back()"
         />
@@ -26,14 +20,8 @@
     </q-page-container>
     <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
       <select-lang />
-      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" label="Help" />
-      <q-btn
-        flat
-        type="a"
-        href="https://github.com/komunitin/komunitin"
-        target="__blank"
-        label="Contribute"
-      />
+      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" :label="$t('Help')" />
+      <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" :label="$t('Contribute')" />
     </q-footer>
   </q-layout>
 </template>
@@ -47,7 +35,7 @@ import selectLang from 'components/SelectLang.vue';
  * Layout base con menú lateral.
  */
 export default Vue.extend({
-  name: 'HomeLayout',
+  name: 'Front',
   components: {
     selectLang,
     FitText
@@ -68,7 +56,7 @@ export default Vue.extend({
     no-repeat fixed;
   background-size: cover;
 }
-// Set teh width of "Welcom to..." div so text can fit in it using the 'vue-resize-text' module.
+// Set the width of "Welcom to..." div so text can fit in it using the 'vue-resize-text' module.
 #title {
   width: 328px;
 }
