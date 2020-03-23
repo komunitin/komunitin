@@ -1,14 +1,13 @@
 import { Server } from 'miragejs';
-import { mockGroup, mockGroupsList } from '../pages/groups/models/mockData';
+import { mockGroup, mockGroupList } from '../pages/groups/models/mockData';
+import KOptions from '../komunitin.json';
 
 console.debug('Mirage activated');
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const server = new Server({
-  timing: 500,
-  logging: true,
-  // urlPrefix: 'https://integralces.net/api',
-  // namespace: 'groups',
+new Server({
+
+  // Take the Base url from mockData.ts
+  urlPrefix: KOptions.apis.social,
 
   routes() {
     if (process.env.USE_MIRAGE) {
@@ -16,53 +15,14 @@ const server = new Server({
     }
     /**
      * List of groups.
+     * 
+     * Ignoring localization, sort, search and pagination query params.
      */
-    this.get(
-      'https://integralces.net/api/groups/:pag/:perPag',
-      (schema, request) => {
-        const pag = request.params.pag;
-        const perPag = request.params.perPag;
-        console.debug({ ListGroupsGet: { pag: pag, perPag: perPag } });
-        return mockGroupsList();
-      }
-    );
+    this.get('/groups', () => mockGroupList());
 
     /**
-     * List of groups width location.
+     * Full Group
      */
-    this.get(
-      'https://integralces.net/api/groups/:pag/:perPag/:lat/:lng',
-      (schema, request) => {
-        const lat = request.params.lat;
-        const lng = request.params.lng;
-        const pag = request.params.pag;
-        const perPag = request.params.perPag;
-
-        console.debug({ Mirage: [pag, perPag, lat, lng] });
-
-        return mockGroupsList();
-      }
-    );
-
-    /**
-     * List of groups width filter.
-     */
-    this.get(
-      'https://integralces.net/api/groups/filter/:search',
-      (schema, request) => {
-        const search = request.params.search;
-        console.debug({ Search: search });
-        return mockGroupsList();
-      }
-    );
-
-    /**
-     * Group.
-     */
-    this.get('https://integralces.net/api/group/:id', (schema, request) => {
-      let id = request.params.id;
-      id = 0;
-      return mockGroup[id];
-    });
+    this.get('/:code', () => mockGroup());
   }
 });

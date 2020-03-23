@@ -22,11 +22,8 @@ import {
 } from "quasar";
 
 describe("Group.vue", () => {
-  let id: string;
-  // let group: object;
-  // let isLoading: boolean;
-  // @ts-ignore
-  let wrapper: Wrapper<Group>;
+  let code: string;
+  let wrapper: Wrapper<Vue>;
   let errorsList: [Error, string];
   let notifyList: [{}];
 
@@ -56,7 +53,7 @@ describe("Group.vue", () => {
   });
 
   beforeEach(() => {
-    id = "1";
+    code = "GRP1";
     notifyList = [{}];
     errorsList = [new Error(), "Init"];
 
@@ -64,7 +61,7 @@ describe("Group.vue", () => {
 
     wrapper = shallowMount(Group, {
       propsData: {
-        id: id
+        group: code
       },
       mocks: {
         // Avoid error with translations.
@@ -94,7 +91,7 @@ describe("Group.vue", () => {
   it("check receive data", async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (wrapper.vm as any).collectGroup("1");
+    await (wrapper.vm as any).fetchGroup();
     expect(wrapper.vm.$data.isLoading).toBe(false);
     expect(wrapper.vm.$data.group).toBeTruthy();
   });

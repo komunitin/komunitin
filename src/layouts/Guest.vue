@@ -23,7 +23,7 @@ import Vue from 'vue';
  * The header needs to be defined by every page.
  */
 export default Vue.extend({
-  name: 'GroupsLayout'
+  name: 'Guest'
 });
 </script>
 <style lang="scss" scope>

@@ -10,10 +10,10 @@ module.exports = function(ctx) {
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
       "komunitin",
+      "errors",
       "i18n",
       "vuelidate",
-      "mirage",
-      "errorsManagement"
+      "mirage"
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -108,7 +108,7 @@ module.exports = function(ctx) {
       manifest: {
         name: "Komunitin",
         short_name: "Komunitin",
-        description: "Open source platform featuring",
+        description: "Open System for Exchange Communities",
         display: "standalone",
         orientation: "portrait",
         background_color: "#ffffff",
@@ -146,7 +146,7 @@ module.exports = function(ctx) {
     // Full list of options: https://quasar.dev/quasar-cli/developing-cordova-apps/configuring-cordova
     cordova: {
       // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing
-      id: "org.komunitin.movil.app"
+      id: "org.komunitin.mobile.app"
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-capacitor-apps/configuring-capacitor
