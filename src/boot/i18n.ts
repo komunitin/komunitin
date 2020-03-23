@@ -2,6 +2,7 @@ import Vue from "vue";
 import { boot } from 'quasar/wrappers'
 import VueI18n from "vue-i18n";
 import DefaultMessages from 'src/i18n/en-us';
+import KOptions from './komunitin';
 
 // Install 'vue-i18n' plugin.
 Vue.use(VueI18n);
@@ -31,7 +32,7 @@ export const i18n = new VueI18n({
  * or the default language code (English) instead.
  * **/
 function normalizeLocale(locale: string) : string {
-  return Vue.prototype.$Koptions.langs.reduce(
+  return KOptions.langs.reduce(
     (lang: string, elem: {label: string, value: string}) => {
       return elem.value === locale ? locale : lang
     }, DEFAULT_LANG); 

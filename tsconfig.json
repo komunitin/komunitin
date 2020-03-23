@@ -12,8 +12,7 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@/*": ["src/*"],
-      "components/": ["src/components/"]
+      "@/*": ["/src/*"]
     }
   },
   "exclude": ["node_modules"],

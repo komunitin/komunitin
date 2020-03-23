@@ -1,4 +1,15 @@
 import Vue from 'vue';
-import Koptions from 'src/komunitin.json';
+import KOptions from 'src/komunitin.json';
 
-Vue.prototype.$Koptions = Koptions;
+/**
+ * Augment Vue interface with $KOptions member.
+ */
+Vue.prototype.$KOptions = KOptions;
+
+declare module 'vue/types/vue' {
+  interface Vue {
+    $KOptions: typeof KOptions
+  }
+}
+
+export default KOptions
