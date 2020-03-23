@@ -33,7 +33,7 @@ const routes: RouteConfig[] = [
         component: () => import('pages/groups/GroupList.vue')
       },
       {
-        path: '/groups/:id',
+        path: '/groups/:code',
         props: true,
         name: 'Group',
         component: () => import('pages/groups/Group.vue')
