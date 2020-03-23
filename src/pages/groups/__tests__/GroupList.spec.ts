@@ -119,13 +119,13 @@ describe("GroupsList.vue", () => {
   it("Check isLoading false", async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (wrapper.vm as any).getGroups(1, 10);
+    await (wrapper.vm as any).fetchGroups();
     expect(wrapper.vm.$data.isLoading).toBe(false);
   });
 
   it("Check data", async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (wrapper.vm as any).getGroups(1, 10);
+    await (wrapper.vm as any).fetchGroups();
     expect(wrapper.vm.$data.groups).toHaveLength(10);
   });
 });

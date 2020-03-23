@@ -6,7 +6,7 @@
     :center="center"
   >
     <l-tile-layer :url="url"></l-tile-layer>
-    <l-marker v-if="markerLatLng" :lat-lng="markerLatLng" :icon="greenIcon"></l-marker>
+    <l-marker v-if="marker" :lat-lng="marker" :icon="greenIcon"></l-marker>
   </l-map>
 </template>
 
@@ -32,7 +32,18 @@ export default {
     LTileLayer,
     LMarker
   },
-  props: ['center', 'markerLatLng'],
+  props: {
+    center: {
+      type: Array,
+      default: undefined,
+      required: true,
+    },
+    marker: {
+      type: Array,
+      default: undefined,
+      required: false,
+    }
+  },
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',

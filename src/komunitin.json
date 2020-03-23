@@ -1,4 +1,7 @@
 {
+  "apis": {
+    "social": "http://localhost:8080/social" 
+  },
   "langs": [
     {
       "label": "Català",
