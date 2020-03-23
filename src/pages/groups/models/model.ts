@@ -1,127 +1,125 @@
 /**
- * Groups Model Location.
- */
-export interface GroupsListModelLocation {
-  name: string;
-  type: string;
-  coordinates: [number, number];
-}
-/**
- * Groups Model.
- */
-export interface GroupsListModel {
-  id: number;
-  data: {
-    attributes: {
-      code: string;
-      name: string;
-      description: string;
-      image: string;
-      website: string;
-      access: string;
-      location: GroupsListModelLocation;
-    };
-  };
-}
-
-/**
  * See https://jsonapi.org/format/#document-resource-identifier-objects
  * 
  */
 export interface ResourceIdentifierObject {
-  type: string,
+  type: string
   id: string
 }
 
-export interface ResourceObject {
-  data: ResourceIdentifierObject
+export interface ResourceObject extends ResourceIdentifierObject {
+  links: {
+    self: string
+  }
 }
 
-export type Contact = ResourceObject & {
-  data: {
-    attributes: {
-      type: string,
-      name: string,
-      created: string,
-      updated: string
-    }
+export interface ErrorObject {
+  status: number
+  code: string
+  title: string
+}
+
+export type Response<T extends ResourceObject,I extends ResourceObject> = ErrorResponse | ResourceResponse<T> | ResourceResponseInclude<T,I> | CollectionResponse<T>;
+
+export interface ErrorResponse {
+  errors: ErrorObject[]
+}
+
+export interface ResourceResponse<T extends ResourceObject> {
+  data : T | null
+}
+
+export interface ResourceResponseInclude<T extends ResourceObject, I extends ResourceObject> {
+  data : T | null
+  included: I[]
+}
+
+export interface CollectionResponse<T extends ResourceObject> {
+  links: {
+    "self": string
+    "first": string
+    "prev": string | null
+    "next": string | null
+  },
+  meta: {
+    count: number
+  }
+  data: T[]
+}
+
+
+/**
+ * Geolocation model.
+ * 
+ * Currently it only supports the Point type but it may be extended in 
+ * the future following the GeoJSON spec.
+ */
+export interface Location {
+  name: string
+  type: "Point"
+  coordinates: [number, number]
+}
+
+/**
+ * Group summarized model for cards.
+ */
+export interface GroupSummary extends ResourceObject{
+  attributes: {
+    code: string
+    name: string
+    description: string
+    image: string
+    website: string
+    access: Access
+    location: Location
   }
 }
 
 /**
- * Group model.
+ * Contact model.
+ * */ 
+export interface Contact extends ResourceObject  {
+  attributes: {
+    type: string
+    name: string
+    created: string
+    updated: string
+  }
+}
+
+export type Access = "public" | "group" | "private"
+
+export interface RelatedCollection {
+  links : {
+    related: string
+  }
+  meta: {
+    count: number
+  }
+}
+/**
+ * Full group model.
  */
-export interface GroupModel {
-  data: {
-    id: string;
-    type: string;
-    attributes: {
-      code: string;
-      name: string;
-      description: string;
-      image: string;
-      website: string;
-      mail: string;
-      access: string;
-      location: {
-        name: string;
-        type: string;
-        bbox: number[];
-        coordinates: [number, number][][];
-      };
+export interface Group extends GroupSummary {
+  attributes: {
+    code: string
+    name: string
+    description: string
+    image: string
+    website: string
+    access: Access
+    location: Location
+    created: string
+    updated: string
+  }
+  relationships: {
+    contacts: {
+      data: ResourceIdentifierObject[];
     };
-    relationships: {
-      contacts: {
-        data: ResourceIdentifierObject[];
-      };
-      members: {
-        links: {
-          related: string;
-        };
-        meta: {
-          count: number;
-        };
-      };
-      categories: {
-        links: {
-          related: string;
-        };
-        meta: {
-          count: number;
-        };
-      };
-      offers: {
-        links: {
-          related: string;
-        };
-        meta: {
-          count: number;
-        };
-      };
-      needs: {
-        links: {
-          related: string;
-        };
-        meta: {
-          count: number;
-        };
-      };
-      posts: {
-        links: {
-          related: string;
-        };
-        meta: {
-          count: number;
-        };
-      };
-    };
-    links: {
-      self: string;
-    };
-    meta: {
-      created: string;
-      updated: string;
-    };
-  };
-  included: object[];
+    members: RelatedCollection
+    categories: RelatedCollection
+    offers: RelatedCollection
+    needs: RelatedCollection
+    posts: RelatedCollection
+  }
 }

@@ -19,7 +19,7 @@ export default Vue.extend({
     return {
       locale: this.$i18n.locale,
       // Available languages.
-      langs: this.$Koptions.langs
+      langs: this.$KOptions.langs
     };
   },
   methods: {
