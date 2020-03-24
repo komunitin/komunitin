@@ -26,11 +26,11 @@ jobs:
       run: wget http://localhost/
     
     - name: Publish to Docker Hub
-      if: github.ref == 'ref/head/master'
+      if: github.ref == 'ref/heads/master'
       run: |
         docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
         docker push komunitin/komunitin-app
     
     - name: Update test.komunitin.org
-      if: github.ref == 'ref/head/master'
+      if: github.ref == 'ref/heads/master'
       run: curl ${{ secrets.DEPLOY_WEBHOOK_URL }}
