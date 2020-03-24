@@ -10,6 +10,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Echo ref
+      run: echo "${{github.ref}}"
+
     - name: Build app
       run: docker build --target komunitin-app-build --tag komunitin-app-build .
 
