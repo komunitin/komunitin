@@ -24,8 +24,8 @@ RUN npm install
 # Rebuild node-sass.
 RUN npm rebuild node-sass
 
-# Build App.
-RUN quasar build -m pwa
+# Build App using the build script defined in package.json
+RUN npm run build
 
 # Production stage
 
