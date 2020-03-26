@@ -129,24 +129,6 @@ export interface Group extends GroupSummary {
     posts: RelatedCollection;
   };
 }
-
-export interface CollectionCategoryResponse<T extends ResourceObject> {
-  links: {
-    self: string;
-    first: string;
-    prev: string | null;
-    next: string | null;
-  };
-  meta: {
-    count: number;
-  };
-  data: T[];
-}
-
-/**
- * Summary categories.
- */
-
 export interface CategorySummary extends ResourceObject {
   attributes: {
     code: string;
@@ -159,42 +141,18 @@ export interface CategorySummary extends ResourceObject {
     updated: string;
   };
 }
-
 /**
- * Full category model.
+ * Categories.
  */
+
 export interface Category extends CategorySummary {
-  attributes: {
-    code: string;
-    name: string;
-    cpa: string[];
-    description: string;
-    icon: string;
-    access: Access;
-    created: string;
-    updated: string;
-  };
   relationships: {
     group: {
       links: {
         related: string;
       };
     };
-    needs: {
-      links: {
-        related: string;
-      };
-      meta: {
-        count: number;
-      };
-    };
-    offers: {
-      links: {
-        related: string;
-      };
-      meta: {
-        count: number;
-      };
-    };
+    needs: RelatedCollection;
+    offers: RelatedCollection;
   };
 }

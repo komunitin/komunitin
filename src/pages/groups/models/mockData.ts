@@ -8,9 +8,8 @@ import {
   ResourceObject,
   ResourceIdentifierObject,
   RelatedCollection,
-  CategorySummary,
   Category,
-  ResourceResponse
+  CategorySummary
 } from "./model";
 import { LoremIpsum, ILoremIpsumParams } from "lorem-ipsum";
 import { uid } from "quasar";
@@ -19,7 +18,6 @@ import KOptions from "../../../komunitin.json";
 // Configuration
 const BASE_URL = KOptions.apis.social;
 const NUM_GROUPS = 11;
-const NUM_CATEGORIES = 20;
 
 const loremOptions: ILoremIpsumParams = {
   format: "html" // "plain" or "html"
@@ -218,7 +216,7 @@ export function mockGroup(): ResourceResponseInclude<Group, Contact> {
   };
 }
 
-function mockCategorySummary(index: number): Category {
+function mockCategorySummary(index: number): CategorySummary {
   const id = uid();
   return {
     id: id,
@@ -233,6 +231,23 @@ function mockCategorySummary(index: number): Category {
       created: new Date().toJSON(),
       updated: new Date().toJSON()
     },
+
+    links: {
+      self: BASE_URL + "/categories/" + id
+    }
+  };
+}
+
+/**
+ * Mock result for /{groupCode}/categories/id
+ *
+ * @todo Utilizar enlaces BASE
+ */
+export function mockCategory(index: number): Category {
+  const summary = mockCategorySummary(index);
+
+  return {
+    ...summary,
     relationships: {
       group: {
         links: {
@@ -244,7 +259,7 @@ function mockCategorySummary(index: number): Category {
           related: "https://komunitin.org/EITE/needs?filter[category]=food"
         },
         meta: {
-          count: 3
+          count: Math.round(Math.random() * 100)
         }
       },
       offers: {
@@ -252,12 +267,9 @@ function mockCategorySummary(index: number): Category {
           related: "https://komunitin.org/EITE/offers?filter[category]=food"
         },
         meta: {
-          count: 32
+          count: Math.round(Math.random() * 100)
         }
       }
-    },
-    links: {
-      self: BASE_URL + "/categories/" + id
     }
   };
 }
@@ -266,11 +278,11 @@ function mockCategorySummary(index: number): Category {
  *
  * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get_groups
  */
-export function mockCategoryList(): CollectionResponse<CategorySummary> {
-  const list = [] as CategorySummary[];
+export function mockCategoryList(): CollectionResponse<Category> {
+  const list = [] as Category[];
 
-  for (let index = 1; index < NUM_CATEGORIES; index++) {
-    list.push(mockCategorySummary(index));
+  for (let index = 1; index <= 4; index++) {
+    list.push(mockCategory(index));
   }
 
   return {
@@ -284,42 +296,5 @@ export function mockCategoryList(): CollectionResponse<CategorySummary> {
     meta: {
       count: Math.round(Math.random() * 500)
     }
-  };
-}
-/**
- * Mock result for /{groupCode}/categories/id
- */
-export function mockCategory(): ResourceResponse<Category> {
-  const summary = mockCategorySummary(1);
-
-  const category: Category = {
-    ...summary,
-    relationships: {
-      group: {
-        links: {
-          related: "https://komunitin.org/EITE"
-        }
-      },
-      offers: {
-        links: {
-          related: "https://komunitin.org/EITE/offers?filter[category]=food"
-        },
-        meta: {
-          count: 32
-        }
-      },
-      needs: {
-        links: {
-          related: "https://komunitin.org/EITE/needs?filter[category]=food"
-        },
-        meta: {
-          count: 2
-        }
-      }
-    }
-  };
-
-  return {
-    data: category
   };
 }
