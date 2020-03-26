@@ -55,20 +55,22 @@
         <!-- explore -->
         <div class="col-12 col-sm-6">
           <group-stats
+            v-if="offers"
             :title="$t('Offers')"
             icon="local_offer"
-            :content="totalOffers"
-            :href="linkOffers"
+            :content="group.relationships.offers.meta.count"
+            :href="group.relationships.offers.links.related"
             :items="offers"
           />
         </div>
 
         <div class="col-12 col-sm-6">
           <group-stats
+            v-if="needs"
             :title="$t('Needs')"
             icon="loyalty"
-            :content="totalNeeds"
-            :href="linkNeeds"
+            :content="group.relationships.needs.meta.count"
+            :href="group.relationships.needs.links.related"
             :items="needs"
           />
         </div>
@@ -78,7 +80,7 @@
             :title="$t('Members')"
             icon="account_circle"
             :content="group.relationships.members.meta.count"
-            :href="`groups/${group.relationships.members.links.related}`"
+            :href="group.relationships.members.links.related"
             :items="[
               '13 Empreses',
               '8 Organitzacions',
@@ -162,12 +164,8 @@ export default Vue.extend({
       isLoading: true,
       contactsView: false,
       socialButtonsView: false,
-      totalNeeds: null as number | null,
-      totalOffers: null as number | null,
       needs: null as string[] | null,
-      offers: null as string[] | null,
-      linkOffers: null as string | null,
-      linkNeeds: null as string | null
+      offers: null as string[] | null
     };
   },
   computed: {
@@ -196,10 +194,6 @@ export default Vue.extend({
     }
   },
   mounted: function(): void {
-    // @todo Since the API does not come a url for
-    //       offers or needs, I build it from here.
-    this.linkNeeds = this.code + "/needs";
-    this.linkOffers = this.code + "/offers";
     this.fetchGroup(this.code);
     this.fetchCategories(this.code);
   },
@@ -217,8 +211,6 @@ export default Vue.extend({
       }
     },
     async fetchCategories(code: string) {
-      // @bug?
-      // const moreMsg = this.$t("AndMoreCategories");
       const moreMsg = "And more categories";
 
       try {
@@ -231,7 +223,6 @@ export default Vue.extend({
           "1",
           "4"
         );
-        this.totalOffers = responseOffers.meta.count;
         for (const category of responseOffers.data) {
           this.offers.push(
             category.relationships.offers.meta.count +
@@ -249,7 +240,6 @@ export default Vue.extend({
           "1",
           "4"
         );
-        this.totalNeeds = responseNeeds.meta.count;
         for (const category of responseNeeds.data) {
           this.needs.push(
             category.relationships.needs.meta.count +
