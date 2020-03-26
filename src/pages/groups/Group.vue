@@ -1,23 +1,10 @@
 <template>
   <div>
     <q-toolbar class="bg-primary text-onprimary">
-      <q-btn
-        flat
-        round
-        icon="arrow_back"
-        aria-label="Home"
-        @click="$router.back()"
-      />
+      <q-btn flat round icon="arrow_back" aria-label="Home" @click="$router.back()" />
       <q-toolbar-title>{{group ? group.attributes.name : ""}}</q-toolbar-title>
 
-      <q-btn
-        v-if="group"
-        right
-        flat
-        round
-        icon="message"
-        @click="contactsView = true"
-      />
+      <q-btn v-if="group" right flat round icon="message" @click="contactsView = true" />
       <share-button
         v-if="group"
         :text="$t('Check the exchange community {group}', {group: group.attributes.name})"
@@ -50,8 +37,7 @@
         <!-- description -->
         <div class="col-12 col-sm-6 col-md-8">
           <div class="text-h6">{{ group.attributes.code }}</div>
-          <div class="text-onsurface-m" v-html="group.attributes.description"
-          ></div>
+          <div class="text-onsurface-m" v-html="group.attributes.description"></div>
           <q-separator spaced />
           <div class="k-inset-actions-md">
             <q-btn
@@ -67,23 +53,17 @@
           </div>
         </div>
         <!-- explore -->
-        <div class="col-12 col-sm-6">
+        <div v-if="offers" class="col-12 col-sm-6">
           <group-stats
             :title="$t('Offers')"
             icon="local_offer"
             :content="group.relationships.offers.meta.count"
             :href="`groups/${group.relationships.offers.links.related}`"
-            :items="[
-              '53 Alimentació',
-              '44 Serveis professionals',
-              '38 Salut i higiene',
-              '32 Arts i cultura',
-              'i més categories'
-            ]"
+            :items="offers"
           />
         </div>
 
-        <div class="col-12 col-sm-6">
+        <div v-if="needs" class="col-12 col-sm-6">
           <group-stats
             :title="$t('Needs')"
             icon="loyalty"
@@ -119,7 +99,7 @@
             :title="$t('Currency')"
             icon="monetization_on"
             content="ℏ"
-            href=""
+            href
             :items="[
               '7.201 transaccions / any',
               '89.500 intercanviats / any',
@@ -133,8 +113,8 @@
             <simple-map class="simple-map" :center="center" :marker="marker" />
             <q-card-section class="group-footer-card text-onsurface-m">
               <q-icon name="place" />
-              {{ group.attributes.location.name }}</q-card-section
-            >
+              {{ group.attributes.location.name }}
+            </q-card-section>
           </q-card>
         </div>
         <div class="col-12 col-sm-6 col-lg-4">
@@ -149,7 +129,7 @@
 import Vue from "vue";
 import api from "../../services/SocialApi";
 import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact } from "./models/model";
+import { Group, Contact, CategorySummary } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
@@ -187,7 +167,9 @@ export default Vue.extend({
       contacts: [] as Contact[],
       isLoading: true,
       contactsView: false,
-      socialButtonsView: false
+      socialButtonsView: false,
+      needs: null as [] | null,
+      offers: null as [] | null
     };
   },
   computed: {
@@ -217,6 +199,7 @@ export default Vue.extend({
   },
   mounted: function(): void {
     this.fetchGroup(this.code);
+    this.fetchCategories(this.code);
   },
   methods: {
     async fetchGroup(code: string) {
@@ -229,6 +212,23 @@ export default Vue.extend({
         this.contacts = response.contacts;
       } finally {
         this.isLoading = false;
+      }
+    },
+    async fetchCategories(code: string) {
+      try {
+        this.needs = null;
+        const response: CategorySummary[] = await api.getCategories(code);
+        console.debug({ response: response });
+
+        this.needs = [];
+        this.offers = [];
+        for (const category in response) {
+          console.debug({ category: category });
+          // this.needs.push(category.attributes.name);
+          // this.offers.push(category.attributes.name);
+        }
+      } finally {
+        // console.log(response);
       }
     }
   }
