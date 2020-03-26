@@ -240,8 +240,6 @@ function mockCategorySummary(index: number): CategorySummary {
 
 /**
  * Mock result for /{groupCode}/categories/id
- *
- * @todo Utilizar enlaces BASE
  */
 export function mockCategory(index: number): Category {
   const summary = mockCategorySummary(index);
@@ -251,12 +249,12 @@ export function mockCategory(index: number): Category {
     relationships: {
       group: {
         links: {
-          related: "https://komunitin.org/EITE"
+          related: BASE_URL + "/group/EITE"
         }
       },
       needs: {
         links: {
-          related: "https://komunitin.org/EITE/needs?filter[category]=food"
+          related: BASE_URL + "/group/EITE/needs?filter[category]=food"
         },
         meta: {
           count: Math.round(Math.random() * 100)
@@ -264,7 +262,7 @@ export function mockCategory(index: number): Category {
       },
       offers: {
         links: {
-          related: "https://komunitin.org/EITE/offers?filter[category]=food"
+          related: BASE_URL + "/group/EITE/offers?filter[category]=food"
         },
         meta: {
           count: Math.round(Math.random() * 100)
