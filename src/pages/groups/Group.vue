@@ -53,29 +53,23 @@
           </div>
         </div>
         <!-- explore -->
-        <div v-if="offers" class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6">
           <group-stats
             :title="$t('Offers')"
             icon="local_offer"
-            :content="group.relationships.offers.meta.count"
-            :href="`groups/${group.relationships.offers.links.related}`"
+            :content="totalOffers"
+            :href="linkOffers"
             :items="offers"
           />
         </div>
 
-        <div v-if="needs" class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6">
           <group-stats
             :title="$t('Needs')"
             icon="loyalty"
-            :content="group.relationships.needs.meta.count"
-            :href="`groups/${group.relationships.needs.links.related}`"
-            :items="[
-              '53 Alimentació',
-              '44 Serveis professionals',
-              '38 Salut i higiene',
-              '32 Arts i cultura',
-              'i més categories'
-            ]"
+            :content="totalNeeds"
+            :href="linkNeeds"
+            :items="needs"
           />
         </div>
 
@@ -129,7 +123,7 @@
 import Vue from "vue";
 import api from "../../services/SocialApi";
 import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact, CategorySummary } from "./models/model";
+import { Group, Contact, Category, CollectionResponse } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
@@ -168,8 +162,12 @@ export default Vue.extend({
       isLoading: true,
       contactsView: false,
       socialButtonsView: false,
-      needs: null as [] | null,
-      offers: null as [] | null
+      totalNeeds: null as number | null,
+      totalOffers: null as number | null,
+      needs: null as string[] | null,
+      offers: null as string[] | null,
+      linkOffers: null as string | null,
+      linkNeeds: null as string | null
     };
   },
   computed: {
@@ -198,6 +196,10 @@ export default Vue.extend({
     }
   },
   mounted: function(): void {
+    // @todo Since the API does not come a url for
+    //       offers or needs, I build it from here.
+    this.linkNeeds = this.code + "/needs";
+    this.linkOffers = this.code + "/offers";
     this.fetchGroup(this.code);
     this.fetchCategories(this.code);
   },
@@ -215,20 +217,49 @@ export default Vue.extend({
       }
     },
     async fetchCategories(code: string) {
-      try {
-        this.needs = null;
-        const response: CategorySummary[] = await api.getCategories(code);
-        console.debug({ response: response });
+      // @bug?
+      // const moreMsg = this.$t("AndMoreCategories");
+      const moreMsg = "And more categories";
 
-        this.needs = [];
+      try {
+        // Offers.
         this.offers = [];
-        for (const category in response) {
-          console.debug({ category: category });
-          // this.needs.push(category.attributes.name);
-          // this.offers.push(category.attributes.name);
+        const responseOffers: CollectionResponse<Category> = await api.getCategories(
+          code,
+          "",
+          "sort=relationships.offers.meta.count",
+          "1",
+          "4"
+        );
+        this.totalOffers = responseOffers.meta.count;
+        for (const category of responseOffers.data) {
+          this.offers.push(
+            category.relationships.offers.meta.count +
+              " " +
+              category.attributes.name
+          );
+        }
+
+        // Needs.
+        this.needs = [];
+        const responseNeeds: CollectionResponse<Category> = await api.getCategories(
+          code,
+          "",
+          "sort=relationships.needs.meta.count",
+          "1",
+          "4"
+        );
+        this.totalNeeds = responseNeeds.meta.count;
+        for (const category of responseNeeds.data) {
+          this.needs.push(
+            category.relationships.needs.meta.count +
+              " " +
+              category.attributes.name
+          );
         }
       } finally {
-        // console.log(response);
+        if (this.offers) this.offers.push(moreMsg);
+        if (this.needs) this.needs.push(moreMsg);
       }
     }
   }

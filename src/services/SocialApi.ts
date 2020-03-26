@@ -6,8 +6,6 @@ import {
   CollectionResponse,
   ErrorObject,
   ResourceResponseInclude,
-  CollectionCategoryResponse,
-  CategorySummary,
   Category
 } from "../pages/groups/models/model";
 import KError, { KErrorCode } from "../KError";
@@ -116,12 +114,44 @@ export default {
    * Get the categories of a group.
    *
    * @param code The group code (usually 4-letters)
+   * @param filter Filter.
+   *        Example: filter[attributes][attributes]=food
+   * @param order Order.
+   *        Example: sort=-created,title
+   *        Example: sort=relationships.offers.meta.count
+   * @param pag Number of page.
+   *        page[number]
+   * @param perPag Number of items.
+   *        page[limit]
    */
-  async getCategories(code: string): Promise<CategorySummary[]> {
+  async getCategories(
+    code: string,
+    filter?: string,
+    order?: string,
+    pag?: string,
+    perPag?: string
+  ): Promise<CollectionResponse<Category>> {
     try {
-      const response = await client.get<CollectionCategoryResponse<Category>>(
-        "/" + code + "/categories"
-      );
+      let query = "/" + code + "/categories";
+      let separator = "?";
+
+      if (filter !== undefined) {
+        query += separator + filter;
+        separator = "&";
+      }
+      if (order !== undefined) {
+        query += separator + order;
+        separator = "&";
+      }
+      if (pag !== undefined) {
+        query += separator + "page[number]=" + pag;
+        separator = "&";
+      }
+      if (perPag !== undefined) {
+        query += separator + "page[limit]=" + perPag;
+        separator = "&";
+      }
+      const response = await client.get<CollectionResponse<Category>>(query);
       if (response.data.data == null) {
         throw new KError(
           KErrorCode.ResourceNotFound,
@@ -129,7 +159,7 @@ export default {
           response
         );
       } else {
-        return response.data.data;
+        return response.data;
       }
     } catch (error) {
       throw getKError(error);
