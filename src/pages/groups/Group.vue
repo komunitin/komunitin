@@ -205,7 +205,7 @@ export default Vue.extend({
         this.isLoading = true;
         this.group = null;
         this.contacts = [];
-        const response = await api.getGroupWithContacts(code);
+        const response = await api.getGroupStatus(code);
         this.group = response.group;
         this.contacts = response.contacts;
       } finally {

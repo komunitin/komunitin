@@ -86,13 +86,13 @@ export default {
    *
    * @param code The group code (usually 4-letters)
    */
-  async getGroupWithContacts(
+  async getGroupStatus(
     code: string
   ): Promise<{ group: Group; contacts: Contact[] }> {
     try {
       const response = await client.get<
         ResourceResponseInclude<Group, Contact>
-      >("/" + code + "?include=contacts");
+      >("/" + code + "?include=contacts,categories,members,currency");
       if (response.data.data == null) {
         throw new KError(
           KErrorCode.ResourceNotFound,
