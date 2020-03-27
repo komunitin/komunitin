@@ -160,3 +160,48 @@ export interface Category extends CategorySummary {
     offers: RelatedCollection;
   };
 }
+
+/**
+ * Address interface.
+ */
+export interface Address {
+  streetAddress: string;
+  addressLocality: string;
+  postalCode: string;
+  addressRegion: string;
+}
+/**
+ * Member summary.
+ */
+export interface MemberSummary extends ResourceObject {
+  attributes: {
+    code: string;
+    access: Access;
+    name: string;
+    type: string;
+    description: string;
+    image: string;
+    address: Address;
+    location: Location;
+    created: string;
+    updated: string;
+  };
+}
+/**
+ * Member interface.
+ */
+
+export interface Member extends MemberSummary {
+  relationships: {
+    contacts: {
+      data: ResourceIdentifierObject[];
+    };
+    group: {
+      links: {
+        related: string;
+      };
+    };
+    needs: RelatedCollection;
+    offers: RelatedCollection;
+  };
+}
