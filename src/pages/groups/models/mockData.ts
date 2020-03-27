@@ -196,7 +196,17 @@ export function mockGroupList(): CollectionResponse<GroupSummary> {
     }
   };
 }
+/**
+ * @todo
+ ResourceResponseInclude2<T extends ResourceObject, I extends
+ResourceObject, J Extends ResourceObject> extends ResourceResponse<T> {
+  included: (I|J)[]
+}
+y por otro lado que la función de SocialApi separe por tipos y devuelva:
 
+{group: Group, contacts: Contact[], categories: Category[] }
+
+ */
 /**
  * Mock result for /{groupCode}
  *
@@ -206,6 +216,9 @@ export function mockGroup(): ResourceResponseInclude<Group, Contact> {
   const summary = mockGroupSummary(1);
   const code = summary.attributes.code;
   const contacts = mockContacts(code);
+  const categories = mockCategoryList(code);
+  const members = mockMemberList(code);
+  const currency = mockCurrency(code);
 
   const group: Group = {
     ...summary,
@@ -228,7 +241,12 @@ export function mockGroup(): ResourceResponseInclude<Group, Contact> {
 
   return {
     data: group,
-    included: contacts
+    included: {
+      contacts,
+      categories,
+      members,
+      currency
+    }
   };
 }
 
@@ -295,7 +313,7 @@ export function mockCategory(index: number): Category {
  *
  * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get_groups
  */
-export function mockCategoryList(): CollectionResponse<Category> {
+export function mockCategoryList(code: string): CollectionResponse<Category> {
   const list = [] as Category[];
 
   for (let index = 1; index <= 4; index++) {
@@ -305,8 +323,8 @@ export function mockCategoryList(): CollectionResponse<Category> {
   return {
     data: list,
     links: {
-      self: BASE_URL + "/categories",
-      first: BASE_URL + "/categories",
+      self: BASE_URL + '/' + code + "/categories",
+      first: BASE_URL + '/' + code + "/categories",
       prev: null,
       next: null
     },
@@ -387,7 +405,7 @@ export function mockMember(index: number): Member {
  *
  * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get_groups
  */
-export function mockMemberList(): CollectionResponse<Member> {
+export function mockMemberList(code: string): CollectionResponse<Member> {
   const list = [] as Member[];
 
   for (let index = 1; index <= 4; index++) {
@@ -397,13 +415,34 @@ export function mockMemberList(): CollectionResponse<Member> {
   return {
     data: list,
     links: {
-      self: BASE_URL + "/categories",
-      first: BASE_URL + "/categories",
+      self: BASE_URL + '/' + code + "/categories",
+      first: BASE_URL + '/' + code + "/categories",
       prev: null,
       next: null
     },
     meta: {
       count: Math.round(Math.random() * 500)
     }
+  };
+}
+
+/**
+ * Mock currency status.
+ *
+ * '7.201 transaccions / any',
+ * '89.500 intercanviats / any',
+ * '6.500 en circulació',
+ * '1 ECO = 1 EÇ = 0,1 ℏ = 1 tk'
+ */
+export function mockCurrency(code: string) {
+  return {
+    symbol: 'EÇ',
+    name: 'EcoVent',
+    value: 0,1,
+    scale: 2,
+    transaccions: Math.round(Math.random() * 10000),
+    exchanges: Math.round(Math.random() * 10000),
+    circulation: Math.round(Math.random() * 10000)
+
   };
 }
