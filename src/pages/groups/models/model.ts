@@ -129,6 +129,10 @@ export interface Group extends GroupSummary {
     posts: RelatedCollection;
   };
 }
+
+/**
+ * Categories summary.
+ */
 export interface CategorySummary extends ResourceObject {
   attributes: {
     code: string;
@@ -142,7 +146,7 @@ export interface CategorySummary extends ResourceObject {
   };
 }
 /**
- * Categories.
+ * Category interface.
  */
 
 export interface Category extends CategorySummary {
