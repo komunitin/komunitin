@@ -128,8 +128,8 @@ export default {
     code: string,
     filter?: string,
     order?: string,
-    pag?: string,
-    perPag?: string
+    pag?: number,
+    perPag?: number
   ): Promise<CollectionResponse<Category>> {
     try {
       let query = "/" + code + "/categories";
