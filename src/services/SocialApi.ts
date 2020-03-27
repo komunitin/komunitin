@@ -126,7 +126,7 @@ export default {
    */
   async getCategories(
     code: string,
-    filter?: string,
+    filter?: {[field: string]: string},
     order?: string,
     pag?: number,
     perPag?: number
