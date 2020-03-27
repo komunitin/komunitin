@@ -9,7 +9,10 @@ import {
   ResourceIdentifierObject,
   RelatedCollection,
   Category,
-  CategorySummary
+  CategorySummary,
+  Member,
+  MemberSummary,
+  Address
 } from "./model";
 import { LoremIpsum, ILoremIpsumParams } from "lorem-ipsum";
 import { uid } from "quasar";
@@ -144,6 +147,19 @@ function resourceIdentifiers(
   });
 }
 
+/**
+ * Mock Address.
+ * @param index Index.
+ */
+function mockAddress(index: number): Address {
+  return {
+    streetAddress: index + " S. Broadway",
+    addressLocality: "Denver",
+    postalCode: "80209",
+    addressRegion: "CO"
+  };
+}
+
 function relatedCollection(path: string, count: number): RelatedCollection {
   return {
     links: {
@@ -216,6 +232,9 @@ export function mockGroup(): ResourceResponseInclude<Group, Contact> {
   };
 }
 
+/**
+ * Mock category summary.
+ */
 function mockCategorySummary(index: number): CategorySummary {
   const id = uid();
   return {
@@ -281,6 +300,98 @@ export function mockCategoryList(): CollectionResponse<Category> {
 
   for (let index = 1; index <= 4; index++) {
     list.push(mockCategory(index));
+  }
+
+  return {
+    data: list,
+    links: {
+      self: BASE_URL + "/categories",
+      first: BASE_URL + "/categories",
+      prev: null,
+      next: null
+    },
+    meta: {
+      count: Math.round(Math.random() * 500)
+    }
+  };
+}
+
+/**
+ * Mock member summary.
+ */
+function mockMemberSummary(index: number): MemberSummary {
+  const id = uid();
+  return {
+    id: id,
+    type: "categories",
+    attributes: {
+      code: lorem.generateWords(1),
+      access: "public",
+      name: lorem.generateWords(Math.round(Math.random() * 2) + 1),
+      type: "business",
+      description: lorem.generateParagraphs(Math.round(Math.random() * 4) + 1),
+      image: testImages[index % testImages.length],
+      address: mockAddress(index),
+      location: testLocations[index % testLocations.length],
+      created: new Date().toJSON(),
+      updated: new Date().toJSON()
+    },
+
+    links: {
+      self: BASE_URL + "/merbers/" + id
+    }
+  };
+}
+
+/**
+ * Mock result for /{groupCode}/categories/id
+ */
+export function mockMember(index: number): Member {
+  const summary = mockMemberSummary(index);
+
+  return {
+    ...summary,
+    relationships: {
+      contacts: {
+        data: [
+          { type: "contacts", id: "7ceb75eb-9da0-4746-bb61-a34e0be49112" },
+          { type: "contacts", id: "193e98b4-a27d-4e8a-9a47-2dc5cd1c1ffb" }
+        ]
+      },
+      group: {
+        links: {
+          related: BASE_URL + "/group/EITE"
+        }
+      },
+      needs: {
+        links: {
+          related: BASE_URL + "/group/EITE/needs?filter[member]=food"
+        },
+        meta: {
+          count: Math.round(Math.random() * 100)
+        }
+      },
+      offers: {
+        links: {
+          related: BASE_URL + "/group/EITE/offers?filter[member]=food"
+        },
+        meta: {
+          count: Math.round(Math.random() * 100)
+        }
+      }
+    }
+  };
+}
+/**
+ * Mock result for GET /{groupCode}/categories
+ *
+ * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get_groups
+ */
+export function mockMemberList(): CollectionResponse<Member> {
+  const list = [] as Member[];
+
+  for (let index = 1; index <= 4; index++) {
+    list.push(mockMember(index));
   }
 
   return {
