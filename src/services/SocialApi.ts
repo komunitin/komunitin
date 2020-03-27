@@ -126,10 +126,10 @@ export default {
    */
   async getCategories(
     code: string,
-    filter?: string,
+    filter?: {[field: string]: string},
     order?: string,
-    pag?: string,
-    perPag?: string
+    pag?: number,
+    perPag?: number
   ): Promise<CollectionResponse<Category>> {
     try {
       let query = "/" + code + "/categories";
