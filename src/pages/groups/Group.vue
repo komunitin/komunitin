@@ -53,7 +53,7 @@
           </div>
         </div>
         <!-- explore -->
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
             v-if="offers"
             :title="$t('Offers')"
@@ -62,9 +62,10 @@
             :href="group.relationships.offers.links.related"
             :items="offers"
           />
+          <q-inner-loading :showing="offers === null" color="icon-dark" />
         </div>
 
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
             v-if="needs"
             :title="$t('Needs')"
@@ -73,9 +74,10 @@
             :href="group.relationships.needs.links.related"
             :items="needs"
           />
+          <q-inner-loading :showing="needs === null" color="icon-dark" />
         </div>
 
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
             :title="$t('Members')"
             icon="account_circle"
@@ -90,7 +92,7 @@
           />
         </div>
 
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
             :title="$t('Currency')"
             icon="monetization_on"
@@ -113,7 +115,7 @@
             </q-card-section>
           </q-card>
         </div>
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-4 relative-position">
           <social-network-list type="contact" :networks="groupContacts" />
         </div>
       </div>
@@ -215,7 +217,6 @@ export default Vue.extend({
 
       try {
         // Offers.
-        this.offers = [];
         const responseOffers: CollectionResponse<Category> = await api.getCategories(
           code,
           "",
@@ -223,6 +224,7 @@ export default Vue.extend({
           "1",
           "4"
         );
+        this.offers = [];
         for (const category of responseOffers.data) {
           this.offers.push(
             category.relationships.offers.meta.count +
@@ -232,7 +234,6 @@ export default Vue.extend({
         }
 
         // Needs.
-        this.needs = [];
         const responseNeeds: CollectionResponse<Category> = await api.getCategories(
           code,
           "",
@@ -240,6 +241,7 @@ export default Vue.extend({
           "1",
           "4"
         );
+        this.needs = [];
         for (const category of responseNeeds.data) {
           this.needs.push(
             category.relationships.needs.meta.count +
