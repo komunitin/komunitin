@@ -90,9 +90,10 @@ export default {
     code: string
   ): Promise<{ group: Group; contacts: Contact[] }> {
     try {
-      const response = await client.get<
-        ResourceResponseInclude<Group, Contact>
-      >("/" + code + "?include=contacts,categories,members,currency");
+      // prettier-ignore
+      const response = await client
+        .get<ResourceResponseInclude<Group, Contact>>("/" + code + "?include=contacts");
+
       if (response.data.data == null) {
         throw new KError(
           KErrorCode.ResourceNotFound,
@@ -168,3 +169,9 @@ export default {
     }
   }
 };
+
+/**
+ * @todo Find currency status.
+ *
+ * ${KOptions.apis.accounting}/${code}/currency
+ */
