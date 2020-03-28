@@ -219,10 +219,10 @@ export default Vue.extend({
         // Offers.
         const responseOffers: CollectionResponse<Category> = await api.getCategories(
           code,
-          "",
+          undefined,
           "sort=relationships.offers.meta.count",
-          "1",
-          "4"
+          1,
+          4
         );
         this.offers = [];
         for (const category of responseOffers.data) {
@@ -236,10 +236,10 @@ export default Vue.extend({
         // Needs.
         const responseNeeds: CollectionResponse<Category> = await api.getCategories(
           code,
-          "",
+          undefined,
           "sort=relationships.needs.meta.count",
-          "1",
-          "4"
+          1,
+          4
         );
         this.needs = [];
         for (const category of responseNeeds.data) {
