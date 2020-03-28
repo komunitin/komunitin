@@ -2,7 +2,7 @@
   <q-card v-ripple flat bordered tabindex="0" @click="this.$router.push(href)">
     <q-card-section class="q-pb-none q-pt-sm">
       <div class="text-overline text-onsurface-m">
-        <q-icon :name="icon" size="xs" color="icon-dark"/>
+        <q-icon :name="icon" size="xs" color="icon-dark" />
         {{ $t(title) }}
       </div>
     </q-card-section>
@@ -10,12 +10,7 @@
       <q-card-section class="col-4">
         <h2 class="q-mt-none q-mb-md">{{ content }}</h2>
         <div class="k-inset-actions-md">
-          <q-btn
-            :to="href"
-            flat
-            color="primary"
-            :label="$t('Explore')"
-          />
+          <q-btn :to="href" flat color="primary" :label="$t('Explore')" />
         </div>
       </q-card-section>
       <q-card-section class="col-8 text-onsurface-m">
@@ -27,13 +22,13 @@
   </q-card>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import Vue from "vue";
 
 /**
- * This component wraps a card with a predefined structure to be used in 
- * Group view. It has a title, a big short value, a list of items and 
+ * This component wraps a card with a predefined structure to be used in
+ * Group view. It has a title, a big short value, a list of items and
  * finally and Explore button.
- * 
+ *
  * +-----------------------+
  * | [icon] title          |
  * |               item[0] |
@@ -41,14 +36,13 @@ import Vue from 'vue';
  * |               item[2] |
  * | Explore               |
  * +-----------------------+
- * 
+ *
  */
 export default Vue.extend({
-  name: 'GroupStats',
-  props: ['icon', 'title', 'content', 'items', 'href'],
+  name: "GroupStats",
+  props: ["icon", "title", "content", "items", "href"],
   data() {
     return {};
-  },
-
+  }
 });
 </script>
