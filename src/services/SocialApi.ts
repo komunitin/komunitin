@@ -123,10 +123,12 @@ export default {
    *        page[number]
    * @param perPag Number of items.
    *        page[limit]
+   *
+   * @todo Parse filter: {[field: string]: string, value: string}
    */
   async getCategories(
     code: string,
-    filter?: {[field: string]: string},
+    filter?: string,
     order?: string,
     pag?: number,
     perPag?: number
