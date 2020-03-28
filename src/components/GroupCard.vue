@@ -9,13 +9,13 @@
       </q-item-section>
       <q-item-section>
         <q-item-label>{{ group.attributes.name }}</q-item-label>
-        <q-item-label caption>
-          {{ group.attributes.code }}
-        </q-item-label>
+        <q-item-label caption>{{ group.attributes.code }}</q-item-label>
       </q-item-section>
-      <share-button class="text-icon-dark"
+      <share-button
+        class="text-icon-dark"
         :text="$t('Check the exchange community {group}', {group: group.attributes.name})"
-        :title="group.attributes.name" :url="url"
+        :title="group.attributes.name"
+        :url="url"
       />
     </q-item>
     <!-- Group position map -->
@@ -27,9 +27,7 @@
     </q-card-section>
     <!-- Group description -->
     <q-card-section>
-      <div v-clamp="5">
-      {{ group.attributes.description }}
-      </div>
+      <div v-clamp="5">{{ group.attributes.description }}</div>
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
@@ -40,21 +38,21 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import ShareButton from './ShareButton.vue';
-import SimpleMap from './SimpleMap.vue';
-import Clamp from '../plugins/Clamp';
+import Vue from "vue";
+import ShareButton from "./ShareButton.vue";
+import SimpleMap from "./SimpleMap.vue";
+import Clamp from "../plugins/Clamp";
 
 Vue.use(Clamp);
 
 export default Vue.extend({
-  name: 'GroupCard',
+  name: "GroupCard",
   components: {
     ShareButton,
     SimpleMap
   },
   props: {
-    group : {
+    group: {
       type: Object,
       required: true,
       default: undefined
@@ -62,10 +60,11 @@ export default Vue.extend({
   },
   computed: {
     url() {
-      const base = window?.location.origin ?? '';
-      return base + this.$router.resolve('groups/' + this.group.attributes.code).href;
+      const base = window?.location.origin ?? "";
+      return (
+        base + this.$router.resolve("groups/" + this.group.attributes.code).href
+      );
     }
   }
 });
-
 </script>

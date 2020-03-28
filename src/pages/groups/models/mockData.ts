@@ -216,9 +216,6 @@ export function mockGroup(): ResourceResponseInclude<Group, Contact> {
   const summary = mockGroupSummary(1);
   const code = summary.attributes.code;
   const contacts = mockContacts(code);
-  const categories = mockCategoryList(code);
-  const members = mockMemberList(code);
-  const currency = mockCurrency(code);
 
   const group: Group = {
     ...summary,
@@ -241,12 +238,7 @@ export function mockGroup(): ResourceResponseInclude<Group, Contact> {
 
   return {
     data: group,
-    included: {
-      contacts,
-      categories,
-      members,
-      currency
-    }
+    included: contacts
   };
 }
 
@@ -323,8 +315,8 @@ export function mockCategoryList(code: string): CollectionResponse<Category> {
   return {
     data: list,
     links: {
-      self: BASE_URL + '/' + code + "/categories",
-      first: BASE_URL + '/' + code + "/categories",
+      self: BASE_URL + "/" + code + "/categories",
+      first: BASE_URL + "/" + code + "/categories",
       prev: null,
       next: null
     },
@@ -415,8 +407,8 @@ export function mockMemberList(code: string): CollectionResponse<Member> {
   return {
     data: list,
     links: {
-      self: BASE_URL + '/' + code + "/categories",
-      first: BASE_URL + '/' + code + "/categories",
+      self: BASE_URL + "/" + code + "/categories",
+      first: BASE_URL + "/" + code + "/categories",
       prev: null,
       next: null
     },
@@ -436,13 +428,12 @@ export function mockMemberList(code: string): CollectionResponse<Member> {
  */
 export function mockCurrency(code: string) {
   return {
-    symbol: 'EÇ',
-    name: 'EcoVent',
-    value: 0,1,
+    symbol: "EÇ",
+    name: "Eco" + code,
+    value: 0.1,
     scale: 2,
     transaccions: Math.round(Math.random() * 10000),
     exchanges: Math.round(Math.random() * 10000),
     circulation: Math.round(Math.random() * 10000)
-
   };
 }
