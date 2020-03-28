@@ -1,6 +1,7 @@
 {
   "apis": {
-    "social": "http://localhost:8080/social" 
+    "social": "http://localhost:8080/social",
+    "accounting": "http://localhost:8080/accounting"
   },
   "langs": [
     {
