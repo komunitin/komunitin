@@ -40,7 +40,33 @@ import Vue from "vue";
  */
 export default Vue.extend({
   name: "GroupStats",
-  props: ["icon", "title", "content", "items", "href"],
+  props: {
+    icon: {
+      type: String,
+      default: "Need icon",
+      required: true
+    },
+    title: {
+      type: String,
+      default: "Need title",
+      required: true
+    },
+    content: {
+      type: String,
+      default: "Need content",
+      required: true
+    },
+    items: {
+      type: [String],
+      default: "Need items",
+      required: true
+    },
+    href: {
+      type: String,
+      default: "Need icon",
+      required: true
+    }
+  },
   data() {
     return {};
   }
