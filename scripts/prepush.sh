@@ -41,7 +41,7 @@ launch_command() {
     if [ $? != 0 ] ; then
         ERROR=$(( $ERROR + 1))
         ERRORS="${ERRORS}\nERROR: $command"
-        echo -e "${RED}${ERROR: $command}${NC}"
+        echo -e "${RED}ERROR: $command${NC}"
     else
         echo -e "${GREEN}Ok${NC}"
     fi
