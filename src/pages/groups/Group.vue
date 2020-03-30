@@ -37,7 +37,8 @@
         <!-- description -->
         <div class="col-12 col-sm-6 col-md-8">
           <div class="text-h6">{{ group.attributes.code }}</div>
-          <div class="text-onsurface-m" v-html="group.attributes.description"></div>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <div class="text-onsurface-m" v-html="compiledMarkdown(group.attributes.description)"></div>
           <q-separator spaced />
           <div class="k-inset-actions-md">
             <q-btn
@@ -125,6 +126,8 @@
 
 <script lang="ts">
 import Vue from "vue";
+import marked from "marked";
+
 import api from "../../services/SocialApi";
 import SimpleMap from "../../components/SimpleMap.vue";
 import { Group, Contact, Category, CollectionResponse } from "./models/model";
@@ -200,6 +203,9 @@ export default Vue.extend({
     this.fetchCategories(this.code);
   },
   methods: {
+    compiledMarkdown: function(text: string) {
+      return marked(text, { sanitize: true, gfm: true, breaks: true });
+    },
     async fetchGroup(code: string) {
       try {
         this.isLoading = true;
