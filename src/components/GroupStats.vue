@@ -43,27 +43,27 @@ export default Vue.extend({
   props: {
     icon: {
       type: String,
-      default: "Need icon",
+      default: "",
       required: true
     },
     title: {
       type: String,
-      default: "Need title",
+      default: "",
       required: true
     },
     content: {
-      type: String,
-      default: "Need content",
+      type: [String, Number],
+      default: 0,
       required: true
     },
     items: {
-      type: [String],
-      default: "Need items",
+      type: Array,
+      default: undefined,
       required: true
     },
     href: {
       type: String,
-      default: "Need icon",
+      default: "",
       required: true
     }
   },

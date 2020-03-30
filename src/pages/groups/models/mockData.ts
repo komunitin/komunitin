@@ -12,7 +12,9 @@ import {
   CategorySummary,
   Member,
   MemberSummary,
-  Address
+  Address,
+  Currency,
+  ResourceResponse
 } from "./model";
 import { LoremIpsum, ILoremIpsumParams } from "lorem-ipsum";
 import { uid } from "quasar";
@@ -345,11 +347,12 @@ export function mockCategoryList(code: string): CollectionResponse<Category> {
  */
 function mockMemberSummary(index: number): MemberSummary {
   const id = uid();
+  const code = lorem.generateWords(1);
   return {
     id: id,
     type: "categories",
     attributes: {
-      code: lorem.generateWords(1),
+      code: code,
       access: "public",
       name: lorem.generateWords(Math.round(Math.random() * 2) + 1),
       type: "business",
@@ -362,7 +365,7 @@ function mockMemberSummary(index: number): MemberSummary {
     },
 
     links: {
-      self: BASE_URL + "/merbers/" + id
+      self: BASE_URL + "/" + code + "/merbers/" + id
     }
   };
 }
@@ -384,12 +387,12 @@ export function mockMember(index: number): Member {
       },
       group: {
         links: {
-          related: BASE_URL + "/group/EITE"
+          related: BASE_URL + "/EITE"
         }
       },
       needs: {
         links: {
-          related: BASE_URL + "/group/EITE/needs?filter[member]=food"
+          related: BASE_URL + "/EITE/needs?filter[member]=food"
         },
         meta: {
           count: Math.round(Math.random() * 100)
@@ -397,7 +400,7 @@ export function mockMember(index: number): Member {
       },
       offers: {
         links: {
-          related: BASE_URL + "/group/EITE/offers?filter[member]=food"
+          related: BASE_URL + "/EITE/offers?filter[member]=food"
         },
         meta: {
           count: Math.round(Math.random() * 100)
@@ -439,15 +442,33 @@ export function mockMemberList(code: string): CollectionResponse<Member> {
  * '89.500 intercanviats / any',
  * '6.500 en circulació',
  * '1 ECO = 1 EÇ = 0,1 ℏ = 1 tk'
+ * {
+
+}
  */
-export function mockCurrency(code: string) {
+export function mockCurrency(code: string): ResourceResponse<Currency> {
   return {
-    symbol: "EÇ",
-    name: "Eco" + code,
-    value: 0.1,
-    scale: 2,
-    transaccions: Math.round(Math.random() * 10000),
-    exchanges: Math.round(Math.random() * 10000),
-    circulation: Math.round(Math.random() * 10000)
+    data: {
+      type: "currencies",
+      id: "XXXX",
+      links: {
+        self: BASE_URL + "/" + code + "/currency"
+      },
+      attributes: {
+        "code-type": "CEN",
+        code: "WDLD",
+        name: "Eco" + code,
+        "name-plural": "Eco" + code + "s",
+        symbol: "EÇ",
+        decimals: 2,
+        value: 100000,
+        scale: 4,
+        stats: {
+          transaccions: Math.round(Math.random() * 10000),
+          exchanges: Math.round(Math.random() * 10000),
+          circulation: Math.round(Math.random() * 10000)
+        }
+      }
+    }
   };
 }
