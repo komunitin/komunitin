@@ -27,7 +27,8 @@
     </q-card-section>
     <!-- Group description -->
     <q-card-section>
-      <div v-clamp="5">{{ group.attributes.description }}</div>
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <div v-clamp="5" v-html="compiledMarkdown(group.attributes.description)"></div>
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
@@ -39,6 +40,8 @@
 
 <script lang="ts">
 import Vue from "vue";
+import marked from "marked";
+
 import ShareButton from "./ShareButton.vue";
 import SimpleMap from "./SimpleMap.vue";
 import Clamp from "../plugins/Clamp";
@@ -64,6 +67,11 @@ export default Vue.extend({
       return (
         base + this.$router.resolve("groups/" + this.group.attributes.code).href
       );
+    }
+  },
+  methods: {
+    compiledMarkdown: function(text: string) {
+      return marked(text, { sanitize: true, gfm: true, breaks: true });
     }
   }
 });
