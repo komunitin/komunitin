@@ -2,15 +2,19 @@ import { Server } from "miragejs";
 import {
   mockGroup,
   mockGroupList,
-  mockCategoryList
+  mockCategoryList,
+  mockCurrency
 } from "../pages/groups/models/mockData";
 import KOptions from "../komunitin.json";
 
 console.debug("Mirage activated");
 
+const urlSocial = KOptions.apis.social;
+const urlAccounting = KOptions.apis.accounting;
+
 new Server({
   // Take the Base url from mockData.ts
-  urlPrefix: KOptions.apis.social,
+  // urlPrefix: KOptions.apis.social,
 
   routes() {
     if (process.env.USE_MIRAGE) {
@@ -21,13 +25,21 @@ new Server({
      *
      * Ignoring localization, sort, search and pagination query params.
      */
-    this.get("/groups", () => mockGroupList());
+    this.get(urlSocial + "/groups", () => mockGroupList());
 
     /**
      * Full Group
      */
-    this.get("/:code", () => mockGroup());
+    this.get(urlSocial + "/:code", () => mockGroup());
 
-    this.get("/:code/categories", () => mockCategoryList());
+    /**
+     * Categories.
+     */
+    this.get(urlSocial + "/:code/categories", () => mockCategoryList());
+
+    /**
+     * Currency.
+     */
+    this.get(urlAccounting + "/:code/currencies", () => mockCurrency());
   }
 });
