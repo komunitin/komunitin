@@ -205,3 +205,41 @@ export interface Member extends MemberSummary {
     offers: RelatedCollection;
   };
 }
+
+/**
+ * Currency.
+ *
+ * https://github.com/komunitin/komunitin-api/blob/master/accounting/README.md#currency
+ *
+ * {
+ *   "type": "currencies",
+ *   "id": "XXXX",
+ *   "attributes": {
+ *       "code-type": "CEN",
+ *       "code": "WDLD",
+ *       "name": "wonder",
+ *       "name-plural": "wonders",
+ *       "symbol": "₩",
+ *       "decimals": 2,
+ *       "scale": 4,
+ *       "value": 100000,
+ *   }
+ * }
+ */
+export interface Currency extends ResourceObject {
+  attributes: {
+    "code-type": string;
+    code: string;
+    name: string;
+    "name-plural": string;
+    symbol: string;
+    decimals: number;
+    scale: number;
+    value: number;
+    stats: {
+      transaccions: number;
+      exchanges: number;
+      circulation: number;
+    };
+  };
+}

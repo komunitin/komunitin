@@ -95,16 +95,12 @@
 
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
+            v-if="currencyLink"
             :title="$t('Currency')"
             icon="monetization_on"
-            content="ℏ"
-            href
-            :items="[
-              '7.201 transaccions / any',
-              '89.500 intercanviats / any',
-              '6.500 en circulació',
-              '1 ECO = 1 EÇ = 0,1 ℏ = 1 tk'
-            ]"
+            :content="currencySymbol"
+            :href="currencyLink"
+            :items="currency"
           />
         </div>
         <div class="col-12 col-sm-6 col-lg-8">
@@ -170,7 +166,10 @@ export default Vue.extend({
       contactsView: false,
       socialButtonsView: false,
       needs: null as string[] | null,
-      offers: null as string[] | null
+      offers: null as string[] | null,
+      currency: null as string[] | null,
+      currencySymbol: null as string | null,
+      currencyLink: null as string | null
     };
   },
   computed: {
@@ -201,10 +200,50 @@ export default Vue.extend({
   mounted: function(): void {
     this.fetchGroup(this.code);
     this.fetchCategories(this.code);
+    this.fetchCurrency(this.code);
   },
   methods: {
     compiledMarkdown: function(text: string) {
       return marked(text, { sanitize: true, gfm: true, breaks: true });
+    },
+    async fetchCurrency(code: string) {
+      try {
+        this.currency = [];
+        const responseCurrrency = await api.getCurrencyStats(code);
+        if (responseCurrrency.data !== null) {
+          const att = responseCurrrency.data.attributes;
+          this.currency.push(
+            "" +
+              att.stats.transaccions +
+              " " +
+              this.$t("transactions") +
+              " / " +
+              this.$t("year")
+          );
+          this.currency.push(
+            "" +
+              att.stats.exchanges +
+              " " +
+              this.$t("exchanges") +
+              " / " +
+              this.$t("year")
+          );
+          this.currency.push(
+            "" +
+              att.stats.circulation +
+              " " +
+              this.$t("circulation") +
+              " / " +
+              this.$t("year")
+          );
+          this.currency.push("1 ECO = 1 EÇ = 0,1 ℏ = 1 tk");
+          this.currencySymbol = att.symbol;
+          this.currencyLink = responseCurrrency.data.links.self;
+        }
+      } finally {
+        // @todo Remove.
+        console.debug("finally");
+      }
     },
     async fetchGroup(code: string) {
       try {

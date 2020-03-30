@@ -6,13 +6,24 @@ import {
   CollectionResponse,
   ErrorObject,
   ResourceResponseInclude,
-  Category
+  ResourceResponse,
+  Category,
+  Currency
 } from "../pages/groups/models/model";
 import KError, { KErrorCode } from "../KError";
 import KOptions from "../komunitin.json";
 
 const client = axios.create({
   baseURL: KOptions.apis.social,
+  withCredentials: false,
+  headers: {
+    Accept: "application/vnd.api+json",
+    "Content-Type": "application/vnd.api+json"
+  }
+});
+// Client from accounting.
+const clientAccounting = axios.create({
+  baseURL: KOptions.apis.accounting,
   withCredentials: false,
   headers: {
     Accept: "application/vnd.api+json",
@@ -167,11 +178,32 @@ export default {
     } catch (error) {
       throw getKError(error);
     }
+  },
+  /**
+   * Find currency status.
+   *
+   * ${KOptions.apis.accounting}/${code}/currency
+   *
+   * @param code The group code (usually 4-letters)
+   *
+   */
+  async getCurrencyStats(code: string): Promise<ResourceResponse<Currency>> {
+    try {
+      // prettier-ignore
+      const response = await clientAccounting
+        .get<ResourceResponse<Currency>>("/" + code + "/currencies");
+
+      if (response.data == null) {
+        throw new KError(
+          KErrorCode.ResourceNotFound,
+          "Resource not found",
+          response
+        );
+      } else {
+        return response.data;
+      }
+    } catch (error) {
+      throw getKError(error);
+    }
   }
 };
-
-/**
- * @todo Find currency status.
- *
- * ${KOptions.apis.accounting}/${code}/currency
- */
