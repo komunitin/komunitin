@@ -132,12 +132,12 @@ function mockGroupSummary(index: number): GroupSummary {
       self: BASE_URL + "/groups/" + code
     },
     meta: {
-      categoryMembers: {
-        business: 13,
-        organitzacions: 8,
-        personals: 40,
-        publics: 4
-      }
+      categoryMembers: [
+        ["business", 13],
+        ["organitzacions", 8],
+        ["personals", 40],
+        ["publics", 4]
+      ]
     }
   };
 }

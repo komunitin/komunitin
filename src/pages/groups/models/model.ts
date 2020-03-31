@@ -80,7 +80,7 @@ export interface GroupSummary extends ResourceObject {
   };
   meta: {
     // Category Members.
-    categoryMembers?: object;
+    categoryMembers?: [string, number][];
   };
 }
 
