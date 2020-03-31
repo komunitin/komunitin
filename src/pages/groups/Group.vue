@@ -60,7 +60,7 @@
             :title="$t('Offers')"
             icon="local_offer"
             :content="group.relationships.offers.meta.count"
-            :href="group.relationships.offers.links.related"
+            :href="code + '/offers'"
             :items="offers"
           />
           <q-inner-loading :showing="offers === null" color="icon-dark" />
@@ -72,7 +72,7 @@
             :title="$t('Needs')"
             icon="loyalty"
             :content="group.relationships.needs.meta.count"
-            :href="group.relationships.needs.links.related"
+            :href="code + '/needs'"
             :items="needs"
           />
           <q-inner-loading :showing="needs === null" color="icon-dark" />
@@ -84,7 +84,7 @@
             :title="$t('Members')"
             icon="account_circle"
             :content="group.relationships.members.meta.count"
-            :href="group.relationships.members.links.related"
+            :href="code + '/members'"
             :items="membersCategory"
           />
           <q-inner-loading :showing="membersCategory === null" color="icon-dark" />
@@ -96,7 +96,7 @@
             :title="$t('Currency')"
             icon="monetization_on"
             :content="currencySymbol"
-            :href="currencyLink"
+            :href="code + '/stats'"
             :items="currency"
           />
         </div>

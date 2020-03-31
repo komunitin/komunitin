@@ -65,6 +65,11 @@ export interface Location {
   coordinates: [number, number];
 }
 
+export interface ImageObject {
+  href: string;
+  alt: string;
+}
+
 /**
  * Group summarized model for cards.
  */
@@ -244,6 +249,40 @@ export interface Currency extends ResourceObject {
       transaccions: number;
       exchanges: number;
       circulation: number;
+    };
+  };
+}
+
+/**
+ * Offer summarized model for cards.
+ */
+export interface OfferSummary extends ResourceObject {
+  attributes: {
+    name: string;
+    // Some markdown.
+    content: string;
+    images: ImageObject[];
+    access: Access;
+    expires: string;
+    created: string;
+    updated: string;
+  };
+}
+
+/**
+ * Full offer model.
+ */
+export interface Offer extends OfferSummary {
+  relationships: {
+    category: {
+      links: {
+        relared: string;
+      };
+    };
+    author: {
+      links: {
+        related: string;
+      };
     };
   };
 }

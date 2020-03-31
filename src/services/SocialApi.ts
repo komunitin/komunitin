@@ -8,7 +8,8 @@ import {
   ResourceResponseInclude,
   ResourceResponse,
   Category,
-  Currency
+  Currency,
+  Offer
 } from "../pages/groups/models/model";
 import KError, { KErrorCode } from "../KError";
 import KOptions from "../komunitin.json";
@@ -202,6 +203,28 @@ export default {
       } else {
         return response.data;
       }
+    } catch (error) {
+      throw getKError(error);
+    }
+  },
+  /**
+   * Get a collection of offers.
+   *
+   * @param search A string so that groups are filtered using this string.
+   */
+  async getOffers(code: string, search?: string): Promise<Offer[]> {
+    let query = "";
+    if (search != undefined) {
+      query += "filter[search]=" + encodeURIComponent(search);
+    }
+    if (query.length > 0) {
+      query = "?" + query;
+    }
+    try {
+      const response = await client.get<CollectionResponse<Offer>>(
+        code + "/offers" + query
+      );
+      return response.data.data;
     } catch (error) {
       throw getKError(error);
     }
