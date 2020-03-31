@@ -254,10 +254,15 @@ export default Vue.extend({
         this.group = response.group;
         this.contacts = response.contacts;
         this.membersCategory = [];
-        debugger;
         const cm = response.group.meta.categoryMembers;
-        for (const key of Object.keys(cm)) {
-          this.membersCategory.push(this.$t(key) + " " + cm[key]);
+
+        if (cm) {
+          for (let i = 0; i < cm.length; i++) {
+            console.log("Block statement execution no." + i);
+            const name = this.$t(cm[i][0]);
+            const count = cm[i][1];
+            this.membersCategory.push(count + " " + name);
+          }
         }
       } finally {
         this.isLoading = false;
