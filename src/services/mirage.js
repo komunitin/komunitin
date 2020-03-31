@@ -3,7 +3,8 @@ import {
   mockGroup,
   mockGroupList,
   mockCategoryList,
-  mockCurrency
+  mockCurrency,
+  mockOfferList
 } from "../pages/groups/models/mockData";
 import KOptions from "../komunitin.json";
 
@@ -41,5 +42,10 @@ new Server({
      * Currency.
      */
     this.get(urlAccounting + "/:code/currencies", () => mockCurrency());
+
+    /**
+     * Offers list.
+     */
+    this.get(urlSocial + "/:code/offers", () => mockOfferList());
   }
 });
