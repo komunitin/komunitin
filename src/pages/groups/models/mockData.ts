@@ -130,6 +130,14 @@ function mockGroupSummary(index: number): GroupSummary {
     },
     links: {
       self: BASE_URL + "/groups/" + code
+    },
+    meta: {
+      categoryMembers: {
+        business: 13,
+        organitzacions: 8,
+        personals: 40,
+        publics: 4
+      }
     }
   };
 }
@@ -212,17 +220,7 @@ export function mockGroupList(): CollectionResponse<GroupSummary> {
     }
   };
 }
-/**
- * @todo
- ResourceResponseInclude2<T extends ResourceObject, I extends
-ResourceObject, J Extends ResourceObject> extends ResourceResponse<T> {
-  included: (I|J)[]
-}
-y por otro lado que la función de SocialApi separe por tipos y devuelva:
 
-{group: Group, contacts: Contact[], categories: Category[] }
-
- */
 /**
  * Mock result for /{groupCode}
  *
