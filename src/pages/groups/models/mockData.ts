@@ -14,7 +14,9 @@ import {
   MemberSummary,
   Address,
   Currency,
-  ResourceResponse
+  ResourceResponse,
+  OfferSummary,
+  Offer
 } from "./model";
 import { LoremIpsum, ILoremIpsumParams } from "lorem-ipsum";
 import { uid } from "quasar";
@@ -467,6 +469,95 @@ export function mockCurrency(code: string): ResourceResponse<Currency> {
           circulation: Math.round(Math.random() * 10000)
         }
       }
+    }
+  };
+}
+
+/**
+ * Mock offer summary.
+ *
+ * @param index Index.
+ */
+function mockOfferSummary(index: number): OfferSummary {
+  const code = "GRP" + index;
+  return {
+    id: uid(),
+    type: "offers",
+    links: {
+      self: BASE_URL + code + "/" + "/offers"
+    },
+    attributes: {
+      name: "Ecologic Bread",
+      content:
+        "Culpa aliqua **nostrud dolor minim** nisi et occaecat exercitation do ea *veniam* duis eu. Et ullamco exercitation anim ut id dolore ad ad nostrud proident amet. Culpa quis labore ex non minim duis eiusmod ea tempor eu amet elit excepteur.\nCupidatat exercitation enim voluptate id irure sint officia fugiat id mollit nisi. Ipsum dolore dolore et enim veniam consectetur nulla duis est quis. Ex in ea sit deserunt exercitation et laborum anim id.\nIrure ullamco consequat ad eiusmod incididunt ad velit amet. Anim dolore ut aliqua officia ad velit anim enim ex quis qui. Incididunt id minim minim ex cillum pariatur amet sit laboris deserunt aliquip adipisicing elit. Est magna quis nostrud sit mollit dolore consectetur quis consectetur occaecat cupidatat magna irure.", // Some markdown.
+      images: [
+        {
+          href: testImages[index],
+          alt: "Ecologic Bread image"
+        },
+        {
+          href: testImages[0],
+          alt: "Ecologic Bread image"
+        },
+        {
+          href: testImages[1],
+          alt: "Ecologic Bread image"
+        }
+      ],
+      access: "public",
+      expires: new Date().toJSON(),
+      created: new Date().toJSON(),
+      updated: new Date().toJSON()
+    }
+  };
+}
+/**
+ * Mock result for /{groupCode}/offers
+ */
+export function mockOffer(): ResourceResponse<Offer> {
+  const summary = mockOfferSummary(1);
+
+  const offer: Offer = {
+    ...summary,
+    relationships: {
+      category: {
+        links: {
+          relared: "https://komunitin.org/EITE/categories/food"
+        }
+      },
+      author: {
+        links: {
+          related: "https://komunitin.org/EITE/EITE0005"
+        }
+      }
+    }
+  };
+
+  return {
+    data: offer
+  };
+}
+
+/**
+ * Mock result for GET /offers/
+ */
+export function mockOfferList(): CollectionResponse<OfferSummary> {
+  const list = [] as OfferSummary[];
+
+  for (let index = 1; index < NUM_GROUPS; index++) {
+    list.push(mockOfferSummary(index));
+  }
+
+  return {
+    data: list,
+    links: {
+      self: BASE_URL + "/offers",
+      first: BASE_URL + "/offers",
+      prev: null,
+      next: null
+    },
+    meta: {
+      count: Math.round(Math.random() * 1500)
     }
   };
 }
