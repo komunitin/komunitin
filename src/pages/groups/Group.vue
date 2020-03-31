@@ -80,17 +80,14 @@
 
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
+            v-if="membersCategory"
             :title="$t('Members')"
             icon="account_circle"
             :content="group.relationships.members.meta.count"
             :href="group.relationships.members.links.related"
-            :items="[
-              '13 Empreses',
-              '8 Organitzacions',
-              '40 Personals',
-              '4 Públics'
-            ]"
+            :items="membersCategory"
           />
+          <q-inner-loading :showing="membersCategory === null" color="icon-dark" />
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
@@ -169,7 +166,8 @@ export default Vue.extend({
       offers: null as string[] | null,
       currency: null as string[] | null,
       currencySymbol: null as string | null,
-      currencyLink: null as string | null
+      currencyLink: null as string | null,
+      membersCategory: null as string[] | null
     };
   },
   computed: {
@@ -203,9 +201,11 @@ export default Vue.extend({
     this.fetchCurrency(this.code);
   },
   methods: {
+    // Parse markdown.
     compiledMarkdown: function(text: string) {
       return marked(text, { sanitize: true, gfm: true, breaks: true });
     },
+    // Currency info.
     async fetchCurrency(code: string) {
       try {
         this.currency = [];
@@ -241,10 +241,10 @@ export default Vue.extend({
           this.currencyLink = responseCurrrency.data.links.self;
         }
       } finally {
-        // @todo Remove.
-        console.debug("finally");
+        this.isLoading = false;
       }
     },
+    // Group info.
     async fetchGroup(code: string) {
       try {
         this.isLoading = true;
@@ -253,10 +253,17 @@ export default Vue.extend({
         const response = await api.getGroupStatus(code);
         this.group = response.group;
         this.contacts = response.contacts;
+        this.membersCategory = [];
+        debugger;
+        const cm = response.group.meta.categoryMembers;
+        for (const key of Object.keys(cm)) {
+          this.membersCategory.push(this.$t(key) + " " + cm[key]);
+        }
       } finally {
         this.isLoading = false;
       }
     },
+    // Categories info.
     async fetchCategories(code: string) {
       const moreMsg = "And more categories";
 

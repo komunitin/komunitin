@@ -78,6 +78,10 @@ export interface GroupSummary extends ResourceObject {
     access: Access;
     location: Location;
   };
+  meta: {
+    // Category Members.
+    categoryMembers?: object;
+  };
 }
 
 /**
