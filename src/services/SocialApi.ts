@@ -185,6 +185,8 @@ export default {
    *
    * ${KOptions.apis.accounting}/${code}/currency
    *
+   * @todo Aplly API urls.
+   *
    * @param code The group code (usually 4-letters)
    *
    */
@@ -210,7 +212,9 @@ export default {
   /**
    * Get a collection of offers.
    *
-   * @param search A string so that groups are filtered using this string.
+   * @todo Apply location.
+   *
+   * @param search A string so that offers are filtered using this string.
    */
   async getOffers(code: string, search?: string): Promise<Offer[]> {
     let query = "";
