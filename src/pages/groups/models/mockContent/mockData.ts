@@ -281,7 +281,7 @@ function mockMemberSummary(index: number): MemberSummary {
   const code = lorem.generateWords(1);
   return {
     id: id,
-    type: "categories",
+    type: "member",
     attributes: {
       code: code,
       access: "public",
@@ -411,6 +411,8 @@ export function mockCurrency(code: string): ResourceResponse<Currency> {
  */
 function mockOfferSummary(index: number): OfferSummary {
   const code = "GRP" + index;
+  const member = mockMember(1);
+
   return {
     id: uid(),
     type: "offers",
@@ -439,7 +441,8 @@ function mockOfferSummary(index: number): OfferSummary {
       expires: new Date().toJSON(),
       created: new Date().toJSON(),
       updated: new Date().toJSON()
-    }
+    },
+    included: member
   };
 }
 /**

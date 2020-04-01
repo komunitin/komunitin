@@ -70,6 +70,30 @@ export interface ImageObject {
   alt: string;
 }
 
+export interface RelatedCollection {
+  links: {
+    related: string;
+  };
+  meta: {
+    count: number;
+  };
+}
+
+/**
+ * Contact model.
+ */
+
+export interface Contact extends ResourceObject {
+  attributes: {
+    type: string;
+    name: string;
+    created: string;
+    updated: string;
+  };
+}
+
+export type Access = "public" | "group" | "private";
+
 /**
  * Group summarized model for cards.
  */
@@ -89,29 +113,6 @@ export interface GroupSummary extends ResourceObject {
   };
 }
 
-/**
- * Contact model.
- */
-
-export interface Contact extends ResourceObject {
-  attributes: {
-    type: string;
-    name: string;
-    created: string;
-    updated: string;
-  };
-}
-
-export type Access = "public" | "group" | "private";
-
-export interface RelatedCollection {
-  links: {
-    related: string;
-  };
-  meta: {
-    count: number;
-  };
-}
 /**
  * Full group model.
  */
@@ -267,6 +268,7 @@ export interface OfferSummary extends ResourceObject {
     created: string;
     updated: string;
   };
+  included: MemberSummary;
 }
 
 /**

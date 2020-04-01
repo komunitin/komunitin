@@ -40,16 +40,22 @@ new Server({
     /**
      * Categories.
      */
-    this.get(urlSocial + "/:code/categories", () => mockCategoryList());
+    this.get(urlSocial + "/:code/categories", (schema, request) =>
+      mockCategoryList(request.params.code)
+    );
 
     /**
      * Currency.
      */
-    this.get(urlAccounting + "/:code/currency", () => mockCurrency());
+    this.get(urlAccounting + "/:code/currency", (schema, request) =>
+      mockCurrency(request.params.code)
+    );
 
     /**
      * Offers list.
      */
-    this.get(urlSocial + "/:code/offers", () => mockOfferList());
+    this.get(urlSocial + "/:code/offers", (schema, request) =>
+      mockOfferList(request.params.code)
+    );
   }
 });
