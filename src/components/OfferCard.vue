@@ -53,7 +53,6 @@ export default Vue.extend({
   },
   computed: {
     url() {
-      // @todo Is necesary?
       const base = window?.location.origin ?? "";
       return (
         base + this.$router.resolve("offers/" + this.offer.attributes.code).href
