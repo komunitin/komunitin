@@ -443,7 +443,7 @@ function mockOfferSummary(index: number): OfferSummary {
   };
 }
 /**
- * Mock result for /{groupCode}/offers
+ * Mock result for /{groupCode}/offers/{id}
  */
 export function mockOffer(): ResourceResponse<Offer> {
   const summary = mockOfferSummary(1);
@@ -470,7 +470,7 @@ export function mockOffer(): ResourceResponse<Offer> {
 }
 
 /**
- * Mock result for GET /offers/
+ * Mock result for GET /{groupCode}/offers/
  */
 export function mockOfferList(): CollectionResponse<OfferSummary> {
   const list = [] as OfferSummary[];

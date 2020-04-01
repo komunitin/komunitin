@@ -30,6 +30,8 @@ new Server({
 
     /**
      * Full Group
+     *
+     * @todo Apply parameter collection on all calls.
      */
     this.get(urlSocial + "/:code", (schema, request) =>
       mockGroup(request.params.code)
