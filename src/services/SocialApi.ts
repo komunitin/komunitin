@@ -6,9 +6,7 @@ import {
   CollectionResponse,
   ErrorObject,
   ResourceResponseInclude,
-  ResourceResponse,
   Category,
-  Currency,
   Offer
 } from "../pages/groups/models/model";
 import KError, { KErrorCode } from "../KError";
@@ -16,15 +14,6 @@ import KOptions from "../komunitin.json";
 
 const client = axios.create({
   baseURL: KOptions.apis.social,
-  withCredentials: false,
-  headers: {
-    Accept: "application/vnd.api+json",
-    "Content-Type": "application/vnd.api+json"
-  }
-});
-// Client from accounting.
-const clientAccounting = axios.create({
-  baseURL: KOptions.apis.accounting,
   withCredentials: false,
   headers: {
     Accept: "application/vnd.api+json",
@@ -180,35 +169,7 @@ export default {
       throw getKError(error);
     }
   },
-  /**
-   * Find currency status.
-   *
-   * ${KOptions.apis.accounting}/${code}/currency
-   *
-   * @todo Aplly API urls.
-   *
-   * @param code The group code (usually 4-letters)
-   *
-   */
-  async getCurrencyStats(code: string): Promise<Currency> {
-    try {
-      // prettier-ignore
-      const response = await clientAccounting
-        .get<ResourceResponse<Currency>>("/" + code + "/currency");
 
-      if (response.data.data == null) {
-        throw new KError(
-          KErrorCode.ResourceNotFound,
-          "Resource not found",
-          response
-        );
-      } else {
-        return response.data.data;
-      }
-    } catch (error) {
-      throw getKError(error);
-    }
-  },
   /**
    * Get a collection of offers.
    *
