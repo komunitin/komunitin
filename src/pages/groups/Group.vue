@@ -210,8 +210,8 @@ export default Vue.extend({
       try {
         this.currency = [];
         const responseCurrrency = await api.getCurrencyStats(code);
-        if (responseCurrrency.data !== null) {
-          const att = responseCurrrency.data.attributes;
+        if (responseCurrrency !== null) {
+          const att = responseCurrrency.attributes;
           this.currency.push(
             "" +
               att.stats.transaccions +
@@ -238,7 +238,7 @@ export default Vue.extend({
           );
           this.currency.push("1 ECO = 1 EÇ = 0,1 ℏ = 1 tk");
           this.currencySymbol = att.symbol;
-          this.currencyLink = responseCurrrency.data.links.self;
+          this.currencyLink = responseCurrrency.links.self;
         }
       } finally {
         this.isLoading = false;

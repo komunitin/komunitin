@@ -61,6 +61,14 @@ export default Vue.extend({
     }
   },
   methods: {
+    /**
+     * @todo Se me ocurre que podríamos hacer una directiva de Vue que sea markdown
+     * (si no es que alguien la ha hecho ya), y ponemos
+     * <div v-markdown>{{ data.markdowntext }}</div> para que lo renderice.
+     * Así nos ahorramos el v-html también. O si esto no es práctico, pues
+     * <div :v-markdown="data.markdowntext"></div>. O incluso un componente
+     * <markdown>{{data.markdown}}</markdown>. Algo así.
+     */
     compiledMarkdown: function(text: string) {
       return marked(text, { sanitize: true, gfm: true, breaks: true });
     }

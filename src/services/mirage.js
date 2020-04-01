@@ -31,7 +31,9 @@ new Server({
     /**
      * Full Group
      */
-    this.get(urlSocial + "/:code", () => mockGroup());
+    this.get(urlSocial + "/:code", (schema, request) =>
+      mockGroup(request.params.code)
+    );
 
     /**
      * Categories.
@@ -41,7 +43,7 @@ new Server({
     /**
      * Currency.
      */
-    this.get(urlAccounting + "/:code/currencies", () => mockCurrency());
+    this.get(urlAccounting + "/:code/currency", () => mockCurrency());
 
     /**
      * Offers list.

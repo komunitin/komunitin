@@ -190,20 +190,20 @@ export default {
    * @param code The group code (usually 4-letters)
    *
    */
-  async getCurrencyStats(code: string): Promise<ResourceResponse<Currency>> {
+  async getCurrencyStats(code: string): Promise<Currency> {
     try {
       // prettier-ignore
       const response = await clientAccounting
-        .get<ResourceResponse<Currency>>("/" + code + "/currencies");
+        .get<ResourceResponse<Currency>>("/" + code + "/currency");
 
-      if (response.data == null) {
+      if (response.data.data == null) {
         throw new KError(
           KErrorCode.ResourceNotFound,
           "Resource not found",
           response
         );
       } else {
-        return response.data;
+        return response.data.data;
       }
     } catch (error) {
       throw getKError(error);

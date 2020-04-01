@@ -41,34 +41,6 @@ const loremOptions: ILoremIpsumParams = {
 // Random text generator
 const lorem = new LoremIpsum(loremOptions);
 
-function mockGroupSummary(index: number): GroupSummary {
-  const code = "GRP" + index;
-  return {
-    id: uid(),
-    type: "groups",
-    attributes: {
-      code: code,
-      name: lorem.generateWords(Math.round(Math.random() * 2) + 1),
-      description: testDescriptions[index % testDescriptions.length],
-      image: testImages[index % testImages.length],
-      website: "https://easterislandgroup.org",
-      access: "public",
-      location: testLocations[index % testLocations.length]
-    },
-    links: {
-      self: BASE_URL + "/groups/" + code
-    },
-    meta: {
-      categoryMembers: [
-        ["business", 13],
-        ["organitzacions", 8],
-        ["personals", 40],
-        ["publics", 4]
-      ]
-    }
-  };
-}
-
 function mockContacts(code: string): Contact[] {
   return Array.from(testContacts, contact => {
     const id: string = uid();
@@ -121,6 +93,33 @@ function relatedCollection(path: string, count: number): RelatedCollection {
     }
   };
 }
+function mockGroupSummary(index: number, code?: string): GroupSummary {
+  if (!code) code = "GRP" + index;
+  return {
+    id: uid(),
+    type: "groups",
+    attributes: {
+      code: code,
+      name: lorem.generateWords(Math.round(Math.random() * 2) + 1),
+      description: testDescriptions[index % testDescriptions.length],
+      image: testImages[index % testImages.length],
+      website: "https://easterislandgroup.org",
+      access: "public",
+      location: testLocations[index % testLocations.length]
+    },
+    links: {
+      self: BASE_URL + "/groups/" + code
+    },
+    meta: {
+      categoryMembers: [
+        ["business", 13],
+        ["organitzacions", 8],
+        ["personals", 40],
+        ["publics", 4]
+      ]
+    }
+  };
+}
 
 /**
  * Mock result for GET /groups/
@@ -153,9 +152,11 @@ export function mockGroupList(): CollectionResponse<GroupSummary> {
  *
  * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get__groupCode_
  */
-export function mockGroup(): ResourceResponseInclude<Group, Contact> {
-  const summary = mockGroupSummary(1);
-  const code = summary.attributes.code;
+export function mockGroup(
+  code: string
+): ResourceResponseInclude<Group, Contact> {
+  const summary = mockGroupSummary(1, code);
+  // const code = summary.attributes.code;
   const contacts = mockContacts(code);
 
   const group: Group = {
