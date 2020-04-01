@@ -93,8 +93,15 @@ function relatedCollection(path: string, count: number): RelatedCollection {
     }
   };
 }
-function mockGroupSummary(index: number, code?: string): GroupSummary {
-  if (!code) code = "GRP" + index;
+
+/**
+ * Mock group summary.
+ *
+ * @param code Code of group.
+ */
+function mockGroupSummary(code: string): GroupSummary {
+  const index = parseInt(code.substr(3));
+
   return {
     id: uid(),
     type: "groups",
@@ -128,9 +135,9 @@ function mockGroupSummary(index: number, code?: string): GroupSummary {
  */
 export function mockGroupList(): CollectionResponse<GroupSummary> {
   const list = [] as GroupSummary[];
-
   for (let index = 1; index < NUM_GROUPS; index++) {
-    list.push(mockGroupSummary(index));
+    const code = "GPR" + index;
+    list.push(mockGroupSummary(code));
   }
 
   return {
@@ -155,10 +162,8 @@ export function mockGroupList(): CollectionResponse<GroupSummary> {
 export function mockGroup(
   code: string
 ): ResourceResponseInclude<Group, Contact> {
-  const summary = mockGroupSummary(1, code);
-  // const code = summary.attributes.code;
+  const summary = mockGroupSummary(code);
   const contacts = mockContacts(code);
-
   const group: Group = {
     ...summary,
     attributes: {
