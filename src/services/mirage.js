@@ -5,7 +5,7 @@ import {
   mockCategoryList,
   mockCurrency,
   mockOfferList
-} from "../pages/groups/models/mockData";
+} from "../pages/groups/models/mockContent/mockData";
 import KOptions from "../komunitin.json";
 
 console.debug("Mirage activated");
