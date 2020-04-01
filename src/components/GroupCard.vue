@@ -28,7 +28,7 @@
     <!-- Group description -->
     <q-card-section>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div v-clamp="5" v-html="compiledMarkdown(group.attributes.description)"></div>
+      <div v-clamp="5" v-html="group.attributes.description"></div>
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
@@ -70,6 +70,8 @@ export default Vue.extend({
     }
   },
   methods: {
+    // @todo In order for clamp to work well it is necessary
+    //       to pass plain text.
     compiledMarkdown: function(text: string) {
       return marked(text, { sanitize: true, gfm: true, breaks: true });
     }
