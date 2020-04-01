@@ -122,6 +122,7 @@ import Vue from "vue";
 import marked from "marked";
 
 import api from "../../services/SocialApi";
+import apiAccounting from "../../services/AccountingApi";
 import SimpleMap from "../../components/SimpleMap.vue";
 import { Group, Contact, Category, CollectionResponse } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
@@ -209,7 +210,7 @@ export default Vue.extend({
     async fetchCurrency(code: string) {
       try {
         this.currency = [];
-        const responseCurrrency = await api.getCurrencyStats(code);
+        const responseCurrrency = await apiAccounting.getCurrencyStats(code);
         if (responseCurrrency !== null) {
           const att = responseCurrrency.attributes;
           this.currency.push(
