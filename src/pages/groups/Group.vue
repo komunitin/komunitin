@@ -269,6 +269,7 @@ export default Vue.extend({
       }
     },
     // Categories info.
+    // @todo Separate needs offers to avoid delay.
     async fetchCategories(code: string) {
       const moreMsg = "And more categories";
 
