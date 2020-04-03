@@ -32,10 +32,11 @@
 
 <script lang="ts">
 import Vue from "vue";
-import marked from "marked";
+// import marked from "marked";
 
 import ShareButton from "./ShareButton.vue";
 import Clamp from "../plugins/Clamp";
+import markdownToTxt from "markdown-to-txt";
 
 Vue.use(Clamp);
 
@@ -69,7 +70,8 @@ export default Vue.extend({
      * <markdown>{{data.markdown}}</markdown>. Algo así.
      */
     compiledMarkdown: function(text: string) {
-      return marked(text, { sanitize: true, gfm: true, breaks: true });
+      // return marked(text, { sanitize: true, gfm: true, breaks: true });
+      return markdownToTxt(text);
     }
   }
 });
