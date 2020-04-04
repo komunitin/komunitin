@@ -1,6 +1,5 @@
-
 export enum KErrorCode {
-  Unknown = 'Unknown',
+  Unknown = "Unknown",
   IncorrectRequest = "IncorrectRequest",
   ServerNoResponse = "ServerNoResponse",
   ResourceNotFound = "ResourceNotFound",
@@ -11,26 +10,29 @@ export enum KErrorCode {
   PositionTimeout = "PositionTimeout",
   PositionUnavailable = "PositionUnavailable",
   PositionPermisionDenied = "PositionPermisionDenied",
-  VueWarning = "VueWarning"
+  VueWarning = "VueWarning",
+  IncorrectCredentials = "IncorrectCredentials",
+  ServerBadResponse = "ServerBadResponse",
+  AuthNoCredentials = "AuthNoCredentials",
+  NotImplemented = "NotImplemented"
 }
 
 /**
  * Error class with code and additional information.
  */
 export default class KError extends Error {
-  code: string
-  debugInfo: object | null
+  code: string;
+  debugInfo: object | null;
 
-  constructor(code = KErrorCode.Unknown, message = '', debugInfo?: object) {
+  constructor(code = KErrorCode.Unknown, message = "", debugInfo?: object) {
     super(message);
     this.code = code;
-    this.debugInfo = (debugInfo !== undefined) ? debugInfo : null;
+    this.debugInfo = debugInfo !== undefined ? debugInfo : null;
   }
   /**
-   * Return the localized message. 
+   * Return the localized message.
    */
   getTranslationKey() {
-    return 'Error' + this.code;
+    return "Error" + this.code;
   }
-
 }

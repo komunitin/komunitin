@@ -24,5 +24,9 @@ new Server({
      * Full Group
      */
     this.get('/:code', () => mockGroup());
+
+    this.passthrough('http://localhost:2029/**');
+    this.passthrough('https://integralces.net/**');
+    this.passthrough('/service-worker.js');
   }
 });
