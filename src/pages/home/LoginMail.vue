@@ -35,10 +35,10 @@
         <q-btn
           outline
           color="transparent"
-          text-color="white"
+          text-color="onoutside"
           :label="$t('Login')"
           icon="account_circle"
-          :disabled="submitStatus === 'PENDING'"
+          :disabled="loginDisabled"
           type="submit"
         />
       </form>
@@ -47,8 +47,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { required, email, minLength } from 'vuelidate/lib/validators';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { validationMixin } from 'vuelidate';
+import KError, { KErrorCode } from '../../KError';
 
 // Login mail.
 export default Vue.extend({
@@ -57,9 +56,13 @@ export default Vue.extend({
     return {
       email: '',
       pass: '',
-      submitStatus: '',
       isPwd: true,
     };
+  },
+  computed: {
+    loginDisabled() : boolean {
+      return this.$v.$invalid;
+    }
   },
   validations: {
     email: {
@@ -68,31 +71,21 @@ export default Vue.extend({
     },
     pass: {
       required,
-      minLength: minLength(8)
+      minLength: minLength(4)
     }
   },
   methods: {
-    submit() {
+    async submit() {
       // Validate.
       this.$v.$touch();
       if (this.$v.$invalid) {
-        this.submitStatus = 'ERROR';
-        console.log(this.$v);
-        this.$q.notify({
-          type: 'negative',
-          message: 'No se ha podido validar el formulario.'
-        });
-      } else {
-        // @todo do your submit logic here
-        this.submitStatus = 'PENDING';
-        setTimeout(() => {
-          console.log({ validate: true, email: this.email, pass: this.pass });
-          this.submitStatus = 'OK';
-        }, 500);
+        // That should not happen, as the submit button should be disabled when the form is not validated.
+        throw new KError(KErrorCode.IncorrectCredentials, "Incorrect email or password");
       }
+      // Perform authentication request.
+      const user = await this.$auth.login(this.email, this.pass);
+      this.$q.notify({type: "positive", message: `Successfully logged in ${user.name} !`});
     }
   }
 });
 </script>
-<style scope>
-</style>
