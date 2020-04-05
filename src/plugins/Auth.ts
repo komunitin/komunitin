@@ -5,13 +5,32 @@ import KError, { KErrorCode } from "src/KError";
 import { LocalStorage } from "quasar";
 import _Vue from "vue";
 
-interface User {
+/**
+ * User data fetched from OIDC /userinfo endpoint. 
+ * https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
+ */
+export interface User {
   sub: string;
   email: string;
   emailVerified: boolean;
   name: string;
   preferredUsername: string;
   zoneinfo: string;
+}
+
+export interface AuthOptions {
+  /**
+   * Absolute URL of the OAuth2 token endpoint.
+   */
+  tokenEndpoint: string;
+  /**
+   * Absolute URL of OIDC userinfo endpoint
+   */
+  userInfoEndpoint: string;
+  /**
+   * OAuth2 Client ID.
+   */
+  clientId: string;
 }
 
 interface TokenResponse {
@@ -37,22 +56,29 @@ interface AuthData {
   scopes: string[];
 }
 
+/**
+ * Implements OAuth2 client with the features:
+ *  - `Resource Owner Password` flow for direct login with email & password.
+ *  - Refresh credentials through refresh tokens.
+ *  - OIDC social login with Google and Facebook (TODO)
+ */
 export class Auth {
-  private static readonly STORAGE_KEY: string = "komunitin-auth";
+  private static readonly STORAGE_KEY: string = "auth-session";
   private static readonly REFRESH_BEFORE_EXPIRE: number = 5 * 60;
-  private static readonly TOKEN_ENDPOINT =
-    KOptions.apis.auth.issuer + KOptions.apis.auth.token;
-  private static readonly USERINFO_ENDPOINT =
-    KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo;
+
+  private readonly tokenEndpoint: string;
+  private readonly userInfoEndpoint: string;
 
   private data?: AuthData;
 
   private userInfo?: User;
 
-  constructor() {
+  constructor(options: AuthOptions) {
     if (LocalStorage.has(Auth.STORAGE_KEY)) {
       this.data = LocalStorage.getItem(Auth.STORAGE_KEY) as AuthData;
     }
+    this.tokenEndpoint = options.tokenEndpoint;
+    this.userInfoEndpoint = options.userInfoEndpoint;
   }
   /**
    * Returns whether this class contains sufficient authorization information.
@@ -100,13 +126,13 @@ export class Auth {
       password: password,
       // eslint-disable-next-line @typescript-eslint/camelcase
       grant_type: "password",
-      scope: "email komunitin_social offline_access openid profile"
+      scope: "email komunitin_social offline_access openid profile",
     });
     return this.getUserInfo();
   }
 
   /**
-   * Authenticate using OpenID Connect provider.
+   * Authenticate using external OpenID Connect provider.
    */
   public async authenticate(provider: "google" | "facebook"): Promise<User> {
     throw new KError(
@@ -120,8 +146,8 @@ export class Auth {
    */
   public async getUserInfo(): Promise<User> {
     if (!this.userInfo) {
-      const response = await axios.get(Auth.USERINFO_ENDPOINT, {
-        headers: { Authorization: `Bearer ${this.data?.accessToken}` }
+      const response = await axios.get(this.userInfoEndpoint, {
+        headers: { Authorization: `Bearer ${this.data?.accessToken}` },
       });
       this.userInfo = {
         sub: response.data.sub,
@@ -129,7 +155,7 @@ export class Auth {
         emailVerified: response.data.email_verified,
         name: response.data.name,
         preferredUsername: response.data.preferred_username,
-        zoneinfo: response.data.zoneinfo
+        zoneinfo: response.data.zoneinfo,
       };
     }
     return this.userInfo;
@@ -147,7 +173,7 @@ export class Auth {
       // eslint-disable-next-line @typescript-eslint/camelcase
       grant_type: "refresh_token",
       // eslint-disable-next-line @typescript-eslint/camelcase
-      refresh_token: this.data.refreshToken
+      refresh_token: this.data.refreshToken,
     });
   }
 
@@ -162,12 +188,12 @@ export class Auth {
     const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => params.append(key, value));
     const response = await axios.post<TokenResponse>(
-      Auth.TOKEN_ENDPOINT,
+      this.tokenEndpoint,
       params,
       {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       }
     );
     if (response.status !== 200) {
@@ -194,7 +220,7 @@ export class Auth {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
       accessTokenExpire: expire,
-      scopes: data.scope.split(" ")
+      scopes: data.scope.split(" "),
     };
 
     // Reset user.
@@ -226,9 +252,11 @@ export class Auth {
 }
 
 /**
+ * Vue plugin functions.
+ * 
  * Install auth instance into Vue.$auth.
  * @param Vue
  */
-export default function(Vue: typeof _Vue) {
-  Vue.prototype.$auth = new Auth();
+export default function (Vue: typeof _Vue, options: AuthOptions) {
+  Vue.prototype.$auth = new Auth(options);
 }
