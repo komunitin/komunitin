@@ -30,7 +30,7 @@ describe("SocialNetworkList", () => {
     delete window.open;
     window.open = jest.fn();
     // Click
-    contact.find({ref: ref}).trigger("click");
+    wrapper.find({ref: ref}).trigger("click");
     // Wait for event to be handled.
     await wrapper.vm.$nextTick();
     expect(window.open).toHaveBeenCalledWith(url, "_blank");
@@ -81,7 +81,7 @@ describe("SocialNetworkList", () => {
   });
 
   it("Contact click", async () => {
-    checkClick(contact, "phone", "tel:"+encodeURIComponent("+34 666 77 88 99"));
+    return checkClick(contact, "phone", "tel:"+encodeURIComponent("+34 666 77 88 99"));
   });
 
   it ("Share html generated", async () => {
@@ -89,6 +89,6 @@ describe("SocialNetworkList", () => {
   });
 
   it("Share click", async () => {
-    checkClick(contact, "twitter", "https://twitter.com/intent/tweet?url=" + encodeURIComponent("https://example.com") +"&text=Text");
+    return checkClick(share, "twitter", "https://twitter.com/intent/tweet?url=" + encodeURIComponent("https://example.com") +"&text=Title");
   });
 });
