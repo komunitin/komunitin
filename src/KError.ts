@@ -14,7 +14,8 @@ export enum KErrorCode {
   IncorrectCredentials = "IncorrectCredentials",
   ServerBadResponse = "ServerBadResponse",
   AuthNoCredentials = "AuthNoCredentials",
-  NotImplemented = "NotImplemented"
+  NotImplemented = "NotImplemented",
+  RequestError = "RequestError"
 }
 
 /**

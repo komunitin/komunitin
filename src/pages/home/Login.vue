@@ -12,6 +12,7 @@
     />
     <p class="text-onoutside-m q-mt-md q-mb-xs">{{ $t('Already registered to a local group?') }}</p>
     <q-btn
+      id="login"
       outline
       color="transparent"
       text-color="onoutside"
