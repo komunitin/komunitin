@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import api from "../../services/SocialApi";
+import api from "../../services/Api/SocialApi";
 import { OfferSummary } from "./models/model";
 
 import SearchBar from "../../components/SearchBar.vue";

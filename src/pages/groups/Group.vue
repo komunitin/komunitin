@@ -121,8 +121,8 @@
 import Vue from "vue";
 import marked from "marked";
 
-import api from "../../services/SocialApi";
-import apiAccounting from "../../services/AccountingApi";
+import api from "../../services/Api/SocialApi";
+import apiAccounting from "../../services/Api/AccountingApi";
 import SimpleMap from "../../components/SimpleMap.vue";
 import { Group, Contact, Category, CollectionResponse } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
