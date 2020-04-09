@@ -411,7 +411,6 @@ export function mockCurrency(code: string): ResourceResponse<Currency> {
  */
 function mockOfferSummary(index: number): OfferSummary {
   const code = "GRP" + index;
-  const member = mockMember(1);
 
   return {
     id: uid(),
@@ -441,15 +440,15 @@ function mockOfferSummary(index: number): OfferSummary {
       expires: new Date().toJSON(),
       created: new Date().toJSON(),
       updated: new Date().toJSON()
-    },
-    included: member
+    }
   };
 }
 /**
  * Mock result for /{groupCode}/offers/{id}
  */
-export function mockOffer(): ResourceResponse<Offer> {
+export function mockOffer(): ResourceResponseInclude<Offer, Member> {
   const summary = mockOfferSummary(1);
+  const member = mockMember(1);
 
   const offer: Offer = {
     ...summary,
@@ -468,7 +467,8 @@ export function mockOffer(): ResourceResponse<Offer> {
   };
 
   return {
-    data: offer
+    data: offer,
+    included: [member]
   };
 }
 
