@@ -1,6 +1,13 @@
 {
   "apis": {
-    "social": "http://localhost:8080/social" 
+    "social": "http://localhost:8080/social",
+    "auth": {
+      "issuer": "http://localhost:2029",
+      "token": "/oauth2/token",
+      "authorization": "/oauth2/authorization",
+      "userInfo": "/oauth2/UserInfo",
+      "clientId": "komunitin-app"
+    }
   },
   "langs": [
     {
