@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import KOptions from "../boot/komunitin";
 import KError, { KErrorCode } from "src/KError";
 //https://quasar.dev/quasar-plugins/web-storage
@@ -33,7 +33,7 @@ export interface AuthOptions {
   clientId: string;
 }
 
-interface TokenResponse {
+export interface TokenResponse {
   access_token: string;
   refresh_token: string;
   scope: string;
@@ -86,7 +86,7 @@ export class Auth {
   public isAuthorized(): boolean {
     return (
       this.data !== undefined &&
-      this.data.accessTokenExpire.getTime() < new Date().getTime()
+      this.data.accessTokenExpire.getTime() > new Date().getTime()
     );
   }
 
@@ -187,14 +187,8 @@ export class Auth {
     // Use URLSearchParams in order to send the request with x-www-urlencoded.
     const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => params.append(key, value));
-    const response = await axios.post<TokenResponse>(
-      this.tokenEndpoint,
-      params,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
+    const response = await axios.post<TokenResponse>(this.tokenEndpoint, params,
+      {headers: {"Content-Type": "application/x-www-form-urlencoded"}}
     );
     if (response.status !== 200) {
       throw new KError(
@@ -203,9 +197,8 @@ export class Auth {
         response
       );
     }
-
     this.processTokenResponse(response.data);
-  }
+  } 
 
   /**
    * Handle the response of a request to /token OAuth2 endpoint
