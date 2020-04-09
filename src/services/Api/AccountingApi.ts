@@ -1,11 +1,8 @@
-import axios, { AxiosError } from "axios";
-import {
-  ErrorObject,
-  ResourceResponse,
-  Currency
-} from "../pages/groups/models/model";
-import KError, { KErrorCode } from "../KError";
-import KOptions from "../komunitin.json";
+import axios from "axios";
+import KError, { KErrorCode } from "../../KError";
+import { getKError } from "./ApiResources";
+import { ResourceResponse, Currency } from "../../pages/groups/models/model";
+import KOptions from "../../komunitin.json";
 
 const clientAccounting = axios.create({
   baseURL: KOptions.apis.accounting,
@@ -15,31 +12,6 @@ const clientAccounting = axios.create({
     "Content-Type": "application/vnd.api+json"
   }
 });
-
-/**
- * Re-throw a KError with the proper code.
- *
- * @param error The error object from Axios library.
- */
-function getKError(error: AxiosError<ErrorObject>) {
-  if (error.response) {
-    // Server returned error. Use code from server response.
-    const apiError = error.response.data;
-    // Check that the code is actually known.
-    const code =
-      apiError.code in KErrorCode
-        ? (apiError.code as KErrorCode)
-        : KErrorCode.UnknownServer;
-
-    return new KError(code, apiError.title, error);
-  } else if (error.request) {
-    // Server didn't respond.
-    return new KError(KErrorCode.ServerNoResponse, error.message, error);
-  } else {
-    // Request could not be prepared.
-    return new KError(KErrorCode.IncorrectRequest, error.message, error);
-  }
-}
 
 /**
  * Define methods for accessing the information from the Komunitin Social API.
