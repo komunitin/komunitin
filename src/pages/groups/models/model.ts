@@ -268,7 +268,6 @@ export interface OfferSummary extends ResourceObject {
     created: string;
     updated: string;
   };
-  included: MemberSummary;
 }
 
 /**
