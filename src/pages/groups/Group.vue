@@ -38,7 +38,7 @@
         <div class="col-12 col-sm-6 col-md-8">
           <div class="text-h6">{{ group.attributes.code }}</div>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="text-onsurface-m" v-html="compiledMarkdown(group.attributes.description)"></div>
+          <div v-md2html="group.attributes.description" class="text-onsurface-m"></div>
           <q-separator spaced />
           <div class="k-inset-actions-md">
             <q-btn
@@ -128,12 +128,16 @@ import { Group, Contact, Category, CollectionResponse } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
+import md2html from "../../plugins/Md2html";
 
 interface ContactNames {
   [key: string]: {
     name: string;
   };
 }
+
+Vue.use(md2html);
+
 /**
  * Page for Group details.
  */
