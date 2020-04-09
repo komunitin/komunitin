@@ -20,7 +20,7 @@
     <!-- Offer description -->
     <q-card-section>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div v-clamp="5" v-html="compiledMarkdown(offer.attributes.content)"></div>
+      <div v-clamp="5" v-md2txt="offer.attributes.content"></div>
     </q-card-section>
     <!-- offer actions -->
     <q-card-actions>
@@ -37,8 +37,10 @@ import Vue from "vue";
 import ShareButton from "./ShareButton.vue";
 import Clamp from "../plugins/Clamp";
 import markdownToTxt from "markdown-to-txt";
+import Md2txt from "../plugins/Md2txt";
 
 Vue.use(Clamp);
+Vue.use(Md2txt);
 
 export default Vue.extend({
   name: "OfferCard",

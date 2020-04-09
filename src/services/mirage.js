@@ -15,7 +15,6 @@ const urlAccounting = KOptions.apis.accounting;
 
 new Server({
   // Take the Base url from mockData.ts
-  // urlPrefix: KOptions.apis.social,
 
   routes() {
     if (process.env.USE_MIRAGE) {

@@ -28,7 +28,7 @@
     <!-- Group description -->
     <q-card-section>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <div v-clamp="5" v-html="compiledMarkdown(group.attributes.description)"></div>
+      <div v-clamp="5" v-md2txt="group.attributes.description"></div>
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
@@ -44,9 +44,10 @@ import Vue from "vue";
 import ShareButton from "./ShareButton.vue";
 import SimpleMap from "./SimpleMap.vue";
 import Clamp from "../plugins/Clamp";
-import markdownToTxt from "markdown-to-txt";
+import Md2txt from "../plugins/Md2txt";
 
 Vue.use(Clamp);
+Vue.use(Md2txt);
 
 export default Vue.extend({
   name: "GroupCard",
@@ -67,13 +68,6 @@ export default Vue.extend({
       return (
         base + this.$router.resolve("groups/" + this.group.attributes.code).href
       );
-    }
-  },
-  methods: {
-    // @todo In order for clamp to work well it is necessary
-    //       to pass plain text.
-    compiledMarkdown: function(text: string) {
-      return markdownToTxt(text);
     }
   }
 });
