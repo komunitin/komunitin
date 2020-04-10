@@ -10,6 +10,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Build app
       run: docker build --target komunitin-app-build --tag komunitin-app-build .
 
@@ -17,10 +18,20 @@ jobs:
       run: docker run --rm komunitin-app-build quasar test --unit jest
     
     - name: Build production
-      run: docker build --tag komunitin-app .
+      run: docker build --tag komunitin/komunitin-app .
     
     - name: Run production
-      run: docker run -d -p 80:80 --rm komunitin-app
+      run: docker run -d -p 80:80 --rm komunitin/komunitin-app
       
     - name: Test production
       run: wget http://localhost/
+    
+    - name: Publish to Docker Hub
+      if: github.ref == 'refs/heads/master'
+      run: |
+        docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
+        docker push komunitin/komunitin-app
+    
+    - name: Update test.komunitin.org
+      if: github.ref == 'refs/heads/master'
+      run: curl ${{ secrets.DEPLOY_WEBHOOK_URL }}

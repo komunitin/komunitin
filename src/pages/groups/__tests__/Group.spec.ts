@@ -61,7 +61,7 @@ describe("Group.vue", () => {
 
     wrapper = shallowMount(Group, {
       propsData: {
-        group: code
+        code
       },
       mocks: {
         // Avoid error with translations.
