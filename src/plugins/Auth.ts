@@ -1,4 +1,4 @@
-import axios, {AxiosError} from "axios";
+import axios from "axios";
 import KOptions from "../boot/komunitin";
 import KError, { KErrorCode } from "src/KError";
 //https://quasar.dev/quasar-plugins/web-storage
