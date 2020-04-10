@@ -1,6 +1,7 @@
 {
   "apis": {
     "social": "http://localhost:8080/social",
+    "accounting": "http://localhost:8080/accounting",
     "auth": {
       "issuer": "http://localhost:2029",
       "token": "/oauth2/token",

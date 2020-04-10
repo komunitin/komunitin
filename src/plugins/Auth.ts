@@ -6,7 +6,7 @@ import { LocalStorage } from "quasar";
 import _Vue from "vue";
 
 /**
- * User data fetched from OIDC /userinfo endpoint. 
+ * User data fetched from OIDC /userinfo endpoint.
  * https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
  */
 export interface User {
@@ -126,7 +126,7 @@ export class Auth {
       password: password,
       // eslint-disable-next-line @typescript-eslint/camelcase
       grant_type: "password",
-      scope: "email komunitin_social offline_access openid profile",
+      scope: "email komunitin_social offline_access openid profile"
     });
     return this.getUserInfo();
   }
@@ -147,7 +147,7 @@ export class Auth {
   public async getUserInfo(): Promise<User> {
     if (!this.userInfo) {
       const response = await axios.get(this.userInfoEndpoint, {
-        headers: { Authorization: `Bearer ${this.data?.accessToken}` },
+        headers: { Authorization: `Bearer ${this.data?.accessToken}` }
       });
       this.userInfo = {
         sub: response.data.sub,
@@ -155,7 +155,7 @@ export class Auth {
         emailVerified: response.data.email_verified,
         name: response.data.name,
         preferredUsername: response.data.preferred_username,
-        zoneinfo: response.data.zoneinfo,
+        zoneinfo: response.data.zoneinfo
       };
     }
     return this.userInfo;
@@ -173,7 +173,7 @@ export class Auth {
       // eslint-disable-next-line @typescript-eslint/camelcase
       grant_type: "refresh_token",
       // eslint-disable-next-line @typescript-eslint/camelcase
-      refresh_token: this.data.refreshToken,
+      refresh_token: this.data.refreshToken
     });
   }
 
@@ -187,8 +187,10 @@ export class Auth {
     // Use URLSearchParams in order to send the request with x-www-urlencoded.
     const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => params.append(key, value));
-    const response = await axios.post<TokenResponse>(this.tokenEndpoint, params,
-      {headers: {"Content-Type": "application/x-www-form-urlencoded"}}
+    const response = await axios.post<TokenResponse>(
+      this.tokenEndpoint,
+      params,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
     if (response.status !== 200) {
       throw new KError(
@@ -198,7 +200,7 @@ export class Auth {
       );
     }
     this.processTokenResponse(response.data);
-  } 
+  }
 
   /**
    * Handle the response of a request to /token OAuth2 endpoint
@@ -213,7 +215,7 @@ export class Auth {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
       accessTokenExpire: expire,
-      scopes: data.scope.split(" "),
+      scopes: data.scope.split(" ")
     };
 
     // Reset user.
@@ -246,10 +248,10 @@ export class Auth {
 
 /**
  * Vue plugin functions.
- * 
+ *
  * Install auth instance into Vue.$auth.
  * @param Vue
  */
-export default function (Vue: typeof _Vue, options: AuthOptions) {
+export default function(Vue: typeof _Vue, options: AuthOptions) {
   Vue.prototype.$auth = new Auth(options);
 }
