@@ -22,6 +22,9 @@ import OfferCard from "../../components/OfferCard.vue";
 
 /**
  * Offers's list.
+ *
+ * @todo Filters by Category.
+ * @todo Order by latest first, nearest first, most relevant first.
  */
 export default Vue.extend({
   name: "OfferList",
