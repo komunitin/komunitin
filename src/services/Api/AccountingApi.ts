@@ -24,8 +24,6 @@ export default {
    *
    * ${KOptions.apis.accounting}/${code}/currency
    *
-   * @todo Aplly API urls.
-   *
    * @param code The group code (usually 4-letters)
    *
    */

@@ -172,7 +172,8 @@ export default Vue.extend({
       currency: null as string[] | null,
       currencySymbol: null as string | null,
       currencyLink: null as string | null,
-      membersCategory: null as string[] | null
+      membersCategory: null as string[] | null,
+      moreCategories: "And more categories"
     };
   },
   computed: {
@@ -202,7 +203,8 @@ export default Vue.extend({
   },
   mounted: function(): void {
     this.fetchGroup(this.code);
-    this.fetchCategories(this.code);
+    this.fetchOffers(this.code);
+    this.fetchNeeds(this.code);
     this.fetchCurrency(this.code);
   },
   methods: {
@@ -263,7 +265,6 @@ export default Vue.extend({
 
         if (cm) {
           for (let i = 0; i < cm.length; i++) {
-            console.log("Block statement execution no." + i);
             const name = this.$t(cm[i][0]);
             const count = cm[i][1];
             this.membersCategory.push(count + " " + name);
@@ -274,10 +275,7 @@ export default Vue.extend({
       }
     },
     // Categories info.
-    // @todo Separate needs offers to avoid delay.
-    async fetchCategories(code: string) {
-      const moreMsg = "And more categories";
-
+    async fetchOffers(code: string) {
       try {
         // Offers.
         const responseOffers: CollectionResponse<Category> = await api.getCategories(
@@ -295,7 +293,12 @@ export default Vue.extend({
               category.attributes.name
           );
         }
-
+      } finally {
+        if (this.offers) this.offers.push(this.moreCategories);
+      }
+    },
+    async fetchNeeds(code: string) {
+      try {
         // Needs.
         const responseNeeds: CollectionResponse<Category> = await api.getCategories(
           code,
@@ -313,8 +316,7 @@ export default Vue.extend({
           );
         }
       } finally {
-        if (this.offers) this.offers.push(moreMsg);
-        if (this.needs) this.needs.push(moreMsg);
+        if (this.needs) this.needs.push(this.moreCategories);
       }
     }
   }

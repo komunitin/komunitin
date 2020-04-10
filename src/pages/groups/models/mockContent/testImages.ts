@@ -1,5 +1,4 @@
 // Images
-// @todo Convert to ImageObject.
 export const testImages = [
   "https://cdn.pixabay.com/photo/2019/12/12/13/42/castle-4690710__340.jpg",
   "https://cdn.pixabay.com/photo/2019/12/26/05/10/pink-4719682__340.jpg",
