@@ -20,9 +20,6 @@ import { OfferSummary } from "./models/model";
 import SearchBar from "../../components/SearchBar.vue";
 import OfferCard from "../../components/OfferCard.vue";
 
-// @todo Apply.
-// import KError, { KErrorCode } from "../../KError";
-
 /**
  * Offers's list.
  */
