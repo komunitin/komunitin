@@ -1,15 +1,11 @@
 <template>
   <div>
-    <search-bar
-      :title="$t('Groups near you')"
-      :back-button="true"
-      @newSearch="fetchGroups()"
-    />
+    <search-bar :title="$t('Groups near you')" :back-button="true" @newSearch="fetchGroups" />
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
         <div v-for="group of groups" :key="group.id" class="col-12 col-sm-6 col-md-4">
-          <group-card :group="group"/>
+          <group-card :group="group" />
         </div>
       </div>
     </div>
@@ -17,20 +13,20 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import api from '../../services/SocialApi';
-import { GroupSummary } from './models/model';
+import Vue from "vue";
+import api from "../../services/Api/SocialApi";
+import { GroupSummary } from "./models/model";
 
-import SearchBar from '../../components/SearchBar.vue';
-import GroupCard from '../../components/GroupCard.vue';
+import SearchBar from "../../components/SearchBar.vue";
+import GroupCard from "../../components/GroupCard.vue";
 
-import KError, { KErrorCode } from '../../KError';
+import KError, { KErrorCode } from "../../KError";
 
 /**
  * Groups's list.
  */
 export default Vue.extend({
-  name: 'GroupList',
+  name: "GroupList",
   components: {
     SearchBar,
     GroupCard
@@ -39,7 +35,7 @@ export default Vue.extend({
     return {
       groups: [] as GroupSummary[],
       isLoading: true as boolean,
-      location: null as [number,number] | null
+      location: null as [number, number] | null
     };
   },
   mounted: function() {
@@ -78,9 +74,11 @@ export default Vue.extend({
     async fetchGroups(search?: string) {
       try {
         this.isLoading = true;
-        this.groups = await api.getGroups(this.location != null ? this.location : undefined, search);
-      }
-      finally {
+        this.groups = await api.getGroups(
+          this.location != null ? this.location : undefined,
+          search
+        );
+      } finally {
         this.isLoading = false;
       }
     }
