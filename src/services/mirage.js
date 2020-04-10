@@ -7,6 +7,7 @@ import {
   mockOfferList
 } from "../pages/groups/models/mockContent/mockData";
 import KOptions from "../komunitin.json";
+import { mockToken, mockUserInfo } from "./mockAuth";
 
 console.debug("Mirage activated");
 
@@ -17,6 +18,9 @@ new Server({
   // Take the Base url from mockData.ts
 
   routes() {
+    // Disable output of all intercepted requests.
+    this.logging = false;
+
     if (process.env.USE_MIRAGE) {
       this.timing = parseInt(process.env.USE_MIRAGE);
     }
@@ -32,6 +36,25 @@ new Server({
      */
     this.get(urlSocial + "/:code", (schema, request) =>
       mockGroup(request.params.code)
+    );
+
+    /**
+     * Auth token
+     */
+    this.post(
+      KOptions.apis.auth.issuer + KOptions.apis.auth.token,
+      (schema, request) => {
+        const params = new URLSearchParams(request.requestBody);
+        return mockToken(params.get("scope"));
+      },
+      200
+    );
+
+    /**
+     * Auth UserInfo
+     */
+    this.get(KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo, () =>
+      mockUserInfo()
     );
 
     /**
@@ -54,5 +77,7 @@ new Server({
     this.get(urlSocial + "/:code/offers", (schema, request) =>
       mockOfferList(request.params.code)
     );
+
+    this.passthrough("/service-worker.js");
   }
 });

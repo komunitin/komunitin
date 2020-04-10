@@ -28,8 +28,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import FitText from 'components/FitText.vue';
-import selectLang from 'components/SelectLang.vue';
+import FitText from '../components/FitText.vue';
+import selectLang from '../components/SelectLang.vue';
 
 /**
  * Layout base con menú lateral.
