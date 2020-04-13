@@ -1,11 +1,13 @@
-import Vue from 'vue';
+import { boot } from 'quasar/wrappers';
 import AuthPlugin, {Auth} from '../plugins/Auth';
-import KOptions from './komunitin';
+import {KOptions} from './komunitin';
 
-Vue.use(AuthPlugin, {
-  clientId: KOptions.apis.auth.clientId,
-  tokenEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.token,
-  userInfoEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo
+export default boot(({Vue}) => {
+  Vue.use(AuthPlugin, {
+    clientId: KOptions.apis.auth.clientId,
+    tokenEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.token,
+    userInfoEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo
+  });  
 });
 
 declare module "vue/types/vue" {
