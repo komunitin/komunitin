@@ -5,7 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      // Configuration from https://quasar.dev/start/vs-code-configuration#Debugging-a-Quasar-project-in-VS-Code
       "type": "chrome",
       "request": "launch",
       "name": "Chrome",
@@ -17,11 +16,30 @@
       }
     },
     {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Firefox",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}/src",
+      "breakOnLoad": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/*"
+      },
+      "pathMappings": [
+        {
+          "url": "webpack:///src/pages",
+          "path": "${workspaceFolder}/src/pages"
+        }
+      ]
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "Jest All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["--runInBand"],
+      "args": [
+        "--runInBand"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
@@ -34,7 +52,11 @@
       "request": "launch",
       "name": "Jest Current File",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": ["${fileBasenameNoExtension}", "--config", "jest.config.js"],
+      "args": [
+        "${fileBasenameNoExtension}",
+        "--config",
+        "jest.config.js"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
@@ -44,4 +66,3 @@
     }
   ]
 }
-
