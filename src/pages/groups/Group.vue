@@ -11,14 +11,7 @@
       />
       <q-toolbar-title>{{group ? group.attributes.name : ""}}</q-toolbar-title>
 
-      <q-btn
-        v-if="group"
-        right
-        flat
-        round
-        icon="message"
-        @click="contactsView = true"
-      />
+      <q-btn v-if="group" right flat round icon="message" @click="contactsView = true" />
       <share-button
         v-if="group"
         :text="$t('Check the exchange community {group}', {group: group.attributes.name})"
@@ -51,8 +44,8 @@
         <!-- description -->
         <div class="col-12 col-sm-6 col-md-8">
           <div class="text-h6">{{ group.attributes.code }}</div>
-          <div class="text-onsurface-m" v-html="group.attributes.description"
-          ></div>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <div v-md2html="group.attributes.description" class="text-onsurface-m"></div>
           <q-separator spaced />
           <div class="k-inset-actions-md">
             <q-btn
@@ -68,65 +61,50 @@
           </div>
         </div>
         <!-- explore -->
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
+            v-if="offers"
             :title="$t('Offers')"
             icon="local_offer"
             :content="group.relationships.offers.meta.count"
-            :href="`groups/${group.relationships.offers.links.related}`"
-            :items="[
-              '53 Alimentació',
-              '44 Serveis professionals',
-              '38 Salut i higiene',
-              '32 Arts i cultura',
-              'i més categories'
-            ]"
+            :href="code + '/offers'"
+            :items="offers"
           />
+          <q-inner-loading :showing="offers === null" color="icon-dark" />
         </div>
 
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
+            v-if="needs"
             :title="$t('Needs')"
             icon="loyalty"
             :content="group.relationships.needs.meta.count"
-            :href="`groups/${group.relationships.needs.links.related}`"
-            :items="[
-              '53 Alimentació',
-              '44 Serveis professionals',
-              '38 Salut i higiene',
-              '32 Arts i cultura',
-              'i més categories'
-            ]"
+            :href="code + '/needs'"
+            :items="needs"
           />
+          <q-inner-loading :showing="needs === null" color="icon-dark" />
         </div>
 
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
+            v-if="membersCategory"
             :title="$t('Members')"
             icon="account_circle"
             :content="group.relationships.members.meta.count"
-            :href="`groups/${group.relationships.members.links.related}`"
-            :items="[
-              '13 Empreses',
-              '8 Organitzacions',
-              '40 Personals',
-              '4 Públics'
-            ]"
+            :href="code + '/members'"
+            :items="membersCategory"
           />
+          <q-inner-loading :showing="membersCategory === null" color="icon-dark" />
         </div>
 
-        <div class="col-12 col-sm-6">
+        <div class="col-12 col-sm-6 relative-position">
           <group-stats
+            v-if="currencyLink"
             :title="$t('Currency')"
             icon="monetization_on"
-            content="ℏ"
-            href=""
-            :items="[
-              '7.201 transaccions / any',
-              '89.500 intercanviats / any',
-              '6.500 en circulació',
-              '1 ECO = 1 EÇ = 0,1 ℏ = 1 tk'
-            ]"
+            :content="currencySymbol"
+            :href="code + '/stats'"
+            :items="currency"
           />
         </div>
         <div class="col-12 col-sm-6 col-lg-8">
@@ -134,11 +112,11 @@
             <simple-map class="simple-map" :center="center" :marker="marker" />
             <q-card-section class="group-footer-card text-onsurface-m">
               <q-icon name="place" />
-              {{ group.attributes.location.name }}</q-card-section
-            >
+              {{ group.attributes.location.name }}
+            </q-card-section>
           </q-card>
         </div>
-        <div class="col-12 col-sm-6 col-lg-4">
+        <div class="col-12 col-sm-6 col-lg-4 relative-position">
           <social-network-list type="contact" :networks="groupContacts" />
         </div>
       </div>
@@ -148,18 +126,25 @@
 
 <script lang="ts">
 import Vue from "vue";
-import api from "../../services/SocialApi";
+import marked from "marked";
+
+import api from "../../services/Api/SocialApi";
+import apiAccounting from "../../services/Api/AccountingApi";
 import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact } from "./models/model";
+import { Group, Contact, Category, CollectionResponse } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
+import md2html from "../../plugins/Md2html";
 
 interface ContactNames {
   [key: string]: {
     name: string;
   };
 }
+
+Vue.use(md2html);
+
 /**
  * Page for Group details.
  */
@@ -188,7 +173,14 @@ export default Vue.extend({
       contacts: [] as Contact[],
       isLoading: true,
       contactsView: false,
-      socialButtonsView: false
+      socialButtonsView: false,
+      needs: null as string[] | null,
+      offers: null as string[] | null,
+      currency: null as string[] | null,
+      currencySymbol: null as string | null,
+      currencyLink: null as string | null,
+      membersCategory: null as string[] | null,
+      moreCategories: "And more categories"
     };
   },
   computed: {
@@ -218,18 +210,120 @@ export default Vue.extend({
   },
   mounted: function(): void {
     this.fetchGroup(this.code);
+    this.fetchOffers(this.code);
+    this.fetchNeeds(this.code);
+    this.fetchCurrency(this.code);
   },
   methods: {
+    // Parse markdown.
+    compiledMarkdown: function(text: string) {
+      return marked(text, { sanitize: true, gfm: true, breaks: true });
+    },
+    // Currency info.
+    async fetchCurrency(code: string) {
+      try {
+        this.currency = [];
+        const responseCurrrency = await apiAccounting.getCurrencyStats(code);
+        if (responseCurrrency !== null) {
+          const att = responseCurrrency.attributes;
+          this.currency.push(
+            "" +
+              att.stats.transaccions +
+              " " +
+              this.$t("transactions") +
+              " / " +
+              this.$t("year")
+          );
+          this.currency.push(
+            "" +
+              att.stats.exchanges +
+              " " +
+              this.$t("exchanges") +
+              " / " +
+              this.$t("year")
+          );
+          this.currency.push(
+            "" +
+              att.stats.circulation +
+              " " +
+              this.$t("circulation") +
+              " / " +
+              this.$t("year")
+          );
+          this.currency.push("1 ECO = 1 EÇ = 0,1 ℏ = 1 tk");
+          this.currencySymbol = att.symbol;
+          this.currencyLink = responseCurrrency.links.self;
+        }
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    // Group info.
     async fetchGroup(code: string) {
       try {
         this.isLoading = true;
         this.group = null;
         this.contacts = [];
-        const response = await api.getGroupWithContacts(code);
+        const response = await api.getGroupStatus(code);
         this.group = response.group;
         this.contacts = response.contacts;
+        this.membersCategory = [];
+        const cm = response.group.meta.categoryMembers;
+
+        if (cm) {
+          for (let i = 0; i < cm.length; i++) {
+            const name = this.$t(cm[i][0]);
+            const count = cm[i][1];
+            this.membersCategory.push(count + " " + name);
+          }
+        }
       } finally {
         this.isLoading = false;
+      }
+    },
+    // Categories info.
+    async fetchOffers(code: string) {
+      try {
+        // Offers.
+        const responseOffers: CollectionResponse<Category> = await api.getCategories(
+          code,
+          undefined,
+          "sort=relationships.offers.meta.count",
+          1,
+          4
+        );
+        this.offers = [];
+        for (const category of responseOffers.data) {
+          this.offers.push(
+            category.relationships.offers.meta.count +
+              " " +
+              category.attributes.name
+          );
+        }
+      } finally {
+        if (this.offers) this.offers.push(this.moreCategories);
+      }
+    },
+    async fetchNeeds(code: string) {
+      try {
+        // Needs.
+        const responseNeeds: CollectionResponse<Category> = await api.getCategories(
+          code,
+          undefined,
+          "sort=relationships.needs.meta.count",
+          1,
+          4
+        );
+        this.needs = [];
+        for (const category of responseNeeds.data) {
+          this.needs.push(
+            category.relationships.needs.meta.count +
+              " " +
+              category.attributes.name
+          );
+        }
+      } finally {
+        if (this.needs) this.needs.push(this.moreCategories);
       }
     }
   }

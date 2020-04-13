@@ -1,13 +1,21 @@
 import { Server } from "miragejs";
-import { mockGroup, mockGroupList } from "../pages/groups/models/mockData";
+import {
+  mockGroup,
+  mockGroupList,
+  mockCategoryList,
+  mockCurrency,
+  mockOfferList
+} from "../pages/groups/models/mockContent/mockData";
 import KOptions from "../komunitin.json";
 import { mockToken, mockUserInfo } from "./mockAuth";
 
 console.debug("Mirage activated");
 
+const urlSocial = KOptions.apis.social;
+const urlAccounting = KOptions.apis.accounting;
+
 new Server({
   // Take the Base url from mockData.ts
-  urlPrefix: KOptions.apis.social,
 
   routes() {
     // Disable output of all intercepted requests.
@@ -21,12 +29,14 @@ new Server({
      *
      * Ignoring localization, sort, search and pagination query params.
      */
-    this.get("/groups", () => mockGroupList());
+    this.get(urlSocial + "/groups", () => mockGroupList());
 
     /**
      * Full Group
      */
-    this.get("/:code", () => mockGroup());
+    this.get(urlSocial + "/:code", (schema, request) =>
+      mockGroup(request.params.code)
+    );
 
     /**
      * Auth token
@@ -35,7 +45,7 @@ new Server({
       KOptions.apis.auth.issuer + KOptions.apis.auth.token,
       (schema, request) => {
         const params = new URLSearchParams(request.requestBody);
-        return mockToken(params.get("scope"))
+        return mockToken(params.get("scope"));
       },
       200
     );
@@ -45,6 +55,27 @@ new Server({
      */
     this.get(KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo, () =>
       mockUserInfo()
+    );
+
+    /**
+     * Categories.
+     */
+    this.get(urlSocial + "/:code/categories", (schema, request) =>
+      mockCategoryList(request.params.code)
+    );
+
+    /**
+     * Currency.
+     */
+    this.get(urlAccounting + "/:code/currency", (schema, request) =>
+      mockCurrency(request.params.code)
+    );
+
+    /**
+     * Offers list.
+     */
+    this.get(urlSocial + "/:code/offers", (schema, request) =>
+      mockOfferList(request.params.code)
     );
 
     this.passthrough("/service-worker.js");

@@ -10,7 +10,7 @@
       @click="$router.back()"
     />
 
-    <q-toolbar-title v-if="!viewSearch"> {{ $t(title) }} </q-toolbar-title>
+    <q-toolbar-title v-if="!viewSearch">{{ $t(title) }}</q-toolbar-title>
 
     <q-input
       v-if="viewSearch"
@@ -22,25 +22,29 @@
       class="full-width"
       @keyup.enter="searchBox()"
     />
-    <q-btn
-      id="button_search"
-      right
-      flat
-      round
-      icon="search"
-      @click="searchBox()"
-    />
+    <q-btn id="button_search" right flat round icon="search" @click="searchBox()" />
   </q-toolbar>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import Vue from "vue";
 
 export default Vue.extend({
-  name: 'SearchBar',
-  props: ['title', 'backButton'],
+  name: "SearchBar",
+  props: {
+    title: {
+      type: String,
+      default: "Need title",
+      required: true
+    },
+    backButton: {
+      type: Boolean,
+      required: false,
+      default: true
+    }
+  },
   data() {
     return {
-      search: '',
+      search: "",
       viewSearch: false as boolean
     };
   },
@@ -50,10 +54,10 @@ export default Vue.extend({
      * - Second click launch search.
      */
     searchBox() {
-      if (this.search !== '') {
+      if (this.search !== "") {
         // Launch search.
         // this.getGroupsListFilter(this.search);
-        this.$emit('newSearch', this.search);
+        this.$emit("newSearch", this.search);
       } else {
         this.viewSearch = !this.viewSearch;
       }
