@@ -1,7 +1,14 @@
 <template>
   <div>
     <q-toolbar class="bg-primary text-onprimary">
-      <q-btn flat round icon="arrow_back" aria-label="Home" @click="$router.back()" />
+      <q-btn
+        id="back"
+        flat
+        round
+        icon="arrow_back"
+        :aria-label="$t('Back')"
+        @click="$router.back()"
+      />
       <q-toolbar-title>{{group ? group.attributes.name : ""}}</q-toolbar-title>
 
       <q-btn v-if="group" right flat round icon="message" @click="contactsView = true" />

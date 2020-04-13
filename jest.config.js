@@ -44,7 +44,8 @@ module.exports = {
     '^quasar$': '<rootDir>/node_modules/quasar/dist/quasar.common.js',
     '^~/(.*)$': '<rootDir>/$1',
     '^src/(.*)$': '<rootDir>/src/$1',
-    '.*css$': '<rootDir>/__mocks__/mock.css'
+    '.*css$': '<rootDir>/__mocks__/mock.css',
+    '^app/(.*)$': '<rootDir>/$1'
   },
   transform: {
     '.*\\.vue$': 'vue-jest',
@@ -54,7 +55,7 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest',
   },
   transformIgnorePatterns: [
-    '<rootDir>/node_modules/(?!quasar/lang.*)',
+    '<rootDir>/node_modules/(?!(quasar/lang.*|quasar/icon-set.*))',
   ],
   snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue'],
   moduleDirectories: ['<rootDir>/node_modules']
