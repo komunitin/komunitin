@@ -136,7 +136,7 @@ function mockGroupSummary(code: string): GroupSummary {
 export function mockGroupList(): CollectionResponse<GroupSummary> {
   const list = [] as GroupSummary[];
   for (let index = 1; index < NUM_GROUPS; index++) {
-    const code = "GPR" + index;
+    const code = "GRP" + index;
     list.push(mockGroupSummary(code));
   }
 
