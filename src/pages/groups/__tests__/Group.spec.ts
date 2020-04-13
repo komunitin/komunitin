@@ -17,8 +17,7 @@ describe("Group.vue", () => {
 
   it("check receive data", async () => {
     expect(wrapper.vm.$data.isLoading).toBe(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (wrapper.vm as any).fetchGroup();
+    await wrapper.vm.$wait();
     expect(wrapper.vm.$data.isLoading).toBe(false);
     expect(wrapper.vm.$data.group).toBeTruthy();
   });
