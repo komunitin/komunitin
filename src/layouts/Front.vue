@@ -2,9 +2,9 @@
   <q-layout view="hhh lpr fff" class="home column justify-start items-center">
     <q-header class="bg-transparent">
       <q-toolbar>
-        <q-btn flat dense round color="onoutside" icon="arrow_back" aria-label="Back"
-          :class="$route.path === '/' ? 'invisible' : ''"
-          @click="$router.back()"
+        <q-btn v-show="showBackButton" id="back" flat dense round color="onoutside" icon="arrow_back"
+          :aria-label="$t('Back')"
+          @click="goBack"
         />
       </q-toolbar>
     </q-header>
@@ -47,6 +47,16 @@ export default Vue.extend({
       locale: this.$i18n.locale
     };
   },
+  computed: {
+    showBackButton(): boolean {
+      return (this.$route.path !== "/");
+    }
+  },
+  methods: {
+    goBack() {
+      this.$router.back();
+    }
+  }
 });
 </script>
 <style lang="scss" scope>

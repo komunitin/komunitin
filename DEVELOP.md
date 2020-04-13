@@ -96,3 +96,15 @@ Colors are defined as variables and standard classes at `src/css/quasar.variable
 - Components must be created using the `Vue.extend` function. We don't use class components.
 - Asynchronous code is written using the `async/await` pattern, and not the Promises API.
 - Error managing is done using the `KError` object, a custom extension of JavaScript `Error` object. When an exception occurs, the code must create a `KError` object with the proper error code from `KErrorCode` enumeration. Then it may just throw it or, if the code knows how to recover, log it using the `$handleError` injected function from `boot/errors.ts` and continue the execution.
+
+### Functional testing
+Functional tests check that app features are working, contrasted to unit tests that check that a particular chunk of code is working. Tests are executed by [NodeJS](https://nodejs.org/) with the [Jest](https://jestjs.io/) framework with a mocked Browser environment. This way tests are much more estable than end to end tests using a full browser and also more meaningful than unit tests.
+
+We've defined a utility module under `/test/jest/utils` with a function `mountComponent` that helps mounting a fully-featured Vue component for our app with all the required environment. It contains the needed plugins, Quasar components, executes boot files and has some handful mocks. You may add additional options by adding the options parameter as in `@vue/test-utils` `mount` function.
+
+Developers are encouraged to create functional tests for their features and place them under `/test/jest/__tests__` folder.
+
+### Unit testing
+For those Vue components or modules that are more complex, developers are encouraged to create unit tests too. Unit tests are placed under `__tests__` folder next to the file being tested. Remember that unit tests should not test code outside the file being tested. For tests involving more than one component or module, use functional tests instead.
+
+Unit tests for Vue components should use the utilities from `@vue/test-utils` instead of our custom `mountComponent` because of performace, since it does not need to set up all the environment but just the minimum to run the code in an isolated environment.
