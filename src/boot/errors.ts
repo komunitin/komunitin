@@ -3,6 +3,7 @@ import Vue from 'vue';
 import KError, { KErrorCode } from '../KError';
 import { Notify } from 'quasar'
 import { i18n } from './i18n'
+import { boot } from 'quasar/wrappers';
 
 
 /**
@@ -60,14 +61,9 @@ declare module 'vue/types/vue' {
      */
     $handleError: typeof handleError;
   }
-}
+} 
 
-/**
- * Add handleError() function to Vue prototype.
- */
-Vue.prototype.$handleError = handleError;
-
-Vue.config.warnHandler = function(message: string, vm: Vue, trace: string) {
+function vueWarnHandler(message: string, vm: Vue, trace: string) {
   try {
     const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, vm});
     handleError(error);
@@ -97,3 +93,10 @@ if (window !== undefined) {
     }
   });
 }
+
+export default boot(({Vue}) => {
+  // Add handleError() function to Vue prototype.
+  Vue.prototype.$handleError = handleError;
+  // Set Vue warning handler.
+  Vue.config.warnHandler = vueWarnHandler;
+});
