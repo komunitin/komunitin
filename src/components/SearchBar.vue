@@ -2,10 +2,11 @@
   <q-toolbar class="bg-primary text-onprimary">
     <q-btn
       v-if="backButton"
+      id="back"
       flat
       round
       icon="arrow_back"
-      aria-label="Home"
+      :aria-label="$t('Back')"
       @click="$router.back()"
     />
 
