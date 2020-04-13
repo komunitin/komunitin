@@ -1,23 +1,7 @@
-import { mount, Wrapper } from "@vue/test-utils";
-
-// Install Komunitin global at Vue.prototype, since boot scripts are not run.
-import "../../boot/komunitin";
-
-// Set global i18n instance.
-import {i18n} from "../../boot/i18n";
-
-import Vue from 'vue';
-import {
-  Quasar,
-  QSelect,
-  QItem,
-  QItemSection,
-  QItemLabel,
-  QBtnDropdown,
-  QList
-} from "quasar";
 
 import SelectLang from "../SelectLang.vue";
+import { Wrapper } from "@vue/test-utils"
+import { mountComponent } from "../../../test/jest/utils";
 
 /**
  * This test uses the global Vue variable in order to properly interact 
@@ -26,32 +10,25 @@ import SelectLang from "../SelectLang.vue";
  * **/
 describe("SelectLang", () => {
   let wrapper: Wrapper<Vue>;
-
-  // Using global Vue instance.
-  Vue.use(Quasar, {
-    components: {
-      QSelect,
-      QItem,
-      QItemSection,
-      QItemLabel,
-      QBtnDropdown,
-      QList
-    }
+  beforeAll(async () => {
+    wrapper = await mountComponent(SelectLang);
   });
-
-  beforeEach(() => {
-    wrapper = mount(SelectLang, { i18n });
-  });
+  afterAll(() => wrapper.destroy());
 
   it("Check language change", async () => {
     expect(wrapper.text()).toContain("Language");
+    // Check language on i18n plugin.
+    expect(wrapper.vm.$i18n.locale).toBe("en-us");
+    // Check language on quasar.
+    expect(wrapper.vm.$q.lang.isoName).toBe("en-us");
     // Don't know how to simulate the click on the menu item,
     // so invocking the method directly.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (wrapper.vm as any).changeLanguage("ca");
     // Check language changed on i18n plugin.
-    expect(i18n.locale).toBe("ca");
+    expect(wrapper.vm.$i18n.locale).toBe("ca");
     // Check language changed on quasar.
     expect(wrapper.vm.$q.lang.isoName).toBe("ca");
+    expect(wrapper.emitted('language-change')).toBeTruthy();
   });
 });

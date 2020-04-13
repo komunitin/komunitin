@@ -2,10 +2,11 @@
   <div>
     <q-toolbar class="bg-primary text-onprimary">
       <q-btn
+        id="back"
         flat
         round
         icon="arrow_back"
-        aria-label="Home"
+        :aria-label="$t('Back')"
         @click="$router.back()"
       />
       <q-toolbar-title>{{group ? group.attributes.name : ""}}</q-toolbar-title>
