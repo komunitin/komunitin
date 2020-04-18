@@ -5,7 +5,7 @@
       unelevated
       color="primary"
       text-color="onprimary"
-      :label="$t('Find your local group')"
+      :label="$t('findYourLocalGroup')"
       icon="explore"
       :to="{ name: 'GroupList' }"
       class="full-width"
@@ -16,7 +16,7 @@
       outline
       color="transparent"
       text-color="onoutside"
-      :label="$t('Login')"
+      :label="$t('login')"
       :to="{ name: 'LoginSelect' }"
       icon="account_circle"
       class="full-width"
