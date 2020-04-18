@@ -19,6 +19,7 @@ export default {
     // eslint-disable-next-line quotes
     "Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d'intercanvi.",
   newInKomunitin: 'Nou/va a komunitin?',
+  alreadyRegisteredToALocalGroup: 'Ja estàs registrat en un grup?',
   findGroupNearby:
     // eslint-disable-next-line quotes
     "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social.",
@@ -29,5 +30,18 @@ export default {
   newGroup: 'Nova ecoxarxa',
   help: 'Ajuda',
   needHelp: 'Necessites ajuda?',
-  createANewGroup: 'Crear una nova comunitat'
+  createANewGroup: 'Crear una nova comunitat',
+  loginWithGoogle: 'Login amb Google',
+  loginWithFacebook: 'Login amb Facebook',
+  loginWithMail: 'Login amb email',
+  email: 'Email',
+  password: 'Contrasenya',
+  invalidEmail: 'Email invàlid',
+  invalidPassword: 'Contrasenya invàlida',
+  language: 'Idioma',
+  contribute: 'Contribueix',
+  groupsNearYou: 'Grups aprop teu',
+  explore: 'Explora',
+  // eslint-disable-next-line quotes
+  signUp: "Dona't d'alta"
 };

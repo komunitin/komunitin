@@ -14,14 +14,14 @@
           <div id="welcome-to"><fit-text>{{ $t('welcomeTo') }}</fit-text></div>
           <div id="komunitin"><fit-text>Komunitin</fit-text></div>
         </h1>
-        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('Open System for Exchange Communities') }}</fit-text></p>
+        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('openSystemForGroupCommunities') }}</fit-text></p>
       </div>
       <router-view />
     </q-page-container>
     <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
       <select-lang />
-      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" :label="$t('Help')" />
-      <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" :label="$t('Contribute')" />
+      <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" :label="$t('help')" />
+      <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" :label="$t('contribute')" />
     </q-footer>
   </q-layout>
 </template>

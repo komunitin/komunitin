@@ -1,6 +1,6 @@
 <template>
   <div>
-    <search-bar :title="$t('Groups near you')" :back-button="true" @newSearch="fetchGroups" />
+    <search-bar :title="$t('groupsNearYou')" :back-button="true" @newSearch="fetchGroups" />
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
