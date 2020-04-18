@@ -14,6 +14,7 @@ export default {
   komunitinIs:
     'Komunitin is an open source platform that offers social currency management for group communities.',
   newInKomunitin: 'New to komunitin?',
+  alreadyRegisteredToALocalGroup: 'Already registered to a local group?',
   findGroupNearby:
     'Find an group network near you and start using social currency',
   useLocation: 'Use location',
@@ -23,5 +24,17 @@ export default {
   newGroup: 'New Group',
   help: 'Help',
   needHelp: 'You need help?',
-  createANewGroup: 'Create a new group'
+  createANewGroup: 'Create a new group',
+  loginWithGoogle: 'Login with Google',
+  loginWithFacebook: 'Login with Facebook',
+  loginWithMail: 'Login with mail',
+  email: 'Email',
+  password: 'Password',
+  invalidEmail: 'Invalid email',
+  invalidPassword: 'Invalid password',
+  language: 'Language',
+  contribute: 'Contribute',
+  groupsNearYou: 'Groups near you',
+  explore: 'Explore',
+  signUp: 'Sign up'
 };
