@@ -11,7 +11,7 @@
     <q-page-container>
       <div id="title" class="text-onoutside q-mt-md q-mb-xl">
         <h1 class="q-mb-xs q-mt-none text-center">
-          <div id="welcome-to"><fit-text>{{ $t('Welcome to') }}</fit-text></div>
+          <div id="welcome-to"><fit-text>{{ $t('welcomeTo') }}</fit-text></div>
           <div id="komunitin"><fit-text>Komunitin</fit-text></div>
         </h1>
         <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('Open System for Exchange Communities') }}</fit-text></p>
@@ -73,7 +73,7 @@ export default Vue.extend({
 // Adjust the size of 'Welcome to' text so it is full-width.
 #welcome-to {
   font-weight: 300;
-  line-height: 72px; 
+  line-height: 72px;
 }
 // Adjust the size of 'Komunitin' text so it is full-width and bold.
 #komunitin {
