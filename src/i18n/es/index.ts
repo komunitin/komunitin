@@ -15,6 +15,7 @@ export default {
   komunitinIs:
     'Komunitin es una plataforma de código abierto que ofrece la gestión de moneda social para las comunidades de intercambio.',
   newInKomunitin: '¿Nuevo/a en komunitin?',
+  alreadyRegisteredToALocalGroup: '¿Ya estás registrado en un grupo?',
   findGroupNearby:
     'Encuentra una red de intercambio cerca de ti y comienza a utilizar moneda social',
   useLocation: 'Usa localización',
@@ -24,5 +25,17 @@ export default {
   newGroup: 'Nueva ecored',
   help: 'Ayuda',
   needHelp: '¿Necesitas ayuda?',
-  createANewGroup: 'Crear nueva ecored'
+  createANewGroup: 'Crear nueva ecored',
+  loginWithGoogle: 'Login con Google',
+  loginWithFacebook: 'Login con Facebook',
+  loginWithMail: 'Login con email',
+  email: 'Email',
+  password: 'Contraseña',
+  invalidEmail: 'Email inválido',
+  invalidPassword: 'Contraseña inválida',
+  language: 'Idioma',
+  contribute: 'Contribuye',
+  groupsNearYou: 'Grupos cerca tuyo',
+  explore: 'Explora',
+  signUp: 'Date de alta'
 };

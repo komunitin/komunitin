@@ -1,5 +1,5 @@
 <template>
-  <q-btn-dropdown flat label="Language">
+  <q-btn-dropdown flat :label="$t('language')">
     <q-list>
       <q-item
         v-for="lang in langs"
