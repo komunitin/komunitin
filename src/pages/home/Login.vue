@@ -5,18 +5,18 @@
       unelevated
       color="primary"
       text-color="onprimary"
-      :label="$t('Find your local group')"
+      :label="$t('findYourLocalGroup')"
       icon="explore"
       :to="{ name: 'GroupList' }"
       class="full-width"
     />
-    <p class="text-onoutside-m q-mt-md q-mb-xs">{{ $t('Already registered to a local group?') }}</p>
+    <p class="text-onoutside-m q-mt-md q-mb-xs">{{ $t('alreadyRegisteredToALocalGroup') }}</p>
     <q-btn
       id="login"
       outline
       color="transparent"
       text-color="onoutside"
-      :label="$t('Login')"
+      :label="$t('login')"
       :to="{ name: 'LoginSelect' }"
       icon="account_circle"
       class="full-width"

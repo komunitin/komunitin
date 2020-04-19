@@ -1,4 +1,5 @@
 <template>
+  <!-- Don't translate the word "Language" since it will probably be better understood by the user seeking for this option rather than the translated word to a language that the user wants to change. -->
   <q-btn-dropdown flat label="Language">
     <q-list>
       <q-item
