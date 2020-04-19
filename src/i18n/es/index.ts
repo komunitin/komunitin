@@ -2,27 +2,40 @@
 // so you can safely delete all default props below
 
 export default {
-  home: 'Inico',
-  Login: 'Login',
-  'Log in': 'Inicia sesión',
-  'Create a new group': 'Crear una nueva comunidad',
-  Menu: 'Menú',
-  'Welcome to': 'Bienvenido/da a',
+
+  home: 'Inicio',
+  login: 'Login',
+  logIn: 'Inicia sesión',
+  menu: 'Menu',
+  findYourLocalGroup: 'Encuentra tu grupo local',
+  openSystemForGroupCommunities: 'Sistema abierto de comunidades de intercambio',
+  welcomeTo: 'Bienvenido/da a',
   failed: 'Error en proceso',
   success: 'Proceso concluido',
-  'Komunitin is':
-    'Komunitin es una plataforma de código abierto que ofrece la gestión de moneda social para las comunidades de intercambio',
-  'New in komunitin': '¿Nuevo / nueva en komunitin?',
-  'Use location': 'Utilizar localización',
-  'Find group nearby':
+  komunitinIs:
+    'Komunitin es una plataforma de código abierto que ofrece la gestión de moneda social para las comunidades de intercambio.',
+  newInKomunitin: '¿Nuevo/a en komunitin?',
+  alreadyRegisteredToALocalGroup: '¿Ya estás registrado en un grupo?',
+  findGroupNearby:
     'Encuentra una red de intercambio cerca de ti y comienza a utilizar moneda social',
-  'or select country': 'o selecciona un país para encontrarla.',
-  'Select conuntry': 'Selecciona un país',
-  'Find Comunnity': 'Troba la teva comunitat i comença a participar.',
-  'If not have community':
-    'Si no tienes una comunidad cerca de usted siempre puedes crearla y empezar una nueva',
-  'New group': 'Nueva ecored',
+  useLocation: 'Usa localización',
+  orSelectCountry: 'o selecciona un país para encontrarla.',
+  selectCounntry: 'Selecciona un país',
+  findComunnity: 'Encuentra tu comunidad y empieza a participar.',
+  newGroup: 'Nueva ecored',
   help: 'Ayuda',
-  'Need help': '¿Necesitas ayuda?',
-  'create a new group': 'Crear una nova ecoxarxa'
+  needHelp: '¿Necesitas ayuda?',
+  createANewGroup: 'Crear nueva ecored',
+  loginWithGoogle: 'Login con Google',
+  loginWithFacebook: 'Login con Facebook',
+  loginWithMail: 'Login con email',
+  email: 'Email',
+  password: 'Contraseña',
+  invalidEmail: 'Email inválido',
+  invalidPassword: 'Contraseña inválida',
+  language: 'Idioma',
+  contribute: 'Contribuye',
+  groupsNearYou: 'Grupos cerca tuyo',
+  explore: 'Explora',
+  signUp: 'Date de alta'
 };

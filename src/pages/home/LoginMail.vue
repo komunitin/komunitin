@@ -5,9 +5,9 @@
           dark
           type="email"
           placeholder="example@example.com"
-          :label="$t('Email')"
+          :label="$t('email')"
           maxlength="30"
-          :rules="[val => !$v.email.$invalid || $t('Invalid email')]"
+          :rules="[val => !$v.email.$invalid || $t('invalidEmail')]"
           lazy-rules
         >
           <template v-slot:append>
@@ -18,9 +18,9 @@
           v-model="pass" outlined
           dark
           :type="isPwd ? 'password' : 'text'"
-          :label="$t('Password')"
+          :label="$t('password')"
           maxlength="30"
-          :rules="[val => !$v.pass.$invalid || $t('Invalid password')]"
+          :rules="[val => !$v.pass.$invalid || $t('invalidPassword')]"
           lazy-rules
         >
           <template v-slot:append>
@@ -31,12 +31,12 @@
             />
           </template>
         </q-input>
-        
+
         <q-btn
           outline
           color="transparent"
           text-color="onoutside"
-          :label="$t('Login')"
+          :label="$t('login')"
           icon="account_circle"
           :disabled="loginDisabled"
           type="submit"

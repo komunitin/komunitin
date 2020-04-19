@@ -5,21 +5,21 @@
       color="surface"
       text-color="onsurface-m"
       icon="img:statics/icons/google.png"
-      :label="$t('Login with Google')"
+      :label="$t('loginWithGoogle')"
     />
     <q-btn
       id="login_facebook"
       color="surface"
       text-color="onsurface-m"
       icon="img:statics/icons/facebook.png"
-      :label="$t('Login with Facebook')"
+      :label="$t('loginWithFacebook')"
     />
     <q-btn
       id="login_mail"
       color="surface"
       text-color="onsurface-m"
       icon="mail"
-      :label="$t('Login with mail')"
+      :label="$t('loginWithMail')"
       :to="{ name: 'LoginMail' }"
     />
   </div>
