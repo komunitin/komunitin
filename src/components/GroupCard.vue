@@ -32,8 +32,8 @@
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
-      <q-btn :to="`groups/${group.attributes.code}`" flat color="primary">{{$t("Explore")}}</q-btn>
-      <q-btn flat color="primary">{{ $t("Sign Up") }}</q-btn>
+      <q-btn :to="`groups/${group.attributes.code}`" flat color="primary">{{$t("explore")}}</q-btn>
+      <q-btn flat color="primary">{{ $t("signUp") }}</q-btn>
     </q-card-actions>
   </q-card>
 </template>
