@@ -3,13 +3,17 @@
     <!-- Header with group avatar, name and short code -->
     <q-item>
       <q-item-section avatar>
-        <q-avatar>
+        <q-avatar class="with-pointer" @click="goToGroup(group.attributes.code)">
           <img :src="group.attributes.image" />
         </q-avatar>
       </q-item-section>
       <q-item-section>
-        <q-item-label>{{ group.attributes.name }}</q-item-label>
-        <q-item-label caption>{{ group.attributes.code }}</q-item-label>
+        <q-item-label class="with-pointer" @click="goToGroup(group.attributes.code)">
+          {{ group.attributes.name }}
+        </q-item-label>
+        <q-item-label caption class="with-pointer" @click="goToGroup(group.attributes.code)">
+          {{ group.attributes.code }}
+        </q-item-label>
       </q-item-section>
       <share-button
         class="text-icon-dark"
@@ -37,6 +41,12 @@
     </q-card-actions>
   </q-card>
 </template>
+
+<style scoped>
+.with-pointer {
+  cursor: pointer;
+}
+</style>
 
 <script lang="ts">
 import Vue from "vue";
@@ -68,6 +78,11 @@ export default Vue.extend({
       return (
         base + this.$router.resolve("groups/" + this.group.attributes.code).href
       );
+    }
+  },
+  methods: {
+    goToGroup: function (groupCode: string) {
+      this.$router.push("groups/" + groupCode)
     }
   }
 });
