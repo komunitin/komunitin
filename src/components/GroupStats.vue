@@ -1,5 +1,5 @@
 <template>
-  <q-card v-ripple flat bordered tabindex="0" @click="this.$router.push(href)">
+  <q-card v-ripple flat bordered tabindex="0" class="cursor-pointer" @click="goToPage(href)">
     <q-card-section class="q-pb-none q-pt-sm">
       <div class="text-overline text-onsurface-m">
         <q-icon :name="icon" size="xs" color="icon-dark" />
@@ -69,6 +69,11 @@ export default Vue.extend({
   },
   data() {
     return {};
+  },
+  methods: {
+    goToPage: function (pageCode: string) {
+      this.$router.push(pageCode)
+    }
   }
 });
 </script>
