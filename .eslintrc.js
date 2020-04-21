@@ -20,7 +20,12 @@ module.exports = {
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#usage-with-prettier
     "prettier",
     "prettier/@typescript-eslint",
-    "prettier/vue"
+    "prettier/vue",
+
+    // Plugin for translations.
+    // https://eslint-plugin-vue-i18n.intlify.dev/started.html#installation
+    "plugin:vue-i18n/recommended"
+    
   ],
   plugins: [
     // Required to apply rules which need type information
@@ -72,6 +77,16 @@ module.exports = {
     // Correct typescript linting until at least 2.0.0 major release
     // See https://github.com/typescript-eslint/typescript-eslint/issues/501
     // See https://github.com/typescript-eslint/typescript-eslint/issues/493
-    "@typescript-eslint/explicit-function-return-type": "off"
+    "@typescript-eslint/explicit-function-return-type": "off",
+    
+    "vue-i18n/no-unused-keys": ["warn", {
+      extensions: [".js", ".vue"]
+    }],
+    "vue-i18n/no-dynamic-keys": "warn"
+  },
+  settings: {
+    "vue-i18n": {
+      localeDir: './src/i18n/**/*.json'
+    }
   }
 };
