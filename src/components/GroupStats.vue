@@ -3,6 +3,7 @@
     <q-card-section class="q-pb-none q-pt-sm">
       <div class="text-overline text-onsurface-m">
         <q-icon :name="icon" size="xs" color="icon-dark" />
+        <!-- eslint-disable vue-i18n/no-dynamic-keys -->
         {{ $t(title) }}
       </div>
     </q-card-section>
@@ -10,7 +11,7 @@
       <q-card-section class="col-4">
         <h2 class="q-mt-none q-mb-md">{{ content }}</h2>
         <div class="k-inset-actions-md">
-          <q-btn :to="href" flat color="primary" :label="$t('Explore')" />
+          <q-btn :to="href" flat color="primary" :label="$t('explore')" />
         </div>
       </q-card-section>
       <q-card-section class="col-8 text-onsurface-m">

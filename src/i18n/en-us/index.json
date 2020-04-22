@@ -31,5 +31,19 @@
   "contribute": "Contribute",
   "groupsNearYou": "Groups near you",
   "explore": "Explore",
-  "signUp": "Sign up"
+  "signUp": "Sign up",
+  "checkTheExchangeCommunityGroup": "Check the exchange community {group}",
+  "checkTheExchangeCommunityOffer": "Check the exchange community {offer}",
+  "back": "Back",
+  "share": "Share",
+  "SorryNothingHere": "Sorry, nothing here...",
+  "offers": "Offers",
+  "contact": "Contact",
+  "needs": "Needs",
+  "members": "Members",
+  "currency": "Currency",
+  "transactions": "Transactions",
+  "year": "Year",
+  "exchanges": "Exchanges",
+  "circulation": "Circulation"
 }

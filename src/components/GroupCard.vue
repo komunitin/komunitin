@@ -13,7 +13,7 @@
       </q-item-section>
       <share-button
         class="text-icon-dark"
-        :text="$t('Check the exchange community {group}', {group: group.attributes.name})"
+        :text="$t('checkTheExchangeCommunityGroup', {group: group.attributes.name})"
         :title="group.attributes.name"
         :url="url"
       />
