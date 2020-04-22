@@ -12,7 +12,7 @@
       </q-item-section>
       <share-button
         class="text-icon-dark"
-        :text="$t('Check the exchange community {offer}', {offer: offer.attributes.name})"
+        :text="$t('checkTheExchangeCommunityOffer', {offer: offer.attributes.name})"
         :title="offer.attributes.name"
         :url="url"
       />
@@ -24,8 +24,8 @@
     </q-card-section>
     <!-- offer actions -->
     <q-card-actions>
-      <q-btn :to="`offers/${offer.id}`" flat color="primary">{{$t("Explore")}}</q-btn>
-      <q-btn flat color="primary">{{ $t("Sign Up") }}</q-btn>
+      <q-btn :to="`offers/${offer.id}`" flat color="primary">{{$t("explore")}}</q-btn>
+      <q-btn flat color="primary">{{ $t("signUp") }}</q-btn>
     </q-card-actions>
   </q-card>
 </template>

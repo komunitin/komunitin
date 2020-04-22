@@ -31,5 +31,19 @@
   "contribute": "Contribueix",
   "groupsNearYou": "Grups aprop teu",
   "explore": "Explora",
-  "signUp": "Dona't d'alta"
+  "signUp": "Dona't d'alta",
+  "checkTheExchangeCommunityGroup": "Check the exchange community {group}",
+  "checkTheExchangeCommunityOffer": "Check the exchange community {offer}",
+  "back": "Back",
+  "share": "Share",
+  "SorryNothingHere": "Sorry, nothing here...",
+  "offers": "Offers",
+  "contact": "Contact",
+  "needs": "Needs",
+  "members": "Members",
+  "currency": "Currency",
+  "transactions": "Transactions",
+  "year": "Year",
+  "exchanges": "Exchanges",
+  "circulation": "Circulation"
 }
