@@ -1,17 +1,17 @@
 <template>
-  <q-card v-if="group">
+  <q-card v-if="group" v-card-click-to="`/groups/${group.attributes.code}`">
     <!-- Header with group avatar, name and short code -->
     <q-item>
       <q-item-section avatar>
-        <q-avatar class="cursor-pointer" @click="goToGroup(group.attributes.code)">
+        <q-avatar>
           <img :src="group.attributes.image" />
         </q-avatar>
       </q-item-section>
       <q-item-section>
-        <q-item-label class="cursor-pointer" @click="goToGroup(group.attributes.code)">
+        <q-item-label>
           {{ group.attributes.name }}
         </q-item-label>
-        <q-item-label caption class="cursor-pointer" @click="goToGroup(group.attributes.code)">
+        <q-item-label>
           {{ group.attributes.code }}
         </q-item-label>
       </q-item-section>
@@ -25,13 +25,13 @@
     <!-- Group position map -->
     <q-card-section class="simple-map">
       <simple-map
+        :interactive="false"
         :center="group.attributes.location.coordinates"
         :marker="group.attributes.location.coordinates"
       />
     </q-card-section>
     <!-- Group description -->
-    <q-card-section class="cursor-pointer" @click="goToGroup(group.attributes.code)">
-      <!-- eslint-disable-next-line vue/no-v-html -->
+    <q-card-section>
       <div v-clamp="5" v-md2txt="group.attributes.description"></div>
     </q-card-section>
     <!-- group actions -->
@@ -49,9 +49,11 @@ import ShareButton from "./ShareButton.vue";
 import SimpleMap from "./SimpleMap.vue";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
+import CardClickTo from "../plugins/CardClickTo";
 
 Vue.use(Clamp);
 Vue.use(Md2txt);
+Vue.use(CardClickTo);
 
 export default Vue.extend({
   name: "GroupCard",
@@ -72,11 +74,6 @@ export default Vue.extend({
       return (
         base + this.$router.resolve("groups/" + this.group.attributes.code).href
       );
-    }
-  },
-  methods: {
-    goToGroup: function (groupCode: string) {
-      this.$router.push("groups/" + groupCode)
     }
   }
 });

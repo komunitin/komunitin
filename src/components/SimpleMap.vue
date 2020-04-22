@@ -1,6 +1,6 @@
 <template>
   <l-map
-    :options="{zoomControl: false}"
+    :options="{zoomControl: false, dragging: interactive}"
     style="height: 200px; width: 100% ; margin: 0;"
     :zoom="zoom"
     :center="center"
@@ -41,6 +41,11 @@ export default {
     marker: {
       type: Array,
       default: undefined,
+      required: false,
+    },
+    interactive: {
+      type: Boolean,
+      default: true,
       required: false,
     }
   },
