@@ -1,5 +1,5 @@
 <template>
-  <q-card v-ripple flat bordered tabindex="0" @click="this.$router.push(href)">
+  <q-card v-card-click-to="href" flat bordered>
     <q-card-section class="q-pb-none q-pt-sm">
       <div class="text-overline text-onsurface-m">
         <q-icon :name="icon" size="xs" color="icon-dark" />
@@ -23,6 +23,9 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
+import CardClickTo from "../plugins/CardClickTo";
+
+Vue.use(CardClickTo);
 
 /**
  * This component wraps a card with a predefined structure to be used in
