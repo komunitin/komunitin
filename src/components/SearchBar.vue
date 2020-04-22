@@ -6,10 +6,11 @@
       flat
       round
       icon="arrow_back"
-      :aria-label="$t('Back')"
+      :aria-label="$t('back')"
       @click="$router.back()"
     />
-
+    
+    <!-- eslint-disable vue-i18n/no-dynamic-keys -->
     <q-toolbar-title v-if="!viewSearch">{{ $t(title) }}</q-toolbar-title>
 
     <q-input
