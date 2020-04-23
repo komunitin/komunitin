@@ -200,7 +200,6 @@ export interface MemberSummary extends ResourceObject {
 /**
  * Member interface.
  */
-
 export interface Member extends MemberSummary {
   relationships: {
     contacts: {
@@ -277,7 +276,7 @@ export interface Offer extends OfferSummary {
   relationships: {
     category: {
       links: {
-        relared: string;
+        related: string;
       };
     };
     author: {
@@ -286,4 +285,5 @@ export interface Offer extends OfferSummary {
       };
     };
   };
+  include: Member;
 }

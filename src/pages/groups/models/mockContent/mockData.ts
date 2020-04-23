@@ -419,21 +419,21 @@ function mockOfferSummary(index: number): OfferSummary {
       self: BASE_URL + code + "/" + "/offers"
     },
     attributes: {
-      name: "Ecologic Bread",
-      content:
-        "Culpa aliqua **nostrud dolor minim** nisi et occaecat exercitation do ea *veniam* duis eu. Et ullamco exercitation anim ut id dolore ad ad nostrud proident amet. Culpa quis labore ex non minim duis eiusmod ea tempor eu amet elit excepteur.\nCupidatat exercitation enim voluptate id irure sint officia fugiat id mollit nisi. Ipsum dolore dolore et enim veniam consectetur nulla duis est quis. Ex in ea sit deserunt exercitation et laborum anim id.\nIrure ullamco consequat ad eiusmod incididunt ad velit amet. Anim dolore ut aliqua officia ad velit anim enim ex quis qui. Incididunt id minim minim ex cillum pariatur amet sit laboris deserunt aliquip adipisicing elit. Est magna quis nostrud sit mollit dolore consectetur quis consectetur occaecat cupidatat magna irure.", // Some markdown.
+      name: lorem.generateWords(Math.round(Math.random() * 2) + 1),
+      content: lorem.generateParagraphs(Math.round(Math.random() * 4) + 1),
+      price: lorem.generateWords(Math.round(Math.random() * 2) + 1),
       images: [
         {
           href: testImages[index],
-          alt: "Ecologic Bread image"
+          alt: lorem.generateParagraphs(Math.round(Math.random() * 4) + 1)
         },
         {
           href: testImages[0],
-          alt: "Ecologic Bread image"
+          alt: lorem.generateParagraphs(Math.round(Math.random() * 4) + 1)
         },
         {
           href: testImages[1],
-          alt: "Ecologic Bread image"
+          alt: lorem.generateParagraphs(Math.round(Math.random() * 4) + 1)
         }
       ],
       access: "public",
@@ -446,16 +446,16 @@ function mockOfferSummary(index: number): OfferSummary {
 /**
  * Mock result for /{groupCode}/offers/{id}
  */
-export function mockOffer(): ResourceResponseInclude<Offer, Member> {
-  const summary = mockOfferSummary(1);
-  const member = mockMember(1);
+export function mockOffer(index: number): Offer {
+  const summary = mockOfferSummary(index);
+  const member = mockMember(index);
 
   const offer: Offer = {
     ...summary,
     relationships: {
       category: {
         links: {
-          relared: "https://komunitin.org/EITE/categories/food"
+          related: "https://komunitin.org/EITE/categories/food"
         }
       },
       author: {
@@ -463,23 +463,23 @@ export function mockOffer(): ResourceResponseInclude<Offer, Member> {
           related: "https://komunitin.org/EITE/EITE0005"
         }
       }
-    }
+    },
+    include: member
   };
 
   return {
-    data: offer,
-    included: [member]
+    ...offer
   };
 }
 
 /**
  * Mock result for GET /{groupCode}/offers/
  */
-export function mockOfferList(): CollectionResponse<OfferSummary> {
-  const list = [] as OfferSummary[];
+export function mockOfferList(): CollectionResponse<Offer> {
+  const list = [] as Offer[];
 
   for (let index = 1; index < NUM_GROUPS; index++) {
-    list.push(mockOfferSummary(index));
+    list.push(mockOffer(index));
   }
 
   return {

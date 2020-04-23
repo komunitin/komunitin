@@ -55,6 +55,7 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.offers = await api.getOffers(this.code, search);
+        console.debug(this.offers);
       } finally {
         this.isLoading = false;
       }
