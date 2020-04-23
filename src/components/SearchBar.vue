@@ -6,11 +6,11 @@
       flat
       round
       icon="arrow_back"
-      :aria-label="$t('Back')"
+      :aria-label="$t('back')"
       @click="$router.back()"
     />
 
-    <q-toolbar-title v-if="!viewSearch">{{ $t(title) }}</q-toolbar-title>
+    <q-toolbar-title v-if="!viewSearch">{{ title }}</q-toolbar-title>
 
     <q-input
       v-if="viewSearch"

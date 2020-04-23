@@ -1,7 +1,7 @@
 import Vue from "vue";
 import { boot } from 'quasar/wrappers'
 import VueI18n from "vue-i18n";
-import DefaultMessages from 'src/i18n/en-us';
+import DefaultMessages from 'src/i18n/en-us/index.json';
 import { KOptions } from './komunitin';
 import { LocalStorage, QVueGlobals } from 'quasar';
 
