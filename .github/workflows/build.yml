@@ -1,6 +1,10 @@
 name: Build
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
 
@@ -14,8 +18,11 @@ jobs:
     - name: Build app
       run: docker build --target komunitin-app-build --tag komunitin-app-build .
 
-    - name: Unit tests
-      run: docker run --rm komunitin-app-build quasar test --unit jest
+    - name: Linter
+      run: docker run --rm komunitin-app-build npm run lint
+
+    - name: Tests
+      run: docker run --rm komunitin-app-build npm run test
     
     - name: Build production
       run: docker build --tag komunitin/komunitin-app .
