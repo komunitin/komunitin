@@ -36,7 +36,7 @@
           outline
           color="transparent"
           text-color="onoutside"
-          :label="$t('login')"
+          :label="$t('logIn')"
           icon="account_circle"
           :disabled="loginDisabled"
           type="submit"
