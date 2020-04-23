@@ -6,15 +6,16 @@
         flat
         round
         icon="arrow_back"
-        :aria-label="$t('Back')"
+        :aria-label="$t('back')"
         @click="$router.back()"
       />
+      <!-- eslint-disable vue-i18n/no-raw-text -->
       <q-toolbar-title>{{group ? group.attributes.name : ""}}</q-toolbar-title>
 
       <q-btn v-if="group" right flat round icon="message" @click="contactsView = true" />
       <share-button
         v-if="group"
-        :text="$t('Check the exchange community {group}', {group: group.attributes.name})"
+        :text="$t('checkTheExchangeCommunityGroup', {group: group.attributes.name})"
         :title="group.attributes.name"
       />
     </q-toolbar>
@@ -23,7 +24,7 @@
     <q-dialog v-if="group" v-model="contactsView">
       <q-card>
         <q-card-section class="q-pb-none">
-          <div class="text-h6">{{ $t("Contact") }}</div>
+          <div class="text-h6">{{ $t("contact") }}</div>
         </q-card-section>
         <q-card-section>
           <social-network-list type="contact" :networks="groupContacts" />
@@ -64,7 +65,7 @@
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
             v-if="offers"
-            :title="$t('Offers')"
+            :title="$t('offers')"
             icon="local_offer"
             :content="group.relationships.offers.meta.count"
             :href="code + '/offers'"
@@ -76,7 +77,7 @@
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
             v-if="needs"
-            :title="$t('Needs')"
+            :title="$t('needs')"
             icon="loyalty"
             :content="group.relationships.needs.meta.count"
             :href="code + '/needs'"
@@ -88,7 +89,7 @@
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
             v-if="membersCategory"
-            :title="$t('Members')"
+            :title="$t('members')"
             icon="account_circle"
             :content="group.relationships.members.meta.count"
             :href="code + '/members'"
@@ -100,7 +101,7 @@
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
             v-if="currencyLink"
-            :title="$t('Currency')"
+            :title="$t('currency')"
             icon="monetization_on"
             :content="currencySymbol"
             :href="code + '/stats'"

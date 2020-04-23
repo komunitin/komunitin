@@ -3,7 +3,7 @@
     <q-header class="bg-transparent">
       <q-toolbar>
         <q-btn v-show="showBackButton" id="back" flat dense round color="onoutside" icon="arrow_back"
-          :aria-label="$t('Back')"
+          :aria-label="$t('back')"
           @click="goBack"
         />
       </q-toolbar>
@@ -12,9 +12,10 @@
       <div id="title" class="text-onoutside q-mt-md q-mb-xl">
         <h1 class="q-mb-xs q-mt-none text-center">
           <div id="welcome-to"><fit-text>{{ $t('welcomeTo') }}</fit-text></div>
+          <!-- eslint-disable vue-i18n/no-raw-text -->
           <div id="komunitin"><fit-text>Komunitin</fit-text></div>
         </h1>
-        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('openSystemForGroupCommunities') }}</fit-text></p>
+        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('openSystemForExchangeCommunities') }}</fit-text></p>
       </div>
       <router-view />
     </q-page-container>
