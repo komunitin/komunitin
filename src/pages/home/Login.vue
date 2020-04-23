@@ -16,7 +16,7 @@
       outline
       color="transparent"
       text-color="onoutside"
-      :label="$t('login')"
+      :label="$t('logIn')"
       :to="{ name: 'LoginSelect' }"
       icon="account_circle"
       class="full-width"
