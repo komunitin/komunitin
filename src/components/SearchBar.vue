@@ -9,9 +9,8 @@
       :aria-label="$t('back')"
       @click="$router.back()"
     />
-    
-    <!-- eslint-disable vue-i18n/no-dynamic-keys -->
-    <q-toolbar-title v-if="!viewSearch">{{ $t(title) }}</q-toolbar-title>
+
+    <q-toolbar-title v-if="!viewSearch">{{ title }}</q-toolbar-title>
 
     <q-input
       v-if="viewSearch"
