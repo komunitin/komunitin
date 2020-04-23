@@ -3,8 +3,7 @@
     <q-card-section class="q-pb-none q-pt-sm">
       <div class="text-overline text-onsurface-m">
         <q-icon :name="icon" size="xs" color="icon-dark" />
-        <!-- eslint-disable vue-i18n/no-dynamic-keys -->
-        {{ $t(title) }}
+        {{ title }}
       </div>
     </q-card-section>
     <q-card-section horizontal>

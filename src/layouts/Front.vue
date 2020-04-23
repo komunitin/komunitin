@@ -15,7 +15,7 @@
           <!-- eslint-disable vue-i18n/no-raw-text -->
           <div id="komunitin"><fit-text>Komunitin</fit-text></div>
         </h1>
-        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('openSystemForGroupCommunities') }}</fit-text></p>
+        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('openSystemForExchangeCommunities') }}</fit-text></p>
       </div>
       <router-view />
     </q-page-container>
