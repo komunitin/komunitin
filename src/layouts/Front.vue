@@ -9,16 +9,13 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <div id="title" class="text-onoutside q-mt-md q-mb-xl">
-        <h1 class="q-mb-xs q-mt-none text-center">
-          <div id="welcome-to"><fit-text>{{ $t('welcomeTo') }}</fit-text></div>
-          <!-- eslint-disable vue-i18n/no-raw-text -->
-          <div id="komunitin"><fit-text>Komunitin</fit-text></div>
-        </h1>
-        <p id="slogan" class="text-subtitle1"><fit-text>{{ $t('openSystemForExchangeCommunities') }}</fit-text></p>
-      </div>
-      <router-view />
+        <div id="title" class="text-onoutside q-mt-md q-mb-xl">
+          <div><img class="logo" src="~assets/logo.svg" alt="Komunitin"/></div>
+          <p id="slogan" class="text-subtitle1 text-onoutside-m q-pb-md"><fit-text>{{ $t('openSystemForExchangeCommunities') }}</fit-text></p>
+        </div>
+        <router-view />
     </q-page-container>
+
     <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
       <select-lang />
       <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" :label="$t('help')" />
@@ -67,22 +64,14 @@ export default Vue.extend({
     no-repeat fixed;
   background-size: cover;
 }
-// Set the width of "Welcom to..." div so text can fit in it using the 'vue-resize-text' module.
+
 #title {
+  // Set the width of title div so text can fit in it using the 'vue-resize-text' module.
   width: 328px;
-}
-// Adjust the size of 'Welcome to' text so it is full-width.
-#welcome-to {
-  font-weight: 300;
-  line-height: 72px;
-}
-// Adjust the size of 'Komunitin' text so it is full-width and bold.
-#komunitin {
-  font-weight: 500;
-  line-height: 72px;
-}
-// Adjust the size of slogan text so it is full-width.
-#slogan {
-  font-style: italic;
+  .logo {
+    // Center the logo and exactly fit to the central div.
+    width: 352px;
+    margin-left: -12px;
+  }
 }
 </style>
