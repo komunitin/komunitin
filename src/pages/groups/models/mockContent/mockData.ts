@@ -91,32 +91,6 @@ function relatedCollection(path: string, count: number): RelatedCollection {
 }
 
 /**
- * Mock result for GET /groups/
- *
- * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get_groups
- */
-export function mockGroupList(): CollectionResponse<Group> {
-  const list = [] as Group[];
-  for (let index = 1; index < NUM_GROUPS; index++) {
-    const code = "GRP" + index;
-    list.push(mockGroup(code).data);
-  }
-
-  return {
-    data: list,
-    links: {
-      self: BASE_URL + "/groups",
-      first: BASE_URL + "/groups",
-      prev: null,
-      next: null
-    },
-    meta: {
-      count: NUM_GROUPS
-    }
-  };
-}
-
-/**
  * Mock result for /{groupCode}
  *
  * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get__groupCode_
@@ -158,6 +132,32 @@ export function mockGroup(
   return {
     data: group,
     included: contacts
+  };
+}
+
+/**
+ * Mock result for GET /groups/
+ *
+ * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get_groups
+ */
+export function mockGroupList(): CollectionResponse<Group> {
+  const list = [] as Group[];
+  for (let index = 1; index < NUM_GROUPS; index++) {
+    const code = "GRP" + index;
+    list.push(mockGroup(code).data);
+  }
+
+  return {
+    data: list,
+    links: {
+      self: BASE_URL + "/groups",
+      first: BASE_URL + "/groups",
+      prev: null,
+      next: null
+    },
+    meta: {
+      count: NUM_GROUPS
+    }
   };
 }
 
