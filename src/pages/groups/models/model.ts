@@ -29,14 +29,14 @@ export interface ErrorResponse {
 }
 
 export interface ResourceResponse<T extends ResourceObject> {
-  data: T | null;
+  data: T;
 }
 
 export interface ResourceResponseInclude<
   T extends ResourceObject,
   I extends ResourceObject
 > {
-  data: T | null;
+  data: T;
   included: I[];
 }
 
@@ -79,6 +79,12 @@ export interface RelatedCollection {
   };
 }
 
+export interface RelatedResource {
+  links: {
+    related: string;
+  };
+}
+
 /**
  * Contact model.
  */
@@ -95,28 +101,9 @@ export interface Contact extends ResourceObject {
 export type Access = "public" | "group" | "private";
 
 /**
- * Group summarized model for cards.
- */
-export interface GroupSummary extends ResourceObject {
-  attributes: {
-    code: string;
-    name: string;
-    description: string;
-    image: string;
-    website: string;
-    access: Access;
-    location: Location;
-  };
-  meta: {
-    // Category Members.
-    categoryMembers?: [string, number][];
-  };
-}
-
-/**
  * Full group model.
  */
-export interface Group extends GroupSummary {
+export interface Group extends ResourceObject {
   attributes: {
     code: string;
     name: string;
@@ -141,9 +128,9 @@ export interface Group extends GroupSummary {
 }
 
 /**
- * Categories summary.
+ * Category interface.
  */
-export interface CategorySummary extends ResourceObject {
+export interface Category extends ResourceObject {
   attributes: {
     code: string;
     name: string;
@@ -154,18 +141,8 @@ export interface CategorySummary extends ResourceObject {
     created: string;
     updated: string;
   };
-}
-/**
- * Category interface.
- */
-
-export interface Category extends CategorySummary {
   relationships: {
-    group: {
-      links: {
-        related: string;
-      };
-    };
+    group: RelatedResource;
     needs: RelatedCollection;
     offers: RelatedCollection;
   };
@@ -180,10 +157,11 @@ export interface Address {
   postalCode: string;
   addressRegion: string;
 }
+
 /**
- * Member summary.
+ * Member interface.
  */
-export interface MemberSummary extends ResourceObject {
+export interface Member extends ResourceObject {
   attributes: {
     code: string;
     access: Access;
@@ -196,21 +174,11 @@ export interface MemberSummary extends ResourceObject {
     created: string;
     updated: string;
   };
-}
-/**
- * Member interface.
- */
-
-export interface Member extends MemberSummary {
   relationships: {
     contacts: {
       data: ResourceIdentifierObject[];
     };
-    group: {
-      links: {
-        related: string;
-      };
-    };
+    group: RelatedResource;
     needs: RelatedCollection;
     offers: RelatedCollection;
   };
@@ -255,12 +223,11 @@ export interface Currency extends ResourceObject {
 }
 
 /**
- * Offer summarized model for cards.
+ * Offer model.
  */
-export interface OfferSummary extends ResourceObject {
+export interface Offer extends ResourceObject {
   attributes: {
     name: string;
-    // Some markdown.
     content: string;
     images: ImageObject[];
     access: Access;
@@ -268,22 +235,8 @@ export interface OfferSummary extends ResourceObject {
     created: string;
     updated: string;
   };
-}
-
-/**
- * Full offer model.
- */
-export interface Offer extends OfferSummary {
   relationships: {
-    category: {
-      links: {
-        relared: string;
-      };
-    };
-    author: {
-      links: {
-        related: string;
-      };
-    };
+    category: RelatedResource;
+    author: RelatedResource;
   };
 }
