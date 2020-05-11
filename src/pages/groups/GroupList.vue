@@ -1,10 +1,18 @@
 <template>
   <div>
-    <search-bar :title="$t('groupsNearYou')" :back-button="true" @newSearch="fetchGroups" />
+    <search-bar
+      :title="$t('groupsNearYou')"
+      :back-button="true"
+      @newSearch="fetchGroups"
+    />
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
-        <div v-for="group of groups" :key="group.id" class="col-12 col-sm-6 col-md-4">
+        <div
+          v-for="group of groups"
+          :key="group.id"
+          class="col-12 col-sm-6 col-md-4"
+        >
           <group-card :group="group" />
         </div>
       </div>
@@ -15,7 +23,7 @@
 <script lang="ts">
 import Vue from "vue";
 import api from "../../services/Api/SocialApi";
-import { GroupSummary } from "./models/model";
+import { Group } from "./models/model";
 
 import SearchBar from "../../components/SearchBar.vue";
 import GroupCard from "../../components/GroupCard.vue";
@@ -33,7 +41,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      groups: [] as GroupSummary[],
+      groups: [] as Group[],
       isLoading: true as boolean,
       location: null as [number, number] | null
     };
