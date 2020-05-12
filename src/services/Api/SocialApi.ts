@@ -5,7 +5,6 @@ import KOptions from "../../komunitin.json";
 import {
   Group,
   Contact,
-  GroupSummary,
   CollectionResponse,
   ResourceResponseInclude,
   Category,
@@ -36,7 +35,7 @@ export default {
   async getGroups(
     location?: [number, number],
     search?: string
-  ): Promise<GroupSummary[]> {
+  ): Promise<Group[]> {
     let query = "";
     if (location !== undefined) {
       query += "sort=location&geo-position=" + location[0] + "," + location[1];
@@ -48,7 +47,7 @@ export default {
       query = "?" + query;
     }
     try {
-      const response = await client.get<CollectionResponse<GroupSummary>>(
+      const response = await client.get<CollectionResponse<Group>>(
         "/groups" + query
       );
       return response.data.data;
@@ -62,7 +61,7 @@ export default {
    *
    * @param code The group code (usually 4-letters)
    */
-  async getGroupStatus(
+  async getGroupWithContacts(
     code: string
   ): Promise<{ group: Group; contacts: Contact[] }> {
     try {
