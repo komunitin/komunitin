@@ -14,7 +14,7 @@ describe('Error404.vue', () => {
   const wrapper = shallowMount(Error404, {
     localVue,
     mocks: {
-      $t: (key: String) => "Sorry, nothing here...",
+      $t: () => "Sorry, nothing here...",
     }
   })
 
