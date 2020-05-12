@@ -15,7 +15,7 @@
 <script lang="ts">
 import Vue from "vue";
 import api from "../../services/Api/SocialApi";
-import { OfferSummary } from "./models/model";
+import { Offer } from "./models/model";
 
 import SearchBar from "../../components/SearchBar.vue";
 import OfferCard from "../../components/OfferCard.vue";
@@ -37,7 +37,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      offers: [] as OfferSummary[],
+      offers: [] as Offer[],
       isLoading: true as boolean
     };
   },

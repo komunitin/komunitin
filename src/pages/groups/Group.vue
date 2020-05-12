@@ -10,12 +10,23 @@
         @click="$router.back()"
       />
       <!-- eslint-disable vue-i18n/no-raw-text -->
-      <q-toolbar-title>{{group ? group.attributes.name : ""}}</q-toolbar-title>
+      <q-toolbar-title>{{
+        group ? group.attributes.name : ""
+      }}</q-toolbar-title>
 
-      <q-btn v-if="group" right flat round icon="message" @click="contactsView = true" />
+      <q-btn
+        v-if="group"
+        right
+        flat
+        round
+        icon="message"
+        @click="contactsView = true"
+      />
       <share-button
         v-if="group"
-        :text="$t('checkTheExchangeCommunityGroup', {group: group.attributes.name})"
+        :text="
+          $t('checkTheExchangeCommunityGroup', { group: group.attributes.name })
+        "
         :title="group.attributes.name"
       />
     </q-toolbar>
@@ -46,7 +57,10 @@
         <div class="col-12 col-sm-6 col-md-8">
           <div class="text-h6">{{ group.attributes.code }}</div>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div v-md2html="group.attributes.description" class="text-onsurface-m"></div>
+          <div
+            v-md2html="group.attributes.description"
+            class="text-onsurface-m"
+          ></div>
           <q-separator spaced />
           <div class="k-inset-actions-md">
             <q-btn
@@ -87,15 +101,14 @@
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
+          <!-- Not providing member types for the moment, as the api does not give it -->
           <group-stats
-            v-if="membersCategory"
             :title="$t('members')"
             icon="account_circle"
             :content="group.relationships.members.meta.count"
             :href="code + '/members'"
-            :items="membersCategory"
+            :items="[]"
           />
-          <q-inner-loading :showing="membersCategory === null" color="icon-dark" />
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
@@ -265,19 +278,9 @@ export default Vue.extend({
         this.isLoading = true;
         this.group = null;
         this.contacts = [];
-        const response = await api.getGroupStatus(code);
+        const response = await api.getGroupWithContacts(code);
         this.group = response.group;
         this.contacts = response.contacts;
-        this.membersCategory = [];
-        const cm = response.group.meta.categoryMembers;
-
-        if (cm) {
-          for (let i = 0; i < cm.length; i++) {
-            const name = this.$t(cm[i][0]);
-            const count = cm[i][1];
-            this.membersCategory.push(count + " " + name);
-          }
-        }
       } finally {
         this.isLoading = false;
       }

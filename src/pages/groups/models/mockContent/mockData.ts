@@ -1,5 +1,4 @@
 import {
-  GroupSummary,
   Group,
   CollectionResponse,
   ResourceResponseInclude,
@@ -8,13 +7,10 @@ import {
   ResourceIdentifierObject,
   RelatedCollection,
   Category,
-  CategorySummary,
   Member,
-  MemberSummary,
   Address,
   Currency,
   ResourceResponse,
-  OfferSummary,
   Offer
 } from "../model";
 import { LoremIpsum, ILoremIpsumParams } from "lorem-ipsum";
@@ -95,14 +91,16 @@ function relatedCollection(path: string, count: number): RelatedCollection {
 }
 
 /**
- * Mock group summary.
+ * Mock result for /{groupCode}
  *
- * @param code Code of group.
+ * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get__groupCode_
  */
-function mockGroupSummary(code: string): GroupSummary {
+export function mockGroup(
+  code: string
+): ResourceResponseInclude<Group, Contact> {
   const index = parseInt(code.substr(3));
-
-  return {
+  const contacts = mockContacts(code);
+  const group: Group = {
     id: uid(),
     type: "groups",
     attributes: {
@@ -112,19 +110,28 @@ function mockGroupSummary(code: string): GroupSummary {
       image: testImages[index % testImages.length],
       website: "https://easterislandgroup.org",
       access: "public",
-      location: testLocations[index % testLocations.length]
+      location: testLocations[index % testLocations.length],
+      created: new Date().toJSON(),
+      updated: new Date().toJSON()
+    },
+    relationships: {
+      contacts: {
+        data: resourceIdentifiers(contacts)
+      },
+      members: relatedCollection(`/${code}/members`, 123),
+      categories: relatedCollection(`/${code}/categories`, 11),
+      offers: relatedCollection(`/${code}/offers`, 222),
+      needs: relatedCollection(`/${code}/needs`, 12),
+      posts: relatedCollection(`/${code}/posts`, 34)
     },
     links: {
-      self: BASE_URL + "/groups/" + code
-    },
-    meta: {
-      categoryMembers: [
-        ["business", 13],
-        ["organitzacions", 8],
-        ["personals", 40],
-        ["publics", 4]
-      ]
+      self: BASE_URL + "/" + code
     }
+  };
+
+  return {
+    data: group,
+    included: contacts
   };
 }
 
@@ -133,11 +140,11 @@ function mockGroupSummary(code: string): GroupSummary {
  *
  * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get_groups
  */
-export function mockGroupList(): CollectionResponse<GroupSummary> {
-  const list = [] as GroupSummary[];
+export function mockGroupList(): CollectionResponse<Group> {
+  const list = [] as Group[];
   for (let index = 1; index < NUM_GROUPS; index++) {
     const code = "GRP" + index;
-    list.push(mockGroupSummary(code));
+    list.push(mockGroup(code).data);
   }
 
   return {
@@ -155,44 +162,9 @@ export function mockGroupList(): CollectionResponse<GroupSummary> {
 }
 
 /**
- * Mock result for /{groupCode}
- *
- * https://app.swaggerhub.com/apis/estevebadia/komunitin-api/0.0.1#/Groups/get__groupCode_
+ * Mock result for /{groupCode}/categories/id
  */
-export function mockGroup(
-  code: string
-): ResourceResponseInclude<Group, Contact> {
-  const summary = mockGroupSummary(code);
-  const contacts = mockContacts(code);
-  const group: Group = {
-    ...summary,
-    attributes: {
-      ...summary.attributes,
-      created: new Date().toJSON(),
-      updated: new Date().toJSON()
-    },
-    relationships: {
-      contacts: {
-        data: resourceIdentifiers(contacts)
-      },
-      members: relatedCollection(`/${code}/members`, 123),
-      categories: relatedCollection(`/${code}/categories`, 11),
-      offers: relatedCollection(`/${code}/offers`, 222),
-      needs: relatedCollection(`/${code}/needs`, 12),
-      posts: relatedCollection(`/${code}/posts`, 34)
-    }
-  };
-
-  return {
-    data: group,
-    included: contacts
-  };
-}
-
-/**
- * Mock category summary.
- */
-function mockCategorySummary(index: number): CategorySummary {
+export function mockCategory(index: number): Category {
   const id = uid();
   return {
     id: id,
@@ -207,21 +179,6 @@ function mockCategorySummary(index: number): CategorySummary {
       created: new Date().toJSON(),
       updated: new Date().toJSON()
     },
-
-    links: {
-      self: BASE_URL + "/categories/" + id
-    }
-  };
-}
-
-/**
- * Mock result for /{groupCode}/categories/id
- */
-export function mockCategory(index: number): Category {
-  const summary = mockCategorySummary(index);
-
-  return {
-    ...summary,
     relationships: {
       group: {
         links: {
@@ -244,6 +201,9 @@ export function mockCategory(index: number): Category {
           count: Math.round(Math.random() * 100)
         }
       }
+    },
+    links: {
+      self: BASE_URL + "/categories/" + id
     }
   };
 }
@@ -274,9 +234,9 @@ export function mockCategoryList(code: string): CollectionResponse<Category> {
 }
 
 /**
- * Mock member summary.
+ * Mock result for /{groupCode}/categories/id
  */
-function mockMemberSummary(index: number): MemberSummary {
+export function mockMember(index: number): Member {
   const id = uid();
   const code = lorem.generateWords(1);
   return {
@@ -294,21 +254,6 @@ function mockMemberSummary(index: number): MemberSummary {
       created: new Date().toJSON(),
       updated: new Date().toJSON()
     },
-
-    links: {
-      self: BASE_URL + "/" + code + "/merbers/" + id
-    }
-  };
-}
-
-/**
- * Mock result for /{groupCode}/categories/id
- */
-export function mockMember(index: number): Member {
-  const summary = mockMemberSummary(index);
-
-  return {
-    ...summary,
     relationships: {
       contacts: {
         data: [
@@ -337,6 +282,9 @@ export function mockMember(index: number): Member {
           count: Math.round(Math.random() * 100)
         }
       }
+    },
+    links: {
+      self: BASE_URL + "/" + code + "/merbers/" + id
     }
   };
 }
@@ -355,8 +303,8 @@ export function mockMemberList(code: string): CollectionResponse<Member> {
   return {
     data: list,
     links: {
-      self: BASE_URL + "/" + code + "/categories",
-      first: BASE_URL + "/" + code + "/categories",
+      self: BASE_URL + "/" + code + "/members",
+      first: BASE_URL + "/" + code + "/members",
       prev: null,
       next: null
     },
@@ -405,19 +353,17 @@ export function mockCurrency(code: string): ResourceResponse<Currency> {
 }
 
 /**
- * Mock offer summary.
- *
- * @param index Index.
+ * Mock result for /{groupCode}/offers/{id}
  */
-function mockOfferSummary(index: number): OfferSummary {
+export function mockOffer(
+  index: number
+): ResourceResponseInclude<Offer, Member> {
+  const member = mockMember(1);
   const code = "GRP" + index;
 
-  return {
+  const offer: Offer = {
     id: uid(),
     type: "offers",
-    links: {
-      self: BASE_URL + code + "/" + "/offers"
-    },
     attributes: {
       name: "Ecologic Bread",
       content:
@@ -440,29 +386,21 @@ function mockOfferSummary(index: number): OfferSummary {
       expires: new Date().toJSON(),
       created: new Date().toJSON(),
       updated: new Date().toJSON()
-    }
-  };
-}
-/**
- * Mock result for /{groupCode}/offers/{id}
- */
-export function mockOffer(): ResourceResponseInclude<Offer, Member> {
-  const summary = mockOfferSummary(1);
-  const member = mockMember(1);
-
-  const offer: Offer = {
-    ...summary,
+    },
     relationships: {
       category: {
         links: {
-          relared: "https://komunitin.org/EITE/categories/food"
+          related: "https://komunitin.org/EITE/categories/food"
         }
       },
       author: {
         links: {
-          related: "https://komunitin.org/EITE/EITE0005"
+          related: "https://komunitin.org/EITE/members/EITE0005"
         }
       }
+    },
+    links: {
+      self: BASE_URL + "/" + code + "/" + "/offers"
     }
   };
 
@@ -475,11 +413,11 @@ export function mockOffer(): ResourceResponseInclude<Offer, Member> {
 /**
  * Mock result for GET /{groupCode}/offers/
  */
-export function mockOfferList(): CollectionResponse<OfferSummary> {
-  const list = [] as OfferSummary[];
+export function mockOfferList(): CollectionResponse<Offer> {
+  const list = [] as Offer[];
 
   for (let index = 1; index < NUM_GROUPS; index++) {
-    list.push(mockOfferSummary(index));
+    list.push(mockOffer(index).data);
   }
 
   return {
