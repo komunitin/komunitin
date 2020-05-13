@@ -1,5 +1,9 @@
-import { GroupsState } from "modules/groups";
+import { GroupsState } from "./modules/groups";
+import { CategoriesState } from "./modules/categories";
+import { ContactsState } from "./modules/contacts";
 
 export default interface State {
-    groups: GroupsState
+    groups: GroupsState,
+    contacts: ContactsState
+    categories: CategoriesState,
 }
