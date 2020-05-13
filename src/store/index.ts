@@ -1,7 +1,8 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import Vue from "vue";
+import Vuex from "vuex";
 
-// import groups from './groups'
+import groups from "./modules/groups";
+import contacts from "./modules/contacts";
 
 Vue.use(Vuex);
 
@@ -16,13 +17,15 @@ Vue.use(Vuex);
 export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      // groups
+      groups,
+      contacts
     },
 
     // enable strict mode (adds overhead!)
     // for dev mode only
-    strict: process.env.DEV === 'true'
+    strict: process.env.DEV === "true"
   });
 
   return Store;
 }
+

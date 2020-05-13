@@ -27,6 +27,7 @@ import { Group } from "./models/model";
 
 import SearchBar from "../../components/SearchBar.vue";
 import GroupCard from "../../components/GroupCard.vue";
+import { LOAD_GROUPS } from "../../store/actions-types";
 
 import KError, { KErrorCode } from "../../KError";
 
@@ -41,17 +42,21 @@ export default Vue.extend({
   },
   data() {
     return {
-      groups: [] as Group[],
       isLoading: true as boolean,
-      location: null as [number, number] | null
+      location: undefined as [number, number] | undefined
     };
+  },
+  computed: {
+    groups() {
+      return this.$store.getters.currentGroups
+    }
   },
   mounted: function() {
     this.getUserLocation();
   },
   methods: {
     hasLocation(): boolean {
-      return this.location != null;
+      return this.location !== undefined;
     },
     handleLocationInfo(position: Position) {
       this.location = [position.coords.longitude, position.coords.latitude];
@@ -82,10 +87,10 @@ export default Vue.extend({
     async fetchGroups(search?: string) {
       try {
         this.isLoading = true;
-        this.groups = await api.getGroups(
-          this.location != null ? this.location : undefined,
+        await this.$store.dispatch(LOAD_GROUPS, {
+          location: this.location,
           search
-        );
+        });
       } finally {
         this.isLoading = false;
       }

@@ -21,8 +21,9 @@ export interface ErrorObject {
 export type Response<T extends ResourceObject, I extends ResourceObject> =
   | ErrorResponse
   | ResourceResponse<T>
+  | CollectionResponse<T>
   | ResourceResponseInclude<T, I>
-  | CollectionResponse<T>;
+  | CollectionResponseInclude<T, I>;
 
 export interface ErrorResponse {
   errors: ErrorObject[];
@@ -30,14 +31,6 @@ export interface ErrorResponse {
 
 export interface ResourceResponse<T extends ResourceObject> {
   data: T;
-}
-
-export interface ResourceResponseInclude<
-  T extends ResourceObject,
-  I extends ResourceObject
-> {
-  data: T;
-  included: I[];
 }
 
 export interface CollectionResponse<T extends ResourceObject> {
@@ -51,6 +44,20 @@ export interface CollectionResponse<T extends ResourceObject> {
     count: number;
   };
   data: T[];
+}
+
+export interface CollectionResponseInclude<
+  T extends ResourceObject,
+  I extends ResourceObject
+> extends CollectionResponse<T> {
+  included: I[];
+}
+
+export interface ResourceResponseInclude<
+  T extends ResourceObject,
+  I extends ResourceObject
+> extends ResourceResponse<T> {
+  included: I[];
 }
 
 /**
@@ -70,6 +77,11 @@ export interface ImageObject {
   alt: string;
 }
 
+/**
+ * To-many relationship.
+ * 
+ * Contains the count metadata.
+ */
 export interface RelatedCollection {
   links: {
     related: string;
@@ -79,10 +91,16 @@ export interface RelatedCollection {
   };
 }
 
+/**
+ * To-one relationship.
+ * 
+ * Contains linkage to the related resource.
+ */
 export interface RelatedResource {
   links: {
     related: string;
-  };
+  },
+  data: ResourceIdentifierObject
 }
 
 /**
