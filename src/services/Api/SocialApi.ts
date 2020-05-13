@@ -6,6 +6,7 @@ import {
   Group,
   Contact,
   CollectionResponse,
+  CollectionResponseInclude,
   ResourceResponseInclude,
   Category,
   Offer
@@ -35,22 +36,24 @@ export default {
   async getGroups(
     location?: [number, number],
     search?: string
-  ): Promise<Group[]> {
-    let query = "";
+  ): Promise<{groups: Group[], contacts: Contact[]}> {
+    let query = "?include=contacts";
+
     if (location !== undefined) {
       query += "sort=location&geo-position=" + location[0] + "," + location[1];
     }
-    if (search != undefined) {
+    if (search !== undefined) {
       query += "filter[search]=" + encodeURIComponent(search);
     }
-    if (query.length > 0) {
-      query = "?" + query;
-    }
+
     try {
-      const response = await client.get<CollectionResponse<Group>>(
+      const response = await client.get<CollectionResponseInclude<Group, Contact>>(
         "/groups" + query
       );
-      return response.data.data;
+      return {
+        groups: response.data.data,
+        contacts: response.data.included
+      }
     } catch (error) {
       throw getKError(error);
     }
@@ -61,7 +64,7 @@ export default {
    *
    * @param code The group code (usually 4-letters)
    */
-  async getGroupWithContacts(
+  async getGroup(
     code: string
   ): Promise<{ group: Group; contacts: Contact[] }> {
     try {
