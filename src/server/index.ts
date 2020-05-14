@@ -31,7 +31,7 @@ export default new Server({
   },
   routes() {
     // Disable output of all intercepted requests.
-    this.logging = true;
+    this.logging = false;
 
     if (process.env.USE_MIRAGE) {
       this.timing = parseInt(process.env.USE_MIRAGE);
