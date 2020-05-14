@@ -1,6 +1,6 @@
 import KOptions from "../komunitin.json";
 import { TokenResponse, User } from "../plugins/Auth";
-import { Server } from "miragejs";
+import { Server, Response } from "miragejs";
 
 function mockToken(scope: string): TokenResponse {
   return {
@@ -36,7 +36,8 @@ export default {
       KOptions.apis.auth.issuer + KOptions.apis.auth.token,
       (schema, request) => {
         const params = new URLSearchParams(request.requestBody);
-        return mockToken(params.get("scope") as string);
+        const data = mockToken(params.get("scope") as string);
+        return new Response(200, {}, data);
       }
     );
 
