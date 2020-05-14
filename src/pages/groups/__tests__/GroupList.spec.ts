@@ -20,6 +20,6 @@ describe("GroupsList.vue", () => {
 
   it("Check data", async () => {
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(GroupCard)).toHaveLength(10);
+    expect(wrapper.findAll(GroupCard)).toHaveLength(7);
   });
 });
