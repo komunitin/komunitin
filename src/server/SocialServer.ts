@@ -60,6 +60,10 @@ function fakeAddress() {
   };
 }
 
+function fakeImage(search = "", size="800x600") {
+  return `https://source.unsplash.com/${size}/?${search}`
+}
+
 interface Association {
   type: string;
   name: string;
@@ -145,7 +149,7 @@ export default {
       code: (i: number) => `GRP${i}`,
       name: (i: number) => `Group ${i}`,
       description: () => fakeMarkdown(4),
-      image: () => faker.image.image(),
+      image: (i: number) => fakeImage(`group${i}`),
       website: () => faker.internet.url(),
       access: "public",
       location: () => fakeLocation(),
@@ -169,7 +173,7 @@ export default {
       //type: "business",
       name: () => faker.name.findName(),
       description: () => fakeMarkdown(2),
-      image: () => faker.image.avatar(),
+      image: () => fakeImage("face","100x100"),
       address: () => fakeAddress(),
       location: () => fakeLocation(),
       created: () => faker.date.past(),
@@ -182,7 +186,7 @@ export default {
       },
       cpa: ["10", "11", "56"],
       description: () => faker.lorem.sentence(),
-      icon: () => faker.image.image(),
+      icon: () => fakeImage("product"),
       access: "public",
       created: () => faker.date.past(),
       updated() {
@@ -195,7 +199,7 @@ export default {
       images: () =>
         Array.from({ length: faker.random.number({ min: 1, max: 5 }) }, () => {
           return {
-            href: faker.image.food(),
+            href: fakeImage("product"),
             alt: faker.company.catchPhrase()
           };
         }),
