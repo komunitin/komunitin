@@ -66,7 +66,6 @@
     "faker": "^4.1.0",
     "jest": "^25.3.0",
     "kind-of": ">=6.0.3",
-    "lorem-ipsum": "^2.0.3",
     "minimist": ">=1.2.3",
     "miragejs": "^0.1.38",
     "ts-jest": "^25.3.1",
