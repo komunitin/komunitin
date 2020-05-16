@@ -10,12 +10,23 @@
         @click="$router.back()"
       />
       <!-- eslint-disable vue-i18n/no-raw-text -->
-      <q-toolbar-title>{{group ? group.attributes.name : ""}}</q-toolbar-title>
+      <q-toolbar-title>{{
+        group ? group.attributes.name : ""
+      }}</q-toolbar-title>
 
-      <q-btn v-if="group" right flat round icon="message" @click="contactsView = true" />
+      <q-btn
+        v-if="group"
+        right
+        flat
+        round
+        icon="message"
+        @click="contactsView = true"
+      />
       <share-button
         v-if="group"
-        :text="$t('checkTheExchangeCommunityGroup', {group: group.attributes.name})"
+        :text="
+          $t('checkTheExchangeCommunityGroup', { group: group.attributes.name })
+        "
         :title="group.attributes.name"
       />
     </q-toolbar>
@@ -27,7 +38,7 @@
           <div class="text-h6">{{ $t("contact") }}</div>
         </q-card-section>
         <q-card-section>
-          <social-network-list type="contact" :networks="groupContacts" />
+          <social-network-list type="contact" :networks="groupContactNames" />
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -46,7 +57,10 @@
         <div class="col-12 col-sm-6 col-md-8">
           <div class="text-h6">{{ group.attributes.code }}</div>
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div v-md2html="group.attributes.description" class="text-onsurface-m"></div>
+          <div
+            v-md2html="group.attributes.description"
+            class="text-onsurface-m"
+          ></div>
           <q-separator spaced />
           <div class="k-inset-actions-md">
             <q-btn
@@ -64,48 +78,43 @@
         <!-- explore -->
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
-            v-if="offers"
             :title="$t('offers')"
             icon="local_offer"
             :content="group.relationships.offers.meta.count"
             :href="code + '/offers'"
-            :items="offers"
+            :items="offersItems"
           />
-          <q-inner-loading :showing="offers === null" color="icon-dark" />
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
-            v-if="needs"
             :title="$t('needs')"
             icon="loyalty"
             :content="group.relationships.needs.meta.count"
             :href="code + '/needs'"
-            :items="needs"
+            :items="needsItems"
           />
-          <q-inner-loading :showing="needs === null" color="icon-dark" />
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
+          <!-- Not providing member types for the moment, as the Social Api does not give it -->
           <group-stats
-            v-if="membersCategory"
             :title="$t('members')"
             icon="account_circle"
             :content="group.relationships.members.meta.count"
             :href="code + '/members'"
-            :items="membersCategory"
+            :items="[]"
           />
-          <q-inner-loading :showing="membersCategory === null" color="icon-dark" />
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
-            v-if="currencyLink"
+            v-if="currency"
             :title="$t('currency')"
             icon="monetization_on"
-            :content="currencySymbol"
+            :content="currency.attributes.symbol"
             :href="code + '/stats'"
-            :items="currency"
+            :items="currencyItems"
           />
         </div>
         <div class="col-12 col-sm-6 col-lg-8">
@@ -118,7 +127,7 @@
           </q-card>
         </div>
         <div class="col-12 col-sm-6 col-lg-4 relative-position">
-          <social-network-list type="contact" :networks="groupContacts" />
+          <social-network-list type="contact" :networks="groupContactNames" />
         </div>
       </div>
     </div>
@@ -127,12 +136,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import marked from "marked";
-
-import api from "../../services/Api/SocialApi";
-import apiAccounting from "../../services/Api/AccountingApi";
 import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact, Category, CollectionResponse } from "./models/model";
+import { Group, Contact, Category, Currency } from "../../store/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
@@ -170,35 +175,25 @@ export default Vue.extend({
   },
   data() {
     return {
-      group: null as Group | null,
-      contacts: [] as Contact[],
-      isLoading: true,
+      itemsLoading: 0,
       contactsView: false,
-      socialButtonsView: false,
-      needs: null as string[] | null,
-      offers: null as string[] | null,
-      currency: null as string[] | null,
-      currencySymbol: null as string | null,
-      currencyLink: null as string | null,
-      membersCategory: null as string[] | null,
-      moreCategories: "And more categories"
+      socialButtonsView: false
     };
   },
   computed: {
-    center(): [number, number] | undefined {
-      return this.group?.attributes.location.coordinates;
+    isLoading(): boolean {
+      return this.itemsLoading > 0;
     },
-    marker(): [number, number] | undefined {
-      return this.group?.attributes.location.coordinates;
+    group(): Group & { contacts: Contact[]; categories: Category[] } {
+      return this.$store.getters["groups/current"];
     },
-    url(): string {
-      return window.location.href;
+    currency(): Currency {
+      return this.$store.getters["currencies/current"];
     },
-    title(): string {
-      return document.title;
-    },
-    groupContacts(): ContactNames {
-      return this.contacts?.reduce(
+    groupContactNames(): ContactNames {
+      // From the array of related Contact objects build
+      // a dictionary { type => name }
+      return this.group.contacts.reduce(
         (contacts: ContactNames, contact: Contact) => {
           contacts[contact.attributes.type] = {
             name: contact.attributes.name
@@ -207,125 +202,71 @@ export default Vue.extend({
         },
         {}
       );
+    },
+    currencyItems(): string[] {
+      const stats = this.currency.attributes.stats;
+      // FIXME: https://github.com/komunitin/komunitin/issues/81
+      return [
+        `${stats.transactions} ${this.$t("transactions")}/${this.$t("year")}`,
+        `${stats.exchanges} ${this.$t("exchanges")}/${this.$t("year")}`,
+        `${stats.circulation} ${this.$t("circulation")}`
+        // Missing the string showing currency value
+        // "1 ECO = 1 EÇ = 0,1 ℏ = 1 tk"
+      ];
+    },
+    offersItems(): string[] {
+      return this.buildCategoryItems("offers");
+    },
+    needsItems(): string[] {
+      return this.buildCategoryItems("needs");
+    },
+    center(): [number, number] | undefined {
+      return this.group?.attributes.location.coordinates;
+    },
+    marker(): [number, number] | undefined {
+      return this.group?.attributes.location.coordinates;
+    },
+    url(): string {
+      return window.location.href;
     }
   },
   mounted: function(): void {
     this.fetchGroup(this.code);
-    this.fetchOffers(this.code);
-    this.fetchNeeds(this.code);
     this.fetchCurrency(this.code);
   },
   methods: {
-    // Parse markdown.
-    compiledMarkdown: function(text: string) {
-      return marked(text, { sanitize: true, gfm: true, breaks: true });
+    // Group info.
+    async fetchGroup(code: string) {
+      try {
+        this.itemsLoading++;
+        await this.$store.dispatch("groups/load", {
+          code,
+          include: "contacts,categories"
+        });
+      } finally {
+        this.itemsLoading--;
+      }
     },
     // Currency info.
     async fetchCurrency(code: string) {
       try {
-        this.currency = [];
-        const responseCurrrency = await apiAccounting.getCurrencyStats(code);
-        if (responseCurrrency !== null) {
-          const att = responseCurrrency.attributes;
-          this.currency.push(
-            "" +
-              att.stats.transaccions +
-              " " +
-              this.$t("transactions") +
-              " / " +
-              this.$t("year")
-          );
-          this.currency.push(
-            "" +
-              att.stats.exchanges +
-              " " +
-              this.$t("exchanges") +
-              " / " +
-              this.$t("year")
-          );
-          this.currency.push(
-            "" +
-              att.stats.circulation +
-              " " +
-              this.$t("circulation") +
-              " / " +
-              this.$t("year")
-          );
-          this.currency.push("1 ECO = 1 EÇ = 0,1 ℏ = 1 tk");
-          this.currencySymbol = att.symbol;
-          this.currencyLink = responseCurrrency.links.self;
-        }
+        this.itemsLoading++;
+        await this.$store.dispatch("currencies/load", { code });
       } finally {
-        this.isLoading = false;
-      }
-    },
-    // Group info.
-    async fetchGroup(code: string) {
-      try {
-        this.isLoading = true;
-        this.group = null;
-        this.contacts = [];
-        const response = await api.getGroupStatus(code);
-        this.group = response.group;
-        this.contacts = response.contacts;
-        this.membersCategory = [];
-        const cm = response.group.meta.categoryMembers;
-
-        if (cm) {
-          for (let i = 0; i < cm.length; i++) {
-            const name = this.$t(cm[i][0]);
-            const count = cm[i][1];
-            this.membersCategory.push(count + " " + name);
-          }
-        }
-      } finally {
-        this.isLoading = false;
+        this.itemsLoading--;
       }
     },
     // Categories info.
-    async fetchOffers(code: string) {
-      try {
-        // Offers.
-        const responseOffers: CollectionResponse<Category> = await api.getCategories(
-          code,
-          undefined,
-          "sort=relationships.offers.meta.count",
-          1,
-          4
-        );
-        this.offers = [];
-        for (const category of responseOffers.data) {
-          this.offers.push(
-            category.relationships.offers.meta.count +
-              " " +
-              category.attributes.name
-          );
-        }
-      } finally {
-        if (this.offers) this.offers.push(this.moreCategories);
+    buildCategoryItems(type: "offers" | "needs"): string[] {
+      // Copy original arrray not to modify it when sorting.
+      const items: string[] = this.group.categories.slice()
+        .sort((a, b) => b.relationships[type].meta.count - a.relationships[type].meta.count)
+        .slice(0, 4)
+        .map(category => `${category.relationships[type].meta.count} ${category.attributes.name}`);
+      if (this.group.categories.length > 4) {
+        items.push(this.$t("andMoreCategories").toString());
       }
-    },
-    async fetchNeeds(code: string) {
-      try {
-        // Needs.
-        const responseNeeds: CollectionResponse<Category> = await api.getCategories(
-          code,
-          undefined,
-          "sort=relationships.needs.meta.count",
-          1,
-          4
-        );
-        this.needs = [];
-        for (const category of responseNeeds.data) {
-          this.needs.push(
-            category.relationships.needs.meta.count +
-              " " +
-              category.attributes.name
-          );
-        }
-      } finally {
-        if (this.needs) this.needs.push(this.moreCategories);
-      }
+      return items;
     }
   }
 });
