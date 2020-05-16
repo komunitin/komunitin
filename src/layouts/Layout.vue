@@ -1,7 +1,7 @@
 <template>
   <div class="bg-outside column">
     <div id="container" class="q-mx-auto bg-surface">
-      <q-layout id="layout" view="lhr lpr lfr">
+      <q-layout id="layout" view="lhh lpr lfr">
         <slot name="toolbar">
           <q-toolbar class="bg-primary text-onprimary">
             <!-- render either back button or menu button -->
