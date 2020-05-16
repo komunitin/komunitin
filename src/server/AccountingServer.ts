@@ -28,7 +28,7 @@ export default {
       value: 100000,
       scale: 4,
       stats: {
-        transaccions: Math.round(Math.random() * 10000),
+        transactions: Math.round(Math.random() * 10000),
         exchanges: Math.round(Math.random() * 10000),
         circulation: Math.round(Math.random() * 10000)
       }

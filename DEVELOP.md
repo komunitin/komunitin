@@ -97,6 +97,13 @@ Colors are defined as variables and standard classes at `src/css/quasar.variable
 - Asynchronous code is written using the `async/await` pattern, and not the Promises API.
 - Error managing is done using the `KError` object, a custom extension of JavaScript `Error` object. When an exception occurs, the code must create a `KError` object with the proper error code from `KErrorCode` enumeration. Then it may just throw it or, if the code knows how to recover, log it using the `$handleError` injected function from `boot/errors.ts` and continue the execution.
 
+### Data
+We use [Vuex](https://vuex.vuejs.org/) to store the data fetched from the backend(s), using the standard pattern:
+!(https://vuex.vuejs.org/vuex.png)
+
+Each resource type si stored in a Vuex module that provide actions to load the resources from the API and getters to obtain the values. Relationships are
+automatically bind to the provided resources using JavaScript getter functions.
+
 ### Functional testing
 Functional tests check that app features are working, contrasted to unit tests that check that a particular chunk of code is working. Tests are executed by [NodeJS](https://nodejs.org/) with the [Jest](https://jestjs.io/) framework with a mocked Browser environment. This way tests are much more estable than end to end tests using a full browser and also more meaningful than unit tests.
 

@@ -25,6 +25,11 @@ describe("Explore groups", () => {
     expect(wrapper.vm.$route.path).toBe("/groups/GRP1");
     const group = wrapper.text();
     expect(group).toContain("GRP1");
+    // Check cards present.
+    expect(group).toContain("Offers");
+    expect(group).toContain("Needs");
+    expect(group).toContain("Members");
+    expect(group).toContain("Currency");
     // Go back home
     wrapper.get("#back").trigger("click");
     await wrapper.vm.$wait();

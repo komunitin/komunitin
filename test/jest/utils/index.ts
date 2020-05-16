@@ -103,7 +103,7 @@ Vue.prototype.$nextTwoTicks = async function() {
 
 Vue.prototype.$wait = async function(time?: number) {
   await this.$nextTwoTicks();
-  await new Promise((r) => setTimeout(r, time ?? 100));
+  await new Promise((r) => setTimeout(r, time ?? 200));
 }
 
 declare module "vue/types/vue" {
@@ -113,7 +113,7 @@ declare module "vue/types/vue" {
      * Known use cases:
      *  - Content needing to reach data from a mocked HTTP request.
      *  - Interact with router.back() feature.
-     * This method waits for two ticks and then for 100 ms or the given time.
+     * This method waits for two ticks and then for 200 ms or the given time.
      */
     $wait(time?: number) : Promise<void>;
 
