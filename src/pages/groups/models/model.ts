@@ -1,3 +1,5 @@
+
+
 /**
  * See https://jsonapi.org/format/#document-resource-identifier-objects
  */
@@ -5,11 +7,14 @@ export interface ResourceIdentifierObject {
   type: string;
   id: string;
 }
-
+export type Relationship = RelatedResource | RelatedLinkedCollection | RelatedCollection;
 export interface ResourceObject extends ResourceIdentifierObject {
   links: {
     self: string;
   };
+  relationships? : {
+    [key: string]: Relationship;
+  }
 }
 
 export interface ErrorObject {
@@ -89,6 +94,16 @@ export interface RelatedCollection {
   meta: {
     count: number;
   };
+  // This is a hack to avoid type issues when dealing
+  // with Relationship type and asking the `data` attribute.
+  data: undefined;
+}
+
+/**
+ * Embedded To-many relationship.
+ */
+export interface RelatedLinkedCollection {
+  data: ResourceIdentifierObject[]
 }
 
 /**
@@ -134,9 +149,7 @@ export interface Group extends ResourceObject {
     updated: string;
   };
   relationships: {
-    contacts: {
-      data: ResourceIdentifierObject[];
-    };
+    contacts: RelatedLinkedCollection;
     members: RelatedCollection;
     categories: RelatedCollection;
     offers: RelatedCollection;
@@ -193,9 +206,7 @@ export interface Member extends ResourceObject {
     updated: string;
   };
   relationships: {
-    contacts: {
-      data: ResourceIdentifierObject[];
-    };
+    contacts: RelatedLinkedCollection;
     group: RelatedResource;
     needs: RelatedCollection;
     offers: RelatedCollection;
@@ -233,7 +244,7 @@ export interface Currency extends ResourceObject {
     scale: number;
     value: number;
     stats: {
-      transaccions: number;
+      transactions: number;
       exchanges: number;
       circulation: number;
     };
