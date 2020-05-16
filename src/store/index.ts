@@ -10,6 +10,8 @@ import {
   Category,
   Currency
 } from "src/store/model";
+// Import user module
+import user from "./user";
 
 Vue.use(Vuex);
 
@@ -49,6 +51,7 @@ const currencies = new class extends Resources<Currency, unknown> {
 export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
+      user,
       groups,
       contacts,
       members,
