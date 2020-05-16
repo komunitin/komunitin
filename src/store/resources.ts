@@ -10,8 +10,17 @@ import Axios, { AxiosInstance, AxiosError } from "axios";
 import KError, { KErrorCode } from "src/KError";
 
 interface ResourcesState<T extends ResourceObject> {
-  resources: { [key: string]: T };
+  /**
+   * Dictionary of resources indexed by id.
+   */
+  resources: { [id: string]: T };
+  /**
+   * Id of current resource.
+   */
   current: string | null;
+  /**
+   * Array of ids of current list of resources.
+   */
   currentList: string[];
 }
 /**
@@ -77,18 +86,41 @@ export interface LoadPayload {
 export class Resources<T extends ResourceObject, S> implements Module<ResourcesState<T>, S> {
   namespaced = true;
 
+  /**
+   * The resource type.
+   */
   readonly type: string;
   protected readonly client: AxiosInstance;
 
+  /**
+   * @param type The resource type.
+   * @param baseUrl The API URL.
+   */
   public constructor(type: string, baseUrl: string) {
     this.type = type;
     this.client = this.getHttpClient(baseUrl);
   }
 
+  /**
+   * Endpoint for the collection of resources of this type. Override if
+   * your resource doesn't follow the standard `/{groupCode}/{type}`.
+   * 
+   * @param groupCode The code of the group
+   */
   protected collectionEndpoint(groupCode: string) {
     return `/${groupCode}/${this.type}`;
   }
 
+  /**
+   * Endpoint for a single resource of this type. Override if
+   * your resource doesn't follow the standard:`
+   * ```
+   *  collectionEndpoint(groupCode)/{code}.
+   * ```
+   * 
+   * @param code The code of the resource
+   * @param groupCode The code of the group
+   */
   protected resourceEndpoint(code: string, groupCode: string) {
     return this.collectionEndpoint(groupCode) + `/${code}`;
   }
@@ -104,10 +136,21 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     });
   }
 
+  /**
+   * Trigger `add` commit to the relevant modules for each resource given.
+   * 
+   * @param included Included resources
+   * @param commit Commit function
+   */
   protected handleIncluded(included: ResourceObject[], commit: Commit) {
     included.forEach(resource => commit(resource.type + "/add", resource, {root: true}));
   }
 
+  /**
+   * Handle error from the API.
+   * 
+   * @param error The Network error.
+   */
   protected getKError(error: AxiosError<ErrorObject>) {
     if (error.response) {
       // Server returned error. Use code from server response.
@@ -173,29 +216,52 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   };
 
   getters = {
+    /**
+     * Gets a resource given its id.
+     */
     one: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: {[key: string]: (id: string) => ResourceObject}) => (id: string) =>
       this.relatedGetters(rootGetters, state.resources[id]),
+    /**
+     * Gets the current resource.
+     */
     current: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: {[key: string]: (id: string) => ResourceObject}) =>
       state.current != null ? this.relatedGetters(rootGetters, state.resources[state.current]) : undefined,
+    /**
+     * Gets the current list of resources.
+     */
     currentList: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: {[key: string]: (id: string) => ResourceObject}) =>
       state.currentList.map(id => state.resources[id]).map(resource => this.relatedGetters(rootGetters, resource))
   };
 
   mutations = {
+    /**
+     * Update the current list of resources
+     */
     setList(state: ResourcesState<T>, resources: T[]) {
       resources.forEach(resource => (state.resources[resource.id] = resource));
       state.currentList = resources.map(resource => resource.id);
     },
+    /**
+     * Update the current resource
+     */
     setCurrent(state: ResourcesState<T>, resource: T) {
       state.resources[resource.id] = resource;
       state.current = resource.id;
     },
+    /**
+     * Add a resource to the dictionary without updating the current resource.
+     */
     add(state: ResourcesState<T>, resource: T) {
       state.resources[resource.id] = resource;
     }
   };
 
   actions = {
+    /**
+     * Fetches the current list of resources.
+     * 
+     * @param payload Configure the request by filtering the results, including related resources, including the current location, sorting.
+     */
     loadList: async (
       { commit }: ActionContext<ResourcesState<T>, S>,
       payload: LoadListPayload
@@ -241,6 +307,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         throw this.getKError(error);
       }
     },
+    /**
+     * Fetches the current reaource.
+     */
     load: async (
       { commit }: ActionContext<ResourcesState<T>, S>,
       payload: LoadPayload
