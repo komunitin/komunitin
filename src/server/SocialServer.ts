@@ -105,6 +105,16 @@ export default {
     }),
     contact: ApiSerializer,
     category: ApiSerializer.extend({
+      links(category: any) {
+        return {
+          "offers": {
+            "related": `${urlSocial}/${category.group.code}/offers?filter[category]=${category.id}`
+          },
+          "needs": {
+            "related": `${urlSocial}/${category.group.code}/needs?filter[category]=${category.id}`
+          }
+        }
+      },
       selfLink: (category: any) =>
         urlSocial + "/" + category.group.code + "/categories/" + category.code
     }),
@@ -131,7 +141,9 @@ export default {
     }),
     contact: Model,
     category: Model.extend({
-      group: belongsTo()
+      group: belongsTo(),
+      offers: hasMany(),
+      needs: hasMany()
     }),
     offer: Model.extend({
       category: belongsTo(),
