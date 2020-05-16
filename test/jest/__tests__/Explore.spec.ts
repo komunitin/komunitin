@@ -19,13 +19,17 @@ describe("Explore groups", () => {
     expect(wrapper.vm.$route.path).toBe("/groups");
     const list = wrapper.text();
     expect(list).toContain("GRP1");
-    expect(list).toContain("GRP10");
+    expect(list).toContain("GRP6");
     wrapper.get("[href='/groups/GRP1']").trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP1");
     const group = wrapper.text();
     expect(group).toContain("GRP1");
-    expect(group).toContain("easterislandgroup.org");
+    // Check cards present.
+    expect(group).toContain("Offers");
+    expect(group).toContain("Needs");
+    expect(group).toContain("Members");
+    expect(group).toContain("Currency");
     // Go back home
     wrapper.get("#back").trigger("click");
     await wrapper.vm.$wait();

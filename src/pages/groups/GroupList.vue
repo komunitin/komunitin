@@ -1,10 +1,18 @@
 <template>
   <div>
-    <search-bar :title="$t('groupsNearYou')" :back-button="true" @newSearch="fetchGroups" />
+    <search-bar
+      :title="$t('groupsNearYou')"
+      :back-button="true"
+      @newSearch="fetchGroups"
+    />
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
-        <div v-for="group of groups" :key="group.id" class="col-12 col-sm-6 col-md-4">
+        <div
+          v-for="group of groups"
+          :key="group.id"
+          class="col-12 col-sm-6 col-md-4"
+        >
           <group-card :group="group" />
         </div>
       </div>
@@ -14,8 +22,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import api from "../../services/Api/SocialApi";
-import { GroupSummary } from "./models/model";
+
+import { Group } from "../../store/model";
 
 import SearchBar from "../../components/SearchBar.vue";
 import GroupCard from "../../components/GroupCard.vue";
@@ -33,17 +41,21 @@ export default Vue.extend({
   },
   data() {
     return {
-      groups: [] as GroupSummary[],
-      isLoading: true as boolean,
-      location: null as [number, number] | null
+      isLoading: true,
+      location: undefined as [number, number] | undefined
     };
+  },
+  computed: {
+    groups(): Group[] {
+      return this.$store.getters["groups/currentList"];
+    }
   },
   mounted: function() {
     this.getUserLocation();
   },
   methods: {
     hasLocation(): boolean {
-      return this.location != null;
+      return this.location !== undefined;
     },
     handleLocationInfo(position: Position) {
       this.location = [position.coords.longitude, position.coords.latitude];
@@ -74,10 +86,11 @@ export default Vue.extend({
     async fetchGroups(search?: string) {
       try {
         this.isLoading = true;
-        this.groups = await api.getGroups(
-          this.location != null ? this.location : undefined,
-          search
-        );
+        await this.$store.dispatch("groups/loadList", {
+          location: this.location,
+          search,
+          include: "contacts"
+        });
       } finally {
         this.isLoading = false;
       }
