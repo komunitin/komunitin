@@ -11,32 +11,34 @@ const excludedElements = ["BUTTON", "A", "INPUT"];
  * @param Vue The Vue instance.
  */
 export default function(Vue: typeof _Vue): void {
-  Vue.directive("card-click-to", (el, binding, vnode) => {
-    // Add mouse cursor-pointer class.
-    el.classList.add("cursor-pointer");
-    // Add the tabindex so it is accessible by keyboard.
-    el.tabIndex = 0;
+  Vue.directive("card-click-to", {
+    bind: (el, binding, vnode) => {
+      // Add mouse cursor-pointer class.
+      el.classList.add("cursor-pointer");
+      // Add the tabindex so it is accessible by keyboard.
+      el.tabIndex = 0;
 
-    const handler = (event: Event) => {
-      // Check that the clicked element is not one of the excluded
-      // elements and is not child of one of the excluded elements.
-      let element = event.target as HTMLElement | null;
-      while (element != null && element != el) {
-        if (excludedElements.includes(element.tagName.toUpperCase())) {
-          return;
+      const handler = (event: Event) => {
+        // Check that the clicked element is not one of the excluded
+        // elements and is not child of one of the excluded elements.
+        let element = event.target as HTMLElement | null;
+        while (element != null && element != el) {
+          if (excludedElements.includes(element.tagName.toUpperCase())) {
+            return;
+          }
+          element = element.parentElement;
         }
-        element = element.parentElement;
-      }
-      // Go to the given route.
-      vnode.context?.$router.push(binding.value);
-    };
-    // Execute on click.
-    el.addEventListener("click", handler);
-    // Execute on enter keydown.
-    el.addEventListener("keyup", (event:KeyboardEvent) => {
-      if (event.key == "Enter") {
-        handler(event);
-      }
-    });
+        // Go to the given route.
+        vnode.context?.$router.push(binding.value);
+      };
+      // Execute on click.
+      el.addEventListener("click", handler);
+      // Execute on enter keydown.
+      el.addEventListener("keyup", (event: KeyboardEvent) => {
+        if (event.key == "Enter") {
+          handler(event);
+        }
+      });
+    }
   });
 }

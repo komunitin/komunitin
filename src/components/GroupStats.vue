@@ -15,7 +15,7 @@
       </q-card-section>
       <q-card-section class="col-8 text-onsurface-m">
         <ul class="q-pa-none q-ma-none">
-          <li v-for="item in items" :key="item">{{item}}</li>
+          <li v-for="(item, i) in items" :key="i">{{item}}</li>
         </ul>
       </q-card-section>
     </q-card-section>
