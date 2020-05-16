@@ -177,21 +177,21 @@ export default Vue.extend({
     return {
       itemsLoading: 0,
       contactsView: false,
-      socialButtonsView: false,
+      socialButtonsView: false
     };
   },
   computed: {
     isLoading(): boolean {
       return this.itemsLoading > 0;
     },
-    group(): Group & {contacts: Contact[], categories: Category[]} {
+    group(): Group & { contacts: Contact[]; categories: Category[] } {
       return this.$store.getters["groups/current"];
     },
     currency(): Currency {
       return this.$store.getters["currency/current"];
     },
     groupContactNames(): ContactNames {
-      // From the array of related Contact objects build 
+      // From the array of related Contact objects build
       // a dictionary { type => name }
       return this.group.contacts.reduce(
         (contacts: ContactNames, contact: Contact) => {
@@ -209,7 +209,7 @@ export default Vue.extend({
       return [
         `${stats.transactions} ${this.$t("transactions")}/${this.$t("year")}`,
         `${stats.exchanges} ${this.$t("exchanges")}/${this.$t("year")}`,
-        `${stats.circulation} ${this.$t("circulation")}`,
+        `${stats.circulation} ${this.$t("circulation")}`
         // Missing the string showing currency value
         // "1 ECO = 1 EÇ = 0,1 ℏ = 1 tk"
       ];
@@ -228,7 +228,7 @@ export default Vue.extend({
     },
     url(): string {
       return window.location.href;
-    },
+    }
   },
   mounted: function(): void {
     this.fetchGroup(this.code);
@@ -261,13 +261,13 @@ export default Vue.extend({
       // Copy original arrray not to modify it when sorting.
       const items: string[] = this.group.categories.slice()
         .sort((a, b) => b.relationships[type].meta.count - a.relationships[type].meta.count)
-        .slice(0, 4) 
+        .slice(0, 4)
         .map(category => `${category.relationships[type].meta.count} ${category.attributes.name}`);
       if (this.group.categories.length > 4) {
         items.push(this.$t("andMoreCategories").toString());
       }
       return items;
-    },
+    }
   }
 });
 </script>
