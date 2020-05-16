@@ -27,7 +27,7 @@ import Vue from "vue";
 
 import { Group } from "../../store/model";
 
-import Layout from "../../layouts/layout.vue";
+import Layout from "../../layouts/Layout.vue";
 import SearchBar from "../../components/SearchBar.vue";
 import GroupCard from "../../components/GroupCard.vue";
 
