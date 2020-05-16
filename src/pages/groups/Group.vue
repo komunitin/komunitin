@@ -78,26 +78,22 @@
         <!-- explore -->
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
-            v-if="offers"
             :title="$t('offers')"
             icon="local_offer"
             :content="group.relationships.offers.meta.count"
             :href="code + '/offers'"
-            :items="offers"
+            :items="offersItems"
           />
-          <q-inner-loading :showing="offers === null" color="icon-dark" />
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
-            v-if="needs"
             :title="$t('needs')"
             icon="loyalty"
             :content="group.relationships.needs.meta.count"
             :href="code + '/needs'"
-            :items="needs"
+            :items="needsItems"
           />
-          <q-inner-loading :showing="needs === null" color="icon-dark" />
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
@@ -113,12 +109,12 @@
 
         <div class="col-12 col-sm-6 relative-position">
           <group-stats
-            v-if="currencyLink"
+            v-if="currency"
             :title="$t('currency')"
             icon="monetization_on"
-            :content="currencySymbol"
+            :content="currency.attributes.symbol"
             :href="code + '/stats'"
-            :items="currency"
+            :items="currencyItems"
           />
         </div>
         <div class="col-12 col-sm-6 col-lg-8">
@@ -140,17 +136,16 @@
 
 <script lang="ts">
 import Vue from "vue";
+
 import marked from "marked";
 
 import SocialApi from "../../services/Api/SocialApi";
-import AccountingApi from "../../services/Api/AccountingApi";
 import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact, Category, CollectionResponse } from "./models/model";
+import { Group, Contact, Category, CollectionResponse, Currency } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
 import md2html from "../../plugins/Md2html";
-import { LOAD_GROUP } from "../../store/actions-types";
 
 interface ContactNames {
   [key: string]: {
@@ -184,27 +179,25 @@ export default Vue.extend({
   },
   data() {
     return {
-      isLoading: true,
+      itemsLoading: 0,
       contactsView: false,
       socialButtonsView: false,
-      
-      needs: null as string[] | null,
-      offers: null as string[] | null,
-      currency: null as string[] | null,
-      currencySymbol: null as string | null,
-      currencyLink: null as string | null,
-      membersCategory: null as string[] | null,
-      moreCategories: "And more categories"
     };
   },
   computed: {
-    group(): Group | undefined {
-      return this.$store.getters.currentGroup;
+    isLoading(): boolean {
+      return this.itemsLoading > 0;
+    },
+    group(): Group & {contacts: Contact[], categories: Category[]} {
+      return this.$store.getters["groups/current"];
+    },
+    currency(): Currency {
+      return this.$store.getters["currency/current"];
     },
     groupContactNames(): ContactNames {
-      // From the array of Contact objects in the store, build 
+      // From the array of related Contact objects build 
       // a dictionary { type => name }
-      return this.$store.getters.currentGroupContacts?.reduce(
+      return this.group.contacts.reduce(
         (contacts: ContactNames, contact: Contact) => {
           contacts[contact.attributes.type] = {
             name: contact.attributes.name
@@ -213,6 +206,23 @@ export default Vue.extend({
         },
         {}
       );
+    },
+    currencyItems(): string[] {
+      const stats = this.currency.attributes.stats;
+      // FIXME: https://github.com/komunitin/komunitin/issues/81
+      return [
+        `${stats.transactions} ${this.$t("transactions")}/${this.$t("year")}`,
+        `${stats.exchanges} ${this.$t("exchanges")}/${this.$t("year")}`,
+        `${stats.circulation} ${this.$t("circulation")}`,
+        // Missing the string showing currency value
+        // "1 ECO = 1 EÇ = 0,1 ℏ = 1 tk"
+      ];
+    },
+    offersItems(): string[] {
+      return this.buildCategoryItems("offers");
+    },
+    needsItems(): string[] {
+      return this.buildCategoryItems("needs");
     },
     center(): [number, number] | undefined {
       return this.group?.attributes.location.coordinates;
@@ -226,105 +236,42 @@ export default Vue.extend({
   },
   mounted: function(): void {
     this.fetchGroup(this.code);
-    this.fetchOffers(this.code);
-    this.fetchNeeds(this.code);
     this.fetchCurrency(this.code);
   },
   methods: {
     // Group info.
     async fetchGroup(code: string) {
       try {
-        this.isLoading = true;
-        this.$store.dispatch(LOAD_GROUP, {code});
-
+        this.itemsLoading++;
+        await this.$store.dispatch("groups/load", {
+          code,
+          include: "contacts,categories"
+        });
       } finally {
-        this.isLoading = false;
+        this.itemsLoading--;
       }
     },
     // Currency info.
     async fetchCurrency(code: string) {
       try {
-        this.currency = [];
-        const responseCurrrency = await AccountingApi.getCurrencyStats(code);
-        if (responseCurrrency !== null) {
-          const att = responseCurrrency.attributes;
-          this.currency.push(
-            "" +
-              att.stats.transaccions +
-              " " +
-              this.$t("transactions") +
-              " / " +
-              this.$t("year")
-          );
-          this.currency.push(
-            "" +
-              att.stats.exchanges +
-              " " +
-              this.$t("exchanges") +
-              " / " +
-              this.$t("year")
-          );
-          this.currency.push(
-            "" +
-              att.stats.circulation +
-              " " +
-              this.$t("circulation") +
-              " / " +
-              this.$t("year")
-          );
-          this.currency.push("1 ECO = 1 EÇ = 0,1 ℏ = 1 tk");
-          this.currencySymbol = att.symbol;
-          this.currencyLink = responseCurrrency.links.self;
-        }
+        this.itemsLoading++;
+        await this.$store.dispatch("currencies/load", { code });
       } finally {
-        this.isLoading = false;
+        this.itemsLoading--;
       }
     },
     // Categories info.
-    async fetchOffers(code: string) {
-      try {
-        // Offers.
-        const responseOffers: CollectionResponse<Category> = await SocialApi.getCategories(
-          code,
-          undefined,
-          "sort=relationships.offers.meta.count",
-          1,
-          4
-        );
-        this.offers = [];
-        for (const category of responseOffers.data) {
-          this.offers.push(
-            category.relationships.offers.meta.count +
-              " " +
-              category.attributes.name
-          );
-        }
-      } finally {
-        if (this.offers) this.offers.push(this.moreCategories);
+    buildCategoryItems(type: "offers" | "needs"): string[] {
+      // Copy original arrray not to modify it when sorting.
+      const items: string[] = this.group.categories.slice()
+        .sort((a, b) => b.relationships[type].meta.count - a.relationships[type].meta.count)
+        .slice(0, 4) 
+        .map(category => `${category.relationships[type].meta.count} ${category.attributes.name}`);
+      if (this.group.categories.length > 4) {
+        items.push(this.$t("andMoreCategories").toString());
       }
+      return items;
     },
-    async fetchNeeds(code: string) {
-      try {
-        // Needs.
-        const responseNeeds: CollectionResponse<Category> = await SocialApi.getCategories(
-          code,
-          undefined,
-          "sort=relationships.needs.meta.count",
-          1,
-          4
-        );
-        this.needs = [];
-        for (const category of responseNeeds.data) {
-          this.needs.push(
-            category.relationships.needs.meta.count +
-              " " +
-              category.attributes.name
-          );
-        }
-      } finally {
-        if (this.needs) this.needs.push(this.moreCategories);
-      }
-    }
   }
 });
 </script>

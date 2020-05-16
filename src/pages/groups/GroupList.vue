@@ -22,12 +22,11 @@
 
 <script lang="ts">
 import Vue from "vue";
-import api from "../../services/Api/SocialApi";
-import { Group } from "./models/model";
+
+import {Group} from "./models/model"
 
 import SearchBar from "../../components/SearchBar.vue";
 import GroupCard from "../../components/GroupCard.vue";
-import { LOAD_GROUPS } from "../../store/actions-types";
 
 import KError, { KErrorCode } from "../../KError";
 
@@ -42,13 +41,13 @@ export default Vue.extend({
   },
   data() {
     return {
-      isLoading: true as boolean,
+      isLoading: true,
       location: undefined as [number, number] | undefined
     };
   },
   computed: {
-    groups() {
-      return this.$store.getters.currentGroups
+    groups(): Group[] {
+      return this.$store.getters["groups/currentList"];
     }
   },
   mounted: function() {
@@ -87,9 +86,10 @@ export default Vue.extend({
     async fetchGroups(search?: string) {
       try {
         this.isLoading = true;
-        await this.$store.dispatch(LOAD_GROUPS, {
+        await this.$store.dispatch("groups/loadList", {
           location: this.location,
-          search
+          search,
+          include: "contacts"
         });
       } finally {
         this.isLoading = false;
