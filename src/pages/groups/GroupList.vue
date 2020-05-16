@@ -1,10 +1,12 @@
 <template>
-  <div>
-    <search-bar
-      :title="$t('groupsNearYou')"
-      :back-button="true"
-      @newSearch="fetchGroups"
-    />
+  <layout>
+    <template v-slot:toolbar>
+      <search-bar
+        :title="$t('groupsNearYou')"
+        :back-button="true"
+        @newSearch="fetchGroups"
+      />
+    </template>
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
@@ -17,7 +19,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </layout>
 </template>
 
 <script lang="ts">
@@ -25,6 +27,7 @@ import Vue from "vue";
 
 import { Group } from "../../store/model";
 
+import Layout from "../../layouts/layout.vue";
 import SearchBar from "../../components/SearchBar.vue";
 import GroupCard from "../../components/GroupCard.vue";
 
@@ -36,6 +39,7 @@ import KError, { KErrorCode } from "../../KError";
 export default Vue.extend({
   name: "GroupList",
   components: {
+    Layout,
     SearchBar,
     GroupCard
   },
