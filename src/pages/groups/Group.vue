@@ -188,7 +188,7 @@ export default Vue.extend({
       return this.$store.getters["groups/current"];
     },
     currency(): Currency {
-      return this.$store.getters["currency/current"];
+      return this.$store.getters["currencies/current"];
     },
     groupContactNames(): ContactNames {
       // From the array of related Contact objects build
