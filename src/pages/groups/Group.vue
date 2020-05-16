@@ -97,7 +97,7 @@
         </div>
 
         <div class="col-12 col-sm-6 relative-position">
-          <!-- Not providing member types for the moment, as the SocialApi does not give it -->
+          <!-- Not providing member types for the moment, as the Social Api does not give it -->
           <group-stats
             :title="$t('members')"
             icon="account_circle"
@@ -136,12 +136,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-
-import marked from "marked";
-
-import SocialApi from "../../services/Api/SocialApi";
 import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact, Category, CollectionResponse, Currency } from "./models/model";
+import { Group, Contact, Category, Currency } from "./models/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";

@@ -3,17 +3,20 @@ import {
   ResourceObject,
   CollectionResponseInclude,
   ResourceResponseInclude,
-  ResourceIdentifierObject
+  ResourceIdentifierObject,
+  ErrorObject
 } from "src/pages/groups/models/model";
-import Axios, { AxiosInstance } from "axios";
-import { getKError } from "src/services/Api/ApiResources";
+import Axios, { AxiosInstance, AxiosError } from "axios";
+import KError, { KErrorCode } from "src/KError";
 
 interface ResourcesState<T extends ResourceObject> {
   resources: { [key: string]: T };
   current: string | null;
   currentList: string[];
 }
-
+/**
+ * Object argument for the `loadList` action.
+ */
 export interface LoadListPayload {
   /**
    * The group where the records belong to.
@@ -40,13 +43,37 @@ export interface LoadListPayload {
    */
   include?: string;
 }
-
+/**
+ * Object argument for the `load` action.
+ */
 export interface LoadPayload {
+  /**
+   * The resource code.
+   */
   code: string;
+  /**
+   * The resource group.
+   */
   group: string;
+  /**
+   * Optional comma-separated list of included relationship resources.
+   */
   include?: string;
 }
-
+/**
+ * Flexible Vuex Module used to retrieve, store and provide resources fetched from the
+ * Komunitin Apis. The implementation is generic for any resource thanks to the JSONAPI
+ * spec.
+ * 
+ * Getters:
+ * - `current`: Gives the current resource.
+ * - `currentList`: Gives the cirrent list of resources.
+ * - `one`: Gives a resource given its id.
+ * 
+ * Actions:
+ * - `load`: Fetches the current resource. Accepts the `LoadPayload` argument.
+ * - `loadList`: Fetches the current list of resources. Accepts the `LoadListPayload` argument.
+ */
 export class Resources<T extends ResourceObject, S> implements Module<ResourcesState<T>, S> {
   namespaced = true;
 
@@ -79,6 +106,26 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
   protected handleIncluded(included: ResourceObject[], commit: Commit) {
     included.forEach(resource => commit(resource.type + "/add", resource, {root: true}));
+  }
+
+  protected getKError(error: AxiosError<ErrorObject>) {
+    if (error.response) {
+      // Server returned error. Use code from server response.
+      const apiError = error.response.data;
+      // Check that the code is actually known.
+      const code =
+        apiError.code in KErrorCode
+          ? (apiError.code as KErrorCode)
+          : KErrorCode.UnknownServer;
+  
+      return new KError(code, apiError.title, error);
+    } else if (error.request) {
+      // Server didn't respond.
+      return new KError(KErrorCode.ServerNoResponse, error.message, error);
+    } else {
+      // Request could not be prepared.
+      return new KError(KErrorCode.IncorrectRequest, error.message, error);
+    }
   }
 
   /**
@@ -191,7 +238,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           this.handleIncluded(response.data.included, commit);
         }
       } catch (error) {
-        throw getKError(error);
+        throw this.getKError(error);
       }
     },
     load: async (
@@ -214,7 +261,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           this.handleIncluded(response.data.included, commit);
         }
       } catch (error) {
-        throw getKError(error);
+        throw this.getKError(error);
       }
     }
   };

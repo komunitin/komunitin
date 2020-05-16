@@ -4,7 +4,7 @@ import Group from "../Group.vue";
 
 describe("Group.vue", () => {
   let code: string;
-  let wrapper: Wrapper<Vue>;
+  let wrapper: Wrapper<Group & {isLoading?: boolean, group?: Group}>;
 
   beforeAll(async () => {
     code = "GRP1";
@@ -16,9 +16,9 @@ describe("Group.vue", () => {
   });
 
   it("check receive data", async () => {
-    expect(wrapper.vm.$data.isLoading).toBe(true);
+    expect(wrapper.vm.isLoading).toBe(true);
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$data.isLoading).toBe(false);
-    expect(wrapper.vm.$data.group).toBeTruthy();
+    expect(wrapper.vm.isLoading).toBe(false);
+    expect(wrapper.vm.group).toBeTruthy();
   });
 });
