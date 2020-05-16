@@ -1,19 +1,6 @@
 <template>
-  <div>
-    <q-toolbar class="bg-primary text-onprimary">
-      <q-btn
-        id="back"
-        flat
-        round
-        icon="arrow_back"
-        :aria-label="$t('back')"
-        @click="$router.back()"
-      />
-      <!-- eslint-disable vue-i18n/no-raw-text -->
-      <q-toolbar-title>{{
-        group ? group.attributes.name : ""
-      }}</q-toolbar-title>
-
+  <layout :title="group ? group.attributes.name : ''" :back="true">
+    <template v-slot:buttons>
       <q-btn
         v-if="group"
         right
@@ -29,7 +16,7 @@
         "
         :title="group.attributes.name"
       />
-    </q-toolbar>
+    </template>
 
     <!-- Message Dialog -->
     <q-dialog v-if="group" v-model="contactsView">
@@ -131,11 +118,12 @@
         </div>
       </div>
     </div>
-  </div>
+  </layout>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import Layout from "../../layouts/Layout.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
 import { Group, Contact, Category, Currency } from "../../store/model";
 import GroupStats from "../../components/GroupStats.vue";
@@ -165,7 +153,8 @@ export default Vue.extend({
     SimpleMap,
     ShareButton,
     GroupStats,
-    SocialNetworkList
+    SocialNetworkList,
+    Layout
   },
   props: {
     code: {
