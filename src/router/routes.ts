@@ -25,20 +25,14 @@ const routes: RouteConfig[] = [
   },
   {
     path: '/groups/',
-    component: () => import('../layouts/Guest.vue'),
-    children: [
-      {
-        path: '/groups/',
-        name: 'GroupList',
-        component: () => import('../pages/groups/GroupList.vue')
-      },
-      {
-        path: '/groups/:code',
-        props: true,
-        name: 'Group',
-        component: () => import('../pages/groups/Group.vue')
-      }
-    ]
+    name: 'GroupList',
+    component: () => import('../pages/groups/GroupList.vue')
+  },
+  {
+    path: '/groups/:code',
+    props: true,
+    name: 'Group',
+    component: () => import('../pages/groups/Group.vue')
   }
 ];
 
