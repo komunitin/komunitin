@@ -9,7 +9,7 @@ import {
   Offer,
   Category,
   Currency
-} from "src/pages/groups/models/model";
+} from "src/store/model";
 
 Vue.use(Vuex);
 

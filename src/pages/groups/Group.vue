@@ -137,7 +137,7 @@
 <script lang="ts">
 import Vue from "vue";
 import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact, Category, Currency } from "./models/model";
+import { Group, Contact, Category, Currency } from "../../store/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
