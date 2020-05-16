@@ -1,14 +1,15 @@
 import { Wrapper } from "@vue/test-utils";
 import { mountComponent } from "../../../../test/jest/utils";
-import Group from "../Group.vue";
+import GroupComponent from "../Group.vue";
+import { Group } from "../../../store/model";
 
 describe("Group.vue", () => {
   let code: string;
-  let wrapper: Wrapper<Group & {isLoading?: boolean, group?: Group}>;
+  let wrapper: Wrapper<Vue & {isLoading?: boolean, group?: Group}>;
 
   beforeAll(async () => {
     code = "GRP1";
-    wrapper = await mountComponent(Group, {
+    wrapper = await mountComponent(GroupComponent, {
       propsData: {
         code
       }

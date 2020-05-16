@@ -5,7 +5,7 @@ import {
   ResourceResponseInclude,
   ResourceIdentifierObject,
   ErrorObject
-} from "src/pages/groups/models/model";
+} from "src/store/model";
 import Axios, { AxiosInstance, AxiosError } from "axios";
 import KError, { KErrorCode } from "src/KError";
 

@@ -23,7 +23,7 @@
 <script lang="ts">
 import Vue from "vue";
 
-import { Group } from "./models/model";
+import { Group } from "../../store/model";
 
 import SearchBar from "../../components/SearchBar.vue";
 import GroupCard from "../../components/GroupCard.vue";
