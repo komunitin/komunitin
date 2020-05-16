@@ -1,3 +1,5 @@
+
+
 /**
  * See https://jsonapi.org/format/#document-resource-identifier-objects
  */
@@ -5,11 +7,14 @@ export interface ResourceIdentifierObject {
   type: string;
   id: string;
 }
-
+export type Relationship = RelatedResource | RelatedLinkedCollection | RelatedCollection;
 export interface ResourceObject extends ResourceIdentifierObject {
   links: {
     self: string;
   };
+  relationships? : {
+    [key: string]: Relationship;
+  }
 }
 
 export interface ErrorObject {
@@ -21,8 +26,9 @@ export interface ErrorObject {
 export type Response<T extends ResourceObject, I extends ResourceObject> =
   | ErrorResponse
   | ResourceResponse<T>
+  | CollectionResponse<T>
   | ResourceResponseInclude<T, I>
-  | CollectionResponse<T>;
+  | CollectionResponseInclude<T, I>;
 
 export interface ErrorResponse {
   errors: ErrorObject[];
@@ -30,14 +36,6 @@ export interface ErrorResponse {
 
 export interface ResourceResponse<T extends ResourceObject> {
   data: T;
-}
-
-export interface ResourceResponseInclude<
-  T extends ResourceObject,
-  I extends ResourceObject
-> {
-  data: T;
-  included: I[];
 }
 
 export interface CollectionResponse<T extends ResourceObject> {
@@ -51,6 +49,20 @@ export interface CollectionResponse<T extends ResourceObject> {
     count: number;
   };
   data: T[];
+}
+
+export interface CollectionResponseInclude<
+  T extends ResourceObject,
+  I extends ResourceObject
+> extends CollectionResponse<T> {
+  included: I[];
+}
+
+export interface ResourceResponseInclude<
+  T extends ResourceObject,
+  I extends ResourceObject
+> extends ResourceResponse<T> {
+  included: I[];
 }
 
 /**
@@ -70,6 +82,11 @@ export interface ImageObject {
   alt: string;
 }
 
+/**
+ * To-many relationship.
+ * 
+ * Contains the count metadata.
+ */
 export interface RelatedCollection {
   links: {
     related: string;
@@ -77,12 +94,28 @@ export interface RelatedCollection {
   meta: {
     count: number;
   };
+  // This is a hack to avoid type issues when dealing
+  // with Relationship type and asking the `data` attribute.
+  data: undefined;
 }
 
+/**
+ * Embedded To-many relationship.
+ */
+export interface RelatedLinkedCollection {
+  data: ResourceIdentifierObject[]
+}
+
+/**
+ * To-one relationship.
+ * 
+ * Contains linkage to the related resource.
+ */
 export interface RelatedResource {
   links: {
     related: string;
-  };
+  },
+  data: ResourceIdentifierObject
 }
 
 /**
@@ -116,9 +149,7 @@ export interface Group extends ResourceObject {
     updated: string;
   };
   relationships: {
-    contacts: {
-      data: ResourceIdentifierObject[];
-    };
+    contacts: RelatedLinkedCollection;
     members: RelatedCollection;
     categories: RelatedCollection;
     offers: RelatedCollection;
@@ -175,9 +206,7 @@ export interface Member extends ResourceObject {
     updated: string;
   };
   relationships: {
-    contacts: {
-      data: ResourceIdentifierObject[];
-    };
+    contacts: RelatedLinkedCollection;
     group: RelatedResource;
     needs: RelatedCollection;
     offers: RelatedCollection;
@@ -215,7 +244,7 @@ export interface Currency extends ResourceObject {
     scale: number;
     value: number;
     stats: {
-      transaccions: number;
+      transactions: number;
       exchanges: number;
       circulation: number;
     };
