@@ -1,3 +1,5 @@
+
+
 /**
  * See https://jsonapi.org/format/#document-resource-identifier-objects
  */
@@ -5,11 +7,14 @@ export interface ResourceIdentifierObject {
   type: string;
   id: string;
 }
-
+export type Relationship = RelatedResource | RelatedLinkedCollection | RelatedCollection;
 export interface ResourceObject extends ResourceIdentifierObject {
   links: {
     self: string;
   };
+  relationships? : {
+    [key: string]: Relationship;
+  }
 }
 
 export interface ErrorObject {
@@ -21,23 +26,16 @@ export interface ErrorObject {
 export type Response<T extends ResourceObject, I extends ResourceObject> =
   | ErrorResponse
   | ResourceResponse<T>
+  | CollectionResponse<T>
   | ResourceResponseInclude<T, I>
-  | CollectionResponse<T>;
+  | CollectionResponseInclude<T, I>;
 
 export interface ErrorResponse {
   errors: ErrorObject[];
 }
 
 export interface ResourceResponse<T extends ResourceObject> {
-  data: T | null;
-}
-
-export interface ResourceResponseInclude<
-  T extends ResourceObject,
-  I extends ResourceObject
-> {
-  data: T | null;
-  included: I[];
+  data: T;
 }
 
 export interface CollectionResponse<T extends ResourceObject> {
@@ -51,6 +49,20 @@ export interface CollectionResponse<T extends ResourceObject> {
     count: number;
   };
   data: T[];
+}
+
+export interface CollectionResponseInclude<
+  T extends ResourceObject,
+  I extends ResourceObject
+> extends CollectionResponse<T> {
+  included: I[];
+}
+
+export interface ResourceResponseInclude<
+  T extends ResourceObject,
+  I extends ResourceObject
+> extends ResourceResponse<T> {
+  included: I[];
 }
 
 /**
@@ -70,6 +82,11 @@ export interface ImageObject {
   alt: string;
 }
 
+/**
+ * To-many relationship.
+ * 
+ * Contains the count metadata.
+ */
 export interface RelatedCollection {
   links: {
     related: string;
@@ -77,6 +94,28 @@ export interface RelatedCollection {
   meta: {
     count: number;
   };
+  // This is a hack to avoid type issues when dealing
+  // with Relationship type and asking the `data` attribute.
+  data: undefined;
+}
+
+/**
+ * Embedded To-many relationship.
+ */
+export interface RelatedLinkedCollection {
+  data: ResourceIdentifierObject[]
+}
+
+/**
+ * To-one relationship.
+ * 
+ * Contains linkage to the related resource.
+ */
+export interface RelatedResource {
+  links: {
+    related: string;
+  },
+  data: ResourceIdentifierObject
 }
 
 /**
@@ -95,28 +134,9 @@ export interface Contact extends ResourceObject {
 export type Access = "public" | "group" | "private";
 
 /**
- * Group summarized model for cards.
- */
-export interface GroupSummary extends ResourceObject {
-  attributes: {
-    code: string;
-    name: string;
-    description: string;
-    image: string;
-    website: string;
-    access: Access;
-    location: Location;
-  };
-  meta: {
-    // Category Members.
-    categoryMembers?: [string, number][];
-  };
-}
-
-/**
  * Full group model.
  */
-export interface Group extends GroupSummary {
+export interface Group extends ResourceObject {
   attributes: {
     code: string;
     name: string;
@@ -129,9 +149,7 @@ export interface Group extends GroupSummary {
     updated: string;
   };
   relationships: {
-    contacts: {
-      data: ResourceIdentifierObject[];
-    };
+    contacts: RelatedLinkedCollection;
     members: RelatedCollection;
     categories: RelatedCollection;
     offers: RelatedCollection;
@@ -141,9 +159,9 @@ export interface Group extends GroupSummary {
 }
 
 /**
- * Categories summary.
+ * Category interface.
  */
-export interface CategorySummary extends ResourceObject {
+export interface Category extends ResourceObject {
   attributes: {
     code: string;
     name: string;
@@ -154,18 +172,8 @@ export interface CategorySummary extends ResourceObject {
     created: string;
     updated: string;
   };
-}
-/**
- * Category interface.
- */
-
-export interface Category extends CategorySummary {
   relationships: {
-    group: {
-      links: {
-        related: string;
-      };
-    };
+    group: RelatedResource;
     needs: RelatedCollection;
     offers: RelatedCollection;
   };
@@ -180,10 +188,11 @@ export interface Address {
   postalCode: string;
   addressRegion: string;
 }
+
 /**
- * Member summary.
+ * Member interface.
  */
-export interface MemberSummary extends ResourceObject {
+export interface Member extends ResourceObject {
   attributes: {
     code: string;
     access: Access;
@@ -196,21 +205,9 @@ export interface MemberSummary extends ResourceObject {
     created: string;
     updated: string;
   };
-}
-/**
- * Member interface.
- */
-
-export interface Member extends MemberSummary {
   relationships: {
-    contacts: {
-      data: ResourceIdentifierObject[];
-    };
-    group: {
-      links: {
-        related: string;
-      };
-    };
+    contacts: RelatedLinkedCollection;
+    group: RelatedResource;
     needs: RelatedCollection;
     offers: RelatedCollection;
   };
@@ -247,7 +244,7 @@ export interface Currency extends ResourceObject {
     scale: number;
     value: number;
     stats: {
-      transaccions: number;
+      transactions: number;
       exchanges: number;
       circulation: number;
     };
@@ -255,12 +252,11 @@ export interface Currency extends ResourceObject {
 }
 
 /**
- * Offer summarized model for cards.
+ * Offer model.
  */
-export interface OfferSummary extends ResourceObject {
+export interface Offer extends ResourceObject {
   attributes: {
     name: string;
-    // Some markdown.
     content: string;
     images: ImageObject[];
     access: Access;
@@ -268,22 +264,8 @@ export interface OfferSummary extends ResourceObject {
     created: string;
     updated: string;
   };
-}
-
-/**
- * Full offer model.
- */
-export interface Offer extends OfferSummary {
   relationships: {
-    category: {
-      links: {
-        relared: string;
-      };
-    };
-    author: {
-      links: {
-        related: string;
-      };
-    };
+    category: RelatedResource;
+    author: RelatedResource;
   };
 }

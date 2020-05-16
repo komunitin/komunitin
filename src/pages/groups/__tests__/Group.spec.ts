@@ -1,14 +1,15 @@
 import { Wrapper } from "@vue/test-utils";
 import { mountComponent } from "../../../../test/jest/utils";
-import Group from "../Group.vue";
+import GroupComponent from "../Group.vue";
+import { Group } from "../../../store/model";
 
 describe("Group.vue", () => {
   let code: string;
-  let wrapper: Wrapper<Vue>;
+  let wrapper: Wrapper<Vue & {isLoading?: boolean, group?: Group}>;
 
   beforeAll(async () => {
     code = "GRP1";
-    wrapper = await mountComponent(Group, {
+    wrapper = await mountComponent(GroupComponent, {
       propsData: {
         code
       }
@@ -16,9 +17,9 @@ describe("Group.vue", () => {
   });
 
   it("check receive data", async () => {
-    expect(wrapper.vm.$data.isLoading).toBe(true);
+    expect(wrapper.vm.isLoading).toBe(true);
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$data.isLoading).toBe(false);
-    expect(wrapper.vm.$data.group).toBeTruthy();
+    expect(wrapper.vm.isLoading).toBe(false);
+    expect(wrapper.vm.group).toBeTruthy();
   });
 });

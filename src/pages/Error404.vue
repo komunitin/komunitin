@@ -3,8 +3,7 @@
     <p>
       <img src="~assets/sad.svg" style="width:30vw;max-width:150px;" />
     </p>
-    <!-- eslint-disable vue-i18n/no-raw-text -->
-    <p class="text-faded">{{ $t('sorryNothingHere') }}<strong>(404)</strong></p>
+    <p class="text-faded">{{ $t('sorryNothingHere') }}</p>
     <q-btn color="secondary" style="width:200px;" to="/" label="Go back" />
   </div>
 </template>
