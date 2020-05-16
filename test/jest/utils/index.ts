@@ -18,9 +18,8 @@ import bootErrors from '../../../src/boot/errors';
 import bootI18n from '../../../src/boot/i18n';
 import bootVuelidate from '../../../src/boot/vuelidate';
 import '../../../src/boot/mirage';
-import bootAuth from '../../../src/boot/auth';
 
-const boots = [bootKomunitin,bootErrors,bootI18n,bootVuelidate,bootAuth];
+const boots = [bootKomunitin,bootErrors,bootI18n,bootVuelidate];
 
 // Get the Quasar plugins to be used.
 const {Quasar, Notify, LocalStorage} = quasar;
@@ -47,17 +46,17 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
   localVue.use(Vuex)
   localVue.use(VueRouter)
 
-  const store = createStore();
-
-  // Set the router mode to "history", as we have in our Quasar config file.
-  process.env.VUE_ROUTER_MODE = "history";
-  const router = createRouter();
-
   // Quasar and Quasar components.
   localVue.use(Quasar, {
     components: QComponents,
     plugins: { Notify, LocalStorage },
   });
+  
+  const store = createStore();
+
+  // Set the router mode to "history", as we have in our Quasar config file.
+  process.env.VUE_ROUTER_MODE = "history";
+  const router = createRouter();
 
   localVue.directive("ripple", jest.fn());
 
