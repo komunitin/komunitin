@@ -83,8 +83,8 @@ export default Vue.extend({
         throw new KError(KErrorCode.IncorrectCredentials, "Incorrect email or password");
       }
       // Perform authentication request.
-      const user = await this.$auth.login(this.email, this.pass);
-      this.$q.notify({type: "positive", message: `Successfully logged in ${user.name} !`});
+      await this.$store.dispatch("login", {email: this.email, password: this.pass});
+      this.$q.notify({type: "positive", message: `Successfully logged in ${this.$store.state.user.userInfo.name} !`});
     }
   }
 });
