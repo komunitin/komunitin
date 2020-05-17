@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Wrapper } from '@vue/test-utils';
+import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 
@@ -11,7 +11,7 @@ describe("Front page and login", () => {
     wrapper = await mountComponent(App);
   });
   afterAll(() => wrapper.destroy());
-  
+
   it("has explore and login buttons", () => {
     const html = wrapper.html();
     expect(html).toContain("account_circle");
@@ -44,7 +44,7 @@ describe("Front page and login", () => {
   });
 
   it("logs in with email and password", async () => {
-    expect(wrapper.vm.$auth.isAuthorized()).toBe(false);
+    expect(wrapper.vm.$store.getters.isLoggedIn).toBe(false);
     // Go to login with mail page.
     wrapper.vm.$router.push("/login-mail");
     await wrapper.vm.$nextTwoTicks();
@@ -57,7 +57,6 @@ describe("Front page and login", () => {
     expect(wrapper.find("button[type='submit']").attributes().disabled).toBeUndefined();
     wrapper.find("button[type='submit']").trigger("click");
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$auth.isAuthorized()).toBe(true);
+    expect(wrapper.vm.$store.getters.isLoggedIn).toBe(true);
   });
-  
 });
