@@ -84,7 +84,10 @@ export default Vue.extend({
       }
       // Perform authentication request.
       await this.$store.dispatch("login", {email: this.email, password: this.pass});
-      this.$q.notify({type: "positive", message: `Successfully logged in ${this.$store.state.user.userInfo.name} !`});
+      if (this.$store.getters.isLoggedIn) {
+        this.$q.notify({type: "positive", message: `Successfully logged in ${this.$store.state.me.userInfo.name} !`});
+        this.$router.push("/groups/" + this.$store.getters.myMember.group.attributes.code)
+      }
     }
   }
 });

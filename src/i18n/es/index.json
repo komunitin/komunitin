@@ -44,5 +44,15 @@
   "year": "Año",
   "exchanges": "Intercambios",
   "circulation": "Circulación",
-  "andMoreCategories": "y más categorías"
+  "andMoreCategories": "y más categorías",
+  "statement": "Movimientos",
+  "myNeeds": "Mis necesidades",
+  "myOffers": "Mis ofertas",
+  "news": "Novedades",
+  "accounts": "Cuentas",
+  "statistics": "Estadísticas",
+  "otherGroups": "Otros grupos",
+  "settings": "Configuración",
+  "editProfile": "Editar perfil",
+  "logout": "Salir"
 }

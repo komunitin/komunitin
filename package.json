@@ -1,7 +1,7 @@
 {
   "name": "komunitin",
   "version": "0.0.1",
-  "description": "Open System for Group Communities",
+  "description": "Open System for Exchange Communities",
   "productName": "Komunitin",
   "cordovaId": "org.komunitin.app",
   "capacitorId": "",
