@@ -62,8 +62,8 @@ export interface AuthData {
  *  - OIDC social login with Google and Facebook (TODO)
  */
 export class Auth {
-  private static readonly STORAGE_KEY: string = "auth-session";
-  private static readonly REFRESH_BEFORE_EXPIRE: number = 5 * 60;
+  public static readonly STORAGE_KEY: string = "auth-session";
+  public static readonly SCOPES = "email komunitin_social offline_access openid profile";
 
   private readonly tokenEndpoint: string;
   private readonly userInfoEndpoint: string;
@@ -141,7 +141,7 @@ export class Auth {
       password: password,
       // eslint-disable-next-line @typescript-eslint/camelcase
       grant_type: "password",
-      scope: "email komunitin_social offline_access openid profile"
+      scope: Auth.SCOPES
     });
   }
 
@@ -248,8 +248,10 @@ export class Auth {
   /**
    * Handle the response of a request to /token OAuth2 endpoint
    * @param response The response.
+   * 
+   * Public function just for testing purposes.
    */
-  private processTokenResponse(response: TokenResponse): AuthData {
+  public processTokenResponse(response: TokenResponse): AuthData {
     // Set data object from response.
     const expire = new Date();
     expire.setSeconds(expire.getSeconds() + response.expires_in);

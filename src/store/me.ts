@@ -2,7 +2,8 @@ import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/komunitin";
 
-const auth = new Auth({
+// Exported just for testing purposes.
+export const auth = new Auth({
   clientId: KOptions.apis.auth.clientId,
   tokenEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.token,
   userInfoEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo
