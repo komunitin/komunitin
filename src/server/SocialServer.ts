@@ -100,6 +100,14 @@ export default {
       selfLink: (group: any) => urlSocial + "/" + group.code
     }),
     member: ApiSerializer.extend({
+      shouldIncludeLinkageData(relationshipKey: string, model: any) {
+        return (
+          ApiSerializer.prototype.shouldIncludeLinkageData.apply(this, [
+            relationshipKey,
+            model
+          ]) || relationshipKey == "contacts"
+        );
+      },
       selfLink: (member: any) =>
         urlSocial + "/" + member.group.code + "/members/" + member.code
     }),
@@ -125,9 +133,16 @@ export default {
     need: ApiSerializer.extend({
       selfLink: (need: any) =>
         urlSocial + "/" + need.group.code + "/needs/" + need.code
+    }),
+    user: ApiSerializer.extend({
+      alwaysIncludeLinkageData: true,
+      selfLink: () => urlSocial + "/users/me",
     })
   },
   models: {
+    user: Model.extend({
+      members: hasMany(),
+    }),
     group: Model.extend({
       members: hasMany(),
       contacts: hasMany(),
@@ -157,6 +172,10 @@ export default {
     })
   },
   factories: {
+    user: Factory.extend({
+      created: () => faker.date.past(),
+      updated: () => faker.date.past()
+    }),
     group: Factory.extend({
       code: (i: number) => `GRP${i}`,
       name: (i: number) => `Group ${i}`,
@@ -254,6 +273,9 @@ export default {
         i++;
       }
     });
+    // Create user.
+    const member = (server.schema as any).members.first();
+    server.create("user", {members: [member]} as any);
   },
   routes(server: Server) {
     // All groups
@@ -277,5 +299,10 @@ export default {
       const group = schema.groups.findBy({ code: request.params.code });
       return schema.offers.where({ group });
     });
+
+    // Logged-in User
+    server.get(urlSocial + "/users/me", (schema: any) => {
+      return schema.users.first();
+    })
   }
 };

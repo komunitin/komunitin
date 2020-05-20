@@ -23,13 +23,13 @@ describe("Front page and login", () => {
     expect(wrapper.find("#back").isVisible()).toBe(false);
     // Click login button.
     wrapper.get("#login").trigger("click");
-    // Vue needs an additional nextTick() to render the content
+    // Vue needs an additional nextTick()'s to render the content
     // got through router.
-    await wrapper.vm.$nextTwoTicks();
+    await wrapper.vm.$nextTicks();
     expect(wrapper.vm.$route.path).toBe("/login-select");
     // Click Login with email button.
     wrapper.get("#login_mail").trigger("click");
-    await wrapper.vm.$nextTwoTicks();
+    await wrapper.vm.$nextTicks();
     expect(wrapper.vm.$route.path).toBe("/login-mail");
     // Click back
     expect(wrapper.get("#back").isVisible()).toBe(true);
@@ -47,7 +47,7 @@ describe("Front page and login", () => {
     expect(wrapper.vm.$store.getters.isLoggedIn).toBe(false);
     // Go to login with mail page.
     wrapper.vm.$router.push("/login-mail");
-    await wrapper.vm.$nextTwoTicks();
+    await wrapper.vm.$nextTicks();
     // Button is disabled since form is empty.
     expect(wrapper.find("button[type='submit']").attributes().disabled).toBe("disabled");
     wrapper.find("input[type='email']").setValue("example@example.com");
