@@ -1,9 +1,9 @@
 <template>
-  <q-item clickable>
+  <q-item clickable active-class="bg-active" :active="active" v-on="$listeners">
     <q-item-section avatar>
-      <q-icon :name="icon" />
+      <q-icon :name="icon" color="icon-dark"/>
     </q-item-section>
-    <q-item-label>{{ title }}</q-item-label>
+    <q-item-section class="text-subtitle2 text-onsurface-m">{{ title }}</q-item-section>
   </q-item>
 </template>
 
@@ -13,7 +13,7 @@ import Vue from "vue";
  * List item in the left drawer menu.
  */
 export default Vue.extend({
-  name: "menu-item",
+  name: "MenuItem",
   props: {
     icon: {
       type: String,
@@ -22,6 +22,16 @@ export default Vue.extend({
     title: {
       type: String,
       required: true
+    },
+    route: {
+      type: String,
+      required: false,
+      default: null
+    }
+  },
+  computed: {
+    active(): boolean {
+      return this.route == this.$router.currentRoute.path
     }
   }
 });

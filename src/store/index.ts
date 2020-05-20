@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import { Resources } from "./resources";
 import { KOptions } from "src/boot/komunitin";
 import {
+  User,
   Group,
   Contact,
   Member,
@@ -10,8 +11,8 @@ import {
   Category,
   Currency
 } from "src/store/model";
-// Import user module
-import user from "./user";
+// Import logged-in user module
+import me from "./me";
 
 Vue.use(Vuex);
 
@@ -28,6 +29,10 @@ const contacts = new Resources<Contact, unknown>("contacts", socialUrl);
 const members = new Resources<Member, unknown>("members", socialUrl);
 const offers = new Resources<Offer, unknown>("offers", socialUrl);
 const categories = new Resources<Category, unknown>("categories", socialUrl);
+const users = new class extends Resources<User, unknown> {
+  collectionEndpoint = () => "/users";
+  resourceEndpoint = () => "/users/me";
+}("users", socialUrl);
 
 // Build modules for Accounting API:
 const accountingUrl = KOptions.apis.accounting;
@@ -51,12 +56,16 @@ const currencies = new class extends Resources<Currency, unknown> {
 export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      user,
+      // Logged-in user module
+      me,
+      // Social API resource modules.
+      users,
       groups,
       contacts,
       members,
       offers,
       categories,
+      // Accounting API resource modules.
       currencies
     },
 
