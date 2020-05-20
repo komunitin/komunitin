@@ -1,6 +1,10 @@
 <template>
   <div class="bg-outside column">
-    <div id="container" class="q-mx-auto bg-surface" :class="showDrawer ? 'with-drawer' : 'without-drawer'">
+    <div
+      id="container"
+      class="q-mx-auto bg-surface"
+      :class="showDrawer ? 'with-drawer' : 'without-drawer'"
+    >
       <q-layout id="layout" view="lhh lpr lfr">
         <q-drawer
           v-if="showDrawer"
@@ -124,5 +128,4 @@ export default Vue.extend({
     @include wrap-main-container(1024px);
   }
 }
-
 </style>
