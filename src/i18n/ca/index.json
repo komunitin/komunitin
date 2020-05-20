@@ -44,5 +44,15 @@
   "year": "Any",
   "exchanges": "Intercanvis",
   "circulation": "Circulació",
-  "andMoreCategories": "i més categories"
+  "andMoreCategories": "i més categories",
+  "statement": "Moviments",
+  "myNeeds": "Les meves necessitats",
+  "myOffers": "Les meves ofertes",
+  "news": "Novetats",
+  "accounts": "Comptes",
+  "statistics": "Estadístiques",
+  "otherGroups": "Altres grups",
+  "settings": "Configuració",
+  "editProfile": "Edita perfil",
+  "logout": "Sortir"
 }

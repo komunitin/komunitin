@@ -100,6 +100,14 @@ export default {
       selfLink: (group: any) => urlSocial + "/" + group.code
     }),
     member: ApiSerializer.extend({
+      shouldIncludeLinkageData(relationshipKey: string, model: any) {
+        return (
+          ApiSerializer.prototype.shouldIncludeLinkageData.apply(this, [
+            relationshipKey,
+            model
+          ]) || relationshipKey == "contacts"
+        );
+      },
       selfLink: (member: any) =>
         urlSocial + "/" + member.group.code + "/members/" + member.code
     }),
@@ -125,9 +133,16 @@ export default {
     need: ApiSerializer.extend({
       selfLink: (need: any) =>
         urlSocial + "/" + need.group.code + "/needs/" + need.code
+    }),
+    user: ApiSerializer.extend({
+      alwaysIncludeLinkageData: true,
+      selfLink: () => urlSocial + "/users/me",
     })
   },
   models: {
+    user: Model.extend({
+      members: hasMany(),
+    }),
     group: Model.extend({
       members: hasMany(),
       contacts: hasMany(),
@@ -157,6 +172,10 @@ export default {
     })
   },
   factories: {
+    user: Factory.extend({
+      created: () => faker.date.past(),
+      updated: () => faker.date.past()
+    }),
     group: Factory.extend({
       code: (i: number) => `GRP${i}`,
       name: (i: number) => `Group ${i}`,
@@ -223,37 +242,44 @@ export default {
   },
   seeds(server: Server) {
     // Create groups.
-    server.createList("group", 7).forEach(group => {
+    server.createList("group", 7).forEach((group, i) => {
       // Create group contacts.
       const contacts = server.createList("contact", 4);
       group.update({ contacts });
-      // Create categories.
-      const categories = server.createList("category", 5, { group } as any);
-      // Create group members
-      const members = server.createList("member", 10, { group } as any);
-      for (let i = 0; i < members.length; i++) {
-        const member = members[i];
-        // Create member contacts.
-        const contacts = server.createList("contact", 4);
-        member.update({ contacts });
-        // Create member offers.
-        const category = categories[i % categories.length];
-        server.createList("offer", 3, {
-          member,
-          category,
-          group
-        } as any);
-        // Create member needs only for some members.
-        if (i % 4 == 0) {
-          server.createList("need", i % 3, {
+      // Only add data for the first two groups. Otherwise we spend a lot of 
+      // time in this function.
+      if (i < 2) {
+        // Create categories.
+        const categories = server.createList("category", 5, { group } as any);
+        // Create group members
+        const members = server.createList("member", 10, { group } as any);
+        for (let i = 0; i < members.length; i++) {
+          const member = members[i];
+          // Create member contacts.
+          const contacts = server.createList("contact", 4);
+          member.update({ contacts });
+          // Create member offers.
+          const category = categories[i % categories.length];
+          server.createList("offer", 3, {
             member,
-            category: categories[(i + 2) % categories.length],
+            category,
             group
           } as any);
+          // Create member needs only for some members.
+          if (i % 4 == 0) {
+            server.createList("need", i % 3, {
+              member,
+              category: categories[(i + 2) % categories.length],
+              group
+            } as any);
+          }
+          i++;
         }
-        i++;
       }
     });
+    // Create user.
+    const member = (server.schema as any).members.first();
+    server.create("user", {members: [member]} as any);
   },
   routes(server: Server) {
     // All groups
@@ -277,5 +303,10 @@ export default {
       const group = schema.groups.findBy({ code: request.params.code });
       return schema.offers.where({ group });
     });
+
+    // Logged-in User
+    server.get(urlSocial + "/users/me", (schema: any) => {
+      return schema.users.first();
+    })
   }
 };
