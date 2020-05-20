@@ -19,6 +19,9 @@ import bootI18n from '../../../src/boot/i18n';
 import bootVuelidate from '../../../src/boot/vuelidate';
 import bootMirage from '../../../src/boot/mirage';
 import bootAuth from '../../../src/boot/auth';
+import { Auth } from '../../../src/plugins/Auth';
+import { auth } from '../../../src/store/me';
+import { mockToken } from 'src/server/AuthServer';
 
 const boots = [bootKomunitin,bootErrors,bootI18n,bootVuelidate,bootMirage,bootAuth];
 
@@ -39,7 +42,7 @@ const QComponents = Object.keys(quasar).reduce((object, key) => {
  * with full Quasar and plugins enabled.
  * @param component 
  */
-export async function mountComponent<V extends Vue>(component: VueClass<V>, options?: ThisTypedMountOptions<V>) {
+export async function mountComponent<V extends Vue>(component: VueClass<V>, options?: ThisTypedMountOptions<V> & {login?: true}) {
   // Use a local Vue instance.
   const localVue = createLocalVue();
 
@@ -52,7 +55,15 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
     components: QComponents,
     plugins: { Notify, LocalStorage },
   });
-  
+
+  LocalStorage.clear();
+
+  // Login state. We must do that before createStore().
+  if (options?.user) {
+    // This call actually saves the mocked token in LocalStorage.
+    auth.processTokenResponse(mockToken(Auth.SCOPES));
+  }
+
   const store = createStore();
 
   // Set the router mode to "history", as we have in our Quasar config file.
