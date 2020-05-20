@@ -242,35 +242,39 @@ export default {
   },
   seeds(server: Server) {
     // Create groups.
-    server.createList("group", 7).forEach(group => {
+    server.createList("group", 7).forEach((group, i) => {
       // Create group contacts.
       const contacts = server.createList("contact", 4);
       group.update({ contacts });
-      // Create categories.
-      const categories = server.createList("category", 5, { group } as any);
-      // Create group members
-      const members = server.createList("member", 10, { group } as any);
-      for (let i = 0; i < members.length; i++) {
-        const member = members[i];
-        // Create member contacts.
-        const contacts = server.createList("contact", 4);
-        member.update({ contacts });
-        // Create member offers.
-        const category = categories[i % categories.length];
-        server.createList("offer", 3, {
-          member,
-          category,
-          group
-        } as any);
-        // Create member needs only for some members.
-        if (i % 4 == 0) {
-          server.createList("need", i % 3, {
+      // Only add data for the first two groups. Otherwise we spend a lot of 
+      // time in this function.
+      if (i < 2) {
+        // Create categories.
+        const categories = server.createList("category", 5, { group } as any);
+        // Create group members
+        const members = server.createList("member", 10, { group } as any);
+        for (let i = 0; i < members.length; i++) {
+          const member = members[i];
+          // Create member contacts.
+          const contacts = server.createList("contact", 4);
+          member.update({ contacts });
+          // Create member offers.
+          const category = categories[i % categories.length];
+          server.createList("offer", 3, {
             member,
-            category: categories[(i + 2) % categories.length],
+            category,
             group
           } as any);
+          // Create member needs only for some members.
+          if (i % 4 == 0) {
+            server.createList("need", i % 3, {
+              member,
+              category: categories[(i + 2) % categories.length],
+              group
+            } as any);
+          }
+          i++;
         }
-        i++;
       }
     });
     // Create user.
