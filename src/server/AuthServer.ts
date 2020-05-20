@@ -2,7 +2,7 @@ import KOptions from "../komunitin.json";
 import { TokenResponse, User } from "../plugins/Auth";
 import { Server, Response } from "miragejs";
 
-function mockToken(scope: string): TokenResponse {
+export function mockToken(scope: string): TokenResponse {
   return {
     // eslint-disable-next-line @typescript-eslint/camelcase
     access_token: "test_access_token",

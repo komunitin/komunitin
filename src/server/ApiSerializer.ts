@@ -14,7 +14,7 @@ export default class ApiSerializer extends JSONAPISerializer {
    * Include linkage data for ro-one relationships
    */
   shouldIncludeLinkageData(relationshipKey: string, model: any) {
-    return model.associations[relationshipKey].type == "belongsTo";
+    return model.associations[relationshipKey].type == "belongsTo" ;
   }
   /**
    * Add meta.count field to collection relationships.

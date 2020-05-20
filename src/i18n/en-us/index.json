@@ -44,5 +44,15 @@
   "year": "Year",
   "exchanges": "Exchanges",
   "circulation": "Circulation",
-  "andMoreCategories": "and more categories"
+  "andMoreCategories": "and more categories",
+  "statement": "Statement",
+  "myNeeds": "My needs",
+  "myOffers": "My Offers",
+  "news": "News",
+  "accounts": "Accounts",
+  "statistics": "Statistics",
+  "otherGroups": "Other groups",
+  "settings": "Settings",
+  "editProfile": "Edit profile",
+  "logout": "Log out"
 }

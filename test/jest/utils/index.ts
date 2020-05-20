@@ -17,9 +17,13 @@ import bootKomunitin from '../../../src/boot/komunitin';
 import bootErrors from '../../../src/boot/errors';
 import bootI18n from '../../../src/boot/i18n';
 import bootVuelidate from '../../../src/boot/vuelidate';
-import '../../../src/boot/mirage';
+import bootMirage from '../../../src/boot/mirage';
+import bootAuth from '../../../src/boot/auth';
+import { Auth } from '../../../src/plugins/Auth';
+import { auth } from '../../../src/store/me';
+import { mockToken } from 'src/server/AuthServer';
 
-const boots = [bootKomunitin,bootErrors,bootI18n,bootVuelidate];
+const boots = [bootKomunitin,bootErrors,bootI18n,bootVuelidate,bootMirage,bootAuth];
 
 // Get the Quasar plugins to be used.
 const {Quasar, Notify, LocalStorage} = quasar;
@@ -38,7 +42,7 @@ const QComponents = Object.keys(quasar).reduce((object, key) => {
  * with full Quasar and plugins enabled.
  * @param component 
  */
-export async function mountComponent<V extends Vue>(component: VueClass<V>, options?: ThisTypedMountOptions<V>) {
+export async function mountComponent<V extends Vue>(component: VueClass<V>, options?: ThisTypedMountOptions<V> & {login?: true}) {
   // Use a local Vue instance.
   const localVue = createLocalVue();
 
@@ -51,7 +55,15 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
     components: QComponents,
     plugins: { Notify, LocalStorage },
   });
-  
+
+  LocalStorage.clear();
+
+  // Login state. We must do that before createStore().
+  if (options?.login) {
+    // This call actually saves the mocked token in LocalStorage.
+    auth.processTokenResponse(mockToken(Auth.SCOPES));
+  }
+
   const store = createStore();
 
   // Set the router mode to "history", as we have in our Quasar config file.
@@ -95,13 +107,14 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
 
 // Add more testing features to Vue.
 
-Vue.prototype.$nextTwoTicks = async function() {
+Vue.prototype.$nextTicks = async function() {
+  await this.$nextTick();
   await this.$nextTick();
   await this.$nextTick();
 }
 
 Vue.prototype.$wait = async function(time?: number) {
-  await this.$nextTwoTicks();
+  await this.$nextTicks();
   await new Promise((r) => setTimeout(r, time ?? 200));
 }
 
@@ -117,12 +130,12 @@ declare module "vue/types/vue" {
     $wait(time?: number) : Promise<void>;
 
     /**
-     * Sometimes tje Vue.$nextTick() function is not enough, and you need to wait for two ticks.
+     * Sometimes the Vue.$nextTick() function is not enough, and you need to wait for more ticks.
      * 
      * Known use cases:
      *  - Wait for rendering the content after triggering an action that changes the current route.
      */
-    $nextTwoTicks(): Promise<void>;
+    $nextTicks(): Promise<void>;
   }
 }
 
