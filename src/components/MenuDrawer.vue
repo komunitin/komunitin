@@ -11,14 +11,21 @@
           {{ myMember.attributes.name }}
         </q-item-label>
         <!-- This is a placeholder -->
-        <q-item-label caption>{{myMember.group.attributes.code + "1234"}}</q-item-label>
+        <q-item-label caption>{{
+          myMember.group.attributes.code + "1234"
+        }}</q-item-label>
       </q-item-section>
       <q-item-section side>
         <q-btn flat round color="icon-dark" icon="expand_more">
           <q-menu auto-close anchor="bottom right" self="top right">
             <q-list>
               <menu-item icon="edit" :title="$t('editProfile')" />
-              <menu-item icon="logout" :title="$t('logout')" @click="logout"/>
+              <menu-item
+                ref="logout"
+                icon="logout"
+                :title="$t('logout')"
+                @click="logout"
+              />
             </q-list>
           </q-menu>
         </q-btn>
@@ -86,14 +93,17 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters(["myMember"]),
-    groupActive() : boolean {
-      return this.$router.currentRoute.path == `/groups/${this.myMember.group.attributes.code}`
+    groupActive(): boolean {
+      return (
+        this.$router.currentRoute.path ==
+        `/groups/${this.myMember.group.attributes.code}`
+      );
     }
   },
   methods: {
     async logout() {
-      await this.$store.dispatch('logout');
-      this.$q.notify({type: "positive", message: "Successfully logged out!"});
+      await this.$store.dispatch("logout");
+      this.$q.notify({ type: "positive", message: "Successfully logged out!" });
       this.$router.push("/");
     }
   }
