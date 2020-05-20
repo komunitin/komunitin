@@ -119,9 +119,21 @@ export interface RelatedResource {
 }
 
 /**
+ * User model.
+ */
+export interface User extends ResourceObject {
+  attributes: {
+    created: string,
+    updated: string,
+  },
+  relationships: {
+    members: RelatedLinkedCollection
+  }
+}
+
+/**
  * Contact model.
  */
-
 export interface Contact extends ResourceObject {
   attributes: {
     type: string;

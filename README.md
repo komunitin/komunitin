@@ -1,6 +1,6 @@
 # Komunitin
 
-Open System for Group Communities
+Open System for Exchange Communities
 
 ![build status](https://github.com/komunitin/komunitin/workflows/Build/badge.svg)
 

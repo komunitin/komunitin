@@ -78,9 +78,22 @@ export class Auth {
    */
   public getStoredTokens(): AuthData | undefined {
     if (LocalStorage.has(Auth.STORAGE_KEY)) {
-      return LocalStorage.getItem(Auth.STORAGE_KEY) as AuthData;
+      const data = LocalStorage.getItem(Auth.STORAGE_KEY) as {accessTokenExpire: string | Date};
+      data.accessTokenExpire = new Date(data.accessTokenExpire);
+      return data as AuthData;
     }
     return undefined;
+  }
+  /**
+   * Do the necessary things to logout the user identified by given AuthData.
+   * 
+   * Actually, it just deletes the saved token but in future it could do server
+   * side operations.
+   */
+  public async logout() {
+    if (LocalStorage.has(Auth.STORAGE_KEY)) {
+      LocalStorage.remove(Auth.STORAGE_KEY);
+    }
   }
   /**
    * Returns whether this class contains sufficient authorization information.
