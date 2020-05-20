@@ -59,7 +59,7 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
   LocalStorage.clear();
 
   // Login state. We must do that before createStore().
-  if (options?.user) {
+  if (options?.login) {
     // This call actually saves the mocked token in LocalStorage.
     auth.processTokenResponse(mockToken(Auth.SCOPES));
   }
