@@ -5,7 +5,6 @@ import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import MenuDrawer from "../../../src/components/MenuDrawer.vue";
-import MenuItem from "../../../src/components/MenuItem.vue";
 
 describe("Front page and login", () => {
   let wrapper: Wrapper<Vue>;
