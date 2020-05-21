@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable active-class="bg-active" :active="active" v-on="$listeners">
+  <q-item clickable active-class="bg-active" :active="active" :disable="disable" @click="click">
     <q-item-section avatar>
       <q-icon :name="icon" color="icon-dark"/>
     </q-item-section>
@@ -23,7 +23,7 @@ export default Vue.extend({
       type: String,
       required: true
     },
-    route: {
+    to: {
       type: String,
       required: false,
       default: null
@@ -31,7 +31,18 @@ export default Vue.extend({
   },
   computed: {
     active(): boolean {
-      return this.route == this.$router.currentRoute.path
+      return this.to == this.$router.currentRoute.path
+    },
+    disable(): boolean {
+      return !this.to && !this.$listeners.click;
+    }
+  },
+  methods: {
+    click() {
+      if (this.to) {
+        this.$router.push(this.to);
+      }
+      this.$emit("click");
     }
   }
 });
