@@ -1,5 +1,5 @@
 <template>
-  <layout :search="true" @search="fetchGroups">
+  <layout :search="true" :title="$t('groupsNearYou')" @search="fetchGroups">
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
