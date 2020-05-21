@@ -12,16 +12,16 @@
           bordered
           show-if-above
           :width="256"
-          :breakpoint="800"
+          @on-layout="drawerChange"
         >
           <menu-drawer />
         </q-drawer>
         <q-header id="header" bordered class="column justify-center">
           <slot name="toolbar">
-            <q-toolbar class="bg-primary text-onprimary">
-              <!-- render either back button or menu button -->
+            <q-toolbar class="bg-primary text-onprimary" :class="(!showBack && !showMenu) ? 'no-button' : ''">
+              <!-- render back button, menu button or none -->
               <q-btn
-                v-if="back"
+                v-if="showBack"
                 id="back"
                 flat
                 round
@@ -29,7 +29,13 @@
                 :aria-label="$t('back')"
                 @click="$router.back()"
               />
-              <q-btn v-else flat round icon="menu" />
+              <q-btn
+                v-if="showMenu"
+                flat
+                round
+                icon="menu"
+                :aria-label="$t('menu')"
+                @click="drawer = !drawer"/>
 
               <q-toolbar-title>
                 {{ title }}
@@ -88,17 +94,31 @@ export default Vue.extend({
       type: String,
       default: ""
     },
-    back: {
-      type: Boolean,
-      default: false
-    }
   },
   data: () => ({
-    drawer: true
+    drawer: true,
+    persistentDrawer: true,
   }),
   computed: {
     showDrawer(): boolean {
       return this.$store.getters.isLoggedIn;
+    },
+    /**
+     * Show the back button.
+     */
+    showBack(): boolean {
+      return !this.showDrawer;
+    },
+    /**
+     * Show the menu button.
+     */
+    showMenu(): boolean {
+      return this.showDrawer && !this.persistentDrawer;
+    }
+  },
+  methods: {
+    drawerChange(state: boolean) {
+      this.persistentDrawer = state;
     }
   }
 });
@@ -127,5 +147,11 @@ export default Vue.extend({
   &.without-drawer {
     @include wrap-main-container(1024px);
   }
+}
+
+// Toolbar has a default padding of 12px. That's ok when there's a button,
+// but it is too low when there's the title directly.
+.no-button {
+  padding-left: 16px;
 }
 </style>
