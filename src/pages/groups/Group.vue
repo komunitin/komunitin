@@ -219,9 +219,17 @@ export default Vue.extend({
       return window.location.href;
     }
   },
-  mounted: function(): void {
-    this.fetchGroup(this.code);
-    this.fetchCurrency(this.code);
+  watch: {
+    // If I call the fetch functions in mounted hook, then a navigation from
+    // `/groups/GRP1` to `/groups/GRP2` doesn't trigger the action since the
+    // component is reused.
+    code: {
+      immediate: true,
+      handler(code: string) {
+        this.fetchGroup(code);
+        this.fetchCurrency(code);
+      }
+    }
   },
   methods: {
     // Group info.

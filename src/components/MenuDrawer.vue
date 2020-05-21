@@ -34,7 +34,7 @@
 
     <q-separator />
 
-    <menu-item icon="home" :title="$t('home')" />
+    <menu-item icon="home" :title="$t('home')"  />
     <menu-item icon="account_balance_wallet" :title="$t('statement')" />
     <menu-item icon="loyalty" :title="$t('myNeeds')" />
     <menu-item icon="local_offer" :title="$t('myOffers')" />
@@ -75,7 +75,7 @@
 
     <q-separator />
 
-    <menu-item icon="group_work" :title="$t('otherGroups')" />
+    <menu-item icon="group_work" :title="$t('otherGroups')" to="/groups" />
     <menu-item icon="settings" :title="$t('settings')" />
     <menu-item icon="help" :title="$t('help')" />
   </q-list>
