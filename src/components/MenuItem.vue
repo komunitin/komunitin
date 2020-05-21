@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable active-class="bg-active" :active="active" :disable="!to" v-on="$listeners" @click="$router.push(to)">
+  <q-item clickable active-class="bg-active" :active="active" :disable="disable" @click="click">
     <q-item-section avatar>
       <q-icon :name="icon" color="icon-dark"/>
     </q-item-section>
@@ -32,6 +32,17 @@ export default Vue.extend({
   computed: {
     active(): boolean {
       return this.to == this.$router.currentRoute.path
+    },
+    disable(): boolean {
+      return !this.to && !this.$listeners.click;
+    }
+  },
+  methods: {
+    click() {
+      if (this.to) {
+        this.$router.push(this.to);
+      }
+      this.$emit("click");
     }
   }
 });
