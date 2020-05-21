@@ -1,5 +1,5 @@
 <template>
-  <layout :title="group ? group.attributes.name : ''" :back="true">
+  <layout :title="group ? group.attributes.name : ''">
     <template v-slot:buttons>
       <q-btn
         v-if="group"
