@@ -164,15 +164,12 @@ export default Vue.extend({
   },
   data() {
     return {
-      itemsLoading: 0,
+      isLoading: true,
       contactsView: false,
       socialButtonsView: false
     };
   },
   computed: {
-    isLoading(): boolean {
-      return this.itemsLoading > 0;
-    },
     group(): Group & { contacts: Contact[]; categories: Category[] } {
       return this.$store.getters["groups/current"];
     },
@@ -219,39 +216,48 @@ export default Vue.extend({
       return window.location.href;
     }
   },
-  mounted: function(): void {
-    this.fetchGroup(this.code);
-    this.fetchCurrency(this.code);
+  created() {
+    // If I just call the fetch functions in created or mounted hook, then navigation from
+    // `/groups/GRP1` to `/groups/GRP2` doesn't trigger the action since the
+    // component is reused. If I otherwise add the `wath` Vue component member, the
+    // tests fail and give "You may have an infinite update loop in a component
+    // render function". So that's the way I found to make it work.
+    this.$watch("code", this.fetchData, { immediate: true });
   },
   methods: {
+    async fetchData(code: string) {
+      this.isLoading = true;
+      try {
+        await Promise.all([this.fetchGroup(code), this.fetchCurrency(code)]);
+      } finally {
+        this.isLoading = false;
+      }
+    },
     // Group info.
     async fetchGroup(code: string) {
-      try {
-        this.itemsLoading++;
-        await this.$store.dispatch("groups/load", {
-          code,
-          include: "contacts,categories"
-        });
-      } finally {
-        this.itemsLoading--;
-      }
+      return this.$store.dispatch("groups/load", {
+        code,
+        include: "contacts,categories"
+      });
     },
     // Currency info.
     async fetchCurrency(code: string) {
-      try {
-        this.itemsLoading++;
-        await this.$store.dispatch("currencies/load", { code });
-      } finally {
-        this.itemsLoading--;
-      }
+      return this.$store.dispatch("currencies/load", { code });
     },
     // Categories info.
     buildCategoryItems(type: "offers" | "needs"): string[] {
       // Copy original arrray not to modify it when sorting.
-      const items: string[] = this.group.categories.slice()
-        .sort((a, b) => b.relationships[type].meta.count - a.relationships[type].meta.count)
+      const items: string[] = this.group.categories
+        .slice()
+        .sort(
+          (a, b) =>
+            b.relationships[type].meta.count - a.relationships[type].meta.count
+        )
         .slice(0, 4)
-        .map(category => `${category.relationships[type].meta.count} ${category.attributes.name}`);
+        .map(
+          category =>
+            `${category.relationships[type].meta.count} ${category.attributes.name}`
+        );
       if (this.group.categories.length > 4) {
         items.push(this.$t("andMoreCategories").toString());
       }
