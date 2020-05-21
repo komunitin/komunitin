@@ -18,7 +18,10 @@
         </q-drawer>
         <q-header id="header" bordered class="column justify-center">
           <slot name="toolbar">
-            <q-toolbar class="bg-primary text-onprimary" :class="(!showBack && !showMenu) ? 'no-button' : ''">
+            <q-toolbar
+              class="bg-primary text-onprimary"
+              :class="!showBack && !showMenu ? 'no-button' : ''"
+            >
               <!-- render back button, menu button or none -->
               <q-btn
                 v-if="showBack"
@@ -35,11 +38,44 @@
                 round
                 icon="menu"
                 :aria-label="$t('menu')"
-                @click="drawer = !drawer"/>
+                @click="drawer = !drawer"
+              />
 
-              <q-toolbar-title>
+              <q-toolbar-title v-if="!searchActive">
                 {{ title }}
               </q-toolbar-title>
+
+              <q-input
+                v-if="searchActive"
+                v-model="searchText"
+                dark
+                dense
+                standout
+                class="q-ml-md q-mr-xs search-box"
+                type="search"
+                debounce="250"
+                autofocus
+                @input="$emit('search-input', searchText)"
+                @keyup.enter="$emit('search', searchText)"
+              >
+                <template v-slot:append>
+                  <q-icon v-if="searchText === ''" name="search" class="cursor-pointer" @click="searchActive = false" />
+                  <q-icon
+                    v-else
+                    name="clear"
+                    class="cursor-pointer"
+                    @click="clearSearchText"
+                  />
+                </template>
+              </q-input>
+
+              <q-btn
+                v-if="search && !searchActive"
+                flat
+                round
+                icon="search"
+                @click="searchActive = true"
+              />
 
               <!-- slot for right buttons -->
               <slot name="buttons"></slot>
@@ -94,10 +130,16 @@ export default Vue.extend({
       type: String,
       default: ""
     },
+    search: {
+      type: Boolean,
+      default: false
+    }
   },
   data: () => ({
     drawer: true,
     persistentDrawer: true,
+    searchActive: false,
+    searchText: ""
   }),
   computed: {
     showDrawer(): boolean {
@@ -119,6 +161,10 @@ export default Vue.extend({
   methods: {
     drawerChange(state: boolean) {
       this.persistentDrawer = state;
+    },
+    clearSearchText() {
+      this.searchText = "";
+      this.$emit("search-input", "");
     }
   }
 });
@@ -153,5 +199,11 @@ export default Vue.extend({
 // but it is too low when there's the title directly.
 .no-button {
   padding-left: 16px;
+}
+
+// We need to say that the search box takes all horizontal space, but the
+// quasar class full-width does not work for us because it overwrites the margins.
+.search-box {
+  width: 100%;
 }
 </style>
