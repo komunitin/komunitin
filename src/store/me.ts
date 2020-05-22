@@ -1,6 +1,7 @@
 import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/komunitin";
+import KError, { KErrorCode } from "src/KError";
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -18,6 +19,10 @@ export interface UserState {
   userInfo?: User;
   tokens?: AuthData;
   memberId?: string;
+  /**
+   * Current location, provided by device.
+   */
+  location?: [number, number];
 }
 
 /**
@@ -52,7 +57,8 @@ export default {
     tokens: auth.getStoredTokens(),
     // It is important to define the property even if undefined in order to add the reactivity.
     userInfo: undefined,
-    memberId: undefined
+    memberId: undefined,
+    location: undefined,
   }),
   getters: {
     isLoggedIn: state =>
@@ -70,7 +76,8 @@ export default {
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
-    myMember: (state, memberId) => (state.memberId = memberId)
+    myMember: (state, memberId) => (state.memberId = memberId),
+    location: (state, location) => (state.location = location),
   },
 
   actions: {
@@ -113,6 +120,41 @@ export default {
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
       context.commit("myMember", undefined);
+    },
+    /**
+     * Get the current location from the device.
+     */
+    locate: async({commit}: ActionContext<UserState, never>) => {
+      // Promisify navigator.geolocation API.
+      try {
+        const location = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            // Success handler.
+            (position: Position) => {
+              const location = [position.coords.longitude, position.coords.latitude];
+              // Resolve promise with location array.
+              resolve(location);
+            },
+            // Error handler
+            (error: PositionError) => {
+              const codes = [] as KErrorCode[];
+              codes[error.TIMEOUT] = KErrorCode.PositionTimeout;
+              codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable;
+              codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied;
+              const kerror = new KError(codes[error.code], error.message, error);
+              // Reject promise with KError
+              reject(kerror);
+            },
+            { maximumAge: 1500000, timeout: 100000 }
+          );
+        });
+        commit("location", location);
+      } catch (error) {
+        // Log error, but dont throw exception as App should work
+        // without user location!
+        // FIXME !!!!!
+        commit("location", undefined);
+      }
     }
   }
 } as Module<UserState, never>;
