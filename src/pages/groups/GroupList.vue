@@ -58,11 +58,7 @@ export default Vue.extend({
       this.fetchGroups();
     },
     handleLocationError(error: PositionError) {
-      // Handle Error.
-      const codes = [] as KErrorCode[];
-      codes[error.TIMEOUT] = KErrorCode.PositionTimeout;
-      codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable;
-      codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied;
+      
       this.$handleError(new KError(codes[error.code], error.message, error));
 
       // Show groups anyway.
