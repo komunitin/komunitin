@@ -1,5 +1,5 @@
 <template>
-  <q-card v-if="group" v-card-click-to="`/groups/${group.attributes.code}`">
+  <q-card v-if="group" v-card-click-to="`/groups/${group.attributes.code}`" flat bordered>
     <!-- Header with group avatar, name and short code -->
     <q-item>
       <q-item-section avatar>
