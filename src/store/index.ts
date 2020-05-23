@@ -13,6 +13,7 @@ import {
 } from "src/store/model";
 // Import logged-in user module
 import me from "./me";
+import ui from "./ui";
 
 Vue.use(Vuex);
 
@@ -58,6 +59,8 @@ export default function(/* { ssrContext } */) {
     modules: {
       // Logged-in user module
       me,
+      // User interface module.
+      ui,
       // Social API resource modules.
       users,
       groups,
