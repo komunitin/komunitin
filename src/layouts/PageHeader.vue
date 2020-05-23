@@ -105,7 +105,7 @@ export default Vue.extend({
      * Show the menu button.
      */
     showMenu(): boolean {
-      return !this.showBack && !this.$store.state.drawerPersistent;
+      return !this.showBack && !this.$store.state.ui.drawerPersistent;
     },
   },
   methods: {

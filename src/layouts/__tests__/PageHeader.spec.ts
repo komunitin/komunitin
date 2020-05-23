@@ -15,7 +15,7 @@ import PageHeader from "../PageHeader.vue";
 
 describe("PageHeader", () => {
   let wrapper: Wrapper<Vue>;
-  let store: Store<{ [key: string]: boolean }>;
+  let store: Store<{ ui: { [key: string]: boolean }}>;
   let toogleDrawer: () => void;
 
   // We use createLocalVue in order not to pollute the global scope.
@@ -37,17 +37,19 @@ describe("PageHeader", () => {
     toogleDrawer = jest.fn();
     store = new Vuex.Store({
       state: () => ({
-        drawerPersistent: true,
-        drawerState: true,
-        drawerExists: true
+        ui: {
+          drawerPersistent: true,
+          drawerState: true,
+          drawerExists: true,
+        }
       }),
       getters: {
-        drawerExists: state => state.drawerExists
+        drawerExists: state => state.ui.drawerExists
       },
       mutations: {
-        drawerPersistent: (state, v) => (state.drawerPersistent = v),
-        drawerState: (state, v) => (state.drawerState = v),
-        drawerExists: (state, v) => (state.drawerExists = v)
+        drawerPersistent: (state, v) => (state.ui.drawerPersistent = v),
+        drawerState: (state, v) => (state.ui.drawerState = v),
+        drawerExists: (state, v) => (state.ui.drawerExists = v)
       },
       actions: { toogleDrawer }
     });
