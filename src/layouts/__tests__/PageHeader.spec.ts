@@ -16,7 +16,7 @@ import PageHeader from "../PageHeader.vue";
 describe("PageHeader", () => {
   let wrapper: Wrapper<Vue>;
   let store: Store<{ [key: string]: boolean }>;
-  let toogleDrawer: any;
+  let toogleDrawer: () => void;
 
   // We use createLocalVue in order not to pollute the global scope.
   const localVue = createLocalVue();
