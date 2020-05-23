@@ -95,7 +95,7 @@ export default Vue.extend({
     ...mapGetters(["myMember"]),
     groupActive(): boolean {
       return (
-        this.$router.currentRoute.path ==
+        this.$route.fullPath ==
         `/groups/${this.myMember.group.attributes.code}`
       );
     }
