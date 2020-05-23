@@ -16,7 +16,7 @@
         <router-view />
     </q-page-container>
 
-    <q-footer class="bg-transparent q-my-md text-center text-onoutside-m">
+    <q-footer class="bg-transparent q-py-md text-center text-onoutside-m">
       <select-lang />
       <q-btn flat type="a" href="http://komunitin.org#help" target="__blank" :label="$t('help')" />
       <q-btn flat type="a" href="https://github.com/komunitin/komunitin" target="__blank" :label="$t('contribute')" />
