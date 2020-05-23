@@ -1,23 +1,24 @@
 <template>
-  <layout :title="group ? group.attributes.name : ''">
-    <template v-slot:buttons>
-      <q-btn
-        v-if="group"
-        right
-        flat
-        round
-        icon="message"
-        @click="contactsView = true"
-      />
-      <share-button
-        v-if="group"
-        :text="
-          $t('checkTheExchangeCommunityGroup', { group: group.attributes.name })
-        "
-        :title="group.attributes.name"
-      />
-    </template>
-
+  <div>
+    <page-header :title="group ? group.attributes.name : ''">
+      <template v-slot:buttons>
+        <q-btn
+          v-if="group"
+          right
+          flat
+          round
+          icon="message"
+          @click="contactsView = true"
+        />
+        <share-button
+          v-if="group"
+          :text="
+            $t('checkTheExchangeCommunityGroup', { group: group.attributes.name })
+          "
+          :title="group.attributes.name"
+        />
+      </template>
+    </page-header>
     <!-- Message Dialog -->
     <q-dialog v-if="group" v-model="contactsView">
       <q-card>
@@ -118,17 +119,17 @@
         </div>
       </div>
     </div>
-  </layout>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import Layout from "../../layouts/Layout.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
 import { Group, Contact, Category, Currency } from "../../store/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
+import PageHeader from "../../layouts/PageHeader.vue";
 import md2html from "../../plugins/Md2html";
 
 interface ContactNames {
@@ -154,7 +155,7 @@ export default Vue.extend({
     ShareButton,
     GroupStats,
     SocialNetworkList,
-    Layout
+    PageHeader
   },
   props: {
     code: {
