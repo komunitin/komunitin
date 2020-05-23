@@ -3,12 +3,12 @@
     <div
       id="container"
       class="q-mx-auto bg-surface"
-      :class="showDrawer ? 'with-drawer' : 'without-drawer'"
+      :class="drawerExists ? 'with-drawer' : 'without-drawer'"
     >
       <q-layout id="layout" view="lhh lpr lfr">
         <q-drawer
-          v-if="showDrawer"
-          v-model="drawer"
+          v-if="drawerExists"
+          v-model="drawerState"
           bordered
           show-if-above
           :width="256"
@@ -16,74 +16,8 @@
         >
           <menu-drawer />
         </q-drawer>
-        <q-header id="header" bordered class="column justify-center">
-          <slot name="toolbar">
-            <q-toolbar
-              class="bg-primary text-onprimary"
-              :class="!showBack && !showMenu ? 'no-button' : ''"
-            >
-              <!-- render back button, menu button or none -->
-              <q-btn
-                v-if="showBack"
-                id="back"
-                flat
-                round
-                icon="arrow_back"
-                :aria-label="$t('back')"
-                @click="$router.back()"
-              />
-              <q-btn
-                v-if="showMenu"
-                flat
-                round
-                icon="menu"
-                :aria-label="$t('menu')"
-                @click="drawer = !drawer"
-              />
-
-              <q-toolbar-title v-if="!searchActive">
-                {{ title }}
-              </q-toolbar-title>
-
-              <q-input
-                v-if="searchActive"
-                v-model="searchText"
-                dark
-                dense
-                standout
-                class="q-ml-md q-mr-xs search-box"
-                type="search"
-                debounce="250"
-                autofocus
-                @input="$emit('search-input', searchText)"
-                @keyup.enter="$emit('search', searchText)"
-              >
-                <template v-slot:append>
-                  <q-icon v-if="searchText === ''" name="search" class="cursor-pointer" @click="searchActive = false" />
-                  <q-icon
-                    v-else
-                    name="clear"
-                    class="cursor-pointer"
-                    @click="clearSearchText"
-                  />
-                </template>
-              </q-input>
-
-              <q-btn
-                v-if="search && !searchActive"
-                flat
-                round
-                icon="search"
-                @click="searchActive = true"
-              />
-
-              <!-- slot for right buttons -->
-              <slot name="buttons"></slot>
-            </q-toolbar>
-          </slot>
-        </q-header>
         <q-page-container>
-          <slot />
+          <router-view/>
         </q-page-container>
       </q-layout>
     </div>
@@ -125,56 +59,27 @@ export default Vue.extend({
   components: {
     MenuDrawer
   },
-  props: {
-    title: {
-      type: String,
-      default: ""
-    },
-    search: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data: () => ({
-    drawer: true,
-    persistentDrawer: true,
-    searchActive: false,
-    searchText: ""
-  }),
   computed: {
-    showDrawer(): boolean {
-      return this.$store.getters.isLoggedIn;
+    drawerExists(): boolean {
+      return this.$store.getters.drawerExists;
     },
-    /**
-     * Show the back button.
-     */
-    showBack(): boolean {
-      return !this.showDrawer;
-    },
-    /**
-     * Show the menu button.
-     */
-    showMenu(): boolean {
-      return this.showDrawer && !this.persistentDrawer;
+    drawerState: {
+      get () {
+        return this.$store.state.ui.drawerState
+      },
+      set (val) {
+        this.$store.commit('drawerState', val)
+      }
     }
   },
   methods: {
     drawerChange(state: boolean) {
-      this.persistentDrawer = state;
+      this.$store.commit("drawerPersistent", state);
     },
-    clearSearchText() {
-      this.searchText = "";
-      this.$emit("search-input", "");
-    }
   }
 });
 </script>
 <style lang="scss" scope>
-// Set the header height plus 1px because the border is included in the height.
-#header {
-  height: $header-height + 1px;
-}
-
 // Container takes 100% with in small screens. In large screens, wrap the content in a
 // centered box. The width of the box depends on whether there is drawer or not.
 @mixin wrap-main-container($width) {
@@ -193,17 +98,5 @@ export default Vue.extend({
   &.without-drawer {
     @include wrap-main-container(1024px);
   }
-}
-
-// Toolbar has a default padding of 12px. That's ok when there's a button,
-// but it is too low when there's the title directly.
-.no-button {
-  padding-left: 16px;
-}
-
-// We need to say that the search box takes all horizontal space, but the
-// quasar class full-width does not work for us because it overwrites the margins.
-.search-box {
-  width: 100%;
 }
 </style>
