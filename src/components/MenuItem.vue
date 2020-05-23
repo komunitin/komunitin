@@ -1,9 +1,9 @@
 <template>
-  <q-item clickable active-class="bg-active" :active="active" :disable="disable" @click="click">
+  <q-item :clickable="!active" active-class="bg-active" :active="active" :disable="disable" @click="click">
     <q-item-section avatar>
-      <q-icon :name="icon" color="icon-dark"/>
+      <q-icon :name="icon" :color="active ? 'primary' : 'icon-dark'"/>
     </q-item-section>
-    <q-item-section class="text-subtitle2 text-onsurface-m">{{ title }}</q-item-section>
+    <q-item-section class="text-subtitle2" :class="active ? 'text-primary' : 'text-onsurface-m'">{{ title }}</q-item-section>
   </q-item>
 </template>
 
@@ -31,7 +31,7 @@ export default Vue.extend({
   },
   computed: {
     active(): boolean {
-      return this.to == this.$router.currentRoute.path
+      return this.to == this.$route.path
     },
     disable(): boolean {
       return !this.to && !this.$listeners.click;
