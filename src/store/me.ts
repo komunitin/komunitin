@@ -2,6 +2,7 @@ import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/komunitin";
 import KError, { KErrorCode } from "src/KError";
+import { handleError } from "../boot/errors";
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -55,14 +56,16 @@ async function loadUser(
 export default {
   state: () => ({
     tokens: auth.getStoredTokens(),
-    // It is important to define the property even if undefined in order to add the reactivity.
+    // It is important to define the properties even if undefined in order to add the reactivity.
     userInfo: undefined,
     memberId: undefined,
-    location: undefined,
+    location: undefined
   }),
   getters: {
     isLoggedIn: state =>
-      state.userInfo !== undefined && state.memberId !== undefined && auth.isAuthorized(state.tokens),
+      state.userInfo !== undefined &&
+      state.memberId !== undefined &&
+      auth.isAuthorized(state.tokens),
     myMember: (state, getters, rootState, rootGetters) => {
       if (state.memberId !== undefined) {
         const user = rootGetters["users/one"](state.memberId);
@@ -77,7 +80,7 @@ export default {
     tokens: (state, tokens) => (state.tokens = tokens),
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
     myMember: (state, memberId) => (state.memberId = memberId),
-    location: (state, location) => (state.location = location),
+    location: (state, location) => (state.location = location)
   },
 
   actions: {
@@ -94,7 +97,7 @@ export default {
     },
     /**
      * Silently authorize user using stored credentials. Throws exception (rejects)
-     * on failed authorization. 
+     * on failed authorization.
      */
     authorize: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isLoggedIn) {
@@ -115,7 +118,7 @@ export default {
     /**
      * Logout current user.
      */
-    logout: async(context: ActionContext<UserState, never>) => {
+    logout: async (context: ActionContext<UserState, never>) => {
       await auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
@@ -124,37 +127,35 @@ export default {
     /**
      * Get the current location from the device.
      */
-    locate: async({commit}: ActionContext<UserState, never>) => {
+    locate: async ({ commit }: ActionContext<UserState, never>) => {
       // Promisify navigator.geolocation API.
-      try {
-        const location = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            // Success handler.
-            (position: Position) => {
-              const location = [position.coords.longitude, position.coords.latitude];
-              // Resolve promise with location array.
-              resolve(location);
-            },
-            // Error handler
-            (error: PositionError) => {
-              const codes = [] as KErrorCode[];
-              codes[error.TIMEOUT] = KErrorCode.PositionTimeout;
-              codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable;
-              codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied;
-              const kerror = new KError(codes[error.code], error.message, error);
-              // Reject promise with KError
-              reject(kerror);
-            },
-            { maximumAge: 1500000, timeout: 100000 }
-          );
-        });
-        commit("location", location);
-      } catch (error) {
-        // Log error, but dont throw exception as App should work
-        // without user location!
-        // FIXME !!!!!
-        commit("location", undefined);
-      }
+      const location = await new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          // Success handler.
+          (position: Position) => {
+            const location = [
+              position.coords.longitude,
+              position.coords.latitude
+            ];
+            // Resolve promise with location array.
+            resolve(location);
+          },
+          // Error handler
+          (error: PositionError) => {
+            const codes = [] as KErrorCode[];
+            codes[error.TIMEOUT] = KErrorCode.PositionTimeout;
+            codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable;
+            codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied;
+            const kerror = new KError(codes[error.code], error.message, error);
+            // Don't crash the application on location error. Just log it and continue.
+            // The app should be able to continue without location info.
+            handleError(kerror);
+            resolve(undefined);
+          },
+          { maximumAge: 1500000, timeout: 100000 }
+        );
+      });
+      commit("location", location);
     }
   }
 } as Module<UserState, never>;

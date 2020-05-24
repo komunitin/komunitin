@@ -1,51 +1,55 @@
 <template>
-  <q-card v-if="offer">
-    <!-- Header with offer avatar, name and short code -->
+  <q-card v-if="offer" v-card-click-to="`/offers/${offer.attributes.code}`" flat bordered>
+    <!-- Header -->
     <q-item>
+      <!-- Member avatar & name -->
       <q-item-section avatar>
         <q-avatar>
-          <img :src="offer.attributes.images[0].href" />
+          <img :src="offer.member.attributes.image" />
         </q-avatar>
       </q-item-section>
       <q-item-section>
-        <q-item-label>{{ offer.attributes.name }}</q-item-label>
+        <q-item-label lines="1" class="text-subtitle2 text-onsurface-m">
+          {{ offer.member.attributes.name }}
+        </q-item-label>
+        <!-- Offer updated date -->
+        <!-- FIXME: format date using moment.js library -->
+        <q-item-label caption>{{
+          offer.attributes.updated
+        }}</q-item-label>
       </q-item-section>
-      <share-button
-        class="text-icon-dark"
-        :text="$t('checkTheExchangeCommunityOffer', {offer: offer.attributes.name})"
-        :title="offer.attributes.name"
-        :url="url"
-      />
+      <!-- FIXME: category icon -->
+      <q-item-section side>
+        <q-avatar color="blue">
+          <q-icon name="restaurant" color="icon-light"/>
+        </q-avatar>
+      </q-item-section>
     </q-item>
-    <!-- Offer description -->
-    <q-card-section>
-      <!-- eslint-disable-next-line vue/no-v-html -->
-      <div v-clamp="5" v-md2txt="offer.attributes.content"></div>
-    </q-card-section>
+    <!-- Offer image -->
+    <q-img :src="offer.attributes.images[0].href" />
+    
     <!-- offer actions -->
-    <q-card-actions>
-      <q-btn :to="`offers/${offer.id}`" flat color="primary">{{$t("explore")}}</q-btn>
-      <q-btn flat color="primary">{{ $t("signUp") }}</q-btn>
-    </q-card-actions>
+    <q-card-section>
+      <div class="text-h6">{{offer.attributes.name}}</div>
+      <!-- FIXME: Add price -->
+      <div v-clamp="3" v-md2txt="offer.attributes.content" class="text-body2 text-justify"></div>
+    </q-card-section>
   </q-card>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-// import marked from "marked";
-
-import ShareButton from "./ShareButton.vue";
+import CardClickTo from "../plugins/CardClickTo";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
 
+Vue.use(CardClickTo);
 Vue.use(Clamp);
 Vue.use(Md2txt);
 
 export default Vue.extend({
   name: "OfferCard",
-  components: {
-    ShareButton
-  },
+  components: {},
   props: {
     offer: {
       type: Object,
@@ -53,13 +57,5 @@ export default Vue.extend({
       default: undefined
     }
   },
-  computed: {
-    url() {
-      const base = window?.location.origin ?? "";
-      return (
-        base + this.$router.resolve("offers/" + this.offer.attributes.code).href
-      );
-    }
-  }
 });
 </script>

@@ -223,6 +223,8 @@ export default Vue.extend({
     // component is reused. If I otherwise add the `wath` Vue component member, the
     // tests fail and give "You may have an infinite update loop in a component
     // render function". So that's the way I found to make it work.
+    //
+    // https://router.vuejs.org/guide/essentials/dynamic-matching.html#reacting-to-params-changes
     this.$watch("code", this.fetchData, { immediate: true });
   },
   methods: {
