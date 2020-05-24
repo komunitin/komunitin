@@ -60,8 +60,21 @@ function fakeAddress() {
   };
 }
 
-function fakeImage(search = "", size="800x600") {
-  return `https://source.unsplash.com/${size}/?${search}`
+function fakeImage(search = "", size = "800x600") {
+  return `https://source.unsplash.com/${size}/?${search}`;
+}
+
+function filter(records: any, request: any) {
+  // Poor man search.
+  if (request.queryParams["filter[search]"]) {
+    const fragment = request.queryParams["filter[search]"];
+    return records.filter((record: any) =>
+      Object.values(record.attrs).some(
+        (value: any) => value && value.toString().toLowerCase().includes(fragment.toLowerCase())
+      )
+    );
+  }
+  return records;
 }
 
 interface Association {
@@ -115,13 +128,13 @@ export default {
     category: ApiSerializer.extend({
       links(category: any) {
         return {
-          "offers": {
-            "related": `${urlSocial}/${category.group.code}/offers?filter[category]=${category.id}`
+          offers: {
+            related: `${urlSocial}/${category.group.code}/offers?filter[category]=${category.id}`
           },
-          "needs": {
-            "related": `${urlSocial}/${category.group.code}/needs?filter[category]=${category.id}`
+          needs: {
+            related: `${urlSocial}/${category.group.code}/needs?filter[category]=${category.id}`
           }
-        }
+        };
       },
       selfLink: (category: any) =>
         urlSocial + "/" + category.group.code + "/categories/" + category.code
@@ -136,12 +149,12 @@ export default {
     }),
     user: ApiSerializer.extend({
       alwaysIncludeLinkageData: true,
-      selfLink: () => urlSocial + "/users/me",
+      selfLink: () => urlSocial + "/users/me"
     })
   },
   models: {
     user: Model.extend({
-      members: hasMany(),
+      members: hasMany()
     }),
     group: Model.extend({
       members: hasMany(),
@@ -204,7 +217,7 @@ export default {
       //type: "business",
       name: () => faker.name.findName(),
       description: () => fakeMarkdown(2),
-      image: () => fakeImage("face","100x100"),
+      image: (i: number) => fakeImage(`face-${i}`, "100x100"),
       address: () => fakeAddress(),
       location: () => fakeLocation(),
       created: () => faker.date.past(),
@@ -227,13 +240,16 @@ export default {
     offer: Factory.extend({
       name: () => faker.commerce.product(),
       content: () => fakeMarkdown(faker.random.number({ min: 1, max: 5 })),
-      images: () =>
-        Array.from({ length: faker.random.number({ min: 1, max: 5 }) }, () => {
-          return {
-            href: fakeImage("product"),
-            alt: faker.company.catchPhrase()
-          };
-        }),
+      images: (i: number) =>
+        Array.from(
+          { length: faker.random.number({ min: 1, max: 5 }) },
+          (v: never, j: number) => {
+            return {
+              href: fakeImage(`product${i}-${j}`),
+              alt: faker.company.catchPhrase()
+            };
+          }
+        ),
       access: "public",
       expires: () => faker.date.future().toJSON(),
       created: () => faker.date.past().toJSON(),
@@ -246,45 +262,44 @@ export default {
       // Create group contacts.
       const contacts = server.createList("contact", 4);
       group.update({ contacts });
-      // Only add data for the first two groups. Otherwise we spend a lot of 
+      // Only add data for the first two groups. Otherwise we spend a lot of
       // time in this function.
       if (i < 2) {
         // Create categories.
         const categories = server.createList("category", 5, { group } as any);
         // Create group members
         const members = server.createList("member", 10, { group } as any);
-        for (let i = 0; i < members.length; i++) {
-          const member = members[i];
+        for (let j = 0; j < members.length; j++) {
+          const member = members[j];
           // Create member contacts.
           const contacts = server.createList("contact", 4);
           member.update({ contacts });
           // Create member offers.
-          const category = categories[i % categories.length];
+          const category = categories[j % categories.length];
           server.createList("offer", 3, {
             member,
             category,
             group
           } as any);
           // Create member needs only for some members.
-          if (i % 4 == 0) {
-            server.createList("need", i % 3, {
+          if (j % 4 == 0) {
+            server.createList("need", j % 3, {
               member,
-              category: categories[(i + 2) % categories.length],
+              category: categories[j % categories.length],
               group
             } as any);
           }
-          i++;
         }
       }
     });
     // Create user.
     const member = (server.schema as any).members.first();
-    server.create("user", {members: [member]} as any);
+    server.create("user", { members: [member] } as any);
   },
   routes(server: Server) {
     // All groups
-    server.get(urlSocial + "/groups", (schema: any) => {
-      return schema.groups.all();
+    server.get(urlSocial + "/groups", (schema: any, request) => {
+      return filter(schema.groups.all(), request);
     });
 
     // Single group
@@ -295,18 +310,18 @@ export default {
     // Group categories.
     server.get(urlSocial + "/:code/categories", (schema: any, request) => {
       const group = schema.groups.findBy({ code: request.params.code });
-      return schema.categories.where({ group });
+      return schema.categories.where({ groupId: group.id });
     });
 
     // Group offers.
-    server.get(urlSocial + "/:code/offers", (schema: any, request) => {
+    server.get(urlSocial + "/:code/offers", (schema: any, request: any) => {
       const group = schema.groups.findBy({ code: request.params.code });
-      return schema.offers.where({ group });
+      return filter(schema.offers.where({ groupId: group.id }), request);
     });
 
     // Logged-in User
     server.get(urlSocial + "/users/me", (schema: any) => {
       return schema.users.first();
-    })
+    });
   }
 };
