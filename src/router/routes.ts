@@ -24,7 +24,7 @@ const routes: RouteConfig[] = [
     ]
   },
   {
-    path: '/groups',
+    path: '/',
     component: () => import('../layouts/Layout.vue'),
     children: [
       {
@@ -37,6 +37,12 @@ const routes: RouteConfig[] = [
         props: true,
         name: 'Group',
         component: () => import('../pages/groups/Group.vue')
+      },
+      {
+        path: '/groups/:code/offers',
+        props: true,
+        name: 'OfferList',
+        component: () => import('../pages/offers/OfferList.vue')
       }
     ]
   }
