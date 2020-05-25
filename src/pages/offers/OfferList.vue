@@ -2,18 +2,18 @@
   <div>
     <page-header
       :search="true"
-      :title="$t('groupsNearYou')"
-      @search="fetchGroups"
+      :title="$t('offers')"
+      @search="fetchOffers"
     />
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <div class="row q-col-gutter-md">
         <div
-          v-for="group of groups"
-          :key="group.id"
+          v-for="offer of offers"
+          :key="offer.id"
           class="col-12 col-sm-6 col-md-4"
         >
-          <group-card :group="group" />
+          <offer-card :offer="offer" />
         </div>
       </div>
     </div>
@@ -23,10 +23,10 @@
 <script lang="ts">
 import Vue from "vue";
 
-import { Group } from "../../store/model";
+import { Offer } from "../../store/model";
 
 import PageHeader from "../../layouts/PageHeader.vue";
-import GroupCard from "../../components/GroupCard.vue";
+import OfferCard from "../../components/OfferCard.vue";
 
 /**
  * Groups's list.
@@ -35,7 +35,13 @@ export default Vue.extend({
   name: "GroupList",
   components: {
     PageHeader,
-    GroupCard
+    OfferCard
+  },
+  props: {
+    code: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {
@@ -43,8 +49,8 @@ export default Vue.extend({
     };
   },
   computed: {
-    groups(): Group[] {
-      return this.$store.getters["groups/currentList"];
+    offers(): Offer[] {
+      return this.$store.getters["offers/currentList"];
     },
     location(): [number,number] | undefined {
       return this.$store.state.me.location;
@@ -52,19 +58,20 @@ export default Vue.extend({
   },
   mounted: async function() {
     await this.$store.dispatch("locate");
-    await this.fetchGroups();
+    await this.fetchOffers();
   },
   methods: {
     /**
      * Load groups ordered by location, if available. Optionally filter them by a search
      */
-    async fetchGroups(search?: string) {
+    async fetchOffers(search?: string) {
       try {
         this.isLoading = true;
-        await this.$store.dispatch("groups/loadList", {
+        await this.$store.dispatch("offers/loadList", {
           location: this.location,
           search,
-          include: "contacts"
+          include: "member,category",
+          group: this.code
         });
       } finally {
         this.isLoading = false;
