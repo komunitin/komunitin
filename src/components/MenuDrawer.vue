@@ -69,7 +69,7 @@
 
     <menu-item icon="info" :title="$t('news')" />
     <menu-item icon="loyalty" :title="$t('needs')" />
-    <menu-item icon="local_offer" :title="$t('offers')" />
+    <menu-item icon="local_offer" :title="$t('offers')" :to="`/groups/${myMember.group.attributes.code}/offers`" />
     <menu-item icon="people" :title="$t('accounts')" />
     <menu-item icon="bar_chart" :title="$t('statistics')" />
 
