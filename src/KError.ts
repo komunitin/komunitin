@@ -2,6 +2,7 @@ export enum KErrorCode {
   Unknown = "Unknown",
   IncorrectRequest = "IncorrectRequest",
   ServerNoResponse = "ServerNoResponse",
+  ServerBadResponse = "ServerBadResponse",
   ResourceNotFound = "ResourceNotFound",
   UnknownServer = "UnknownServer",
   UnknownVueError = "UnknownVueError",
@@ -12,10 +13,15 @@ export enum KErrorCode {
   PositionPermisionDenied = "PositionPermisionDenied",
   VueWarning = "VueWarning",
   IncorrectCredentials = "IncorrectCredentials",
-  ServerBadResponse = "ServerBadResponse",
   AuthNoCredentials = "AuthNoCredentials",
   NotImplemented = "NotImplemented",
-  RequestError = "RequestError"
+  RequestError = "RequestError",
+  /**
+   * This condition should not happen and it indicates a programming bug 
+   * that needs to be solved by the development team. Use it to assert complex
+   * conditions.
+   */
+  ScriptError = "ScriptError"
 }
 
 /**

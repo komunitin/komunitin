@@ -51,9 +51,10 @@ export default class ApiSerializer extends JSONAPISerializer {
     return undefined;
   }
   /**
+   * Apply page[x] query params.
    * 
-   * @param object 
-   * @param request 
+   * @param object The serialized json object, before pagination.
+   * @param request The original (fake) request object
    */
   private paginate(json: any, request: Request) {
     // Apply page[after].
@@ -102,7 +103,7 @@ export default class ApiSerializer extends JSONAPISerializer {
     if (hasPrevious) {
       const prev = new URL(request.url);
       prev.searchParams.set("page[before]", json.data[0].id);
-      json.links.next = prev.toString();
+      json.links.prev = prev.toString();
     } else {
       json.links.prev = null;
     }
