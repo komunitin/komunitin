@@ -1,21 +1,25 @@
 <template>
   <div>
-    <page-header
-      :search="true"
-      :title="$t('offers')"
-      @search="fetchOffers"
-    />
+    <page-header :search="true" :title="$t('offers')" @search="fetchOffers" />
     <div class="q-pa-md">
       <q-inner-loading :showing="isLoading" color="icon-dark" />
-      <div class="row q-col-gutter-md">
-        <div
-          v-for="offer of offers"
-          :key="offer.id"
-          class="col-12 col-sm-6 col-md-4"
-        >
-          <offer-card :offer="offer" />
+      <q-infinite-scroll :disable="disableScrollLoad" @load="loadNext">
+        <div class="row q-col-gutter-md">
+          <div
+            v-for="offer of offers"
+            :key="offer.id"
+            class="col-12 col-sm-6 col-md-4"
+          >
+            <offer-card :offer="offer" />
+          </div>
         </div>
-      </div>
+        <template v-slot:loading>
+          <div class="row justify-center q-my-md">
+            <!-- 42px is the default size of q-inner-loading -->
+            <q-spinner color="icon-dark" size="42px" />
+          </div>
+        </template>
+      </q-infinite-scroll>
     </div>
   </div>
 </template>
@@ -46,17 +50,16 @@ export default Vue.extend({
   data() {
     return {
       isLoading: true,
+      disableScrollLoad: true,
+      offers: [] as Offer[]
     };
   },
   computed: {
-    offers(): Offer[] {
-      return this.$store.getters["offers/currentList"];
-    },
-    location(): [number,number] | undefined {
+    location(): [number, number] | undefined {
       return this.$store.state.me.location;
     }
   },
-  mounted: async function() {
+  created: async function() {
     await this.$store.dispatch("locate");
     await this.fetchOffers();
   },
@@ -67,15 +70,29 @@ export default Vue.extend({
     async fetchOffers(search?: string) {
       try {
         this.isLoading = true;
+        this.disableScrollLoad = true;
         await this.$store.dispatch("offers/loadList", {
           location: this.location,
           search,
           include: "member,category",
           group: this.code
         });
+        this.offers.push(...this.$store.getters["offers/currentList"]);
       } finally {
         this.isLoading = false;
+        // Delay one tick before enabling infinite-scroll loading in order to allow the
+        // fetched content to be displyed before checking the scroll position.
+        await this.$nextTick();
+        this.disableScrollLoad = false;
       }
+    },
+    /**
+     * Implementation of the QInfiniteScroll load callback.
+     */
+    async loadNext(index: number, done: (stop?: boolean) => void) {
+      await this.$store.dispatch("offers/loadNext");
+      this.offers.push(...this.$store.getters["offers/currentList"]);
+      done(!this.$store.getters["offers/hasNext"]);
     }
   }
 });
