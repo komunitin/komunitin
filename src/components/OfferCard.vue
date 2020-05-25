@@ -1,5 +1,10 @@
 <template>
-  <q-card v-if="offer" v-card-click-to="`/offers/${offer.attributes.code}`" flat bordered>
+  <q-card
+    v-if="offer"
+    v-card-click-to="`/offers/${offer.attributes.code}`"
+    flat
+    bordered
+  >
     <!-- Header -->
     <q-item>
       <!-- Member avatar & name -->
@@ -13,33 +18,44 @@
           {{ offer.member.attributes.name }}
         </q-item-label>
         <!-- Offer updated date -->
-        <!-- FIXME: format date using moment.js library -->
         <q-item-label caption>{{
-          offer.attributes.updated
+          offer.attributes.updated | date
         }}</q-item-label>
       </q-item-section>
-      <!-- FIXME: category icon -->
       <!--q-item-section side>
-        <q-avatar color="gray">
-          <q-icon name="restaurant" color="icon-light"/>
-        </q-avatar>
+        TODO: Here it goes the category icon, as defined in the mockups
       </q-item-section-->
     </q-item>
+
     <!-- Offer images -->
-    
-    <q-carousel  v-model="slide" animated infinite swipeable :navigation="offer.attributes.images.length > 1"
-    height="200px" class="overflow-hidden">
-      <q-carousel-slide v-for="(image, i) of offer.attributes.images" :key="i"
-      :name="i+1" class="q-pa-none overflow-hidden column">
-        <q-img :src="image.href" :alt="image.alt"/>
+    <q-carousel
+      v-model="slide"
+      animated
+      swipeable
+      infinite
+      :arrows="offer.attributes.images.length > 1"
+      height="200px"
+      class="overflow-hidden"
+    >
+      <q-carousel-slide
+        v-for="(image, i) of offer.attributes.images"
+        :key="i"
+        :name="i + 1"
+        class="q-pa-none overflow-hidden column"
+      >
+        <q-img :src="image.href" :alt="image.alt" />
       </q-carousel-slide>
     </q-carousel>
-    
-    <!-- offer actions -->
+
+    <!-- offer title and description -->
     <q-card-section>
-      <div class="text-h6">{{offer.attributes.name}}</div>
-      <!-- FIXME: Add price -->
-      <div v-clamp="3" v-md2txt="offer.attributes.content" class="text-body2 text-justify text-onsurface-m"></div>
+      <div class="text-h6">{{ offer.attributes.name }}</div>
+      <!-- TODO: Add price -->
+      <div
+        v-clamp="3"
+        v-md2txt="offer.attributes.content"
+        class="text-body2 text-justify text-onsurface-m"
+      ></div>
     </q-card-section>
   </q-card>
 </template>
@@ -66,6 +82,6 @@ export default Vue.extend({
   },
   data: () => ({
     slide: 1
-  }),
+  })
 });
 </script>
