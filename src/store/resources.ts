@@ -6,7 +6,7 @@ import {
   ResourceIdentifierObject,
   ErrorObject
 } from "src/store/model";
-import Axios, { AxiosInstance, AxiosError } from "axios";
+import Axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
 
 interface ResourcesState<T extends ResourceObject> {
@@ -19,9 +19,14 @@ interface ResourcesState<T extends ResourceObject> {
    */
   current: string | null;
   /**
-   * Array of ids of current list of resources.
+   * Array of ids of current list of resources. Note that for paginated responses,
+   * this list contains the current chunk.
    */
   currentList: string[];
+  /**
+   * The url of the next page. null means no next page, undefined means unknown.
+   */
+  next: string | null | undefined;
 }
 /**
  * Object argument for the `loadList` action.
@@ -76,7 +81,7 @@ export interface LoadPayload {
  * 
  * Getters:
  * - `current`: Gives the current resource.
- * - `currentList`: Gives the cirrent list of resources.
+ * - `currentList`: Gives the cirrent list of resources. For paginated collections, this is the current chunk.
  * - `one`: Gives a resource given its id.
  * 
  * Actions:
@@ -146,6 +151,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     included.forEach(resource => commit(resource.type + "/add", resource, {root: true}));
   }
 
+  protected handleCollectionResponse(response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>, commit: Commit) {
+    // Commit mutation(s).
+    const result = response.data;
+    commit("setList", result.data);
+    commit("setNext", result.links.next);
+    if (result.included) {
+      this.handleIncluded(result.included, commit);
+    }
+  }
+
   /**
    * Handle error from the API.
    * 
@@ -212,7 +227,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   state = {
     resources: {},
     current: null,
-    currentList: []
+    currentList: [],
+    next: undefined,
   };
 
   getters = {
@@ -230,7 +246,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      * Gets the current list of resources.
      */
     currentList: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: {[key: string]: (id: string) => ResourceObject}) =>
-      state.currentList.map(id => state.resources[id]).map(resource => this.relatedGetters(rootGetters, resource))
+      state.currentList.map(id => state.resources[id]).map(resource => this.relatedGetters(rootGetters, resource)),
+    /**
+     * Returns whether the current list has more resources to be fetched.
+     */
+    hasNext: (state: ResourcesState<T>) => (state.next === undefined ?  undefined : (state.next !== null)),
   };
 
   mutations = {
@@ -253,7 +273,13 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      */
     add(state: ResourcesState<T>, resource: T) {
       state.resources[resource.id] = resource;
-    }
+    },
+    /**
+     * Update the next link.
+     */
+    setNext(state: ResourcesState<T>, next: string | null) {
+      state.next = next;
+    },
   };
 
   actions = {
@@ -297,12 +323,23 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       // Call API
       try {
         const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(url);
-        // Commit mutation(s).
-        const resources = response.data.data;
-        commit("setList", resources);
-        if (response.data.included) {
-          this.handleIncluded(response.data.included, commit);
+        this.handleCollectionResponse(response, commit);
+      } catch (error) {
+        throw this.getKError(error);
+      }
+    },
+    loadNext: async ({ state, commit }: ActionContext<ResourcesState<T>, S>) => {
+      try {
+        if (state.next === null) {
+          // There are no more results.
+          return;
         }
+        if (state.next === undefined) {
+          // We can't do the loadNext call yet, since we don't have any next link. A loadList action should be called first.
+          throw new KError(KErrorCode.ScriptError, "Unexpected call to 'loadNext' resource action with undefined next link.");
+        }
+        const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(state.next);
+        this.handleCollectionResponse(response, commit);
       } catch (error) {
         throw this.getKError(error);
       }
