@@ -6,26 +6,11 @@
     bordered
   >
     <!-- Header -->
-    <q-item>
-      <!-- Member avatar & name -->
-      <q-item-section avatar>
-        <q-avatar>
-          <img :src="offer.member.attributes.image" />
-        </q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label lines="1" class="text-subtitle2 text-onsurface-m">
-          {{ offer.member.attributes.name }}
-        </q-item-label>
-        <!-- Offer updated date -->
-        <q-item-label caption>{{
-          offer.attributes.updated | date
-        }}</q-item-label>
-      </q-item-section>
-      <!--q-item-section side>
-        TODO: Here it goes the category icon, as defined in the mockups
-      </q-item-section-->
-    </q-item>
+    <member-header :member="offer.member">
+      <template #caption>
+        {{ offer.attributes.updated | date }}
+      </template>
+    </member-header>
 
     <!-- Offer images -->
     <q-carousel
@@ -65,6 +50,7 @@ import Vue from "vue";
 import CardClickTo from "../plugins/CardClickTo";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
+import MemberHeader from "./MemberHeader.vue";
 
 Vue.use(CardClickTo);
 Vue.use(Clamp);
@@ -72,7 +58,9 @@ Vue.use(Md2txt);
 
 export default Vue.extend({
   name: "OfferCard",
-  components: {},
+  components: {
+    MemberHeader
+  },
   props: {
     offer: {
       type: Object,
