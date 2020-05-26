@@ -2,7 +2,7 @@
   <div id="header" class="column justify-center bg-primary">
     <q-toolbar
       class="text-onprimary"
-      :class="!showBack && !showMenu ? 'no-button' : ''"
+      :class="noButton ? 'no-button' : ''"
     >
       <!-- render back button, menu button or none -->
       <q-btn
@@ -34,7 +34,8 @@
         dark
         dense
         standout
-        class="q-ml-md q-mr-xs search-box"
+        class="q-mr-xs search-box"
+        :class="noButton ? '' : 'q-ml-md'"
         type="search"
         debounce="250"
         autofocus
@@ -107,6 +108,12 @@ export default Vue.extend({
     showMenu(): boolean {
       return !this.showBack && !this.$store.state.ui.drawerPersistent;
     },
+    /**
+     * Show no button
+     */
+    noButton(): boolean {
+      return !this.showBack && !this.showMenu;
+    }
   },
   methods: {
     clearSearchText() {
