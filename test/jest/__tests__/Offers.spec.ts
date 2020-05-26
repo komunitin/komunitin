@@ -2,18 +2,24 @@
 import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
-import { QInnerLoading, QInfiniteScroll } from "quasar";
+import { QInnerLoading, QInfiniteScroll, QBtn } from "quasar";
 import OfferCard from "../../../src/components/OfferCard.vue";
+import PageHeader from "../../../src/layouts/PageHeader.vue";
 import ApiSerializer from "src/server/ApiSerializer";
 
 describe("Front page and login", () => {
   let wrapper: Wrapper<Vue>;
+  // This is necessary to stop QInfiniteScroll continuously trigger load content.
+  jest.spyOn(document.body, "scrollHeight", "get").mockImplementation(() => 1500);
+
+
   beforeAll(async () => {
     wrapper = await mountComponent(App);
+    
   });
   afterAll(() => wrapper.destroy());
 
-  it("Loads offers", async () => {
+  it("Loads offers and searches", async () => {
     await wrapper.vm.$router.push("/groups/GRP0/offers");
     await wrapper.vm.$nextTick();
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
@@ -29,5 +35,19 @@ describe("Front page and login", () => {
     expect(wrapper.findAll(OfferCard).length).toBe(30);
     // The QInfiniteScroll is stopped since we fetched all data.
     expect((wrapper.find(QInfiniteScroll).vm as any).working).toBe(false);
+    
+    // Search: I've not factored it in another "it" function because I
+    // don't know how to reload the page without a router DuplicateNavigation
+    // warning, and I prefer not to mount the App twice just for that.
+
+    // The user interaction is already tested in PageHeader unit test,
+    // here just emit the search event.
+    wrapper.get(PageHeader).vm.$emit("search","soap");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(OfferCard).length).toBe(0);
+    expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
+    await wrapper.vm.$wait();
+    // found three results!
+    expect(wrapper.findAll(OfferCard).length).toBe(3);
   });
 });
