@@ -71,6 +71,7 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.disableScrollLoad = true;
+        this.offers = [];
         await this.$store.dispatch("offers/loadList", {
           location: this.location,
           search,
@@ -90,8 +91,10 @@ export default Vue.extend({
      * Implementation of the QInfiniteScroll load callback.
      */
     async loadNext(index: number, done: (stop?: boolean) => void) {
-      await this.$store.dispatch("offers/loadNext");
-      this.offers.push(...this.$store.getters["offers/currentList"]);
+      if (this.$store.getters["offers/hasNext"]) {
+        await this.$store.dispatch("offers/loadNext");
+        this.offers.push(...this.$store.getters["offers/currentList"]);
+      }
       done(!this.$store.getters["offers/hasNext"]);
     }
   }

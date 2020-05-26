@@ -39,6 +39,7 @@ export default {
    * @param server 
    */
   seeds(server: any) {
+    faker.seed(2029);
     // Create a currency for each group
     server.schema.groups.all().models.forEach((group: ModelInstance<{[key:string]: string}>) => {
       server.create("currency", { code: group.code });

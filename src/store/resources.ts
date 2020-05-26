@@ -332,6 +332,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       try {
         if (state.next === null) {
           // There are no more results.
+          commit("setList", []);
           return;
         }
         if (state.next === undefined) {
