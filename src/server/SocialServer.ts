@@ -257,6 +257,7 @@ export default {
     })
   },
   seeds(server: Server) {
+    faker.seed(2030);
     // Create groups.
     server.createList("group", 7).forEach((group, i) => {
       // Create group contacts.
