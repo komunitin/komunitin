@@ -1,21 +1,10 @@
 <template>
   <q-list>
-    <q-item id="my-member" clickable>
-      <q-item-section avatar>
-        <q-avatar>
-          <img :src="myMember.attributes.image" />
-        </q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label lines="1" class="text-subtitle2 text-onsurface-m">
-          {{ myMember.attributes.name }}
-        </q-item-label>
-        <!-- This is a placeholder -->
-        <q-item-label caption>{{
-          myMember.group.attributes.code + "1234"
-        }}</q-item-label>
-      </q-item-section>
-      <q-item-section side>
+    <member-header id="my-member" :member="myMember">
+      <template #caption>
+        {{ myMember.group.attributes.code + "1234" }}
+      </template>
+      <template #side>
         <q-btn flat round color="icon-dark" icon="expand_more">
           <q-menu auto-close anchor="bottom right" self="top right">
             <q-list>
@@ -29,8 +18,8 @@
             </q-list>
           </q-menu>
         </q-btn>
-      </q-item-section>
-    </q-item>
+      </template>
+    </member-header>
 
     <q-separator />
 
@@ -85,11 +74,13 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import MenuItem from "./MenuItem.vue";
+import MemberHeader from "./MemberHeader.vue";
 
 export default Vue.extend({
   name: "MenuDrawer",
   components: {
-    MenuItem
+    MenuItem,
+    MemberHeader
   },
   computed: {
     ...mapGetters(["myMember"]),
