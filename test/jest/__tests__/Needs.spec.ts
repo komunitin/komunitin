@@ -15,7 +15,6 @@ describe("Needs", () => {
 
   beforeAll(async () => {
     wrapper = await mountComponent(App);
-    
   });
   afterAll(() => wrapper.destroy());
 
