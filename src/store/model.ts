@@ -281,3 +281,21 @@ export interface Offer extends ResourceObject {
     author: RelatedResource;
   };
 }
+
+/**
+ * Need model
+ */
+export interface Need extends ResourceObject {
+  attributes: {
+    content: string;
+    images: ImageObject[];
+    access: Access;
+    expires: string;
+    created: string;
+    updated: string;
+  };
+  relationships: {
+    category: RelatedResource;
+    author: RelatedResource;
+  };
+}
