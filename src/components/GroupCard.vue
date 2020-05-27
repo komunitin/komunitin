@@ -1,5 +1,10 @@
 <template>
-  <q-card v-if="group" v-card-click-to="`/groups/${group.attributes.code}`" flat bordered>
+  <q-card
+    v-if="group"
+    v-card-click-to="`/groups/${group.attributes.code}`"
+    flat
+    bordered
+  >
     <!-- Header with group avatar, name and short code -->
     <q-item>
       <q-item-section avatar>
@@ -16,8 +21,13 @@
         </q-item-label>
       </q-item-section>
       <share-button
-        class="text-icon-dark"
-        :text="$t('checkTheExchangeCommunityGroup', {group: group.attributes.name})"
+        icon="share"
+        flat
+        round
+        color="icon-dark"
+        :text="
+          $t('checkTheExchangeCommunityGroup', { group: group.attributes.name })
+        "
         :title="group.attributes.name"
         :url="url"
       />
@@ -36,7 +46,9 @@
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
-      <q-btn :to="`groups/${group.attributes.code}`" flat color="primary">{{$t("explore")}}</q-btn>
+      <q-btn :to="`groups/${group.attributes.code}`" flat color="primary">{{
+        $t("explore")
+      }}</q-btn>
       <q-btn flat color="primary">{{ $t("signUp") }}</q-btn>
     </q-card-actions>
   </q-card>
