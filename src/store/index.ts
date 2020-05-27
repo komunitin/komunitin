@@ -8,6 +8,7 @@ import {
   Contact,
   Member,
   Offer,
+  Need,
   Category,
   Currency
 } from "src/store/model";
@@ -29,6 +30,7 @@ const groups = new class extends Resources<Group, unknown> {
 const contacts = new Resources<Contact, unknown>("contacts", socialUrl);
 const members = new Resources<Member, unknown>("members", socialUrl);
 const offers = new Resources<Offer, unknown>("offers", socialUrl);
+const needs = new Resources<Need, unknown>("needs", socialUrl);
 const categories = new Resources<Category, unknown>("categories", socialUrl);
 const users = new class extends Resources<User, unknown> {
   collectionEndpoint = () => "/users";
@@ -67,6 +69,7 @@ export default function(/* { ssrContext } */) {
       contacts,
       members,
       offers,
+      needs,
       categories,
       // Accounting API resource modules.
       currencies

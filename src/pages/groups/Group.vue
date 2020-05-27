@@ -2,34 +2,27 @@
   <div>
     <page-header :title="group ? group.attributes.name : ''">
       <template v-slot:buttons>
-        <q-btn
+        <contact-button
           v-if="group"
-          right
-          flat
-          round
           icon="message"
-          @click="contactsView = true"
+          round
+          flat
+          :contacts="group.contacts"
         />
         <share-button
           v-if="group"
+          icon="share"
+          flat
+          round
           :text="
-            $t('checkTheExchangeCommunityGroup', { group: group.attributes.name })
+            $t('checkTheExchangeCommunityGroup', {
+              group: group.attributes.name
+            })
           "
           :title="group.attributes.name"
         />
       </template>
     </page-header>
-    <!-- Message Dialog -->
-    <q-dialog v-if="group" v-model="contactsView">
-      <q-card>
-        <q-card-section class="q-pb-none">
-          <div class="text-h6">{{ $t("contact") }}</div>
-        </q-card-section>
-        <q-card-section>
-          <social-network-list type="contact" :networks="groupContactNames" />
-        </q-card-section>
-      </q-card>
-    </q-dialog>
 
     <div class="q-pa-md">
       <!-- Loading spinner -->
@@ -115,7 +108,7 @@
           </q-card>
         </div>
         <div class="col-12 col-sm-6 col-lg-4 relative-position">
-          <social-network-list type="contact" :networks="groupContactNames" />
+          <social-network-list type="contact" :contacts="group.contacts" />
         </div>
       </div>
     </div>
@@ -128,15 +121,10 @@ import SimpleMap from "../../components/SimpleMap.vue";
 import { Group, Contact, Category, Currency } from "../../store/model";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
+import ContactButton from "../../components/ContactButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
 import PageHeader from "../../layouts/PageHeader.vue";
 import md2html from "../../plugins/Md2html";
-
-interface ContactNames {
-  [key: string]: {
-    name: string;
-  };
-}
 
 Vue.use(md2html);
 
@@ -153,6 +141,7 @@ export default Vue.extend({
   components: {
     SimpleMap,
     ShareButton,
+    ContactButton,
     GroupStats,
     SocialNetworkList,
     PageHeader
@@ -166,7 +155,6 @@ export default Vue.extend({
   data() {
     return {
       isLoading: true,
-      contactsView: false,
       socialButtonsView: false
     };
   },
@@ -177,19 +165,7 @@ export default Vue.extend({
     currency(): Currency {
       return this.$store.getters["currencies/current"];
     },
-    groupContactNames(): ContactNames {
-      // From the array of related Contact objects build
-      // a dictionary { type => name }
-      return this.group.contacts.reduce(
-        (contacts: ContactNames, contact: Contact) => {
-          contacts[contact.attributes.type] = {
-            name: contact.attributes.name
-          };
-          return contacts;
-        },
-        {}
-      );
-    },
+
     currencyItems(): string[] {
       const stats = this.currency.attributes.stats;
       // FIXME: https://github.com/komunitin/komunitin/issues/81
@@ -212,9 +188,6 @@ export default Vue.extend({
     },
     marker(): [number, number] | undefined {
       return this.group?.attributes.location.coordinates;
-    },
-    url(): string {
-      return window.location.href;
     }
   },
   created() {

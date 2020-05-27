@@ -12,9 +12,8 @@
   "findGroupNearby": "Troba una xarxa d'intercanvi prop de tu i comença a utilitzar moneda social.",
   "useLocation": "Utilitza localització",
   "orSelectCountry": "o selecciona un país per trobar-la.",
-  "selectCounntry": "Selecciona un país",
   "findComunnity": "Troba la teva comunitat i comença a participar.",
-  "newGroup": "Nova ecoxarxa",
+  "newGroup": "Nova xarxa d'intercanvi",
   "help": "Ajuda",
   "needHelp": "Necessites ajuda?",
   "createANewGroup": "Crear una nova comunitat",
@@ -30,8 +29,7 @@
   "groupsNearYou": "Grups aprop teu",
   "explore": "Explora",
   "signUp": "Dona't d'alta",
-  "checkTheExchangeCommunityGroup": "Fes una ullada a la ecoxarxa {group}",
-  "checkTheExchangeCommunityOffer": "Fes una ullada a la oferta {offer}",
+  "checkTheExchangeCommunityGroup": "Descobreix la xarxa d'intercanvi {group}",
   "back": "Enrera",
   "share": "Comparteix",
   "sorryNothingHere": "Ho sentim, aquí no hi ha res...",
@@ -54,5 +52,7 @@
   "otherGroups": "Altres grups",
   "settings": "Configuració",
   "editProfile": "Edita perfil",
-  "logout": "Sortir"
+  "logout": "Sortir",
+  "reply": "Respon",
+  "checkThisNeed": "Fixa't en aquesta necessitat de {member}"
 }
