@@ -12,12 +12,11 @@
   "findGroupNearby": "Encuentra una red de intercambio cerca de ti y comienza a utilizar moneda social",
   "useLocation": "Usa localización",
   "orSelectCountry": "o selecciona un país para encontrarla.",
-  "selectCounntry": "Selecciona un país",
   "findComunnity": "Encuentra tu comunidad y empieza a participar.",
-  "newGroup": "Nueva ecored",
+  "newGroup": "Nueva red de intercambio",
   "help": "Ayuda",
   "needHelp": "¿Necesitas ayuda?",
-  "createANewGroup": "Crear nueva ecored",
+  "createANewGroup": "Crear una nueva red de intercambio",
   "loginWithGoogle": "Login con Google",
   "loginWithFacebook": "Login con Facebook",
   "loginWithMail": "Login con email",
@@ -30,8 +29,7 @@
   "groupsNearYou": "Grupos cerca tuyo",
   "explore": "Explora",
   "signUp": "Date de alta",
-  "checkTheExchangeCommunityGroup": "Dale una mirada a la ecored {group}",
-  "checkTheExchangeCommunityOffer": "Dale una mirada a la oferta {offer}",
+  "checkTheExchangeCommunityGroup": "Descubre la red de intercambio {group}",
   "back": "Atrás",
   "share": "Comparte",
   "sorryNothingHere": "Lo sentimos, aquí no hay nada...",
@@ -54,5 +52,7 @@
   "otherGroups": "Otros grupos",
   "settings": "Configuración",
   "editProfile": "Editar perfil",
-  "logout": "Salir"
+  "logout": "Salir",
+  "reply": "Responder",
+  "checkThisNeed": "Fíjate en esta necesidad de {member}"
 }
