@@ -12,7 +12,6 @@
   "findGroupNearby": "Find an group network near you and start using social currency",
   "useLocation": "Use location",
   "orSelectCountry": "or select a country to find it",
-  "selectCounntry": "Select a country",
   "findComunnity": "Find your community and start participating.",
   "newGroup": "New Group",
   "help": "Help",
@@ -31,7 +30,6 @@
   "explore": "Explore",
   "signUp": "Sign up",
   "checkTheExchangeCommunityGroup": "Check the exchange community {group}",
-  "checkTheExchangeCommunityOffer": "Check the exchange community {offer}",
   "back": "Back",
   "share": "Share",
   "sorryNothingHere": "Sorry, nothing here...",
@@ -54,5 +52,7 @@
   "otherGroups": "Other groups",
   "settings": "Settings",
   "editProfile": "Edit profile",
-  "logout": "Log out"
+  "logout": "Log out",
+  "reply": "Reply",
+  "checkThisNeed": "Check this need from {member}"
 }

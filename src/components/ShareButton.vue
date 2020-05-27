@@ -1,8 +1,6 @@
 <template>
   <span>
-    <slot :share="share">
-      <q-btn icon="share" flat round @click="share"/>
-    </slot>
+    <q-btn v-bind="$attrs" @click="share"/>
     <q-dialog v-if="!navigatorShare" v-model="dialog">
       <q-card>
         <q-card-section>
