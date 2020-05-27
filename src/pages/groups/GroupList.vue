@@ -1,75 +1,24 @@
 <template>
-  <div>
-    <page-header
-      :search="true"
-      :title="$t('groupsNearYou')"
-      @search="fetchGroups"
-    />
-    <div class="q-pa-md">
-      <q-inner-loading :showing="isLoading" color="icon-dark" />
-      <div class="row q-col-gutter-md">
-        <div
-          v-for="group of groups"
-          :key="group.id"
-          class="col-12 col-sm-6 col-md-4"
-        >
-          <group-card :group="group" />
-        </div>
-      </div>
-    </div>
-  </div>
+  <resource-card-list
+    :card="card"
+    code=""
+    :title="$t('groupsNearYou')"
+    prop-name="group"
+    module-name="groups"
+    include="contacts"
+  />
 </template>
-
 <script lang="ts">
 import Vue from "vue";
-
-import { Group } from "../../store/model";
-
-import PageHeader from "../../layouts/PageHeader.vue";
+import ResourceCardList from "../ResourceCardList.vue";
 import GroupCard from "../../components/GroupCard.vue";
 
-/**
- * Groups's list.
- */
 export default Vue.extend({
-  name: "GroupList",
   components: {
-    PageHeader,
-    GroupCard
+    ResourceCardList
   },
-  data() {
-    return {
-      isLoading: true,
-    };
-  },
-  computed: {
-    groups(): Group[] {
-      return this.$store.getters["groups/currentList"];
-    },
-    location(): [number,number] | undefined {
-      return this.$store.state.me.location;
-    }
-  },
-  mounted: async function() {
-    await this.$store.dispatch("locate");
-    await this.fetchGroups();
-  },
-  methods: {
-    /**
-     * Load groups ordered by location, if available. Optionally filter them by a search
-     */
-    async fetchGroups(search?: string) {
-      try {
-        this.isLoading = true;
-        await this.$store.dispatch("groups/loadList", {
-          location: this.location,
-          search,
-          include: "contacts"
-        });
-      } finally {
-        this.isLoading = false;
-      }
-    }
-  }
+  data: () => ({
+    card: GroupCard
+  })
 });
 </script>
