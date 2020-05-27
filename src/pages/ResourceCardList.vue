@@ -101,10 +101,12 @@ export default Vue.extend({
         this.resources.push(...this.$store.getters[this.moduleName + "/currentList"]);
       } finally {
         this.isLoading = false;
-        // Delay one tick before enabling infinite-scroll loading in order to allow the
-        // fetched content to be displyed before checking the scroll position.
-        await this.$nextTick();
-        this.disableScrollLoad = false;
+        if (this.$store.getters[this.moduleName + "/hasNext"]) {
+          // Delay one tick before enabling infinite-scroll loading in order to allow the
+          // fetched content to be displyed before checking the scroll position.
+          await this.$nextTick();
+          this.disableScrollLoad = false;
+        }
       }
     },
     /**

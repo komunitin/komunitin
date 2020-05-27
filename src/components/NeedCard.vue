@@ -51,9 +51,9 @@
         flat
         round
         color="icon-dark"
-        :url="needAbsoluteUrl"
-        :title="$t('checkThisNeed', { member: need.member.name })"
-        :text="need.content"
+        :url="url"
+        :title="$t('checkThisNeed', { member: need.member.attributes.name })"
+        :text="need.attributes.content"
       />
     </q-card-actions>
   </q-card>
@@ -92,8 +92,11 @@ export default Vue.extend({
     hasImages(): boolean {
       return this.need.attributes.images.length > 0;
     },
-    needAbsoluteUrl(): string {
-      return this.$router.resolve(`/needs/${this.need.attributes.code}`).href;
+    url(): string {
+      const base = window?.location.origin ?? "";
+      return (
+        base + this.$router.resolve("needs/" + this.need.attributes.code).href
+      );
     }
   }
 });

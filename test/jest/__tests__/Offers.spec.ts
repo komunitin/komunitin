@@ -2,12 +2,12 @@
 import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
-import { QInnerLoading, QInfiniteScroll, QBtn } from "quasar";
+import { QInnerLoading, QInfiniteScroll } from "quasar";
 import OfferCard from "../../../src/components/OfferCard.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import ApiSerializer from "src/server/ApiSerializer";
 
-describe("Front page and login", () => {
+describe("Offers", () => {
   let wrapper: Wrapper<Vue>;
   // This is necessary to stop QInfiniteScroll continuously trigger load content.
   jest.spyOn(document.body, "scrollHeight", "get").mockImplementation(() => 1500);
