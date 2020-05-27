@@ -239,6 +239,9 @@ export default {
     }),
     offer: Factory.extend({
       name: () => faker.commerce.product(),
+      code() {
+        return faker.helpers.slugify((this as any).name);
+      },
       content: () => fakeMarkdown(faker.random.number({ min: 1, max: 5 })),
       images: (i: number) =>
         Array.from(
@@ -250,6 +253,25 @@ export default {
             };
           }
         ),
+      access: "public",
+      expires: () => faker.date.future().toJSON(),
+      created: () => faker.date.past().toJSON(),
+      updated: () => faker.date.recent().toJSON()
+    }),
+    need: Factory.extend({
+      content: () => fakeMarkdown(faker.random.number({min: 1, max: 2})),
+      code() {
+        return faker.helpers.slugify((this as any).content.substr(0, 10));
+      },
+      images: (i: number) => Array.from(
+        // Often it's empty.
+        { length: Math.max(faker.random.number({ min: -2, max: 4 }), 0) },
+        (v: never, j: number) => {
+          return {
+            href: fakeImage(`need${i}-${j}`),
+          };
+        }
+      ),
       access: "public",
       expires: () => faker.date.future().toJSON(),
       created: () => faker.date.past().toJSON(),
@@ -284,7 +306,7 @@ export default {
           } as any);
           // Create member needs only for some members.
           if (j % 4 == 0) {
-            server.createList("need", j % 3, {
+            server.createList("need", (j % 3) + 1, {
               member,
               category: categories[j % categories.length],
               group
@@ -318,6 +340,12 @@ export default {
     server.get(urlSocial + "/:code/offers", (schema: any, request: any) => {
       const group = schema.groups.findBy({ code: request.params.code });
       return filter(schema.offers.where({ groupId: group.id }), request);
+    });
+
+    // Group offers.
+    server.get(urlSocial + "/:code/needs", (schema: any, request: any) => {
+      const group = schema.groups.findBy({ code: request.params.code });
+      return filter(schema.needs.where({ groupId: group.id }), request);
     });
 
     // Logged-in User

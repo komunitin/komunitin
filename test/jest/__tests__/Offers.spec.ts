@@ -42,12 +42,12 @@ describe("Front page and login", () => {
 
     // The user interaction is already tested in PageHeader unit test,
     // here just emit the search event.
-    wrapper.get(PageHeader).vm.$emit("search","soap");
+    wrapper.get(PageHeader).vm.$emit("search","bacon");
     await wrapper.vm.$nextTick();
     expect(wrapper.findAll(OfferCard).length).toBe(0);
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
-    // found three results!
+    // found 3 results!
     expect(wrapper.findAll(OfferCard).length).toBe(3);
   });
 });
