@@ -19,11 +19,42 @@ export interface LoginPayload {
 export interface UserState {
   userInfo?: User;
   tokens?: AuthData;
-  memberId?: string;
+  userId?: string;
+  accountId?: string;
   /**
    * Current location, provided by device.
    */
   location?: [number, number];
+}
+
+/**
+ * Load OIDC user info.
+ */
+async function loadUserInfo(accessToken: string, { commit }: ActionContext<UserState, never>) {
+  return auth.getUserInfo(accessToken).then(userInfo => {
+    commit("userInfo", userInfo);
+  });
+}
+
+/**
+ * Load member and account resources for current user.
+ */
+async function loadUserData(accessToken: string,
+  { commit, dispatch, getters, rootGetters }: ActionContext<UserState, never>
+) {
+  await dispatch("users/load", {
+    include: "members,members.group"
+  });
+  const userId = rootGetters["users/current"].id;
+  commit("myUser", userId);
+  
+  // Load the Accounting API account record.
+  await dispatch("loadUrl", {
+    url: getters.myMember.attributes.account,
+    include: "currency"
+  });
+  const accountId = rootGetters["accounts/current"].id;
+  commit("myAccount", accountId);
 }
 
 /**
@@ -36,19 +67,12 @@ export interface UserState {
  */
 async function loadUser(
   accessToken: string,
-  { commit, dispatch, rootGetters }: ActionContext<UserState, never>
+  context: ActionContext<UserState, never>
 ) {
   // Get the OIDC userInfo data.
-  const action1 = auth.getUserInfo(accessToken).then(userInfo => {
-    commit("userInfo", userInfo);
-  });
+  const action1 = loadUserInfo(accessToken, context);
   // Load the Social API users/me endpoint.
-  const action2 = dispatch("users/load", {
-    include: "members,members.group"
-  }).then(() => {
-    const memberId = rootGetters["users/current"].id;
-    commit("myMember", memberId);
-  });
+  const action2 = loadUserData(accessToken, context);
   // Run these two calls in "parallel".
   return Promise.all([action1, action2]);
 }
@@ -58,20 +82,28 @@ export default {
     tokens: auth.getStoredTokens(),
     // It is important to define the properties even if undefined in order to add the reactivity.
     userInfo: undefined,
-    memberId: undefined,
+    userId: undefined,
+    accountId: undefined,
     location: undefined
   }),
   getters: {
     isLoggedIn: state =>
       state.userInfo !== undefined &&
-      state.memberId !== undefined &&
+      state.userId !== undefined &&
+      state.accountId !== undefined &&
       auth.isAuthorized(state.tokens),
     myMember: (state, getters, rootState, rootGetters) => {
-      if (state.memberId !== undefined) {
-        const user = rootGetters["users/one"](state.memberId);
+      if (state.userId !== undefined) {
+        const user = rootGetters["users/one"](state.userId);
         if (user.members.length > 0) {
           return user.members[0];
         }
+      }
+      return undefined;
+    },
+    myAccount: (state, getters, rootState, rootGetters) => {
+      if (state.accountId !== undefined) {
+        return rootGetters["accounts/one"](state.accountId);
       }
       return undefined;
     }
@@ -79,7 +111,8 @@ export default {
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
-    myMember: (state, memberId) => (state.memberId = memberId),
+    myUser: (state, userId) => (state.userId = userId),
+    myAccount: (state, accountId) => (state.accountId = accountId),
     location: (state, location) => (state.location = location)
   },
 
@@ -122,14 +155,15 @@ export default {
       await auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
-      context.commit("myMember", undefined);
+      context.commit("myUser", undefined);
+      context.commit("myAccount", undefined);
     },
     /**
      * Get the current location from the device.
      */
     locate: async ({ commit }: ActionContext<UserState, never>) => {
       // Promisify navigator.geolocation API.
-      const location = await new Promise((resolve) => {
+      const location = await new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(
           // Success handler.
           (position: Position) => {

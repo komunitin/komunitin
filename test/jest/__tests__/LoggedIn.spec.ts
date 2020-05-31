@@ -14,4 +14,13 @@ describe("logged in", () => {
     await wrapper.vm.$wait();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0");
   });
+  it("renders Group, member and account data", async() => {
+    const text = wrapper.text();
+    // Member name
+    expect(text).toContain("Jayce Glover");
+    // Acount number
+    expect(text).toContain("GRP00000");
+    // Group name
+    expect(text).toContain("Group 0");
+  })
 });
