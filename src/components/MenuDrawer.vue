@@ -2,7 +2,7 @@
   <q-list>
     <member-header id="my-member" :member="myMember">
       <template #caption>
-        {{ myMember.group.attributes.code + "1234" }}
+        {{ myAccount.attributes.code }}
       </template>
       <template #side>
         <q-btn flat round color="icon-dark" icon="expand_more">
@@ -80,7 +80,7 @@ export default Vue.extend({
     MemberHeader
   },
   computed: {
-    ...mapGetters(["myMember"]),
+    ...mapGetters(["myMember", "myAccount"]),
     groupActive(): boolean {
       return (
         this.$route.fullPath ==

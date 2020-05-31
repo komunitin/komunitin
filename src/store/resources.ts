@@ -74,6 +74,21 @@ export interface LoadPayload {
    */
   include?: string;
 }
+
+/**
+ * Payload for the `loadUrl` action
+ */
+export interface LoadUrlPayload {
+  /**
+   * The resource url.
+   */
+  url: string;
+  /**
+   * Optional comma-separated list of included relationship resources.
+   */
+  include?: string;
+}
+
 /**
  * Flexible Vuex Module used to retrieve, store and provide resources fetched from the
  * Komunitin Apis. The implementation is generic for any resource thanks to the JSONAPI
@@ -103,7 +118,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   public constructor(type: string, baseUrl: string) {
     this.type = type;
-    this.client = this.getHttpClient(baseUrl);
+    this.client = Resources.getHttpClient(baseUrl);
   }
 
   /**
@@ -130,9 +145,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     return this.collectionEndpoint(groupCode) + `/${code}`;
   }
 
-  private getHttpClient(baseUrl: string): AxiosInstance {
+  private static getHttpClient(baseURL?: string): AxiosInstance {
     return Axios.create({
-      baseURL: baseUrl,
+      baseURL,
       withCredentials: false,
       headers: {
         Accept: "application/vnd.api+json",
@@ -147,7 +162,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * @param included Included resources
    * @param commit Commit function
    */
-  protected handleIncluded(included: ResourceObject[], commit: Commit) {
+  protected static handleIncluded(included: ResourceObject[], commit: Commit) {
     included.forEach(resource => commit(resource.type + "/add", resource, {root: true}));
   }
 
@@ -157,7 +172,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     commit("setList", result.data);
     commit("setNext", result.links.next);
     if (result.included) {
-      this.handleIncluded(result.included, commit);
+      Resources.handleIncluded(result.included, commit);
     }
   }
 
@@ -166,7 +181,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * 
    * @param error The Network error.
    */
-  protected getKError(error: AxiosError<ErrorObject>) {
+  protected static getKError(error: AxiosError<ErrorObject>) {
     if (error.response) {
       // Server returned error. Use code from server response.
       const apiError = error.response.data;
@@ -325,7 +340,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(url);
         this.handleCollectionResponse(response, commit);
       } catch (error) {
-        throw this.getKError(error);
+        throw Resources.getKError(error);
       }
     },
     loadNext: async ({ state, commit }: ActionContext<ResourcesState<T>, S>) => {
@@ -342,7 +357,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(state.next);
         this.handleCollectionResponse(response, commit);
       } catch (error) {
-        throw this.getKError(error);
+        throw Resources.getKError(error);
       }
     },
     /**
@@ -365,11 +380,46 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         const resource = response.data.data;
         commit("setCurrent", resource);
         if (response.data.included) {
-          this.handleIncluded(response.data.included, commit);
+          Resources.handleIncluded(response.data.included, commit);
         }
       } catch (error) {
-        throw this.getKError(error);
+        throw Resources.getKError(error);
       }
     }
   };
+
+  /**
+   * This is a static action implementation that loads any JSONAPI url and commits the 
+   * result to the relevant module instance.
+   * 
+   * It should be added as a single `loadUrl` action implementation.
+   */
+  static async loadUrl({commit}: ActionContext<never, never>, payload: LoadUrlPayload) {
+    let url = payload.url;
+    if (payload.include) {
+      const params = new URLSearchParams();
+      params.set("include", payload.include);
+      url += url.includes("?") ? "&" : "?"
+      url += params.toString();
+    }
+    try {
+      const client = Resources.getHttpClient();
+      const response = await client.get<ResourceResponseInclude<ResourceObject, ResourceObject>>(url);
+      const resource = response.data.data;
+      if (Array.isArray(resource)) {
+        throw new KError(KErrorCode.NotImplemented, "Generic loading of resource collections is not implemented. May be it is a good moment to do so ;)");
+      }
+      const type = resource.type;
+      // Mutate the relevant vuex module, that is by convention named 
+      // equal to the resource type.
+      commit(`${type}/setCurrent`, resource, {root: true});
+      if (response.data.included) {
+        Resources.handleIncluded(response.data.included, commit);
+      }
+    } catch (error) {
+      throw Resources.getKError(error);
+    }
+    // Note that all action implementations are similar, 
+    // so they could be factored as a single generic one.
+  }
 }
