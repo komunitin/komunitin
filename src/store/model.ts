@@ -247,10 +247,10 @@ export interface Member extends ResourceObject {
  */
 export interface Currency extends ResourceObject {
   attributes: {
-    "code-type": string;
+    codeType: string;
     code: string;
     name: string;
-    "name-plural": string;
+    namePlural: string;
     symbol: string;
     decimals: number;
     scale: number;
@@ -261,6 +261,25 @@ export interface Currency extends ResourceObject {
       circulation: number;
     };
   };
+}
+
+/**
+ * Account model
+ * 
+ * https://github.com/komunitin/komunitin-api/blob/master/accounting/README.md#account
+ */
+export interface Account extends ResourceObject {
+  attributes: {
+    code: string;
+    balance: number;
+    //locked: 0,
+    creditLimit: number;
+    debitLimit: number;
+    //capabilities: ["pay", "charge"],
+  };
+  relationships: {
+    currency: RelatedResource;
+  }
 }
 
 /**
