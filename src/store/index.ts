@@ -11,7 +11,8 @@ import {
   Need,
   Category,
   Currency,
-  Account
+  Account,
+  ResourceObject
 } from "src/store/model";
 // Import logged-in user module
 import me from "./me";

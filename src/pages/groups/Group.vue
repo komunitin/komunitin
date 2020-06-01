@@ -204,6 +204,10 @@ export default Vue.extend({
     async fetchData(code: string) {
       this.isLoading = true;
       try {
+        // We are using the fact that a group and its related currency
+        // share the same unique code. This way we can make the two calls 
+        // in parallel. Another option, formally more robust but less 
+        // efficient would be to get the currency url from the group data.
         await Promise.all([this.fetchGroup(code), this.fetchCurrency(code)]);
       } finally {
         this.isLoading = false;
