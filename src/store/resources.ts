@@ -207,9 +207,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * getter that lazily loads related resources from the store.
    * 
    * @param rootGetters Store getters object.
-   * @param main Resource Object.
+   * @param main ResourceObject.
+   * 
+   * @return the main ResourceObject
    */
-  protected relatedGetters(rootGetters: Record<string, (id: string) => ResourceObject>, main: ResourceObject) {
+  protected relatedGetters(rootGetters: Record<string, (id: string) => ResourceObject>, main: ResourceObject): ResourceObject {
     if (main.relationships) {
       const relationships = Object.entries(main.relationships)
         .filter(([,value]) => value.data !== undefined);
