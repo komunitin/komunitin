@@ -209,7 +209,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * @param rootGetters Store getters object.
    * @param main Resource Object.
    */
-  protected relatedGetters(rootGetters: {[key: string]: (id: string) => ResourceObject}, main: ResourceObject) {
+  protected relatedGetters(rootGetters: Record<string, (id: string) => ResourceObject>, main: ResourceObject) {
     if (main.relationships) {
       const relationships = Object.entries(main.relationships)
         .filter(([,value]) => value.data !== undefined);
@@ -250,17 +250,17 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     /**
      * Gets a resource given its id.
      */
-    one: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: {[key: string]: (id: string) => ResourceObject}) => (id: string) =>
+    one: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: Record<string, (id: string) => ResourceObject>) => (id: string) =>
       this.relatedGetters(rootGetters, state.resources[id]),
     /**
      * Gets the current resource.
      */
-    current: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: {[key: string]: (id: string) => ResourceObject}) =>
+    current: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: Record<string, (id: string) => ResourceObject>) =>
       state.current != null ? this.relatedGetters(rootGetters, state.resources[state.current]) : undefined,
     /**
      * Gets the current list of resources.
      */
-    currentList: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: {[key: string]: (id: string) => ResourceObject}) =>
+    currentList: (state: ResourcesState<T>, _getters: unknown, _rootState: unknown, rootGetters: Record<string, (id: string) => ResourceObject>) =>
       state.currentList.map(id => state.resources[id]).map(resource => this.relatedGetters(rootGetters, resource)),
     /**
      * Returns whether the current list has more resources to be fetched.
