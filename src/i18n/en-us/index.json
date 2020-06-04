@@ -54,5 +54,6 @@
   "editProfile": "Edit profile",
   "logout": "Log out",
   "reply": "Reply",
-  "checkThisNeed": "Check this need from {member}"
+  "checkThisNeed": "Check this need from {member}",
+  "limitAmount": "Limit {amount}"
 }
