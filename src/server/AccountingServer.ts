@@ -4,6 +4,7 @@ import { Model, Factory, Server, ModelInstance, belongsTo } from "miragejs";
 import faker from "faker";
 import KOptions from "../komunitin.json";
 import ApiSerializer from "./ApiSerializer";
+import { filter } from "./ServerUtils";
 
 const urlAccounting = KOptions.apis.accounting;
 
@@ -30,10 +31,10 @@ export default {
   },
   factories: {
     currency: Factory.extend({
-      "code-type": "CEN",
+      codeType: "CEN",
       code: (i: number) => `CUR${i}`,
       name: () => faker.hacker.noun(),
-      "name-plural": () => faker.hacker.noun() + "s",
+      namePlural: () => faker.hacker.noun() + "s",
       symbol: () => faker.finance.currencySymbol(),
       decimals: 2,
       value: 100000,
@@ -46,9 +47,9 @@ export default {
     }),
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
-      balance: faker.random.number({ max: 1000, min: -500, precision: 10 }),
+      balance: () => faker.random.number({ max: 10000000, min: -5000000, precision: 100 }),
       creditLimit: -1,
-      debitLimit: 500
+      debitLimit: 5000000
     })
   },
   /**
@@ -97,6 +98,11 @@ export default {
     // Single currency
     server.get(urlAccounting + "/:code/currency", (schema: any, request) => {
       return schema.currencies.findBy({ code: request.params.code });
+    });
+    // Accounts list
+    server.get(urlAccounting + "/:code/accounts", (schema: any, request) => {
+      const currency = schema.currencies.findBy({ code: request.params.code });
+      return filter(schema.accounts.where({ currencyId: currency.id }), request);
     });
     // Single account
     server.get(

@@ -6,17 +6,16 @@ import {
   User,
   Group,
   Contact,
-  Member,
   Offer,
   Need,
   Category,
   Currency,
-  Account,
-  ResourceObject
+  Account  
 } from "src/store/model";
 // Import logged-in user module
 import me from "./me";
 import ui from "./ui";
+import { Members } from "./members";
 
 Vue.use(Vuex);
 
@@ -30,7 +29,7 @@ const groups = new (class extends Resources<Group, unknown> {
 })("groups", socialUrl);
 
 const contacts = new Resources<Contact, unknown>("contacts", socialUrl);
-const members = new Resources<Member, unknown>("members", socialUrl);
+const members = new Members<unknown>(socialUrl);
 const offers = new Resources<Offer, unknown>("offers", socialUrl);
 const needs = new Resources<Need, unknown>("needs", socialUrl);
 const categories = new Resources<Category, unknown>("categories", socialUrl);
