@@ -3,6 +3,7 @@
 
 import { Model, belongsTo, hasMany, Server, Factory } from "miragejs";
 import faker from "faker";
+import { filter } from "./ServerUtils"
 
 import { ContactNetworks } from "../components/SocialNetworks";
 import KOptions from "../komunitin.json";
@@ -62,19 +63,6 @@ function fakeAddress() {
 
 function fakeImage(search = "", size = "800x600") {
   return `https://source.unsplash.com/${size}/?${search}`;
-}
-
-function filter(records: any, request: any) {
-  // Poor man search.
-  if (request.queryParams["filter[search]"]) {
-    const fragment = request.queryParams["filter[search]"];
-    return records.filter((record: any) =>
-      Object.values(record.attrs).some(
-        (value: any) => value && value.toString().toLowerCase().includes(fragment.toLowerCase())
-      )
-    );
-  }
-  return records;
 }
 
 interface Association {
@@ -291,7 +279,7 @@ export default {
         // Create categories.
         const categories = server.createList("category", 5, { group } as any);
         // Create group members
-        const members = server.createList("member", 10, { group } as any);
+        const members = server.createList("member", i == 0 ? 30 : 5, { group } as any);
         for (let j = 0; j < members.length; j++) {
           const member = members[j];
           // Create member contacts.
@@ -346,6 +334,12 @@ export default {
     server.get(urlSocial + "/:code/needs", (schema: any, request: any) => {
       const group = schema.groups.findBy({ code: request.params.code });
       return filter(schema.needs.where({ groupId: group.id }), request);
+    });
+
+    // Group members.
+    server.get(urlSocial + "/:code/members", (schema: any, request: any) => {
+      const group = schema.groups.findBy({ code: request.params.code });
+      return filter(schema.members.where({ groupId: group.id }), request);
     });
 
     // Logged-in User
