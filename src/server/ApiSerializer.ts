@@ -122,4 +122,11 @@ export default class ApiSerializer extends JSONAPISerializer {
     }
     return json;
   }
+
+  /**
+   * Overwrite the default behavior with the identity.
+   */
+  keyForAttribute(key: string): string {
+    return key;
+  }
 }
