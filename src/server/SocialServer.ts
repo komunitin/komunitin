@@ -279,7 +279,7 @@ export default {
         // Create categories.
         const categories = server.createList("category", 5, { group } as any);
         // Create group members
-        const members = server.createList("member", 10, { group } as any);
+        const members = server.createList("member", i == 0 ? 30 : 5, { group } as any);
         for (let j = 0; j < members.length; j++) {
           const member = members[j];
           // Create member contacts.
