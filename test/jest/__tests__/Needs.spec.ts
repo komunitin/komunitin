@@ -25,12 +25,12 @@ describe("Needs", () => {
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
     // Load.
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(NeedCard).length).toBe(6);
+    expect(wrapper.findAll(NeedCard).length).toBe(15);
     // Infinite loading doesn't get enabled since we already fetched all data.
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
-    wrapper.get(PageHeader).vm.$emit("search","lorem");
+    wrapper.get(PageHeader).vm.$emit("search","repellendus");
     await wrapper.vm.$wait();
-    // found 2 results!
-    expect(wrapper.findAll(NeedCard).length).toBe(2);
+    // found 4 results!
+    expect(wrapper.findAll(NeedCard).length).toBe(4);
   });
 });
