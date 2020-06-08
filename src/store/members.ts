@@ -18,10 +18,11 @@ export interface LoadMemberPayload extends LoadPayload {
 
 interface MembersState extends ResourcesState<Member> {
   /**
-   * The code of the group from the last call to loadList.
-   * Internal data not to be used from outside this module.
+   * The code of the group/currency from the last call to loadList.
+   * Internal data not to be used from outside this module. Null means
+   * that we're not adding accounts to the members list.
    */
-  nextGroup: string | null
+  nextCurrency: string | null
 }
 
 /**
@@ -39,12 +40,12 @@ export class Members<S> extends Resources<Member, S> {
     // Augment module state and mutations.
     this.state = {
       ...this.state,
-      nextGroup: null
+      nextCurrency: null
     } as MembersState;
     this.mutations = {
       ...this.mutations,
-      setNextGroup: (state: MembersState, code: string) => {
-        state.nextGroup = code;
+      setNextCurrency: (state: MembersState, code: string) => {
+        state.nextCurrency = code;
       }
     } as never;
   }
@@ -58,8 +59,6 @@ export class Members<S> extends Resources<Member, S> {
   ) {
     // Load the list of members.
     await super.loadList(context, payload);
-    // Save the group code for loadNext calls.
-    context.commit("setNextGroup", payload.group);
     // Load accounts.
     await this.handleIncludeAccounts(context, payload);
   }
@@ -69,9 +68,7 @@ export class Members<S> extends Resources<Member, S> {
    */
   protected async loadNext(context: ActionContext<MembersState, S>) {
     await super.loadNext(context);
-    await this.handleIncludeAccounts(context, {
-      group: context.state.nextGroup as string
-    });
+    await this.handleIncludeAccounts(context);
   }
 
   /**
@@ -89,8 +86,22 @@ export class Members<S> extends Resources<Member, S> {
    */
   protected async handleIncludeAccounts(
     context: ActionContext<MembersState, S>,
-    payload: LoadMemberListPayload
+    payload?: LoadMemberListPayload
   ) {
+    if (payload !== undefined) {
+      // Save the group code for loadNext calls, and set to null if we're 
+      // not inlcuding accounts.
+      const currencyCode = payload.includeAccounts ? payload.group : null;
+      context.commit("setNextCurrency", currencyCode);
+    } else {
+      // This is a call from loadNext. Create payload from nextCurrency state variable.
+      payload = {
+        includeAccounts: context.state.nextCurrency != null,
+        // if includeAccounts is false, then group doesn't matter.
+        group: context.state.nextCurrency ?? "", 
+      }
+    }
+
     if (payload.includeAccounts) {
       const members = context.getters["currentList"] as Member[];
       const ids = members.map(member => member.attributes.account.data.id);
