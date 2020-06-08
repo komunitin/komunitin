@@ -54,5 +54,6 @@
   "editProfile": "Editar perfil",
   "logout": "Salir",
   "reply": "Responder",
-  "checkThisNeed": "Fíjate en esta necesidad de {member}"
+  "checkThisNeed": "Fíjate en esta necesidad de {member}",
+  "limitAmount": "Límite {amount}"
 }

@@ -1,5 +1,5 @@
 <template>
-  <q-item>
+  <q-item v-bind="$attrs">
     <!-- Member avatar & name -->
     <q-item-section avatar>
       <q-avatar>
@@ -12,9 +12,7 @@
       </q-item-label>
       <!-- Offer updated date -->
       <q-item-label caption>
-        <!-- FIXME: This is a temporal placeholder. Substitute it by the real number -->
-        <!-- eslint-disable-next-line vue-i18n/no-raw-text -->
-        <slot name="caption">ABCD0123</slot>
+        <slot name="caption">{{ account }}</slot>
       </q-item-label>
     </q-item-section>
     <q-item-section side>
@@ -31,6 +29,11 @@ export default Vue.extend({
     member: {
       type: Object,
       required: true,
+    }
+  },
+  computed: {
+    account(): string {
+      return (this.member.account) ? this.member.account.attributes.code : "";
     }
   }
 });

@@ -216,6 +216,7 @@ export interface Member extends ResourceObject {
     location: Location;
     created: string;
     updated: string;
+    account: RelatedResource;
   };
   relationships: {
     contacts: RelatedLinkedCollection;
