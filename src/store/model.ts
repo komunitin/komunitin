@@ -7,14 +7,20 @@ export interface ResourceIdentifierObject {
   type: string;
   id: string;
 }
-export type Relationship = RelatedResource | RelatedLinkedCollection | RelatedCollection;
+/**
+ * Extension of ResourceIdentifierObject defined in External Relationships 
+ * custom profile: https://github.com/komunitin/komunitin-api/blob/master/jsonapi-profiles/external.md
+ */
+export interface ExternalResourceIdentifierObject extends ResourceIdentifierObject {
+  external: true;
+  href: string;
+}
+export type Relationship = RelatedResource | RelatedLinkedCollection | RelatedCollection | RelatedExternalResource;
 export interface ResourceObject extends ResourceIdentifierObject {
   links: {
     self: string;
   };
-  relationships? : {
-    [key: string]: Relationship;
-  }
+  relationships?: Record<string, Relationship>
 }
 
 export interface ErrorObject {
@@ -117,6 +123,13 @@ export interface RelatedResource {
   },
   data: ResourceIdentifierObject
 }
+/**
+ * Extension of the one-to-one Relationship Object defined in External Relationship ustom profile:
+ * https://github.com/komunitin/komunitin-api/blob/master/jsonapi-profiles/external.md
+ */
+export interface RelatedExternalResource {
+  data: ExternalResourceIdentifierObject;
+}
 
 /**
  * User model.
@@ -167,6 +180,7 @@ export interface Group extends ResourceObject {
     offers: RelatedCollection;
     needs: RelatedCollection;
     posts: RelatedCollection;
+    currency: RelatedExternalResource;
   };
 }
 
@@ -216,13 +230,13 @@ export interface Member extends ResourceObject {
     location: Location;
     created: string;
     updated: string;
-    account: RelatedResource;
   };
   relationships: {
     contacts: RelatedLinkedCollection;
     group: RelatedResource;
     needs: RelatedCollection;
     offers: RelatedCollection;
+    account: RelatedExternalResource;
   };
 }
 
