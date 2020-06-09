@@ -22,17 +22,25 @@ export default class ApiSerializer extends JSONAPISerializer {
   /**
    * Add meta.count field to collection relationships.
    * Add self link.
+   * Add external relationship fields.
    */
   getResourceObjectForModel(model: any) {
     const json = super.getResourceObjectForModel(model);
     model.associationKeys.forEach((key: string) => {
       const relationship = model[key];
       const relationshipKey = (this as any).keyForRelationship(key);
-
+      
+      const jsonRelationship = json.relationships[relationshipKey];
+      // Add meta.count field.
       if ((this as any).isCollection(relationship)) {
-        json.relationships[relationshipKey].meta = {
+        jsonRelationship.meta = {
           count: relationship.models.length
         }
+      }
+      // Add external relationship fields (only work for one-to-one relationships)
+      if (this.isExternal(relationshipKey) && (this as any).isModel(relationship)) {
+        jsonRelationship.data.external = true;
+        jsonRelationship.data.href = this.getExternalRelationhipHref(relationshipKey, relationship);
       }
     });
     const serializer = (this as any).serializerFor(model.modelName);
@@ -43,6 +51,22 @@ export default class ApiSerializer extends JSONAPISerializer {
       }
     }
     return json;
+  }
+  /**
+   * Returns whether the relationship identified by given key is external.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected isExternal(key: string): boolean {
+    return false;
+  }
+  /**
+   * Returns the absolute URL identifying an external resource.
+   * 
+   * Implementations overriding `isExternal` must also override and implement this function.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getExternalRelationhipHref(key: string, relationship: any): string {
+    throw new Error("Not implemented!");
   }
   /**
    * Self link for given model. Return undefined for not setting the link.
