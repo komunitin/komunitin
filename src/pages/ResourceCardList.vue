@@ -149,7 +149,10 @@ export default Vue.extend({
      */
     async loadNext(index: number, done: (stop?: boolean) => void) {
       if (this.$store.getters[this.moduleName + "/hasNext"]) {
-        await this.$store.dispatch(this.moduleName + "/loadNext");
+        await this.$store.dispatch(this.moduleName + "/loadNext", {
+          group: this.code,
+          include: this.include
+        });
         this.resources.push(...this.$store.getters[ this.moduleName + "/currentList"]);
       }
       done(!this.$store.getters[this.moduleName + "/hasNext"]);
