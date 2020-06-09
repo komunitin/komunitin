@@ -83,14 +83,7 @@ export default {
       .all()
       .models.forEach((group: ModelInstance<Record<string, any>>) => {
         const currency = server.create("currency", { code: group.code });
-        group.update({
-          currency: {
-            links: {
-              related: `${urlAccounting}/${group.code}/currency`
-            },
-            data: { type: "currencies", id: currency.id }
-          }
-        });
+        group.update({ currency });
       });
     // Create an account for each member
     server.schema.members
@@ -103,14 +96,7 @@ export default {
             code: accountCode,
             currency: server.schema.currencies.findBy({ code })
           });
-          member.update({
-            account: {
-              links: {
-                related: `${urlAccounting}/${code}/accounts/${accountCode}`
-              },
-              data: { type: "accounts", id: account.id }
-            }
-          });
+          member.update({ account });
         }
       );
 

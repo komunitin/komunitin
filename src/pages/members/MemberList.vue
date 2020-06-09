@@ -2,10 +2,9 @@
   <resource-card-list
     v-slot="slotProps"
     :code="code"
-    :title="$t('accounts')"
+    :title="$t('members')"
     module-name="members"
-    include="contacts"
-    :load-options="{includeAccounts: true}"
+    include="contacts,account"
   >
     <q-list v-if="slotProps.resources" padding>
       <member-header

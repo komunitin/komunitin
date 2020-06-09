@@ -10,6 +10,7 @@ import KOptions from "../komunitin.json";
 import ApiSerializer from "./ApiSerializer";
 
 const urlSocial = KOptions.apis.social;
+const urlAccounting = KOptions.apis.accounting;
 
 const contactTypes = Object.keys(ContactNetworks);
 
@@ -98,7 +99,13 @@ export default {
           ]) || relationshipKey == "contacts"
         );
       },
-      selfLink: (group: any) => urlSocial + "/" + group.code
+      selfLink: (group: any) => urlSocial + "/" + group.code,
+      isExternal(relationshipKey: string) {
+        return relationshipKey == "currency";
+      },
+      getExternalRelationhipHref(relationshipKey: string, model: any) {
+        return `${urlAccounting}/${model.code}/currency`;
+      }
     }),
     member: ApiSerializer.extend({
       shouldIncludeLinkageData(relationshipKey: string, model: any) {
@@ -110,7 +117,13 @@ export default {
         );
       },
       selfLink: (member: any) =>
-        urlSocial + "/" + member.group.code + "/members/" + member.code
+        urlSocial + "/" + member.group.code + "/members/" + member.code,
+      isExternal(relationshipKey: string) {
+        return relationshipKey == "account";
+      },
+      getExternalRelationhipHref(relationshipKey: string, model: any) {
+        return `${urlAccounting}/${model.currency.code}/accounts/${model.code}`;
+      }
     }),
     contact: ApiSerializer,
     category: ApiSerializer.extend({
@@ -149,11 +162,13 @@ export default {
       contacts: hasMany(),
       categories: hasMany(),
       offers: hasMany(),
-      needs: hasMany()
+      needs: hasMany(),
+      currency: belongsTo(),
     }),
     member: Model.extend({
       group: belongsTo(),
-      contacts: hasMany()
+      contacts: hasMany(),
+      account: belongsTo(),
     }),
     contact: Model,
     category: Model.extend({
