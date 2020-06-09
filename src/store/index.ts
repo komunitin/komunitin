@@ -10,12 +10,12 @@ import {
   Need,
   Category,
   Currency,
-  Account  
+  Account,  
+  Member
 } from "src/store/model";
 // Import logged-in user module
 import me from "./me";
 import ui from "./ui";
-import { Members } from "./members";
 
 Vue.use(Vuex);
 
@@ -26,10 +26,14 @@ const socialUrl = KOptions.apis.social;
 const groups = new (class extends Resources<Group, unknown> {
   collectionEndpoint = () => "/groups";
   resourceEndpoint = (code: string) => `/${code}`;
+  externalRelationships = () => ["currency"];
 })("groups", socialUrl);
 
 const contacts = new Resources<Contact, unknown>("contacts", socialUrl);
-const members = new Members<unknown>(socialUrl);
+const members = new (class extends Resources<Member, unknown> {
+  externalRelationships = () => ["account"];
+})("members", socialUrl);
+
 const offers = new Resources<Offer, unknown>("offers", socialUrl);
 const needs = new Resources<Need, unknown>("needs", socialUrl);
 const categories = new Resources<Category, unknown>("categories", socialUrl);
