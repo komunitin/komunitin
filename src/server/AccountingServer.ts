@@ -1,6 +1,6 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Model, Factory, Server, ModelInstance, belongsTo } from "miragejs";
+import { Model, Factory, Server, ModelInstance, belongsTo, hasMany } from "miragejs";
 import faker from "faker";
 import KOptions from "../komunitin.json";
 import ApiSerializer from "./ApiSerializer";
@@ -26,8 +26,12 @@ export default {
   models: {
     currency: Model,
     account: Model.extend({
+      currency: belongsTo(),
+      transactions: hasMany(),
+    }),
+    transaction: Model.extend({
       currency: belongsTo()
-    })
+    }),
   },
   factories: {
     currency: Factory.extend({
@@ -50,6 +54,22 @@ export default {
       balance: () => faker.random.number({ max: 10000000, min: -5000000, precision: 100 }),
       creditLimit: -1,
       debitLimit: 5000000
+    }),
+    transaction: Factory.extend({
+      tansfers: (i: number) => [{
+        payer: `${urlAccounting}/CUR0/accounts/account-${i % 5}`,
+        payee: `${urlAccounting}/CUR0/accounts/account-${i + 1 % 5}`,
+        amount: faker.random.number({min: 0.1*10000, max: 100*10000, precision: 100}),
+        meta: faker.company.catchPhrase(),
+      }],
+      state: (i: number) => (i < 3 ? "pending" : (i % 8 == 0) ? "rejected" : "committed"),
+      created: (i: number) => faker.date.recent(i % 5).toJSON(),
+      updated() {
+        return this.created;
+      },
+      expires() {
+        return (this as any).state == "pending" ? faker.date.future().toJSON() : undefined;
+      }
     })
   },
   /**
@@ -93,6 +113,21 @@ export default {
           });
         }
       );
+
+    // Generate 50 transactions from the first account to the following 5 accounts.
+    const accounts = server.schema.accounts.all();
+    const account = accounts[0];
+    for (let i = 1; i < 6; i++) {
+      const other = accounts[i];
+      server.createList("transaction", 5, {
+        payer: `${urlAccounting}/${account.currency.code}/accounts/${account.code}`,
+        payee: `${urlAccounting}/${other.currency.code}/accounts/${other.code}`,
+      });
+      server.createList("transaction", 5, {
+        payer: `${urlAccounting}/${other.currency.code}/accounts/${other.code}`,
+        payee: `${urlAccounting}/${account.currency.code}/accounts/${account.code}`,
+      });
+    }
   },
   routes(server: Server) {
     // Single currency
