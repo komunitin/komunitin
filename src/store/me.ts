@@ -50,7 +50,7 @@ async function loadUserData(accessToken: string,
   
   // Load the Accounting API account record.
   await dispatch("loadUrl", {
-    url: getters.myMember.attributes.account.links.related,
+    url: getters.myMember.relationships.account.data.href,
     include: "currency"
   });
   const accountId = rootGetters["accounts/current"].id;

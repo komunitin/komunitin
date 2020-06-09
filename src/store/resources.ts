@@ -4,7 +4,8 @@ import {
   CollectionResponseInclude,
   ResourceResponseInclude,
   ResourceIdentifierObject,
-  ErrorObject
+  ErrorObject,
+  ExternalResourceIdentifierObject
 } from "src/store/model";
 import Axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
@@ -90,6 +91,20 @@ export interface LoadUrlPayload {
 }
 
 /**
+ * Payload for the `loadNext` action.
+ */
+export interface LoadNextPayload {
+  /**
+   * The resource group.
+   */
+  group: string;
+  /**
+   * Optional comma-separated list of included relationship resources.
+   */
+  include?: string;
+}
+
+/**
  * Flexible Vuex Module used to retrieve, store and provide resources fetched from the
  * Komunitin Apis. The implementation is generic for any resource thanks to the JSONAPI
  * spec.
@@ -145,6 +160,14 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     return this.collectionEndpoint(groupCode) + `/${code}`;
   }
 
+  /**
+   * Return a string array withthe name of external relationships.
+   * Override if your resource has external relationships.
+   */
+  protected externalRelationships(): string[] {
+    return [];
+  }
+
   private static getHttpClient(baseURL?: string): AxiosInstance {
     return Axios.create({
       baseURL,
@@ -168,17 +191,44 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     );
   }
 
-  protected handleCollectionResponse(
+  protected async handleCollectionResponse(
     response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
-    commit: Commit
+    { commit, dispatch }: ActionContext<ResourcesState<T>, S>,
+    includeExternal: string[],
+    group: string
   ) {
     // Commit mutation(s).
     const result = response.data;
     commit("setList", result.data);
     commit("setNext", result.links.next);
+    // Commit included resources.
     if (result.included) {
       Resources.handleIncluded(result.included, commit);
     }
+    // Fetch external relationships.
+    const promises = includeExternal.map((key: string) => {
+      const ids = result.data.map(
+        resource =>
+          (resource.relationships?.[key]
+            ?.data as ExternalResourceIdentifierObject).id
+      );
+      if (ids.length > 0) {
+        const type = (result.data[0].relationships?.[key]
+          .data as ExternalResourceIdentifierObject).type;
+        return dispatch(
+          `${type}/loadList`,
+          {
+            group,
+            filter: {
+              id: ids.join(",")
+            }
+          } as LoadListPayload,
+          { root: true }
+        );
+      }
+    });
+
+    return Promise.all(promises);
   }
 
   /**
@@ -267,7 +317,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       _getters: unknown,
       _rootState: unknown,
       rootGetters: Record<string, (id: string) => T>
-    ) => (id: string) => state.resources[id] ? this.relatedGetters(rootGetters, state.resources[id]) : null,
+    ) => (id: string) =>
+      state.resources[id]
+        ? this.relatedGetters(rootGetters, state.resources[id])
+        : null,
     /**
      * Gets the current resource.
      */
@@ -329,9 +382,18 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   };
 
   actions = {
-    loadList: (context: ActionContext<ResourcesState<T>, S>, payload: LoadListPayload) => this.loadList(context, payload),
-    loadNext: (context: ActionContext<ResourcesState<T>, S>) => this.loadNext(context),
-    load: (context: ActionContext<ResourcesState<T>, S>, payload: LoadPayload) => this.load(context, payload)
+    loadList: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: LoadListPayload
+    ) => this.loadList(context, payload),
+    loadNext: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: LoadNextPayload
+    ) => this.loadNext(context, payload),
+    load: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: LoadPayload
+    ) => this.load(context, payload)
   };
   /**
    * Fetches the current list of resources.
@@ -339,7 +401,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * @param payload Configure the request by filtering the results, including related resources, including the current location, sorting.
    */
   protected async loadList(
-    { commit }: ActionContext<ResourcesState<T>, S>,
+    context: ActionContext<ResourcesState<T>, S>,
     payload: LoadListPayload
   ) {
     // Build query string.
@@ -364,8 +426,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (payload.sort) {
       params.set("sort", payload.sort);
     }
-    if (payload.include) {
-      params.set("include", payload.include);
+
+    const { localInclude, externalInclude } = this.splitIncludeParam(
+      payload.include
+    );
+    if (localInclude.length > 0) {
+      params.set("include", localInclude.join(","));
     }
     let url = this.collectionEndpoint(payload.group);
     const query = params.toString();
@@ -373,30 +439,41 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     // Call API
     try {
       const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(url);
-      this.handleCollectionResponse(response, commit);
+      await this.handleCollectionResponse(
+        response,
+        context,
+        externalInclude,
+        payload.group
+      );
     } catch (error) {
       throw Resources.getKError(error);
     }
   }
-  protected async loadNext({
-    state,
-    commit
-  }: ActionContext<ResourcesState<T>, S>) {
+  protected async loadNext(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadNextPayload
+  ) {
     try {
-      if (state.next === null) {
+      if (context.state.next === null) {
         // There are no more results.
-        commit("setList", []);
+        context.commit("setList", []);
         return;
       }
-      if (state.next === undefined) {
+      if (context.state.next === undefined) {
         // We can't do the loadNext call yet, since we don't have any next link. A loadList action should be called first.
         throw new KError(
           KErrorCode.ScriptError,
           "Unexpected call to 'loadNext' resource action with undefined next link."
         );
       }
-      const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(state.next);
-      this.handleCollectionResponse(response, commit);
+      const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
+      const { externalInclude } = this.splitIncludeParam(payload.include);
+      await this.handleCollectionResponse(
+        response,
+        context,
+        externalInclude,
+        payload.group
+      );
     } catch (error) {
       throw Resources.getKError(error);
     }
@@ -405,13 +482,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * Fetches the current reaource.
    */
   protected async load(
-    { commit }: ActionContext<ResourcesState<T>, S>,
+    { commit, dispatch }: ActionContext<ResourcesState<T>, S>,
     payload: LoadPayload
   ) {
     let url = this.resourceEndpoint(payload.code, payload.group);
-    if (payload.include) {
+    const { localInclude, externalInclude } = this.splitIncludeParam(
+      payload.include
+    );
+    if (localInclude.length > 0) {
       const params = new URLSearchParams();
-      params.set("include", payload.include);
+      params.set("include", localInclude.join(","));
       url += "?" + params.toString();
     }
     // Call API
@@ -423,6 +503,14 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       if (response.data.included) {
         Resources.handleIncluded(response.data.included, commit);
       }
+      // Load external relationships
+      await Promise.all(
+        externalInclude.map((key: string) => {
+          const url = (resource.relationships?.[key]
+            .data as ExternalResourceIdentifierObject).href;
+          return dispatch("loadUrl", { url });
+        })
+      );
     } catch (error) {
       throw Resources.getKError(error);
     }
@@ -430,7 +518,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
   /**
    * This is a static action implementation that loads any JSONAPI url and commits the
-   * result to the relevant module instance.
+   * result to the relevant module instance. It does not support inclusion of external
+   * relationships.
    *
    * It should be added as a single `loadUrl` action implementation.
    */
@@ -467,5 +556,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     // Note that all action implementations are similar,
     // so they could be factored as a single generic one.
+  }
+  protected splitIncludeParam(
+    include?: string
+  ): { localInclude: string[]; externalInclude: string[] } {
+    const array = include ? include.split(",") : [];
+    const external = this.externalRelationships();
+    return {
+      localInclude: array.filter(field => !external.includes(field)),
+      externalInclude: array.filter(field => external.includes(field))
+    };
   }
 }
