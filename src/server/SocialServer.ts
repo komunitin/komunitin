@@ -10,7 +10,6 @@ import KOptions from "../komunitin.json";
 import ApiSerializer from "./ApiSerializer";
 
 const urlSocial = KOptions.apis.social;
-const urlAccounting = KOptions.apis.accounting;
 
 const contactTypes = Object.keys(ContactNetworks);
 
@@ -103,9 +102,6 @@ export default {
       isExternal(relationshipKey: string) {
         return relationshipKey == "currency";
       },
-      getExternalRelationhipHref(relationshipKey: string, model: any) {
-        return `${urlAccounting}/${model.code}/currency`;
-      }
     }),
     member: ApiSerializer.extend({
       shouldIncludeLinkageData(relationshipKey: string, model: any) {
@@ -121,9 +117,6 @@ export default {
       isExternal(relationshipKey: string) {
         return relationshipKey == "account";
       },
-      getExternalRelationhipHref(relationshipKey: string, model: any) {
-        return `${urlAccounting}/${model.currency.code}/accounts/${model.code}`;
-      }
     }),
     contact: ApiSerializer,
     category: ApiSerializer.extend({
@@ -356,6 +349,12 @@ export default {
       const group = schema.groups.findBy({ code: request.params.code });
       return filter(schema.members.where({ groupId: group.id }), request);
     });
+
+    // Single member.
+    server.get(urlSocial + "/:code/members/:member", (schema: any, request: any) => {
+      return schema.members.findBy({ code: request.params.member });
+    });
+
 
     // Logged-in User
     server.get(urlSocial + "/users/me", (schema: any) => {
