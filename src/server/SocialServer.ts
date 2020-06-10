@@ -10,7 +10,6 @@ import KOptions from "../komunitin.json";
 import ApiSerializer from "./ApiSerializer";
 
 const urlSocial = KOptions.apis.social;
-const urlAccounting = KOptions.apis.accounting;
 
 const contactTypes = Object.keys(ContactNetworks);
 

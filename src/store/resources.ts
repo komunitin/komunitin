@@ -104,8 +104,7 @@ export interface LoadNextPayload {
  * - `load`: Fetches the current resource. Accepts the `LoadPayload` argument.
  * - `loadList`: Fetches the current list of resources. Accepts the `LoadListPayload` argument.
  */
-export class Resources<T extends ResourceObject, S>
-  implements Module<ResourcesState<T>, S> {
+export class Resources<T extends ResourceObject, S> implements Module<ResourcesState<T>, S> {
   namespaced = true;
 
   /**
@@ -425,9 +424,7 @@ export class Resources<T extends ResourceObject, S>
     if (query.length > 0) url += "?" + query;
     // Call API
     try {
-      const response = await this.client.get<
-        CollectionResponseInclude<T, ResourceObject>
-      >(url);
+      const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(url);
       await this.handleCollectionResponse(response, context, payload.group);
     } catch (error) {
       throw Resources.getKError(error);
@@ -450,9 +447,7 @@ export class Resources<T extends ResourceObject, S>
           "Unexpected call to 'loadNext' resource action with undefined next link."
         );
       }
-      const response = await this.client.get<
-        CollectionResponseInclude<T, ResourceObject>
-      >(context.state.next);
+      const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
       await this.handleCollectionResponse(response, context, payload.group);
     } catch (error) {
       throw Resources.getKError(error);
@@ -474,9 +469,7 @@ export class Resources<T extends ResourceObject, S>
     }
     // Call API
     try {
-      const response = await this.client.get<
-        ResourceResponseInclude<T, ResourceObject>
-      >(url);
+      const response = await this.client.get<ResourceResponseInclude<T, ResourceObject>>(url);
       // Commit mutation(s).
       const resource = response.data.data;
       commit("setCurrent", resource);
