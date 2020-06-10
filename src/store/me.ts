@@ -39,7 +39,7 @@ async function loadUserInfo(accessToken: string, { commit }: ActionContext<UserS
  * Load member and account resources for current user.
  */
 async function loadUserData(accessToken: string,
-  { commit, dispatch, getters, rootGetters }: ActionContext<UserState, never>
+  { commit, dispatch, rootGetters }: ActionContext<UserState, never>
 ) {
   await dispatch("users/load", {
     // We can't include account.currency since account is an external relationship.
