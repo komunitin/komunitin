@@ -21,6 +21,17 @@ export default {
         account.currency.code +
         "/accounts/" +
         account.code
+    }),
+    transaction: ApiSerializer.extend({
+      selfLink: (transaction: any) => `${urlAccounting}/${transaction.currency.code}/transactions/${transaction.id}`,
+      shouldIncludeLinkageData(relationshipKey: string, model: any) {
+        return (
+          ApiSerializer.prototype.shouldIncludeLinkageData.apply(this, [
+            relationshipKey,
+            model
+          ]) || relationshipKey == "transfers"
+        );
+      },
     })
   },
   models: {
@@ -30,8 +41,13 @@ export default {
       transactions: hasMany(),
     }),
     transaction: Model.extend({
-      currency: belongsTo()
+      currency: belongsTo(),
+      transfers: hasMany(),
     }),
+    transfer: Model.extend({
+      payer: belongsTo("account"),
+      payee: belongsTo("account"),
+    })
   },
   factories: {
     currency: Factory.extend({
@@ -56,12 +72,6 @@ export default {
       debitLimit: 5000000
     }),
     transaction: Factory.extend({
-      tansfers: (i: number) => [{
-        payer: `${urlAccounting}/CUR0/accounts/account-${i % 5}`,
-        payee: `${urlAccounting}/CUR0/accounts/account-${i + 1 % 5}`,
-        amount: faker.random.number({min: 0.1*10000, max: 100*10000, precision: 100}),
-        meta: faker.company.catchPhrase(),
-      }],
       state: (i: number) => (i < 3 ? "pending" : (i % 8 == 0) ? "rejected" : "committed"),
       created: (i: number) => faker.date.recent(i % 5).toJSON(),
       updated() {
@@ -70,6 +80,10 @@ export default {
       expires() {
         return (this as any).state == "pending" ? faker.date.future().toJSON() : undefined;
       }
+    }),
+    transfer: Factory.extend({
+      amount: () => faker.random.number({min: 0.1*10000, max: 100*10000, precision: 100}),
+      meta: () => faker.company.catchPhrase(),
     })
   },
   /**
@@ -100,19 +114,28 @@ export default {
         }
       );
 
-    // Generate 50 transactions from the first account to the following 5 accounts.
+    // Generate 50 transactions between the first account and the following 5 accounts.
     const accounts = server.schema.accounts.all();
     const account = accounts[0];
+    const currency = account.currency;
     for (let i = 1; i < 6; i++) {
       const other = accounts[i];
-      server.createList("transaction", 5, {
-        payer: `${urlAccounting}/${account.currency.code}/accounts/${account.code}`,
-        payee: `${urlAccounting}/${other.currency.code}/accounts/${other.code}`,
+      const payments = server.createList("transfer", 5, {
+        payer: account,
+        payee: other
       });
-      server.createList("transaction", 5, {
-        payer: `${urlAccounting}/${other.currency.code}/accounts/${other.code}`,
-        payee: `${urlAccounting}/${account.currency.code}/accounts/${account.code}`,
+      payments.forEach((transfer: ModelInstance) => server.create("transaction", {
+        transfers: [transfer],
+        currency
+      }));
+      const charges = server.createList("transfer", 5, {
+        payer: other,
+        payee: account
       });
+      charges.forEach((transfer: ModelInstance) => server.create("transaction", {
+        transfers: [transfer],
+        currency
+      }));
     }
   },
   routes(server: Server) {
@@ -136,6 +159,17 @@ export default {
           code: request.params.code,
           currencyId: currency.id
         });
+      }
+    );
+    // Account transactions.
+    server.get(`${urlAccounting}/:currency/accounts/:code/transactions`,
+      (schema: any, request) => {
+        const account = schema.accounts.findBy({
+          code: request.params.code
+        })
+        return schema.transactions.where(
+          (transaction: any) => (transaction.transfers[0].payer == account || transaction.transfers[0].payee == account)
+        );
       }
     );
   }
