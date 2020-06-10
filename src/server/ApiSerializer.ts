@@ -1,7 +1,7 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { JSONAPISerializer, Request, Model } from "miragejs";
-import { ResourceObject, ExternalResourceObject, ResourceIdentifierObject } from "src/store/model";
+import { JSONAPISerializer, Request } from "miragejs";
+import { ResourceIdentifierObject, ResourceObject } from "src/store/model";
 
 declare module "miragejs/serializer" {
   interface JSONAPISerializer {
