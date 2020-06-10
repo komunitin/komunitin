@@ -15,12 +15,11 @@ describe("Offers", () => {
 
   beforeAll(async () => {
     wrapper = await mountComponent(App);
-    
+    await wrapper.vm.$router.push("/groups/GRP0/offers");
   });
   afterAll(() => wrapper.destroy());
 
-  it("Loads offers and searches", async () => {
-    await wrapper.vm.$router.push("/groups/GRP0/offers");
+  it("Loads offers", async () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
@@ -35,11 +34,9 @@ describe("Offers", () => {
     expect(wrapper.findAll(OfferCard).length).toBe(40);
     // The QInfiniteScroll is still working because we haven't fetched all data yet.
     expect((wrapper.find(QInfiniteScroll).vm as any).working).toBe(true);
-    
-    // Search: I've not factored it in another "it" function because I
-    // don't know how to reload the page without a router DuplicateNavigation
-    // warning, and I prefer not to mount the App twice just for that.
-    
+  });
+
+  it ("searches offers", async () => {
     // The user interaction is already tested in PageHeader unit test,
     // here just emit the search event.
     wrapper.get(PageHeader).vm.$emit("search","bacon");

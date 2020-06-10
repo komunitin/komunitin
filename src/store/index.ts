@@ -1,6 +1,6 @@
 import Vue from "vue";
-import Vuex, { ActionContext } from "vuex";
-import { Resources, LoadUrlPayload } from "./resources";
+import Vuex from "vuex";
+import { Resources } from "./resources";
 import { KOptions } from "src/boot/komunitin";
 import {
   User,
@@ -95,19 +95,6 @@ export default function(/* { ssrContext } */) {
       currencies,
       accounts
     },
-    actions: {
-      /**
-       * Generic action for loading any JSONAPI resource. This action allows us to
-       * idrectly implement HATEOAS links.
-       */
-      async loadUrl(
-        context: ActionContext<never, never>,
-        payload: LoadUrlPayload
-      ) {
-        return Resources.loadUrl(context, payload);
-      }
-    },
-
     // enable strict mode (adds overhead!) for dev mode only
     strict: process.env.DEV === "true"
   });
