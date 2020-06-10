@@ -19,7 +19,7 @@ describe("Offers", () => {
   });
   afterAll(() => wrapper.destroy());
 
-  it("Loads offers and searches", async () => {
+  it("Loads offers", async () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
