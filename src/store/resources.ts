@@ -1,11 +1,11 @@
-import { Module, ActionContext, Commit } from "vuex";
+import { Module, ActionContext, Commit, Dispatch } from "vuex";
 import {
   ResourceObject,
   CollectionResponseInclude,
   ResourceResponseInclude,
   ResourceIdentifierObject,
   ErrorObject,
-  ExternalResourceIdentifierObject
+  ExternalResourceObject
 } from "src/store/model";
 import Axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
@@ -70,20 +70,6 @@ export interface LoadPayload {
    * The resource group.
    */
   group: string;
-  /**
-   * Optional comma-separated list of included relationship resources.
-   */
-  include?: string;
-}
-
-/**
- * Payload for the `loadUrl` action
- */
-export interface LoadUrlPayload {
-  /**
-   * The resource url.
-   */
-  url: string;
   /**
    * Optional comma-separated list of included relationship resources.
    */
@@ -160,14 +146,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     return this.collectionEndpoint(groupCode) + `/${code}`;
   }
 
-  /**
-   * Return a string array withthe name of external relationships.
-   * Override if your resource has external relationships.
-   */
-  protected externalRelationships(): string[] {
-    return [];
-  }
-
   private static getHttpClient(baseURL?: string): AxiosInstance {
     return Axios.create({
       baseURL,
@@ -182,19 +160,53 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   /**
    * Trigger `add` commit to the relevant modules for each resource given.
    *
+   * If there are included external resources, then dispatch actions to load them. The
+   * returned promise will resolve when these actions fulfill.
+   *
    * @param included Included resources
    * @param commit Commit function
    */
-  protected static handleIncluded(included: ResourceObject[], commit: Commit) {
-    included.forEach(resource =>
-      commit(resource.type + "/add", resource, { root: true })
-    );
+  protected static async handleIncluded(
+    included: ResourceObject[],
+    group: string,
+    commit: Commit,
+    dispatch: Dispatch
+  ) {
+    // Here we'll accumulate all external resources.
+    const external: Record<string, ExternalResourceObject[]> = {};
+    included.forEach(resource => {
+      if (!(resource as ExternalResourceObject).external) {
+        // Standard included resource. Commit change!
+        commit(resource.type + "/add", resource, { root: true });
+      } else {
+        // External included resource.
+        if (!external[resource.type]) {
+          external[resource.type] = [];
+        }
+        external[resource.type].push(resource as ExternalResourceObject);
+      }
+    });
+    // Fetch external resources.
+    const promises = Object.keys(external).map(name => {
+      const ids = external[name].map(resource => resource.id).join(",");
+      return dispatch(
+        `${name}/loadList`,
+        {
+          group,
+          filter: {
+            id: ids
+          }
+        } as LoadListPayload,
+        { root: true }
+      );
+    });
+
+    await Promise.all(promises);
   }
 
   protected async handleCollectionResponse(
     response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
     { commit, dispatch }: ActionContext<ResourcesState<T>, S>,
-    includeExternal: string[],
     group: string
   ) {
     // Commit mutation(s).
@@ -203,32 +215,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     commit("setNext", result.links.next);
     // Commit included resources.
     if (result.included) {
-      Resources.handleIncluded(result.included, commit);
+      await Resources.handleIncluded(result.included, group, commit, dispatch);
     }
-    // Fetch external relationships.
-    const promises = includeExternal.map((key: string) => {
-      const ids = result.data.map(
-        resource =>
-          (resource.relationships?.[key]
-            ?.data as ExternalResourceIdentifierObject).id
-      );
-      if (ids.length > 0) {
-        const type = (result.data[0].relationships?.[key]
-          .data as ExternalResourceIdentifierObject).type;
-        return dispatch(
-          `${type}/loadList`,
-          {
-            group,
-            filter: {
-              id: ids.join(",")
-            }
-          } as LoadListPayload,
-          { root: true }
-        );
-      }
-    });
-
-    return Promise.all(promises);
   }
 
   /**
@@ -427,9 +415,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       params.set("sort", payload.sort);
     }
 
-    const { localInclude, externalInclude } = this.splitIncludeParam(
-      payload.include
-    );
+    const { localInclude } = this.splitIncludeParam(payload.include);
     if (localInclude.length > 0) {
       params.set("include", localInclude.join(","));
     }
@@ -439,12 +425,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     // Call API
     try {
       const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(url);
-      await this.handleCollectionResponse(
-        response,
-        context,
-        externalInclude,
-        payload.group
-      );
+      await this.handleCollectionResponse(response, context, payload.group);
     } catch (error) {
       throw Resources.getKError(error);
     }
@@ -467,13 +448,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         );
       }
       const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
-      const { externalInclude } = this.splitIncludeParam(payload.include);
-      await this.handleCollectionResponse(
-        response,
-        context,
-        externalInclude,
-        payload.group
-      );
+      await this.handleCollectionResponse(response, context, payload.group);
     } catch (error) {
       throw Resources.getKError(error);
     }
@@ -486,9 +461,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadPayload
   ) {
     let url = this.resourceEndpoint(payload.code, payload.group);
-    const { localInclude, externalInclude } = this.splitIncludeParam(
-      payload.include
-    );
+    const { localInclude } = this.splitIncludeParam(payload.include);
     if (localInclude.length > 0) {
       const params = new URLSearchParams();
       params.set("include", localInclude.join(","));
@@ -501,70 +474,21 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       const resource = response.data.data;
       commit("setCurrent", resource);
       if (response.data.included) {
-        Resources.handleIncluded(response.data.included, commit);
-      }
-      // Load external relationships
-      await Promise.all(
-        externalInclude.map((key: string) => {
-          const url = (resource.relationships?.[key]
-            .data as ExternalResourceIdentifierObject).href;
-          return dispatch("loadUrl", { url });
-        })
-      );
-    } catch (error) {
-      throw Resources.getKError(error);
-    }
-  }
-
-  /**
-   * This is a static action implementation that loads any JSONAPI url and commits the
-   * result to the relevant module instance. It does not support inclusion of external
-   * relationships.
-   *
-   * It should be added as a single `loadUrl` action implementation.
-   */
-  static async loadUrl(
-    { commit }: ActionContext<never, never>,
-    payload: LoadUrlPayload
-  ) {
-    let url = payload.url;
-    if (payload.include) {
-      const params = new URLSearchParams();
-      params.set("include", payload.include);
-      url += url.includes("?") ? "&" : "?";
-      url += params.toString();
-    }
-    try {
-      const client = Resources.getHttpClient();
-      const response = await client.get<ResourceResponseInclude<ResourceObject, ResourceObject>>(url);
-      const resource = response.data.data;
-      if (Array.isArray(resource)) {
-        throw new KError(
-          KErrorCode.NotImplemented,
-          "Generic loading of resource collections is not implemented. May be it is a good moment to do so ;)"
+        await Resources.handleIncluded(
+          response.data.included,
+          payload.group,
+          commit,
+          dispatch
         );
       }
-      const type = resource.type;
-      // Mutate the relevant vuex module, that is by convention named
-      // equal to the resource type.
-      commit(`${type}/setCurrent`, resource, { root: true });
-      if (response.data.included) {
-        Resources.handleIncluded(response.data.included, commit);
-      }
     } catch (error) {
       throw Resources.getKError(error);
     }
-    // Note that all action implementations are similar,
-    // so they could be factored as a single generic one.
   }
-  protected splitIncludeParam(
-    include?: string
-  ): { localInclude: string[]; externalInclude: string[] } {
+  protected splitIncludeParam(include?: string): { localInclude: string[] } {
     const array = include ? include.split(",") : [];
-    const external = this.externalRelationships();
     return {
-      localInclude: array.filter(field => !external.includes(field)),
-      externalInclude: array.filter(field => external.includes(field))
+      localInclude: array.filter(() => true)
     };
   }
 }
