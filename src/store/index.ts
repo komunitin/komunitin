@@ -52,7 +52,14 @@ const currencies = new (class extends Resources<Currency, unknown> {
   resourceEndpoint = (code: string) => `/${code}/currency`;
 })("currencies", accountingUrl);
 
-const accounts = new Resources<Account, unknown>("accounts", accountingUrl);
+const accounts = new (class extends Resources<Account, unknown>{
+  inverseRelationships = () => ({
+    member: {
+      module: "members",
+      field: "account"
+    }
+  })
+})("accounts", accountingUrl);
 
 /*
  * If not building with SSR mode, you can

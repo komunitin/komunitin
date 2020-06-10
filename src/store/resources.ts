@@ -1,14 +1,14 @@
-import { Module, ActionContext, Commit } from "vuex";
-import {
-  ResourceObject,
-  CollectionResponseInclude,
-  ResourceResponseInclude,
-  ResourceIdentifierObject,
-  ErrorObject,
-  ExternalResourceIdentifierObject
-} from "src/store/model";
-import Axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
+import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
+import {
+  CollectionResponseInclude,
+  ErrorObject,
+  ExternalResourceIdentifierObject,
+  ResourceIdentifierObject,
+  ResourceObject,
+  ResourceResponseInclude
+} from "src/store/model";
+import { ActionContext, Commit, Module } from "vuex";
 
 export interface ResourcesState<T extends ResourceObject> {
   /**
@@ -104,6 +104,15 @@ export interface LoadNextPayload {
   include?: string;
 }
 
+interface SplittedIncludes {
+  localInclude: string[];
+  externalInclude: string[];
+  inverseInclude: string[];
+}
+type Getter = 
+  & ((id: string) => ResourceObject)
+  & ((conditions: Record<string, string>) => ResourceObject);
+
 /**
  * Flexible Vuex Module used to retrieve, store and provide resources fetched from the
  * Komunitin Apis. The implementation is generic for any resource thanks to the JSONAPI
@@ -168,6 +177,29 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     return [];
   }
 
+  /**
+   * Override this method to fetch inverse relationships to this resource.
+   *
+   * If a resource of type A has a one-to-one relationship to this resource but
+   * this resource doesn't directly have the inverse relationship, by declaring
+   * the inverse relatinship it will behave as if teh inverse relationship was
+   * also present in the API.
+   *
+   * When an inverse relationship declared here is required through the include
+   * field in a load action, the action will fetch and link the associated resources
+   * in a second request so they are accessible as if they were directly related.
+   *
+   * It also works with external relationships.
+   *
+   * @returns an object with the inverse relationship name as keys and, as values,
+   * a descriptor object with entries `module` for the vuex module name that manages
+   * the related resource and `field` for the name of the direct relationship from
+   * the related resource to this resource.
+   */
+  protected inverseRelationships(): Record<string, { module: string; field: string }> {
+    return {};
+  }
+
   private static getHttpClient(baseURL?: string): AxiosInstance {
     return Axios.create({
       baseURL,
@@ -191,11 +223,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     );
   }
 
+  /**
+   * Commits the results provided by AxiosResponse and then it eventually fetches
+   * the external relationships and the inverse relationships.
+   */
   protected async handleCollectionResponse(
     response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
     { commit, dispatch }: ActionContext<ResourcesState<T>, S>,
+    group: string,
     includeExternal: string[],
-    group: string
+    includeInverse: string[]
   ) {
     // Commit mutation(s).
     const result = response.data;
@@ -206,7 +243,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       Resources.handleIncluded(result.included, commit);
     }
     // Fetch external relationships.
-    const promises = includeExternal.map((key: string) => {
+    const externals = includeExternal.map((key: string) => {
       const ids = result.data.map(
         resource =>
           (resource.relationships?.[key]
@@ -228,7 +265,25 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       }
     });
 
-    return Promise.all(promises);
+    const inverses = includeInverse.map((key: string) => {
+      const ids = result.data.map(resource => resource.id);
+      if (ids.length > 0) {
+        const descriptors = this.inverseRelationships();
+        const type = descriptors[key].module;
+        return (
+          dispatch(`${type}/loadList`),
+          {
+            group,
+            filter: {
+              [descriptors[key].field]: ids.join(",")
+            }
+          } as LoadListPayload,
+          { root: true }
+        );
+      }
+    });
+
+    return Promise.all([...externals, ...inverses]);
   }
 
   /**
@@ -266,10 +321,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    *
    * @return the main ResourceObject
    */
-  protected relatedGetters(
-    rootGetters: Record<string, (id: string) => T>,
-    main: T
-  ): T {
+  protected relatedGetters(rootGetters: Record<string, Getter>, main: T): T {
+    // Add getters for relationships.
     if (main.relationships) {
       const relationships = Object.entries(main.relationships).filter(
         ([, value]) => value.data !== undefined
@@ -298,6 +351,17 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         });
       }
     }
+    // Add getters for inverse relationships (only one-to-one).
+    const inverses = this.inverseRelationships();
+    Object.keys(inverses).forEach(name => {
+      Object.defineProperty(main, name, {
+        get: function() {
+          return rootGetters[inverses[name].module + "/find"]({
+            [inverses[name].field]: main.id
+          });
+        }
+      });
+    });
     return main;
   }
 
@@ -316,11 +380,41 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
-      rootGetters: Record<string, (id: string) => T>
+      rootGetters: Record<string, Getter>
     ) => (id: string) =>
       state.resources[id]
         ? this.relatedGetters(rootGetters, state.resources[id])
         : null,
+    /**
+     * Gets the first resource meeting some criteria. Criteria is a map with 
+     * field => value. 
+     * 
+     * If field is an attribute, the value is matched with attribute value.
+     * If field is a relationship, the value is mathed against the related resource id.
+     */
+    find: (
+      state: ResourcesState<T>,
+      _getters: unknown,
+      _rootState: unknown,
+      rootGetters: Record<string, Getter>
+    ) => (conditions: Record<string, string>) => {
+      const target = Object.values(state.resources).find((resource: ResourceObject) =>
+        Object.entries(conditions).every(
+          ([field, value]) => {
+            if (resource.attributes?.[field]) {
+              return resource.attributes[field] == value;
+            }
+            // Check that the relationship is defined and is to-one.
+            else if (typeof resource.relationships?.[field].data == "object") {
+              return (resource.relationships[field].data as ResourceIdentifierObject).id == value
+            }
+            return false;
+          }
+        )
+      );
+      return target ? this.relatedGetters(rootGetters, target) : null;
+    },
+
     /**
      * Gets the current resource.
      */
@@ -328,7 +422,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
-      rootGetters: Record<string, (id: string) => T>
+      rootGetters: Record<string, Getter>
     ) =>
       state.current != null
         ? this.relatedGetters(rootGetters, state.resources[state.current])
@@ -340,7 +434,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
-      rootGetters: Record<string, (id: string) => T>
+      rootGetters: Record<string, Getter>
     ) =>
       state.currentList
         .map(id => state.resources[id])
@@ -427,9 +521,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       params.set("sort", payload.sort);
     }
 
-    const { localInclude, externalInclude } = this.splitIncludeParam(
-      payload.include
-    );
+    const {
+      localInclude,
+      externalInclude,
+      inverseInclude
+    } = this.splitIncludeParam(payload.include);
     if (localInclude.length > 0) {
       params.set("include", localInclude.join(","));
     }
@@ -442,8 +538,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       await this.handleCollectionResponse(
         response,
         context,
+        payload.group,
         externalInclude,
-        payload.group
+        inverseInclude
       );
     } catch (error) {
       throw Resources.getKError(error);
@@ -467,12 +564,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         );
       }
       const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
-      const { externalInclude } = this.splitIncludeParam(payload.include);
+      const { externalInclude, inverseInclude } = this.splitIncludeParam(
+        payload.include
+      );
       await this.handleCollectionResponse(
         response,
         context,
+        payload.group,
         externalInclude,
-        payload.group
+        inverseInclude
       );
     } catch (error) {
       throw Resources.getKError(error);
@@ -557,14 +657,17 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     // Note that all action implementations are similar,
     // so they could be factored as a single generic one.
   }
-  protected splitIncludeParam(
-    include?: string
-  ): { localInclude: string[]; externalInclude: string[] } {
+
+  protected splitIncludeParam(include?: string): SplittedIncludes {
     const array = include ? include.split(",") : [];
     const external = this.externalRelationships();
+    const inverse = Object.keys(this.inverseRelationships());
     return {
-      localInclude: array.filter(field => !external.includes(field)),
-      externalInclude: array.filter(field => external.includes(field))
+      localInclude: array.filter(
+        field => !external.includes(field) && !inverse.includes(field)
+      ),
+      externalInclude: array.filter(field => external.includes(field)),
+      inverseInclude: array.filter(field => inverse.includes(field))
     };
   }
 }

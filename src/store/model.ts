@@ -20,6 +20,7 @@ export interface ResourceObject extends ResourceIdentifierObject {
   links: {
     self: string;
   };
+  attributes?: Record<string, unknown>
   relationships?: Record<string, Relationship>
 }
 
@@ -294,6 +295,30 @@ export interface Account extends ResourceObject {
   };
   relationships: {
     currency: RelatedResource;
+  }
+}
+
+export interface Transaction extends ResourceObject {
+  attributes: {
+    state: "new" | "pending" | "accepted" | "committed" | "rejected" | "deleted";
+    expires?: string;
+    created: string;
+    updated: string;
+  },
+  relationships: {
+    currency: RelatedResource,
+    transfers: RelatedLinkedCollection
+  }
+}
+
+export interface Transfer extends ResourceObject {
+  attributes: {
+    amount: number,
+    meta: string
+  },
+  relationships: {
+    payer: RelatedResource,
+    payee: RelatedResource
   }
 }
 
