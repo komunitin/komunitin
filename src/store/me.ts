@@ -20,7 +20,6 @@ export interface UserState {
   userInfo?: User;
   tokens?: AuthData;
   userId?: string;
-  accountId?: string;
   /**
    * Current location, provided by device.
    */
@@ -43,18 +42,13 @@ async function loadUserData(accessToken: string,
   { commit, dispatch, getters, rootGetters }: ActionContext<UserState, never>
 ) {
   await dispatch("users/load", {
-    include: "members,members.group"
+    // We can't include account.currency since account is an external relationship.
+    // However we can include both group.currency and members.account, both external
+    // relationships with the same effect.
+    include: "members,members.group,members.group.currency,members.account"
   });
   const userId = rootGetters["users/current"].id;
   commit("myUser", userId);
-  
-  // Load the Accounting API account record.
-  await dispatch("loadUrl", {
-    url: getters.myMember.relationships.account.data.href,
-    include: "currency"
-  });
-  const accountId = rootGetters["accounts/current"].id;
-  commit("myAccount", accountId);
 }
 
 /**
@@ -90,7 +84,6 @@ export default {
     isLoggedIn: state =>
       state.userInfo !== undefined &&
       state.userId !== undefined &&
-      state.accountId !== undefined &&
       auth.isAuthorized(state.tokens),
     myMember: (state, getters, rootState, rootGetters) => {
       if (state.userId !== undefined) {
@@ -101,18 +94,14 @@ export default {
       }
       return undefined;
     },
-    myAccount: (state, getters, rootState, rootGetters) => {
-      if (state.accountId !== undefined) {
-        return rootGetters["accounts/one"](state.accountId);
-      }
-      return undefined;
+    myAccount: (state, getters) => {
+      return getters.myMember?.account
     }
   },
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
     myUser: (state, userId) => (state.userId = userId),
-    myAccount: (state, accountId) => (state.accountId = accountId),
     location: (state, location) => (state.location = location)
   },
 
@@ -156,7 +145,6 @@ export default {
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
       context.commit("myUser", undefined);
-      context.commit("myAccount", undefined);
     },
     /**
      * Get the current location from the device.

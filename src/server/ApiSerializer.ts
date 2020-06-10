@@ -1,12 +1,13 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { JSONAPISerializer, Request } from "miragejs";
-import { ResourceObject } from "src/store/model";
+import { JSONAPISerializer, Request, Model } from "miragejs";
+import { ResourceObject, ExternalResourceObject, ResourceIdentifierObject } from "src/store/model";
 
 declare module "miragejs/serializer" {
   interface JSONAPISerializer {
     getResourceObjectForModel(model: any): any;
     serialize(object: any, request: Request): any;
+    getHashForIncludedResource(model: any): any;
   }
 }
 
@@ -37,11 +38,6 @@ export default class ApiSerializer extends JSONAPISerializer {
           count: relationship.models.length
         }
       }
-      // Add external relationship fields (only work for one-to-one relationships)
-      if (this.isExternal(relationshipKey) && (this as any).isModel(relationship)) {
-        jsonRelationship.data.external = true;
-        jsonRelationship.data.href = this.getExternalRelationhipHref(relationshipKey, relationship);
-      }
     });
     const serializer = (this as any).serializerFor(model.modelName);
     const url = serializer.selfLink(model);
@@ -52,6 +48,25 @@ export default class ApiSerializer extends JSONAPISerializer {
     }
     return json;
   }
+
+  /**
+   * Extend base function to support inclusion of external resources as defined
+   * in https://github.com/komunitin/komunitin-api/blob/master/jsonapi-profiles/external.md
+  */
+  getHashForIncludedResource(model: any) {
+    // Delete attributes and relationships for external resources, and add the "external" flag.
+    const [hash, ] = super.getHashForIncludedResource(model);
+    if (this.isExternal(model.modelName)) {
+      hash.included.forEach((resource: any) => {
+        delete resource.attributes;
+        delete resource.relationships;
+        resource.external = true;
+      })
+    }
+    // Also dont follow the inclusion chain, since this is external resource and 
+    // therefore this server can't know about related resources of this included resource.
+    return [hash, []];
+  }
   /**
    * Returns whether the relationship identified by given key is external.
    */
@@ -59,15 +74,7 @@ export default class ApiSerializer extends JSONAPISerializer {
   protected isExternal(key: string): boolean {
     return false;
   }
-  /**
-   * Returns the absolute URL identifying an external resource.
-   * 
-   * Implementations overriding `isExternal` must also override and implement this function.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getExternalRelationhipHref(key: string, relationship: any): string {
-    throw new Error("Not implemented!");
-  }
+
   /**
    * Self link for given model. Return undefined for not setting the link.
    */
@@ -130,6 +137,45 @@ export default class ApiSerializer extends JSONAPISerializer {
       json.links.prev = prev.toString();
     } else {
       json.links.prev = null;
+    }
+
+    this.filterIncluded(json);
+  }
+
+  private _addIncludedRelationship(rid: ResourceIdentifierObject, json: any, included: ResourceObject[]) {
+    const index = json.included.findIndex((resource: ResourceObject) => resource.id  == rid.id);
+    if (index != -1) {
+      const incl = json.included.splice(index, 1)[0];
+      included.push(incl);
+      // Recursive call to include nested resources.
+      this._filterIncludedResource(incl, json, included);
+    }
+  }
+  private _filterIncludedResource(resource: ResourceObject, json: any, included: ResourceObject[]) {
+    if (resource.relationships) {
+      Object.values(resource.relationships).forEach(rel => {
+        if (rel.data) {
+          if (Array.isArray(rel.data)) {
+            rel.data.forEach( resource => this._addIncludedRelationship(resource, json, included));
+          } else {
+            this._addIncludedRelationship(rel.data, json, included);
+          }
+        }
+      });
+    }
+  }
+  /**
+   * Removes unnecessary included objects after pagination.
+   * 
+   * @param json The paginated response
+   */
+  private filterIncluded(json: any) : void {
+    const included: ResourceObject[] = [];
+    if (json.included) {
+      json.data.forEach((resource: ResourceObject) => {
+        this._filterIncludedResource(resource, json, included);
+      })
+      json.included = included;
     }
   }
 
