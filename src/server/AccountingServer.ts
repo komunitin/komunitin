@@ -115,13 +115,13 @@ export default {
         }
       );
 
-    // Generate 50 transactions between the first account and the following 5 accounts.
+    // Generate 25 transactions between the first account and the following 5 accounts.
     const accounts = server.schema.accounts.all();
     const account = accounts.models[0];
     const currency = account.currency;
     for (let i = 1; i < 6; i++) {
       const other = accounts.models[i];
-      const payments = server.createList("transfer", 5, {
+      const payments = server.createList("transfer", 2, {
         payer: account,
         payee: other
       });
@@ -129,7 +129,7 @@ export default {
         transfers: [transfer],
         currency
       }));
-      const charges = server.createList("transfer", 5, {
+      const charges = server.createList("transfer", 3, {
         payer: other,
         payee: account
       });

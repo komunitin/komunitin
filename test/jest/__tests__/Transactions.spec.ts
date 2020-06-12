@@ -31,19 +31,19 @@ describe("Transactions", () => {
     expect(transactions.length).toBe(20);
     const first = transactions.wrappers[0];
     expect(first.text()).toContain("today");
-    expect(first.text()).toContain("Hermina");
-    expect(first.text()).toContain("35.67 $");
-    expect(first.text()).toContain("Seamless");
+    expect(first.text()).toContain("Antonio");
+    expect(first.text()).toContain("47.92 $");
+    expect(first.text()).toContain("Operative");
 
-    const fifth = transactions.wrappers[4];
+    const fifth = transactions.wrappers[6];
     expect(fifth.text()).toContain("Pending");
     expect(fifth.text()).toContain("Hermina");
-    expect(fifth.text()).toContain("-55.84 $");
-    expect(fifth.text()).toContain("Configurable");
+    expect(fifth.text()).toContain("-40.47 $");
+    expect(fifth.text()).toContain("Inverse");
     // Search
     wrapper.get(PageHeader).vm.$emit("search", "configurable");
     await wrapper.vm.$wait();
     // Check result!
-    expect(wrapper.get(TransactionList).findAll(MemberHeader).length).toBe(3);
+    expect(wrapper.get(TransactionList).findAll(MemberHeader).length).toBe(2);
   });
 })
