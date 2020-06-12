@@ -32,10 +32,14 @@ export default class ApiSerializer extends JSONAPISerializer {
       const relationshipKey = (this as any).keyForRelationship(key);
       
       const jsonRelationship = json.relationships[relationshipKey];
-      // Add meta.count field.
-      if ((this as any).isCollection(relationship)) {
-        jsonRelationship.meta = {
-          count: relationship.models.length
+      // External relationships have associations but their relationships are deleted
+      // from the hash in getHashForIncludedResource(), so this variable may be undefined.
+      if (jsonRelationship) {
+        // Add meta.count field.
+        if ((this as any).isCollection(relationship)) {
+          jsonRelationship.meta = {
+            count: relationship.models.length
+          }
         }
       }
     });
@@ -55,17 +59,20 @@ export default class ApiSerializer extends JSONAPISerializer {
   */
   getHashForIncludedResource(model: any) {
     // Delete attributes and relationships for external resources, and add the "external" flag.
-    const [hash, ] = super.getHashForIncludedResource(model);
+    const computed = super.getHashForIncludedResource(model);
+    const hash = computed[0];
+
     if (this.isExternal(model.modelName)) {
       hash.included.forEach((resource: any) => {
         delete resource.attributes;
         delete resource.relationships;
         resource.external = true;
-      })
+      });
+      // Also dont follow the inclusion chain, since this is external resource and 
+      // therefore this server can't know about related resources of this included resource.
+      computed[1] = [];
     }
-    // Also dont follow the inclusion chain, since this is external resource and 
-    // therefore this server can't know about related resources of this included resource.
-    return [hash, []];
+    return computed;
   }
   /**
    * Returns whether the relationship identified by given key is external.
