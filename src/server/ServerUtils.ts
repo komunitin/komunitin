@@ -24,7 +24,12 @@ export function filter(records: any, request: any) {
     .map(([name, value]) => ([(name.match(regex) as string[])[1], value]) as [string,string])
     .forEach(([name, value] ) => {
       const values = value.split(",");
-      records = records.filter((record: any) => values.includes(record[name]))
+      records = records.filter((record: any) => {
+        if (record.associations[name]) {
+          name = record.associations[name].identifier;
+        }
+        return values.includes(record[name])
+      })
     });
     
   return records;

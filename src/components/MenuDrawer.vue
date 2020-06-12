@@ -24,7 +24,12 @@
     <q-separator />
 
     <menu-item icon="home" :title="$t('home')"  />
-    <menu-item icon="account_balance_wallet" :title="$t('statement')" />
+    <menu-item 
+      id="menu-transactions" 
+      icon="account_balance_wallet"
+      :title="$t('transactions')" 
+      :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}/transactions`"
+    />
 
     <q-separator />
 

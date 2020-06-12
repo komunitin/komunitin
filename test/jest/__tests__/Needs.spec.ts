@@ -26,8 +26,10 @@ describe("Needs", () => {
     // Load.
     await wrapper.vm.$wait();
     expect(wrapper.findAll(NeedCard).length).toBe(15);
-    // Infinite loading doesn't get enabled since we already fetched all data.
+    // Infinite loading stops working immediately since we
+    // already fetched all data.
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
+
     wrapper.get(PageHeader).vm.$emit("search","repellendus");
     await wrapper.vm.$wait();
     // found 4 results!
