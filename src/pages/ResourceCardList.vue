@@ -3,7 +3,7 @@
     <page-header :search="true" :title="title" @search="fetchResources" />
     <div>
       <q-inner-loading :showing="isLoading" color="icon-dark" />
-      <q-infinite-scroll :disable="disableScrollLoad" @load="loadNext">
+      <q-infinite-scroll :disable="!autoload || disableScrollLoad" @load="loadNext">
         <slot v-if="!isLoading" :resources="resources">
           <div class="q-pa-md row q-col-gutter-md">
             <div
@@ -91,14 +91,33 @@ export default Vue.extend({
       default: ""
     },
     /**
-     * Extra options to add to the load action. Must be an object 
-     * that will be added to the payload parameter of the loadList
-     * vuex action.
+     * The sort parameter string when fetching resources.
      */
-    loadOptions: {
+    sort: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    /**
+     * Filter object. Each pair `key => value` will be added as a
+     * query parameter `filter[key]=value`.
+     */
+    filter: {
       type: Object,
       required: false,
       default: () => ({})
+    },
+    /**
+     * Enable autoloading feature. Default to true.
+     * 
+     * Useful if you want to temporaly deactivate autoloading while 
+     * performing operations between loading the resources and being 
+     * able to display them.
+     */
+    autoload: {
+      type: Boolean,
+      required: false,
+      default: true,
     }
   },
   data() {
@@ -113,6 +132,9 @@ export default Vue.extend({
       return this.$store.state.me.location;
     }
   },
+  // Note that even if this is marked async, Vue does not wait for the
+  // promise to be resolved to continue the rendering. It is done just
+  // to be able to fetch resources after locate.
   created: async function() {
     await this.$store.dispatch("locate");
     await this.fetchResources();
@@ -131,9 +153,11 @@ export default Vue.extend({
           search,
           include: this.include,
           group: this.code,
-          ...this.loadOptions
+          filter: this.filter,
+          sort: this.sort,
         });
         this.resources.push(...this.$store.getters[this.moduleName + "/currentList"]);
+        this.$emit("afterLoad");
       } finally {
         this.isLoading = false;
         // Delay one tick before enabling infinite-scroll loading in order to allow the
@@ -151,9 +175,11 @@ export default Vue.extend({
       if (this.$store.getters[this.moduleName + "/hasNext"]) {
         await this.$store.dispatch(this.moduleName + "/loadNext", {
           group: this.code,
-          include: this.include
+          include: this.include,
+          sort: this.sort,
         });
         this.resources.push(...this.$store.getters[ this.moduleName + "/currentList"]);
+        this.$emit("afterLoad");
       }
       done(!this.$store.getters[this.moduleName + "/hasNext"]);
     }

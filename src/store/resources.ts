@@ -1,14 +1,14 @@
+import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import KError, { KErrorCode } from "src/KError";
 import { Module, ActionContext, Commit, Dispatch } from "vuex";
 import {
-  ResourceObject,
   CollectionResponseInclude,
-  ResourceResponseInclude,
-  ResourceIdentifierObject,
   ErrorObject,
+  ResourceIdentifierObject,
+  ResourceObject,
+  ResourceResponseInclude,
   ExternalResourceObject
 } from "src/store/model";
-import Axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
-import KError, { KErrorCode } from "src/KError";
 
 export interface ResourcesState<T extends ResourceObject> {
   /**
@@ -88,7 +88,15 @@ export interface LoadNextPayload {
    * Optional comma-separated list of included relationship resources.
    */
   include?: string;
+  /**
+   * Sort the results using this field.
+   */
+  sort?: string;
 }
+
+type Getter = 
+  & ((id: string) => ResourceObject)
+  & ((conditions: Record<string, string>) => ResourceObject);
 
 /**
  * Flexible Vuex Module used to retrieve, store and provide resources fetched from the
@@ -144,6 +152,27 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   protected resourceEndpoint(code: string, groupCode: string) {
     return this.collectionEndpoint(groupCode) + `/${code}`;
+  }
+
+  /**
+   * Override this method to add getters for inverse relationships of this resource.
+   *
+   * If a resource of type A has a one-to-one relationship to this resource but
+   * this resource doesn't directly have the inverse relationship, by declaring
+   * the inverse relatinship the resource object will behave as if teh inverse 
+   * relationship was also present in the API. The loading of the related object,
+   * however, can't be done using the `include` parameter of load actions, but
+   * has to be done through a separate load action. It also works with external 
+   * relationships.
+   *
+   *
+   * @returns an object with the inverse relationship name as keys and, as values,
+   * a descriptor object with entries `module` for the vuex module name that manages
+   * the related resource and `field` for the name of the direct relationship from
+   * the related resource to this resource.
+   */
+  protected inverseRelationships(): Record<string, { module: string; field: string }> {
+    return {};
   }
 
   private static getHttpClient(baseURL?: string): AxiosInstance {
@@ -204,11 +233,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     await Promise.all(promises);
   }
 
+  /**
+   * Commits the results provided by AxiosResponse and then it eventually fetches
+   * the external relationships.
+   */
   protected async handleCollectionResponse(
     response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
-    { commit, dispatch }: ActionContext<ResourcesState<T>, S>,
+    context: ActionContext<ResourcesState<T>, S>,
     group: string
   ) {
+    const {commit, dispatch} = context;
     // Commit mutation(s).
     const result = response.data;
     commit("setList", result.data);
@@ -218,7 +252,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       await Resources.handleIncluded(result.included, group, commit, dispatch);
     }
   }
-
   /**
    * Handle error from the API.
    *
@@ -254,17 +287,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    *
    * @return the main ResourceObject
    */
-  protected relatedGetters(
-    rootGetters: Record<string, (id: string) => T>,
-    main: T
-  ): T {
+  protected relatedGetters(rootGetters: Record<string, Getter>, main: T): T {
+    // Copy object so we don't modify the object in state.
+    main = JSON.parse(JSON.stringify(main));
+    
+    // Add getters for relationships.
     if (main.relationships) {
       const relationships = Object.entries(main.relationships).filter(
         ([, value]) => value.data !== undefined
       );
       if (relationships.length > 0) {
-        // Copy object so we don't modify the object in state.
-        main = JSON.parse(JSON.stringify(main));
         relationships.forEach(([name, value]) => {
           if (Array.isArray(value.data)) {
             Object.defineProperty(main, name, {
@@ -286,6 +318,19 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         });
       }
     }
+    // Add getters for inverse relationships (only one-to-one).
+    const inverses = this.inverseRelationships();
+    Object.keys(inverses)
+      .filter(name => !name.includes("."))
+      .forEach(name => {
+        Object.defineProperty(main, name, {
+          get: function() {
+            return rootGetters[inverses[name].module + "/find"]({
+              [inverses[name].field]: main.id
+            });
+          }
+        });
+      });
     return main;
   }
 
@@ -304,11 +349,41 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
-      rootGetters: Record<string, (id: string) => T>
+      rootGetters: Record<string, Getter>
     ) => (id: string) =>
       state.resources[id]
         ? this.relatedGetters(rootGetters, state.resources[id])
         : null,
+    /**
+     * Gets the first resource meeting some criteria. Criteria is a map with 
+     * field => value. 
+     * 
+     * If field is an attribute, the value is matched with attribute value.
+     * If field is a relationship, the value is mathed against the related resource id.
+     */
+    find: (
+      state: ResourcesState<T>,
+      _getters: unknown,
+      _rootState: unknown,
+      rootGetters: Record<string, Getter>
+    ) => (conditions: Record<string, string>) => {
+      const target = Object.values(state.resources).find((resource: ResourceObject) =>
+        Object.entries(conditions).every(
+          ([field, value]) => {
+            if (resource.attributes?.[field]) {
+              return resource.attributes[field] == value;
+            }
+            // Check that the relationship is defined and is to-one.
+            else if (typeof resource.relationships?.[field].data == "object") {
+              return (resource.relationships[field].data as ResourceIdentifierObject).id == value
+            }
+            return false;
+          }
+        )
+      );
+      return target ? this.relatedGetters(rootGetters, target) : null;
+    },
+
     /**
      * Gets the current resource.
      */
@@ -316,7 +391,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
-      rootGetters: Record<string, (id: string) => T>
+      rootGetters: Record<string, Getter>
     ) =>
       state.current != null
         ? this.relatedGetters(rootGetters, state.resources[state.current])
@@ -328,7 +403,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
-      rootGetters: Record<string, (id: string) => T>
+      rootGetters: Record<string, Getter>
     ) =>
       state.currentList
         .map(id => state.resources[id])
@@ -415,9 +490,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       params.set("sort", payload.sort);
     }
 
-    const { localInclude } = this.splitIncludeParam(payload.include);
-    if (localInclude.length > 0) {
-      params.set("include", localInclude.join(","));
+    if (payload.include) {
+      params.set("include", payload.include);
     }
     let url = this.collectionEndpoint(payload.group);
     const query = params.toString();
@@ -425,7 +499,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     // Call API
     try {
       const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(url);
-      await this.handleCollectionResponse(response, context, payload.group);
+      await this.handleCollectionResponse(
+        response,
+        context,
+        payload.group
+      );
     } catch (error) {
       throw Resources.getKError(error);
     }
@@ -448,7 +526,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         );
       }
       const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
-      await this.handleCollectionResponse(response, context, payload.group);
+
+      await this.handleCollectionResponse(
+        response,
+        context,
+        payload.group,
+      );
     } catch (error) {
       throw Resources.getKError(error);
     }
@@ -461,10 +544,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadPayload
   ) {
     let url = this.resourceEndpoint(payload.code, payload.group);
-    const { localInclude } = this.splitIncludeParam(payload.include);
-    if (localInclude.length > 0) {
+    if (payload.include) {
       const params = new URLSearchParams();
-      params.set("include", localInclude.join(","));
+      params.set("include", payload.include);
       url += "?" + params.toString();
     }
     // Call API
@@ -485,10 +567,5 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       throw Resources.getKError(error);
     }
   }
-  protected splitIncludeParam(include?: string): { localInclude: string[] } {
-    const array = include ? include.split(",") : [];
-    return {
-      localInclude: array.filter(() => true)
-    };
-  }
+
 }
