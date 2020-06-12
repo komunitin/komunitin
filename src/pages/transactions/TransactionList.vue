@@ -6,6 +6,7 @@
     :title="$t('transactions')"
     module-name="transactions"
     include="currency,transfers,transfers.payer,transfers.payee"
+    sort="-updated"
     :filter="{ account: myAccount.id }"
     :autoload="autoload"
     @afterLoad="fetchMembers"

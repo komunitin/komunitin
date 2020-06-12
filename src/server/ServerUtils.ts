@@ -34,3 +34,26 @@ export function filter(records: any, request: any) {
     
   return records;
 }
+
+/**
+ * Implements the sorting for a JSON:API request.
+ */
+export function sort(records: any, request: any) {
+  let field: string = request.queryParams["sort"];
+  let ascending = true;
+  if (field.startsWith("-")) {
+    field = field.substr(1);
+    ascending = false;
+  }
+  records = records.sort((a:any, b:any) => {
+    let res = 0;
+    if (a[field] < b[field]) {
+      res = -1
+    } else if (a[field] > b[field]) {
+      res = 1;
+    }
+    if (!ascending) res = res * (-1)
+    return res;
+  })
+  return records;
+}
