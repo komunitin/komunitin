@@ -25,9 +25,9 @@ describe("Transactions", () => {
     wrapper.get("#menu-transactions").trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/JayceGloverDDS.Rolfson96/transactions");
-    const transactions = wrapper.get(TransactionList).findAll(MemberHeader)
     // Further wait to load members.
     await wrapper.vm.$wait();
+    const transactions = wrapper.get(TransactionList).findAll(MemberHeader)
     expect(transactions.length).toBe(20);
     const first = transactions.wrappers[0];
     expect(first.text()).toContain("today");
