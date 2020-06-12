@@ -11,7 +11,9 @@ import {
   Category,
   Currency,
   Account,  
-  Member
+  Member,
+  Transaction,
+  Transfer
 } from "src/store/model";
 // Import logged-in user module
 import me from "./me";
@@ -21,18 +23,14 @@ Vue.use(Vuex);
 
 // Build modules for Social API:
 const socialUrl = KOptions.apis.social;
-// `groups` resource does not follow the general pattern
-// as other resources which is encoded in base class.
+// `groups` resource does not follow the general pattern for endpoints.
 const groups = new (class extends Resources<Group, unknown> {
   collectionEndpoint = () => "/groups";
   resourceEndpoint = (code: string) => `/${code}`;
-  externalRelationships = () => ["currency"];
 })("groups", socialUrl);
 
 const contacts = new Resources<Contact, unknown>("contacts", socialUrl);
-const members = new (class extends Resources<Member, unknown> {
-  externalRelationships = () => ["account"];
-})("members", socialUrl);
+const members = new Resources<Member, unknown>("members", socialUrl);
 
 const offers = new Resources<Offer, unknown>("offers", socialUrl);
 const needs = new Resources<Need, unknown>("needs", socialUrl);
@@ -45,14 +43,37 @@ const users = new (class extends Resources<User, unknown> {
 // Build modules for Accounting API:
 const accountingUrl = KOptions.apis.accounting;
 // Build modules for Accounting API:
-// `currencies` resource does not follow the general pattern
-// as other resources which is encoded in base class.
+// `currencies` resource does not follow the general pattern for endpoints.
 const currencies = new (class extends Resources<Currency, unknown> {
   collectionEndpoint = () => "/currencies";
   resourceEndpoint = (code: string) => `/${code}/currency`;
+  /**
+   * Defines the inverse of the external relation group -> currency, so 
+   * actions to currencies module can be called with include=group.
+   */
+  inverseRelationships = () => ({
+    group: {
+      module: "groups",
+      field: "currency"
+    }
+  })
 })("currencies", accountingUrl);
 
-const accounts = new Resources<Account, unknown>("accounts", accountingUrl);
+const accounts = new (class extends Resources<Account, unknown> {
+  /**
+   * Defines the inverse of the external relation member -> account, so 
+   * actions to accounts module can be called with include=member.
+   */
+  inverseRelationships = () => ({
+    member: {
+      module: "members",
+      field: "account"
+    }
+  })
+})("accounts", accountingUrl);
+
+const transactions = new Resources<Transaction, unknown>("transactions", accountingUrl);
+const transfers = new Resources<Transfer, unknown>("transfers", accountingUrl);
 
 /*
  * If not building with SSR mode, you can
@@ -86,7 +107,9 @@ export default function(/* { ssrContext } */) {
       categories,
       // Accounting API resource modules.
       currencies,
-      accounts
+      accounts,
+      transactions,
+      transfers
     },
     // enable strict mode (adds overhead!) for dev mode only
     strict: process.env.DEV === "true"
