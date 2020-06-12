@@ -90,10 +90,6 @@ export interface LoadNextPayload {
   include?: string;
 }
 
-interface SplittedIncludes {
-  localInclude: string[];
-  inverseInclude: string[];
-}
 type Getter = 
   & ((id: string) => ResourceObject)
   & ((conditions: Record<string, string>) => ResourceObject);
@@ -155,18 +151,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   }
 
   /**
-   * Override this method to fetch inverse relationships to this resource.
+   * Override this method to add getters for inverse relationships of this resource.
    *
    * If a resource of type A has a one-to-one relationship to this resource but
    * this resource doesn't directly have the inverse relationship, by declaring
-   * the inverse relatinship it will behave as if teh inverse relationship was
-   * also present in the API.
+   * the inverse relatinship the resource object will behave as if teh inverse 
+   * relationship was also present in the API. The loading of the related object,
+   * however, can't be done using the `include` parameter of load actions, but
+   * has to be done through a separate load action. It also works with external 
+   * relationships.
    *
-   * When an inverse relationship declared here is required through the include
-   * field in a load action, the action will fetch and link the associated resources
-   * in a second request so they are accessible as if they were directly related.
-   *
-   * It also works with external relationships.
    *
    * @returns an object with the inverse relationship name as keys and, as values,
    * a descriptor object with entries `module` for the vuex module name that manages
@@ -237,14 +231,14 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
   /**
    * Commits the results provided by AxiosResponse and then it eventually fetches
-   * the external relationships and the inverse relationships.
+   * the external relationships.
    */
   protected async handleCollectionResponse(
     response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
-    { commit, dispatch }: ActionContext<ResourcesState<T>, S>,
-    group: string,
-    includeInverse: string[]
+    context: ActionContext<ResourcesState<T>, S>,
+    group: string
   ) {
+    const {commit, dispatch} = context;
     // Commit mutation(s).
     const result = response.data;
     commit("setList", result.data);
@@ -252,30 +246,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     // Commit included resources.
     if (result.included) {
       await Resources.handleIncluded(result.included, group, commit, dispatch);
-    }    
-
-    // Fetch inverse relationships.
-    const inverses = includeInverse.map((key: string) => {
-      const ids = result.data.map(resource => resource.id);
-      if (ids.length > 0) {
-        const descriptors = this.inverseRelationships();
-        const type = descriptors[key].module;
-        return (
-          dispatch(`${type}/loadList`),
-          {
-            group,
-            filter: {
-              [descriptors[key].field]: ids.join(",")
-            }
-          } as LoadListPayload,
-          { root: true }
-        );
-      }
-    });
-
-    await Promise.all(inverses);
+    }
   }
-
   /**
    * Handle error from the API.
    *
@@ -312,14 +284,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * @return the main ResourceObject
    */
   protected relatedGetters(rootGetters: Record<string, Getter>, main: T): T {
+    // Copy object so we don't modify the object in state.
+    main = JSON.parse(JSON.stringify(main));
+    
     // Add getters for relationships.
     if (main.relationships) {
       const relationships = Object.entries(main.relationships).filter(
         ([, value]) => value.data !== undefined
       );
       if (relationships.length > 0) {
-        // Copy object so we don't modify the object in state.
-        main = JSON.parse(JSON.stringify(main));
         relationships.forEach(([name, value]) => {
           if (Array.isArray(value.data)) {
             Object.defineProperty(main, name, {
@@ -343,15 +316,17 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     // Add getters for inverse relationships (only one-to-one).
     const inverses = this.inverseRelationships();
-    Object.keys(inverses).forEach(name => {
-      Object.defineProperty(main, name, {
-        get: function() {
-          return rootGetters[inverses[name].module + "/find"]({
-            [inverses[name].field]: main.id
-          });
-        }
+    Object.keys(inverses)
+      .filter(name => !name.includes("."))
+      .forEach(name => {
+        Object.defineProperty(main, name, {
+          get: function() {
+            return rootGetters[inverses[name].module + "/find"]({
+              [inverses[name].field]: main.id
+            });
+          }
+        });
       });
-    });
     return main;
   }
 
@@ -511,12 +486,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       params.set("sort", payload.sort);
     }
 
-    const {
-      localInclude,
-      inverseInclude
-    } = this.splitIncludeParam(payload.include);
-    if (localInclude.length > 0) {
-      params.set("include", localInclude.join(","));
+    if (payload.include) {
+      params.set("include", payload.include);
     }
     let url = this.collectionEndpoint(payload.group);
     const query = params.toString();
@@ -527,8 +498,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       await this.handleCollectionResponse(
         response,
         context,
-        payload.group,
-        inverseInclude
+        payload.group
       );
     } catch (error) {
       throw Resources.getKError(error);
@@ -553,14 +523,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       }
       const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
 
-      const { inverseInclude } = this.splitIncludeParam(
-        payload.include
-      );
       await this.handleCollectionResponse(
         response,
         context,
         payload.group,
-        inverseInclude
       );
     } catch (error) {
       throw Resources.getKError(error);
@@ -574,10 +540,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadPayload
   ) {
     let url = this.resourceEndpoint(payload.code, payload.group);
-    const { localInclude } = this.splitIncludeParam(payload.include);
-    if (localInclude.length > 0) {
+    if (payload.include) {
       const params = new URLSearchParams();
-      params.set("include", localInclude.join(","));
+      params.set("include", payload.include);
       url += "?" + params.toString();
     }
     // Call API
@@ -599,14 +564,4 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
   }
 
-  protected splitIncludeParam(include?: string): SplittedIncludes {
-    const array = include ? include.split(",") : [];
-    const inverse = Object.keys(this.inverseRelationships());
-    return {
-      localInclude: array.filter(
-        field => !inverse.includes(field)
-      ),
-      inverseInclude: array.filter(field => inverse.includes(field))
-    };
-  }
 }

@@ -32,7 +32,8 @@ export default {
           ]) || relationshipKey == "transfers"
         );
       },
-    })
+    }),
+    transfer: ApiSerializer
   },
   models: {
     currency: Model,
@@ -116,10 +117,10 @@ export default {
 
     // Generate 50 transactions between the first account and the following 5 accounts.
     const accounts = server.schema.accounts.all();
-    const account = accounts[0];
+    const account = accounts.models[0];
     const currency = account.currency;
     for (let i = 1; i < 6; i++) {
-      const other = accounts[i];
+      const other = accounts.models[i];
       const payments = server.createList("transfer", 5, {
         payer: account,
         payee: other
@@ -162,14 +163,16 @@ export default {
       }
     );
     // Account transactions.
-    server.get(`${urlAccounting}/:currency/accounts/:code/transactions`,
+    server.get(`${urlAccounting}/:currency/transactions`,
       (schema: any, request) => {
-        const account = schema.accounts.findBy({
-          code: request.params.code
-        })
-        return schema.transactions.where(
-          (transaction: any) => (transaction.transfers[0].payer == account || transaction.transfers[0].payee == account)
-        );
+        if (request.queryParams["filter[account]"]) {
+          const accountId = request.queryParams["filter[account]"];
+          const transfers = schema.transfers.where((transfer: any) => transfer.payerId == accountId || transfer.payeeId == accountId);
+          const ids = transfers.models.map((model: any) => model.id);
+          return schema.transactions.where((transaction: any) => ids.includes(transaction.transferIds[0]))
+        } else {
+          throw new Error("Unexpected request!");
+        }
       }
     );
   }
