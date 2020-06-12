@@ -4,7 +4,7 @@ import { Model, Factory, Server, ModelInstance, belongsTo, hasMany } from "mirag
 import faker from "faker";
 import KOptions from "../komunitin.json";
 import ApiSerializer from "./ApiSerializer";
-import { filter } from "./ServerUtils";
+import { filter, sort } from "./ServerUtils";
 
 const urlAccounting = KOptions.apis.accounting;
 
@@ -166,10 +166,13 @@ export default {
     server.get(`${urlAccounting}/:currency/transactions`,
       (schema: any, request) => {
         if (request.queryParams["filter[account]"]) {
+          // Custom filtering.
           const accountId = request.queryParams["filter[account]"];
           const transfers = schema.transfers.where((transfer: any) => transfer.payerId == accountId || transfer.payeeId == accountId);
           const ids = transfers.models.map((model: any) => model.id);
-          return schema.transactions.where((transaction: any) => ids.includes(transaction.transferIds[0]))
+          let result = schema.transactions.where((transaction: any) => ids.includes(transaction.transferIds[0]));
+          result = sort(result, request)
+          return result;
         } else {
           throw new Error("Unexpected request!");
         }

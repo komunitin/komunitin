@@ -91,6 +91,14 @@ export default Vue.extend({
       default: ""
     },
     /**
+     * The sort parameter string when fetching resources.
+     */
+    sort: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    /**
      * Filter object. Each pair `key => value` will be added as a
      * query parameter `filter[key]=value`.
      */
@@ -146,6 +154,7 @@ export default Vue.extend({
           include: this.include,
           group: this.code,
           filter: this.filter,
+          sort: this.sort,
         });
         this.resources.push(...this.$store.getters[this.moduleName + "/currentList"]);
         this.$emit("afterLoad");
@@ -166,7 +175,8 @@ export default Vue.extend({
       if (this.$store.getters[this.moduleName + "/hasNext"]) {
         await this.$store.dispatch(this.moduleName + "/loadNext", {
           group: this.code,
-          include: this.include
+          include: this.include,
+          sort: this.sort,
         });
         this.resources.push(...this.$store.getters[ this.moduleName + "/currentList"]);
         this.$emit("afterLoad");

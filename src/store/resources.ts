@@ -88,6 +88,10 @@ export interface LoadNextPayload {
    * Optional comma-separated list of included relationship resources.
    */
   include?: string;
+  /**
+   * Sort the results using this field.
+   */
+  sort?: string;
 }
 
 type Getter = 
