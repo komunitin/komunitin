@@ -55,5 +55,6 @@
   "logout": "Sortir",
   "reply": "Respon",
   "checkThisNeed": "Fixa't en aquesta necessitat de {member}",
-  "limitAmount": "Límit {amount}"
+  "limitAmount": "Límit {amount}",
+  "pending": "Pendent"
 }
