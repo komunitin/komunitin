@@ -55,5 +55,6 @@
   "logout": "Log out",
   "reply": "Reply",
   "checkThisNeed": "Check this need from {member}",
-  "limitAmount": "Limit {amount}"
+  "limitAmount": "Limit {amount}",
+  "pending": "Pending"
 }
