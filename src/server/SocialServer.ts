@@ -281,32 +281,34 @@ export default {
       // Create group contacts.
       const contacts = server.createList("contact", 4);
       group.update({ contacts });
-      // Only add data for the first two groups. Otherwise we spend a lot of
+      // Only add data for the first group. Otherwise we spend a lot of
       // time in this function.
-      if (i < 2) {
+      if (i == 0) {
         // Create categories.
         const categories = server.createList("category", 5, { group } as any);
         // Create group members
-        const members = server.createList("member", i == 0 ? 30 : 5, { group } as any);
+        const members = server.createList("member", 30, { group } as any);
         for (let j = 0; j < members.length; j++) {
           const member = members[j];
           // Create member contacts.
           const contacts = server.createList("contact", 4);
           member.update({ contacts });
-          // Create member offers.
-          const category = categories[j % categories.length];
-          server.createList("offer", 3, {
-            member,
-            category,
-            group
-          } as any);
-          // Create member needs only for some members.
-          if (j % 4 == 0) {
-            server.createList("need", (j % 3) + 1, {
+          // Create member offers and needs only for the first 10 members.
+          if (j < 10) {
+            const category = categories[j % categories.length];
+            server.createList("offer", 3, {
               member,
-              category: categories[j % categories.length],
+              category,
               group
             } as any);
+            // Create member needs only for some members.
+            if (j % 3 == 0) {
+              server.createList("need", (j % 3) + 1, {
+                member,
+                category: categories[j % categories.length],
+                group
+              } as any);
+            }
           }
         }
       }

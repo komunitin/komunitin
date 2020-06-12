@@ -31,9 +31,9 @@ describe("Offers", () => {
     // with the tech layer, just call the trigger() function in QInfiniteScroll.
     (wrapper.find(QInfiniteScroll).vm as QInfiniteScroll).trigger();
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(OfferCard).length).toBe(40);
-    // The QInfiniteScroll is still working because we haven't fetched all data yet.
-    expect((wrapper.find(QInfiniteScroll).vm as any).working).toBe(true);
+    expect(wrapper.findAll(OfferCard).length).toBe(30);
+    // The QInfiniteScroll stopped.
+    expect((wrapper.find(QInfiniteScroll).vm as any).working).toBe(false);
   });
 
   it ("searches offers", async () => {
@@ -45,7 +45,7 @@ describe("Offers", () => {
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     // found 3 results!
-    expect(wrapper.findAll(OfferCard).length).toBe(6);
+    expect(wrapper.findAll(OfferCard).length).toBe(3);
   })
 
 });
