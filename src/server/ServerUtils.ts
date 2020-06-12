@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/**
- * Implements the filtering for a JSON:API request.
- * 
- * @param records 
- * @param request 
- */
-export function filter(records: any, request: any) {
+export function search(records: any, request: any) {
   // Poor man search.
   if (request.queryParams["filter[search]"]) {
     const fragment = request.queryParams["filter[search]"];
@@ -16,6 +10,17 @@ export function filter(records: any, request: any) {
       )
     );
   }
+  return records;
+}
+
+/**
+ * Implements the filtering for a JSON:API request.
+ * 
+ * @param records 
+ * @param request 
+ */
+export function filter(records: any, request: any) {
+  records = search(records, request);
   // Filter by field values
   const regex = /filter\[(.+)\]/;
   Object.entries(request.queryParams)
