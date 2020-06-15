@@ -33,6 +33,10 @@ RUN npm run build
 FROM nginx:stable-alpine
 # Copy the built application from Build stage to nginx HTML folder.
 COPY --from=komunitin-app-build /app/dist/pwa /usr/share/nginx/html
+# Configure nginx so that load/refresh works with virtual routes
+RUN rm /etc/nginx/conf.d/default.conf
+COPY docker/localhost.conf /etc/nginx/conf.d/
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 
