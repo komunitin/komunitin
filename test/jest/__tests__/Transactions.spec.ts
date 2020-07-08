@@ -41,9 +41,9 @@ describe("Transactions", () => {
     expect(fifth.text()).toContain("-61.51 $");
     expect(fifth.text()).toContain("Integrated");
     // Search
-    wrapper.get(PageHeader).vm.$emit("search", "configurable");
+    wrapper.get(PageHeader).vm.$emit("search", "inter");
     await wrapper.vm.$wait();
     // Check result!
-    expect(wrapper.get(TransactionList).findAll(MemberHeader).length).toBe(2);
+    expect(wrapper.get(TransactionList).findAll(MemberHeader).length).toBe(4);
   });
 })
