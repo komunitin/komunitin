@@ -12,7 +12,6 @@ import {
   Currency,
   Account,  
   Member,
-  Transaction,
   Transfer
 } from "src/store/model";
 // Import logged-in user module
@@ -72,7 +71,6 @@ const accounts = new (class extends Resources<Account, unknown> {
   })
 })("accounts", accountingUrl);
 
-const transactions = new Resources<Transaction, unknown>("transactions", accountingUrl);
 const transfers = new Resources<Transfer, unknown>("transfers", accountingUrl);
 
 /*
@@ -108,7 +106,6 @@ export default function(/* { ssrContext } */) {
       // Accounting API resource modules.
       currencies,
       accounts,
-      transactions,
       transfers
     },
     // enable strict mode (adds overhead!) for dev mode only
