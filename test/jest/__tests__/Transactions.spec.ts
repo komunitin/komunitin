@@ -32,14 +32,14 @@ describe("Transactions", () => {
     const first = transactions.wrappers[0];
     expect(first.text()).toContain("today");
     expect(first.text()).toContain("Antonio");
-    expect(first.text()).toContain("47.92 $");
-    expect(first.text()).toContain("Operative");
+    expect(first.text()).toContain("86.06 $");
+    expect(first.text()).toContain("Front");
 
     const fifth = transactions.wrappers[6];
     expect(fifth.text()).toContain("Pending");
     expect(fifth.text()).toContain("Hermina");
-    expect(fifth.text()).toContain("-40.47 $");
-    expect(fifth.text()).toContain("Inverse");
+    expect(fifth.text()).toContain("-61.51 $");
+    expect(fifth.text()).toContain("Integrated");
     // Search
     wrapper.get(PageHeader).vm.$emit("search", "configurable");
     await wrapper.vm.$wait();
