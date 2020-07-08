@@ -39,15 +39,12 @@ export default {
     currency: Model,
     account: Model.extend({
       currency: belongsTo(),
-      transactions: hasMany(),
-    }),
-    transaction: Model.extend({
-      currency: belongsTo(),
       transfers: hasMany(),
     }),
     transfer: Model.extend({
-      payer: belongsTo("account"),
-      payee: belongsTo("account"),
+      payer: belongsTo("account", {inverse: null}),
+      payee: belongsTo("account", {inverse: null}),
+      currency: belongsTo(),
     })
   },
   factories: {
@@ -72,7 +69,9 @@ export default {
       creditLimit: -1,
       debitLimit: 5000000
     }),
-    transaction: Factory.extend({
+    transfer: Factory.extend({
+      amount: () => faker.random.number({min: 0.1*10000, max: 100*10000, precision: 100}),
+      meta: () => faker.company.catchPhrase(),
       state: (i: number) => (i < 3 ? "pending" : (i % 8 == 0) ? "rejected" : "committed"),
       created: (i: number) => faker.date.recent(i % 5).toJSON(),
       updated() {
@@ -82,10 +81,6 @@ export default {
         return (this as any).state == "pending" ? faker.date.future().toJSON() : undefined;
       }
     }),
-    transfer: Factory.extend({
-      amount: () => faker.random.number({min: 0.1*10000, max: 100*10000, precision: 100}),
-      meta: () => faker.company.catchPhrase(),
-    })
   },
   /**
    * Needs to be called after SocialServer.seeds.
@@ -121,22 +116,16 @@ export default {
     const currency = account.currency;
     for (let i = 1; i < 6; i++) {
       const other = accounts.models[i];
-      const payments = server.createList("transfer", 2, {
+      server.createList("transfer", 2, {
         payer: account,
-        payee: other
-      });
-      payments.forEach((transfer: ModelInstance) => server.create("transaction", {
-        transfers: [transfer],
+        payee: other,
         currency
-      }));
-      const charges = server.createList("transfer", 3, {
+      });
+      server.createList("transfer", 3, {
         payer: other,
-        payee: account
-      });
-      charges.forEach((transfer: ModelInstance) => server.create("transaction", {
-        transfers: [transfer],
+        payee: account,
         currency
-      }));
+      });
     }
   },
   routes(server: Server) {
@@ -163,7 +152,7 @@ export default {
       }
     );
     // Account transactions.
-    server.get(`${urlAccounting}/:currency/transactions`,
+    server.get(`${urlAccounting}/:currency/transfers`,
       (schema: any, request) => {
         if (request.queryParams["filter[account]"]) {
           // Custom filtering.
@@ -171,11 +160,8 @@ export default {
           let transfers = schema.transfers.where((transfer: any) => transfer.payerId == accountId || transfer.payeeId == accountId);
           // Apply search to transfer objects instead of transaction objects.
           transfers = search(transfers, request);
-
-          const ids = transfers.models.map((model: any) => model.id);
-          let result = schema.transactions.where((transaction: any) => ids.includes(transaction.transferIds[0]));
-          result = sort(result, request);
-          return result;
+          transfers = sort(transfers, request);
+          return transfers;
         } else {
           throw new Error("Unexpected request!");
         }
