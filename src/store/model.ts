@@ -294,27 +294,19 @@ export interface Account extends ResourceObject {
   }
 }
 
-export interface Transaction extends ResourceObject {
+export interface Transfer extends ResourceObject {
   attributes: {
+    amount: number,
+    meta: string,
     state: "new" | "pending" | "accepted" | "committed" | "rejected" | "deleted";
     expires?: string;
     created: string;
     updated: string;
   },
   relationships: {
-    currency: RelatedResource,
-    transfers: RelatedLinkedCollection
-  }
-}
-
-export interface Transfer extends ResourceObject {
-  attributes: {
-    amount: number,
-    meta: string
-  },
-  relationships: {
     payer: RelatedResource,
-    payee: RelatedResource
+    payee: RelatedResource,
+    currency: RelatedResource,
   }
 }
 

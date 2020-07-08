@@ -4,8 +4,8 @@
     v-slot="slotProps"
     :code="code"
     :title="$t('transactions')"
-    module-name="transactions"
-    include="currency,transfers,transfers.payer,transfers.payee"
+    module-name="transfers"
+    include="currency,payer,payee"
     sort="-updated"
     :filter="{ account: myAccount.id }"
     :autoload="autoload"
@@ -13,30 +13,30 @@
   >
     <q-list v-if="slotProps.resources" padding>
         <member-header
-          v-for="transaction of loadedTransactions(slotProps.resources)"
-          :key="transaction.id"
-          :member="otherMember(transaction)"
+          v-for="transfer of loadedTransfers(slotProps.resources)"
+          :key="transfer.id"
+          :member="otherMember(transfer)"
           clickable
-          :class="transaction.attributes.state"
+          :class="transfer.attributes.state"
         >
           <template #caption>
-            {{ transfer(transaction).attributes.meta }}
+            {{ transfer.attributes.meta }}
           </template>
           <template #side>
             <div class="column items-end">
               <q-item-label caption class="col">
-                <span v-if="transaction.attributes.state == 'pending'">
+                <span v-if="transfer.attributes.state == 'pending'">
                   {{ $t("pending") }}
                 </span>
                 <span v-else>
-                  {{ transaction.attributes.updated | date }}
+                  {{ transfer.attributes.updated | date }}
                 </span>
               </q-item-label>
               <div
                 class="col currency text-h6"
-                :class="signedAmount(transaction) >= 0 ? 'positive' : 'negative'"
+                :class="signedAmount(transfer) >= 0 ? 'positive' : 'negative'"
               >
-                {{ $currency(signedAmount(transaction), transaction.currency) }}
+                {{ $currency(signedAmount(transfer), transfer.currency) }}
               </div>
             </div>
           </template>
@@ -50,13 +50,10 @@ import { mapGetters } from "vuex";
 import MemberHeader from "../../components/MemberHeader.vue";
 import FormatCurrency from "../../plugins/FormatCurrency";
 import ResourceCardList from "../ResourceCardList.vue";
-import { Transaction, Transfer, Member } from "../../store/model";
+import { Transfer, Member } from "../../store/model";
 
 Vue.use(FormatCurrency);
 
-interface ExtendedTransaction extends Transaction {
-  transfers: ExtendedTransfer[];
-}
 interface ExtendedTransfer extends Transfer {
   payer: ExtendedAccount;
   payee: ExtendedAccount;
@@ -85,16 +82,16 @@ export default Vue.extend({
   },
   data: () => ({
     /**
-     * A dictionary transaction id => true, for transactions such that the
+     * A dictionary transfer id => true, for transfers such that the
      * related member is aleready laoded.
      * 
      * See hasMember() method for further details.
      */
-    transactionLoaded: {} as Record<string, boolean>,
+    transferLoaded: {} as Record<string, boolean>,
     /**
      * Whether to activate the autoloading feature of ResourceCardList.
      * 
-     * We use this variable to disable autoloading while fetching transaction members.
+     * We use this variable to disable autoloading while fetching transfer members.
      */
     autoload: true,
   }),
@@ -102,34 +99,27 @@ export default Vue.extend({
     ...mapGetters(["myAccount"])
   },
   methods: {
-    transfer(transaction: ExtendedTransaction): ExtendedTransfer {
-      return transaction.transfers[0];
-    },
-    otherMember(transaction: ExtendedTransaction): Member {
-      const payer = this.transfer(transaction).payer;
-      const payee = this.transfer(transaction).payee;
+    otherMember(transfer: ExtendedTransfer): Member {
+      const payer = transfer.payer;
+      const payee = transfer.payee;
       // We can't directly compare object references because they're not the same.
       const other = this.myAccount.id == payer.id ? payee : payer;
       return other.member;
     },
-    signedAmount(transaction: ExtendedTransaction): number {
-      const transfer = this.transfer(transaction);
-      return transfer.payer.id == this.myAccount.id
-        ? -transfer.attributes.amount
-        : transfer.attributes.amount;
+    signedAmount(transfer: ExtendedTransfer): number {
+      return (transfer.payer.id == this.myAccount.id ? -1 : 1) * transfer.attributes.amount;
     },
     /**
-     * Fetch the member objects associated to the just loaded transactions.
+     * Fetch the member objects associated to the just loaded transfers.
      * 
      * Note that members can't be loaded using the regular inclusion pattern of JSON:API 
      * because the relationship account=>member is inverse.
      */
     async fetchMembers() {
       this.autoload = false;
-      const transactions = this.$store.getters["transactions/currentList"];
+      const transfers = this.$store.getters["transfers/currentList"];
       const accountIds = new Set<string>();
-      transactions
-        .map((transaction: ExtendedTransaction) => this.transfer(transaction))
+      transfers
         .forEach((transfer: ExtendedTransfer) => {
           accountIds.add(transfer.payer.id);
           accountIds.add(transfer.payee.id);
@@ -140,31 +130,22 @@ export default Vue.extend({
           account: Array.from(accountIds).join(",")
         }
       });
-      transactions.forEach((transaction: ExtendedTransaction) => {
-        this.transactionLoaded[transaction.id] = true
+      transfers.forEach((transfer: ExtendedTransfer) => {
+        this.transferLoaded[transfer.id] = true
       });
       this.autoload = true;
     },
     /**
-     * Filter the transaction list to those that are fully loaded.
+     * Filter the transfer list to those that are fully loaded.
      * 
-     * Use this function instead of `transaction.payer.member !== null` since the latter 
+     * Use this function instead of `transfer.payer.member !== null` since the latter 
      * is not reactive. Indeed, the link to associated resources are provided through 
      * lazy getters, so there are not "plain data" and hence can't be handled by the
-     * reactive library. This function, instead, uses the plain dictionary this.transactionLoaded
+     * reactive library. This function, instead, uses the plain dictionary this.transferLoaded
      * which does have the reactive properties.
      */
-    loadedTransactions(transactions: ExtendedTransaction[]): ExtendedTransaction[] {
-      const loaded = transactions.filter(transaction => this.transactionLoaded[transaction.id]);
-      loaded.forEach(transaction => {
-        if (this.transfer(transaction).payer.member == null) {
-          console.error("Invalid payer state!");
-        }
-        if (this.transfer(transaction).payee.member == null) {
-          console.log("Invalid payee state!");
-        }
-      })
-      return loaded;
+    loadedTransfers(transfers: ExtendedTransfer[]): ExtendedTransfer[] {
+      return transfers.filter(transfer => this.transferLoaded[transfer.id]);
     }
   }
 });
