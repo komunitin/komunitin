@@ -1,5 +1,5 @@
 import Vue from "vue";
-import { createLocalVue, mount, shallowMount, Wrapper } from "@vue/test-utils";
+import { createLocalVue, mount, Wrapper } from "@vue/test-utils";
 import Vuex, { Store } from "vuex";
 
 import {
