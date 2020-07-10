@@ -1,7 +1,8 @@
 <template>
   <div>
     <page-header :search="true" :title="title" @search="fetchResources" />
-    <div>
+    <q-page-container>
+      <q-page>
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <q-infinite-scroll :disable="!autoload || disableScrollLoad" @load="loadNext">
         <slot v-if="!isLoading" :resources="resources">
@@ -24,7 +25,8 @@
           </div>
         </template>
       </q-infinite-scroll>
-    </div>
+    </q-page>
+  </q-page-container>
   </div>
 </template>
 
