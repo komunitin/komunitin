@@ -28,29 +28,9 @@ import MenuDrawer from "../components/MenuDrawer.vue";
 
 /**
  * Main app layout.
- *
- * Pages should use this component as its top-level wrapper:
- * ```
- * <layout>
- *   <!-- Page content -->
- * </layout>
- * ```
- * Pages may overwrite the default toolbar by:
- * ```
- * <layout>
- *   <template v-slot:toolbar>
- *     <!-- Define here your custom toolbar -->
- *   </template>
- * </layout>
- * ```
- * Or just the right toolbar buttons:
- * ```
- * <layout>
- *   <template v-slot:buttons>
- *     <!-- Define here your custom right toolbar buttons -->
- *   </template>
- * </layout>
- * ```
+ * 
+ * Contains the left drawer but not the header, which should be defined by each page
+ * using the PageHeader component.
  */
 export default Vue.extend({
   name: "Layout",
