@@ -10,10 +10,6 @@ import MemberList from "../../../src/pages/members/MemberList.vue";
 // See also Offers.spec.ts
 describe("Members", () => {
   let wrapper: Wrapper<Vue>;
-  // This is necessary to stop QInfiniteScroll continuously trigger load content.
-  jest
-    .spyOn(document.body, "scrollHeight", "get")
-    .mockImplementation(() => 1500);
 
   beforeAll(async () => {
     wrapper = await mountComponent(App, { login: true });
