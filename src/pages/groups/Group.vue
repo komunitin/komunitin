@@ -23,8 +23,8 @@
         />
       </template>
     </page-header>
-
-    <div class="q-pa-md">
+    <q-page-container>
+      <q-page class="q-pa-md">
       <!-- Loading spinner -->
       <q-inner-loading :showing="isLoading" color="icon-dark" />
       <!-- Group view -->
@@ -111,8 +111,9 @@
           <social-network-list type="contact" :contacts="group.contacts" />
         </div>
       </div>
+      </q-page>
+  </q-page-container>
     </div>
-  </div>
 </template>
 
 <script lang="ts">

@@ -101,7 +101,10 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
   // Mock $q.notify since it throws an error in testing environment.
   // "Cannot read property 'iconSet' of undefined".
   wrapper.vm.$q.notify = jest.fn();
-  
+
+  // Set a value on scrollHeight property so QInfiniteScrolling don't load all resources.
+  Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {configurable: true, value: 1500});
+
   return wrapper;
 }
 
