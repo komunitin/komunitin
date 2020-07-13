@@ -5,22 +5,21 @@ import TransactionList from "../../../src/pages/transactions/TransactionList.vue
 import MemberHeader from "../../../src/components/MemberHeader.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 
-
 describe("Transactions", () => {
   let wrapper: Wrapper<Vue>;
-  // This is necessary to stop QInfiniteScroll continuously trigger load content.
-  jest
-    .spyOn(document.body, "scrollHeight", "get")
-    .mockImplementation(() => 1500);
-
-  beforeAll(async () => {
+  
+  beforeAll(async () => {  
     wrapper = await mountComponent(App, { login: true });
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => {
+    wrapper.destroy();
+  });
 
+  
   it("Loads and searches tansactions", async () => {
     // Wait for the login redirect.
     await wrapper.vm.$wait();
+
     // Click members link
     wrapper.get("#menu-transactions").trigger("click");
     await wrapper.vm.$wait();

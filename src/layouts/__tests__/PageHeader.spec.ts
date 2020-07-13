@@ -9,13 +9,14 @@ import {
   QToolbarTitle,
   QInput,
   QHeader,
-  QIcon
+  QIcon,
+  QLayout
 } from "quasar";
 import PageHeader from "../PageHeader.vue";
 
 describe("PageHeader", () => {
   let wrapper: Wrapper<Vue>;
-  let store: Store<{ ui: { [key: string]: boolean }}>;
+  let store: Store<{ ui: { [key: string]: boolean } }>;
   let toogleDrawer: () => void;
 
   // We use createLocalVue in order not to pollute the global scope.
@@ -29,7 +30,8 @@ describe("PageHeader", () => {
       QToolbarTitle,
       QInput,
       QHeader,
-      QIcon
+      QIcon,
+      QLayout
     }
   });
 
@@ -40,7 +42,7 @@ describe("PageHeader", () => {
         ui: {
           drawerPersistent: true,
           drawerState: true,
-          drawerExists: true,
+          drawerExists: true
         }
       }),
       getters: {
@@ -53,7 +55,17 @@ describe("PageHeader", () => {
       },
       actions: { toogleDrawer }
     });
+    const layout = mount(QLayout, {
+      propsData: {
+        view: "LHH LpR LfR"
+      },
+      localVue
+    });
+
     wrapper = mount(PageHeader, {
+      provide: {
+        layout: layout.vm
+      },
       propsData: {
         title: "Test title",
         search: true

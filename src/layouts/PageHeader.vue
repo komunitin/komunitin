@@ -1,5 +1,5 @@
 <template>
-  <div id="header" class="column justify-center bg-primary">
+  <q-header id="header" class="column justify-center bg-primary">
     <q-toolbar
       class="text-onprimary"
       :class="noButton ? 'no-button' : ''"
@@ -69,7 +69,7 @@
       <!-- slot for right buttons -->
       <slot name="buttons"></slot>
     </q-toolbar>
-  </div>
+  </q-header>
 </template>
 <script lang="ts">
 import Vue from "vue";

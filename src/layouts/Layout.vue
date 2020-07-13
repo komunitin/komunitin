@@ -5,7 +5,7 @@
       class="q-mx-auto bg-surface"
       :class="drawerExists ? 'with-drawer' : 'without-drawer'"
     >
-      <q-layout id="layout" view="lhh lpr lfr">
+      <q-layout id="layout" view="LHH LpR LfR" container>
         <q-drawer
           v-if="drawerExists"
           v-model="drawerState"
@@ -16,9 +16,7 @@
         >
           <menu-drawer />
         </q-drawer>
-        <q-page-container>
-          <router-view/>
-        </q-page-container>
+        <router-view/>
       </q-layout>
     </div>
   </div>
@@ -30,29 +28,9 @@ import MenuDrawer from "../components/MenuDrawer.vue";
 
 /**
  * Main app layout.
- *
- * Pages should use this component as its top-level wrapper:
- * ```
- * <layout>
- *   <!-- Page content -->
- * </layout>
- * ```
- * Pages may overwrite the default toolbar by:
- * ```
- * <layout>
- *   <template v-slot:toolbar>
- *     <!-- Define here your custom toolbar -->
- *   </template>
- * </layout>
- * ```
- * Or just the right toolbar buttons:
- * ```
- * <layout>
- *   <template v-slot:buttons>
- *     <!-- Define here your custom right toolbar buttons -->
- *   </template>
- * </layout>
- * ```
+ * 
+ * Contains the left drawer but not the header, which should be defined by each page
+ * using the PageHeader component.
  */
 export default Vue.extend({
   name: "Layout",
@@ -86,12 +64,13 @@ export default Vue.extend({
   // The 18px is an estimation of the scroll-bar width.
   @media (min-width: $width + 18px) {
     width: $width;
-    margin-top: 48px;
-    margin-bottom: 48px;
+    height: calc(100vh - 24px);
+    margin-top: 24px;
   }
 }
 #container {
   width: 100%;
+  height: 100vh;
   &.with-drawer {
     @include wrap-main-container(1280px);
   }
