@@ -9,9 +9,6 @@ import ApiSerializer from "src/server/ApiSerializer";
 
 describe("Offers", () => {
   let wrapper: Wrapper<Vue>;
-  // This is necessary to stop QInfiniteScroll continuously trigger load content.
-  jest.spyOn(document.body, "scrollHeight", "get").mockImplementation(() => 1500);
-
 
   beforeAll(async () => {
     wrapper = await mountComponent(App);
