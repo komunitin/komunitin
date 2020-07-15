@@ -78,6 +78,14 @@ function vueWarnHandler(message: string, vm: Vue, trace: string) {
  */
 if (window !== undefined) {
   window.addEventListener('error', function(event: ErrorEvent) {
+    // This error is thrown but is harmless, so we can safely ignore it.
+    // In fact, it is mandatory that we ignore it since otherwise we enter 
+    // in an infinite loop due to the notification widget.
+    if (event.message.includes("ResizeObserver loop limit exceeded")) {
+      // TODO: Maybe remove this warning in production.
+      console.warn(event.message);
+      return;
+    }
     try {
       let kerror: KError;
       if (event.error instanceof KError) {

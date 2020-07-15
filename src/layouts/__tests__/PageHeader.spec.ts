@@ -10,7 +10,8 @@ import {
   QInput,
   QHeader,
   QIcon,
-  QLayout
+  QLayout,
+  QScrollObserver
 } from "quasar";
 import PageHeader from "../PageHeader.vue";
 
@@ -31,7 +32,8 @@ describe("PageHeader", () => {
       QInput,
       QHeader,
       QIcon,
-      QLayout
+      QLayout,
+      QScrollObserver
     }
   });
 
@@ -43,15 +45,20 @@ describe("PageHeader", () => {
           drawerPersistent: true,
           drawerState: true,
           drawerExists: true
+        },
+        stub: {
+          myAccount: undefined,
         }
       }),
       getters: {
-        drawerExists: state => state.ui.drawerExists
+        drawerExists: state => state.ui.drawerExists,
+        myAccount: state => state.stub.myAccount,
       },
       mutations: {
         drawerPersistent: (state, v) => (state.ui.drawerPersistent = v),
         drawerState: (state, v) => (state.ui.drawerState = v),
-        drawerExists: (state, v) => (state.ui.drawerExists = v)
+        drawerExists: (state, v) => (state.ui.drawerExists = v),
+        myAccount: (state, v) => (state.stub.myAccount = v),
       },
       actions: { toogleDrawer }
     });
@@ -68,11 +75,13 @@ describe("PageHeader", () => {
       },
       propsData: {
         title: "Test title",
-        search: true
+        search: true,
+        balance: true
       },
       // Avoid error with translations.
       mocks: {
-        $t: (key: string) => key
+        $t: (key: string) => key,
+        $n: (n: number) => n + '',
       },
       store,
       localVue,
@@ -159,5 +168,37 @@ describe("PageHeader", () => {
     expect(
       (wrapper.emitted("search-input") as Array<Array<string>>)[1]
     ).toEqual([""]);
+  });
+  it("shows the balance", async () => {
+    const account = {
+      attributes: {
+        balance: 100
+      },
+      currency: {
+        attributes: {
+          scale: 2,
+          decimals: 2,
+          symbol: "$"
+        },
+      }
+    }
+    store.commit("myAccount", account);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.text()).toContain("balance");
+    expect(wrapper.text()).toContain("1 $");
+    expect(wrapper.element.style.height).toBe("170px");
+    const scroll = wrapper.get(QScrollObserver);
+    scroll.vm.$emit("scroll", {position: 10});
+    await wrapper.vm.$nextTick();
+    expect(wrapper.element.style.height).toBe("160px");
+    expect(wrapper.text()).toContain("$");
+    scroll.vm.$emit("scroll", {position: 101});
+    await wrapper.vm.$nextTick();
+    expect(wrapper.text()).not.toContain("$");
+    expect(wrapper.element.style.height).toBe("69px");
+    scroll.vm.$emit("scroll", {position: 200});
+    await wrapper.vm.$nextTick();
+    expect(wrapper.element.style.height).toBe("64px");
+    
   });
 });
