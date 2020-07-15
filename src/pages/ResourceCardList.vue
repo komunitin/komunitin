@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header :search="true" :title="title" @search="fetchResources" />
+    <page-header search :title="title" balance @search="fetchResources" />
     <q-page-container>
       <q-page>
       <q-inner-loading :showing="isLoading" color="icon-dark" />

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header :title="group ? group.attributes.name : ''">
+    <page-header :title="group ? group.attributes.name : ''" balance>
       <template v-slot:buttons>
         <contact-button
           v-if="group"
