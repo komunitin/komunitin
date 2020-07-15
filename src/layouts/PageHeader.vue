@@ -1,8 +1,9 @@
 <template>
-  <q-header id="header" class="column justify-center bg-primary">
+  <q-header id="header" class="bg-primary" :class="showBalance ? 'column' : 'row'" :style="`height: ${computedHeight}px;`">
     <q-toolbar
       class="text-onprimary"
-      :class="noButton ? 'no-button' : ''"
+      :class="(showBalance ? '' : 'col-shrink ') + (noButton ? 'q-px-none' : 'q-pr-none')"
+      style="min-height: 50px"
     >
       <!-- render back button, menu button or none -->
       <q-btn
@@ -23,10 +24,25 @@
         :aria-label="$t('menu')"
         @click="$store.dispatch('toogleDrawer')"
       />
-
+    </q-toolbar>
+    <div v-if="showBalance"
+      class="col self-center column items-center"
+    > 
+      <div class="text-body2 text-onprimary-m"
+      :style="`font-size: ${0.875*balanceScaleFactor}rem; line-height: ${1.25*balanceScaleFactor}rem;`">{{$t('balance')}}</div>
+      <div class="text-h3 text-onprimary-m"
+      :style="`font-size: ${3*balanceScaleFactor}rem; line-height: ${3.125*balanceScaleFactor}rem`">{{
+        $currency(
+          myAccount.attributes.balance,
+          myAccount.currency
+        )
+      }}</div>
+    </div>
+    <q-toolbar :class="((noButton || showBalance) ? 'no-button ' : '') + (showBalance ? '' : 'col-grow q-pl-none')">
       <q-toolbar-title v-if="!searchActive">
         {{ title }}
       </q-toolbar-title>
+      
 
       <q-input
         v-if="searchActive"
@@ -68,11 +84,24 @@
 
       <!-- slot for right buttons -->
       <slot name="buttons"></slot>
+      <q-scroll-observer v-if="balance" @scroll="scrollHandler" />
     </q-toolbar>
   </q-header>
 </template>
 <script lang="ts">
 import Vue from "vue";
+import { mapGetters } from "vuex";
+import FormatCurrency from "../plugins/FormatCurrency";
+
+Vue.use(FormatCurrency);
+
+interface ScrollDetails {
+  position: number;
+  direction: "up" | "down";
+  directionChanged: boolean;
+  inflexionPosition: number;
+}
+
 export default Vue.extend({
   name: "PageHeader",
   props: {
@@ -89,13 +118,24 @@ export default Vue.extend({
     search: {
       type: Boolean,
       default: false
+    },
+    /**
+     * Make the toolbar prominent and show the current balance.
+     */
+    balance: {
+      type: Boolean,
+      default: false
     }
   },
-  data: () => ({
-    searchActive: false,
-    searchText: ""
-  }),
+  data() {
+    return {
+      searchActive: false,
+      searchText: "",
+      scrollOffset: 0,
+    }
+  },
   computed: {
+    ...mapGetters(["myAccount"]),
     /**
      * Show the back button.
      */
@@ -113,25 +153,39 @@ export default Vue.extend({
      */
     noButton(): boolean {
       return !this.showBack && !this.showMenu;
+    },
+    headerHeight(): number { return 64 },
+    toolbarHeight(): number { return 50 },
+    balanceHeight(): number { return 70 },
+    prominentHeight(): number {
+      return 2 * this.toolbarHeight + this.balanceHeight;
+    },
+    originalHeight(): number {
+      // $header-height = 64
+      return this.balance && this.myAccount ? this.prominentHeight : this.headerHeight;
+    },
+    computedHeight(): number {
+      return Math.max(64, this.originalHeight - this.scrollOffset);
+    },
+    balanceScaleFactor():number {
+      return Math.min(1, Math.max(0, 1 - ((this.scrollOffset) / this.balanceHeight)));
+    },
+    showBalance() : boolean {
+      return this.balance && this.myAccount && (this.balanceScaleFactor > 0);
     }
   },
   methods: {
     clearSearchText() {
       this.searchText = "";
       this.$emit("search-input", "");
+    },
+    scrollHandler(details: ScrollDetails) {
+      this.scrollOffset = details.position;
     }
   }
 });
 </script>
 <style lang="scss" scoped>
-
-// On large screens, when the drawer is persistent, set the header height 
-// plus 1px because the border is included in the height.
-//@media(min-width: 1023px) {
-  #header {
-    height: $header-height + 1px;
-  }
-//}
 // Toolbar has a default padding of 12px. That's ok when there's a button,
 // but it is too low when there's the title directly.
 .no-button {
