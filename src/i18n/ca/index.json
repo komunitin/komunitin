@@ -55,5 +55,6 @@
   "reply": "Respon",
   "checkThisNeed": "Fixa't en aquesta necessitat de {member}",
   "limitAmount": "Límit {amount}",
-  "pending": "Pendent"
+  "pending": "Pendent",
+  "balance": "Saldo"
 }
