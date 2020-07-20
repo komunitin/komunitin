@@ -54,7 +54,15 @@
   "logout": "Log out",
   "reply": "Reply",
   "checkThisNeed": "Check this need from {member}",
-  "limitAmount": "Limit {amount}",
+  "minAmount": "Min {amount}",
+  "maxAmount": "Max {amount}",
   "pending": "Pending",
-  "balance": "Balance"
+  "balance": "Balance",
+  "personalAccount": "Personal account",
+  "businessAccount": "Business account",
+  "publicAccount": "Public account",
+  "profile": "Profile",
+  "bio": "Bio",
+  "location": "Location",
+  "shareMember":"Check {member}\n{bio}"
 }

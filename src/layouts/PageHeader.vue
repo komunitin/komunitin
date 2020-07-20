@@ -1,9 +1,10 @@
 <template>
+<div>
   <q-header id="header" class="bg-primary" :class="showBalance ? 'column' : 'row'" :style="`height: ${computedHeight}px;`">
     <q-toolbar
       class="text-onprimary"
       :class="(showBalance ? '' : 'col-shrink ') + (noButton ? 'q-px-none' : 'q-pr-none')"
-      style="min-height: 50px"
+      :style="`min-height: ${toolbarHeight}px`"
     >
       <!-- render back button, menu button or none -->
       <q-btn
@@ -84,9 +85,18 @@
 
       <!-- slot for right buttons -->
       <slot name="buttons"></slot>
-      <q-scroll-observer v-if="balance" @scroll="scrollHandler" />
+      <q-scroll-observer v-if="balance" @scroll.passive="scrollHandler" />
     </q-toolbar>
   </q-header>
+  <!-- We add a dummy transparent div here to add the height we substract from the collapsible part.
+  I've not been able to do it in a more elegant fashion :(
+  
+  The point is that QPageContainer dynamically sets a padding-top equal to the QHeader height. Since we 
+  reduce this height on scroll, then the page goes up as twice as fast, because of the scrolling and 
+  because of the shrinking. With this dummy div we compensate one of those to achieve normal behavior.
+   -->
+  <div :style="`height: ${offsetHeight}px`" />
+  </div>
 </template>
 <script lang="ts">
 import Vue from "vue";
@@ -102,6 +112,16 @@ interface ScrollDetails {
   inflexionPosition: number;
 }
 
+/**
+ * Header component with some features for the Komunitin app
+ *  - In small screens, shows a menu button or a back button depending on wether 
+ * exists the left drawer, which in turn depends on whether the user is logged in.
+ *  - If balance prop is set to true, shows a section with the logged in account 
+ * balance. This section shrinks on scroll.
+ *  - If search prop is set to true, provides a search box that emits the `search` event.
+ *  - Provides a slot #buttons to be able to customize the right toolbar buttons 
+ * depending on the page content.
+ */
 export default Vue.extend({
   name: "PageHeader",
   props: {
@@ -132,6 +152,7 @@ export default Vue.extend({
       searchActive: false,
       searchText: "",
       scrollOffset: 0,
+      offset: 0,
     }
   },
   computed: {
@@ -154,24 +175,36 @@ export default Vue.extend({
     noButton(): boolean {
       return !this.showBack && !this.showMenu;
     },
+    /**
+     * Constant value for the thin header height.
+     */
     headerHeight(): number { return 64 },
+    /**
+     * Constant value for the toolbar height.
+     */
     toolbarHeight(): number { return 50 },
+    /**
+     * Constant value for the height of the balance section.
+     */
     balanceHeight(): number { return 70 },
+
     prominentHeight(): number {
       return 2 * this.toolbarHeight + this.balanceHeight;
     },
     originalHeight(): number {
-      // $header-height = 64
       return this.balance && this.myAccount ? this.prominentHeight : this.headerHeight;
     },
     computedHeight(): number {
-      return Math.max(64, this.originalHeight - this.scrollOffset);
+      return this.originalHeight - this.offset;
     },
     balanceScaleFactor():number {
-      return Math.min(1, Math.max(0, 1 - ((this.scrollOffset) / this.balanceHeight)));
+      return Math.max(0, 1 - this.offset / this.balanceHeight);
     },
     showBalance() : boolean {
-      return this.balance && this.myAccount && (this.balanceScaleFactor > 0);
+      return this.balance && this.myAccount && this.offset < this.balanceHeight;
+    },
+    offsetHeight() : number {
+      return this.originalHeight - this.computedHeight;
     }
   },
   methods: {
@@ -180,6 +213,7 @@ export default Vue.extend({
       this.$emit("search-input", "");
     },
     scrollHandler(details: ScrollDetails) {
+      this.offset = Math.min(details.position, this.originalHeight - this.headerHeight)
       this.scrollOffset = details.position;
     }
   }

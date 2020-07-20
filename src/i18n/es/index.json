@@ -54,7 +54,15 @@
   "logout": "Salir",
   "reply": "Responder",
   "checkThisNeed": "Fíjate en esta necesidad de {member}",
-  "limitAmount": "Límite {amount}",
+  "minAmount": "Min {amount}",
+  "maxAmount": "Max {amount}",
   "pending": "Pendiente",
-  "balance": "Saldo"
+  "balance": "Saldo",
+  "personalAccount": "Cuenta personal",
+  "businessAccount": "Cuenta de empresa",
+  "publicAccount": "Cuenta pública",
+  "profile": "Perfil",
+  "bio": "Bio",
+  "location": "Ubicación",
+  "shareMember":"Fíjate en la cuenta de {member}\n{bio}"
 }

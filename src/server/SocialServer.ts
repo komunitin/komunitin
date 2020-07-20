@@ -162,6 +162,8 @@ export default {
       group: belongsTo(),
       contacts: hasMany(),
       account: belongsTo(),
+      needs: hasMany(),
+      offers: hasMany(),
     }),
     contact: Model,
     category: Model.extend({
@@ -210,7 +212,7 @@ export default {
         return faker.internet.userName((this as any).name);
       },
       access: "public",
-      //type: "business",
+      type: () => faker.random.arrayElement(["personal", "business", "public"]),
       name: () => faker.name.findName(),
       description: () => fakeMarkdown(2),
       image: (i: number) => fakeImage(`face-${i}`, "100x100"),
@@ -275,27 +277,32 @@ export default {
     })
   },
   seeds(server: Server) {
-    faker.seed(2030);
+    faker.seed(1);
     // Create groups.
     server.createList("group", 7).forEach((group, i) => {
       // Create group contacts.
+      faker.seed(1);
       const contacts = server.createList("contact", 4);
       group.update({ contacts });
       // Only add data for the first group. Otherwise we spend a lot of
       // time in this function.
       if (i == 0) {
         // Create categories.
+        faker.seed(2030);
         const categories = server.createList("category", 5, { group } as any);
         // Create group members
+        faker.seed(1);
         const members = server.createList("member", 30, { group } as any);
         for (let j = 0; j < members.length; j++) {
           const member = members[j];
           // Create member contacts.
+          faker.seed(1);
           const contacts = server.createList("contact", 4);
           member.update({ contacts });
           // Create member offers and needs only for the first 10 members.
           if (j < 10) {
             const category = categories[j % categories.length];
+            faker.seed(1);
             server.createList("offer", 3, {
               member,
               category,
@@ -303,6 +310,7 @@ export default {
             } as any);
             // Create member needs only for some members.
             if (j % 3 == 0) {
+              faker.seed(1);
               server.createList("need", (j % 3) + 1, {
                 member,
                 category: categories[j % categories.length],

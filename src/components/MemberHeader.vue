@@ -1,5 +1,5 @@
 <template>
-  <q-item v-bind="$attrs">
+  <q-item v-bind="$attrs" :clickable="to && !active" :active="active" @click="click">
     <!-- Member avatar & name -->
     <q-item-section avatar>
       <q-avatar>
@@ -29,11 +29,27 @@ export default Vue.extend({
     member: {
       type: Object,
       required: true,
+    },
+    to: {
+      type: String,
+      required: false,
+      default: null
     }
   },
   computed: {
+    active(): boolean {
+      return this.to == this.$route.path;
+    },
     account(): string {
       return (this.member.account) ? this.member.account.attributes.code : "";
+    },
+  },
+  methods: {
+    click() {
+      if (this.to) {
+        this.$router.push(this.to);
+      }
+      this.$emit("click");
     }
   }
 });
