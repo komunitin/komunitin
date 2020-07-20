@@ -23,20 +23,20 @@ describe("Transactions", () => {
     // Click members link
     wrapper.get("#menu-transactions").trigger("click");
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/JayceGloverDDS.Rolfson96/transactions");
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62/transactions");
     // Further wait to load members.
     await wrapper.vm.$wait();
     const transactions = wrapper.get(TransactionList).findAll(MemberHeader)
     expect(transactions.length).toBe(20);
     const first = transactions.wrappers[0];
     expect(first.text()).toContain("today");
-    expect(first.text()).toContain("Antonio");
+    expect(first.text()).toContain("Alessandra");
     expect(first.text()).toContain("86.06 $");
     expect(first.text()).toContain("Front");
 
     const fifth = transactions.wrappers[6];
     expect(fifth.text()).toContain("Pending");
-    expect(fifth.text()).toContain("Hermina");
+    expect(fifth.text()).toContain("Thea");
     expect(fifth.text()).toContain("-61.51 $");
     expect(fifth.text()).toContain("Integrated");
     // Search

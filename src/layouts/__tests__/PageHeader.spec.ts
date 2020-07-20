@@ -186,19 +186,20 @@ describe("PageHeader", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("balance");
     expect(wrapper.text()).toContain("1 $");
-    expect(wrapper.element.style.height).toBe("170px");
+    const header = wrapper.get(QHeader).element;
+    expect(header.style.height).toBe("170px");
     const scroll = wrapper.get(QScrollObserver);
     scroll.vm.$emit("scroll", {position: 10});
     await wrapper.vm.$nextTick();
-    expect(wrapper.element.style.height).toBe("160px");
+    expect(header.style.height).toBe("160px");
     expect(wrapper.text()).toContain("$");
     scroll.vm.$emit("scroll", {position: 101});
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).not.toContain("$");
-    expect(wrapper.element.style.height).toBe("69px");
+    expect(header.style.height).toBe("69px");
     scroll.vm.$emit("scroll", {position: 200});
     await wrapper.vm.$nextTick();
-    expect(wrapper.element.style.height).toBe("64px");
+    expect(header.style.height).toBe("64px");
     
   });
 });

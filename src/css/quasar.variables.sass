@@ -28,7 +28,8 @@ $error     : #B00020
 $outside   : #312D21
 
 // Menu active background item
-$active: rgba( $primary, .12)
+// This is rgba($primary, .12) over #fff background.
+$active: #f3f8e5
 
 
 // Text colors
@@ -47,8 +48,10 @@ $onoutside-m: rgba(255,255,255,0.74)
 
 // Color for text on surface / high emphasis
 $onsurface: rgba(0,0,0,0.87)
-// Color for text on surface with / emphasis
+// Color for text on surface / medium emphasis
 $onsurface-m: rgba(0,0,0,.63)
+// Color for text on surface / disabled
+$onsurface-d: rgba(0,0,0,.38)
 
 // Icon colors
 $icon-dark: rgba(0,0,0,.54)
@@ -61,6 +64,10 @@ $positive  : #21ba45
 $negative  : $error
 $info      : #31CCEC
 $warning   : #F2C037
+
+// Currency  colors
+$positive-amount : $primary
+$negative-amount : $kblue
 
 // Sizes
 $header-height: 64px
