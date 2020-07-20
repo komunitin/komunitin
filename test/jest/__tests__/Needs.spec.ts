@@ -30,6 +30,6 @@ describe("Needs", () => {
     wrapper.get(PageHeader).vm.$emit("search","modi");
     await wrapper.vm.$wait();
     // found 4 results!
-    expect(wrapper.findAll(NeedCard).length).toBe(3);
+    expect(wrapper.findAll(NeedCard).length).toBe(4);
   });
 });

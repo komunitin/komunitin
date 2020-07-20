@@ -17,7 +17,7 @@ describe("MirageJS Server", () => {
   });
 
   it("includes account external resource", async() => {
-    const response = await Axios.get(`${urlSocial}/GRP0/members/JayceGloverDDS.Rolfson96?include=account`);
+    const response = await Axios.get(`${urlSocial}/GRP0/members/TomasaNikolausV_Ledner62?include=account`);
     const account = response.data.included.find((resource: ResourceObject) => resource.type == "accounts");
     expect(account.external).toBe(true);
     expect(account.links.self).toBe(`${urlAccounting}/GRP0/accounts/GRP00000`);

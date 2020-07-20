@@ -54,7 +54,15 @@
   "logout": "Sortir",
   "reply": "Respon",
   "checkThisNeed": "Fixa't en aquesta necessitat de {member}",
-  "limitAmount": "Límit {amount}",
+  "minAmount": "Min {amount}",
+  "maxAmount": "Max {amount}",
   "pending": "Pendent",
-  "balance": "Saldo"
+  "balance": "Saldo",
+  "personalAccount": "Compte personal",
+  "businessAccount": "Compte d'empresa",
+  "publicAccount": "Compte públic",
+  "profile": "Perfil",
+  "bio": "Bio",
+  "location": "Ubicació",
+  "shareMember":"Fixa't en el compte de {member}\n{bio}"
 }

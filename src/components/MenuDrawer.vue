@@ -1,11 +1,12 @@
 <template>
   <q-list>
-    <member-header id="my-member" :member="myMember">
+    <member-header id="my-member" :member="myMember" :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}`"
+      active-class="bg-active">
       <template #caption>
         {{ myAccount.attributes.code }}
       </template>
       <template #side>
-        <q-btn flat round color="icon-dark" icon="expand_more">
+        <q-btn flat round color="icon-dark" icon="expand_more" @click.stop>
           <q-menu auto-close anchor="bottom right" self="top right">
             <q-list>
               <menu-item icon="edit" :title="$t('editProfile')" />

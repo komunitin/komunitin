@@ -220,7 +220,7 @@ export interface Member extends ResourceObject {
     code: string;
     access: Access;
     name: string;
-    type: string;
+    type: "personal" | "business" | "public";
     description: string;
     image: string;
     address: Address;
