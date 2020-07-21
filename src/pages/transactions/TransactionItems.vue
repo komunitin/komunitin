@@ -1,13 +1,13 @@
 <template>
   <resource-cards
-    v-if="myAccount"
+    v-if="account"
     ref="resourceCards"
     v-slot="slotProps"
     :code="code"
     module-name="transfers"
     include="currency,payer,payee"
     sort="-updated"
-    :filter="{ account: myAccount.id }"
+    :filter="{ account: account.id }"
     :autoload="autoload"
     @afterLoad="fetchMembers"
   >
@@ -50,13 +50,12 @@
 </template>
 <script lang="ts">
 import Vue from "vue"
-import { mapGetters } from "vuex";
 
 import MemberHeader from "../../components/MemberHeader.vue";
 import ResourceCards from "../ResourceCards.vue";
 
 import FormatCurrency from "../../plugins/FormatCurrency";
-import { Transfer, Member } from "../../store/model";
+import { Transfer, Member, Account } from "../../store/model";
 
 Vue.use(FormatCurrency);
 
@@ -66,6 +65,9 @@ interface ExtendedTransfer extends Transfer {
 }
 interface ExtendedAccount extends Account {
   member: Member;
+}
+interface ExtendedMember extends Member {
+  account: Account;
 }
 
 export default Vue.extend({
@@ -80,9 +82,8 @@ export default Vue.extend({
       required: true
     },
 
-    /** Not really used by now, as we suppose this is the current logged-in account. */
-    memberCode: {
-      type: String,
+    member: {
+      type: Object,
       required: true
     }
   },
@@ -102,18 +103,20 @@ export default Vue.extend({
     autoload: true,
   }),
   computed: {
-    ...mapGetters(["myAccount"])
+    account() : Account {
+      return this.member.account;
+    }
   },
   methods: {
     otherMember(transfer: ExtendedTransfer): Member {
       const payer = transfer.payer;
       const payee = transfer.payee;
       // We can't directly compare object references because they're not the same.
-      const other = this.myAccount.id == payer.id ? payee : payer;
+      const other = this.account.id == payer.id ? payee : payer;
       return other.member;
     },
     signedAmount(transfer: ExtendedTransfer): number {
-      return (transfer.payer.id == this.myAccount.id ? -1 : 1) * transfer.attributes.amount;
+      return (transfer.payer.id == this.account.id ? -1 : 1) * transfer.attributes.amount;
     },
     /**
      * Fetch the member objects associated to the just loaded transfers.

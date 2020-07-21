@@ -296,7 +296,7 @@ export default {
         for (let j = 0; j < members.length; j++) {
           const member = members[j];
           // Create member contacts.
-          faker.seed(1);
+          faker.seed(1 + j);
           const contacts = server.createList("contact", 4);
           member.update({ contacts });
           // Create member offers and needs only for the first 10 members.
