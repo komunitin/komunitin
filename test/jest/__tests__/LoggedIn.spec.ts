@@ -17,7 +17,7 @@ describe("logged in", () => {
   it("renders Group, member and account data", async() => {
     const text = wrapper.text();
     // Member name
-    expect(text).toContain("Jayce Glover");
+    expect(text).toContain("Tomasa Nikolaus");
     // Acount number
     expect(text).toContain("GRP00000");
     // Group name

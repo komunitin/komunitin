@@ -37,23 +37,23 @@ describe("Members", () => {
     // Check GRP00002 result
     const members = wrapper.get(MemberList).findAll(MemberHeader);
     const second = members.wrappers[2];
-    expect(second.text()).toContain("Antonio");
+    expect(second.text()).toContain("Alessandra");
     expect(second.text()).toContain("GRP00002");
     expect(second.text()).toContain("161.23 $");
-    expect(second.text()).toContain("Limit 500 $");
+    expect(second.text()).toContain("Min -500 $");
     // Check GRP00025 result
     const other = members.wrappers[25];
-    expect(other.text()).toContain("Hailey");
+    expect(other.text()).toContain("Norene");
     expect(other.text()).toContain("GRP00025");
     expect(other.text()).toContain("478.56 $");
-    expect(other.text()).toContain("Limit 500 $");
+    expect(other.text()).toContain("Min -500 $");
     // Search
-    wrapper.get(PageHeader).vm.$emit("search", "abigail");
+    wrapper.get(PageHeader).vm.$emit("search", "andrea");
     await wrapper.vm.$wait();
     // Check result!
     expect(wrapper.get(MemberList).findAll(MemberHeader).length).toBe(1);
     const result = wrapper.get(MemberList).get(MemberHeader);
-    expect(result.text()).toContain("Abigail");
+    expect(result.text()).toContain("Andreanne");
     expect(result.text()).toContain("GRP00004");
     expect(result.text()).toContain("751.83 $");
   });

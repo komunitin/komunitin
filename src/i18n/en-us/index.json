@@ -44,8 +44,8 @@
   "circulation": "Circulation",
   "andMoreCategories": "and more categories",
   "statement": "Statement",
-  "myNeeds": "My needs",
-  "myOffers": "My Offers",
+  "nNeeds": "No Needs | 1 Need | {n} Needs",
+  "nOffers": "No Offers | 1 Offer | {n} Offers",
   "accounts": "Accounts",
   "statistics": "Statistics",
   "otherGroups": "Other groups",
@@ -54,7 +54,15 @@
   "logout": "Log out",
   "reply": "Reply",
   "checkThisNeed": "Check this need from {member}",
-  "limitAmount": "Limit {amount}",
+  "minAmount": "Min {amount}",
+  "maxAmount": "Max {amount}",
   "pending": "Pending",
-  "balance": "Balance"
+  "balance": "Balance",
+  "personalAccount": "Personal account",
+  "businessAccount": "Business account",
+  "publicAccount": "Public account",
+  "profile": "Profile",
+  "bio": "Bio",
+  "location": "Location",
+  "shareMember":"Check {member}\n{bio}"
 }
