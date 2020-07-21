@@ -36,13 +36,13 @@ describe("Offers", () => {
   it ("searches offers", async () => {
     // The user interaction is already tested in PageHeader unit test,
     // here just emit the search event.
-    wrapper.get(PageHeader).vm.$emit("search","bacon");
+    wrapper.get(PageHeader).vm.$emit("search","hat");
     await wrapper.vm.$nextTick();
     expect(wrapper.findAll(OfferCard).length).toBe(0);
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     // found 3 results!
-    expect(wrapper.findAll(OfferCard).length).toBe(3);
+    expect(wrapper.findAll(OfferCard).length).toBe(10);
   })
 
 });
