@@ -48,9 +48,10 @@
           @input="tabChange"
         >
           <q-tab name="profile" icon="account_circle" :label="$t('profile')" />
-          <q-tab name="needs" icon="loyalty" :label="$t('needs')" />
-          <q-tab name="offers" icon="local_offer" :label="$t('offers')" />
+          <q-tab name="needs" icon="loyalty" :label="$tc('nNeeds', member.relationships.needs.meta.count)" />
+          <q-tab name="offers" icon="local_offer" :label="$tc('nOffers', member.relationships.offers.meta.count)" />
           <q-tab
+            v-if="transactions"
             name="transactions"
             icon="account_balance_wallet"
             :label="$t('transactions')"
@@ -79,6 +80,14 @@ export default Vue.extend({
     tab: {
       type: String,
       required: true
+    },
+    /**
+     * Whether to show the transactions tab.
+     */
+    transactions: {
+      type: Boolean,
+      required: false,
+      default: true
     }
   },
   data() {

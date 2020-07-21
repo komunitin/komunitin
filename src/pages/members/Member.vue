@@ -19,7 +19,7 @@
     </page-header>
     <q-page-container>
       <q-page>
-        <member-page-header :member="member" :tab="tab" @tabChange="tab = $event"/>
+        <member-page-header :member="member" :tab="tab" :transactions="!isMe" @tabChange="tab = $event"/>
         <q-tab-panels v-model="tab">
           <q-tab-panel name="profile" keep-alive>
             <member-profile :member="member"/>
@@ -30,8 +30,8 @@
           <q-tab-panel name="offers" keep-alive>
             <member-offers :member="member" :group-code="code"/>
           </q-tab-panel>
-          <q-tab-panel name="transactions" keep-alive>
-            <member-transactions :member="member" :group-code="code"/>
+          <q-tab-panel v-if="!isMe" name="transactions" keep-alive>
+            <transaction-items :code="code" :member="member"/>
           </q-tab-panel>
         </q-tab-panels>
       </q-page>
@@ -40,6 +40,8 @@
 </template>
 <script lang="ts">
 import Vue from "vue"
+import {mapGetters} from "vuex";
+
 import PageHeader from "../../layouts/PageHeader.vue";
 import ContactButton from "../../components/ContactButton.vue";
 import ShareButton from "../../components/ShareButton.vue";
@@ -47,7 +49,7 @@ import MemberPageHeader from "./MemberPageHeader.vue";
 import MemberProfile from "./MemberProfile.vue";
 import MemberNeeds from "./MemberNeeds.vue";
 import MemberOffers from "./MemberOffers.vue";
-import MemberTransactions from "./MemberTransactions.vue";
+import TransactionItems from "../transactions/TransactionItems.vue";
 import { Member, Currency } from '../../store/model';
 export default Vue.extend({
   name: "Member",
@@ -59,7 +61,7 @@ export default Vue.extend({
     MemberProfile,
     MemberNeeds,
     MemberOffers,
-    MemberTransactions
+    TransactionItems
   },
   props: {
     code: {
@@ -75,8 +77,12 @@ export default Vue.extend({
     tab: "profile"
   }),
   computed: {
+    ...mapGetters(["myMember"]),
     member() : Member & {account: Account & {currency: Currency}} {
       return this.$store.getters['members/current'];
+    },
+    isMe() : boolean {
+      return this.member && this.myMember && this.member.id == this.myMember.id;
     }
   },
   created() {
