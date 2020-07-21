@@ -125,9 +125,9 @@ import ShareButton from "../../components/ShareButton.vue";
 import ContactButton from "../../components/ContactButton.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
 import PageHeader from "../../layouts/PageHeader.vue";
-import md2html from "../../plugins/Md2html";
+import Md2html from "../../plugins/Md2html";
 
-Vue.use(md2html);
+Vue.use(Md2html);
 
 /**
  * Page for Group details.

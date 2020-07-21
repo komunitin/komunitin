@@ -35,17 +35,17 @@ describe("Groups", () => {
     // Code
     expect(text).toContain("GRP0");
     // Description
-    expect(text).toContain("Velit quis voluptatum harum");
+    expect(text).toContain("Et facere placeat molestiae");
     // URL
-    expect(text).toContain("vance.info");
+    expect(text).toContain("rae.name");
     // Offers card
     expect(text).toContain("Offers");
     expect(text).toContain("30");
-    expect(text).toContain("6 Garden");
+    expect(text).toContain("6 Health");
     // Needs card
     expect(text).toContain("Needs");
     expect(text).toContain("4");
-    expect(text).toContain("1 Garden");
+    expect(text).toContain("1 Health");
     // Members card
     expect(text).toContain("Members");
     expect(text).toContain("30");
@@ -54,11 +54,11 @@ describe("Groups", () => {
     expect(text).toContain("Currency");
     expect(text).toContain("$");
     // Location
-    expect(text).toContain("Avon");
+    expect(text).toContain("Buckinghamshire");
     // Contact
-    expect(text).toContain("558-336-5373");
-    expect(text).toContain("Mittie.Green@hotmail.com");
-    expect(text).toContain("@Noel82");
-    expect(text).toContain("474-283-1596");
+    expect(text).toContain("133-639-5843");
+    expect(text).toContain("Marco.Volkman@yahoo.com");
+    expect(text).toContain("@Precious_Rau31");
+    expect(text).toContain("086-054-6945");
   })
 });
