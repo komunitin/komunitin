@@ -1,6 +1,6 @@
 <template>
     <collapsible-header :collapsible-height="200"  :fixed-height="72">
-      <div class="row q-py-lg bg-active text-onsurface-m">
+      <div class="row q-py-lg text-onsurface-m bg-active collapsible-content">
         <div class="col-md-4 col-6 q-px-md">
           <img class="member-image q-mx-auto" :src="member.attributes.image" />
         </div>
@@ -121,5 +121,8 @@ export default Vue.extend({
   max-height: 152px;
   max-width: 152px;
   border-radius: 76px;
+}
+.collapsible-content {
+  height: 200px;
 }
 </style>
