@@ -1,6 +1,6 @@
 <template>
 <div>
-  <q-page-sticky position="top" expand class="z-top">
+  <q-page-sticky position="top" expand class="z-fab">
     <div :style="`height: ${computedHeight}px;`" class="overflow-hidden relative-position full-width">
       <div class="absolute-bottom">
         <slot/>
