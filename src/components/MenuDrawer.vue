@@ -63,7 +63,6 @@
     <menu-item id="menu-needs" icon="loyalty" :title="$t('needs')" :to="`/groups/${myMember.group.attributes.code}/needs`"/>
     <menu-item id="menu-offers" icon="local_offer" :title="$t('offers')" :to="`/groups/${myMember.group.attributes.code}/offers`" />
     <menu-item id="menu-members" icon="people" :title="$t('members')" :to="`/groups/${myMember.group.attributes.code}/members`" />
-    <menu-item icon="bar_chart" :title="$t('statistics')" />
 
     <q-separator />
 
