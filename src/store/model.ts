@@ -190,6 +190,10 @@ export interface Category extends ResourceObject {
     name: string;
     cpa: string[];
     description: string;
+    /**
+     * The category icon, following the same convention as Quasar framework for icon components:
+     * https://quasar.dev/vue-components/icon
+     */
     icon: string;
     access: Access;
     created: string;

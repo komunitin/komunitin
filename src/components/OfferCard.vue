@@ -10,6 +10,11 @@
       <template #caption>
         {{ offer.attributes.updated | date }}
       </template>
+      <template #side>
+        <q-avatar :icon="offer.category.attributes.icon" text-color="onprimary" color="kblue" >
+          <q-tooltip>{{ offer.category.attributes.name }}</q-tooltip>
+        </q-avatar>
+      </template>
     </member-header>
 
     <!-- Offer images -->
