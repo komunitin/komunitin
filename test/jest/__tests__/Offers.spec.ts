@@ -31,6 +31,8 @@ describe("Offers", () => {
     expect(wrapper.findAll(OfferCard).length).toBe(30);
     // The QInfiniteScroll stopped.
     expect((wrapper.find(QInfiniteScroll).vm as any).working).toBe(false);
+    // Category icon
+    expect(wrapper.findAll(OfferCard).at(0).text()).toContain("accessibility_new");
   });
 
   it ("searches offers", async () => {
