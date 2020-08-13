@@ -26,6 +26,8 @@ describe("Needs", () => {
     // Infinite loading stops working immediately since we
     // already fetched all data.
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
+    // Category
+    expect(wrapper.findAll(NeedCard).at(1).text()).toContain("build");
 
     wrapper.get(PageHeader).vm.$emit("search","modi");
     await wrapper.vm.$wait();

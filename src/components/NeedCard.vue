@@ -10,6 +10,11 @@
       <template #caption>
         {{ need.attributes.updated | date }}
       </template>
+      <template #side>
+        <q-avatar :icon="need.category.attributes.icon" text-color="onprimary" color="kred" >
+          <q-tooltip>{{ need.category.attributes.name }}</q-tooltip>
+        </q-avatar>
+      </template>
     </member-header>
     <!-- Need images -->
     <q-carousel
