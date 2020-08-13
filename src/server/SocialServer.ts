@@ -65,6 +65,11 @@ function fakeImage(search = "", size = "800x600") {
   return `https://source.unsplash.com/${size}/?${search}`;
 }
 
+function fakeCategoryIconName(i: number): string {
+  const icons = ["accessibility_new", "accessible_forward", "account_balance", "build", "eco", "house", "agriculture", "hotel", "pedal_bike", "restaurant", "clean_hands"];
+  return icons[i % icons.length];
+}
+
 interface Association {
   type: string;
   name: string;
@@ -226,9 +231,9 @@ export default {
       code() {
         return faker.helpers.slugify((this as any).name);
       },
-      cpa: ["10", "11", "56"],
+      cpa: (i: number) => ["" + i, "" + 0, "" + 0],
       description: () => faker.lorem.sentence(),
-      icon: () => fakeImage("product"),
+      icon: (i: number) => fakeCategoryIconName(i),
       access: "public",
       created: () => faker.date.past(),
       updated() {
