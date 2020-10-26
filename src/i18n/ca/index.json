@@ -34,6 +34,7 @@
   "share": "Comparteix",
   "sorryNothingHere": "Ho sentim, aquí no hi ha res...",
   "offers": "Ofertes",
+  "offer": "Oferta",
   "contact": "Contacte",
   "needs": "Necesitats",
   "members": "Membres",
@@ -64,5 +65,9 @@
   "profile": "Perfil",
   "bio": "Bio",
   "location": "Ubicació",
-  "shareMember":"Fixa't en el compte de {member}\n{bio}"
+  "shareMember":"Fixa't en el compte de {member}\n{bio}",
+  "updatedAt": "Actualitzat {date}",
+  "expiresAt": "Expira {date}",
+  "price": "Preu",
+  "checkThisOffer": "Fixa't en aquesta oferta de {member}"
 }

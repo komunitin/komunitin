@@ -34,6 +34,7 @@
   "share": "Comparte",
   "sorryNothingHere": "Lo sentimos, aquí no hay nada...",
   "offers": "Ofertas",
+  "offer": "Oferta",
   "contact": "Contacto",
   "needs": "Necesidades",
   "members": "Miembros",
@@ -64,5 +65,9 @@
   "profile": "Perfil",
   "bio": "Bio",
   "location": "Ubicación",
-  "shareMember":"Fíjate en la cuenta de {member}\n{bio}"
+  "shareMember":"Fíjate en la cuenta de {member}\n{bio}",
+  "updatedAt": "Actualizado {date}",
+  "expiresAt": "Expira {date}",
+  "price": "Precio",
+  "checkThisOffer": "Fíjate en esta oferta de {member}"
 }

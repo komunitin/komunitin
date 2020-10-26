@@ -1,7 +1,7 @@
 <template>
   <q-card
     v-if="offer"
-    v-card-click-to="`/offers/${offer.attributes.code}`"
+    v-card-click-to="`/groups/${code}/offers/${offer.attributes.code}`"
     flat
     bordered
   >
@@ -11,9 +11,7 @@
         {{ offer.attributes.updated | date }}
       </template>
       <template #side>
-        <q-avatar :icon="offer.category.attributes.icon" text-color="onprimary" color="kblue" >
-          <q-tooltip>{{ offer.category.attributes.name }}</q-tooltip>
-        </q-avatar>
+        <category-avatar :category="offer.category" color="kblue"/>
       </template>
     </member-header>
 
@@ -56,6 +54,7 @@ import CardClickTo from "../plugins/CardClickTo";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
 import MemberHeader from "./MemberHeader.vue";
+import CategoryAvatar from "./CategoryAvatar.vue";
 
 Vue.use(CardClickTo);
 Vue.use(Clamp);
@@ -64,9 +63,16 @@ Vue.use(Md2txt);
 export default Vue.extend({
   name: "OfferCard",
   components: {
-    MemberHeader
+    MemberHeader,
+    CategoryAvatar
   },
   props: {
+    // Group code.
+    code: {
+      type: String,
+      required: true,
+    },
+    // Offer object with member and category assotiations.
     offer: {
       type: Object,
       required: true,
