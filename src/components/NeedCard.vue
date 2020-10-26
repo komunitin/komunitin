@@ -11,9 +11,7 @@
         {{ need.attributes.updated | date }}
       </template>
       <template #side>
-        <q-avatar :icon="need.category.attributes.icon" text-color="onprimary" color="kred" >
-          <q-tooltip>{{ need.category.attributes.name }}</q-tooltip>
-        </q-avatar>
+        <category-avatar :category="need.category" color="kred"/>
       </template>
     </member-header>
     <!-- Need images -->
@@ -72,6 +70,7 @@ import Md2txt from "../plugins/Md2txt";
 import MemberHeader from "./MemberHeader.vue";
 import ShareButton from "./ShareButton.vue";
 import ContactButton from "./ContactButton.vue";
+import CategoryAvatar from "./CategoryAvatar.vue";
 
 Vue.use(CardClickTo);
 Vue.use(Clamp);
@@ -82,7 +81,8 @@ export default Vue.extend({
   components: {
     MemberHeader,
     ShareButton,
-    ContactButton
+    ContactButton,
+    CategoryAvatar
   },
   props: {
     need: {

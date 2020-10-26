@@ -67,7 +67,13 @@ const routes: RouteConfig[] = [
         props: true,
         name: 'TransactionList',
         component: () => import('../pages/transactions/TransactionList.vue')
-      }
+      },
+      {
+        path: '/groups/:code/offers/:offerCode',
+        props: true,
+        name: 'Offer',
+        component: () => import('../pages/offers/Offer.vue')
+      },
     ]
   }
 ];
