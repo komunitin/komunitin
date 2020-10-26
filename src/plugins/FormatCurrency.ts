@@ -7,6 +7,10 @@ export interface CurrencyFormat {
    * Whether to render all the decimals. Default to true.
    */
   decimals?: boolean
+  /**
+   * Whether to apply the currency scale so the input value in an integer. Default to true.
+   */
+  scale?: boolean
 }
 
 export default function(Vue: typeof _Vue): void  {
@@ -18,10 +22,14 @@ export default function(Vue: typeof _Vue): void  {
    * @param options Format options.
    */
   Vue.prototype.$currency = function(amount: number, currency: Currency, options?: CurrencyFormat): string {
-    amount = amount / (10 ** currency.attributes.scale);
     
-    // Decimals is true if undefined.
-    const decimals = options?.decimals ?? true; 
+    // Decimals and scale are true if undefined.
+    const decimals = options?.decimals ?? true;
+    const scale = options?.scale ?? true;
+
+    if (scale) {
+      amount = amount / (10 ** currency.attributes.scale);
+    }
 
     const format: NumberFormatOptions | undefined = 
     decimals ? {
