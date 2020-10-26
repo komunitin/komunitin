@@ -322,6 +322,7 @@ export interface Offer extends ResourceObject {
     name: string;
     content: string;
     images: ImageObject[];
+    price: string;
     access: Access;
     expires: string;
     created: string;
@@ -329,7 +330,7 @@ export interface Offer extends ResourceObject {
   };
   relationships: {
     category: RelatedResource;
-    author: RelatedResource;
+    member: RelatedResource;
   };
 }
 

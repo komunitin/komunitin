@@ -11,7 +11,7 @@
           >
             <!-- this v-if is superfluous, since when this slot is rendered, card is always defined.
             But setting it prevents an unexpected exception in vue-test-utils -->
-            <component :is="card" v-if="card" :[propName]="resource" />
+            <component :is="card" v-if="card" :[propName]="resource" :code="code"/>
           </div>
         </div>
       </slot>

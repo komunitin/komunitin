@@ -70,6 +70,18 @@ function fakeCategoryIconName(i: number): string {
   return icons[i % icons.length];
 }
 
+function fakePrice(i:number): string {
+  if (i % 2 == 0) {
+    return "" + (i/100.0)
+  } else {
+    if (i % 4 == 1) {
+      return "Request a quote";
+    } else {
+      return "Contact me!";
+    }
+  }
+}
+
 interface Association {
   type: string;
   name: string;
@@ -242,10 +254,11 @@ export default {
     }),
     offer: Factory.extend({
       name: () => faker.commerce.product(),
-      code() {
-        return faker.helpers.slugify((this as any).name);
+      code(i: number) {
+        return faker.helpers.slugify((this as any).name) + i;
       },
-      content: () => fakeMarkdown(faker.random.number({ min: 1, max: 5 })),
+      content: () => fakeMarkdown(faker.random.number({ min: 1, max: 3 })),
+      price: () => fakePrice(faker.random.number({min: 1, max:1000})),
       images: (i: number) =>
         Array.from(
           { length: faker.random.number({ min: 1, max: 5 }) },
@@ -307,7 +320,7 @@ export default {
           // Create member offers and needs only for the first 10 members.
           if (j < 10) {
             const category = categories[j % categories.length];
-            faker.seed(1);
+            faker.seed(j);
             server.createList("offer", 3, {
               member,
               category,
@@ -368,6 +381,11 @@ export default {
     // Single member.
     server.get(urlSocial + "/:code/members/:member", (schema: any, request: any) => {
       return schema.members.findBy({ code: request.params.member });
+    });
+
+    // Single offer.
+    server.get(urlSocial + "/:code/offers/:offer", (schema: any, request: any) => {
+      return schema.offers.findBy({ code: request.params.offer });
     });
 
 
