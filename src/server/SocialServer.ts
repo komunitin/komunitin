@@ -281,7 +281,7 @@ export default {
       },
       images: (i: number) => Array.from(
         // Often it's empty.
-        { length: Math.max(faker.random.number({ min: -2, max: 4 }), 0) },
+        { length: Math.max(faker.random.number({ min: -2, max: 2 }), 0) },
         (v: never, j: number) => {
           return {
             href: fakeImage(`need${i}-${j}`),
@@ -328,7 +328,7 @@ export default {
             } as any);
             // Create member needs only for some members.
             if (j % 3 == 0) {
-              faker.seed(1);
+              faker.seed(j);
               server.createList("need", (j % 3) + 1, {
                 member,
                 category: categories[j % categories.length],
@@ -386,6 +386,11 @@ export default {
     // Single offer.
     server.get(urlSocial + "/:code/offers/:offer", (schema: any, request: any) => {
       return schema.offers.findBy({ code: request.params.offer });
+    });
+
+    // Single need
+    server.get(urlSocial + "/:code/needs/:need", (schema: any, request: any) => {
+      return schema.needs.findBy({ code: request.params.need });
     });
 
 
