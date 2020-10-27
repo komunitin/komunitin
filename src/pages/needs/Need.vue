@@ -5,7 +5,7 @@
       <q-page v-if="need" class="q-pa-lg">
         <offer-layout :num-images="need.attributes.images.length">
           <template #member>
-            <member-header ref="member" :member="need.member" class="q-pa-none"/>
+            <member-header :to="`/groups/${code}/members/${need.member.attributes.code}`" :member="need.member" class="q-pa-none"/>
           </template>
           <template #category>
             <category-avatar color="kred" :category="need.category" caption/>

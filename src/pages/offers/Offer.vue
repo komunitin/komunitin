@@ -5,7 +5,7 @@
       <q-page v-if="offer" class="q-pa-lg">
         <offer-layout :num-images="offer.attributes.images.length">
           <template #member>
-            <member-header ref="member" :member="offer.member" class="q-pa-none"/>
+            <member-header :to="`/groups/${code}/members/${offer.member.attributes.code}`" :member="offer.member" class="q-pa-none"/>
           </template>
           <template #category>
             <category-avatar color="kblue" :category="offer.category" caption/>
@@ -16,7 +16,8 @@
           <template #content>
             <div class="text-h4 q-pb-sm">{{ offer.attributes.name }}</div>
             <div class="text-h6 q-pb-sm">
-              <span class="text-onsurface-m">{{ $t('price') }} </span> 
+              <span class="text-onsurface-m">{{ $t('price') }}</span>
+              <span>&nbsp;</span>
               <span class="negative-amount">{{ price }}</span>
             </div>
             <div class="text-body2 text-onsurface-m q-pb-md">
