@@ -1,7 +1,7 @@
 <template>
   <q-card
     v-if="need"
-    v-card-click-to="`/needs/${need.attributes.code}`"
+    v-card-click-to="`/groups/${code}/needs/${need.attributes.code}`"
     flat
     bordered
   >
@@ -15,25 +15,7 @@
       </template>
     </member-header>
     <!-- Need images -->
-    <q-carousel
-      v-if="hasImages"
-      v-model="slide"
-      animated
-      swipeable
-      infinite
-      :arrows="need.attributes.images.length > 1"
-      height="200px"
-      class="overflow-hidden"
-    >
-      <q-carousel-slide
-        v-for="(image, i) of need.attributes.images"
-        :key="i"
-        :name="i + 1"
-        class="q-pa-none overflow-hidden column"
-      >
-        <q-img :src="image.href" :alt="image.alt" />
-      </q-carousel-slide>
-    </q-carousel>
+    <carousel v-if="hasImages" :images="need.attributes.images" height="200px" />
 
     <!-- Need text -->
     <q-card-section>
@@ -71,6 +53,7 @@ import MemberHeader from "./MemberHeader.vue";
 import ShareButton from "./ShareButton.vue";
 import ContactButton from "./ContactButton.vue";
 import CategoryAvatar from "./CategoryAvatar.vue";
+import Carousel from "./Carousel.vue";
 
 Vue.use(CardClickTo);
 Vue.use(Clamp);
@@ -82,9 +65,15 @@ export default Vue.extend({
     MemberHeader,
     ShareButton,
     ContactButton,
-    CategoryAvatar
+    CategoryAvatar,
+    Carousel
   },
   props: {
+    // Group code.
+    code: {
+      type: String,
+      required: true,
+    },
     need: {
       type: Object,
       required: true

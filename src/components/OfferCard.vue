@@ -16,24 +16,7 @@
     </member-header>
 
     <!-- Offer images -->
-    <q-carousel
-      v-model="slide"
-      animated
-      swipeable
-      infinite
-      :arrows="offer.attributes.images.length > 1"
-      height="200px"
-      class="overflow-hidden"
-    >
-      <q-carousel-slide
-        v-for="(image, i) of offer.attributes.images"
-        :key="i"
-        :name="i + 1"
-        class="q-pa-none overflow-hidden column"
-      >
-        <q-img :src="image.href" :alt="image.alt" />
-      </q-carousel-slide>
-    </q-carousel>
+    <carousel :images="offer.attributes.images" height="200px"/>
 
     <!-- offer title and description -->
     <q-card-section>
@@ -51,6 +34,7 @@
 <script lang="ts">
 import Vue from "vue";
 import CardClickTo from "../plugins/CardClickTo";
+import Carousel from "./Carousel.vue";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
 import MemberHeader from "./MemberHeader.vue";
@@ -64,7 +48,8 @@ export default Vue.extend({
   name: "OfferCard",
   components: {
     MemberHeader,
-    CategoryAvatar
+    CategoryAvatar,
+    Carousel
   },
   props: {
     // Group code.
@@ -78,9 +63,6 @@ export default Vue.extend({
       required: true,
       default: undefined
     }
-  },
-  data: () => ({
-    slide: 1
-  })
+  }
 });
 </script>
