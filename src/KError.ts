@@ -16,6 +16,7 @@ export enum KErrorCode {
   AuthNoCredentials = "AuthNoCredentials",
   NotImplemented = "NotImplemented",
   RequestError = "RequestError",
+  InvalidTransferState = "InvalidTransferState",
   /**
    * This condition should not happen and it indicates a programming bug 
    * that needs to be solved by the development team. Use it to assert complex

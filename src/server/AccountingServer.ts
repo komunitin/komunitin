@@ -151,14 +151,13 @@ export default {
         });
       }
     );
-    // Account transactions.
+    // Account transfers.
     server.get(`${urlAccounting}/:currency/transfers`,
       (schema: any, request) => {
         if (request.queryParams["filter[account]"]) {
           // Custom filtering.
           const accountId = request.queryParams["filter[account]"];
           let transfers = schema.transfers.where((transfer: any) => transfer.payerId == accountId || transfer.payeeId == accountId);
-          // Apply search to transfer objects instead of transaction objects.
           transfers = search(transfers, request);
           transfers = sort(transfers, request);
           return transfers;
@@ -167,5 +166,11 @@ export default {
         }
       }
     );
+    // Single transfer
+    server.get(`${urlAccounting}/:currency/transfers/:id`,
+      (schema: any, request) => {
+        return schema.transfers.find(request.params.id);
+      }
+    )
   }
 };

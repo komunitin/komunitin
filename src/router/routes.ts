@@ -79,6 +79,12 @@ const routes: RouteConfig[] = [
         props: true,
         name: 'Need',
         component: () => import("../pages/needs/Need.vue")
+      },
+      {
+        path: '/groups/:code/transactions/:transferCode',
+        props: true,
+        name: 'Transaction',
+        component: () => import("../pages/transactions/Transaction.vue")
       }
     ]
   }

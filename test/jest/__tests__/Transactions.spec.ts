@@ -45,4 +45,18 @@ describe("Transactions", () => {
     // Check result!
     expect(wrapper.get(TransactionList).findAll(MemberHeader).length).toBe(4);
   });
+  it("renders single transaction", async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/transactions/10046e7b-7d33-4e99-b765-085f39848594");
+    await wrapper.vm.$wait();
+    const text = wrapper.text();
+    expect(text).toContain("Isobel");
+    expect(text).toContain("GRP00005");
+    expect(text).toContain("Tomasa");
+    expect(text).toContain("GRP00000");
+    expect(text).toContain("-47.53 $");
+    expect(text).toContain("yesterday at");
+    expect(text).toContain("Robust");
+    expect(text).toContain("Committed");
+    expect(text).toContain("Group 0");
+  })
 })
