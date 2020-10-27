@@ -18,6 +18,7 @@
         :member="otherMember(transfer)"
         clickable
         :class="transfer.attributes.state"
+        :to="`/groups/${code}/transactions/${transfer.id}`"
       >
         <template #caption>
           {{ transfer.attributes.meta }}
