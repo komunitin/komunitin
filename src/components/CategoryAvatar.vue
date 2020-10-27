@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="q-py-xs">
     <span v-if="caption && right" class="q-pr-md text-overline text-uppercase text-onsurface-m">{{ category.attributes.name }}</span>
     <q-avatar :icon="category.attributes.icon" text-color="onprimary" :color="color" size="40px" >
       <q-tooltip v-if="!caption">{{ category.attributes.name }}</q-tooltip>
