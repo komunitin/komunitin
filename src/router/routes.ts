@@ -74,6 +74,12 @@ const routes: RouteConfig[] = [
         name: 'Offer',
         component: () => import('../pages/offers/Offer.vue')
       },
+      {
+        path: '/groups/:code/needs/:needCode',
+        props: true,
+        name: 'Need',
+        component: () => import("../pages/needs/Need.vue")
+      }
     ]
   }
 ];
