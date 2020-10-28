@@ -29,7 +29,7 @@ describe("Member", () => {
     const text = wrapper.text();
     expect(text).toContain("GRP0000");
     expect(text).toContain("Public account");
-    expect(text).toContain("515.04 $");
+    expect(text).toContain("655.92 $");
     expect(text).toContain("Min -500 $");
     // Tabs
     expect(text).toContain("Profile");
@@ -40,7 +40,7 @@ describe("Member", () => {
     expect(text).toContain("Consequuntur aut est fuga");
     // Contact
     expect(text).toContain("133-639-5843");
-    expect(text).toContain("@Precious_Rau31");
+    expect(text).toContain("@Jordi");
     // Location
     expect(text).toContain("Avon");
     
@@ -70,13 +70,13 @@ describe("Member", () => {
     const member = wrapper.get(MemberList).findAll(MemberHeader).at(1);
     member.trigger("click");
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TheaKlocko87");
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/MagaliLeffler45");
     const text = wrapper.text();
-    expect(text).toContain("Thea");
+    expect(text).toContain("Magali");
     expect(text).toContain("GRP00001");
-    expect(text).toContain("261.39 $");
-    expect(text).toContain("Magnam ullam at");
-    expect(text).toContain("Ozella_Gerhold49@hotmail.com");
+    expect(text).toContain("-199.78 $");
+    expect(text).toContain("Nisi");
+    expect(text).toContain("@yahoo.com");
     expect(text).toContain("No Needs");
     expect(text).toContain("3 Offers");
 
@@ -91,7 +91,7 @@ describe("Member", () => {
     const offers = wrapper.findAll(OfferCard);
     expect(offers.length).toBe(3);
     const offer = offers.at(0);
-    expect(offer.text()).toContain("Thea");
+    expect(offer.text()).toContain("Magali");
 
     // Transactions
     tabs.at(3).trigger("click");

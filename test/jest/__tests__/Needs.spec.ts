@@ -32,14 +32,14 @@ describe("Needs", () => {
     wrapper.get(PageHeader).vm.$emit("search","modi");
     await wrapper.vm.$wait();
     // found 4 results!
-    expect(wrapper.findAll(NeedCard).length).toBe(3);
+    expect(wrapper.findAll(NeedCard).length).toBe(2);
   });
   it ("Renders single need", async () => {
     await wrapper.vm.$router.push("/groups/GRP0/needs/Et-quae-po");
     await wrapper.vm.$wait();
     const text = wrapper.text();
-    expect(text).toContain("Christiana");
-    expect(text).toContain("Baby");
+    expect(text).toContain("Esteban");
+    expect(text).toContain("Shoes");
     expect(text).toContain("Et quae");
     expect(text).toContain("GRP00009");
     expect(text).toContain("Updated yesterday");
