@@ -78,5 +78,7 @@
   "accepted": "Acceptada",
   "committed": "Confirmada",
   "rejected": "Rebutjada",
-  "deleted": "Eliminada"
+  "deleted": "Eliminada",
+  "payer": "Pagador/a",
+  "payee": "Cobrador/a"
 }
