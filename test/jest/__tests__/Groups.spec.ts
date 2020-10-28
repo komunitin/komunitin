@@ -57,8 +57,8 @@ describe("Groups", () => {
     expect(text).toContain("Buckinghamshire");
     // Contact
     expect(text).toContain("133-639-5843");
-    expect(text).toContain("Marco.Volkman@yahoo.com");
-    expect(text).toContain("@Precious_Rau31");
-    expect(text).toContain("086-054-6945");
+    expect(text).toContain("Larue_Johnston41@gmail.com");
+    expect(text).toContain("@Teresa.Effertz29");
+    expect(text).toContain("693-357-6718");
   })
 });
