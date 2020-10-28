@@ -41,6 +41,7 @@
   "members": "Membres",
   "currency": "Moneda",
   "transactions": "Transaccions",
+  "transaction": "Transacció",
   "year": "Any",
   "exchanges": "Intercanvis",
   "circulation": "Circulació",
@@ -58,7 +59,6 @@
   "checkThisNeed": "Fixa't en aquesta necessitat de {member}",
   "minAmount": "Min {amount}",
   "maxAmount": "Max {amount}",
-  "pending": "Pendent",
   "balance": "Saldo",
   "personalAccount": "Compte personal",
   "businessAccount": "Compte d'empresa",
@@ -70,5 +70,15 @@
   "updatedAt": "Actualitzat {date}",
   "expiresAt": "Expira {date}",
   "price": "Preu",
-  "checkThisOffer": "Fixa't en aquesta oferta de {member}"
+  "checkThisOffer": "Fixa't en aquesta oferta de {member}",
+  "state": "Estat",
+  "group": "Grup",
+  "new": "Nova",
+  "pending": "Pendent",
+  "accepted": "Acceptada",
+  "committed": "Confirmada",
+  "rejected": "Rebutjada",
+  "deleted": "Eliminada",
+  "payer": "Pagador/a",
+  "payee": "Cobrador/a"
 }

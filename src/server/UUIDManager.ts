@@ -1,5 +1,8 @@
-import { uid } from "quasar";
+import faker from "faker";
 
+/**
+ * Implements UIDs as identifiers for MirageJS using faker UID generator.
+ */
 export default class UUIDIndetityManager {
   ids: Set<string>;
 
@@ -9,9 +12,9 @@ export default class UUIDIndetityManager {
 
   // Returns a new unused unique identifier.
   fetch() {
-    let id = uid();
+    let id = faker.random.uuid();
     while (this.ids.has(id)) {
-      id = uid();
+      id = faker.random.uuid();
     }
 
     this.ids.add(id);

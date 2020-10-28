@@ -41,6 +41,7 @@
   "members": "Miembros",
   "currency": "Moneda",
   "transactions": "Transacciones",
+  "transaction": "Transacción",
   "year": "Año",
   "exchanges": "Intercambios",
   "circulation": "Circulación",
@@ -58,7 +59,6 @@
   "checkThisNeed": "Fíjate en esta necesidad de {member}",
   "minAmount": "Min {amount}",
   "maxAmount": "Max {amount}",
-  "pending": "Pendiente",
   "balance": "Saldo",
   "personalAccount": "Cuenta personal",
   "businessAccount": "Cuenta de empresa",
@@ -70,5 +70,15 @@
   "updatedAt": "Actualizado {date}",
   "expiresAt": "Expira {date}",
   "price": "Precio",
-  "checkThisOffer": "Fíjate en esta oferta de {member}"
+  "checkThisOffer": "Fíjate en esta oferta de {member}",
+  "state": "Estado",
+  "group": "Grupo",
+  "new": "Nueva",
+  "pending": "Pendiente",
+  "accepted": "Aceptada",
+  "committed": "Confirmada",
+  "rejected": "Rechazada",
+  "deleted": "Eliminada",
+  "payer": "Pagador/a",
+  "payee": "Cobrador/a"
 }

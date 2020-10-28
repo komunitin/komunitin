@@ -38,23 +38,23 @@ describe("Offers", () => {
   it ("searches offers", async () => {
     // The user interaction is already tested in PageHeader unit test,
     // here just emit the search event.
-    wrapper.get(PageHeader).vm.$emit("search","ball");
+    wrapper.get(PageHeader).vm.$emit("search","soap");
     await wrapper.vm.$nextTick();
     expect(wrapper.findAll(OfferCard).length).toBe(0);
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     // found 10 results!
-    expect(wrapper.findAll(OfferCard).length).toBe(4);
+    expect(wrapper.findAll(OfferCard).length).toBe(3);
   })
 
   it ("renders single offer", async() => {
-    await wrapper.vm.$router.push("/groups/GRP0/offers/Ball23");
+    await wrapper.vm.$router.push("/groups/GRP0/offers/Soap4");
     await wrapper.vm.$wait();
     const text = wrapper.text();
-    expect(text).toContain("Ball");
-    expect(text).toContain("Piper");
-    expect(text).toContain("GRP00007");
-    expect(text).toContain("5.58 $");
+    expect(text).toContain("Soap");
+    expect(text).toContain("Magali");
+    expect(text).toContain("GRP00001");
+    expect(text).toContain("7.60 $");
     expect(text).toContain("Updated yesterday");
   })
 
