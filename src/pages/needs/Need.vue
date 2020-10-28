@@ -91,7 +91,6 @@ export default Vue.extend({
   created() {
     // See comment in analogous function at Group.vue.
     this.$watch("needCode", this.fetchData, { immediate: true });
-    
   },
   methods: {
     async fetchData(needCode: string) {
