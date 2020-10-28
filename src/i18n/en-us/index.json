@@ -78,5 +78,7 @@
   "accepted": "Accepted",
   "committed": "Committed",
   "rejected": "Rejected",
-  "deleted": "Deleted"
+  "deleted": "Deleted",
+  "payer": "Payer",
+  "payee": "Payee"
 }
