@@ -11,13 +11,14 @@ describe("Needs", () => {
   let wrapper: Wrapper<Vue>;
 
   beforeAll(async () => {
-    wrapper = await mountComponent(App);
+    wrapper = await mountComponent(App, { login: true });
   });
   afterAll(() => wrapper.destroy());
 
   it("Loads needs and searches", async () => {
-    await wrapper.vm.$router.push("/groups/GRP0/needs");
-    await wrapper.vm.$nextTick();
+    // Wait for login redirect
+    await wrapper.vm.$wait();
+    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
     // Load.

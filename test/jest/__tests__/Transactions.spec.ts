@@ -17,9 +17,8 @@ describe("Transactions", () => {
 
   
   it("Loads and searches tansactions", async () => {
-    // Wait for the login redirect.
+    // Wait for login redirect
     await wrapper.vm.$wait();
-
     // Click members link
     wrapper.get("#menu-transactions").trigger("click");
     await wrapper.vm.$wait();

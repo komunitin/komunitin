@@ -27,6 +27,11 @@ export default Vue.extend({
       type: String,
       required: false,
       default: null
+    },
+    href: {
+      type: String,
+      required: false,
+      default: null
     }
   },
   computed: {
@@ -34,13 +39,15 @@ export default Vue.extend({
       return this.to == this.$route.path
     },
     disable(): boolean {
-      return !this.to && !this.$listeners.click;
+      return !this.to && !this.href && !this.$listeners.click;
     }
   },
   methods: {
     click() {
       if (this.to) {
         this.$router.push(this.to);
+      } else if (this.href) {
+        window.open(this.href, "_blank");
       }
       this.$emit("click");
     }
