@@ -24,7 +24,7 @@
 
     <q-separator />
 
-    <menu-item icon="home" :title="$t('home')"  />
+    <!--menu-item icon="home" :title="$t('home')"  /-->
     <menu-item 
       id="menu-transactions" 
       icon="account_balance_wallet"
@@ -67,7 +67,7 @@
     <q-separator />
 
     <menu-item icon="group_work" :title="$t('otherGroups')" to="/groups" />
-    <menu-item icon="help" :title="$t('help')" />
+    <menu-item icon="info" :title="$t('komunitinProject')" href="https://github.com/komunitin/komunitin"/>
   </q-list>
 </template>
 

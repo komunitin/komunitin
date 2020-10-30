@@ -11,12 +11,14 @@ describe("Offers", () => {
   let wrapper: Wrapper<Vue>;
 
   beforeAll(async () => {
-    wrapper = await mountComponent(App);
-    await wrapper.vm.$router.push("/groups/GRP0/offers");
+    wrapper = await mountComponent(App, { login: true });
   });
   afterAll(() => wrapper.destroy());
 
   it("Loads offers", async () => {
+    // Wait for login redirect
+    await wrapper.vm.$wait();
+    await wrapper.vm.$router.push("/groups/GRP0/offers");
     await wrapper.vm.$nextTick();
     expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
     expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);

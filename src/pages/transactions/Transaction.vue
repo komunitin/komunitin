@@ -5,12 +5,12 @@
       <q-page v-if="ready" class="q-py-lg col-12 col-sm-8 col-md-6">
         <div class="q-py-sm"> <!-- payer -->
           <div class="text-overline text-uppercase text-onsurface-d q-pl-md">{{$t("payer")}}</div>
-          <member-header :member="transfer.payee.member" />
+          <member-header :member="transfer.payee.member" :to="`/groups/${code}/members/${transfer.payee.member.attributes.code}`"/>
         </div>
         <q-separator />
         <div class="q-py-sm"> <!-- payee -->
           <div class="text-overline text-uppercase text-onsurface-d q-pl-md">{{$t("payee")}}</div>
-          <member-header :member="transfer.payer.member" />
+          <member-header :member="transfer.payer.member" :to="`/groups/${code}/members/${transfer.payer.member.attributes.code}`"/>
         </div>
         <q-separator />
         <div class="text-center q-py-lg"><!-- main section -->

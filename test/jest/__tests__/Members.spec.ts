@@ -17,7 +17,7 @@ describe("Members", () => {
   afterAll(() => wrapper.destroy());
 
   it("Loads members, balances and searches", async () => {
-    // Wait for the login redirect.
+    // Wait for login redirect
     await wrapper.vm.$wait();
     // Click members link
     await wrapper.get("#menu-members").trigger("click");
