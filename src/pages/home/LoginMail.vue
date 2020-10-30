@@ -86,7 +86,15 @@ export default Vue.extend({
       await this.$store.dispatch("login", {email: this.email, password: this.pass});
       if (this.$store.getters.isLoggedIn) {
         this.$q.notify({type: "positive", message: `Successfully logged in ${this.$store.state.me.userInfo.name} !`});
-        this.$router.push("/groups/" + this.$store.getters.myMember.group.attributes.code)
+        
+        // If user came here due to a redirect when trying to access a protected route,
+        // bring them to where they tried to go. 
+        const redirect = (typeof this.$route.query.redirect == "string") 
+          ? this.$route.query.redirect 
+        // I'd prefer redirecting to "/" and let the general router guard to redirect the user
+        // where it needs to, but it seems that the Vue Router doesn't allow that.
+          : `/groups/${this.$store.getters.myMember.group.attributes.code}/needs`;
+        this.$router.push(redirect);
       }
     }
   }

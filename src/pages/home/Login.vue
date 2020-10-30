@@ -17,7 +17,7 @@
       color="transparent"
       text-color="onoutside"
       :label="$t('logIn')"
-      :to="{ name: 'LoginSelect' }"
+      :to="{ name: 'LoginMail' }"
       icon="account_circle"
       class="full-width"
     />
