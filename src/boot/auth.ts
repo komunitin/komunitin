@@ -8,16 +8,30 @@ export default boot(({ router, store }) => {
       await store.dispatch("authorize");
       // User is logged in.
       if (to.path == "/" || to.path.startsWith("/login")) {
-        // Redirect to dashboard. But since dashboard is still not developed, redirect to group page.
-        next(`/groups/${store.getters.myMember.group.attributes.code}`);
+        // Redirect to dashboard. But since dashboard is still not developed, redirect to needs page.
+        next(`/groups/${store.getters.myMember.group.attributes.code}/needs`);
       } else {
         next();
       }
     } catch (error) {
-      // User is not logged in.
-      // That'd be the place to redirect in case of tryinc to access a restricted route,
-      // but so far all the pages we've developed are publicly accessible.
-      next();
+      // User is not logged in. If user is trying to access a private node, bring them to login page
+      // so they are redirected to the desired path after login.
+      
+      //Private nodes are all but:
+      //  - /
+      //  - /login*
+      //  - /groups
+      //  - /groups/XXXX
+      if (to.path != "/" && !to.path.startsWith("/login") && to.path != "/groups" && !(/^\/groups\/\w+$/.test(to.path))) {
+        next({
+          path: "/login-mail",
+          query: {
+            redirect: to.path
+          }});
+      } else {
+        next();
+      }
+      
     }
   });
 });

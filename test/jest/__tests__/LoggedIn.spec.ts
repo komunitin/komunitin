@@ -12,7 +12,7 @@ describe("logged in", () => {
   it("redirects when logged in", async() => {
     // Wait for the redirect.
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.path).toBe("/groups/GRP0");
+    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
   });
   it("renders Group, member and account data", async() => {
     const text = wrapper.text();
