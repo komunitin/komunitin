@@ -34,7 +34,7 @@
               </span>
             </q-item-label>
             <div
-              class="col currency text-h6"
+              class="col transaction-amount text-h6"
               :class="
                 signedAmount(transfer) >= 0
                   ? 'positive-amount'
@@ -163,3 +163,12 @@ export default Vue.extend({
   }
 })
 </script>
+<style lang="scss" scoped>
+  /*
+   * Set negative margin-top so the transaction amount so that it is 
+   * inline with the transaction description and not too low.
+   */
+  .transaction-amount {
+    margin-top: -12px;
+  } 
+</style>

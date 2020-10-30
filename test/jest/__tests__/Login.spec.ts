@@ -27,16 +27,19 @@ describe("Front page and login", () => {
     // Vue needs an additional nextTick()'s to render the content
     // got through router.
     await wrapper.vm.$nextTicks();
-    expect(wrapper.vm.$route.path).toBe("/login-select");
+    // *** LoginSelect page has been disabled by now, since the only 
+    // *** implemented login method so far is the classic email/password.
+    //expect(wrapper.vm.$route.path).toBe("/login-select");
     // Click Login with email button.
-    wrapper.get("#login_mail").trigger("click");
-    await wrapper.vm.$nextTicks();
+    //wrapper.get("#login_mail").trigger("click");
+    //await wrapper.vm.$nextTicks();
     expect(wrapper.vm.$route.path).toBe("/login-mail");
     // Click back
     expect(wrapper.get("#back").isVisible()).toBe(true);
-    wrapper.get("#back").trigger("click");
-    await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.path).toBe("/login-select");
+    // *** LoginSelect's been disabled.
+    //wrapper.get("#back").trigger("click");
+    //await wrapper.vm.$wait();
+    //expect(wrapper.vm.$route.path).toBe("/login-select");
     // Click back again
     expect(wrapper.get("#back").isVisible()).toBe(true);
     wrapper.get("#back").trigger("click");
@@ -62,7 +65,7 @@ describe("Front page and login", () => {
     wrapper.find("button[type='submit']").trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$store.getters.isLoggedIn).toBe(true);
-    expect(wrapper.vm.$route.path).toBe("/groups/GRP0");
+    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
     // Click the account switcher
     wrapper
       .find("#my-member")
