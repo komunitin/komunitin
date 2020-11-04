@@ -229,7 +229,7 @@ export class Auth {
    */
   private async tokenRequest(data: TokenRequestData): Promise<AuthData> {
     // eslint-disable-next-line @typescript-eslint/camelcase
-    data.client_id = KOptions.apis.auth.clientId;
+    data.client_id = KOptions.oauth.clientid;
     // Use URLSearchParams in order to send the request with x-www-urlencoded.
     const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => params.append(key, value));

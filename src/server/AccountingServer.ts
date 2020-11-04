@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Model, Factory, Server, ModelInstance, belongsTo, hasMany } from "miragejs";
 import faker from "faker";
-import KOptions from "../komunitin.json";
+import { KOptions } from "../boot/komunitin";
 import ApiSerializer from "./ApiSerializer";
 import { filter, sort, search } from "./ServerUtils";
 
-const urlAccounting = KOptions.apis.accounting;
+const urlAccounting = KOptions.url.accounting;
 
 export default {
   serializers: {

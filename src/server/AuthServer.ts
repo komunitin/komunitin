@@ -1,4 +1,4 @@
-import KOptions from "../komunitin.json";
+import { KOptions } from "../boot/komunitin";
 import { TokenResponse, User } from "../plugins/Auth";
 import { Server, Response } from "miragejs";
 
@@ -33,7 +33,7 @@ export default {
   routes(server: Server) {
     // OAuth2 token
     server.post(
-      KOptions.apis.auth.issuer + KOptions.apis.auth.token,
+      KOptions.url.auth + "/token",
       (schema, request) => {
         const params = new URLSearchParams(request.requestBody);
         const data = mockToken(params.get("scope") as string);
@@ -44,7 +44,7 @@ export default {
     /**
      * Auth UserInfo
      */
-    server.get(KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo, () =>
+    server.get(KOptions.url.auth + "/UserInfo", () =>
       mockUserInfo()
     );
   }
