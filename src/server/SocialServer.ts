@@ -6,10 +6,10 @@ import faker from "faker";
 import { filter } from "./ServerUtils"
 
 import { ContactNetworks } from "../components/SocialNetworks";
-import KOptions from "../komunitin.json";
+import { KOptions } from "../boot/komunitin";
 import ApiSerializer from "./ApiSerializer";
 
-const urlSocial = KOptions.apis.social;
+const urlSocial = KOptions.url.social;
 
 const contactTypes = Object.keys(ContactNetworks);
 

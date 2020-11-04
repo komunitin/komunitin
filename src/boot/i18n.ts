@@ -2,7 +2,7 @@ import Vue from "vue";
 import { boot } from "quasar/wrappers";
 import VueI18n from "vue-i18n";
 import DefaultMessages from "src/i18n/en-us/index.json";
-import { KOptions } from "./komunitin";
+import langs from "src/i18n";
 import { LocalStorage, QVueGlobals } from "quasar";
 import { formatRelative, Locale } from "date-fns";
 
@@ -32,12 +32,7 @@ export let i18n: VueI18n;
  * or the default language code (English) instead.
  * **/
 function normalizeLocale(locale: string): string {
-  return KOptions.langs.reduce(
-    (lang: string, elem: { label: string; value: string }) => {
-      return elem.value === locale ? locale : lang;
-    },
-    DEFAULT_LANG
-  );
+  return (locale in langs) ? locale : DEFAULT_LANG;
 }
 
 /**

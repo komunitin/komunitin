@@ -6,9 +6,9 @@ import { handleError } from "../boot/errors";
 
 // Exported just for testing purposes.
 export const auth = new Auth({
-  clientId: KOptions.apis.auth.clientId,
-  tokenEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.token,
-  userInfoEndpoint: KOptions.apis.auth.issuer + KOptions.apis.auth.userInfo
+  clientId: KOptions.oauth.clientid,
+  tokenEndpoint: KOptions.url.auth + "/token",
+  userInfoEndpoint: KOptions.url.auth + "/UserInfo"
 });
 
 export interface LoginPayload {
