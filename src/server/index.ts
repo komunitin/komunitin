@@ -33,13 +33,25 @@ export default new Server({
     // Disable output of all intercepted requests.
     this.logging = false;
 
-    if (process.env.USE_MIRAGE) {
-      this.timing = parseInt(process.env.USE_MIRAGE);
+    if (process.env.MOCK_TIMEOUT) {
+      this.timing = parseInt(process.env.MOCK_TIMEOUT);
+    }
+    if (process.env.MOCK_AUTH) {
+      AuthServer.routes(this);
+    } else {
+      this.passthrough(process.env.URL_AUTH + "/**");
+    }
+    if (process.env.MOCK_SOCIAL) {
+      SocialServer.routes(this);
+    } else {
+      this.passthrough(process.env.URL_SOCIAL + "/**");
+    }
+    if (process.env.MOCK_ACCOUNTING) {
+      AccountingServer.routes(this);
+    } else {
+      this.passthrough(process.env.URL_ACCOUNTING + "/**");
     }
 
-    AuthServer.routes(this);
-    SocialServer.routes(this);
-    AccountingServer.routes(this);
     this.passthrough("/service-worker.js");
   }
 });

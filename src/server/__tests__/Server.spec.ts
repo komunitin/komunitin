@@ -1,10 +1,10 @@
 import "../index";
 import Axios from "axios";
-import KOptions from "../../komunitin.json";
+import { KOptions } from "../../boot/komunitin";
 import { ResourceObject } from "src/store/model";
 
-const urlSocial = KOptions.apis.social;
-const urlAccounting = KOptions.apis.accounting;
+const urlSocial = KOptions.url.social;
+const urlAccounting = KOptions.url.accounting;
 
 describe("MirageJS Server", () => {
   it ("includes currency external resource", async () => {
