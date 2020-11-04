@@ -81,5 +81,7 @@
   "deleted": "Eliminada",
   "payer": "Pagador/a",
   "payee": "Cobrador/a",
-  "komunitinProject": "Proyecto Komunitin"
+  "komunitinProject": "Proyecto Komunitin",
+  "loggedIn": "Iniciada la sesión {name}!",
+  "incorrectEmailOrPassword": "Email o contraseña incorrectos."
 }

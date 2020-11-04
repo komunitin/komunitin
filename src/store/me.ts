@@ -108,14 +108,27 @@ export default {
   actions: {
     /**
      * Authorize user using email and password.
+     * 
+     * Does no throw exception on invalid credentials.
      */
     login: async (
       context: ActionContext<UserState, never>,
       payload: LoginPayload
     ) => {
-      const tokens = await auth.login(payload.email, payload.password);
-      context.commit("tokens", tokens);
-      return loadUser(tokens.accessToken, context);
+      try {
+        const tokens = await auth.login(payload.email, payload.password);
+        context.commit("tokens", tokens);
+        await loadUser(tokens.accessToken, context);
+      } catch (error) {
+        if (error instanceof KError && error.code == KErrorCode.AuthNoCredentials) {
+          // Invalid credentials, but don't throw exception. 
+          // User should check isLoggedIn getter, that will return false.
+          context.dispatch("logout");
+        } else {
+          // Any unexpected error, throw it!
+          throw error;
+        }
+      }
     },
     /**
      * Silently authorize user using stored credentials. Throws exception (rejects)
@@ -126,7 +139,7 @@ export default {
         try {
           const tokens = await auth.authorize(context.state.tokens);
           context.commit("tokens", tokens);
-          return loadUser(tokens.accessToken, context);
+          await loadUser(tokens.accessToken, context);
         } catch (error) {
           // Couldn't authorize. Delete credentials so we don't attempt another
           // call next time.
@@ -140,11 +153,11 @@ export default {
     /**
      * Logout current user.
      */
-    logout: async (context: ActionContext<UserState, never>) => {
-      await auth.logout();
-      context.commit("tokens", undefined);
-      context.commit("userInfo", undefined);
-      context.commit("myUser", undefined);
+    logout: async ({commit}: ActionContext<UserState, never>) => {
+      auth.logout();
+      commit("tokens", undefined);
+      commit("userInfo", undefined);
+      commit("myUser", undefined);
     },
     /**
      * Get the current location from the device.

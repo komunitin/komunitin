@@ -85,7 +85,12 @@ export default Vue.extend({
       // Perform authentication request.
       await this.$store.dispatch("login", {email: this.email, password: this.pass});
       if (this.$store.getters.isLoggedIn) {
-        this.$q.notify({type: "positive", message: `Successfully logged in ${this.$store.state.me.userInfo.name} !`});
+        this.$q.notify({
+          type: "positive", 
+          message: this.$t("loggedIn", {
+            name: this.$store.state.me.userInfo.name
+          }).toString()
+        });
         
         // If user came here due to a redirect when trying to access a protected route,
         // bring them to where they tried to go. 
@@ -95,6 +100,11 @@ export default Vue.extend({
         // where it needs to, but it seems that the Vue Router doesn't allow that.
           : `/groups/${this.$store.getters.myMember.group.attributes.code}/needs`;
         this.$router.push(redirect);
+      } else {
+        this.$q.notify({
+          type: "negative",
+          message: this.$t("incorrectEmailOrPassword").toString()
+        })
       }
     }
   }

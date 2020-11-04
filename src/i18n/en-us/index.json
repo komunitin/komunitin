@@ -81,5 +81,7 @@
   "deleted": "Deleted",
   "payer": "Payer",
   "payee": "Payee",
-  "komunitinProject": "Komunitin project"
+  "komunitinProject": "Komunitin project",
+  "loggedIn": "Successfully logged in {name}!",
+  "incorrectEmailOrPassword": "Incorrect email or password."
 }

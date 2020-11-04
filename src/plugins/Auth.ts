@@ -134,6 +134,8 @@ export class Auth {
    *
    * @param email The user email
    * @param password The user password
+   * 
+   * Throws exception / rejects promise on invalid credentials.
    */
   public async login(email: string, password: string): Promise<AuthData> {
     return this.tokenRequest({
@@ -226,6 +228,8 @@ export class Auth {
   /**
    * Perform a request to /token OAuth2 endpoint.
    * @param data The data to be sent. client_id is set automatically.
+   * 
+   * Throws exception on invalid credentials.
    */
   private async tokenRequest(data: TokenRequestData): Promise<AuthData> {
     // eslint-disable-next-line @typescript-eslint/camelcase
