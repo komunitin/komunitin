@@ -3,15 +3,15 @@
   <q-btn-dropdown flat label="Language">
     <q-list>
       <q-item
-        v-for="lang in langs"
-        :key="lang.value"
-        :ref="lang.value"
+        v-for="(label, lang) in langs"
+        :key="lang"
+        :ref="lang"
         v-close-popup
         clickable
-        @click="changeLanguage(lang.value)"
+        @click="changeLanguage(lang)"
       >
         <q-item-section>
-          <q-item-label>{{ lang.label }}</q-item-label>
+          <q-item-label>{{ label }}</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>
@@ -19,6 +19,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
+import langs from "../i18n";
 
 export default Vue.extend({
   name: "SelectLang",
@@ -26,7 +27,7 @@ export default Vue.extend({
     return {
       locale: this.$i18n.locale,
       // Available languages.
-      langs: this.$KOptions.langs
+      langs
     };
   },
   methods: {

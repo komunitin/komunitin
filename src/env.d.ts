@@ -1,4 +1,7 @@
-
+/**
+ * Define the type of process.env object so it doesn't trigger
+ * TypeScript compile errors.
+ */
 declare namespace NodeJS {
   interface ProcessEnv {
     NODE_ENV: string;
