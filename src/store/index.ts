@@ -21,7 +21,7 @@ import ui from "./ui";
 Vue.use(Vuex);
 
 // Build modules for Social API:
-const socialUrl = KOptions.apis.social;
+const socialUrl = KOptions.url.social;
 // `groups` resource does not follow the general pattern for endpoints.
 const groups = new (class extends Resources<Group, unknown> {
   collectionEndpoint = () => "/groups";
@@ -40,7 +40,7 @@ const users = new (class extends Resources<User, unknown> {
 })("users", socialUrl);
 
 // Build modules for Accounting API:
-const accountingUrl = KOptions.apis.accounting;
+const accountingUrl = KOptions.url.accounting;
 // Build modules for Accounting API:
 // `currencies` resource does not follow the general pattern for endpoints.
 const currencies = new (class extends Resources<Currency, unknown> {

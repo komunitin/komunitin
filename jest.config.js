@@ -2,6 +2,9 @@ module.exports = {
   globals: {
     __DEV__: true
   },
+  setupFiles: [
+    '<rootDir>/test/jest/jest.env.ts'
+  ],
   // This commented option lets us add some custom code before each test.
   // setupFilesAfterEnv: [
   //  '<rootDir>/test/jest/jest.setup.js'
