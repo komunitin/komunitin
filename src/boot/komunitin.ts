@@ -9,15 +9,15 @@ const KOptions = {
     /**
      * Authorization API URL.
      */
-    auth: process.env.URL_AUTH ?? "http://localhost:8080/auth",
+    auth: process.env.AUTH_URL ?? "http://localhost:8080/auth",
     /**
      * Social API URL.
      */
-    social: process.env.URL_SOCIAL ?? "http://localhost:8080/social",
+    social: process.env.SOCIAL_URL ?? "http://localhost:8080/social",
     /**
      * Accounting API URL.
      */
-    accounting: process.env.URL_ACCOUNTING ?? "http://localhost:8080/auth"
+    accounting: process.env.ACCOUNTING_URL ?? "http://localhost:8080/auth"
   },
   oauth: {
     /**
