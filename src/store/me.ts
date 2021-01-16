@@ -41,14 +41,28 @@ async function loadUserInfo(accessToken: string, { commit }: ActionContext<UserS
 async function loadUserData(accessToken: string,
   { commit, dispatch, rootGetters }: ActionContext<UserState, never>
 ) {
+  // Resource actions allow including external relationships such as members.account,
+  // but we can't use it right here because we still don't know the group code, which
+  // is necessary for this process to work. So we manually do the twy calls.
   await dispatch("users/load", {
-    // We can't include account.currency since account is an external relationship.
-    // However we can include both group.currency and members.account, both external
-    // relationships with the same effect.
-    include: "members,members.group,members.group.currency,members.account"
+    include: "members,members.group"
   });
-  const userId = rootGetters["users/current"].id;
-  commit("myUser", userId);
+  const user = rootGetters["users/current"];
+
+  // We here compute the currency code and account code from their URLS so we can fetch 
+  // them using the store methods. This is kind of a perversion of HATEOAS since we could 
+  // more coherently fetch them directly from the provided link. But we have all the store 
+  // infrastructure like this, so this is a little hack that I hope won't make problems.
+  const currencyUrl = user.members[0].group.relationships.currency.links.related;
+  // https://.../accounting/<GROUP>/currency
+  const currencyCode = currencyUrl.split('/').slice(-2)[0];
+  const accountUrl = user.members[0].relationships.account.links.related;
+  // https://.../accounting/<GROUP>/accounts/<CODE>
+  const accountCode = accountUrl.split('/').slice(-1)[0];
+
+  // Fetch currency and account from accounting API.
+  await dispatch("accounts/load", {group: currencyCode, code: accountCode, include: "currency"});
+  commit("myUser", user.id);
 }
 
 /**
@@ -96,7 +110,9 @@ export default {
     },
     myAccount: (state, getters) => {
       return getters.myMember?.account
-    }
+    },
+    accessToken: (state) => 
+      state.tokens?.accessToken
   },
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
