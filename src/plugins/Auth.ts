@@ -63,7 +63,7 @@ export interface AuthData {
  */
 export class Auth {
   public static readonly STORAGE_KEY: string = "auth-session";
-  public static readonly SCOPES = "email komunitin_social offline_access openid profile";
+  public static readonly SCOPES = "komunitin_social komunitin_accounting email offline_access openid profile";
 
   private readonly tokenEndpoint: string;
   private readonly userInfoEndpoint: string;

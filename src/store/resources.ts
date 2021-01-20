@@ -119,7 +119,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * The resource type.
    */
   readonly type: string;
-  protected readonly client: AxiosInstance;
+  /**
+   * The API base URL.
+   */
+  readonly baseUrl: string;
 
   /**
    * @param type The resource type.
@@ -127,7 +130,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   public constructor(type: string, baseUrl: string) {
     this.type = type;
-    this.client = Resources.getHttpClient(baseUrl);
+    this.baseUrl = baseUrl;
   }
 
   /**
@@ -175,13 +178,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     return {};
   }
 
-  private static getHttpClient(baseURL?: string): AxiosInstance {
+  private getHttpClient(context: ActionContext<ResourcesState<T>, S>): AxiosInstance {
+    
     return Axios.create({
-      baseURL,
-      withCredentials: false,
+      baseURL: this.baseUrl,
+      withCredentials: true,
       headers: {
         Accept: "application/vnd.api+json",
-        "Content-Type": "application/vnd.api+json"
+        "Content-Type": "application/vnd.api+json",
+        Authorization: `Bearer ${context.rootGetters['accessToken']}`
       }
     });
   }
@@ -201,10 +206,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     commit: Commit,
     dispatch: Dispatch
   ) {
-    // Here we'll accumulate all external resources.
+    // Here we commit all included resources and accumulate all external resources for later fetch.
     const external: Record<string, ExternalResourceObject[]> = {};
     included.forEach(resource => {
-      if (!(resource as ExternalResourceObject).external) {
+      if (!(resource as ExternalResourceObject).meta?.external) {
         // Standard included resource. Commit change!
         commit(resource.type + "/add", resource, { root: true });
       } else {
@@ -498,7 +503,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (query.length > 0) url += "?" + query;
     // Call API
     try {
-      const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(url);
+      const response = await this.getHttpClient(context).get<CollectionResponseInclude<T, ResourceObject>>(url, 
+        { headers: {Authorization: `Bearer ${context.rootGetters['accessToken']}`}});
       await this.handleCollectionResponse(
         response,
         context,
@@ -525,7 +531,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           "Unexpected call to 'loadNext' resource action with undefined next link."
         );
       }
-      const response = await this.client.get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
+      const response = await this.getHttpClient(context).get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
 
       await this.handleCollectionResponse(
         response,
@@ -540,7 +546,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * Fetches the current reaource.
    */
   protected async load(
-    { commit, dispatch }: ActionContext<ResourcesState<T>, S>,
+    context: ActionContext<ResourcesState<T>, S>,
     payload: LoadPayload
   ) {
     let url = this.resourceEndpoint(payload.code, payload.group);
@@ -551,16 +557,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     // Call API
     try {
-      const response = await this.client.get<ResourceResponseInclude<T, ResourceObject>>(url);
+      const response = await this.getHttpClient(context).get<ResourceResponseInclude<T, ResourceObject>>(url);
       // Commit mutation(s).
       const resource = response.data.data;
-      commit("setCurrent", resource);
+      context.commit("setCurrent", resource);
       if (response.data.included) {
         await Resources.handleIncluded(
           response.data.included,
           payload.group,
-          commit,
-          dispatch
+          context.commit,
+          context.dispatch
         );
       }
     } catch (error) {

@@ -1,6 +1,9 @@
 module.exports = {
   globals: {
-    __DEV__: true
+    __DEV__: true,
+    "vue-jest": {
+      "babelConfig": true
+    }
   },
   setupFiles: [
     '<rootDir>/test/jest/jest.env.ts'
@@ -61,5 +64,5 @@ module.exports = {
     '<rootDir>/node_modules/(?!(quasar/lang.*|quasar/icon-set.*))',
   ],
   snapshotSerializers: ['<rootDir>/node_modules/jest-serializer-vue'],
-  moduleDirectories: ['<rootDir>/node_modules']
+  moduleDirectories: ['<rootDir>/node_modules'],
 };

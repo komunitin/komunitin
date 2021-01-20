@@ -34,6 +34,7 @@ function showError(error: KError) {
  * @param error The error to be logged.
  */
 function logError(error: KError) {
+  // eslint-disable-next-line no-console
   console.error(`[${error.code}] ${error}`);
 }
 
@@ -41,6 +42,7 @@ function logError(error: KError) {
  * Log error produced while trying to handle the error. 
  */
 function logErrorHandling(error: Error) {
+  // eslint-disable-next-line no-console
   console.error(`[${KErrorCode.ErrorHandling}] Error while handling another error: ${error.message}`);
 }
 
@@ -83,7 +85,10 @@ if (window !== undefined) {
     // in an infinite loop due to the notification widget.
     if (event.message.includes("ResizeObserver loop limit exceeded")) {
       // TODO: Maybe remove this warning in production.
-      console.warn(event.message);
+      if (process.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.warn(event.message);
+      }
       return;
     }
     try {

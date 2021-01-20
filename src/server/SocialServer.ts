@@ -10,6 +10,7 @@ import { KOptions } from "../boot/komunitin";
 import ApiSerializer from "./ApiSerializer";
 
 const urlSocial = KOptions.url.social;
+const urlAccounting = KOptions.url.accounting;
 
 const contactTypes = Object.keys(ContactNetworks);
 
@@ -134,6 +135,13 @@ export default {
       isExternal(relationshipKey: string) {
         return relationshipKey == "account";
       },
+      links: (member: any) => {
+        return {
+          account: {
+            related: `${urlAccounting}/${member.account.currency.code}/accounts/${member.account.code}`
+          }
+        }
+      }
     }),
     contact: ApiSerializer,
     category: ApiSerializer.extend({
@@ -160,7 +168,15 @@ export default {
     }),
     user: ApiSerializer.extend({
       alwaysIncludeLinkageData: true,
-      selfLink: () => urlSocial + "/users/me"
+      selfLink: () => urlSocial + "/users/me",
+      links(user: any) {
+        const member = user.members.models[0];
+        return {
+          members: {
+            related: `${urlSocial}/${member.group.code}/members/${member.code}` 
+          }
+        }
+      }
     })
   },
   models: {

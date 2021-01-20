@@ -40,7 +40,7 @@ export interface ResourceResponse<T extends ResourceObject> {
 export interface CollectionResponse<T extends ResourceObject> {
   links: {
     self: string;
-    first: string;
+    //first: string;
     prev: string | null;
     next: string | null;
   };
@@ -124,8 +124,10 @@ export interface RelatedResource {
  * https://github.com/komunitin/komunitin-api/blob/master/jsonapi-profiles/external.md
  */
 export interface ExternalResourceObject extends ResourceObject {
-  external: true;
   relationships?: undefined;
+  meta: {
+    external : true
+  }
 }
 
 /**
@@ -271,6 +273,7 @@ export interface Currency extends ResourceObject {
     decimals: number;
     scale: number;
     value: number;
+    // TODO: Remove this from here!
     stats: {
       transactions: number;
       exchanges: number;
@@ -319,6 +322,7 @@ export interface Transfer extends ResourceObject {
  */
 export interface Offer extends ResourceObject {
   attributes: {
+    code: string;
     name: string;
     content: string;
     images: ImageObject[];
@@ -339,6 +343,7 @@ export interface Offer extends ResourceObject {
  */
 export interface Need extends ResourceObject {
   attributes: {
+    code: string;
     content: string;
     images: ImageObject[];
     access: Access;
