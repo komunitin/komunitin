@@ -4,14 +4,14 @@
       id="login_google"
       color="surface"
       text-color="onsurface-m"
-      icon="img:statics/icons/google.png"
+      icon="img:icons/google.png"
       :label="$t('loginWithGoogle')"
     />
     <q-btn
       id="login_facebook"
       color="surface"
       text-color="onsurface-m"
-      icon="img:statics/icons/facebook.png"
+      icon="img:icons/facebook.png"
       :label="$t('loginWithFacebook')"
     />
     <q-btn

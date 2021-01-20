@@ -74,8 +74,8 @@ describe("Front page and login", () => {
     await wrapper.vm.$nextTick();
     // Click logout
     wrapper
-      .find(MenuDrawer)
-      .find({ ref: "logout" })
+      .findComponent(MenuDrawer)
+      .findComponent({ ref: "logout" })
       .trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$store.getters.isLoggedIn).toBe(false);

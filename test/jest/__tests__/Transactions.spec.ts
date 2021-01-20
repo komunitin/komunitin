@@ -25,7 +25,7 @@ describe("Transactions", () => {
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62/transactions");
     // Further wait to load members.
     await wrapper.vm.$wait();
-    const transactions = wrapper.get(TransactionList).findAll(MemberHeader)
+    const transactions = wrapper.getComponent(TransactionList).findAllComponents(MemberHeader)
     expect(transactions.length).toBe(20);
     const first = transactions.wrappers[0];
     expect(first.text()).toContain("today");
@@ -39,10 +39,10 @@ describe("Transactions", () => {
     expect(fifth.text()).toContain("-86.22 $");
     expect(fifth.text()).toContain("base");
     // Search
-    wrapper.get(PageHeader).vm.$emit("search", "inter");
+    wrapper.getComponent(PageHeader).vm.$emit("search", "inter");
     await wrapper.vm.$wait();
     // Check result!
-    expect(wrapper.get(TransactionList).findAll(MemberHeader).length).toBe(2);
+    expect(wrapper.getComponent(TransactionList).findAllComponents(MemberHeader).length).toBe(2);
   });
   it("renders single transaction", async () => {
     await wrapper.vm.$router.push("/groups/GRP0/transactions/10046e7b-7d33-4e99-b765-085f39848594");
