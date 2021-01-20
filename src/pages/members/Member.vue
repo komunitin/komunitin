@@ -1,5 +1,5 @@
 <template>
-  <div v-if="member">
+  <div v-if="ready">
     <page-header :title="member.attributes.name">
       <template #buttons>
         <contact-button icon="message" round flat :contacts="member.contacts" />
@@ -74,7 +74,8 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    tab: "profile"
+    tab: "profile",
+    ready : false
   }),
   computed: {
     ...mapGetters(["myMember"]),
@@ -90,12 +91,21 @@ export default Vue.extend({
     this.$watch("memberCode", this.fetchData, { immediate: true });
   },
   methods: {
-    fetchData(memberCode: string) {
-      return this.$store.dispatch("members/load", {
+    async fetchData(memberCode: string) {
+      this.ready = false;
+      await this.$store.dispatch("members/load", {
         code: memberCode,
         group: this.code,
-        include: "contacts,account,account.currency,offers,needs"
+        include: "contacts,offers,needs"
+      });
+      await this.$store.dispatch("accounts/loadList", {
+        group: this.code,
+        filter: {
+          id: this.member.relationships.account.data.id
+        },
+        include: "currency"
       })
+      this.ready = true;
     },
   }
 })

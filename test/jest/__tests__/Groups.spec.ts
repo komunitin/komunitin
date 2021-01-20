@@ -17,17 +17,17 @@ describe("Groups", () => {
   it("Loads groups", async () => {
     await wrapper.vm.$router.push("/groups");
     await wrapper.vm.$nextTick();
-    expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
     // Load.
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(GroupCard).length).toBe(7);
-    expect((wrapper.find(QInnerLoading).vm as QInnerLoading).showing).toBe(false);
+    expect(wrapper.findAllComponents(GroupCard).length).toBe(7);
+    expect((wrapper.findComponent(QInnerLoading).vm as QInnerLoading).showing).toBe(false);
   });
 
   it ("Render group page", async () => {
     await wrapper.vm.$router.push("/groups/GRP0");
     await wrapper.vm.$nextTick();
-    expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     const text = wrapper.text();
     // Title
