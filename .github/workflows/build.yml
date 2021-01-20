@@ -16,21 +16,24 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build app
-      run: docker build --target komunitin-app-build --tag komunitin-app-build .
+      run: docker build --build-arg QENV=mirage --target komunitin-app-build --tag komunitin-app-build:mirage .
 
     - name: Linter
-      run: docker run --rm komunitin-app-build npm run lint
+      run: docker run --rm komunitin-app-build:mirage npm run lint
 
     - name: Tests
-      run: docker run --rm komunitin-app-build npm run test
+      run: docker run --rm komunitin-app-build:mirage npm run test
     
     - name: Build production
-      run: docker build --tag komunitin/komunitin-app .
+      run: docker build --build-arg QENV=build --tag komunitin/komunitin-app .
+
+    - name: Build demo
+      run: docker build --build-arg QENV=demo --tag komunitin/komunitin-app:demo .
     
-    - name: Run production
-      run: docker run -d -p 80:80 --rm komunitin/komunitin-app
+    - name: Run demo
+      run: docker run -d -p 80:80 --rm komunitin/komunitin-app:demo
       
-    - name: Test production
+    - name: Check demo
       run: wget http://localhost/
     
     - name: Publish to Docker Hub
@@ -38,6 +41,7 @@ jobs:
       run: |
         docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
         docker push komunitin/komunitin-app
+        docker push komunitin/komunitin-app:demo
     
     - name: Update test.komunitin.org
       if: github.ref == 'refs/heads/master'

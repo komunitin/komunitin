@@ -13,19 +13,24 @@ RUN npm install -g @quasar/cli
 
 COPY . .
 
-# Build stage
-
-# Use the image created in develop stage.
-FROM komunitin-app-develop as komunitin-app-build
-
 # Install dependencies.
 RUN npm install
 
 # Rebuild node-sass.
 RUN npm rebuild node-sass
 
-# Build App using the build script defined in package.json
-RUN npm run build
+# Build stage
+
+# Use the image created in develop stage.
+FROM komunitin-app-develop as komunitin-app-build
+
+# Set the build flavour. Allowed options are:
+# QENV=mirage, QENV=local, QENV=demo, QENV=build
+ARG QENV=build
+ENV QENV=$QENV
+
+# Build App using the quasar CLI app.
+RUN quasar build -m pwa
 
 # Production stage
 
