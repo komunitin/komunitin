@@ -19,21 +19,21 @@ describe("Needs", () => {
     // Wait for login redirect
     await wrapper.vm.$wait();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
-    expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
-    expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
+    expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
     // Load.
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(NeedCard).length).toBe(4);
+    expect(wrapper.findAllComponents(NeedCard).length).toBe(4);
     // Infinite loading stops working immediately since we
     // already fetched all data.
-    expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
+    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
     // Category
-    expect(wrapper.findAll(NeedCard).at(1).text()).toContain("build");
+    expect(wrapper.findAllComponents(NeedCard).at(1).text()).toContain("build");
 
-    wrapper.get(PageHeader).vm.$emit("search","modi");
+    wrapper.getComponent(PageHeader).vm.$emit("search","modi");
     await wrapper.vm.$wait();
     // found 4 results!
-    expect(wrapper.findAll(NeedCard).length).toBe(2);
+    expect(wrapper.findAllComponents(NeedCard).length).toBe(2);
   });
   it ("Renders single need", async () => {
     await wrapper.vm.$router.push("/groups/GRP0/needs/Et-quae-po");

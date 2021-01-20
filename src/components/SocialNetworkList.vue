@@ -9,7 +9,7 @@
     >
       <q-item-section avatar>
         <q-avatar size="lg">
-          <img :src="`statics/icons/contacts/${key}.svg`" />
+          <img :src="`icons/contacts/${key}.svg`" />
         </q-avatar>
       </q-item-section>
       <q-item-section v-if="network.name !== undefined">

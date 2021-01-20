@@ -85,7 +85,7 @@ describe("PageHeader", () => {
       },
       store,
       localVue,
-      attachToDocument: true
+      attachTo: document.body
     });
   });
 
@@ -93,7 +93,7 @@ describe("PageHeader", () => {
 
   function findSearchButton(wrapper: Wrapper<Vue>) {
     return wrapper
-      .findAll(QBtn)
+      .findAllComponents(QBtn)
       .filter(button => button.text().includes("search"));
   }
 
@@ -131,7 +131,7 @@ describe("PageHeader", () => {
 
   it("has search box", async () => {
     expect(wrapper.text()).toContain("Test title");
-    expect(wrapper.find(QInput).exists()).toBe(false);
+    expect(wrapper.findComponent(QInput).exists()).toBe(false);
     const search = findSearchButton(wrapper);
     expect(search.exists()).toBe(true);
     search.trigger("click");
@@ -186,9 +186,9 @@ describe("PageHeader", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("balance");
     expect(wrapper.text()).toContain("1 $");
-    const header = wrapper.get(QHeader).element;
+    const header = wrapper.getComponent(QHeader).element;
     expect(header.style.height).toBe("170px");
-    const scroll = wrapper.get(QScrollObserver);
+    const scroll = wrapper.getComponent(QScrollObserver);
     scroll.vm.$emit("scroll", {position: 10});
     await wrapper.vm.$nextTick();
     expect(header.style.height).toBe("160px");

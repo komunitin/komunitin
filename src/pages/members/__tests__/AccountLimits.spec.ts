@@ -36,7 +36,7 @@ describe('AccountLimits.vue', () => {
       mocks
     });
     expect(wrapper.text()).toBe("maxAmount 50 %");
-    expect(wrapper.find(QSeparator).exists()).toBe(false);
+    expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
   });
 
   it("renders debit limit", () => {
@@ -55,7 +55,7 @@ describe('AccountLimits.vue', () => {
       mocks
     });
     expect(wrapper.text()).toBe("minAmount -50 %");
-    expect(wrapper.find(QSeparator).exists()).toBe(false);
+    expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
   });
 
   it("renders both limits", () => {
@@ -75,7 +75,7 @@ describe('AccountLimits.vue', () => {
     });
     expect(wrapper.text()).toContain("minAmount -50 %");
     expect(wrapper.text()).toContain("maxAmount 60 %");
-    expect(wrapper.find(QSeparator).exists()).toBe(true);
+    expect(wrapper.findComponent(QSeparator).exists()).toBe(true);
   });
 
 })

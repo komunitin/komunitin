@@ -39,7 +39,7 @@ describe("SocialNetworkList", () => {
     delete window.open;
     window.open = jest.fn();
     // Click
-    wrapper.find({ ref: ref }).trigger("click");
+    wrapper.findComponent({ ref: ref }).trigger("click");
     // Wait for event to be handled.
     await wrapper.vm.$nextTick();
     expect(window.open).toHaveBeenCalledWith(url, "_blank");

@@ -24,18 +24,18 @@ describe("Members", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members");
-    expect(wrapper.get(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     // Wait for content loading.
     await wrapper.vm.$wait();
-    expect(wrapper.get(MemberList).findAll(MemberHeader).length).toBe(20);
-    (wrapper.get(QInfiniteScroll).vm as QInfiniteScroll).trigger();
+    expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(20);
+    (wrapper.getComponent(QInfiniteScroll).vm as QInfiniteScroll).trigger();
     await wrapper.vm.$wait();
-    expect(wrapper.get(MemberList).findAll(MemberHeader).length).toBe(30);
+    expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(30);
     await wrapper.vm.$nextTick();
     // Infinite scroll stopped since we fetchyed all available data.
-    expect((wrapper.find(QInfiniteScroll).vm as any).working).toBe(false);
+    expect((wrapper.findComponent(QInfiniteScroll).vm as any).working).toBe(false);
     // Check GRP00002 result
-    const members = wrapper.get(MemberList).findAll(MemberHeader);
+    const members = wrapper.getComponent(MemberList).findAllComponents(MemberHeader);
     const second = members.wrappers[2];
     expect(second.text()).toContain("Cameron");
     expect(second.text()).toContain("GRP00002");
@@ -48,11 +48,11 @@ describe("Members", () => {
     expect(other.text()).toContain("386.64 $");
     expect(other.text()).toContain("Min -500 $");
     // Search
-    wrapper.get(PageHeader).vm.$emit("search", "isobe");
+    wrapper.getComponent(PageHeader).vm.$emit("search", "isobe");
     await wrapper.vm.$wait();
     // Check result!
-    expect(wrapper.get(MemberList).findAll(MemberHeader).length).toBe(1);
-    const result = wrapper.get(MemberList).get(MemberHeader);
+    expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(1);
+    const result = wrapper.getComponent(MemberList).getComponent(MemberHeader);
     expect(result.text()).toContain("Isobel Upton");
     expect(result.text()).toContain("GRP00005");
     expect(result.text()).toContain("598.71 $");
