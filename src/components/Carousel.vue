@@ -14,7 +14,7 @@
         :key="i"
         :name="i + 1"
         class="q-pa-none"
-        :img-src="image.href"
+        :img-src="image"
       >
       </q-carousel-slide>
     </q-carousel>
@@ -24,7 +24,7 @@
     >
       <div v-for="(image, i) of images" :key="i" class="col-3">
         <img
-          :src="image.href"
+          :src="image"
           class="thumbnail vertical-bottom cursor-pointer"
           :class="'thumbnail-' + (slide == i + 1 ? 'active' : 'inactive')"
           @click="slide = i + 1"

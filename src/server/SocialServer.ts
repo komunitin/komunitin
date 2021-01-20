@@ -278,12 +278,7 @@ export default {
       images: (i: number) =>
         Array.from(
           { length: faker.random.number({ min: 1, max: 5 }) },
-          (v: never, j: number) => {
-            return {
-              href: fakeImage(`product${i}-${j}`),
-              alt: faker.company.catchPhrase()
-            };
-          }
+          (v: never, j: number) => fakeImage(`product${i}-${j}`),
         ),
       access: "public",
       expires: () => faker.date.future().toJSON(),

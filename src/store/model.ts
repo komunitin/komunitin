@@ -76,10 +76,7 @@ export interface Location {
   coordinates: [number, number];
 }
 
-export interface ImageObject {
-  href: string;
-  alt: string;
-}
+export type ImageObject = string;
 
 /**
  * To-many relationship.
@@ -165,7 +162,7 @@ export interface Group extends ResourceObject {
     code: string;
     name: string;
     description: string;
-    image: string;
+    image: ImageObject;
     website: string;
     access: Access;
     location: Location;
@@ -228,7 +225,7 @@ export interface Member extends ResourceObject {
     name: string;
     type: "personal" | "business" | "public";
     description: string;
-    image: string;
+    image: ImageObject;
     address: Address;
     location: Location;
     created: string;
