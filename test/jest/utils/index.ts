@@ -2,7 +2,7 @@ import Vue, { ComponentOptions } from 'vue';
 import {VueClass, createLocalVue, mount, ThisTypedMountOptions } from '@vue/test-utils'
 
 import Vuex from 'vuex';
-import VueRouter from 'vue-router';
+import VueRouter, { RawLocation } from 'vue-router';
 import createStore from 'src/store/index';
 import createRouter from 'src/router/index';
 
@@ -26,7 +26,8 @@ import { mockToken } from 'src/server/AuthServer';
 const boots = [bootKomunitin,bootErrors,bootI18n,bootVuelidate,bootMirage,bootAuth];
 
 // Get the Quasar plugins to be used.
-const {Quasar, Notify, LocalStorage} = quasar;
+const {Quasar, LocalStorage} = quasar;
+
 
 // Get an object containing all Quasar Vue components.
 const QComponents = Object.keys(quasar).reduce((object, key) => {
@@ -49,15 +50,15 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
   // Vuex and router plugins.
   localVue.use(Vuex)
   localVue.use(VueRouter)
-
+  
   // Quasar and Quasar components.
   localVue.use(Quasar, {
     components: QComponents,
-    plugins: { Notify, LocalStorage },
+    plugins: { LocalStorage },
   });
 
   LocalStorage.clear();
-
+  
   // Login state. We must do that before createStore().
   if (options?.login) {
     // This call actually saves the mocked token in LocalStorage.
@@ -73,9 +74,9 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
   localVue.directive("ripple", jest.fn());
 
   // Call boot files with localVue.
-  const redirect = (url:string) => {window.location.href = url};
+  const redirect = (url:RawLocation) => {window.location.href = url.toString()};
   const app = {} as ComponentOptions<Vue>;
-  const bootParams = {app, router, store, Vue: localVue, redirect, urlPath: ""};
+  const bootParams = {app, router, store, Vue: localVue, redirect, urlPath: "", publicPath: ""};
   for (const boot of boots) {
     await boot(bootParams);
   }
@@ -86,7 +87,7 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
     localVue,
     store,
     router,
-    attachToDocument: true,
+    attachTo: document.body,
     stubs: {
       // stub map components since they throw errors in test environment.
       LMap: true,
@@ -98,9 +99,9 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
 
   const wrapper = mount(component, mountOptions);
 
-  // Mock $q.notify since it throws an error in testing environment.
-  // "Cannot read property 'iconSet' of undefined".
+  // Mock $q.notify since it throws an errors in testing environment if we use the actual module.
   wrapper.vm.$q.notify = jest.fn();
+  quasar.Notify.create = jest.fn();
 
   // Set a value on scrollHeight property so QInfiniteScrolling don't load all resources.
   Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {configurable: true, value: 1500});
@@ -166,15 +167,4 @@ const mockGeolocation = {
   )
 };
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface Global {
-      navigator: {
-        geolocation: {};
-      }
-    }
-  }
-}
-
-global.navigator.geolocation = mockGeolocation;
+Object.defineProperty(global.navigator, 'geolocation', {value: mockGeolocation});

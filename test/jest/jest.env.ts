@@ -1,8 +1,6 @@
-// Load dotenv helper package
-import { config } from 'dotenv';
-
-// Load dev.env environment to process.env
-config({path: "dev.env"});
+// Load "mirage" environment.
+import env from "../../.quasar.env.json";
+Object.assign(process.env, env.mirage);
 
 // Fine-tune some variables specifically for jest testing:
 
