@@ -13,36 +13,42 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   ready() {
     if (process.env.DEV) {
+      // eslint-disable-next-line no-console
       console.log("App is being served from cache by a service worker.");
     }
   },
 
   registered(/* registration */) {
     if (process.env.DEV) {
+      // eslint-disable-next-line no-console
       console.log("Service worker has been registered.");
     }
   },
 
   cached(/* registration */) {
     if (process.env.DEV) {
+      // eslint-disable-next-line no-console
       console.log("Content has been cached for offline use.");
     }
   },
 
   updatefound(/* registration */) {
     if (process.env.DEV) {
+      // eslint-disable-next-line no-console
       console.log("New content is downloading.");
     }
   },
 
   updated(/* registration */) {
     if (process.env.DEV) {
+      // eslint-disable-next-line no-console
       console.log("New content is available; please refresh.");
     }
   },
 
   offline() {
     if (process.env.DEV) {
+      // eslint-disable-next-line no-console
       console.log(
         "No internet connection found. App is running in offline mode."
       );
@@ -51,6 +57,7 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   error(err) {
     if (process.env.DEV) {
+      // eslint-disable-next-line no-console
       console.error("Error during service worker registration:", err);
     }
   }

@@ -12,10 +12,10 @@
     "build": "cross-env QENV=build quasar build -m pwa",
     "test": "quasar test --unit jest",
     "lint": "eslint --ext .ts,.vue --ignore-path .gitignore --max-warnings 0 ./src",
+    "start": "quasar serve --history dist/pwa",
     "test:coverage": "jest --silent --coverage src/",
     "test:watch": "jest --watch src/",
     "doc": "typedoc --out docs --tsconfig tsconfig.json src",
-    "todo": "egrep -r '@todo|@bug|@dev' src/",
     "testAll": "tsc -p tsconfig.json --noEmit && npm run test && npm run lint"
   },
   "dependencies": {
@@ -30,7 +30,6 @@
     "clamp-js": "^0.7.0",
     "core-js": "^3.8.3",
     "date-fns": "^2.16.1",
-    "dotenv": "^8.2.0",
     "leaflet": "^1.7.1",
     "markdown-to-txt": "^1.0.1",
     "marked": "^0.8.2",
