@@ -7,6 +7,7 @@ import AuthServer from "./AuthServer";
 import UUIDIndetityManager from "./UUIDManager";
 import AccountingServer from "./AccountingServer";
 
+// eslint-disable-next-line no-console
 console.debug("Mocking server responses with MirageJS.");
 
 export default new Server({
