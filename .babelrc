@@ -10,7 +10,9 @@
             "modules": "commonjs",
             "targets": {
               "node": "current"
-            }
+            },
+            "useBuiltIns": "usage",
+            "corejs": 3
           }
         ]
       ]

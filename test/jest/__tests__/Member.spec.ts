@@ -35,7 +35,7 @@ describe("Member", () => {
     expect(text).toContain("Profile");
     expect(text).toContain("1 Need");
     expect(text).toContain("3 Offers");
-    expect(wrapper.findAll(QTab).length).toBe(3);
+    expect(wrapper.findAllComponents(QTab).length).toBe(3);
     // Bio
     expect(text).toContain("Consequuntur aut est fuga");
     // Contact
@@ -46,20 +46,20 @@ describe("Member", () => {
     
     // Needs
 
-    const needsTab = wrapper.findAll(QTab).at(1);
+    const needsTab = wrapper.findAllComponents(QTab).at(1);
     needsTab.trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.get(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(NeedCard).length).toBe(1);
+    expect(wrapper.findAllComponents(NeedCard).length).toBe(1);
     
     // Offers
-    const offersTab = wrapper.findAll(QTab).at(2);
+    const offersTab = wrapper.findAllComponents(QTab).at(2);
     offersTab.trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.get(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(OfferCard).length).toBe(3);
+    expect(wrapper.findAllComponents(OfferCard).length).toBe(3);
   });
 
   it("Navigation from Members List", async () => {
@@ -67,7 +67,7 @@ describe("Member", () => {
     wrapper.get("#menu-members").trigger("click");
     await wrapper.vm.$nextTicks();
     await wrapper.vm.$wait();
-    const member = wrapper.get(MemberList).findAll(MemberHeader).at(1);
+    const member = wrapper.getComponent(MemberList).findAllComponents(MemberHeader).at(1);
     member.trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/MagaliLeffler45");
@@ -80,15 +80,15 @@ describe("Member", () => {
     expect(text).toContain("No Needs");
     expect(text).toContain("3 Offers");
 
-    const tabs = wrapper.findAll(QTab);
+    const tabs = wrapper.findAllComponents(QTab);
     expect(tabs.length).toBe(4);
 
     //Offers
     tabs.at(2).trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.get(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
-    const offers = wrapper.findAll(OfferCard);
+    const offers = wrapper.findAllComponents(OfferCard);
     expect(offers.length).toBe(3);
     const offer = offers.at(0);
     expect(offer.text()).toContain("Magali");
@@ -96,9 +96,9 @@ describe("Member", () => {
     // Transactions
     tabs.at(3).trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.get(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
-    const transactions = wrapper.get(TransactionItems).findAll(MemberHeader);
+    const transactions = wrapper.getComponent(TransactionItems).findAllComponents(MemberHeader);
     expect(transactions.length).toBe(5);
   });
 

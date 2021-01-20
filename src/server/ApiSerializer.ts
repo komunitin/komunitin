@@ -66,7 +66,7 @@ export default class ApiSerializer extends JSONAPISerializer {
       hash.included.forEach((resource: any) => {
         delete resource.attributes;
         delete resource.relationships;
-        resource.external = true;
+        resource.meta = {external: true};
       });
       // Also dont follow the inclusion chain, since this is external resource and 
       // therefore this server can't know about related resources of this included resource.

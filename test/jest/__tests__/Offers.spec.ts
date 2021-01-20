@@ -20,33 +20,33 @@ describe("Offers", () => {
     await wrapper.vm.$wait();
     await wrapper.vm.$router.push("/groups/GRP0/offers");
     await wrapper.vm.$nextTick();
-    expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
-    expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(true);
+    expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
     // Initial load.
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(OfferCard).length).toBe(ApiSerializer.DEFAULT_PAGE_SIZE);
-    expect(wrapper.find(QInfiniteScroll).props("disable")).toBe(false);
+    expect(wrapper.findAllComponents(OfferCard).length).toBe(ApiSerializer.DEFAULT_PAGE_SIZE);
+    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(false);
     // Instead of trying to simulate the scroll event, which is very coupled
     // with the tech layer, just call the trigger() function in QInfiniteScroll.
-    (wrapper.find(QInfiniteScroll).vm as QInfiniteScroll).trigger();
+    (wrapper.findComponent(QInfiniteScroll).vm as QInfiniteScroll).trigger();
     await wrapper.vm.$wait();
-    expect(wrapper.findAll(OfferCard).length).toBe(30);
+    expect(wrapper.findAllComponents(OfferCard).length).toBe(30);
     // The QInfiniteScroll stopped.
-    expect((wrapper.find(QInfiniteScroll).vm as any).working).toBe(false);
+    expect((wrapper.findComponent(QInfiniteScroll).vm as any).working).toBe(false);
     // Category icon
-    expect(wrapper.findAll(OfferCard).at(0).text()).toContain("accessibility_new");
+    expect(wrapper.findAllComponents(OfferCard).at(0).text()).toContain("accessibility_new");
   });
 
   it ("searches offers", async () => {
     // The user interaction is already tested in PageHeader unit test,
     // here just emit the search event.
-    wrapper.get(PageHeader).vm.$emit("search","soap");
+    wrapper.getComponent(PageHeader).vm.$emit("search","soap");
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(OfferCard).length).toBe(0);
-    expect(wrapper.find(QInnerLoading).isVisible()).toBe(true);
+    expect(wrapper.findAllComponents(OfferCard).length).toBe(0);
+    expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     // found 10 results!
-    expect(wrapper.findAll(OfferCard).length).toBe(3);
+    expect(wrapper.findAllComponents(OfferCard).length).toBe(3);
   })
 
   it ("renders single offer", async() => {
