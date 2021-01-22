@@ -248,7 +248,7 @@ export default {
       type: () => faker.random.arrayElement(["personal", "business", "public"]),
       name: () => faker.name.findName(),
       description: () => fakeMarkdown(2),
-      image: (i: number) => fakeImage(`face-${i}`, "100x100"),
+      image: (i: number) => (i % 3 == 0) ? null : fakeImage(`face-${i}`, "100x100"),
       address: () => fakeAddress(),
       location: () => fakeLocation(),
       created: () => faker.date.past(),
