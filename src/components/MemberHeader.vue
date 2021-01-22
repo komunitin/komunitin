@@ -2,12 +2,7 @@
   <q-item v-bind="$attrs" :clickable="to && !active" :active="active" @click="click">
     <!-- Member avatar & name -->
     <q-item-section avatar>
-      <q-avatar v-if="member.attributes.image">
-        <img :src="member.attributes.image" />
-      </q-avatar>
-      <q-avatar v-else text-color="white" :style="`background-color: ${memberColor};`">
-        {{ initial }}
-      </q-avatar>
+      <avatar :img-src="member.attributes.image" :text="member.attributes.name" />
     </q-item-section>
     <q-item-section>
       <q-item-label lines="1" class="text-subtitle2 text-onsurface-m">
@@ -26,9 +21,13 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import {colors} from "quasar";
+import Avatar from "./Avatar.vue";
+
 export default Vue.extend({
   name: "MemberHeader",
+  components: {
+    Avatar
+  },
   props: {
     member: {
       type: Object,
@@ -47,15 +46,6 @@ export default Vue.extend({
     account(): string {
       return (this.member.account) ? this.member.account.attributes.code : "";
     },
-    initial(): string {
-      return this.member.attributes.name.substring(0,1).toUpperCase();
-    },
-    memberColor(): string {
-      const seed = Math.abs(this.member.attributes.name.split("").reduce(
-        (hash: number, b: string) => (((hash << 5) - hash) + b.charCodeAt(0)), 0)); 
-      const rgb = colors.hsvToRgb({h: seed % 360, s: 80, v:80});
-      return colors.rgbToHex(rgb);
-    }
   },
   methods: {
     click() {

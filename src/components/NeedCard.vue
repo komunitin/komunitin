@@ -11,7 +11,7 @@
         {{ need.attributes.updated | date }}
       </template>
       <template #side>
-        <category-avatar :category="need.category" color="kred"/>
+        <category-avatar :category="need.category" type="need"/>
       </template>
     </member-header>
     <!-- Need images -->

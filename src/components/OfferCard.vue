@@ -11,7 +11,7 @@
         {{ offer.attributes.updated | date }}
       </template>
       <template #side>
-        <category-avatar :category="offer.category" color="kblue"/>
+        <category-avatar :category="offer.category" type="offer"/>
       </template>
     </member-header>
 

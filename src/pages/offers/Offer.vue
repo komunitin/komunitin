@@ -8,7 +8,7 @@
             <member-header :to="`/groups/${code}/members/${offer.member.attributes.code}`" :member="offer.member" class="q-pa-none"/>
           </template>
           <template #category>
-            <category-avatar color="kblue" :category="offer.category" caption/>
+            <category-avatar type="offer" :category="offer.category" caption/>
           </template>
           <template #images>
             <carousel :images="offer.attributes.images" thumbnails height="400px"/>

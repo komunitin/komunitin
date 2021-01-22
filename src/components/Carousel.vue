@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-carousel
+      v-if="images && images.length"
       v-model="slide"
       v-bind="$attrs"
       animated
@@ -18,6 +19,7 @@
       >
       </q-carousel-slide>
     </q-carousel>
+    <fit-text v-else update class="placeholder"><q-icon name="no_photography"/></fit-text>
     <div
       v-if="thumbnails && (images.length > 1)"
       class="gt-sm q-mt-none row q-col-gutter-sm"
@@ -35,10 +37,14 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
+import FitText from "./FitText.vue";
 /**
  * Almost just a wrapper around Quasar QCarousel to avoid repetition and unify behavior across the app.
  */
 export default Vue.extend({
+  components: {
+    FitText
+  },
   props: {
     thumbnails: {
       type: Boolean,
@@ -64,5 +70,10 @@ export default Vue.extend({
 }
 .thumbnail-inactive:hover {
   opacity: 1;
+}
+.placeholder{
+  color: rgba(0,0,0,0.12);
+  line-height: 0;
+  padding: 0 48px;
 }
 </style>
