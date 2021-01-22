@@ -293,11 +293,7 @@ export default {
       images: (i: number) => Array.from(
         // Often it's empty.
         { length: Math.max(faker.random.number({ min: -2, max: 2 }), 0) },
-        (v: never, j: number) => {
-          return {
-            href: fakeImage(`need${i}-${j}`),
-          };
-        }
+        (v: never, j: number) => fakeImage(`need${i}-${j}`)
       ),
       access: "public",
       expires: () => faker.date.future().toJSON(),
