@@ -8,7 +8,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "baseUrl": ".",
-    "types": ["quasar", "node", "jest"],
+    "types": ["quasar", "node", "jest", "resize-observer-browser"],
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
