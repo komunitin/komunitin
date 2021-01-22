@@ -47,7 +47,6 @@ describe("Members", () => {
     // Default avatar
     const avatar = members.wrappers[0].findComponent(QAvatar); 
     expect(avatar.text()).toEqual("T");
-    expect(avatar.html()).toContain("rgb(41, 204, 114)");
 
     // Check GRP00025 result
     const other = members.wrappers[25];
