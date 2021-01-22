@@ -44,9 +44,7 @@
       @click="$router.push(`/groups/${myMember.group.attributes.code}`)"
     >
       <q-item-section avatar>
-        <q-avatar>
-          <img :src="myMember.group.attributes.image" />
-        </q-avatar>
+        <avatar :img-src="myMember.group.attributes.image" :text="myMember.group.attributes.code" />
       </q-item-section>
       <q-item-section>
         <div class="text-subtitle2">
@@ -76,12 +74,14 @@ import Vue from "vue";
 import { mapGetters } from "vuex";
 import MenuItem from "./MenuItem.vue";
 import MemberHeader from "./MemberHeader.vue";
+import Avatar from "./Avatar.vue";
 
 export default Vue.extend({
   name: "MenuDrawer",
   components: {
     MenuItem,
-    MemberHeader
+    MemberHeader,
+    Avatar
   },
   computed: {
     ...mapGetters(["myMember", "myAccount"]),

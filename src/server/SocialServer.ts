@@ -224,7 +224,7 @@ export default {
       code: (i: number) => `GRP${i}`,
       name: (i: number) => `Group ${i}`,
       description: () => fakeMarkdown(4),
-      image: (i: number) => fakeImage(`group${i}`),
+      image: (i: number) => (i % 2 == 0) ? fakeImage(`group${i}`) : null,
       website: () => faker.internet.url(),
       access: "public",
       location: () => fakeLocation(),
@@ -248,7 +248,7 @@ export default {
       type: () => faker.random.arrayElement(["personal", "business", "public"]),
       name: () => faker.name.findName(),
       description: () => fakeMarkdown(2),
-      image: (i: number) => fakeImage(`face-${i}`, "100x100"),
+      image: (i: number) => (i % 3 == 0) ? null : fakeImage(`face-${i}`, "100x100"),
       address: () => fakeAddress(),
       location: () => fakeLocation(),
       created: () => faker.date.past(),
@@ -261,7 +261,7 @@ export default {
       },
       cpa: (i: number) => ["" + i, "" + 0, "" + 0],
       description: () => faker.lorem.sentence(),
-      icon: (i: number) => fakeCategoryIconName(i),
+      icon: (i: number) => (i % 3 == 1) ? null : fakeCategoryIconName(i),
       access: "public",
       created: () => faker.date.past(),
       updated() {
@@ -277,7 +277,7 @@ export default {
       price: () => fakePrice(faker.random.number({min: 1, max:1000})),
       images: (i: number) =>
         Array.from(
-          { length: faker.random.number({ min: 1, max: 5 }) },
+          { length: faker.random.number({ min: 0, max: 5 }) },
           (v: never, j: number) => fakeImage(`product${i}-${j}`),
         ),
       access: "public",

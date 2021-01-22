@@ -2,7 +2,8 @@
     <collapsible-header :collapsible-height="200"  :fixed-height="72">
       <div class="row q-py-lg text-onsurface-m bg-active collapsible-content">
         <div class="col-md-4 col-6 q-px-md">
-          <img class="member-image q-mx-auto" :src="member.attributes.image" />
+          <img v-if="member.attributes.image" class="member-image q-mx-auto" :src="member.attributes.image" />
+          <div v-else class="member-image q-mx-auto"><fit-text update><avatar :text="member.attributes.name" size="inherit"></avatar></fit-text></div>
         </div>
         <div class="col column">
           <div>
@@ -65,12 +66,16 @@ import Vue from "vue";
 import CollapsibleHeader from "../../layouts/CollapsibleHeader.vue";
 import AccountLimits from "./AccountLimits.vue";
 import { Member } from "../../store/model";
+import Avatar from "../../components/Avatar.vue";
+import FitText from "src/components/FitText.vue";
 
 export default Vue.extend({
   name: "MemberPageHeader",
   components: {
     AccountLimits,
-    CollapsibleHeader
+    CollapsibleHeader,
+    Avatar,
+    FitText
   },
   props: {
     member: {
@@ -103,7 +108,7 @@ export default Vue.extend({
         public: this.$t("publicAccount") as string
       };
       return labels[(this.member as Member).attributes.type];
-    }
+    },
   },
   methods: {
     tabChange(value: string) {
@@ -121,6 +126,7 @@ export default Vue.extend({
   max-height: 152px;
   max-width: 152px;
   border-radius: 76px;
+  line-height: 0;
 }
 .collapsible-content {
   height: 200px;

@@ -1,7 +1,7 @@
 <template>
   <div class="q-py-xs">
     <span v-if="caption && right" class="q-pr-md text-overline text-uppercase text-onsurface-m">{{ category.attributes.name }}</span>
-    <q-avatar :icon="category.attributes.icon" text-color="onprimary" :color="color" size="40px" >
+    <q-avatar :icon="icon" text-color="onprimary" :color="color" size="40px" >
       <q-tooltip v-if="!caption">{{ category.attributes.name }}</q-tooltip>
     </q-avatar>
     <span v-if="caption && !right" class="q-pl-md text-overline text-uppercase text-onsurface-m">{{ category.attributes.name }}</span>
@@ -16,9 +16,10 @@ export default Vue.extend({
       type: Object,
       required: true,
     },
-    color: {
+    type: {
       type: String,
-      required: true,
+      required: false,
+      default: "need"
     },
     caption: {
       type: Boolean,
@@ -29,6 +30,17 @@ export default Vue.extend({
       type: Boolean,
       required: false,
       default: false,
+    }
+  },
+  computed: {
+    color(): string {
+      return this.type == 'need' ? 'kred' : 'kblue';
+    },
+    icon(): string {
+      return this.category.attributes.icon ?? this.defaultIcon;
+    },
+    defaultIcon(): string {
+      return this.type == 'need' ? "loyalty" : "local_offer";
     }
   }
 })
