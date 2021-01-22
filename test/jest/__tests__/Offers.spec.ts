@@ -40,7 +40,7 @@ describe("Offers", () => {
   it ("searches offers", async () => {
     // The user interaction is already tested in PageHeader unit test,
     // here just emit the search event.
-    wrapper.getComponent(PageHeader).vm.$emit("search","soap");
+    wrapper.getComponent(PageHeader).vm.$emit("search","pants");
     await wrapper.vm.$nextTick();
     expect(wrapper.findAllComponents(OfferCard).length).toBe(0);
     expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
@@ -50,13 +50,13 @@ describe("Offers", () => {
   })
 
   it ("renders single offer", async() => {
-    await wrapper.vm.$router.push("/groups/GRP0/offers/Soap4");
+    await wrapper.vm.$router.push("/groups/GRP0/offers/Tuna5");
     await wrapper.vm.$wait();
     const text = wrapper.text();
-    expect(text).toContain("Soap");
+    expect(text).toContain("Tuna");
     expect(text).toContain("Magali");
     expect(text).toContain("GRP00001");
-    expect(text).toContain("7.60 $");
+    expect(text).toContain("0.88 $");
     expect(text).toContain("Updated yesterday");
   })
 
