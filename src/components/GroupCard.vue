@@ -8,9 +8,7 @@
     <!-- Header with group avatar, name and short code -->
     <q-item>
       <q-item-section avatar>
-        <q-avatar>
-          <img :src="group.attributes.image" />
-        </q-avatar>
+        <avatar :img-src="group.attributes.image" :text="group.attributes.code"/>
       </q-item-section>
       <q-item-section>
         <q-item-label>
@@ -59,6 +57,7 @@ import Vue from "vue";
 
 import ShareButton from "./ShareButton.vue";
 import SimpleMap from "./SimpleMap.vue";
+import Avatar from "./Avatar.vue";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
 import CardClickTo from "../plugins/CardClickTo";
@@ -71,7 +70,8 @@ export default Vue.extend({
   name: "GroupCard",
   components: {
     ShareButton,
-    SimpleMap
+    SimpleMap,
+    Avatar
   },
   props: {
     group: {
