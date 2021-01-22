@@ -2,7 +2,7 @@
 import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
-import { QInnerLoading, QInfiniteScroll } from "quasar";
+import { QInnerLoading, QInfiniteScroll, QAvatar } from "quasar";
 import MemberHeader from "../../../src/components/MemberHeader.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import MemberList from "../../../src/pages/members/MemberList.vue";
@@ -41,6 +41,13 @@ describe("Members", () => {
     expect(second.text()).toContain("GRP00002");
     expect(second.text()).toContain("583.11 $");
     expect(second.text()).toContain("Min -500 $");
+    // Avatar image
+    expect(second.html()).toContain("<img");
+
+    // Default avatar
+    const avatar = members.wrappers[0].findComponent(QAvatar); 
+    expect(avatar.text()).toEqual("T");
+
     // Check GRP00025 result
     const other = members.wrappers[25];
     expect(other.text()).toContain("Roberto");

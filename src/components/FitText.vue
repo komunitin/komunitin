@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue from "vue";
 
 /**
  * The <fit-text> component is a <span> that adjusts its fontSize 
@@ -14,6 +14,12 @@ import Vue from 'vue';
  */
 export default Vue.extend({
   name: 'FitText',
+  props: {
+    update: {
+      type: Boolean,
+      default: false,
+    }
+  },
   mounted: function() {
     // Call the fit function after the children has been rendered too.
     this.$nextTick(this.fit);
@@ -26,6 +32,11 @@ export default Vue.extend({
     // Experimental API `fonts` is not (yet) included in Document interface.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (document as any).fonts?.ready.then(this.fit);
+    // Update on resize.
+    if ((this.update) && (typeof ResizeObserver !== 'undefined')) {
+      const observer = new ResizeObserver(this.fit);
+      observer.observe(this.$el.parentElement as HTMLElement);
+    }
   },
   updated: function() {
     // Call the fit function after the children has been rendered too.
