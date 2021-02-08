@@ -83,6 +83,13 @@ describe("Member", () => {
     const tabs = wrapper.findAllComponents(QTab);
     expect(tabs.length).toBe(4);
 
+    // Needs (empty)
+    tabs.at(1).trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
+    await wrapper.vm.$wait();
+    expect(wrapper.text()).toContain("nothing here");
+
     //Offers
     tabs.at(2).trigger("click");
     await wrapper.vm.$nextTick();

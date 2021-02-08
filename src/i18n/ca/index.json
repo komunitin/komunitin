@@ -26,7 +26,7 @@
   "invalidPassword": "Contrasenya invàlida",
   "language": "Idioma",
   "contribute": "Contribueix",
-  "groupsNearYou": "Grups aprop teu",
+  "groupsNearYou": "Grups a prop teu",
   "explore": "Explora",
   "signUp": "Dona't d'alta",
   "checkTheExchangeCommunityGroup": "Descobreix la xarxa d'intercanvi {group}",
@@ -81,5 +81,6 @@
   "deleted": "Eliminada",
   "payer": "Pagador/a",
   "payee": "Cobrador/a",
-  "komunitinProject": "Projecte Komunitin"
+  "komunitinProject": "Projecte Komunitin",
+  "nothingHere": "Aquí no hi ha res... Encara!"
 }
