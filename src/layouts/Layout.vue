@@ -57,7 +57,7 @@ export default Vue.extend({
   }
 });
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 // Container takes 100% with in small screens. In large screens, wrap the content in a
 // centered box. The width of the box depends on whether there is drawer or not.
 @mixin wrap-main-container($width) {
