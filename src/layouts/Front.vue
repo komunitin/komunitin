@@ -57,7 +57,7 @@ export default Vue.extend({
   }
 });
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 // Set the background image for home page
 .home {
   background: $outside url('~assets/home_background-700.jpg') center
