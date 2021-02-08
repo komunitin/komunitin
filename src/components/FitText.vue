@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span class="fittext">
     <slot></slot>
   </span>
 </template>
@@ -74,9 +74,8 @@ export default Vue.extend({
 });
 
 </script>
-
-<style lang="scss" scope>
-  span {
+<style lang="scss" scoped>
+  span.fittext {
     // Make the span have clientWidth.
     display: inline-block;
     // Forbid word wrapping.

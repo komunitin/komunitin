@@ -2,7 +2,8 @@
   <div>
     <q-inner-loading :showing="isLoading" color="icon-dark" />
     <q-infinite-scroll :disable="!autoload || disableScrollLoad" @load="loadNext">
-      <slot v-if="!isLoading" :resources="resources">
+      <empty v-if="isEmpty && !isLoading"/>
+      <slot v-else-if="!isLoading" :resources="resources">
         <div class="q-pa-md row q-col-gutter-md">
           <div
             v-for="resource of resources"
@@ -28,12 +29,16 @@
 <script lang="ts">
 import Vue from "vue";
 import { ResourceObject } from "../store/model";
+import Empty from "../components/Empty.vue";
 
 /**
  * Generic resource card list.
  */
 export default Vue.extend({
   name: "ResourceCards",
+  components: {
+    Empty
+  },
   props: {
     /**
      * The group code
@@ -114,6 +119,9 @@ export default Vue.extend({
   computed: {
     location(): [number, number] | undefined {
       return this.$store.state.me.location;
+    },
+    isEmpty() : boolean {
+      return this.resources.length == 0;
     }
   },
   // Note that even if this is marked async, Vue does not wait for the
