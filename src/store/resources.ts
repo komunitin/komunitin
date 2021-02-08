@@ -6,7 +6,6 @@ import {
   ErrorObject,
   ResourceIdentifierObject,
   ResourceObject,
-  ResourceResponseInclude,
   ExternalResourceObject
 } from "src/store/model";
 import { UserState } from "./me";
