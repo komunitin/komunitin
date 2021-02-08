@@ -9,6 +9,7 @@ import {
   ResourceResponseInclude,
   ExternalResourceObject
 } from "src/store/model";
+import { UserState } from "./me";
 
 export interface ResourcesState<T extends ResourceObject> {
   /**
@@ -179,7 +180,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   }
 
   private getHttpClient(context: ActionContext<ResourcesState<T>, S>): AxiosInstance {
-    
     return Axios.create({
       baseURL: this.baseUrl,
       withCredentials: true,
@@ -189,6 +189,19 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         Authorization: `Bearer ${context.rootGetters['accessToken']}`
       }
     });
+  }
+
+  private async request(context: ActionContext<ResourcesState<T>, S>, url: string) {
+    try {
+      return await this.getHttpClient(context).get(url)
+    } catch (error) {
+      if (error.code == 401 && (context.rootState as UserState).userId) {
+        // Unauthorized. Try refreshing token.
+        await context.dispatch("authorize");
+        return await this.getHttpClient(context).get(url);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -503,8 +516,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (query.length > 0) url += "?" + query;
     // Call API
     try {
-      const response = await this.getHttpClient(context).get<CollectionResponseInclude<T, ResourceObject>>(url, 
-        { headers: {Authorization: `Bearer ${context.rootGetters['accessToken']}`}});
+      const response = await this.request(context, url);
       await this.handleCollectionResponse(
         response,
         context,
@@ -531,7 +543,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           "Unexpected call to 'loadNext' resource action with undefined next link."
         );
       }
-      const response = await this.getHttpClient(context).get<CollectionResponseInclude<T, ResourceObject>>(context.state.next);
+      const response = await this.request(context, context.state.next);
 
       await this.handleCollectionResponse(
         response,
@@ -557,7 +569,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     // Call API
     try {
-      const response = await this.getHttpClient(context).get<ResourceResponseInclude<T, ResourceObject>>(url);
+      const response = await this.request(context, url);
       // Commit mutation(s).
       const resource = response.data.data;
       context.commit("setCurrent", resource);
