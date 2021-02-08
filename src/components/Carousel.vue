@@ -61,7 +61,7 @@ export default Vue.extend({
   }),
 });
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 .thumbnail {
   width: 100%
 }

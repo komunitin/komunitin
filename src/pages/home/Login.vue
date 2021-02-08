@@ -36,7 +36,7 @@ export default Vue.extend({
   name: 'Login'
 });
 </script>
-<style lang="scss" scope>
+<style lang="scss" scoped>
 // Wider non-standard button.
 #explore {
   height: 48px;
