@@ -44,3 +44,4 @@ pre-master.sh
 # Test reports
 /test/jest/coverage
 src/debug.log
+notifications/__debug_bin
