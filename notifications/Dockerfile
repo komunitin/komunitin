@@ -1,9 +1,12 @@
-FROM golang:1.16-buster
-
+FROM golang
 
 RUN mkdir /opt/notifications
 WORKDIR /opt/notifications
 
-COPY . .
+# Install dlv debugger
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-CMD ["go", "run", "notifications.go"]
+COPY . .
+RUN go build -o main .
+
+CMD ["./main"]
