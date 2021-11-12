@@ -1,10 +1,12 @@
 version: "3.2"
 services:
-  rabbitmq:
-    image: rabbitmq:3.8-management
+  redis:
+    image: redis:alpine
   notifications:
     build: .
-
-
-
-
+    ports: 
+      - "2028:2028"
+      - "40000:40000"
+    entrypoint: dlv debug github.com/komunitin/komunitin/notifications -l 0.0.0.0:40000 --headless=true --log=true --api-version=2
+    volumes:
+      - .:/opt/notifications
