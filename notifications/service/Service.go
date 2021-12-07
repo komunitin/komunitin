@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/jsonapi"
+	"github.com/komunitin/jsonapi"
 )
 
 const (
