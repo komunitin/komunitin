@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/jsonapi"
+	"github.com/komunitin/jsonapi"
 	"github.com/komunitin/komunitin/notifications/service"
 	"github.com/komunitin/komunitin/notifications/store"
 )
@@ -15,23 +15,27 @@ const (
 	EventStream = "events"
 )
 
-type Transfer struct {
-	Id string `jsonapi:"primary,transfers"`
+type ExternalTransfer struct {
+	Id       string `jsonapi:"primary,transfers"`
+	Href     string `jsonapi:"meta,href"`
+	External bool   `jsonapi:"meta,external"`
 }
 
 type Event struct {
 	// The type of the event
-	Id       string    `jsonapi:"primary,events"`
-	Name     string    `jsonapi:"attr,name"`
-	Source   string    `jsonapi:"attr,source"`
-	Time     time.Time `jsonapi:"attr,time,iso8601"`
-	Transfer *Transfer `jsonapi:"relation,transfer,omitempty"`
+	Id       string            `jsonapi:"primary,events"`
+	Name     string            `jsonapi:"attr,name"`
+	Source   string            `jsonapi:"attr,source"`
+	Code     string            `jsonapi:"attr,code"`
+	Time     time.Time         `jsonapi:"attr,time,iso8601"`
+	Transfer *ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
 }
 
 // Implement Metable interface in Transfer object to declare that it is an external object.
-func (transfer Transfer) JSONAPIMeta() *jsonapi.Meta {
+func (transfer ExternalTransfer) JSONAPIMeta() *jsonapi.Meta {
 	return &jsonapi.Meta{
 		"external": true,
+		"href":     transfer.Href,
 	}
 }
 
@@ -43,17 +47,22 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		var event Event
-		err = service.ValidateJson(w, r, &event)
+		event := new(Event)
+		err = service.ValidateJson(w, r, event)
 		if err != nil {
 			return
 		}
-		// Enqueue event to the stream.
-		id, err := stream.Add(r.Context(), map[string]interface{}{
+		value := map[string]interface{}{
 			"name":   event.Name,
 			"source": event.Source,
 			"time":   event.Time.String(),
-		})
+			"code":   event.Code,
+		}
+		if event.Transfer != nil {
+			value["transfer"] = event.Transfer.Href
+		}
+		// Enqueue event to the stream.
+		id, err := stream.Add(r.Context(), value)
 		if err != nil {
 			// Unexpected error
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -66,7 +75,7 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 		// Send response, which is the same as the request but with the id.
 		event.Id = id
-		err = jsonapi.MarshalPayload(w, &event)
+		err = jsonapi.MarshalPayload(w, event)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Println(err.Error())

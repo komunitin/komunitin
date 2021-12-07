@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -51,7 +52,9 @@ func (store *Store) Set(ctx context.Context, class string, id string, value inte
 func (store *Store) Get(ctx context.Context, class string, id string) (interface{}, error) {
 	return store.client.Get(ctx, key(class, id)).Result()
 }
-func (store *Store) GetByIndex(ctx context.Context, class string, index string, id string) ([]interface{}, error) {
+
+// Return the values of given store class that match the given index and unmarshal them using the provided struct type with json annotations.
+func (store *Store) GetByIndex(ctx context.Context, class string, t reflect.Type, index string, id string) ([]interface{}, error) {
 	// Get data using the index.
 	var encoded []interface{}
 	_, err := store.client.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
@@ -66,9 +69,9 @@ func (store *Store) GetByIndex(ctx context.Context, class string, index string, 
 		return nil, err
 	}
 	// Decode data
-	var values []interface{}
+	values := []interface{}{}
 	for _, v := range encoded {
-		var item map[string]interface{}
+		item := reflect.New(t.Elem())
 		err := json.Unmarshal([]byte(v.(string)), &item)
 		if err != nil {
 			return nil, err

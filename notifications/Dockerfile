@@ -8,5 +8,6 @@ RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 COPY . .
 RUN go build -o main .
+ENV GOOGLE_APPLICATION_CREDENTIALS=komunitin-project-firebase-adminsdk.json
 
 CMD ["./main"]
