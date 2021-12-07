@@ -12,7 +12,8 @@ module.exports = function(ctx) {
       "i18n",
       "vuelidate",
       "mirage",
-      "auth"
+      "auth",
+      "messaging"
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -99,7 +100,7 @@ module.exports = function(ctx) {
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
+      workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
         name: "Komunitin",
@@ -187,6 +188,10 @@ module.exports = function(ctx) {
           }
         });
       }
+    },
+    sourceFiles : {
+      registerServiceWorker: 'src-pwa/register-service-worker.ts',
+      serviceWorker: 'src-pwa/custom-service-worker.ts',
     }
   };
 };

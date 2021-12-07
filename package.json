@@ -30,6 +30,7 @@
     "clamp-js": "^0.7.0",
     "core-js": "^3.8.3",
     "date-fns": "^2.16.1",
+    "firebase": "^9.6.0",
     "leaflet": "^1.7.1",
     "markdown-to-txt": "^1.0.1",
     "marked": "^0.8.2",
