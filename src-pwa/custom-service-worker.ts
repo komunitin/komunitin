@@ -6,9 +6,7 @@ import {
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { ExpirationPlugin } from 'workbox-expiration';
 
-import { initializeApp } from "firebase/app";
-import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
-import { firebaseConfig } from "../src/boot/messaging"
+import { Notifications } from "../src/plugins/Notifications"
 
 // Precache generated manifest file.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,17 +37,7 @@ registerRoute(
   }),
 );
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-// Retrieve an instance of Firebase Messaging so that it can handle background
-// messages.
-const messaging = getMessaging(app);
-
-/**
- * Push Message handler.
- */
-onBackgroundMessage(messaging, (payload) => {
-  console.log('Background message received. ', payload);
-  // ...
-})
+// Setup push notifications handler.
+const notifications = new Notifications()
+notifications.receiveBackgroundMessages();
 

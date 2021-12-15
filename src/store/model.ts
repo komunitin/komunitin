@@ -353,3 +353,15 @@ export interface Need extends ResourceObject {
     author: RelatedResource;
   };
 }
+
+export interface NotificationsSubscription extends ResourceObject {
+  attributes: {
+    token: string;
+    // Here it goes the notification settings as an embedded map.
+    // settings: NotiifcationSettings
+  };
+  relationships: {
+    user: RelatedResource;
+    member: RelatedResource;
+  }
+}
