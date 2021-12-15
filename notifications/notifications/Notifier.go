@@ -6,9 +6,10 @@ import (
 	"log"
 	"net/http"
 	"reflect"
-	"time"
 
 	firebase "firebase.google.com/go"
+	"firebase.google.com/go/messaging"
+
 	"github.com/komunitin/jsonapi"
 	"github.com/komunitin/komunitin/notifications/events"
 	"github.com/komunitin/komunitin/notifications/store"
@@ -23,38 +24,9 @@ const (
 	SocialUrl     = "http://localhost:2029/ces/api/social"
 )
 
-type Transfer struct {
-	Id       string    `jsonapi:"primary,transfers"`
-	Amount   int       `jsonapi:"attr,amount"`
-	Meta     string    `jsonapi:"attr,meta"`
-	State    string    `jsonapi:"attr,state"`
-	Expires  time.Time `jsonapi:"attr,expires,iso8601"`
-	Created  time.Time `jsonapi:"attr,expires,iso8601"`
-	Updated  time.Time `jsonapi:"attr,expires,iso8601"`
-	Payer    *Account  `jsonapi:"relation,payer"`
-	Payee    *Account  `jsonapi:"relation,payee"`
-	Currency *Currency `jsonapi:"relation,currency"`
-}
-
-type Account struct {
-	Id          string    `jsonapi:"primary,accounts"`
-	Code        string    `jsonapi:"attr,code"`
-	Balance     int       `jsonapi:"attr,balance"`
-	CreditLimit int       `jsonapi:"attr,creditLimit"`
-	DebitLimit  int       `jsonapi:"attr,debitLimit"`
-	Currency    *Currency `jsonapi:"relation,currency"`
-}
-
-type Currency struct {
-	Id         string `jsonapi:"primary,currencies"`
-	CodeType   string `jsonapi:"attr,codeType"`
-	Code       string `jsonapi:"attr,code"`
-	Name       string `jsonapi:"attr,name"`
-	NamePlural string `jsonapi:"attr,namePlural"`
-	Symbol     string `jsonapi:"attr,symbol"`
-	Decimals   int    `jsonapi:"attr,decimals"`
-	Scale      int    `jsonapi:"attr,scale"`
-	Value      int    `jsonapi:"attr,value"`
+type Message struct {
+	Title string
+	Body  string
 }
 
 // Wait for data in events stream and perform notifications as needed.
@@ -125,7 +97,7 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 		return err
 	}
 
-	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*Account)(nil)).Elem())
+	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*Member)(nil)).Elem())
 
 	if err != nil {
 		return err
@@ -134,14 +106,20 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 	payerMember := members[0].(Member)
 	payeeMember := members[1].(Member)
 
-	payerMsg := fmt.Sprintf("Purchase of %s from %s.", formatAmount(transfer.Amount, transfer.Currency), payeeMember.Name)
+	payerMsg := Message{
+		Title: "New purchase",
+		Body:  fmt.Sprintf("Purchase of %s from %s.", formatAmount(transfer.Amount, transfer.Currency), payeeMember.Name),
+	}
 	err = notifyMember(ctx, payerMsg, payerMember)
 
 	if err != nil {
 		return err
 	}
 
-	payeeMsg := fmt.Sprintf("Recieved %s from %s.", formatAmount(transfer.Amount, transfer.Currency), payerMember.Name)
+	payeeMsg := Message{
+		Title: "Payment recieved",
+		Body:  fmt.Sprintf("Recieved %s from %s.", formatAmount(transfer.Amount, transfer.Currency), payerMember.Name),
+	}
 	err = notifyMember(ctx, payeeMsg, payeeMember)
 
 	if err != nil {
@@ -157,48 +135,62 @@ func formatAmount(amount int, currency *Currency) string {
 	return fmt.Sprintf(format, float64(amount)/float64(currency.Scale), currency.Symbol)
 }
 
-func notifyMember(ctx context.Context, msg string, member Member) error {
+func notifyMember(ctx context.Context, msg Message, member Member) error {
 	// 1. Get users by member.
 	store, err := store.NewStore()
 	if err != nil {
 		return err
 	}
-	subscriptions, err := store.GetByIndex(ctx, "subscriptions", reflect.TypeOf((*MemberSubscription)(nil)), "member", member.Id)
-	// Member should always have at leat one user, isn't it? But perhaps I should'n assume that at this point.
+
+	// Get subscriptions for this member.
+	res, err := store.GetByIndex(ctx, "subscriptions", reflect.TypeOf((*Subscription)(nil)), "member", member.Id)
 	if err != nil {
 		return err
 	}
 
-	devices := []DeviceSubscription{}
-	for _, subscription := range subscriptions {
-		// 2. Get devices by user.
-		userDevices, err := store.GetByIndex(ctx, "devices", reflect.TypeOf((*DeviceSubscription)(nil)), "user", subscription.(MemberSubscription).User.Id)
-		if err != nil {
-			return err
-		}
-		for _, device := range userDevices {
-			devices = append(devices, device.(DeviceSubscription))
-		}
+	// Just change types from []interface{} to []Subscription.
+	subscriptions := make([]Subscription, len(res))
+	for i, sub := range res {
+		subscriptions[i] = sub.(Subscription)
 	}
 
-	for _, device := range devices {
-		err = notifyDevice(ctx, msg, device)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return notifyDevices(ctx, msg, subscriptions)
 }
 
-func notifyDevice(ctx context.Context, msg string, device DeviceSubscription) error {
-	config := &firebase.Config{
-		ProjectID: "komunitin-project",
+func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscription) error {
+	// Credentials are implicitly loaded from a JSON file identifyed by the environment
+	// variable GOOGLE_APPLICATION_CREDENTIALS.
+	app, err := firebase.NewApp(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("Error initializing firebase: %v\n", err)
 	}
-	app, err := firebase.NewApp(ctx, config, nil)
+	client, err := app.Messaging(ctx)
+	if err != nil {
+		return fmt.Errorf("Error getting firebase messaging client: %v\n", err)
+	}
+
+	// Build array of registration tokens
+	tokens := make([]string, len(subscriptions))
+	for i, sub := range subscriptions {
+		tokens[i] = sub.Token
+	}
+
+	// Build firebase message object.
+	message := &messaging.MulticastMessage{
+		Tokens: tokens,
+		Notification: &messaging.Notification{
+			Title: msg.Title,
+			Body:  msg.Body,
+		},
+	}
+
+	// Send the message!
+	br, err := client.SendMulticast(ctx, message)
 	if err != nil {
 		return err
 	}
+
+	log.Default().Printf("%d messages sent.\n", br.SuccessCount)
 
 	return nil
 }
