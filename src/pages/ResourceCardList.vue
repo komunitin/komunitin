@@ -1,11 +1,11 @@
 <template>
   <div>
     <page-header search :title="title" balance @search="fetchResources" />
-    <q-page-container>
+    <page-container>
       <q-page>
       <resource-cards ref="resourceCards" v-bind="$attrs"/>
     </q-page>
-  </q-page-container>
+  </page-container>
   </div>
 </template>
 
@@ -13,6 +13,7 @@
 import Vue from "vue";
 
 import PageHeader from "../layouts/PageHeader.vue";
+import PageContainer from "../layouts/PageContainer.vue"
 import ResourceCards from "./ResourceCards.vue"
 
 /**
@@ -22,6 +23,7 @@ export default Vue.extend({
   name: "ResourceCardList",
   components: {
     PageHeader,
+    PageContainer,
     ResourceCards
   },
   props: {

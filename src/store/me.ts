@@ -3,6 +3,8 @@ import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/komunitin";
 import KError, { KErrorCode } from "src/KError";
 import { handleError } from "../boot/errors";
+import { NotificationsSubscription } from "./model"
+import { Notifications } from "src/plugins/Notifications";
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -24,6 +26,10 @@ export interface UserState {
    * Current location, provided by device.
    */
   location?: [number, number];
+  /**
+   * Subscription to push notifications.
+   */
+  subscriptionToken?: string;
 }
 
 /**
@@ -92,13 +98,16 @@ export default {
     userInfo: undefined,
     userId: undefined,
     accountId: undefined,
-    location: undefined
+    location: undefined,
+    subscriptionToken: undefined
   }),
   getters: {
     isLoggedIn: state =>
       state.userInfo !== undefined &&
       state.userId !== undefined &&
       auth.isAuthorized(state.tokens),
+    isSubscribed: state =>
+      state.subscriptionToken !== undefined,
     myMember: (state, getters, rootState, rootGetters) => {
       if (state.userId !== undefined) {
         const user = rootGetters["users/one"](state.userId);
@@ -118,7 +127,8 @@ export default {
     tokens: (state, tokens) => (state.tokens = tokens),
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
     myUser: (state, userId) => (state.userId = userId),
-    location: (state, location) => (state.location = location)
+    location: (state, location) => (state.location = location),
+    subscription: (state, subscriptionToken) => (state.subscriptionToken = subscriptionToken)
   },
 
   actions: {
@@ -194,6 +204,30 @@ export default {
         );
       });
       commit("location", location);
+    },
+    /**
+     * Subscribe to push notifications
+    */
+    subscribe: async (context: ActionContext<UserState, never>) => {
+      if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
+        let subscription : NotificationsSubscription = {
+          type: "subscriptions",
+          id:"",
+          links: {
+            self: ""
+          },
+          attributes: {
+            token: ""
+          },
+          relationships: {
+            user: context.getters.myUser,
+            member: context.getters.myMember,
+          }
+        }
+        const notifications = new Notifications();
+        subscription = await notifications.subscribe(subscription);
+        context.commit("subscription", subscription.attributes.token);
+      }
     }
   }
 } as Module<UserState, never>;

@@ -9,7 +9,7 @@ export default {
   routes(server: Server) {
     // Devices POST endpoint.
     server.post(
-      KOptions.url.notifications + "/devices",
+      KOptions.url.notifications + "/subscriptions",
       (schema, request) => {
         return new Response(201, {}, request.requestBody);
       }
