@@ -3,7 +3,8 @@ import { getMessaging, getToken, MessagePayload, Messaging, onMessage } from "fi
 import { KOptions } from "../boot/komunitin"
 import axios from "axios";
 import { onBackgroundMessage, getMessaging as getMessagingSW } from "firebase/messaging/sw";
-import { NotificationsSubscription } from "src/store/model";
+import { Member, NotificationsSubscription, ResourceResponse, User } from "src/store/model";
+import { runInContext } from "vm";
 
 export class Notifications {
   
@@ -42,7 +43,7 @@ export class Notifications {
   /**
    * Subscribe the current device, user and member to push notifications.
   */
-  public async subscribe(subscription: NotificationsSubscription): Promise<NotificationsSubscription> {
+  public async subscribe(user: User, member:Member, accessToken: string): Promise<NotificationsSubscription> {
     // Initialize Firebase
     const messaging = this.getMessaging();
     const vapidKey = process.env.PUSH_SERVER_KEY;
@@ -54,16 +55,54 @@ export class Notifications {
         vapidKey,
         serviceWorkerRegistration
       });
-      // Update token.
-      subscription.attributes.token = token;
+      const message = {
+        data: {
+          type: "subscriptions",
+          attributes: {
+            token,
+            settings: {}
+          },
+          relationships: {
+            user: {
+              data: {
+                id: user.id,
+                type: "users",
+                meta: {
+                  external: true,
+                  href: user.links.self
+                }
+              }
+            },
+            member: {
+              data: {
+                id: member.id,
+                type: "members",
+                meta: {
+                  external: true,
+                  href: member.links.self
+                }
+              }
+            }
+          }
+        }
+      }
       // Send token to the server.
-      const response = await axios.post<NotificationsSubscription>(KOptions.url.notifications + '/subscriptions', subscription);
+      const response = await axios.post<ResourceResponse<NotificationsSubscription>>(
+        KOptions.url.notifications + '/subscriptions', 
+        message, {
+          headers: {
+            Accept: "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json",
+            Authorization: `Bearer ${accessToken}` 
+          }
+        });
+
       /**
        * Push Message handler.
        */
       onMessage(messaging, this.onMessage)
 
-      return response.data
+      return response.data.data
 
     } catch (err) {
       // The user doesn't grant the app to receive notifications.

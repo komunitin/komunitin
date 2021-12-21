@@ -3,7 +3,6 @@ import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/komunitin";
 import KError, { KErrorCode } from "src/KError";
 import { handleError } from "../boot/errors";
-import { NotificationsSubscription } from "./model"
 import { Notifications } from "src/plugins/Notifications";
 
 // Exported just for testing purposes.
@@ -108,12 +107,16 @@ export default {
       auth.isAuthorized(state.tokens),
     isSubscribed: state =>
       state.subscriptionToken !== undefined,
-    myMember: (state, getters, rootState, rootGetters) => {
+    myUser: (state, getters, rootState, rootGetters) => {
       if (state.userId !== undefined) {
-        const user = rootGetters["users/one"](state.userId);
-        if (user.members.length > 0) {
-          return user.members[0];
-        }
+        return rootGetters["users/one"](state.userId);
+      }
+      return undefined;
+    },
+    myMember: (state, getters) => {
+      const user = getters.myUser;
+      if (user?.members.length > 0) {
+        return user.members[0];
       }
       return undefined;
     },
@@ -210,23 +213,9 @@ export default {
     */
     subscribe: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
-        let subscription : NotificationsSubscription = {
-          type: "subscriptions",
-          id:"",
-          links: {
-            self: ""
-          },
-          attributes: {
-            token: ""
-          },
-          relationships: {
-            user: context.getters.myUser,
-            member: context.getters.myMember,
-          }
-        }
         const notifications = new Notifications();
-        subscription = await notifications.subscribe(subscription);
-        context.commit("subscription", subscription.attributes.token);
+        const token = await notifications.subscribe(context.getters.myUser, context.getters.myMember);
+        context.commit("subscription", token);
       }
     }
   }
