@@ -124,6 +124,7 @@ export interface ExternalResourceObject extends ResourceObject {
   relationships?: undefined;
   meta: {
     external : true
+    href: string
   }
 }
 
