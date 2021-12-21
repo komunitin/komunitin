@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"reflect"
+	"strings"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
@@ -19,9 +21,10 @@ const (
 	TransferCommitted = "TransferCommitted"
 )
 
-const (
-	AccountingUrl = "http://localhost:2029/ces/api/accounting"
-	SocialUrl     = "http://localhost:2029/ces/api/social"
+// These configuration parameters are set docker-compose.xml file.
+var (
+	accountingUrl = os.Getenv("KOMUNITIN_ACCOUNTING_URL")
+	socialUrl     = os.Getenv("KOMUNITIN_SOCIAL_URL")
 )
 
 type Message struct {
@@ -31,7 +34,7 @@ type Message struct {
 
 // Wait for data in events stream and perform notifications as needed.
 func Notifier(ctx context.Context) error {
-	// TODO: Bettererror handling. Need to be studied carefully, but:
+	// TODO: Better error handling. Need to be studied carefully, but:
 	//  - error at reading could be reattempted after X seconds
 	//  - erroneous events/notifications could be moved to a seaparate stream
 
@@ -53,8 +56,8 @@ func Notifier(ctx context.Context) error {
 		}
 		err = handleEvent(ctx, value)
 		if err != nil {
-			// Unexpected error,terminating.
-			return err
+			// Error handling event. Just print and ignore event.
+			log.Printf("Error handling event: %v\n", err)
 		}
 		// Acknowledge event handled
 		stream.Ack(ctx, id)
@@ -72,12 +75,31 @@ func handleEvent(ctx context.Context, value map[string]interface{}) error {
 	return nil
 }
 
+func fixUrl(url string) string {
+	url = strings.Replace(url, "/localhost", "/host.docker.internal", 1)
+	return url
+}
+func getResource(ctx context.Context, url string) (*http.Response, error) {
+	url = fixUrl(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	token, err := getAuthorizationToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	return http.DefaultClient.Do(req)
+}
 func handleTransferCommitted(ctx context.Context, value map[string]interface{}) error {
-
-	// Get full transfer object.  Code missing!
-	res, err := http.Get(value["transfer"].(string))
+	// Get full transfer object.
+	res, err := getResource(ctx, value["transfer"].(string)+"?include=currency")
 	if err != nil {
 		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("error getting transfer object: %s", res.Status)
 	}
 	transfer := new(Transfer)
 	err = jsonapi.UnmarshalPayload(res.Body, transfer)
@@ -91,20 +113,23 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 	payee := transfer.Payee
 
 	// Get the members related to these accounts.
-	res, err = http.Get(SocialUrl + "/" + code + "/members?filter[account]=" + payer.Id + "," + payee.Id)
+	url := socialUrl + "/" + code + "/members?filter[account]=" + payer.Id + "," + payee.Id
+	res, err = getResource(ctx, url)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("error getting member objects: %s", res.Status)
+	}
+
+	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*Member)(nil)))
 
 	if err != nil {
 		return err
 	}
 
-	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*Member)(nil)).Elem())
-
-	if err != nil {
-		return err
-	}
-
-	payerMember := members[0].(Member)
-	payeeMember := members[1].(Member)
+	payerMember := members[0].(*Member)
+	payeeMember := members[1].(*Member)
 
 	payerMsg := Message{
 		Title: "New purchase",
@@ -135,7 +160,7 @@ func formatAmount(amount int, currency *Currency) string {
 	return fmt.Sprintf(format, float64(amount)/float64(currency.Scale), currency.Symbol)
 }
 
-func notifyMember(ctx context.Context, msg Message, member Member) error {
+func notifyMember(ctx context.Context, msg Message, member *Member) error {
 	// 1. Get users by member.
 	store, err := store.NewStore()
 	if err != nil {
@@ -147,14 +172,16 @@ func notifyMember(ctx context.Context, msg Message, member Member) error {
 	if err != nil {
 		return err
 	}
-
-	// Just change types from []interface{} to []Subscription.
-	subscriptions := make([]Subscription, len(res))
-	for i, sub := range res {
-		subscriptions[i] = sub.(Subscription)
+	if len(res) > 0 {
+		// Just change types from []interface{} to []Subscription.
+		subscriptions := make([]Subscription, len(res))
+		for i, sub := range res {
+			subscriptions[i] = sub.(Subscription)
+		}
+		return notifyDevices(ctx, msg, subscriptions)
+	} else {
+		return nil
 	}
-
-	return notifyDevices(ctx, msg, subscriptions)
 }
 
 func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscription) error {
@@ -162,11 +189,11 @@ func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscriptio
 	// variable GOOGLE_APPLICATION_CREDENTIALS.
 	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("Error initializing firebase: %v\n", err)
+		return fmt.Errorf("error initializing firebase: %v", err)
 	}
 	client, err := app.Messaging(ctx)
 	if err != nil {
-		return fmt.Errorf("Error getting firebase messaging client: %v\n", err)
+		return fmt.Errorf("error getting firebase messaging client: %v", err)
 	}
 
 	// Build array of registration tokens
@@ -190,7 +217,7 @@ func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscriptio
 		return err
 	}
 
-	log.Default().Printf("%d messages sent.\n", br.SuccessCount)
+	log.Printf("%d messages sent.\n", br.SuccessCount)
 
 	return nil
 }

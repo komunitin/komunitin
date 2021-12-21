@@ -72,7 +72,6 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 		// Return success following JSON:API spec https://jsonapi.org/format/#crud-creating-responses.
 		w.Header().Set(service.ContentType, jsonapi.MediaType)
 		// Not adding Location header since events are not accessible (by the moment).
-		w.WriteHeader(http.StatusCreated)
 		// Send response, which is the same as the request but with the id.
 		event.Id = id
 		err = jsonapi.MarshalPayload(w, event)
@@ -81,6 +80,7 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 			log.Println(err.Error())
 			return
 		}
+		w.WriteHeader(http.StatusCreated)
 	}
 }
 

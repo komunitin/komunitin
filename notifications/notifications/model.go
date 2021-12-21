@@ -5,10 +5,10 @@ import (
 )
 
 type Member struct {
-	Id      string          `jsonapi:"primary,members"`
-	Code    string          `jsonapi:"attr,code"`
-	Name    string          `jsonapi:"attr,name"`
-	Account ExternalAccount `jsonapi:"relation,account"`
+	Id      string           `jsonapi:"primary,members"`
+	Code    string           `jsonapi:"attr,code"`
+	Name    string           `jsonapi:"attr,name"`
+	Account *ExternalAccount `jsonapi:"relation,account"`
 	// Ommitted other fields.
 }
 
