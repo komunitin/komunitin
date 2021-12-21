@@ -62,8 +62,12 @@ func (store *Store) GetByIndex(ctx context.Context, class string, t reflect.Type
 		if err != nil {
 			return err
 		}
-		encoded, err = pipe.MGet(ctx, ids...).Result()
-		return err
+		if len(ids) > 0 {
+			encoded, err = pipe.MGet(ctx, ids...).Result()
+			return err
+		} else {
+			return nil
+		}
 	})
 	if err != nil {
 		return nil, err

@@ -10,9 +10,9 @@ import (
 	"github.com/rs/xid"
 )
 
-// Device
+// Subscrption resource object
 type Subscription struct {
-	Id    string `jsonapi:"primary,devices" json:"id"`
+	Id    string `jsonapi:"primary,subscriptions" json:"id"`
 	Token string `jsonapi:"attr,token" json:"token"`
 	// jsonapi lib doesn't support typed embedded structs.
 	Settings map[string]interface{} `jsonapi:"attr,settings" json:"settings"`
@@ -43,9 +43,14 @@ func subscriptionsHandler(store *store.Store) http.HandlerFunc {
 			// Http error already sent by called function.
 			return
 		}
-		// TODO: validate settings.
+		// Validate provided data.
+		if subscription.Member == nil || subscription.User == nil {
+			http.Error(w, "Missing member and/or user relationships.", http.StatusBadRequest)
+			return
+		}
+		// TODO: Validate that provided user/member matches the one privided in authorization.
 
-		if subscription.Id != "" {
+		if subscription.Id == "" {
 			subscription.Id = xid.New().String()
 		}
 		// TODO: else, validate provided id has same user and member.
@@ -57,6 +62,7 @@ func subscriptionsHandler(store *store.Store) http.HandlerFunc {
 			log.Println(err)
 			return
 		}
+		log.Printf("New subscription %s.\n", subscription.Id)
 		// Return success following JSON:API spec https://jsonapi.org/format/#crud-creating-responses.
 		w.Header().Set(service.ContentType, jsonapi.MediaType)
 		// Not adding Location header since events are not accessible (by the moment).
