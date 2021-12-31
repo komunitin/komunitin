@@ -1,5 +1,8 @@
 package store
 
+// Implements a key-value store with indexing.
+// This is an interface for the REDIS database.
+
 import (
 	"context"
 	"encoding/json"
@@ -13,6 +16,7 @@ type Store struct {
 	client redis.Client
 }
 
+// Create a new store.
 func NewStore() (*Store, error) {
 	store := &Store{
 		// Store and Stream ara using the same Redis instance. That's fine but incidental.
@@ -53,37 +57,47 @@ func (store *Store) Get(ctx context.Context, class string, id string) (interface
 	return store.client.Get(ctx, key(class, id)).Result()
 }
 
-// Return the values of given store class that match the given index and unmarshal them using the provided struct type with json annotations.
+// Return the values of given store class that match the given index. Values are unmarshaled using the provided struct pointer type
+// with json annotations.
+// t = reflect.TypeOf((*Model)(nil))
 func (store *Store) GetByIndex(ctx context.Context, class string, t reflect.Type, index string, id string) ([]interface{}, error) {
-	// Get data using the index.
-	var encoded []interface{}
-	_, err := store.client.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
-		ids, err := pipe.SMembers(ctx, indexKey(class, index, id)).Result()
-		if err != nil {
-			return err
-		}
-		if len(ids) > 0 {
-			encoded, err = pipe.MGet(ctx, ids...).Result()
-			return err
-		} else {
-			return nil
-		}
-	})
+	// Get data keys using the index.
+	ids, err := store.client.SMembers(ctx, indexKey(class, index, id)).Result()
 	if err != nil {
 		return nil, err
 	}
-	// Decode data
+	// Quick return if there's no data.
+	if len(ids) == 0 {
+		return []interface{}{}, nil
+	}
+
+	// Build keys from index values.
+	for index, id := range ids {
+		ids[index] = key(class, id)
+	}
+
+	// Get objects.
+	encoded, err := store.client.MGet(ctx, ids...).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	// Decode json objects.
 	values := []interface{}{}
 	for _, v := range encoded {
-		item := reflect.New(t.Elem())
-		err := json.Unmarshal([]byte(v.(string)), &item)
-		if err != nil {
-			return nil, err
+		if v != nil {
+			// t = *Model.Type, t.Elem() = Model.Type, new is *Model, item is interface{}
+			item := reflect.New(t.Elem()).Interface()
+			err := json.Unmarshal([]byte(v.(string)), item)
+			if err != nil {
+				return nil, err
+			}
+			values = append(values, item)
 		}
-		values = append(values, item)
 	}
 	return values, nil
 }
+
 func key(class string, id string) string {
 	return "object" + ":" + class + ":" + id
 }

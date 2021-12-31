@@ -1,5 +1,7 @@
 package service
 
+// JSON:API service helpers
+
 import (
 	"encoding/json"
 	"errors"

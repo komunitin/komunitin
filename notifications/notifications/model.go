@@ -1,5 +1,7 @@
 package notifications
 
+// Komunitin API object models.
+
 import (
 	"time"
 )

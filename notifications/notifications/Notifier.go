@@ -1,9 +1,12 @@
 package notifications
 
+// Listens the events stream and send relevant push notifications to users.
+
 import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"reflect"
@@ -14,6 +17,7 @@ import (
 
 	"github.com/komunitin/jsonapi"
 	"github.com/komunitin/komunitin/notifications/events"
+	"github.com/komunitin/komunitin/notifications/i18n"
 	"github.com/komunitin/komunitin/notifications/store"
 )
 
@@ -23,14 +27,19 @@ const (
 
 // These configuration parameters are set docker-compose.xml file.
 var (
-	accountingUrl = os.Getenv("KOMUNITIN_ACCOUNTING_URL")
-	socialUrl     = os.Getenv("KOMUNITIN_SOCIAL_URL")
+	/*accountingUrl = os.Getenv("KOMUNITIN_ACCOUNTING_URL")*/
+	socialUrl = os.Getenv("KOMUNITIN_SOCIAL_URL")
+	appUrl    = os.Getenv("KOMUNITIN_APP_URL")
 )
 
 type Message struct {
 	Title string
 	Body  string
+	Icon  string
+	Link  string
 }
+
+type MessageBuilder func(i18n.Localizer) Message
 
 // Wait for data in events stream and perform notifications as needed.
 func Notifier(ctx context.Context) error {
@@ -131,21 +140,31 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 	payerMember := members[0].(*Member)
 	payeeMember := members[1].(*Member)
 
-	payerMsg := Message{
-		Title: "New purchase",
-		Body:  fmt.Sprintf("Purchase of %s from %s.", formatAmount(transfer.Amount, transfer.Currency), payeeMember.Name),
-	}
-	err = notifyMember(ctx, payerMsg, payerMember)
+	iconUrl := appUrl + "/icons/icon-512x512.png"
+	transferUrl := appUrl + "/groups/" + code + "/transactions/" + transfer.Id
+	amount := formatAmount(transfer.Amount, transfer.Currency)
+
+	err = notifyMember(ctx, payerMember, func(l i18n.Localizer) Message {
+		return Message{
+			Title: l.Sprintf("newPurchase"),
+			Body:  l.Sprintf("newPurchaseText", amount, payeeMember.Name),
+			Icon:  iconUrl,
+			Link:  transferUrl,
+		}
+	})
 
 	if err != nil {
 		return err
 	}
 
-	payeeMsg := Message{
-		Title: "Payment recieved",
-		Body:  fmt.Sprintf("Recieved %s from %s.", formatAmount(transfer.Amount, transfer.Currency), payerMember.Name),
-	}
-	err = notifyMember(ctx, payeeMsg, payeeMember)
+	notifyMember(ctx, payeeMember, func(l i18n.Localizer) Message {
+		return Message{
+			Title: l.Sprintf("paymentReceived"),
+			Body:  l.Sprintf("paymentReceivedText", amount, payerMember.Name),
+			Icon:  iconUrl,
+			Link:  transferUrl,
+		}
+	})
 
 	if err != nil {
 		return err
@@ -157,31 +176,50 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 // Format a currency amount for human readability.
 func formatAmount(amount int, currency *Currency) string {
 	format := fmt.Sprint("%.", currency.Decimals, "f%s") // "%.2f%s"
-	return fmt.Sprintf(format, float64(amount)/float64(currency.Scale), currency.Symbol)
+	return fmt.Sprintf(format, float64(amount)/math.Pow(10, float64(currency.Scale)), currency.Symbol)
 }
 
-func notifyMember(ctx context.Context, msg Message, member *Member) error {
-	// 1. Get users by member.
+func getMemberSubscriptions(ctx context.Context, member *Member) ([]Subscription, error) {
+	// Get connection to DB.
 	store, err := store.NewStore()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Get subscriptions for this member.
 	res, err := store.GetByIndex(ctx, "subscriptions", reflect.TypeOf((*Subscription)(nil)), "member", member.Id)
 	if err != nil {
+		return nil, err
+	}
+
+	// Just change types from []interface{} to []Subscription.
+	subscriptions := make([]Subscription, len(res))
+	for i, sub := range res {
+		// Convert to *Subscription and dereference.
+		subscriptions[i] = *(sub.(*Subscription))
+	}
+	return subscriptions, nil
+}
+
+func notifyMember(ctx context.Context, member *Member, msgBuilder MessageBuilder) error {
+	payerSubs, err := getMemberSubscriptions(ctx, member)
+	if err != nil {
 		return err
 	}
-	if len(res) > 0 {
-		// Just change types from []interface{} to []Subscription.
-		subscriptions := make([]Subscription, len(res))
-		for i, sub := range res {
-			subscriptions[i] = sub.(Subscription)
+	if len(payerSubs) > 0 {
+		l := getLocalizationFromSubscription(payerSubs[0])
+		msg := msgBuilder(l)
+		err = notifyDevices(ctx, msg, payerSubs)
+		if err != nil {
+			return err
 		}
-		return notifyDevices(ctx, msg, subscriptions)
-	} else {
-		return nil
 	}
+	return nil
+}
+
+func getLocalizationFromSubscription(subs Subscription) i18n.Localizer {
+	locale := subs.Settings["locale"].(string)
+	return i18n.GetLocalization(locale)
 }
 
 func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscription) error {
@@ -209,6 +247,14 @@ func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscriptio
 			Title: msg.Title,
 			Body:  msg.Body,
 		},
+		Webpush: &messaging.WebpushConfig{
+			Notification: &messaging.WebpushNotification{
+				Icon: msg.Icon,
+			},
+			FcmOptions: &messaging.WebpushFcmOptions{
+				Link: msg.Link,
+			},
+		},
 	}
 
 	// Send the message!
@@ -216,6 +262,7 @@ func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscriptio
 	if err != nil {
 		return err
 	}
+	// TODO: Handle errors by deleting invalid tokens.
 
 	log.Printf("%d messages sent.\n", br.SuccessCount)
 

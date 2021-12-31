@@ -1,5 +1,10 @@
 package events
 
+// Implements the /events notifications API endpoint.
+//
+// The events service gets event objects and enqueues these events in the events stream.
+// These are asynchronously consumed by the notifier process to send push messages to users.
+
 import (
 	"context"
 	"log"
@@ -71,6 +76,7 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 		}
 		// Return success following JSON:API spec https://jsonapi.org/format/#crud-creating-responses.
 		w.Header().Set(service.ContentType, jsonapi.MediaType)
+		w.WriteHeader(http.StatusCreated)
 		// Not adding Location header since events are not accessible (by the moment).
 		// Send response, which is the same as the request but with the id.
 		event.Id = id
@@ -80,7 +86,6 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 			log.Println(err.Error())
 			return
 		}
-		w.WriteHeader(http.StatusCreated)
 	}
 }
 

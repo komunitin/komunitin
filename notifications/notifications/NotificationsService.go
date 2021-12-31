@@ -1,8 +1,11 @@
 package notifications
 
+// Implements the /subscriptions Notifications API endpoint.
+
 import (
 	"log"
 	"net/http"
+	"reflect"
 
 	"github.com/komunitin/jsonapi"
 	"github.com/komunitin/komunitin/notifications/service"
@@ -50,10 +53,28 @@ func subscriptionsHandler(store *store.Store) http.HandlerFunc {
 		}
 		// TODO: Validate that provided user/member matches the one privided in authorization.
 
-		if subscription.Id == "" {
+		// Check if provided subscription already exists.
+		existing, err := store.GetByIndex(r.Context(), "subscriptions", reflect.TypeOf(subscription), "member", subscription.Member.Id)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Println(err)
+			return
+		}
+		// Check if device is already subscribed
+		found := false
+		for _, current := range existing {
+			sub := current.(*Subscription)
+			if sub.Token == subscription.Token &&
+				sub.Member.Id == subscription.Member.Id &&
+				sub.User.Id == subscription.User.Id {
+				// Set the subscription id to the matching id so the subscription will ve overwritten.
+				subscription.Id = sub.Id
+				found = true
+			}
+		}
+		if !found {
 			subscription.Id = xid.New().String()
 		}
-		// TODO: else, validate provided id has same user and member.
 
 		// Store subscription indexed by member.
 		err = store.Set(r.Context(), "subscriptions", subscription.Id, subscription, map[string]string{"member": subscription.Member.Id}, 0)
@@ -62,7 +83,8 @@ func subscriptionsHandler(store *store.Store) http.HandlerFunc {
 			log.Println(err)
 			return
 		}
-		log.Printf("New subscription %s.\n", subscription.Id)
+		log.Printf("Stored subscription %s.\n", subscription.Id)
+
 		// Return success following JSON:API spec https://jsonapi.org/format/#crud-creating-responses.
 		w.Header().Set(service.ContentType, jsonapi.MediaType)
 		// Not adding Location header since events are not accessible (by the moment).
