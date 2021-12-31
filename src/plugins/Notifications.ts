@@ -4,7 +4,10 @@ import { KOptions } from "../boot/komunitin"
 import axios from "axios";
 import { onBackgroundMessage, getMessaging as getMessagingSW } from "firebase/messaging/sw";
 import { Member, NotificationsSubscription, ResourceResponse, User } from "src/store/model";
-import { runInContext } from "vm";
+
+export interface SubscriptionSettings {
+  locale: string
+}
 
 export class Notifications {
   
@@ -43,7 +46,7 @@ export class Notifications {
   /**
    * Subscribe the current device, user and member to push notifications.
   */
-  public async subscribe(user: User, member:Member, accessToken: string): Promise<NotificationsSubscription> {
+  public async subscribe(user: User, member: Member, settings: SubscriptionSettings, accessToken: string): Promise<NotificationsSubscription> {
     // Initialize Firebase
     const messaging = this.getMessaging();
     const vapidKey = process.env.PUSH_SERVER_KEY;
@@ -60,7 +63,7 @@ export class Notifications {
           type: "subscriptions",
           attributes: {
             token,
-            settings: {}
+            settings
           },
           relationships: {
             user: {
@@ -127,7 +130,7 @@ export class Notifications {
     console.log("Received foreground message.", payload);
   }
 
-  private onBackgroundMessage(payload: MessagePayload) : void {
+  private async onBackgroundMessage(payload: MessagePayload) {
     console.log("Received background message.", payload);
   }
 }
