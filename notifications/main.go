@@ -22,6 +22,7 @@ func main() {
 		AllowCredentials: true,
 		AllowedOrigins: []string{
 			"http://localhost:8080",
+			"https://localhost:2030",
 			"https://demo.komunitin.org",
 			"https://komunitin.org",
 		},

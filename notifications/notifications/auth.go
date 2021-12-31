@@ -1,5 +1,10 @@
 package notifications
 
+// Requests access token to komunitin auth API using the client credentials Oauth2 flow.
+// This flow grants access to this app to the whole API.
+// we're getting komunitin_social_read_all and komunitin_accounting_read_all scopes so
+// we can read anything from these APIs but we can't change anything.
+
 import (
 	"context"
 	"encoding/json"

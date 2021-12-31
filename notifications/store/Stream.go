@@ -1,5 +1,7 @@
 package store
 
+// Implements a queue or stream of objects using the readis STREAM data type.
+
 import (
 	"context"
 	"strings"
