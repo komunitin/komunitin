@@ -82,5 +82,8 @@
   "payer": "Pagador/a",
   "payee": "Cobrador/a",
   "komunitinProject": "Proyecto Komunitin",
-  "nothingHere": "Nada por aquí... ¡Aún!"
+  "nothingHere": "Nada por aquí... ¡Aún!",
+  "enableNotificationsText": "Activa las notificaciones para conocer los movimientos de tu cuenta y notícias importantes de tu red. Puedes configurarlas o desactivarlas en qualquier momento.",
+  "enableNotifications": "Activa las notificaciones",
+  "dismiss": "Ignora"
 }

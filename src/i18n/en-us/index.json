@@ -82,5 +82,8 @@
   "payer": "Payer",
   "payee": "Payee",
   "komunitinProject": "Komunitin project",
-  "nothingHere": "There's nothing here... Yet!"
+  "nothingHere": "There's nothing here... Yet!",
+  "enableNotificationsText": "Enable notifications to be aware of movements in your account and important news in your network. You can configure or disable them later.",
+  "enableNotifications": "Enable notifications",
+  "dismiss": "Dismiss"
 }
