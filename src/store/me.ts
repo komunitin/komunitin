@@ -4,6 +4,7 @@ import { KOptions } from "src/boot/komunitin";
 import KError, { KErrorCode } from "src/KError";
 import { handleError } from "../boot/errors";
 import { Notifications } from "src/plugins/Notifications";
+import { i18n } from "../boot/i18n"
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -183,7 +184,7 @@ export default {
       const location = await new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(
           // Success handler.
-          (position: Position) => {
+          (position: GeolocationPosition) => {
             const location = [
               position.coords.longitude,
               position.coords.latitude
@@ -192,7 +193,7 @@ export default {
             resolve(location);
           },
           // Error handler
-          (error: PositionError) => {
+          (error: GeolocationPositionError) => {
             const codes = [] as KErrorCode[];
             codes[error.TIMEOUT] = KErrorCode.PositionTimeout;
             codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable;
@@ -214,7 +215,14 @@ export default {
     subscribe: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
         const notifications = new Notifications();
-        const token = await notifications.subscribe(context.getters.myUser, context.getters.myMember);
+
+        const token = await notifications.subscribe(
+          context.getters.myUser, 
+          context.getters.myMember,
+          {
+            locale: i18n.locale
+          },
+          context.getters.accessToken);
         context.commit("subscription", token);
       }
     }
