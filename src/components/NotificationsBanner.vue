@@ -1,9 +1,9 @@
 <template>
   <q-banner v-if="show" class="text-onsurface-m">
-    {{$t("Enable notifications to be aware of movements in your account and important news in your network. You can configure or disable them later.")}}
+    {{$t("enableNotificationsText")}}
     <template v-slot:action>
-      <q-btn flat color="primary" :label="$t('Dismiss')" @click="dismiss"/>
-      <q-btn flat color="primary" :label="$t('Enable notifications')" @click="subscribe"/>
+      <q-btn flat color="primary" :label="$t('dismiss')" @click="dismiss"/>
+      <q-btn flat color="primary" :label="$t('enableNotifications')" @click="subscribe"/>
     </template>
   </q-banner>
 </template>

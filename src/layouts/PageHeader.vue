@@ -102,7 +102,6 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import FormatCurrency from "../plugins/FormatCurrency";
-import NotificationsBanner from "../components/NotificationsBanner.vue";
 
 Vue.use(FormatCurrency);
 
@@ -125,9 +124,6 @@ interface ScrollDetails {
  */
 export default Vue.extend({
   name: "PageHeader",
-  components: {
-    NotificationsBanner
-  },
   props: {
     /**
      * Page title
