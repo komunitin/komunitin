@@ -48,15 +48,18 @@
 <script lang="ts">
 import Vue from "vue";
 
-import PageHeader from "../../layouts/PageHeader.vue";
+import Md2html from "../../plugins/Md2html";
+
 import OfferLayout from "../../layouts/OfferLayout.vue";
+import PageHeader from "../../layouts/PageHeader.vue";
+
+import Carousel from "../../components/Carousel.vue";
 import CategoryAvatar from "../../components/CategoryAvatar.vue";
+import ContactButton from "../../components/ContactButton.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
-import ContactButton from "../../components/ContactButton.vue";
-import Carousel from "../../components/Carousel.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
-import Md2html from "../../plugins/Md2html";
+
 import { Need } from "../../store/model";
 
 Vue.use(Md2html);

@@ -21,10 +21,22 @@ Install the [Quasar framework](https://quasar.dev/), a develompent framework bui
 npm install -g @quasar/cli
 npm install
 ```
+### Install local certificates
+ - Install [mkcert](https://github.com/FiloSottile/mkcert#installation)
+ - Create local CA root and set the `LOCAL_CA_ROOT` env variable:
+```bash
+mkcert -install
+export LOCAL_CA_ROOT="$(mkcert -CAROOT)/rootCA.pem"
+```
+ - Create certificates for localhost
+```bash
+mkdir tmp/certs && cd tmp/certs
+mkcert localhost
+```
 
 ### Run
 
-Build and launch the development HTTP server, that will make the app accessible at `http://localhost:8080/`.
+Build and launch the development HTTP server, that will make the app accessible at `https://localhost:2030/`.
 
 ```bash
 npm run dev

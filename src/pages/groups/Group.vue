@@ -118,14 +118,18 @@
 
 <script lang="ts">
 import Vue from "vue";
-import SimpleMap from "../../components/SimpleMap.vue";
-import { Group, Contact, Category, Currency } from "../../store/model";
+
+import Md2html from "../../plugins/Md2html";
+
+import PageHeader from "../../layouts/PageHeader.vue";
+
+import ContactButton from "../../components/ContactButton.vue";
 import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
-import ContactButton from "../../components/ContactButton.vue";
+import SimpleMap from "../../components/SimpleMap.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
-import PageHeader from "../../layouts/PageHeader.vue";
-import Md2html from "../../plugins/Md2html";
+
+import { Group, Contact, Category, Currency } from "../../store/model";
 
 Vue.use(Md2html);
 

@@ -63,11 +63,15 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
+
 import CollapsibleHeader from "../../layouts/CollapsibleHeader.vue";
+
 import AccountLimits from "./AccountLimits.vue";
-import { Member } from "../../store/model";
-import Avatar from "../../components/Avatar.vue";
+
+import Avatar from "src/components/Avatar.vue";
 import FitText from "src/components/FitText.vue";
+
+import { Member } from "../../store/model";
 
 export default Vue.extend({
   name: "MemberPageHeader",

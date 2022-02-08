@@ -66,11 +66,11 @@ declare module 'vue/types/vue' {
 } 
 
 function vueWarnHandler(message: string, vm: Vue, trace: string) {
+  const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, vm});
   try {
-    const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, vm});
     handleError(error);
   }
-  catch(error) {
+  catch (exception) {
     logErrorHandling(error);
   }
 };
@@ -91,18 +91,18 @@ if (window !== undefined) {
       }
       return;
     }
+    let kerror: KError;
+    if (event.error instanceof KError) {
+      kerror = event.error;
+    }
+    else {
+      kerror = new KError(KErrorCode.UnknownScript, event.message, {url: event.filename , line: event.lineno, column: event.colno, error: event.error})
+    }
     try {
-      let kerror: KError;
-      if (event.error instanceof KError) {
-        kerror = event.error;
-      }
-      else {
-        kerror = new KError(KErrorCode.UnknownScript, event.message, {url: event.filename , line: event.lineno, column: event.colno, error: event.error})
-      }
       handleError(kerror);
     }
     catch(error) {
-      logErrorHandling(error);
+      logErrorHandling(kerror);
     }
   });
 }

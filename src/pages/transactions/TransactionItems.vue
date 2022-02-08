@@ -52,10 +52,11 @@
 <script lang="ts">
 import Vue from "vue"
 
-import MemberHeader from "../../components/MemberHeader.vue";
-import ResourceCards from "../ResourceCards.vue";
-
 import FormatCurrency from "../../plugins/FormatCurrency";
+
+import ResourceCards from "../ResourceCards.vue";
+import MemberHeader from "../../components/MemberHeader.vue";
+
 import { Transfer, Member, Account } from "../../store/model";
 
 Vue.use(FormatCurrency);
