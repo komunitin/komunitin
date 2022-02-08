@@ -219,7 +219,7 @@ func notifyMember(ctx context.Context, member *Member, msgBuilder MessageBuilder
 
 func getLocalizationFromSubscription(subs Subscription) i18n.Localizer {
 	locale := subs.Settings["locale"].(string)
-	return i18n.GetLocalization(locale)
+	return i18n.GetLocalizer(locale)
 }
 
 func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscription) error {

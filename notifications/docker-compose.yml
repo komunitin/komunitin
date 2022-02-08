@@ -2,12 +2,28 @@ version: "3.2"
 services:
   redis:
     image: redis:alpine    
+
   notifications:
     build: .
+    ports:
+     - 2028:2028 
+    environment:
+      - KOMUNITIN_ACCOUNTING_URL=http://host.docker.internal:2029/ces/api/accounting
+      - KOMUNITIN_SOCIAL_URL=http://host.docker.internal:2029/ces/api/social
+      - KOMUNITIN_AUTH_URL=http://host.docker.internal:2029/oauth2
+      - KOMUNITIN_APP_URL=https://localhost:2030
+      - NOTIFICATIONS_CLIENT_ID=notifications-service
+      - NOTIFICATIONS_CLIENT_SECRET=komunitin
+    profiles:
+     - "run"
+  
+  notifications-dev:
+    build:
+      context: .
+      target: notifications-dev 
     ports: 
       - "2028:2028"
       - "40000:40000"
-    entrypoint: dlv debug github.com/komunitin/komunitin/notifications -l 0.0.0.0:40000 --headless=true --log=true --api-version=2
     volumes:
       - .:/opt/notifications
     environment:
@@ -17,6 +33,9 @@ services:
       - KOMUNITIN_APP_URL=https://localhost:2030
       - NOTIFICATIONS_CLIENT_ID=notifications-service
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
+    profiles:
+      - "dev"
+      
   redis-commander:
     image: rediscommander/redis-commander:latest
     restart: always
@@ -24,3 +43,5 @@ services:
      - REDIS_HOSTS=local:redis:6379
     ports:
      - "2027:8081" 
+    profiles:
+      - "dev"
