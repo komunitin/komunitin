@@ -46,3 +46,4 @@ pre-master.sh
 src/debug.log
 notifications/__debug_bin
 notifications/komunitin-project-firebase-adminsdk.json
+tmp
