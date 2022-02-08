@@ -1,7 +1,7 @@
 <template>
   <div>
     <page-header :title="group ? group.attributes.name : ''" balance>
-      <template v-slot:buttons>
+      <template #buttons>
         <contact-button
           v-if="group"
           icon="message"

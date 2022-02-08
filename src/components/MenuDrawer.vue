@@ -1,6 +1,9 @@
 <template>
   <q-list>
-    <member-header id="my-member" :member="myMember" :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}`"
+    <member-header
+      id="my-member" 
+      :member="myMember" 
+      :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}`"
       active-class="bg-active">
       <template #caption>
         {{ myAccount.attributes.code }}

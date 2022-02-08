@@ -139,7 +139,6 @@ export class Auth {
     return this.tokenRequest({
       username: email,
       password: password,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       grant_type: "password",
       scope: Auth.SCOPES
     });
@@ -216,9 +215,7 @@ export class Auth {
       throw new KError(KErrorCode.Unknown, "Missing authentication data.");
     }
     return this.tokenRequest({
-      // eslint-disable-next-line @typescript-eslint/camelcase
       grant_type: "refresh_token",
-      // eslint-disable-next-line @typescript-eslint/camelcase
       refresh_token: tokens.refreshToken
     });
   }
@@ -228,7 +225,6 @@ export class Auth {
    * @param data The data to be sent. client_id is set automatically.
    */
   private async tokenRequest(data: TokenRequestData): Promise<AuthData> {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     data.client_id = KOptions.oauth.clientid;
     // Use URLSearchParams in order to send the request with x-www-urlencoded.
     const params = new URLSearchParams();

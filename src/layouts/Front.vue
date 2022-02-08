@@ -2,10 +2,7 @@
   <q-layout view="hhh lpr fff" class="home column justify-start items-center">
     <q-header class="bg-transparent">
       <q-toolbar>
-        <q-btn v-show="showBackButton" id="back" flat dense round color="onoutside" icon="arrow_back"
-          :aria-label="$t('back')"
-          @click="goBack"
-        />
+        <q-btn v-show="showBackButton" id="back" flat dense round color="onoutside" icon="arrow_back" :aria-label="$t('back')" @click="goBack" />
       </q-toolbar>
     </q-header>
     <q-page-container>

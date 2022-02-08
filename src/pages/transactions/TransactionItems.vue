@@ -68,9 +68,6 @@ interface ExtendedTransfer extends Transfer {
 interface ExtendedAccount extends Account {
   member: Member;
 }
-interface ExtendedMember extends Member {
-  account: Account;
-}
 
 export default Vue.extend({
   name:"TransactionItems",

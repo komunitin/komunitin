@@ -32,7 +32,8 @@
                  }) }}</span>
             </div>
             <div class="q-pb-lg row q-col-gutter-md justify-end">
-              <share-button flat color="primary" :label="$t('share')"
+              <share-button 
+                flat color="primary" :label="$t('share')"
                 :title="$t('checkThisOffer', {member: offer.member.attributes.name})"
                 :text="offer.attributes.name"
               />
