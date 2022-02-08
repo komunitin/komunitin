@@ -31,8 +31,8 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import KError, {KErrorCode} from "../../KError";
 import { mapGetters } from "vuex";
+import KError, {KErrorCode} from "../../KError";
 import PageHeader from "../../layouts/PageHeader.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 import {Transfer, Account} from "../../store/model";

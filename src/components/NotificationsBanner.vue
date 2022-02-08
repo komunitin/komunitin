@@ -1,7 +1,7 @@
 <template>
   <q-banner v-if="show" class="text-onsurface-m">
     {{$t("enableNotificationsText")}}
-    <template v-slot:action>
+    <template #action>
       <q-btn flat color="primary" :label="$t('dismiss')" @click="dismiss"/>
       <q-btn flat color="primary" :label="$t('enableNotifications')" @click="subscribe"/>
     </template>
@@ -35,7 +35,7 @@ export default Vue.extend({
     dismiss(): void {
       this.$store.commit("notificationsBannerDismissed", true);
     },
-    async subscribe(): Promise<any> {
+    async subscribe() {
       const permission = await Notification.requestPermission()
       if (permission == "granted") {
         return this.$store.dispatch("subscribe");

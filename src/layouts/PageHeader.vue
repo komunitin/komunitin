@@ -26,13 +26,13 @@
         @click="$store.dispatch('toogleDrawer')"
       />
     </q-toolbar>
-    <div v-if="showBalance"
-      class="col self-center column items-center"
-    > 
-      <div class="text-body2 text-onprimary-m"
-      :style="`font-size: ${0.875*balanceScaleFactor}rem; line-height: ${1.25*balanceScaleFactor}rem;`">{{$t('balance')}}</div>
-      <div class="text-h3 text-onprimary-m"
-      :style="`font-size: ${3*balanceScaleFactor}rem; line-height: ${3.125*balanceScaleFactor}rem`">{{
+    <div v-if="showBalance" class="col self-center column items-center"> 
+      <div 
+        class="text-body2 text-onprimary-m"
+        :style="`font-size: ${0.875*balanceScaleFactor}rem; line-height: ${1.25*balanceScaleFactor}rem;`">{{$t('balance')}}</div>
+      <div 
+        class="text-h3 text-onprimary-m"
+        :style="`font-size: ${3*balanceScaleFactor}rem; line-height: ${3.125*balanceScaleFactor}rem`">{{
         $currency(
           myAccount.attributes.balance,
           myAccount.currency
@@ -59,7 +59,7 @@
         @input="$emit('search-input', searchText)"
         @keyup.enter="$emit('search', searchText)"
       >
-        <template v-slot:append>
+        <template #append>
           <q-icon
             v-if="searchText === ''"
             name="search"

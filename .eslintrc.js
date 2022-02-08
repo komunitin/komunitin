@@ -19,8 +19,6 @@ module.exports = {
     // Usage with Prettier, provided by 'eslint-config-prettier'.
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#usage-with-prettier
     "prettier",
-    "prettier/@typescript-eslint",
-    "prettier/vue",
 
     // Plugin for translations.
     // https://eslint-plugin-vue-i18n.intlify.dev/started.html#installation
@@ -49,7 +47,8 @@ module.exports = {
   },
 
   env: {
-    browser: true
+    browser: true,
+    node: true
   },
 
   globals: {
@@ -72,7 +71,7 @@ module.exports = {
 
     // Custom
     "vue/component-name-in-template-casing": ["error", "kebab-case"],
-    "@typescript-eslint/ban-ts-ignore": "warn",
+    "vue/multi-word-component-names": "off",
 
     // Correct typescript linting until at least 2.0.0 major release
     // See https://github.com/typescript-eslint/typescript-eslint/issues/501

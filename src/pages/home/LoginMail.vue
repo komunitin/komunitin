@@ -10,7 +10,7 @@
           :rules="[val => !$v.email.$invalid || $t('invalidEmail')]"
           lazy-rules
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon name="mail"/>
           </template>
         </q-input>
@@ -23,7 +23,7 @@
           :rules="[val => !$v.pass.$invalid || $t('invalidPassword')]"
           lazy-rules
         >
-          <template v-slot:append>
+          <template #append>
             <q-icon
               :name="isPwd ? 'visibility_off' : 'visibility'"
               class="cursor-pointer"
