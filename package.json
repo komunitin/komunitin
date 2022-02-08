@@ -36,7 +36,7 @@
     "marked": "^0.8.2",
     "quasar": "^1.15.0",
     "vue-element-loading": "^1.1.6",
-    "vue-i18n": "^8.22.4",
+    "vue-i18n": "^8.27.0",
     "vue2-leaflet": "^2.6.0",
     "vuelidate": "^0.7.6"
   },
@@ -49,8 +49,8 @@
     "@types/faker": "^4.1.12",
     "@types/node": "^12.19.14",
     "@types/resize-observer-browser": "^0.1.5",
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
+    "@typescript-eslint/eslint-plugin": "^5.11.0",
+    "@typescript-eslint/parser": "^5.11.0",
     "acorn": "^8.0.4",
     "cross-env": "^7.0.3",
     "eslint": "^6.8.0",
@@ -66,7 +66,7 @@
     "node-sass": "^4.14.1",
     "ts-jest": "^25.5.1",
     "typedoc": "^0.17.8",
-    "typescript": "^3.9.7",
+    "typescript": "^4.5.5",
     "vue-jest": "^3.0.7",
     "workbox-webpack-plugin": "^6.0.2"
   },

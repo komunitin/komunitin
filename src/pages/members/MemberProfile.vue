@@ -22,9 +22,12 @@
 </template>
 <script lang="ts">
 import Vue from "vue"
+
+import Md2html from "../../plugins/Md2html";
+
 import SimpleMap from "../../components/SimpleMap.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue"
-import Md2html from "../../plugins/Md2html";
+
 
 Vue.use(Md2html);
 

@@ -11,6 +11,7 @@ export enum KErrorCode {
   PositionTimeout = "PositionTimeout",
   PositionUnavailable = "PositionUnavailable",
   PositionPermisionDenied = "PositionPermisionDenied",
+  NotificationsPermissionDenied = "NotificationsPermissionDenied",
   VueWarning = "VueWarning",
   IncorrectCredentials = "IncorrectCredentials",
   AuthNoCredentials = "AuthNoCredentials",

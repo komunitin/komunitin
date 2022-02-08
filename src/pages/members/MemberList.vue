@@ -46,11 +46,16 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import PageHeader from "../../layouts/PageHeader.vue";
-import MemberHeader from "../../components/MemberHeader.vue";
 import FormatCurrency from "../../plugins/FormatCurrency";
-import ResourceCards from "../ResourceCards.vue";
+
+import PageHeader from "../../layouts/PageHeader.vue";
+
 import AccountLimits from "./AccountLimits.vue";
+import ResourceCards from "../ResourceCards.vue";
+
+import MemberHeader from "../../components/MemberHeader.vue";
+
+
 
 Vue.use(FormatCurrency);
 

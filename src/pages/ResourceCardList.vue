@@ -12,8 +12,9 @@
 <script lang="ts">
 import Vue from "vue";
 
-import PageHeader from "../layouts/PageHeader.vue";
 import PageContainer from "../layouts/PageContainer.vue"
+import PageHeader from "../layouts/PageHeader.vue";
+
 import ResourceCards from "./ResourceCards.vue"
 
 /**

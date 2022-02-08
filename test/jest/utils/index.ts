@@ -82,7 +82,7 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
   }
 
   // Merge options injected by boot functions.
-  const mountOptions = {
+  const mountOptions: ThisTypedMountOptions<V> = {
     ...app,
     localVue,
     store,
@@ -95,7 +95,7 @@ export async function mountComponent<V extends Vue>(component: VueClass<V>, opti
       LMarker: true
     },
     ...options,
-  }
+  };
 
   const wrapper = mount(component, mountOptions);
 

@@ -1,3 +1,7 @@
+// This is not TypeScript since it is not properly handled by Quasar right now. It will be added to v3 version, so 
+// we should move to TS when updating Quasar to v3.
+// See https://quasar.dev/quasar-cli/developing-pwa/pwa-with-typescript
+
 import { precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import {
@@ -5,12 +9,13 @@ import {
 } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { ExpirationPlugin } from 'workbox-expiration';
-
-import { Notifications } from "../src/plugins/Notifications"
+import { onBackgroundMessage, getMessaging } from "firebase/messaging/sw";
+import { initializeApp } from 'firebase/app';
+import firebaseConfig from 'src/plugins/FirebaseConfig';
 
 // Precache generated manifest file.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-precacheAndRoute((self as any).__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST);
 
 // JS and CSS and assets should be already precached so we don't need to do any
 // runtime caching.
@@ -38,6 +43,12 @@ registerRoute(
 );
 
 // Setup push notifications handler.
-const notifications = new Notifications()
-notifications.receiveBackgroundMessages();
 
+// Initialize Firebase so we receive push notifications.
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
+// Push Message handler. 
+onBackgroundMessage(messaging, async (payload) => {
+  // Do something with the message
+})

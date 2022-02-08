@@ -28,8 +28,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { ResourceObject } from "../store/model";
 import Empty from "../components/Empty.vue";
+import { ResourceObject } from "../store/model";
 
 /**
  * Generic resource card list.

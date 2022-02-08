@@ -33,12 +33,14 @@
 
 <script lang="ts">
 import Vue from "vue";
+
 import CardClickTo from "../plugins/CardClickTo";
-import Carousel from "./Carousel.vue";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
-import MemberHeader from "./MemberHeader.vue";
+
+import Carousel from "./Carousel.vue";
 import CategoryAvatar from "./CategoryAvatar.vue";
+import MemberHeader from "./MemberHeader.vue";
 
 Vue.use(CardClickTo);
 Vue.use(Clamp);

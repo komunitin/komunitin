@@ -72,9 +72,10 @@
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters } from "vuex";
-import MenuItem from "./MenuItem.vue";
-import MemberHeader from "./MemberHeader.vue";
 import Avatar from "./Avatar.vue";
+import MemberHeader from "./MemberHeader.vue";
+import MenuItem from "./MenuItem.vue";
+
 
 export default Vue.extend({
   name: "MenuDrawer",

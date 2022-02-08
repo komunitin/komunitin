@@ -36,7 +36,7 @@ describe("SocialNetworkList", () => {
 
   async function checkClick(wrapper: Wrapper<Vue>, ref: string, url: string) {
     // Mock window.open function.
-    delete window.open;
+    // delete window.open;
     window.open = jest.fn();
     // Click
     wrapper.findComponent({ ref: ref }).trigger("click");

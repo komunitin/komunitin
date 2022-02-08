@@ -49,11 +49,12 @@ import Vue from "vue";
 import CardClickTo from "../plugins/CardClickTo";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
+
+import Carousel from "./Carousel.vue";
+import CategoryAvatar from "./CategoryAvatar.vue";
+import ContactButton from "./ContactButton.vue";
 import MemberHeader from "./MemberHeader.vue";
 import ShareButton from "./ShareButton.vue";
-import ContactButton from "./ContactButton.vue";
-import CategoryAvatar from "./CategoryAvatar.vue";
-import Carousel from "./Carousel.vue";
 
 Vue.use(CardClickTo);
 Vue.use(Clamp);

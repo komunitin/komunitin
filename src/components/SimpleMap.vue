@@ -14,22 +14,13 @@
   </l-map>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from "vue";
 import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const LeafIcon = L.Icon.extend({
-  options: {
-    iconSize: [50, 50],
-    iconAnchor: [25, 40],
-    shadowAnchor: [4, 62],
-    shadowSize: [50, 64],
-    popupAnchor: [-3, -76]
-  }
-});
-
-export default {
+export default Vue.extend({
   name: "SimpleMap",
   components: {
     LMap,
@@ -63,8 +54,14 @@ export default {
     return {
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       zoom: 3,
-      greenIcon: new LeafIcon({
-        // eslint-disable-next-line no-undef
+      greenIcon: L.Icon.extend({
+        options: {
+          iconSize: [50, 50],
+          iconAnchor: [25, 40],
+          shadowAnchor: [4, 62],
+          shadowSize: [50, 64],
+          popupAnchor: [-3, -76]
+        },
         iconUrl: require("../assets/icons/marker.png"),
         shadowUrl: "http://leafletjs.com/examples/custom-icons/leaf-shadow.png"
       })
@@ -80,7 +77,7 @@ export default {
       return this.marker.slice().reverse();
     }
   }
-};
+});
 </script>
 <style scoped>
 .leaflet-bottom.leaflet-right {

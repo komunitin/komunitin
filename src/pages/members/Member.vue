@@ -43,14 +43,17 @@ import Vue from "vue"
 import {mapGetters} from "vuex";
 
 import PageHeader from "../../layouts/PageHeader.vue";
+
 import ContactButton from "../../components/ContactButton.vue";
-import ShareButton from "../../components/ShareButton.vue";
-import MemberPageHeader from "./MemberPageHeader.vue";
-import MemberProfile from "./MemberProfile.vue";
 import MemberNeeds from "./MemberNeeds.vue";
 import MemberOffers from "./MemberOffers.vue";
+import MemberPageHeader from "./MemberPageHeader.vue";
+import MemberProfile from "./MemberProfile.vue";
+import ShareButton from "../../components/ShareButton.vue";
 import TransactionItems from "../transactions/TransactionItems.vue";
-import { Member, Currency } from '../../store/model';
+
+import { Member, Currency, Account } from '../../store/model';
+
 export default Vue.extend({
   name: "Member",
   components: {

@@ -55,12 +55,15 @@
 <script lang="ts">
 import Vue from "vue";
 
-import ShareButton from "./ShareButton.vue";
-import SimpleMap from "./SimpleMap.vue";
-import Avatar from "./Avatar.vue";
+import CardClickTo from "../plugins/CardClickTo";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
-import CardClickTo from "../plugins/CardClickTo";
+
+
+import Avatar from "./Avatar.vue";
+import ShareButton from "./ShareButton.vue";
+import SimpleMap from "./SimpleMap.vue";
+
 
 Vue.use(Clamp);
 Vue.use(Md2txt);

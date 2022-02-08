@@ -5,7 +5,7 @@
 # Develop stage
 
 # Use the latest official node image with Alpine Linux.
-FROM node:13-alpine as komunitin-app-develop
+FROM node:14-alpine as komunitin-app-develop
 WORKDIR /app
 COPY package*.json ./
 # Install quasar framework
