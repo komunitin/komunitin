@@ -1,11 +1,19 @@
 <template>
   <div>
-    <page-header search :title="title" balance @search="fetchResources" />
+    <page-header
+      search
+      :title="title"
+      balance
+      @search="fetchResources"
+    />
     <page-container>
       <q-page>
-      <resource-cards ref="resourceCards" v-bind="$attrs"/>
-    </q-page>
-  </page-container>
+        <resource-cards
+          ref="resourceCards"
+          v-bind="$attrs"
+        />
+      </q-page>
+    </page-container>
   </div>
 </template>
 

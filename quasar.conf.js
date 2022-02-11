@@ -110,7 +110,7 @@ module.exports = configure(function(ctx) {
     pwa: {
       workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {
-        maximumFileSizeToCacheInBytes: 3*1024*1024 //3MB
+        maximumFileSizeToCacheInBytes: 4*1024*1024 //4MB
       }, // only for GenerateSW
       manifest: {
         name: "Komunitin",

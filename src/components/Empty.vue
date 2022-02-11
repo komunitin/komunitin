@@ -1,9 +1,16 @@
 <template>
   <div class="row">
     <div class="col-12 col-sm-6 col-md-4 q-pa-lg xs-last">
-      <img class="full-width empty-img" src="~assets/acorn-512.png" />
+      <img
+        class="full-width empty-img"
+        src="~assets/acorn-512.png"
+      >
     </div>
-    <div class="col-12 col-sm-6 col-md-8 q-pa-lg self-center"><div class="text-h4 text-onsurface-m">{{text}}</div></div>
+    <div class="col-12 col-sm-6 col-md-8 q-pa-lg self-center">
+      <div class="text-h4 text-onsurface-m">
+        {{ text }}
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts">

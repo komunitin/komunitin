@@ -1,9 +1,17 @@
 <template>
   <div>
-    <q-avatar v-if="imgSrc" :size="size">
-      <img :src="imgSrc" />
+    <q-avatar
+      v-if="imgSrc"
+      :size="size"
+    >
+      <img :src="imgSrc">
     </q-avatar>
-    <q-avatar v-else text-color="white" :size="size" :style="`background-color: ${bgColor};`">
+    <q-avatar
+      v-else
+      text-color="white"
+      :size="size"
+      :style="`background-color: ${bgColor};`"
+    >
       {{ initial }}
     </q-avatar>
   </div>

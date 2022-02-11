@@ -9,12 +9,14 @@
     >
       <q-item-section avatar>
         <q-avatar size="lg">
-          <img :src="`icons/contacts/${key}.svg`" />
+          <img :src="`icons/contacts/${key}.svg`">
         </q-avatar>
       </q-item-section>
       <q-item-section v-if="network.name !== undefined">
         <q-item-label>{{ network.name }}</q-item-label>
-        <q-item-label caption>{{ network.label }}</q-item-label>
+        <q-item-label caption>
+          {{ network.label }}
+        </q-item-label>
       </q-item-section>
       <q-item-section v-else>
         <q-item-label>{{ network.label }}</q-item-label>

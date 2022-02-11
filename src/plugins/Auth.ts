@@ -90,7 +90,7 @@ export class Auth {
    * Actually, it just deletes the saved token but in future it could do server
    * side operations.
    */
-  public async logout() {
+  public logout(): void {
     if (LocalStorage.has(Auth.STORAGE_KEY)) {
       LocalStorage.remove(Auth.STORAGE_KEY);
     }

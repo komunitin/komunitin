@@ -11,11 +11,18 @@
         {{ need.attributes.updated | date }}
       </template>
       <template #side>
-        <category-avatar :category="need.category" type="need"/>
+        <category-avatar
+          :category="need.category"
+          type="need"
+        />
       </template>
     </member-header>
     <!-- Need images -->
-    <carousel v-if="hasImages" :images="need.attributes.images" height="200px" />
+    <carousel
+      v-if="hasImages"
+      :images="need.attributes.images"
+      height="200px"
+    />
 
     <!-- Need text -->
     <q-card-section>
@@ -27,9 +34,15 @@
     </q-card-section>
 
     <q-card-actions>
-      <contact-button flat color="primary" :contacts="need.member.contacts">{{
-        $t("reply")
-      }}</contact-button>
+      <contact-button
+        flat
+        color="primary"
+        :contacts="need.member.contacts"
+      >
+        {{
+          $t("reply")
+        }}
+      </contact-button>
       <q-space />
       <share-button
         icon="share"

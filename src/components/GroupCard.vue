@@ -8,7 +8,10 @@
     <!-- Header with group avatar, name and short code -->
     <q-item>
       <q-item-section avatar>
-        <avatar :img-src="group.attributes.image" :text="group.attributes.code"/>
+        <avatar
+          :img-src="group.attributes.image"
+          :text="group.attributes.code"
+        />
       </q-item-section>
       <q-item-section>
         <q-item-label>
@@ -40,14 +43,28 @@
     </q-card-section>
     <!-- Group description -->
     <q-card-section>
-      <div v-clamp="5" v-md2txt="group.attributes.description"></div>
+      <div
+        v-clamp="5"
+        v-md2txt="group.attributes.description"
+      />
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
-      <q-btn :to="`groups/${group.attributes.code}`" flat color="primary">{{
-        $t("explore")
-      }}</q-btn>
-      <q-btn flat color="primary">{{ $t("signUp") }}</q-btn>
+      <q-btn
+        :to="`groups/${group.attributes.code}`"
+        flat
+        color="primary"
+      >
+        {{
+          $t("explore")
+        }}
+      </q-btn>
+      <q-btn
+        flat
+        color="primary"
+      >
+        {{ $t("signUp") }}
+      </q-btn>
     </q-card-actions>
   </q-card>
 </template>

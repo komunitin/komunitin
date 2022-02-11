@@ -1,6 +1,9 @@
 <template>
   <div>
-    <page-header :title="group ? group.attributes.name : ''" balance>
+    <page-header
+      :title="group ? group.attributes.name : ''"
+      balance
+    >
       <template #buttons>
         <contact-button
           v-if="group"
@@ -25,95 +28,113 @@
     </page-header>
     <q-page-container>
       <q-page class="q-pa-md">
-      <!-- Loading spinner -->
-      <q-inner-loading :showing="isLoading" color="icon-dark" />
-      <!-- Group view -->
+        <!-- Loading spinner -->
+        <q-inner-loading
+          :showing="isLoading"
+          color="icon-dark"
+        />
+        <!-- Group view -->
 
-      <div v-if="group" class="row q-col-gutter-md">
-        <!-- image -->
-        <div class="col-12 col-sm-6 col-md-4">
-          <q-img :src="group.attributes.image" />
-        </div>
-        <!-- description -->
-        <div class="col-12 col-sm-6 col-md-8">
-          <div class="text-h6">{{ group.attributes.code }}</div>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <div
-            v-md2html="group.attributes.description"
-            class="text-onsurface-m"
-          ></div>
-          <q-separator spaced />
-          <div class="k-inset-actions-md">
-            <q-btn
-              type="a"
+        <div
+          v-if="group"
+          class="row q-col-gutter-md"
+        >
+          <!-- image -->
+          <div class="col-12 col-sm-6 col-md-4">
+            <q-img :src="group.attributes.image" />
+          </div>
+          <!-- description -->
+          <div class="col-12 col-sm-6 col-md-8">
+            <div class="text-h6">
+              {{ group.attributes.code }}
+            </div>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div
+              v-md2html="group.attributes.description"
+              class="text-onsurface-m"
+            />
+            <q-separator spaced />
+            <div class="k-inset-actions-md">
+              <q-btn
+                type="a"
+                flat
+                no-caps
+                :href="group.attributes.website"
+                target="_blank"
+                icon="link"
+                :label="group.attributes.website | link"
+                color="onsurface-m"
+              />
+            </div>
+          </div>
+          <!-- explore -->
+          <div class="col-12 col-sm-6 relative-position">
+            <group-stats
+              :title="$t('offers')"
+              icon="local_offer"
+              :content="group.relationships.offers.meta.count"
+              :href="code + '/offers'"
+              :items="offersItems"
+            />
+          </div>
+
+          <div class="col-12 col-sm-6 relative-position">
+            <group-stats
+              :title="$t('needs')"
+              icon="loyalty"
+              :content="group.relationships.needs.meta.count"
+              :href="code + '/needs'"
+              :items="needsItems"
+            />
+          </div>
+
+          <div class="col-12 col-sm-6 relative-position">
+            <!-- Not providing member types for the moment, as the Social Api does not give it -->
+            <group-stats
+              :title="$t('members')"
+              icon="account_circle"
+              :content="group.relationships.members.meta.count"
+              :href="code + '/members'"
+              :items="[]"
+            />
+          </div>
+
+          <div class="col-12 col-sm-6 relative-position">
+            <group-stats
+              v-if="currency"
+              :title="$t('currency')"
+              icon="monetization_on"
+              :content="currency.attributes.symbol"
+              :href="code + '/stats'"
+              :items="currencyItems"
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-lg-8">
+            <q-card
+              square
               flat
-              no-caps
-              :href="group.attributes.website"
-              target="_blank"
-              icon="link"
-              :label="group.attributes.website | link"
-              color="onsurface-m"
+            >
+              <simple-map
+                class="simple-map"
+                :center="center"
+                :marker="marker"
+              />
+              <q-card-section class="group-footer-card text-onsurface-m">
+                <q-icon name="place" />
+                {{ group.attributes.location.name }}
+              </q-card-section>
+            </q-card>
+          </div>
+          <div class="col-12 col-sm-6 col-lg-4 relative-position">
+            <social-network-list
+              type="contact"
+              :contacts="group.contacts"
             />
           </div>
         </div>
-        <!-- explore -->
-        <div class="col-12 col-sm-6 relative-position">
-          <group-stats
-            :title="$t('offers')"
-            icon="local_offer"
-            :content="group.relationships.offers.meta.count"
-            :href="code + '/offers'"
-            :items="offersItems"
-          />
-        </div>
-
-        <div class="col-12 col-sm-6 relative-position">
-          <group-stats
-            :title="$t('needs')"
-            icon="loyalty"
-            :content="group.relationships.needs.meta.count"
-            :href="code + '/needs'"
-            :items="needsItems"
-          />
-        </div>
-
-        <div class="col-12 col-sm-6 relative-position">
-          <!-- Not providing member types for the moment, as the Social Api does not give it -->
-          <group-stats
-            :title="$t('members')"
-            icon="account_circle"
-            :content="group.relationships.members.meta.count"
-            :href="code + '/members'"
-            :items="[]"
-          />
-        </div>
-
-        <div class="col-12 col-sm-6 relative-position">
-          <group-stats
-            v-if="currency"
-            :title="$t('currency')"
-            icon="monetization_on"
-            :content="currency.attributes.symbol"
-            :href="code + '/stats'"
-            :items="currencyItems"
-          />
-        </div>
-        <div class="col-12 col-sm-6 col-lg-8">
-          <q-card square flat>
-            <simple-map class="simple-map" :center="center" :marker="marker" />
-            <q-card-section class="group-footer-card text-onsurface-m">
-              <q-icon name="place" />
-              {{ group.attributes.location.name }}
-            </q-card-section>
-          </q-card>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-4 relative-position">
-          <social-network-list type="contact" :contacts="group.contacts" />
-        </div>
-      </div>
       </q-page>
-  </q-page-container>
-    </div>
+    </q-page-container>
+  </div>
 </template>
 
 <script lang="ts">

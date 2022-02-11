@@ -1,17 +1,27 @@
 <template>
-<div>
-  <q-page-sticky position="top" expand class="z-fab">
-    <div :style="`height: ${computedHeight}px;`" class="overflow-hidden relative-position full-width">
-      <div class="absolute-bottom">
-        <slot/>
+  <div>
+    <q-page-sticky
+      position="top"
+      expand
+      class="z-fab"
+    >
+      <div
+        :style="`height: ${computedHeight}px;`"
+        class="overflow-hidden relative-position full-width"
+      >
+        <div class="absolute-bottom">
+          <slot />
+        </div>
       </div>
-    </div>
-    <q-scroll-observer ref="scrollObserver" @scroll.passive="scrollHandler" />
-    <slot name="fixed"/>
-  </q-page-sticky>
-  <!-- Pull down the main content -->
-  <div :style="`height: ${collapsibleHeight + fixedHeight}px;`"/>
-</div>
+      <q-scroll-observer
+        ref="scrollObserver"
+        @scroll.passive="scrollHandler"
+      />
+      <slot name="fixed" />
+    </q-page-sticky>
+    <!-- Pull down the main content -->
+    <div :style="`height: ${collapsibleHeight + fixedHeight}px;`" />
+  </div>
 </template>
 <script lang="ts">
 import Vue from "vue"

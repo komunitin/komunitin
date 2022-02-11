@@ -11,7 +11,10 @@
     :autoload="autoload"
     @afterLoad="fetchMembers"
   >
-    <q-list v-if="slotProps.resources" padding>
+    <q-list
+      v-if="slotProps.resources"
+      padding
+    >
       <member-header
         v-for="transfer of loadedTransfers(slotProps.resources)"
         :key="transfer.id"
@@ -25,7 +28,10 @@
         </template>
         <template #side>
           <div class="column items-end">
-            <q-item-label caption class="col">
+            <q-item-label
+              caption
+              class="col"
+            >
               <span v-if="transfer.attributes.state == 'pending'">
                 {{ $t("pending") }}
               </span>

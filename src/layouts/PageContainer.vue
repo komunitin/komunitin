@@ -1,7 +1,7 @@
 <template>
   <q-page-container>
-    <notifications-banner/>
-    <slot/>
+    <notifications-banner />
+    <slot />
   </q-page-container>
 </template>
 <script lang="ts">

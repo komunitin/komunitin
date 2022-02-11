@@ -81,7 +81,10 @@ module.exports = {
     "vue-i18n/no-unused-keys": ["warn", {
       extensions: [".js", ".vue"]
     }],
-    "vue-i18n/no-dynamic-keys": "warn"
+    "vue-i18n/no-dynamic-keys": "warn",
+    // TODO: enable that!
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/ban-types": "off"
   },
   settings: {
     "vue-i18n": {

@@ -1,9 +1,18 @@
 <template>
   <div>
-    <q-inner-loading :showing="isLoading" color="icon-dark" />
-    <q-infinite-scroll :disable="!autoload || disableScrollLoad" @load="loadNext">
-      <empty v-if="isEmpty && !isLoading"/>
-      <slot v-else-if="!isLoading" :resources="resources">
+    <q-inner-loading
+      :showing="isLoading"
+      color="icon-dark"
+    />
+    <q-infinite-scroll
+      :disable="!autoload || disableScrollLoad"
+      @load="loadNext"
+    >
+      <empty v-if="isEmpty && !isLoading" />
+      <slot
+        v-else-if="!isLoading"
+        :resources="resources"
+      >
         <div class="q-pa-md row q-col-gutter-md">
           <div
             v-for="resource of resources"
@@ -12,14 +21,22 @@
           >
             <!-- this v-if is superfluous, since when this slot is rendered, card is always defined.
             But setting it prevents an unexpected exception in vue-test-utils -->
-            <component :is="card" v-if="card" :[propName]="resource" :code="code"/>
+            <component
+              :is="card"
+              v-if="card"
+              :[propName]="resource"
+              :code="code"
+            />
           </div>
         </div>
       </slot>
       <template #loading>
         <div class="row justify-center q-my-md">
           <!-- 42px is the default size of q-inner-loading -->
-          <q-spinner color="icon-dark" size="42px" />
+          <q-spinner
+            color="icon-dark"
+            size="42px"
+          />
         </div>
       </template>
     </q-infinite-scroll>
