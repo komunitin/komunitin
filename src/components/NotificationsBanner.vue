@@ -1,9 +1,22 @@
 <template>
-  <q-banner v-if="show" class="text-onsurface-m">
-    {{$t("enableNotificationsText")}}
+  <q-banner
+    v-if="show"
+    class="text-onsurface-m"
+  >
+    {{ $t("enableNotificationsText") }}
     <template #action>
-      <q-btn flat color="primary" :label="$t('dismiss')" @click="dismiss"/>
-      <q-btn flat color="primary" :label="$t('enableNotifications')" @click="subscribe"/>
+      <q-btn
+        flat
+        color="primary"
+        :label="$t('dismiss')"
+        @click="dismiss"
+      />
+      <q-btn
+        flat
+        color="primary"
+        :label="$t('enableNotifications')"
+        @click="subscribe"
+      />
     </template>
   </q-banner>
 </template>

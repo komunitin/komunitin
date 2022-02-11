@@ -5,12 +5,12 @@
     :zoom="zoom"
     :center="centerLatLng"
   >
-    <l-tile-layer :url="url"></l-tile-layer>
+    <l-tile-layer :url="url" />
     <l-marker
       v-if="marker"
       :lat-lng="markerLatLng"
       :icon="greenIcon"
-    ></l-marker>
+    />
   </l-map>
 </template>
 

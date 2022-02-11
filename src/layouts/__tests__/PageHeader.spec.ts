@@ -186,7 +186,7 @@ describe("PageHeader", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("balance");
     expect(wrapper.text()).toContain("1 $");
-    const header = wrapper.getComponent(QHeader).element;
+    const header = wrapper.getComponent(QHeader).element as HTMLElement;
     expect(header.style.height).toBe("170px");
     const scroll = wrapper.getComponent(QScrollObserver);
     scroll.vm.$emit("scroll", {position: 10});

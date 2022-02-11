@@ -46,7 +46,7 @@ function logErrorHandling(error: Error) {
   console.error(`[${KErrorCode.ErrorHandling}] Error while handling another error: ${error.message}`);
 }
 
-export function handleError(error: KError) {
+export function handleError(error: KError): void {
   logError(error);
   showError(error);
 }
@@ -73,7 +73,7 @@ function vueWarnHandler(message: string, vm: Vue, trace: string) {
   catch (exception) {
     logErrorHandling(error);
   }
-};
+}
 
 /**
  * Register global error handler for errors occurred outside Vue components. 

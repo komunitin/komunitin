@@ -41,7 +41,7 @@ export default class KError extends Error {
   /**
    * Return the localized message.
    */
-  getTranslationKey() {
+  getTranslationKey(): string {
     return "Error" + this.code;
   }
 }

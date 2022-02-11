@@ -1,6 +1,11 @@
 <template>
   <div>
-    <page-header search :title="$t('members')" balance @search="search" />
+    <page-header
+      search
+      :title="$t('members')"
+      balance
+      @search="search"
+    />
     <q-page-container>
       <q-page>
         <resource-cards
@@ -10,7 +15,10 @@
           module-name="members"
           include="contacts,account"
         >
-          <q-list v-if="slotProps.resources" padding>
+          <q-list
+            v-if="slotProps.resources"
+            padding
+          >
             <member-header
               v-for="member of slotProps.resources"
               :key="member.id"
@@ -34,7 +42,12 @@
                       )
                     }}
                   </div>
-                  <q-item-label caption class="col"><account-limits :account="member.account"/></q-item-label>
+                  <q-item-label
+                    caption
+                    class="col"
+                  >
+                    <account-limits :account="member.account" />
+                  </q-item-label>
                 </div>
               </template>
             </member-header>

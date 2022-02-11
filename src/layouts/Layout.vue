@@ -5,7 +5,11 @@
       class="q-mx-auto bg-surface"
       :class="drawerExists ? 'with-drawer' : 'without-drawer'"
     >
-      <q-layout id="layout" view="LHH LpR LfR" container>
+      <q-layout
+        id="layout"
+        view="LHH LpR LfR"
+        container
+      >
         <q-drawer
           v-if="drawerExists"
           v-model="drawerState"
@@ -16,7 +20,7 @@
         >
           <menu-drawer />
         </q-drawer>
-        <router-view/>
+        <router-view />
       </q-layout>
     </div>
   </div>

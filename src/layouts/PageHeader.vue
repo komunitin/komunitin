@@ -1,102 +1,119 @@
 <template>
-<div>
-  <q-header id="header" class="bg-primary" :class="showBalance ? 'column' : 'row'" :style="`height: ${computedHeight}px;`">
-    <q-toolbar
-      class="text-onprimary"
-      :class="(showBalance ? '' : 'col-shrink ') + (noButton ? 'q-px-none' : 'q-pr-none')"
-      :style="`min-height: ${toolbarHeight}px`"
+  <div>
+    <q-header
+      id="header"
+      class="bg-primary"
+      :class="showBalance ? 'column' : 'row'"
+      :style="`height: ${computedHeight}px;`"
     >
-      <!-- render back button, menu button or none -->
-      <q-btn
-        v-if="showBack"
-        id="back"
-        flat
-        round
-        icon="arrow_back"
-        :aria-label="$t('back')"
-        @click="$router.back()"
-      />
-      <q-btn
-        v-if="showMenu"
-        id="menu"
-        flat
-        round
-        icon="menu"
-        :aria-label="$t('menu')"
-        @click="$store.dispatch('toogleDrawer')"
-      />
-    </q-toolbar>
-    <div v-if="showBalance" class="col self-center column items-center"> 
-      <div 
-        class="text-body2 text-onprimary-m"
-        :style="`font-size: ${0.875*balanceScaleFactor}rem; line-height: ${1.25*balanceScaleFactor}rem;`">{{$t('balance')}}</div>
-      <div 
-        class="text-h3 text-onprimary-m"
-        :style="`font-size: ${3*balanceScaleFactor}rem; line-height: ${3.125*balanceScaleFactor}rem`">{{
-        $currency(
-          myAccount.attributes.balance,
-          myAccount.currency
-        )
-      }}</div>
-    </div>
-    <q-toolbar :class="((noButton || showBalance) ? 'no-button ' : '') + (showBalance ? '' : 'col-grow q-pl-none')">
-      <q-toolbar-title v-if="!searchActive">
-        {{ title }}
-      </q-toolbar-title>
+      <q-toolbar
+        class="text-onprimary"
+        :class="(showBalance ? '' : 'col-shrink ') + (noButton ? 'q-px-none' : 'q-pr-none')"
+        :style="`min-height: ${toolbarHeight}px`"
+      >
+        <!-- render back button, menu button or none -->
+        <q-btn
+          v-if="showBack"
+          id="back"
+          flat
+          round
+          icon="arrow_back"
+          :aria-label="$t('back')"
+          @click="$router.back()"
+        />
+        <q-btn
+          v-if="showMenu"
+          id="menu"
+          flat
+          round
+          icon="menu"
+          :aria-label="$t('menu')"
+          @click="$store.dispatch('toogleDrawer')"
+        />
+      </q-toolbar>
+      <div
+        v-if="showBalance"
+        class="col self-center column items-center"
+      > 
+        <div 
+          class="text-body2 text-onprimary-m"
+          :style="`font-size: ${0.875*balanceScaleFactor}rem; line-height: ${1.25*balanceScaleFactor}rem;`"
+        >
+          {{ $t('balance') }}
+        </div>
+        <div 
+          class="text-h3 text-onprimary-m"
+          :style="`font-size: ${3*balanceScaleFactor}rem; line-height: ${3.125*balanceScaleFactor}rem`"
+        >
+          {{
+            $currency(
+              myAccount.attributes.balance,
+              myAccount.currency
+            )
+          }}
+        </div>
+      </div>
+      <q-toolbar :class="((noButton || showBalance) ? 'no-button ' : '') + (showBalance ? '' : 'col-grow q-pl-none')">
+        <q-toolbar-title v-if="!searchActive">
+          {{ title }}
+        </q-toolbar-title>
       
 
-      <q-input
-        v-if="searchActive"
-        v-model="searchText"
-        dark
-        dense
-        standout
-        class="q-mr-xs search-box"
-        :class="noButton ? '' : 'q-ml-md'"
-        type="search"
-        debounce="250"
-        autofocus
-        @input="$emit('search-input', searchText)"
-        @keyup.enter="$emit('search', searchText)"
-      >
-        <template #append>
-          <q-icon
-            v-if="searchText === ''"
-            name="search"
-            class="cursor-pointer"
-            @click="searchActive = false"
-          />
-          <q-icon
-            v-else
-            name="clear"
-            class="cursor-pointer"
-            @click="clearSearchText"
-          />
-        </template>
-      </q-input>
+        <q-input
+          v-if="searchActive"
+          v-model="searchText"
+          dark
+          dense
+          standout
+          class="q-mr-xs search-box"
+          :class="noButton ? '' : 'q-ml-md'"
+          type="search"
+          debounce="250"
+          autofocus
+          @input="$emit('search-input', searchText)"
+          @keyup.enter="$emit('search', searchText)"
+        >
+          <template #append>
+            <q-icon
+              v-if="searchText === ''"
+              name="search"
+              class="cursor-pointer"
+              @click="searchActive = false"
+            />
+            <q-icon
+              v-else
+              name="clear"
+              class="cursor-pointer"
+              @click="clearSearchText"
+            />
+          </template>
+        </q-input>
 
-      <q-btn
-        v-if="search && !searchActive"
-        flat
-        round
-        icon="search"
-        @click="searchActive = true"
-      />
+        <q-btn
+          v-if="search && !searchActive"
+          flat
+          round
+          icon="search"
+          @click="searchActive = true"
+        />
 
-      <!-- slot for right buttons -->
-      <slot name="buttons"></slot>
-      <q-scroll-observer v-if="balance" @scroll.passive="scrollHandler" />
-    </q-toolbar>
-  </q-header>
-  <!-- We add a dummy transparent div here to add the height we substract from the collapsible part.
+        <!-- slot for right buttons -->
+        <slot name="buttons" />
+        <q-scroll-observer
+          v-if="balance"
+          @scroll.passive="scrollHandler"
+        />
+      </q-toolbar>
+    </q-header>
+    <!-- We add a dummy transparent div here to add the height we substract from the collapsible part.
   I've not been able to do it in a more elegant fashion :(
   
   The point is that QPageContainer dynamically sets a padding-top equal to the QHeader height. Since we 
   reduce this height on scroll, then the page goes up as twice as fast, because of the scrolling and 
   because of the shrinking. With this dummy div we compensate one of those to achieve normal behavior.
    -->
-  <div :style="`height: ${offsetHeight}px`" />
-</div>
+    <div :style="`height: ${offsetHeight}px`" />
+  </div>
 </template>
 <script lang="ts">
 import Vue from "vue";

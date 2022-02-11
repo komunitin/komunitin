@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "types": ["quasar", "node", "jest", "resize-observer-browser"],
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "extends": "@quasar/app/tsconfig-preset",
   "exclude": ["src-pwa"]

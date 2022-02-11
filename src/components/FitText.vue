@@ -1,6 +1,6 @@
 <template>
   <span class="fittext">
-    <slot></slot>
+    <slot />
   </span>
 </template>
 

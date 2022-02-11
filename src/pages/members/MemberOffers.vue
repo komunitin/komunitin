@@ -1,5 +1,5 @@
 <template>
-    <resource-cards
+  <resource-cards
     :card="card"
     :code="groupCode"
     prop-name="offer"
