@@ -8,7 +8,10 @@
 FROM node:16 as komunitin-app-develop
 WORKDIR /app
 
-RUN apt-get install build-essential procps curl file git libnss3-tools && brew install mkcert
+RUN apt-get update && apt-get -y install build-essential procps curl file git libnss3-tools \
+  && /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+  && brew install mkcert
+
 RUN mkdir tmp/certs && mkcert -cert-file tmp/certs/localhost.pem -key-file tmp/certs/localhost-key.pem localhost
 
 
