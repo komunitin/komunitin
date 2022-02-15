@@ -4,9 +4,14 @@
 
 # Develop stage
 
-# Use the latest official node image with Alpine Linux.
-FROM node:14-alpine as komunitin-app-develop
+# Use the latest official node image.
+FROM node:16 as komunitin-app-develop
 WORKDIR /app
+
+RUN apt-get install build-essential procps curl file git libnss3-tools && brew install mkcert
+RUN mkdir tmp/certs && mkcert -cert-file tmp/certs/localhost.pem -key-file tmp/certs/localhost-key.pem localhost
+
+
 COPY package*.json ./
 # Install quasar framework
 RUN npm install -g @quasar/cli
