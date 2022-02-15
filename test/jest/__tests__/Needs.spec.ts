@@ -1,16 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * @jest-environment jsdom
+ */
 import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading, QInfiniteScroll } from "quasar";
 import NeedCard from "../../../src/components/NeedCard.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
+import { seeds } from "src/server";
 
 // See also Offers.spec.ts
 describe("Needs", () => {
   let wrapper: Wrapper<Vue>;
 
   beforeAll(async () => {
+    seeds();
     wrapper = await mountComponent(App, { login: true });
   });
   afterAll(() => wrapper.destroy());
@@ -40,7 +45,7 @@ describe("Needs", () => {
     await wrapper.vm.$wait();
     const text = wrapper.text();
     expect(text).toContain("Esteban");
-    expect(text).toContain("Shoes");
+    expect(text).toContain("Baby");
     expect(text).toContain("Et quae");
     expect(text).toContain("GRP00009");
     expect(text).toContain("Updated yesterday");

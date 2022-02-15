@@ -11,11 +11,7 @@ module.exports = {
   collectCoverage: false,
   coverageDirectory: '<rootDir>/test/jest/coverage',
   collectCoverageFrom: [
-    '<rootDir>/src/components/*.{ts,vue}',
-    '<rootDir>/src/components/**/*.{ts,vue}',
-    '<rootDir>/src/pages/*/*/*.{ts,vue}',
-    '<rootDir>/src/services/*.{ts,vue}',
-    '<rootDir>/src/store/*/*/*.{ts,vue}',
+    '<rootDir>/src/**/*.{ts,vue}',
   ],
   coverageReporters: [
     'html',
@@ -50,7 +46,7 @@ module.exports = {
     '^app/(.*)$': '<rootDir>/$1',
   },
   transform: {
-    '.*\\.vue$': 'vue-jest',
+    '.*\\.vue$': '@vue/vue2-jest',
     '.*\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
     '^.+\\.tsx?$': 'ts-jest',

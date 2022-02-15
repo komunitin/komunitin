@@ -8,10 +8,6 @@ import createRouter from 'src/router/index';
 
 import * as quasar from 'quasar';
 
-// Enable mirage. Don't know how to do it otherwise so it works with
-// inline VSCode debugging.
-process.env.USE_MIRAGE = "0";
-
 // Boot files.
 import bootKomunitin from '../../../src/boot/komunitin';
 import bootErrors from '../../../src/boot/errors';
@@ -115,6 +111,7 @@ Vue.prototype.$nextTicks = async function() {
   await this.$nextTick();
   await this.$nextTick();
   await this.$nextTick();
+  await this.$nextTick();
 }
 
 Vue.prototype.$wait = async function(time?: number) {
@@ -125,7 +122,7 @@ Vue.prototype.$wait = async function(time?: number) {
 declare module "vue/types/vue" {
   interface Vue {
     /**
-     * Sometimes the Vue.$nextTick() or Vue.$nextTwoTicks() function is not enough for the content to be completely updated.
+     * Sometimes the Vue.$nextTick() or Vue.$nextTicks() function is not enough for the content to be completely updated.
      * Known use cases:
      *  - Content needing to reach data from a mocked HTTP request.
      *  - Interact with router.back() feature.
@@ -168,3 +165,10 @@ const mockGeolocation = {
 };
 
 Object.defineProperty(global.navigator, 'geolocation', {value: mockGeolocation});
+
+// Mock Notification.
+const mockNotification = {
+  requestPermission: jest.fn().mockImplementation((success) => Promise.resolve(success(false))),
+  permission: "default"
+}
+Object.defineProperty(global, 'Notification', {value: mockNotification})

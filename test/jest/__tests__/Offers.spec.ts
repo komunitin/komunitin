@@ -6,11 +6,13 @@ import { QInnerLoading, QInfiniteScroll } from "quasar";
 import OfferCard from "../../../src/components/OfferCard.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import ApiSerializer from "src/server/ApiSerializer";
+import { seeds } from "src/server";
 
 describe("Offers", () => {
   let wrapper: Wrapper<Vue>;
 
   beforeAll(async () => {
+    seeds();
     wrapper = await mountComponent(App, { login: true });
   });
   afterAll(() => wrapper.destroy());
@@ -32,7 +34,7 @@ describe("Offers", () => {
     await wrapper.vm.$wait();
     expect(wrapper.findAllComponents(OfferCard).length).toBe(30);
     // The QInfiniteScroll stopped.
-    expect((wrapper.findComponent(QInfiniteScroll).vm as any).working).toBe(false);
+    expect((wrapper.findComponent(QInfiniteScroll).vm as any).isWorking).toBe(false);
     // Category icon
     expect(wrapper.findAllComponents(OfferCard).at(0).text()).toContain("accessibility_new");
   });

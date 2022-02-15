@@ -2,11 +2,16 @@ import "../index";
 import Axios from "axios";
 import { KOptions } from "../../boot/komunitin";
 import { ResourceObject } from "src/store/model";
+import { seeds } from "../index";
 
 const urlSocial = KOptions.url.social;
 const urlAccounting = KOptions.url.accounting;
 
 describe("MirageJS Server", () => {
+  beforeAll(async () => {
+    seeds();
+  })
+
   it ("includes currency external resource", async () => {
     const response = await Axios.get(`${urlSocial}/GRP0?include=currency`);
     const currency = response.data.included.find((resource: ResourceObject) => resource.type == "currencies");

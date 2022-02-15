@@ -4,6 +4,7 @@ import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading } from "quasar";
 import GroupCard from "../../../src/components/GroupCard.vue";
+import { seeds } from "../../../src/server";
 
 // See also Offers.spec.ts
 describe("Groups", () => {
@@ -11,6 +12,7 @@ describe("Groups", () => {
 
   beforeAll(async () => {
     wrapper = await mountComponent(App);
+    seeds();
   });
   afterAll(() => wrapper.destroy());
 
@@ -45,7 +47,7 @@ describe("Groups", () => {
     // Needs card
     expect(text).toContain("Needs");
     expect(text).toContain("4");
-    expect(text).toContain("1 Health");
+    expect(text).toContain("1 Garden");
     // Members card
     expect(text).toContain("Members");
     expect(text).toContain("30");
@@ -56,9 +58,9 @@ describe("Groups", () => {
     // Location
     expect(text).toContain("Buckinghamshire");
     // Contact
-    expect(text).toContain("133-639-5843");
-    expect(text).toContain("Larue_Johnston41@gmail.com");
-    expect(text).toContain("@Teresa.Effertz29");
-    expect(text).toContain("693-357-6718");
+    expect(text).toContain("363-958-4365");
+    expect(text).toContain("Kaci.Donnelly31@yahoo.com");
+    expect(text).toContain("@Amir_Mann");
+    expect(text).toContain("186-667-337");
   })
 });

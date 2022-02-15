@@ -9,7 +9,7 @@
     <l-marker
       v-if="marker"
       :lat-lng="markerLatLng"
-      :icon="greenIcon"
+      :icon="markerIcon"
     />
   </l-map>
 </template>
@@ -54,16 +54,9 @@ export default Vue.extend({
     return {
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       zoom: 3,
-      greenIcon: L.Icon.extend({
-        options: {
-          iconSize: [50, 50],
-          iconAnchor: [25, 40],
-          shadowAnchor: [4, 62],
-          shadowSize: [50, 64],
-          popupAnchor: [-3, -76]
-        },
+      markerIcon: L.icon({
         iconUrl: require("../assets/icons/marker.png"),
-        shadowUrl: "http://leafletjs.com/examples/custom-icons/leaf-shadow.png"
+        shadowUrl: require("../assets/icons/marker-shadow.png"),
       })
     };
   },
@@ -75,12 +68,12 @@ export default Vue.extend({
     },
     markerLatLng() {
       return this.marker.slice().reverse();
-    }
+    },
   }
 });
 </script>
-<style scoped>
+<!--style scoped>
 .leaflet-bottom.leaflet-right {
   display: none;
 }
-</style>
+</style-->
