@@ -5,11 +5,13 @@ import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import MenuDrawer from "../../../src/components/MenuDrawer.vue";
+import { seeds } from "src/server";
 
 describe("Front page and login", () => {
   let wrapper: Wrapper<Vue>;
   beforeAll(async () => {
     wrapper = await mountComponent(App);
+    seeds();
   });
   afterAll(() => wrapper.destroy());
 

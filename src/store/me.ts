@@ -88,7 +88,7 @@ async function loadUser(
   // Load the Social API users/me endpoint.
   const action2 = loadUserData(accessToken, context);
   // Run these two calls in "parallel".
-  return Promise.all([action1, action2]);
+  await Promise.all([action1, action2]);
 }
 
 export default {
@@ -145,7 +145,7 @@ export default {
     ) => {
       const tokens = await auth.login(payload.email, payload.password);
       context.commit("tokens", tokens);
-      return loadUser(tokens.accessToken, context);
+      await loadUser(tokens.accessToken, context);
     },
     /**
      * Silently authorize user using stored credentials. Throws exception (rejects)
@@ -156,12 +156,12 @@ export default {
         try {
           const tokens = await auth.authorize(context.state.tokens);
           context.commit("tokens", tokens);
-          return loadUser(tokens.accessToken, context);
+          await loadUser(tokens.accessToken, context);
         } catch (error) {
           // Couldn't authorize. Delete credentials so we don't attempt another
           // call next time.
           if (context.state.tokens) {
-            context.dispatch("logout");
+            await context.dispatch("logout");
           }
           throw error;
         }
@@ -171,7 +171,7 @@ export default {
      * Logout current user.
      */
     logout: async (context: ActionContext<UserState, never>) => {
-      await auth.logout();
+      auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
       context.commit("myUser", undefined);

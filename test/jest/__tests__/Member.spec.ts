@@ -7,11 +7,13 @@ import OfferCard from "../../../src/components/OfferCard.vue";
 import MemberList from "../../../src/pages/members/MemberList.vue";
 import MemberHeader from "../../../src/components/MemberHeader.vue";
 import TransactionItems from "../../../src/pages/transactions/TransactionItems.vue";
+import { seeds } from "src/server";
 
 describe("Member", () => {
   let wrapper: Wrapper<Vue>;
 
   beforeAll(async () => {
+    seeds();
     wrapper = await mountComponent(App, { login: true });
   });
   afterAll(() => wrapper.destroy());
@@ -39,8 +41,8 @@ describe("Member", () => {
     // Bio
     expect(text).toContain("Consequuntur aut est fuga");
     // Contact
-    expect(text).toContain("133-639-5843");
-    expect(text).toContain("@Jordi");
+    expect(text).toContain("363-958-4365");
+    expect(text).toContain("@Sharon.Turner");
     // Location
     expect(text).toContain("Avon");
     

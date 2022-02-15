@@ -4,11 +4,14 @@
 import { Wrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
+import { seeds } from "../../../src/server";
 
 describe("Explore groups", () => {
   let wrapper: Wrapper<Vue>;
   beforeAll(async() => {
+    // Load data in mocking server.
     wrapper = await mountComponent(App);
+    seeds();
   });
 
   afterAll(() => wrapper.destroy());
