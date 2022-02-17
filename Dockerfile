@@ -5,7 +5,7 @@
 # Develop stage
 
 # Use the latest official node image.
-FROM node:16 as komunitin-app-develop
+FROM node:14 as komunitin-app-develop
 WORKDIR /app
 
 # Install mkcert
@@ -17,17 +17,21 @@ RUN apt-get update && apt-get -y install libnss3-tools wget \
 # Create self-signed certificates.
 RUN mkdir -p tmp/certs && mkcert -cert-file tmp/certs/localhost.pem -key-file tmp/certs/localhost-key.pem localhost
 
+# Copy just package.json so when there's no package changes we don't 
+# need to update the install step.
 COPY package*.json ./
+
 # Install quasar framework
 RUN npm install -g @quasar/cli
-
-COPY . .
 
 # Install dependencies.
 RUN npm install
 
 # Rebuild node-sass.
 RUN npm rebuild node-sass
+
+# Copy sources 
+COPY . .
 
 # Build stage
 
