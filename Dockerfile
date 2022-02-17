@@ -8,12 +8,14 @@
 FROM node:16 as komunitin-app-develop
 WORKDIR /app
 
-RUN apt-get update && apt-get -y install build-essential procps curl file git libnss3-tools \
-  && /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
-  && brew install mkcert
+# Install mkcert
+RUN apt-get update && apt-get -y install libnss3-tools wget \
+  && wget -O /usr/local/bin/mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64 \
+  && chmod a+x /usr/local/bin/mkcert \
+  && mkcert -install
 
-RUN mkdir tmp/certs && mkcert -cert-file tmp/certs/localhost.pem -key-file tmp/certs/localhost-key.pem localhost
-
+# Create self-signed certificates.
+RUN mkdir -p tmp/certs && mkcert -cert-file tmp/certs/localhost.pem -key-file tmp/certs/localhost-key.pem localhost
 
 COPY package*.json ./
 # Install quasar framework
