@@ -14,6 +14,9 @@ RUN apt-get update && apt-get -y install libnss3-tools wget \
   && chmod a+x /usr/local/bin/mkcert \
   && mkcert -install
 
+# Set local CA ROOT env variable (used from quasar.conf.js) 
+ENV LOCAL_CA_ROOT=variabl/root/.local/share/mkcert/rootCA.pem
+
 # Create self-signed certificates.
 RUN mkdir -p tmp/certs && mkcert -cert-file tmp/certs/localhost.pem -key-file tmp/certs/localhost-key.pem localhost
 
