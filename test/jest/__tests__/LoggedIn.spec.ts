@@ -1,4 +1,5 @@
 import { Wrapper } from "@vue/test-utils";
+import { seeds } from "src/server";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 
@@ -6,6 +7,7 @@ describe("logged in", () => {
   let wrapper: Wrapper<Vue>;
 
   beforeAll(async () => {
+    seeds();
     wrapper = await mountComponent(App, { login: true });
   });
 

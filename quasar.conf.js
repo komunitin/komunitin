@@ -1,7 +1,9 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
+const fs = require('fs')
+const { configure } = require('quasar/wrappers')
 
-module.exports = function(ctx) {
+module.exports = configure(function(ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
@@ -12,7 +14,7 @@ module.exports = function(ctx) {
       "i18n",
       "vuelidate",
       "mirage",
-      "auth"
+      "auth",
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -82,11 +84,18 @@ module.exports = function(ctx) {
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
-    devServer: {
-      https: false,
-      port: 8080,
-      open: true // opens browser window automatically
-    },
+    // Only define the dev server when on dev mode, since otherwise we don't need to configure 
+    // local certificates.
+    devServer: ctx.dev ? {
+      host: "localhost",
+      port: 2030,
+      open: true,
+      https: {
+        key: fs.readFileSync("./tmp/certs/localhost-key.pem"),
+        cert: fs.readFileSync("./tmp/certs/localhost.pem"),
+        ca: fs.readFileSync(process.env.LOCAL_CA_ROOT)
+      }
+    } : {},
 
     // animations: 'all', // --- includes all animations
     // https://quasar.dev/options/animations
@@ -99,8 +108,10 @@ module.exports = function(ctx) {
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {}, // only for GenerateSW
+      workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
+      workboxOptions: {
+        maximumFileSizeToCacheInBytes: 4*1024*1024 //4MB
+      }, // only for GenerateSW
       manifest: {
         name: "Komunitin",
         short_name: "Komunitin",
@@ -187,6 +198,10 @@ module.exports = function(ctx) {
           }
         });
       }
+    },
+    sourceFiles : {
+      registerServiceWorker: 'src-pwa/register-service-worker.js',
+      serviceWorker: 'src-pwa/custom-service-worker.js',
     }
   };
-};
+});

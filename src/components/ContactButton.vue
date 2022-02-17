@@ -1,7 +1,10 @@
 <template>
   <span>
     <slot name="button">
-      <q-btn v-bind="$attrs" @click="show" ><slot/></q-btn>
+      <q-btn
+        v-bind="$attrs"
+        @click="show"
+      ><slot /></q-btn>
     </slot>
     <q-dialog v-model="contactsView">
       <q-card>
@@ -9,7 +12,10 @@
           <div class="text-h6">{{ $t("contact") }}</div>
         </q-card-section>
         <q-card-section>
-          <social-network-list type="contact" :contacts="contacts" />
+          <social-network-list
+            type="contact"
+            :contacts="contacts"
+          />
         </q-card-section>
       </q-card>
     </q-dialog>

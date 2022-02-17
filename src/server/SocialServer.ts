@@ -236,9 +236,7 @@ export default {
       name: (i: number) =>
         fakeContactName(contactTypes[i % contactTypes.length]),
       created: () => faker.date.past().toJSON(),
-      updated() {
-        return this.created;
-      }
+      updated: () => faker.date.past().toJSON(),
     }),
     member: Factory.extend({
       code() {
@@ -264,9 +262,7 @@ export default {
       icon: (i: number) => (i % 3 == 1) ? null : fakeCategoryIconName(i),
       access: "public",
       created: () => faker.date.past(),
-      updated() {
-        return this.created;
-      }
+      updated: () => faker.date.past(),
     }),
     offer: Factory.extend({
       name: () => faker.commerce.product(),

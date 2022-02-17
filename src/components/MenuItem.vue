@@ -1,9 +1,23 @@
 <template>
-  <q-item :clickable="!active" active-class="bg-active" :active="active" :disable="disable" @click="click">
+  <q-item
+    :clickable="!active"
+    active-class="bg-active"
+    :active="active"
+    :disable="disable"
+    @click="click"
+  >
     <q-item-section avatar>
-      <q-icon :name="icon" :color="active ? 'primary' : 'icon-dark'"/>
+      <q-icon
+        :name="icon"
+        :color="active ? 'primary' : 'icon-dark'"
+      />
     </q-item-section>
-    <q-item-section class="text-subtitle2" :class="active ? 'text-primary' : 'text-onsurface-m'">{{ title }}</q-item-section>
+    <q-item-section
+      class="text-subtitle2"
+      :class="active ? 'text-primary' : 'text-onsurface-m'"
+    >
+      {{ title }}
+    </q-item-section>
   </q-item>
 </template>
 

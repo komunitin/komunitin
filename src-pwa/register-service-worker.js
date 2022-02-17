@@ -1,9 +1,12 @@
+// This is not TypeScript since it is not properly handled by Quasar right now. It will be added to v3 version, so 
+// we should move to TS when updating Quasar to v3.
+// See https://quasar.dev/quasar-cli/developing-pwa/pwa-with-typescript
+
 import { register } from "register-service-worker";
 
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
-
 register(process.env.SERVICE_WORKER_FILE, {
   // The registrationOptions object will be passed as the second argument
   // to ServiceWorkerContainer.register()
@@ -11,11 +14,13 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   // registrationOptions: { scope: "./" },
 
-  ready() {
+  async ready(/* registration */) {
     if (process.env.DEV) {
       // eslint-disable-next-line no-console
       console.log("App is being served from cache by a service worker.");
     }
+    //const subscription = await subscribeToPushNotifications(registration);
+    //return sendSubscriptionToServer(subscription);
   },
 
   registered(/* registration */) {
@@ -62,3 +67,4 @@ register(process.env.SERVICE_WORKER_FILE, {
     }
   }
 });
+

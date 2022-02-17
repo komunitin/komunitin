@@ -11,6 +11,7 @@ export enum KErrorCode {
   PositionTimeout = "PositionTimeout",
   PositionUnavailable = "PositionUnavailable",
   PositionPermisionDenied = "PositionPermisionDenied",
+  NotificationsPermissionDenied = "NotificationsPermissionDenied",
   VueWarning = "VueWarning",
   IncorrectCredentials = "IncorrectCredentials",
   AuthNoCredentials = "AuthNoCredentials",
@@ -40,7 +41,7 @@ export default class KError extends Error {
   /**
    * Return the localized message.
    */
-  getTranslationKey() {
+  getTranslationKey(): string {
     return "Error" + this.code;
   }
 }

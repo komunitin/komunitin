@@ -1,4 +1,3 @@
-import Vue from "vue";
 import { boot } from "quasar/wrappers";
 import VueI18n from "vue-i18n";
 import DefaultMessages from "src/i18n/en-us/index.json";

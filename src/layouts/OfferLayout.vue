@@ -1,20 +1,26 @@
 <template>
   <div>
-    <div class="column q-col-gutter-md" :style="$q.screen.gt.sm ? `height: ${parentHeight}px` : ''">
+    <div
+      class="column q-col-gutter-md"
+      :style="$q.screen.gt.sm ? `height: ${parentHeight}px` : ''"
+    >
       <div class="col-auto item">
-        <slot name="member"/>
+        <slot name="member" />
       </div>
-      <div v-if="numImages > 0" class="col-auto item">
-        <slot name="images"/>
+      <div
+        v-if="numImages > 0"
+        class="col-auto item"
+      >
+        <slot name="images" />
       </div>
       <div class="col-auto item sm-last">
-        <slot name="map"/>
+        <slot name="map" />
       </div>
       <div class="col-auto item">
-        <slot name="category"/>
+        <slot name="category" />
       </div>
       <div class="col-auto item content">
-        <slot name="content"/>
+        <slot name="content" />
       </div>
     </div>
   </div>

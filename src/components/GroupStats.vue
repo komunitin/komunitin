@@ -1,21 +1,41 @@
 <template>
-  <q-card v-card-click-to="href" flat bordered>
+  <q-card
+    v-card-click-to="href"
+    flat
+    bordered
+  >
     <q-card-section class="q-pb-none q-pt-sm">
       <div class="text-overline text-onsurface-m">
-        <q-icon :name="icon" size="xs" color="icon-dark" />
+        <q-icon
+          :name="icon"
+          size="xs"
+          color="icon-dark"
+        />
         {{ title }}
       </div>
     </q-card-section>
     <q-card-section horizontal>
       <q-card-section class="col-4">
-        <h2 class="q-mt-none q-mb-md">{{ content }}</h2>
+        <h2 class="q-mt-none q-mb-md">
+          {{ content }}
+        </h2>
         <div class="k-inset-actions-md">
-          <q-btn :to="href" flat color="primary" :label="$t('explore')" />
+          <q-btn
+            :to="href"
+            flat
+            color="primary"
+            :label="$t('explore')"
+          />
         </div>
       </q-card-section>
       <q-card-section class="col-8 text-onsurface-m">
         <ul class="q-pa-none q-ma-none">
-          <li v-for="(item, i) in items" :key="i">{{item}}</li>
+          <li
+            v-for="(item, i) in items"
+            :key="i"
+          >
+            {{ item }}
+          </li>
         </ul>
       </q-card-section>
     </q-card-section>

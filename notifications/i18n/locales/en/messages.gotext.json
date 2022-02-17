@@ -1,0 +1,61 @@
+{
+    "language": "en",
+    "messages": [
+        {
+            "id": "newPurchase",
+            "message": "New purchase",
+            "translation": "New purchase"
+        },
+        {
+            "id": "newPurchaseText",
+            "message": "Purchase of {Amount} from {Name}.",
+            "translation": "Purchase of {Amount} from {Name}.",
+            "placeholders": [
+                {
+                    "id": "Amount",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "amount"
+                },
+                {
+                    "id": "Name",
+                    "string": "%[2]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "payerMember.Name"
+                }
+            ]
+        },
+        {
+            "id": "paymentReceived",
+            "message": "paymentReceived",
+            "translation": "Payment received"
+        },
+        {
+            "id": "paymentReceivedText",
+            "message": "Payment received of {Amount} from {Name}.",
+            "translation": "Payment received of {Amount} from {Name}.",
+            "placeholders": [
+                {
+                    "id": "Amount",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "amount"
+                },
+                {
+                    "id": "Name",
+                    "string": "%[2]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "payeeMember.Name"
+                }
+            ]
+        }
+    ]
+}

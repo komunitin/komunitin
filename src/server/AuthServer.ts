@@ -4,11 +4,8 @@ import { Server, Response } from "miragejs";
 
 export function mockToken(scope: string): TokenResponse {
   return {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token: "test_access_token",
-    // eslint-disable-next-line @typescript-eslint/camelcase
     refresh_token: "test_refresh_token",
-    // eslint-disable-next-line @typescript-eslint/camelcase
     expires_in: 3600,
     scope: scope
   };

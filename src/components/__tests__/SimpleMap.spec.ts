@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
 import SimpleMap from "../SimpleMap.vue";
 

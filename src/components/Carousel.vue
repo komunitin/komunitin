@@ -16,21 +16,30 @@
         :name="i + 1"
         class="q-pa-none"
         :img-src="image"
-      >
-      </q-carousel-slide>
+      />
     </q-carousel>
-    <fit-text v-else update class="placeholder"><q-icon name="no_photography"/></fit-text>
+    <fit-text
+      v-else
+      update
+      class="placeholder"
+    >
+      <q-icon name="no_photography" />
+    </fit-text>
     <div
       v-if="thumbnails && (images.length > 1)"
       class="gt-sm q-mt-none row q-col-gutter-sm"
     >
-      <div v-for="(image, i) of images" :key="i" class="col-3">
+      <div
+        v-for="(image, i) of images"
+        :key="i"
+        class="col-3"
+      >
         <img
           :src="image"
           class="thumbnail vertical-bottom cursor-pointer"
           :class="'thumbnail-' + (slide == i + 1 ? 'active' : 'inactive')"
           @click="slide = i + 1"
-        />
+        >
       </div>
     </div>
   </div>

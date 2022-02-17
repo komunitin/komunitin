@@ -1,9 +1,18 @@
 <template>
   <div>
-    <page-header search :title="$t('transactions')" balance @search="search" />
+    <page-header
+      search
+      :title="$t('transactions')"
+      balance
+      @search="search"
+    />
     <q-page-container>
       <q-page>
-        <transaction-items ref="transactionItems" :code="code" :member="myMember"/>
+        <transaction-items
+          ref="transactionItems"
+          :code="code"
+          :member="myMember"
+        />
       </q-page>
     </q-page-container>
   </div>

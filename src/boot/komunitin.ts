@@ -17,7 +17,11 @@ const KOptions = {
     /**
      * Accounting API URL.
      */
-    accounting: process.env.ACCOUNTING_URL ?? "http://localhost:8080/auth"
+    accounting: process.env.ACCOUNTING_URL ?? "http://localhost:8080/auth",
+    /**
+     * Notifications API URL.
+     */
+    notifications: process.env.NOTIFICATIONS_URL ?? "http://localhost:8080/notifications"
   },
   oauth: {
     /**

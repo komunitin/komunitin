@@ -1,22 +1,9 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "sourceMap": true,
-    "target": "es6",
-    "strict": true,
-    "experimentalDecorators": true,
-    "module": "esnext",
-    "moduleResolution": "node",
     "baseUrl": ".",
     "types": ["quasar", "node", "jest", "resize-observer-browser"],
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "paths": {
-      "@/*": ["/src/*"],
-      // Make typescript search for modules at src/types, where we have the type declarations.
-      "*" : ["*", "src/types/*"]
-    }
+    "allowSyntheticDefaultImports": true
   },
-  "exclude": ["node_modules", "src/types"],
-  "extends": "@quasar/app/tsconfig-preset"
+  "extends": "@quasar/app/tsconfig-preset",
+  "exclude": ["src-pwa"]
 }
