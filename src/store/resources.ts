@@ -194,7 +194,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     try {
       return await this.getHttpClient(context).get(url)
     } catch (error) {
-      if (error.code == 401 && (context.rootState as UserState).userId) {
+      if ((error as AxiosError).code == "401" && (context.rootState as UserState).userId) {
         // Unauthorized. Try refreshing token.
         await context.dispatch("authorize");
         return await this.getHttpClient(context).get(url);
@@ -522,7 +522,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         payload.group
       );
     } catch (error) {
-      throw Resources.getKError(error);
+      throw Resources.getKError(error as AxiosError);
     }
   }
   protected async loadNext(
@@ -550,7 +550,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         payload.group,
       );
     } catch (error) {
-      throw Resources.getKError(error);
+      throw Resources.getKError(error as AxiosError);
     }
   }
   /**
@@ -581,7 +581,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         );
       }
     } catch (error) {
-      throw Resources.getKError(error);
+      throw Resources.getKError(error as AxiosError);
     }
   }
 

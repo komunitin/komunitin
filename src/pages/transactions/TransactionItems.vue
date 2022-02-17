@@ -11,7 +11,10 @@
     :autoload="autoload"
     @afterLoad="fetchMembers"
   >
-    <q-list v-if="slotProps.resources" padding>
+    <q-list
+      v-if="slotProps.resources"
+      padding
+    >
       <member-header
         v-for="transfer of loadedTransfers(slotProps.resources)"
         :key="transfer.id"
@@ -25,7 +28,10 @@
         </template>
         <template #side>
           <div class="column items-end">
-            <q-item-label caption class="col">
+            <q-item-label
+              caption
+              class="col"
+            >
               <span v-if="transfer.attributes.state == 'pending'">
                 {{ $t("pending") }}
               </span>
@@ -52,10 +58,11 @@
 <script lang="ts">
 import Vue from "vue"
 
-import MemberHeader from "../../components/MemberHeader.vue";
-import ResourceCards from "../ResourceCards.vue";
-
 import FormatCurrency from "../../plugins/FormatCurrency";
+
+import ResourceCards from "../ResourceCards.vue";
+import MemberHeader from "../../components/MemberHeader.vue";
+
 import { Transfer, Member, Account } from "../../store/model";
 
 Vue.use(FormatCurrency);
@@ -66,9 +73,6 @@ interface ExtendedTransfer extends Transfer {
 }
 interface ExtendedAccount extends Account {
   member: Member;
-}
-interface ExtendedMember extends Member {
-  account: Account;
 }
 
 export default Vue.extend({

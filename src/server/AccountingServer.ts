@@ -74,9 +74,7 @@ export default {
       meta: () => faker.company.catchPhrase(),
       state: (i: number) => (i < 3 ? "pending" : (i % 8 == 0) ? "rejected" : "committed"),
       created: (i: number) => faker.date.recent(i % 5).toJSON(),
-      updated() {
-        return this.created;
-      },
+      updated: (i: number) => faker.date.recent(i % 5).toJSON(),
       expires() {
         return (this as any).state == "pending" ? faker.date.future().toJSON() : undefined;
       }

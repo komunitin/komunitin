@@ -46,7 +46,7 @@ function logErrorHandling(error: Error) {
   console.error(`[${KErrorCode.ErrorHandling}] Error while handling another error: ${error.message}`);
 }
 
-export function handleError(error: KError) {
+export function handleError(error: KError): void {
   logError(error);
   showError(error);
 }
@@ -66,14 +66,14 @@ declare module 'vue/types/vue' {
 } 
 
 function vueWarnHandler(message: string, vm: Vue, trace: string) {
+  const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, vm});
   try {
-    const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, vm});
     handleError(error);
   }
-  catch(error) {
+  catch (exception) {
     logErrorHandling(error);
   }
-};
+}
 
 /**
  * Register global error handler for errors occurred outside Vue components. 
@@ -91,18 +91,18 @@ if (window !== undefined) {
       }
       return;
     }
+    let kerror: KError;
+    if (event.error instanceof KError) {
+      kerror = event.error;
+    }
+    else {
+      kerror = new KError(KErrorCode.UnknownScript, event.message, {url: event.filename , line: event.lineno, column: event.colno, error: event.error})
+    }
     try {
-      let kerror: KError;
-      if (event.error instanceof KError) {
-        kerror = event.error;
-      }
-      else {
-        kerror = new KError(KErrorCode.UnknownScript, event.message, {url: event.filename , line: event.lineno, column: event.colno, error: event.error})
-      }
       handleError(kerror);
     }
     catch(error) {
-      logErrorHandling(error);
+      logErrorHandling(kerror);
     }
   });
 }

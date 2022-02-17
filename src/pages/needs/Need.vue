@@ -2,39 +2,69 @@
   <div>
     <page-header :title="$t('need')" />
     <q-page-container>
-      <q-page v-if="need" class="q-pa-lg">
+      <q-page
+        v-if="need"
+        class="q-pa-lg"
+      >
         <offer-layout :num-images="need.attributes.images.length">
           <template #member>
-            <member-header :to="`/groups/${code}/members/${need.member.attributes.code}`" :member="need.member" class="q-pa-none"/>
+            <member-header
+              :to="`/groups/${code}/members/${need.member.attributes.code}`"
+              :member="need.member"
+              class="q-pa-none"
+            />
           </template>
           <template #category>
-            <category-avatar type="need" :category="need.category" caption/>
+            <category-avatar
+              type="need"
+              :category="need.category"
+              caption
+            />
           </template>
           <template #images>
-            <carousel :images="need.attributes.images" thumbnails height="400px" />
+            <carousel
+              :images="need.attributes.images"
+              thumbnails
+              height="400px"
+            />
           </template>
           <template #content>
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('updatedAt', {
-                  date: $options.filters.date(need.attributes.updated)
-                }) }}</span>
+                date: $options.filters.date(need.attributes.updated)
+              }) }}</span>
             </div>
-            <div v-md2html="need.attributes.content" class="col text-body1 text-onsurface"></div>
+            <div
+              v-md2html="need.attributes.content"
+              class="col text-body1 text-onsurface"
+            />
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('expiresAt', {
-                    date: $options.filters.date(need.attributes.expires)
-                  }) }}</span>
+                date: $options.filters.date(need.attributes.expires)
+              }) }}</span>
             </div>
             <div class="q-pb-lg row q-col-gutter-md justify-end">
-              <share-button flat color="primary" :label="$t('share')"
+              <share-button 
+                flat
+                color="primary"
+                :label="$t('share')"
                 :title="$t('checkThisNeed', {member: need.member.attributes.name})"
                 :text="need.attributes.text"
               />
-              <contact-button unelevated color="primary" :label="$t('contact')" :contacts="need.member.contacts" /> 
+              <contact-button
+                unelevated
+                color="primary"
+                :label="$t('contact')"
+                :contacts="need.member.contacts"
+              /> 
             </div>
           </template>
           <template #map>
-            <simple-map class="simple-map" :center="need.member.attributes.location.coordinates" :marker="need.member.attributes.location.coordinates" />
+            <simple-map
+              class="simple-map"
+              :center="need.member.attributes.location.coordinates"
+              :marker="need.member.attributes.location.coordinates"
+            />
             <div class="text-onsurface-m">
               <q-icon name="place" />
               {{ need.member.attributes.location.name }}
@@ -48,15 +78,18 @@
 <script lang="ts">
 import Vue from "vue";
 
-import PageHeader from "../../layouts/PageHeader.vue";
+import Md2html from "../../plugins/Md2html";
+
 import OfferLayout from "../../layouts/OfferLayout.vue";
+import PageHeader from "../../layouts/PageHeader.vue";
+
+import Carousel from "../../components/Carousel.vue";
 import CategoryAvatar from "../../components/CategoryAvatar.vue";
+import ContactButton from "../../components/ContactButton.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
-import ContactButton from "../../components/ContactButton.vue";
-import Carousel from "../../components/Carousel.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
-import Md2html from "../../plugins/Md2html";
+
 import { Need } from "../../store/model";
 
 Vue.use(Md2html);

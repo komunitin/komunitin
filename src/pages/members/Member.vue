@@ -2,7 +2,12 @@
   <div v-if="ready">
     <page-header :title="member.attributes.name">
       <template #buttons>
-        <contact-button icon="message" round flat :contacts="member.contacts" />
+        <contact-button
+          icon="message"
+          round
+          flat
+          :contacts="member.contacts"
+        />
         <share-button
           icon="share"
           flat
@@ -19,19 +24,46 @@
     </page-header>
     <q-page-container>
       <q-page>
-        <member-page-header :member="member" :tab="tab" :transactions="!isMe" @tabChange="tab = $event"/>
+        <member-page-header
+          :member="member"
+          :tab="tab"
+          :transactions="!isMe"
+          @tabChange="tab = $event"
+        />
         <q-tab-panels v-model="tab">
-          <q-tab-panel name="profile" keep-alive>
-            <member-profile :member="member"/>
+          <q-tab-panel
+            name="profile"
+            keep-alive
+          >
+            <member-profile :member="member" />
           </q-tab-panel>
-          <q-tab-panel name="needs" keep-alive>
-            <member-needs :member="member" :group-code="code"/>
+          <q-tab-panel
+            name="needs"
+            keep-alive
+          >
+            <member-needs
+              :member="member"
+              :group-code="code"
+            />
           </q-tab-panel>
-          <q-tab-panel name="offers" keep-alive>
-            <member-offers :member="member" :group-code="code"/>
+          <q-tab-panel
+            name="offers"
+            keep-alive
+          >
+            <member-offers
+              :member="member"
+              :group-code="code"
+            />
           </q-tab-panel>
-          <q-tab-panel v-if="!isMe" name="transactions" keep-alive>
-            <transaction-items :code="code" :member="member"/>
+          <q-tab-panel
+            v-if="!isMe"
+            name="transactions"
+            keep-alive
+          >
+            <transaction-items
+              :code="code"
+              :member="member"
+            />
           </q-tab-panel>
         </q-tab-panels>
       </q-page>
@@ -43,14 +75,17 @@ import Vue from "vue"
 import {mapGetters} from "vuex";
 
 import PageHeader from "../../layouts/PageHeader.vue";
+
 import ContactButton from "../../components/ContactButton.vue";
-import ShareButton from "../../components/ShareButton.vue";
-import MemberPageHeader from "./MemberPageHeader.vue";
-import MemberProfile from "./MemberProfile.vue";
 import MemberNeeds from "./MemberNeeds.vue";
 import MemberOffers from "./MemberOffers.vue";
+import MemberPageHeader from "./MemberPageHeader.vue";
+import MemberProfile from "./MemberProfile.vue";
+import ShareButton from "../../components/ShareButton.vue";
 import TransactionItems from "../transactions/TransactionItems.vue";
-import { Member, Currency } from '../../store/model';
+
+import { Member, Currency, Account } from '../../store/model';
+
 export default Vue.extend({
   name: "Member",
   components: {

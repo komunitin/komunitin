@@ -3,6 +3,8 @@ import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/komunitin";
 import KError, { KErrorCode } from "src/KError";
 import { handleError } from "../boot/errors";
+import { Notifications } from "src/plugins/Notifications";
+import { i18n } from "../boot/i18n"
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -24,6 +26,10 @@ export interface UserState {
    * Current location, provided by device.
    */
   location?: [number, number];
+  /**
+   * Subscription to push notifications.
+   */
+  subscriptionToken?: string;
 }
 
 /**
@@ -82,7 +88,7 @@ async function loadUser(
   // Load the Social API users/me endpoint.
   const action2 = loadUserData(accessToken, context);
   // Run these two calls in "parallel".
-  return Promise.all([action1, action2]);
+  await Promise.all([action1, action2]);
 }
 
 export default {
@@ -92,19 +98,26 @@ export default {
     userInfo: undefined,
     userId: undefined,
     accountId: undefined,
-    location: undefined
+    location: undefined,
+    subscriptionToken: undefined
   }),
   getters: {
     isLoggedIn: state =>
       state.userInfo !== undefined &&
       state.userId !== undefined &&
       auth.isAuthorized(state.tokens),
-    myMember: (state, getters, rootState, rootGetters) => {
+    isSubscribed: state =>
+      state.subscriptionToken !== undefined,
+    myUser: (state, getters, rootState, rootGetters) => {
       if (state.userId !== undefined) {
-        const user = rootGetters["users/one"](state.userId);
-        if (user.members.length > 0) {
-          return user.members[0];
-        }
+        return rootGetters["users/one"](state.userId);
+      }
+      return undefined;
+    },
+    myMember: (state, getters) => {
+      const user = getters.myUser;
+      if (user?.members.length > 0) {
+        return user.members[0];
       }
       return undefined;
     },
@@ -118,7 +131,8 @@ export default {
     tokens: (state, tokens) => (state.tokens = tokens),
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
     myUser: (state, userId) => (state.userId = userId),
-    location: (state, location) => (state.location = location)
+    location: (state, location) => (state.location = location),
+    subscription: (state, subscriptionToken) => (state.subscriptionToken = subscriptionToken)
   },
 
   actions: {
@@ -131,7 +145,7 @@ export default {
     ) => {
       const tokens = await auth.login(payload.email, payload.password);
       context.commit("tokens", tokens);
-      return loadUser(tokens.accessToken, context);
+      await loadUser(tokens.accessToken, context);
     },
     /**
      * Silently authorize user using stored credentials. Throws exception (rejects)
@@ -142,12 +156,12 @@ export default {
         try {
           const tokens = await auth.authorize(context.state.tokens);
           context.commit("tokens", tokens);
-          return loadUser(tokens.accessToken, context);
+          await loadUser(tokens.accessToken, context);
         } catch (error) {
           // Couldn't authorize. Delete credentials so we don't attempt another
           // call next time.
           if (context.state.tokens) {
-            context.dispatch("logout");
+            await context.dispatch("logout");
           }
           throw error;
         }
@@ -157,7 +171,7 @@ export default {
      * Logout current user.
      */
     logout: async (context: ActionContext<UserState, never>) => {
-      await auth.logout();
+      auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
       context.commit("myUser", undefined);
@@ -170,7 +184,7 @@ export default {
       const location = await new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(
           // Success handler.
-          (position: Position) => {
+          (position: GeolocationPosition) => {
             const location = [
               position.coords.longitude,
               position.coords.latitude
@@ -179,7 +193,7 @@ export default {
             resolve(location);
           },
           // Error handler
-          (error: PositionError) => {
+          (error: GeolocationPositionError) => {
             const codes = [] as KErrorCode[];
             codes[error.TIMEOUT] = KErrorCode.PositionTimeout;
             codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable;
@@ -194,6 +208,23 @@ export default {
         );
       });
       commit("location", location);
+    },
+    /**
+     * Subscribe to push notifications
+    */
+    subscribe: async (context: ActionContext<UserState, never>) => {
+      if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
+        const notifications = new Notifications();
+
+        const token = await notifications.subscribe(
+          context.getters.myUser, 
+          context.getters.myMember,
+          {
+            locale: i18n.locale
+          },
+          context.getters.accessToken);
+        context.commit("subscription", token);
+      }
     }
   }
 } as Module<UserState, never>;

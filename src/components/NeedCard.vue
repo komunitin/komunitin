@@ -11,11 +11,18 @@
         {{ need.attributes.updated | date }}
       </template>
       <template #side>
-        <category-avatar :category="need.category" type="need"/>
+        <category-avatar
+          :category="need.category"
+          type="need"
+        />
       </template>
     </member-header>
     <!-- Need images -->
-    <carousel v-if="hasImages" :images="need.attributes.images" height="200px" />
+    <carousel
+      v-if="hasImages"
+      :images="need.attributes.images"
+      height="200px"
+    />
 
     <!-- Need text -->
     <q-card-section>
@@ -27,9 +34,15 @@
     </q-card-section>
 
     <q-card-actions>
-      <contact-button flat color="primary" :contacts="need.member.contacts">{{
-        $t("reply")
-      }}</contact-button>
+      <contact-button
+        flat
+        color="primary"
+        :contacts="need.member.contacts"
+      >
+        {{
+          $t("reply")
+        }}
+      </contact-button>
       <q-space />
       <share-button
         icon="share"
@@ -49,11 +62,12 @@ import Vue from "vue";
 import CardClickTo from "../plugins/CardClickTo";
 import Clamp from "../plugins/Clamp";
 import Md2txt from "../plugins/Md2txt";
+
+import Carousel from "./Carousel.vue";
+import CategoryAvatar from "./CategoryAvatar.vue";
+import ContactButton from "./ContactButton.vue";
 import MemberHeader from "./MemberHeader.vue";
 import ShareButton from "./ShareButton.vue";
-import ContactButton from "./ContactButton.vue";
-import CategoryAvatar from "./CategoryAvatar.vue";
-import Carousel from "./Carousel.vue";
 
 Vue.use(CardClickTo);
 Vue.use(Clamp);

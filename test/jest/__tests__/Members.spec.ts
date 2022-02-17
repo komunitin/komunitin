@@ -6,12 +6,14 @@ import { QInnerLoading, QInfiniteScroll, QAvatar } from "quasar";
 import MemberHeader from "../../../src/components/MemberHeader.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import MemberList from "../../../src/pages/members/MemberList.vue";
+import { seeds } from "src/server";
 
 // See also Offers.spec.ts
 describe("Members", () => {
   let wrapper: Wrapper<Vue>;
 
   beforeAll(async () => {
+    seeds();
     wrapper = await mountComponent(App, { login: true });
   });
   afterAll(() => wrapper.destroy());
@@ -32,8 +34,9 @@ describe("Members", () => {
     await wrapper.vm.$wait();
     expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(30);
     await wrapper.vm.$nextTick();
-    // Infinite scroll stopped since we fetchyed all available data.
-    expect((wrapper.findComponent(QInfiniteScroll).vm as any).working).toBe(false);
+    // Infinite scroll stopped since we fetched all available data.
+    const scroll = wrapper.findComponent(QInfiniteScroll).vm as any;
+    expect(scroll.isWorking).toBe(false)
     // Check GRP00002 result
     const members = wrapper.getComponent(MemberList).findAllComponents(MemberHeader);
     const second = members.wrappers[2];

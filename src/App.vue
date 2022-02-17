@@ -4,10 +4,11 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import Vue from "vue";
 
 /**
- * App main component.
+ * Main App class.
  */
-export default class App extends Vue {}
+export default Vue.extend({});
+
 </script>

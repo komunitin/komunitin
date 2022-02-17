@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import Error404 from '../Error404.vue'
 import {Quasar, QBtn} from 'quasar'

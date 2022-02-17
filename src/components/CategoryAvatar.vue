@@ -1,10 +1,23 @@
 <template>
   <div class="q-py-xs">
-    <span v-if="caption && right" class="q-pr-md text-overline text-uppercase text-onsurface-m">{{ category.attributes.name }}</span>
-    <q-avatar :icon="icon" text-color="onprimary" :color="color" size="40px" >
-      <q-tooltip v-if="!caption">{{ category.attributes.name }}</q-tooltip>
+    <span
+      v-if="caption && right"
+      class="q-pr-md text-overline text-uppercase text-onsurface-m"
+    >{{ category.attributes.name }}</span>
+    <q-avatar
+      :icon="icon"
+      text-color="onprimary"
+      :color="color"
+      size="40px"
+    >
+      <q-tooltip v-if="!caption">
+        {{ category.attributes.name }}
+      </q-tooltip>
     </q-avatar>
-    <span v-if="caption && !right" class="q-pl-md text-overline text-uppercase text-onsurface-m">{{ category.attributes.name }}</span>
+    <span
+      v-if="caption && !right"
+      class="q-pl-md text-overline text-uppercase text-onsurface-m"
+    >{{ category.attributes.name }}</span>
   </div>
 </template>
 <script lang="ts">

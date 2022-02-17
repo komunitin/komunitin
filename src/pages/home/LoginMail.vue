@@ -1,47 +1,52 @@
 <template>
-      <form class="column q-gutter-md" @submit.prevent="submit">
-        <q-input
-          v-model="email" outlined
-          dark
-          type="email"
-          placeholder="example@example.com"
-          :label="$t('email')"
-          maxlength="30"
-          :rules="[val => !$v.email.$invalid || $t('invalidEmail')]"
-          lazy-rules
-        >
-          <template v-slot:append>
-            <q-icon name="mail"/>
-          </template>
-        </q-input>
-        <q-input
-          v-model="pass" outlined
-          dark
-          :type="isPwd ? 'password' : 'text'"
-          :label="$t('password')"
-          maxlength="30"
-          :rules="[val => !$v.pass.$invalid || $t('invalidPassword')]"
-          lazy-rules
-        >
-          <template v-slot:append>
-            <q-icon
-              :name="isPwd ? 'visibility_off' : 'visibility'"
-              class="cursor-pointer"
-              @click="isPwd = !isPwd"
-            />
-          </template>
-        </q-input>
-
-        <q-btn
-          outline
-          color="transparent"
-          text-color="onoutside"
-          :label="$t('logIn')"
-          icon="account_circle"
-          :disabled="loginDisabled"
-          type="submit"
+  <form
+    class="column q-gutter-md"
+    @submit.prevent="submit"
+  >
+    <q-input
+      v-model="email"
+      outlined
+      dark
+      type="email"
+      placeholder="example@example.com"
+      :label="$t('email')"
+      maxlength="30"
+      :rules="[val => !$v.email.$invalid || $t('invalidEmail')]"
+      lazy-rules
+    >
+      <template #append>
+        <q-icon name="mail" />
+      </template>
+    </q-input>
+    <q-input
+      v-model="pass"
+      outlined
+      dark
+      :type="isPwd ? 'password' : 'text'"
+      :label="$t('password')"
+      maxlength="30"
+      :rules="[val => !$v.pass.$invalid || $t('invalidPassword')]"
+      lazy-rules
+    >
+      <template #append>
+        <q-icon
+          :name="isPwd ? 'visibility_off' : 'visibility'"
+          class="cursor-pointer"
+          @click="isPwd = !isPwd"
         />
-      </form>
+      </template>
+    </q-input>
+
+    <q-btn
+      outline
+      color="transparent"
+      text-color="onoutside"
+      :label="$t('logIn')"
+      icon="account_circle"
+      :disabled="loginDisabled"
+      type="submit"
+    />
+  </form>
 </template>
 
 <script lang="ts">

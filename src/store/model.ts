@@ -124,6 +124,7 @@ export interface ExternalResourceObject extends ResourceObject {
   relationships?: undefined;
   meta: {
     external : true
+    href: string
   }
 }
 
@@ -352,4 +353,16 @@ export interface Need extends ResourceObject {
     category: RelatedResource;
     author: RelatedResource;
   };
+}
+
+export interface NotificationsSubscription extends ResourceObject {
+  attributes: {
+    token: string;
+    // Here it goes the notification settings as an embedded map.
+    // settings: NotiifcationSettings
+  };
+  relationships: {
+    user: RelatedResource;
+    member: RelatedResource;
+  }
 }

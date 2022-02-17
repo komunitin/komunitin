@@ -82,5 +82,8 @@
   "payer": "Pagador/a",
   "payee": "Cobrador/a",
   "komunitinProject": "Projecte Komunitin",
-  "nothingHere": "Aquí no hi ha res... Encara!"
+  "nothingHere": "Aquí no hi ha res... Encara!",
+  "enableNotificationsText": "Activa les notificacions per estar al corrent dels moviments del teu compte i altres notícies importants de la teva xarxa. Pots configurar-les o desactivar-les quan vulguis.",
+  "enableNotifications": "Activa les notificacions",
+  "dismiss": "Ignora"
 }
