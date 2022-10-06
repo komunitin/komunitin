@@ -61,7 +61,7 @@
     "eslint-plugin-vue-i18n": "^0.3.0",
     "faker": "^4.1.0",
     "kind-of": ">=6.0.3",
-    "minimist": ">=1.2.3",
+    "minimist": ">=1.2.6",
     "miragejs": "^0.1.41",
     "node-sass": "^7.0.3",
     "typedoc": "^0.17.8",
