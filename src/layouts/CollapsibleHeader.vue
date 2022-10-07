@@ -24,7 +24,7 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 
 export interface ScrollDetails {
   position: number;
@@ -40,7 +40,7 @@ export interface ScrollDetails {
  * 
  * This element must be placed as the first child of the QPage element.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "CollapsibleHeader",
   props: {
     /**

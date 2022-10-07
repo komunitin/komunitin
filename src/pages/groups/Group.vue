@@ -62,7 +62,7 @@
                 :href="group.attributes.website"
                 target="_blank"
                 icon="link"
-                :label="group.attributes.website | link"
+                :label="link(group.attributes.website)"
                 color="onsurface-m"
               />
             </div>
@@ -138,9 +138,9 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-import Md2html from "../../plugins/Md2html";
+import md2html from "../../plugins/Md2html";
 
 import PageHeader from "../../layouts/PageHeader.vue";
 
@@ -152,18 +152,11 @@ import SocialNetworkList from "../../components/SocialNetworkList.vue";
 
 import { Group, Contact, Category, Currency } from "../../store/model";
 
-Vue.use(Md2html);
-
 /**
  * Page for Group details.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "Group",
-  filters: {
-    link(link: string): string {
-      return link.replace(/(https|http):\/\//, "");
-    }
-  },
   components: {
     SimpleMap,
     ShareButton,
@@ -172,10 +165,20 @@ export default Vue.extend({
     SocialNetworkList,
     PageHeader
   },
+  directives: {
+    md2html
+  },
   props: {
     code: {
       type: String,
       required: true
+    }
+  },
+  setup() {
+    return {
+      link(link: string): string {
+        return link.replace(/(https|http):\/\//, "");
+      }
     }
   },
   data() {

@@ -45,12 +45,12 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import FitText from "./FitText.vue";
 /**
  * Almost just a wrapper around Quasar QCarousel to avoid repetition and unify behavior across the app.
  */
-export default Vue.extend({
+export default defineComponent({
   components: {
     FitText
   },

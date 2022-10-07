@@ -1,10 +1,10 @@
 import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
-import { KOptions } from "src/boot/komunitin";
+import { KOptions } from "src/boot/koptions";
 import KError, { KErrorCode } from "src/KError";
 import { handleError } from "../boot/errors";
 import { Notifications } from "src/plugins/Notifications";
-import { i18n } from "../boot/i18n"
+import { useI18n } from "vue-i18n"
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -220,7 +220,7 @@ export default {
           context.getters.myUser, 
           context.getters.myMember,
           {
-            locale: i18n.locale
+            locale: useI18n().locale
           },
           context.getters.accessToken);
         context.commit("subscription", token);

@@ -44,14 +44,14 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import Empty from "../components/Empty.vue";
 import { ResourceObject } from "../store/model";
 
 /**
  * Generic resource card list.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "ResourceCards",
   components: {
     Empty

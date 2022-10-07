@@ -1,8 +1,8 @@
-import Vue from 'vue';
+import { ComponentPublicInstance } from 'vue';
 
 import KError, { KErrorCode } from '../KError';
 import { Notify } from 'quasar'
-import { i18n } from './i18n'
+import { useI18n } from 'vue-i18n';
 import { boot } from 'quasar/wrappers';
 
 
@@ -12,7 +12,7 @@ import { boot } from 'quasar/wrappers';
  * @param error The error.
  */
 function getLocalizedMessage(error: KError): string {
-  return i18n.t(error.getTranslationKey()).toString();
+  return useI18n().t(error.getTranslationKey()).toString();
 }
 
 /**
@@ -51,22 +51,8 @@ export function handleError(error: KError): void {
   showError(error);
 }
 
-declare module 'vue/types/vue' {
-  interface Vue {
-    /**
-     * Main function for error handling.
-     * 
-     * Use this function when you can continue the execution but you want to log the error anyway. Otherwise
-     * just throw the KError.
-     * 
-     * @param error The error to handle
-     */
-    $handleError: typeof handleError;
-  }
-} 
-
-function vueWarnHandler(message: string, vm: Vue, trace: string) {
-  const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, vm});
+function vueWarnHandler(message: string, instance: ComponentPublicInstance | null, trace: string) {
+  const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, instance});
   try {
     handleError(error);
   }
@@ -107,9 +93,23 @@ if (window !== undefined) {
   });
 }
 
-export default boot(({Vue}) => {
+export default boot(({app}) => {
   // Add handleError() function to Vue prototype.
-  Vue.prototype.$handleError = handleError;
+  app.config.globalProperties.$handleError = handleError;
   // Set Vue warning handler.
-  Vue.config.warnHandler = vueWarnHandler;
+  app.config.warnHandler = vueWarnHandler;
 });
+
+declare module "@vue/runtime-core" {
+  interface ComponentCustomProperties {
+    /**
+     * Main function for error handling.
+     * 
+     * Use this function when you can continue the execution but you want to log the error anyway. Otherwise
+     * just throw the KError.
+     * 
+     * @param error The error to handle
+     */
+    $handleError: (error: KError) => void;
+  }
+}

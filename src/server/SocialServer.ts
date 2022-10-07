@@ -6,7 +6,7 @@ import faker from "faker";
 import { filter } from "./ServerUtils"
 
 import { ContactNetworks } from "../components/SocialNetworks";
-import { KOptions } from "../boot/komunitin";
+import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 
 const urlSocial = KOptions.url.social;

@@ -8,19 +8,25 @@
     <l-tile-layer :url="url" />
     <l-marker
       v-if="marker"
-      :lat-lng="markerLatLng"
+      :lat-lng="markerLatLng" 
       :icon="markerIcon"
     />
   </l-map>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
-import L from "leaflet";
+import { defineComponent } from "vue";
+import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import "leaflet/dist/leaflet.css";
 
-export default Vue.extend({
+interface SimpleMapData {
+  url: string,
+  zoom: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  markerIcon?: any
+}
+
+export default defineComponent({
   name: "SimpleMap",
   components: {
     LMap,
@@ -50,25 +56,30 @@ export default Vue.extend({
       required: false
     }
   },
-  data() {
+  data() : SimpleMapData {
     return {
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       zoom: 3,
-      markerIcon: L.icon({
-        iconUrl: require("../assets/icons/marker.png"),
-        shadowUrl: require("../assets/icons/marker-shadow.png"),
-      })
     };
   },
   computed: {
     // Leaflet expects [latitude, longitude] while GeoJSON
     // is the opposite.
     centerLatLng() {
-      return this.center.slice().reverse();
+      return this.center?.slice().reverse();
     },
     markerLatLng() {
-      return this.marker.slice().reverse();
+      return this.marker?.slice().reverse();
     },
+  },
+  async beforeMount() {
+    // See here on why we're not just importing leaflet at the beggining of the file:
+    // https://github.com/vue-leaflet/vue-leaflet#working-with-leaflet
+    const { icon } = await import("leaflet/dist/leaflet-src.esm")
+    this.markerIcon = icon({
+      iconUrl: require("../assets/icons/marker.png"),
+      shadowUrl: require("../assets/icons/marker-shadow.png"),
+    })
   }
 });
 </script>

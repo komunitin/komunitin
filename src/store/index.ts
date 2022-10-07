@@ -1,7 +1,6 @@
-import Vue from "vue";
-import Vuex from "vuex";
-import { Resources } from "./resources";
-import { KOptions } from "src/boot/komunitin";
+import { createStore, Store } from "vuex";
+import { Resources, ResourcesState } from "./resources";
+import { KOptions } from "src/boot/koptions";
 import {
   User,
   Group,
@@ -15,10 +14,8 @@ import {
   Transfer
 } from "src/store/model";
 // Import logged-in user module
-import me from "./me";
-import ui from "./ui";
-
-Vue.use(Vuex);
+import me, { UserState } from "./me";
+import ui, { UIState } from "./ui";
 
 // Build modules for Social API:
 const socialUrl = KOptions.url.social;
@@ -81,8 +78,8 @@ const transfers = new Resources<Transfer, unknown>("transfers", accountingUrl);
  * async/await or return a Promise which resolves
  * with the Store instance.
  */
-export default function(/* { ssrContext } */) {
-  const Store = new Vuex.Store({
+export default function(/* { ssrContext } */): Store<never> {
+  const store = createStore({
     modules: {
       // Logged-in user module
       me,
@@ -112,5 +109,25 @@ export default function(/* { ssrContext } */) {
     strict: process.env.DEV === "true"
   });
 
-  return Store;
+  return store;
+}
+
+declare module '@vue/runtime-core' {
+  interface State {
+    me: UserState
+    ui: UIState
+    users: ResourcesState<User>
+    groups: ResourcesState<Group>
+    contacts: ResourcesState<Contact>
+    members: ResourcesState<Member>
+    offers: ResourcesState<Offer>
+    needs: ResourcesState<Need>
+    categories: ResourcesState<Category>
+    currencies: ResourcesState<Currency>
+    accounts: ResourcesState<Account>
+    transfers: ResourcesState<Transfer>
+  }
+  interface ComponentCustomProperties {
+    $store: Store<State>
+  }
 }

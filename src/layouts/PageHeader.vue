@@ -46,7 +46,7 @@
           :style="`font-size: ${3*balanceScaleFactor}rem; line-height: ${3.125*balanceScaleFactor}rem`"
         >
           {{
-            $currency(
+            FormatCurrency(
               myAccount.attributes.balance,
               myAccount.currency
             )
@@ -116,11 +116,9 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 import FormatCurrency from "../plugins/FormatCurrency";
-
-Vue.use(FormatCurrency);
 
 interface ScrollDetails {
   position: number;
@@ -139,7 +137,7 @@ interface ScrollDetails {
  *  - Provides a slot #buttons to be able to customize the right toolbar buttons 
  * depending on the page content.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "PageHeader",
   props: {
     /**
@@ -162,6 +160,11 @@ export default Vue.extend({
     balance: {
       type: Boolean,
       default: false
+    }
+  },
+  setup() {
+    return {
+      FormatCurrency
     }
   },
   data() {

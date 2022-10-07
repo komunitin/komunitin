@@ -21,10 +21,10 @@
   </q-btn-dropdown>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import langs from "../i18n";
 
-export default Vue.extend({
+export default defineComponent({
   name: "SelectLang",
   data() {
     return {

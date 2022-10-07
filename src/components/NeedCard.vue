@@ -8,7 +8,7 @@
     <!-- Header -->
     <member-header :member="need.member">
       <template #caption>
-        {{ need.attributes.updated | date }}
+        {{ $formatDate(need.attributes.updated) }}
       </template>
       <template #side>
         <category-avatar
@@ -58,10 +58,10 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import CardClickTo from "../plugins/CardClickTo";
-import Clamp from "../plugins/Clamp";
-import Md2txt from "../plugins/Md2txt";
+import { defineComponent } from "vue";
+import cardClickTo from "../plugins/CardClickTo";
+import clamp from "../plugins/Clamp";
+import md2txt from "../plugins/Md2txt";
 
 import Carousel from "./Carousel.vue";
 import CategoryAvatar from "./CategoryAvatar.vue";
@@ -69,11 +69,7 @@ import ContactButton from "./ContactButton.vue";
 import MemberHeader from "./MemberHeader.vue";
 import ShareButton from "./ShareButton.vue";
 
-Vue.use(CardClickTo);
-Vue.use(Clamp);
-Vue.use(Md2txt);
-
-export default Vue.extend({
+export default defineComponent({
   name: "NeedCard",
   components: {
     MemberHeader,
@@ -81,6 +77,11 @@ export default Vue.extend({
     ContactButton,
     CategoryAvatar,
     Carousel
+  },
+  directives: {
+    clamp,
+    md2txt,
+    cardClickTo
   },
   props: {
     // Group code.

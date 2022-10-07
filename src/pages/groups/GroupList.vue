@@ -9,11 +9,11 @@
   />
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import ResourceCardList from "../ResourceCardList.vue";
 import GroupCard from "../../components/GroupCard.vue";
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ResourceCardList
   },

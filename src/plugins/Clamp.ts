@@ -1,8 +1,8 @@
 import clamp from 'clamp-js';
-import _Vue from 'vue';
+import { DirectiveBinding } from 'vue';
 
-export default function(Vue: typeof _Vue): void  {
-  // Add the global directive v-clamp and bind the passed attribute value 
-  // to the clamp option of Clamp.js library.
-  Vue.directive('clamp', (el, binding) => clamp(el, {clamp : binding.value}));
+// Directive v-clamp to be declared in directives element property.
+export default function(el: HTMLElement, binding: DirectiveBinding<string> ) {
+  // bind the passed attribute value to the clamp option of Clamp.js library.
+  return clamp(el, {clamp : binding.value})
 }

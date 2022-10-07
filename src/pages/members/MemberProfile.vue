@@ -34,21 +34,22 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 
-import Md2html from "../../plugins/Md2html";
+import md2html from "../../plugins/Md2html";
 
 import SimpleMap from "../../components/SimpleMap.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue"
 
 
-Vue.use(Md2html);
-
-export default Vue.extend({
+export default defineComponent({
   name: "MemberProfile",
   components: {
     SimpleMap,
     SocialNetworkList
+  },
+  directives: {
+    md2html
   },
   props: {
     member: {

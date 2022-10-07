@@ -1,4 +1,4 @@
-import { KOptions } from "../boot/komunitin";
+import { KOptions } from "../boot/koptions";
 import { TokenResponse, User } from "../plugins/Auth";
 import { Server, Response } from "miragejs";
 

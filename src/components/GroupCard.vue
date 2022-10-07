@@ -70,28 +70,28 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-import CardClickTo from "../plugins/CardClickTo";
-import Clamp from "../plugins/Clamp";
-import Md2txt from "../plugins/Md2txt";
+import cardClickTo from "../plugins/CardClickTo";
+import clamp from "../plugins/Clamp";
+import md2txt from "../plugins/Md2txt";
 
 
 import Avatar from "./Avatar.vue";
 import ShareButton from "./ShareButton.vue";
 import SimpleMap from "./SimpleMap.vue";
 
-
-Vue.use(Clamp);
-Vue.use(Md2txt);
-Vue.use(CardClickTo);
-
-export default Vue.extend({
+export default defineComponent({
   name: "GroupCard",
   components: {
     ShareButton,
     SimpleMap,
     Avatar
+  },
+  directives: {
+    md2txt,
+    clamp,
+    cardClickTo
   },
   props: {
     group: {
