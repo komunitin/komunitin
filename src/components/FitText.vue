@@ -5,14 +5,14 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 /**
  * The <fit-text> component is a <span> that adjusts its fontSize 
  * so that it fits the parent element width.
  * @displayName Fit Text
  */
-export default Vue.extend({
+export default defineComponent({
   name: 'FitText',
   props: {
     update: {

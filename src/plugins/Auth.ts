@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { KOptions } from "../boot/komunitin";
+import { KOptions } from "../boot/koptions";
 import KError, { KErrorCode } from "src/KError";
 //https://quasar.dev/quasar-plugins/web-storage
 import { LocalStorage } from "quasar";

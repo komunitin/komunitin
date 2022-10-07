@@ -27,14 +27,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from "vue";
 
 /**
  * Login select.
  *
  * @todo Login con google o facebook.
  */
-export default Vue.extend({
+export default defineComponent({
   name: 'Login'
 });
 </script>

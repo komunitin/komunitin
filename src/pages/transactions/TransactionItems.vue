@@ -36,7 +36,7 @@
                 {{ $t("pending") }}
               </span>
               <span v-else>
-                {{ transfer.attributes.updated | date }}
+                {{ $formatDate(transfer.attributes.updated) }}
               </span>
             </q-item-label>
             <div
@@ -47,7 +47,7 @@
                   : 'negative-amount'
               "
             >
-              {{ $currency(signedAmount(transfer), transfer.currency) }}
+              {{ FormatCurrency(signedAmount(transfer), transfer.currency) }}
             </div>
           </div>
         </template>
@@ -56,7 +56,7 @@
   </resource-cards>
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 
 import FormatCurrency from "../../plugins/FormatCurrency";
 
@@ -64,8 +64,6 @@ import ResourceCards from "../ResourceCards.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 
 import { Transfer, Member, Account } from "../../store/model";
-
-Vue.use(FormatCurrency);
 
 interface ExtendedTransfer extends Transfer {
   payer: ExtendedAccount;
@@ -75,7 +73,7 @@ interface ExtendedAccount extends Account {
   member: Member;
 }
 
-export default Vue.extend({
+export default defineComponent({
   name:"TransactionItems",
   components: {
     MemberHeader,
@@ -91,6 +89,9 @@ export default Vue.extend({
       type: Object,
       required: true
     }
+  },
+  setup() {
+    return { FormatCurrency }
   },
   data: () => ({
     /**

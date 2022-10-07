@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Model, Factory, Server, ModelInstance, belongsTo, hasMany } from "miragejs";
 import faker from "faker";
-import { KOptions } from "../boot/komunitin";
+import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { filter, sort, search } from "./ServerUtils";
 

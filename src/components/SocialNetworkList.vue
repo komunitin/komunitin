@@ -25,7 +25,7 @@
   </q-list>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import * as SocialNetworks from "./SocialNetworks";
 
 import { Contact } from "../store/model";
@@ -42,7 +42,7 @@ interface DataNetwork {
   translateLabel: boolean;
 }
 
-export default Vue.extend({
+export default defineComponent({
   name: "SocialNetworkList",
   props: {
     type: {

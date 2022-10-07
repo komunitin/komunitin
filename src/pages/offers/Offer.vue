@@ -84,9 +84,9 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 
-import Md2html from "../../plugins/Md2html";
+import md2html from "../../plugins/Md2html";
 
 import OfferLayout from "../../layouts/OfferLayout.vue";
 import PageHeader from "../../layouts/PageHeader.vue";
@@ -100,9 +100,7 @@ import SimpleMap from "../../components/SimpleMap.vue";
 
 import { Offer, Member, Account, Currency } from "../../store/model";
 
-Vue.use(Md2html);
-
-export default Vue.extend({
+export default defineComponent({
   components: {
     MemberHeader,
     SimpleMap,
@@ -112,6 +110,9 @@ export default Vue.extend({
     ContactButton,
     Carousel,
     OfferLayout
+  },
+  directives: {
+    md2html
   },
   props: {
     code: {

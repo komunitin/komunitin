@@ -9,17 +9,16 @@ import createRouter from 'src/router/index';
 import * as quasar from 'quasar';
 
 // Boot files.
-import bootKomunitin from '../../../src/boot/komunitin';
+import bootKomunitin from '../../../src/boot/koptions';
 import bootErrors from '../../../src/boot/errors';
 import bootI18n from '../../../src/boot/i18n';
-import bootVuelidate from '../../../src/boot/vuelidate';
 import bootMirage from '../../../src/boot/mirage';
 import bootAuth from '../../../src/boot/auth';
 import { Auth } from '../../../src/plugins/Auth';
 import { auth } from '../../../src/store/me';
 import { mockToken } from 'src/server/AuthServer';
 
-const boots = [bootKomunitin,bootErrors,bootI18n,bootVuelidate,bootMirage,bootAuth];
+const boots = [bootKomunitin,bootErrors,bootI18n,bootMirage,bootAuth];
 
 // Get the Quasar plugins to be used.
 const {Quasar, LocalStorage} = quasar;

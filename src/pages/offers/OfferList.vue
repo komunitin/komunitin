@@ -9,11 +9,11 @@
   />
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import ResourceCardList from "../ResourceCardList.vue";
 import OfferCard from "../../components/OfferCard.vue";
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ResourceCardList
   },

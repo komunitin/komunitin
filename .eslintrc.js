@@ -14,7 +14,7 @@ module.exports = {
     // `plugin:vue/essential` by default, consider switching to `plugin:vue/strongly-recommended`
     //  or `plugin:vue/recommended` for stricter rules.
     // See https://github.com/vuejs/eslint-plugin-vue#priority-a-essential-error-prevention
-    "plugin:vue/recommended",
+    "plugin:vue/vue3-recommended",
 
     // Usage with Prettier, provided by 'eslint-config-prettier'.
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#usage-with-prettier
@@ -22,7 +22,7 @@ module.exports = {
 
     // Plugin for translations.
     // https://eslint-plugin-vue-i18n.intlify.dev/started.html#installation
-    "plugin:vue-i18n/recommended"
+    //"plugin:vue-i18n/recommended"
     
   ],
   plugins: [
@@ -78,10 +78,12 @@ module.exports = {
     // See https://github.com/typescript-eslint/typescript-eslint/issues/493
     "@typescript-eslint/explicit-function-return-type": "off",
     
+    /*
     "vue-i18n/no-unused-keys": ["warn", {
       extensions: [".js", ".vue"]
     }],
     "vue-i18n/no-dynamic-keys": "warn",
+    */
     // TODO: enable that!
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/ban-types": "off"

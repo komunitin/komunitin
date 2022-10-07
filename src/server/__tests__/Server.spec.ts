@@ -1,6 +1,6 @@
 import "../index";
 import Axios from "axios";
-import { KOptions } from "../../boot/komunitin";
+import { KOptions } from "../../boot/koptions";
 import { ResourceObject } from "src/store/model";
 import { seeds } from "../index";
 

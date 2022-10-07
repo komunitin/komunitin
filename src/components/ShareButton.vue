@@ -25,7 +25,7 @@
 </template>
 <script lang="ts">
 
-import Vue from 'vue';
+import { defineComponent } from "vue";
 
 import SocialNetworkList from './SocialNetworkList.vue';
 
@@ -34,7 +34,7 @@ import SocialNetworkList from './SocialNetworkList.vue';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const navigatorShare = (typeof ((navigator as any)?.share) !== 'undefined');
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ShareButton',
   components: {SocialNetworkList},
   props: {

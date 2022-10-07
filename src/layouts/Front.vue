@@ -61,14 +61,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from "vue";
 import FitText from '../components/FitText.vue';
 import selectLang from '../components/SelectLang.vue';
 
 /**
  * Layout base con menú lateral.
  */
-export default Vue.extend({
+export default defineComponent({
   name: 'Front',
   components: {
     selectLang,

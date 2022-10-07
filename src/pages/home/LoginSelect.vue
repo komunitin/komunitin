@@ -26,10 +26,10 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 // Login select.
-export default Vue.extend({
+export default defineComponent({
   name: "LoginSelect"
 });
 </script>

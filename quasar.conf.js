@@ -2,6 +2,7 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 const fs = require('fs')
 const { configure } = require('quasar/wrappers')
+const ESLintPlugin = require('eslint-webpack-plugin')
 
 module.exports = configure(function(ctx) {
   return {
@@ -9,10 +10,9 @@ module.exports = configure(function(ctx) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
-      "komunitin",
+      "koptions",
       "errors",
       "i18n",
-      "vuelidate",
       "mirage",
       "auth",
     ],
@@ -36,7 +36,7 @@ module.exports = configure(function(ctx) {
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
       iconSet: "material-icons", // Quasar icon set
-      lang: "en-us", // Quasar language pack
+      lang: "en-US", // Quasar language pack
 
       // Possible values for "all":
       // * 'auto' - Auto-import needed Quasar components & directives
@@ -80,7 +80,12 @@ module.exports = configure(function(ctx) {
       extendWebpack(cfg) {},
       // Create complete source maps to enable debugging from VSCode.
       // https://quasar.dev/start/vs-code-configuration#Debugging-a-Quasar-project-in-VS-Code
-      devtool: "source-map"
+      devtool: "source-map",
+      chainWebpack (chain) {
+        chain
+          .plugin('eslint-webpack-plugin')
+          .use(ESLintPlugin, [{ extensions: ['ts', 'vue'] }])
+      }
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer

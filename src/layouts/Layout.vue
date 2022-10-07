@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import MenuDrawer from "../components/MenuDrawer.vue";
 
 /**
@@ -36,7 +36,7 @@ import MenuDrawer from "../components/MenuDrawer.vue";
  * Contains the left drawer but not the header, which should be defined by each page
  * using the PageHeader component.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "Layout",
   components: {
     MenuDrawer

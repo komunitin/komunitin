@@ -42,10 +42,8 @@
   </q-card>
 </template>
 <script lang="ts">
-import Vue from "vue";
-import CardClickTo from "../plugins/CardClickTo";
-
-Vue.use(CardClickTo);
+import { defineComponent } from "vue";
+import cardClickTo from "../plugins/CardClickTo";
 
 /**
  * This component wraps a card with a predefined structure to be used in
@@ -61,8 +59,11 @@ Vue.use(CardClickTo);
  * +-----------------------+
  *
  */
-export default Vue.extend({
+export default defineComponent({
   name: "GroupStats",
+  directives: {
+    cardClickTo
+  },
   props: {
     icon: {
       type: String,
