@@ -46,7 +46,7 @@ export default defineComponent({
   },
   methods: {
     fetchResources(search: string) : void {
-      (this.$refs.resourceCards as Vue & {fetchResources: (s:string) => void}).fetchResources(search);
+      (this.$refs.resourceCards as {fetchResources: (s:string) => void}).fetchResources(search);
     }
   }
   

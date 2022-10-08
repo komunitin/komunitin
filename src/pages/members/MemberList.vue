@@ -88,7 +88,7 @@ export default defineComponent({
   },
   methods: {
     search(query: string) {
-      (this.$refs.memberItems as Vue & {fetchResources: (s: string) => void}).fetchResources(query);
+      (this.$refs.memberItems as {fetchResources: (s: string) => void}).fetchResources(query);
     }
   }
 });

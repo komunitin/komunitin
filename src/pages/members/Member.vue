@@ -28,7 +28,7 @@
           :member="member"
           :tab="tab"
           :transactions="!isMe"
-          @tabChange="tab = $event"
+          @tab-change="tab = $event"
         />
         <q-tab-panels v-model="tab">
           <q-tab-panel

@@ -52,6 +52,7 @@ export default defineComponent({
       default: null
     }
   },
+  emits: ["click"],
   computed: {
     active(): boolean {
       return this.to == this.$route.path;

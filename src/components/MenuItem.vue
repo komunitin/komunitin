@@ -48,12 +48,13 @@ export default defineComponent({
       default: null
     }
   },
+  emits: ["click"],
   computed: {
     active(): boolean {
       return this.to == this.$route.path
     },
     disable(): boolean {
-      return !this.to && !this.href && !this.$listeners.click;
+      return !this.to && !this.href && !this.$attrs.onClick;
     }
   },
   methods: {
