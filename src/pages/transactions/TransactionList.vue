@@ -41,7 +41,7 @@ export default defineComponent({
   },
   methods: {
     search(query: string) {
-      (this.$refs.transactionItems as Vue & {fetchResources: (s: string) => void}).fetchResources(query);
+      (this.$refs.transactionItems as {fetchResources: (s: string) => void}).fetchResources(query);
     }
   }
 });

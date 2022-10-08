@@ -3,6 +3,11 @@
 const fs = require('fs')
 const { configure } = require('quasar/wrappers')
 const ESLintPlugin = require('eslint-webpack-plugin')
+const qenv = require('./.quasar.env.json');
+const environment = qenv[process.env.QENV];
+
+console.log("Environment:")
+console.log(environment);
 
 module.exports = configure(function(ctx) {
   return {
@@ -61,7 +66,10 @@ module.exports = configure(function(ctx) {
 
     supportTS: {
       tsCheckerConfig: {
-        eslint: true
+        eslint: {
+          enabled: true,
+          files: './src/**/*.{ts,tsx,js,jsx,vue}'
+        }
       }
     },
 
@@ -85,7 +93,8 @@ module.exports = configure(function(ctx) {
         chain
           .plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: ['ts', 'vue'] }])
-      }
+      },
+      env: environment
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
@@ -113,7 +122,7 @@ module.exports = configure(function(ctx) {
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
+      workboxPluginMode: 'InjectManifest',//"InjectManifest", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {
         maximumFileSizeToCacheInBytes: 4*1024*1024 //4MB
       }, // only for GenerateSW
@@ -203,10 +212,6 @@ module.exports = configure(function(ctx) {
           }
         });
       }
-    },
-    sourceFiles : {
-      registerServiceWorker: 'src-pwa/register-service-worker.js',
-      serviceWorker: 'src-pwa/custom-service-worker.js',
     }
   };
 });

@@ -26,6 +26,7 @@ import langs from "../i18n";
 
 export default defineComponent({
   name: "SelectLang",
+  emits: ["language-change"],
   data() {
     return {
       locale: this.$i18n.locale,

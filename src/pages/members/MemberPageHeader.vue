@@ -45,7 +45,7 @@
               "
             >
               {{
-                $currency(
+                FormatCurrency(
                   member.account.attributes.balance,
                   member.account.currency
                 )
@@ -76,12 +76,12 @@
         <q-tab
           name="needs"
           icon="loyalty"
-          :label="$tc('nNeeds', member.relationships.needs.meta.count)"
+          :label="$t('nNeeds', member.relationships.needs.meta.count)"
         />
         <q-tab
           name="offers"
           icon="local_offer"
-          :label="$tc('nOffers', member.relationships.offers.meta.count)"
+          :label="$t('nOffers', member.relationships.offers.meta.count)"
         />
         <q-tab
           v-if="transactions"
@@ -104,6 +104,7 @@ import Avatar from "src/components/Avatar.vue";
 import FitText from "src/components/FitText.vue";
 
 import { Member } from "../../store/model";
+import FormatCurrency from "../../plugins/FormatCurrency"
 
 export default defineComponent({
   name: "MemberPageHeader",
@@ -131,6 +132,12 @@ export default defineComponent({
       default: true
     }
   },
+  emits: ['tab-change'],
+  setup() {
+    return {
+      FormatCurrency
+    }
+  },
   data() {
     return {
       currentTab: this.tab
@@ -149,7 +156,7 @@ export default defineComponent({
   methods: {
     tabChange(value: string) {
       // Emit the custom event "tabChange" so it can be handled by parent.
-      this.$emit("tabChange", value);
+      this.$emit("tab-change", value);
     }
   }
 });

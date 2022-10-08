@@ -9,7 +9,7 @@
     sort="-updated"
     :filter="{ account: account.id }"
     :autoload="autoload"
-    @afterLoad="fetchMembers"
+    @after-load="fetchMembers"
   >
     <q-list
       v-if="slotProps.resources"
@@ -163,7 +163,7 @@ export default defineComponent({
       return transfers.filter(transfer => this.transferLoaded[transfer.id]);
     },
     fetchResources(search: string): void {
-      (this.$refs.resourceCards as Vue & {fetchResources: (s: string) => void}).fetchResources(search);
+      (this.$refs.resourceCards as {fetchResources: (s: string) => void}).fetchResources(search);
     }
   }
 })

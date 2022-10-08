@@ -162,6 +162,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['search-input', 'search'],
   setup() {
     return {
       FormatCurrency

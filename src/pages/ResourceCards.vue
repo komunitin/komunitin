@@ -68,7 +68,7 @@ export default defineComponent({
      * The item Vue Component Constructor
      */
     card: {
-      type: Function,
+      type: Object,
       required: false,
       default: null,
     },
@@ -126,6 +126,7 @@ export default defineComponent({
       default: true,
     }
   },
+  emits: ['after-load'],
   data() {
     return {
       isLoading: true,
@@ -166,7 +167,7 @@ export default defineComponent({
           sort: this.sort,
         });
         this.resources.push(...this.$store.getters[this.moduleName + "/currentList"]);
-        this.$emit("afterLoad");
+        this.$emit("after-load");
       } finally {
         this.isLoading = false;
         // Delay one tick before enabling infinite-scroll loading in order to allow the
@@ -188,7 +189,7 @@ export default defineComponent({
           sort: this.sort,
         });
         this.resources.push(...this.$store.getters[ this.moduleName + "/currentList"]);
-        this.$emit("afterLoad");
+        this.$emit("after-load");
       }
       done(!this.$store.getters[this.moduleName + "/hasNext"]);
     }
