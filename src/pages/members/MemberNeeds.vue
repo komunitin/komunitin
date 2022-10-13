@@ -30,7 +30,7 @@ export default defineComponent({
   },
   data() {
     return {
-      card: NeedCard,
+      card: NeedCard.name,
       filter: {
         member: this.member.id
       }

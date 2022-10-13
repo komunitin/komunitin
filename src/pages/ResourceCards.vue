@@ -47,14 +47,19 @@
 import { defineComponent } from "vue";
 import Empty from "../components/Empty.vue";
 import { ResourceObject } from "../store/model";
-
+import NeedCard from "../components/NeedCard.vue";
+import OfferCard from "../components/OfferCard.vue";
+import GroupCard from "../components/GroupCard.vue"
 /**
  * Generic resource card list.
  */
 export default defineComponent({
   name: "ResourceCards",
   components: {
-    Empty
+    Empty,
+    NeedCard,
+    OfferCard,
+    GroupCard
   },
   props: {
     /**
@@ -68,7 +73,7 @@ export default defineComponent({
      * The item Vue Component Constructor
      */
     card: {
-      type: Object,
+      type: String,
       required: false,
       default: null,
     },
