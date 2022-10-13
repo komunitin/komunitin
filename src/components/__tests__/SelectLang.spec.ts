@@ -1,6 +1,6 @@
 
 import SelectLang from "../SelectLang.vue";
-import { Wrapper } from "@vue/test-utils"
+import { VueWrapper } from "@vue/test-utils"
 import { mountComponent } from "../../../test/jest/utils";
 
 /**
@@ -9,11 +9,11 @@ import { mountComponent } from "../../../test/jest/utils";
  * but also the language logic.
  * **/
 describe("SelectLang", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
   beforeAll(async () => {
     wrapper = await mountComponent(SelectLang);
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("Check language change", async () => {
     expect(wrapper.text()).toContain("Language");

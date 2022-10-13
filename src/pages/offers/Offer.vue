@@ -100,7 +100,8 @@ import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
 
-import { Offer, Member, Account, Currency } from "../../store/model";
+import { Offer, Member, Account, Currency, Category, Contact } from "../../store/model";
+import FormatCurrency from "src/plugins/FormatCurrency";
 
 export default defineComponent({
   components: {
@@ -129,7 +130,7 @@ export default defineComponent({
     }
   },
   computed: {
-    offer(): Offer & {member: Member & { account: Account & { currency: Currency } } } {
+    offer(): Offer & {category: Category} & {member: Member & { account: Account & { currency: Currency }, contacts: Contact[] } } {
       return this.$store.getters["offers/current"];
     },
     /**
@@ -143,7 +144,7 @@ export default defineComponent({
       if (!isNaN(numeric)) {
         // Append the currency symbol if price is just a number.
         const currency = this.offer.member.account.currency
-        return this.$currency(numeric, currency, {scale: false} );
+        return FormatCurrency(numeric, currency, {scale: false} );
       } else {
         return price;
       }

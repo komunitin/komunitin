@@ -70,8 +70,8 @@
           type="search"
           debounce="250"
           autofocus
-          @input="$emit('search-input', searchText)"
-          @keyup.enter="$emit('search', searchText)"
+          @update:model-value="onUpdateSearchText"
+          @keyup.enter="onSearch"
         >
           <template #append>
             <q-icon
@@ -101,7 +101,7 @@
         <slot name="buttons" />
         <q-scroll-observer
           v-if="balance"
-          @scroll.passive="scrollHandler"
+          @scroll="scrollHandler"
         />
       </q-toolbar>
     </q-header>
@@ -119,13 +119,6 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 import FormatCurrency from "../plugins/FormatCurrency";
-
-interface ScrollDetails {
-  position: number;
-  direction: "up" | "down";
-  directionChanged: boolean;
-  inflexionPosition: number;
-}
 
 /**
  * Header component with some features for the Komunitin app
@@ -233,9 +226,16 @@ export default defineComponent({
       this.searchText = "";
       this.$emit("search-input", "");
     },
-    scrollHandler(details: ScrollDetails) {
-      this.offset = Math.min(details.position, this.originalHeight - this.headerHeight)
-      this.scrollOffset = details.position;
+    scrollHandler(details: { position: { top: number; }; }) {      
+      this.offset = Math.min(details.position.top, this.originalHeight - this.headerHeight)
+      this.scrollOffset = details.position.top;
+    },
+    onUpdateSearchText() {
+      console.log("Search: " + this.searchText);
+      this.$emit('search-input', this.searchText)
+    },
+    onSearch() {
+      this.$emit('search', this.searchText);
     }
   }
 });

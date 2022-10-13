@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Wrapper } from "@vue/test-utils";
+import { VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading } from "quasar";
@@ -8,13 +8,13 @@ import { seeds } from "../../../src/server";
 
 // See also Offers.spec.ts
 describe("Groups", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
 
   beforeAll(async () => {
     wrapper = await mountComponent(App);
     seeds();
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("Loads groups", async () => {
     await wrapper.vm.$router.push("/groups");

@@ -26,12 +26,6 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 
-export interface ScrollDetails {
-  position: number;
-  direction: "up" | "down";
-  directionChanged: boolean;
-  inflexionPosition: number;
-}
 
 /**
  * This element provides a second header in a page, with two sections.
@@ -67,8 +61,8 @@ export default defineComponent({
     },
   },
   methods: {
-    scrollHandler(details: ScrollDetails) {
-      const newOffset = Math.min(details.position, this.collapsibleHeight);
+    scrollHandler(details: { position: { top: number; }; }) {
+      const newOffset = Math.min(details.position.top, this.collapsibleHeight);
       if (newOffset != this.offset) {
         this.offset = newOffset;
       }
