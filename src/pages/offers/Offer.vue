@@ -39,16 +39,18 @@
             </div>
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('updatedAt', {
-                date: $options.filters.date(offer.attributes.updated)
+                date: $formatDate(offer.attributes.updated)
               }) }}</span>
             </div>
+            <!-- eslint-disable vue/no-v-html -->
             <div
-              v-md2html="offer.attributes.content"
               class="col text-body1 text-onsurface"
+              v-html="md2html(offer.attributes.content)"
             />
+            <!-- eslint-enable vue/no-v-html -->
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('expiresAt', {
-                date: $options.filters.date(offer.attributes.expires)
+                date: $formatDate(offer.attributes.expires)
               }) }}</span>
             </div>
             <div class="q-pb-lg row q-col-gutter-md justify-end">
@@ -111,9 +113,6 @@ export default defineComponent({
     Carousel,
     OfferLayout
   },
-  directives: {
-    md2html
-  },
   props: {
     code: {
       type: String,
@@ -122,6 +121,11 @@ export default defineComponent({
     offerCode: {
       type: String,
       required: true
+    }
+  },
+  setup() {
+    return {
+      md2html
     }
   },
   computed: {

@@ -18,7 +18,7 @@ export default defineComponent({
     ResourceCardList
   },
   data: () => ({
-    card: GroupCard
+    card: GroupCard.name
   })
 });
 </script>

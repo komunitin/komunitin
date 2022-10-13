@@ -220,7 +220,7 @@ export default {
           context.getters.myUser, 
           context.getters.myMember,
           {
-            locale: useI18n().locale
+            locale: useI18n().locale.value
           },
           context.getters.accessToken);
         context.commit("subscription", token);

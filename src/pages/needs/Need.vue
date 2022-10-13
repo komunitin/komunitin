@@ -31,16 +31,18 @@
           <template #content>
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('updatedAt', {
-                date: $options.filters.date(need.attributes.updated)
+                date: $formatDate(need.attributes.updated)
               }) }}</span>
             </div>
-            <div
-              v-md2html="need.attributes.content"
+            <!-- eslint-disable vue/no-v-html -->
+            <div 
               class="col text-body1 text-onsurface"
+              v-html="md2html(need.attributes.content)"
             />
+            <!-- eslint-enable vue/no-v-html -->
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('expiresAt', {
-                date: $options.filters.date(need.attributes.expires)
+                date: $formatDate(need.attributes.expires)
               }) }}</span>
             </div>
             <div class="q-pb-lg row q-col-gutter-md justify-end">
@@ -103,9 +105,6 @@ export default defineComponent({
     Carousel,
     OfferLayout
   },
-  directives: {
-    md2html
-  },
   props: {
     code: {
       type: String,
@@ -114,6 +113,11 @@ export default defineComponent({
     needCode: {
       type: String,
       required: true
+    }
+  },
+  setup() {
+    return {
+      md2html
     }
   },
   computed: {

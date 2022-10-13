@@ -1,12 +1,10 @@
-import Vue, { ComponentOptions } from 'vue';
-import {VueClass, createLocalVue, mount, ThisTypedMountOptions } from '@vue/test-utils'
+import {mount } from '@vue/test-utils'
 
-import Vuex from 'vuex';
-import VueRouter, { RawLocation } from 'vue-router';
 import createStore from 'src/store/index';
 import createRouter from 'src/router/index';
 
 import * as quasar from 'quasar';
+import { ComponentConstructor } from 'quasar';
 
 // Boot files.
 import bootKomunitin from '../../../src/boot/koptions';
@@ -31,7 +29,7 @@ const QComponents = Object.keys(quasar).reduce((object, key) => {
     object[key] = val
   }
   return object
-}, {} as {[key: string]: Vue});
+}, {} as {[key: string]: ComponentConstructor});
 
 /**
  * Mount a Vue component for Unit testing in a local Vue instance,

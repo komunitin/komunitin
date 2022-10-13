@@ -24,7 +24,7 @@ export default defineComponent({
     }
   },
   data: () => ({
-    card: OfferCard
+    card: OfferCard.name
   })
 });
 </script>

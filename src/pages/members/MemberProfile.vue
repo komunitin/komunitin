@@ -6,7 +6,11 @@
         <div class="text-overline text-uppercase text-onsurface-d">
           {{ $t('bio') }}
         </div>
-        <div v-md2html="member.attributes.description" />
+        <!-- eslint-disable vue/no-v-html -->
+        <div 
+          v-html="md2html(member.attributes.description)"
+        />
+        <!-- eslint-enable vue/no-v-html -->
       </div>
       <!-- LOCATION -->
       <div>
@@ -48,13 +52,15 @@ export default defineComponent({
     SimpleMap,
     SocialNetworkList
   },
-  directives: {
-    md2html
-  },
   props: {
     member: {
       type: Object,
       required: true
+    }
+  },
+  setup() {
+    return {
+      md2html
     }
   }
 })
