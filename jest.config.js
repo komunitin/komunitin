@@ -1,4 +1,4 @@
-const esModules = ['quasar', 'quasar/lang', 'lodash-es'].join('|');
+const esModules = ['quasar', 'quasar/lang', 'lodash-es', 'leaflet/dist/leaflet-src.esm'].join('|');
 
 module.exports = {
   globals: {

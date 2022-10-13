@@ -97,7 +97,6 @@ export default defineComponent({
     group: {
       type: Object,
       required: true,
-      default: undefined
     }
   },
   computed: {

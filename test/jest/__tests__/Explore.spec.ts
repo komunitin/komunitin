@@ -1,20 +1,20 @@
 /**
  * @jest-environment jsdom
  */
-import { Wrapper } from "@vue/test-utils";
+import { VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { seeds } from "../../../src/server";
 
 describe("Explore groups", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
   beforeAll(async() => {
     // Load data in mocking server.
     wrapper = await mountComponent(App);
     seeds();
   });
 
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("goes to explore group and back to front page", async () => {
     wrapper.get("#explore").trigger("click");

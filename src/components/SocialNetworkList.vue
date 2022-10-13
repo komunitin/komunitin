@@ -48,7 +48,7 @@ export default defineComponent({
     type: {
       type: String,
       default: SHARE,
-      validator: value => [CONTACT, SHARE].includes(value)
+      validator: (value: string) => [CONTACT, SHARE].includes(value)
     },
     /**
      * Required if type = contact.

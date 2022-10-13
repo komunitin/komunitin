@@ -1,4 +1,4 @@
-import { Wrapper } from "@vue/test-utils";
+import { VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import TransactionList from "../../../src/pages/transactions/TransactionList.vue";
@@ -7,14 +7,14 @@ import PageHeader from "../../../src/layouts/PageHeader.vue";
 import { seeds } from "src/server";
 
 describe("Transactions", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
   
   beforeAll(async () => {  
     seeds();
     wrapper = await mountComponent(App, { login: true });
   });
   afterAll(() => {
-    wrapper.destroy();
+    wrapper.unmount();
   });
 
   
@@ -29,13 +29,13 @@ describe("Transactions", () => {
     await wrapper.vm.$wait();
     const transactions = wrapper.getComponent(TransactionList).findAllComponents(MemberHeader)
     expect(transactions.length).toBe(20);
-    const first = transactions.wrappers[0];
+    const first = transactions[0];
     expect(first.text()).toContain("Pending");
     expect(first.text()).toContain("Magali");
     expect(first.text()).toContain("-8.00 $");
     expect(first.text()).toContain("Persevering");
 
-    const second = transactions.wrappers[1];
+    const second = transactions[1];
     expect(second.text()).toContain("today");
     expect(second.text()).toContain("Isobel");
     expect(second.text()).toContain("70.72 $");

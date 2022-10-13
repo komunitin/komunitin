@@ -151,7 +151,7 @@ export default {
     );
     // Account transfers.
     server.get(`${urlAccounting}/:currency/transfers`,
-      (schema: any, request) => {
+      (schema: any, request: any) => {
         if (request.queryParams["filter[account]"]) {
           // Custom filtering.
           const accountId = request.queryParams["filter[account]"];
@@ -166,7 +166,7 @@ export default {
     );
     // Single transfer
     server.get(`${urlAccounting}/:currency/transfers/:id`,
-      (schema: any, request) => {
+      (schema: any, request: any) => {
         return schema.transfers.find(request.params.id);
       }
     )

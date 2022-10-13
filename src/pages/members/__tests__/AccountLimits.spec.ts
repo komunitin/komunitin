@@ -1,13 +1,18 @@
-import { createLocalVue, shallowMount } from "@vue/test-utils";
+import { shallowMount } from "@vue/test-utils";
 import AccountLimits from "../AccountLimits.vue";
 import {Quasar, QSeparator} from 'quasar'
-import FormatCurrency from "../../../plugins/FormatCurrency";
+import { config } from '@vue/test-utils';
+import { createI18n } from "vue-i18n";
+
+// Install quasar.
+config.global.plugins.unshift([Quasar, {}]);
+// Install i18n.
+const i18n = createI18n({
+  legacy: false
+})
+config.global.plugins.unshift([i18n])
 
 describe('AccountLimits.vue', () => {
-  const localVue = createLocalVue();
-  localVue.use(Quasar, {components: {QSeparator}})
-  localVue.use(FormatCurrency);
-
   const mocks = {
     $t: (key: string, value: {amount: number}) => `${key} ${value.amount}`,
     $n: (n: number) => n + '',
@@ -29,11 +34,12 @@ describe('AccountLimits.vue', () => {
       currency
     };
     const wrapper = shallowMount(AccountLimits, {
-      localVue,
-      propsData: {
+      props: {
         account
       },
-      mocks
+      global: {
+        mocks
+      }
     });
     expect(wrapper.text()).toBe("maxAmount 50 %");
     expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
@@ -48,11 +54,12 @@ describe('AccountLimits.vue', () => {
       currency
     };
     const wrapper = shallowMount(AccountLimits, {
-      localVue,
-      propsData: {
+      props: {
         account
       },
-      mocks
+      global: {
+        mocks
+      }
     });
     expect(wrapper.text()).toBe("minAmount -50 %");
     expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
@@ -67,11 +74,12 @@ describe('AccountLimits.vue', () => {
       currency
     };
     const wrapper = shallowMount(AccountLimits, {
-      localVue,
       propsData: {
         account
       },
-      mocks
+      global: {
+        mocks
+      }
     });
     expect(wrapper.text()).toContain("minAmount -50 %");
     expect(wrapper.text()).toContain("maxAmount 60 %");

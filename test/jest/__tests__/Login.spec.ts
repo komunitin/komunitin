@@ -1,19 +1,19 @@
 /**
  * @jest-environment jsdom
  */
-import { Wrapper } from "@vue/test-utils";
+import { VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import MenuDrawer from "../../../src/components/MenuDrawer.vue";
 import { seeds } from "src/server";
 
 describe("Front page and login", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
   beforeAll(async () => {
     wrapper = await mountComponent(App);
     seeds();
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("has explore and login buttons", () => {
     const html = wrapper.html();
