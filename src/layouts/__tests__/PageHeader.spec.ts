@@ -132,7 +132,6 @@ describe("PageHeader", () => {
     // Focus
     expect(input.element).toBe(document.activeElement);
     const pageHeader = wrapper.findComponent(PageHeader);
-    console.log(pageHeader.vm.searchText);
     input.setValue("a");
     await wrapper.vm.$nextTick();
     // Jest somehow seems to trick the debouncing behavior of QInput

@@ -231,7 +231,6 @@ export default defineComponent({
       this.scrollOffset = details.position.top;
     },
     onUpdateSearchText() {
-      console.log("Search: " + this.searchText);
       this.$emit('search-input', this.searchText)
     },
     onSearch() {
