@@ -46,7 +46,7 @@
           :style="`font-size: ${3*balanceScaleFactor}rem; line-height: ${3.125*balanceScaleFactor}rem`"
         >
           {{
-            $currency(
+            FormatCurrency(
               myAccount.attributes.balance,
               myAccount.currency
             )
@@ -70,8 +70,8 @@
           type="search"
           debounce="250"
           autofocus
-          @input="$emit('search-input', searchText)"
-          @keyup.enter="$emit('search', searchText)"
+          @update:model-value="onUpdateSearchText"
+          @keyup.enter="onSearch"
         >
           <template #append>
             <q-icon
@@ -101,7 +101,7 @@
         <slot name="buttons" />
         <q-scroll-observer
           v-if="balance"
-          @scroll.passive="scrollHandler"
+          @scroll="scrollHandler"
         />
       </q-toolbar>
     </q-header>
@@ -116,18 +116,9 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 import FormatCurrency from "../plugins/FormatCurrency";
-
-Vue.use(FormatCurrency);
-
-interface ScrollDetails {
-  position: number;
-  direction: "up" | "down";
-  directionChanged: boolean;
-  inflexionPosition: number;
-}
 
 /**
  * Header component with some features for the Komunitin app
@@ -139,7 +130,7 @@ interface ScrollDetails {
  *  - Provides a slot #buttons to be able to customize the right toolbar buttons 
  * depending on the page content.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "PageHeader",
   props: {
     /**
@@ -162,6 +153,12 @@ export default Vue.extend({
     balance: {
       type: Boolean,
       default: false
+    }
+  },
+  emits: ['search-input', 'search'],
+  setup() {
+    return {
+      FormatCurrency
     }
   },
   data() {
@@ -229,9 +226,15 @@ export default Vue.extend({
       this.searchText = "";
       this.$emit("search-input", "");
     },
-    scrollHandler(details: ScrollDetails) {
-      this.offset = Math.min(details.position, this.originalHeight - this.headerHeight)
-      this.scrollOffset = details.position;
+    scrollHandler(details: { position: { top: number; }; }) {      
+      this.offset = Math.min(details.position.top, this.originalHeight - this.headerHeight)
+      this.scrollOffset = details.position.top;
+    },
+    onUpdateSearchText() {
+      this.$emit('search-input', this.searchText)
+    },
+    onSearch() {
+      this.$emit('search', this.searchText);
     }
   }
 });

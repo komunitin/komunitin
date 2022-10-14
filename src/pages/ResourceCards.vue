@@ -44,17 +44,22 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import Empty from "../components/Empty.vue";
 import { ResourceObject } from "../store/model";
-
+import NeedCard from "../components/NeedCard.vue";
+import OfferCard from "../components/OfferCard.vue";
+import GroupCard from "../components/GroupCard.vue"
 /**
  * Generic resource card list.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "ResourceCards",
   components: {
-    Empty
+    Empty,
+    NeedCard,
+    OfferCard,
+    GroupCard
   },
   props: {
     /**
@@ -65,10 +70,10 @@ export default Vue.extend({
       required: true
     },
     /**
-     * The item Vue Component Constructor
+     * The item Vue Component Name
      */
     card: {
-      type: Function,
+      type: String,
       required: false,
       default: null,
     },
@@ -126,6 +131,7 @@ export default Vue.extend({
       default: true,
     }
   },
+  emits: ['after-load'],
   data() {
     return {
       isLoading: true,
@@ -166,7 +172,7 @@ export default Vue.extend({
           sort: this.sort,
         });
         this.resources.push(...this.$store.getters[this.moduleName + "/currentList"]);
-        this.$emit("afterLoad");
+        this.$emit("after-load");
       } finally {
         this.isLoading = false;
         // Delay one tick before enabling infinite-scroll loading in order to allow the
@@ -188,7 +194,7 @@ export default Vue.extend({
           sort: this.sort,
         });
         this.resources.push(...this.$store.getters[ this.moduleName + "/currentList"]);
-        this.$emit("afterLoad");
+        this.$emit("after-load");
       }
       done(!this.$store.getters[this.moduleName + "/hasNext"]);
     }

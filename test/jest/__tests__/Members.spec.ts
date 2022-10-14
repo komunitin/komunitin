@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Wrapper } from "@vue/test-utils";
+import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading, QInfiniteScroll, QAvatar } from "quasar";
@@ -10,21 +10,23 @@ import { seeds } from "src/server";
 
 // See also Offers.spec.ts
 describe("Members", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
 
   beforeAll(async () => {
     seeds();
     wrapper = await mountComponent(App, { login: true });
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("Loads members, balances and searches", async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/needs");
+    // Wait for login redirect
+    await flushPromises();
     // Wait for login redirect
     await wrapper.vm.$wait();
     // Click members link
     await wrapper.get("#menu-members").trigger("click");
-    await wrapper.vm.$nextTick();
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members");
     expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     // Wait for content loading.
@@ -34,12 +36,9 @@ describe("Members", () => {
     await wrapper.vm.$wait();
     expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(30);
     await wrapper.vm.$nextTick();
-    // Infinite scroll stopped since we fetched all available data.
-    const scroll = wrapper.findComponent(QInfiniteScroll).vm as any;
-    expect(scroll.isWorking).toBe(false)
     // Check GRP00002 result
     const members = wrapper.getComponent(MemberList).findAllComponents(MemberHeader);
-    const second = members.wrappers[2];
+    const second = members[2];
     expect(second.text()).toContain("Cameron");
     expect(second.text()).toContain("GRP00002");
     expect(second.text()).toContain("583.11 $");
@@ -48,11 +47,11 @@ describe("Members", () => {
     expect(second.html()).toContain("<img");
 
     // Default avatar
-    const avatar = members.wrappers[0].findComponent(QAvatar); 
+    const avatar = members[0].findComponent(QAvatar); 
     expect(avatar.text()).toEqual("T");
 
     // Check GRP00025 result
-    const other = members.wrappers[25];
+    const other = members[25];
     expect(other.text()).toContain("Roberto");
     expect(other.text()).toContain("GRP00025");
     expect(other.text()).toContain("386.64 $");

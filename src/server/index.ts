@@ -1,7 +1,7 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Registry, Server } from "miragejs";
-import { KOptions } from "src/boot/komunitin";
+import { KOptions } from "src/boot/koptions";
 
 import SocialServer from "./SocialServer";
 import AuthServer from "./AuthServer";

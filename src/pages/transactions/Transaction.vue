@@ -34,10 +34,10 @@
             class="text-h4"
             :class="positive ? 'positive-amount' : 'negative-amount'"
           >
-            {{ $currency((positive ? 1 : -1) * transfer.attributes.amount, transfer.currency) }}
+            {{ FormatCurrency((positive ? 1 : -1) * transfer.attributes.amount, transfer.currency) }}
           </div>
           <div class="text-subtitle1 text-onsurface-d">
-            {{ transfer.attributes.updated | date }}
+            {{ $formatDate(transfer.attributes.updated) }}
           </div>
           <div class="text-body1">
             {{ transfer.attributes.meta }}
@@ -54,14 +54,15 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 import KError, {KErrorCode} from "../../KError";
 import PageHeader from "../../layouts/PageHeader.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 import {Transfer, Account} from "../../store/model";
+import FormatCurrency from "../../plugins/FormatCurrency"
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PageHeader,
     MemberHeader
@@ -75,6 +76,9 @@ export default Vue.extend({
       type: String,
       required: true
     }
+  },
+  setup() {
+    return { FormatCurrency }
   },
   data: () => ({
     // We need to explicitely warn Vue on when the data is ready since the dependencies 

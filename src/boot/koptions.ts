@@ -34,13 +34,13 @@ const KOptions = {
 // For use outside Vue components.
 export { KOptions };
 
-declare module "vue/types/vue" {
-  interface Vue {
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
     $KOptions: typeof KOptions;
   }
 }
 
-export default boot(({ Vue }) => {
+export default boot(({ app }) => {
   // Augment Vue interface with $KOptions member.
-  Vue.prototype.$KOptions = KOptions;
+  app.config.globalProperties.$KOptions = KOptions;
 });

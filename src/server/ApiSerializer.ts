@@ -94,10 +94,10 @@ export default class ApiSerializer extends JSONAPISerializer {
    * @param object The serialized json object, before pagination.
    * @param request The original (fake) request object
    */
-  private paginate(json: any, request: Request) {
+  private paginate(json: any, request: any) {
     // Apply page[after].
     let hasPrevious = false;
-    const after = request.queryParams["page[after]"] as string | undefined;
+    const after = request.queryParams["page[after]"];
     if (after) {
       const index = json.data.findIndex((elem: ResourceObject) => elem.id == after);
       if (index == -1) {
@@ -108,7 +108,7 @@ export default class ApiSerializer extends JSONAPISerializer {
       json.data.splice(0, index + 1);
     }
     // Apply page[before]
-    const before = request.queryParams["page[before]"] as string | undefined;
+    const before = request.queryParams["page[before]"];
     if (before) {
       const index = json.data.findIndex((elem: ResourceObject) => elem.id == before);
       if (index == -1) {

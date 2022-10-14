@@ -1,5 +1,5 @@
 import { Server, Response } from "miragejs";
-import { KOptions } from "../boot/komunitin";
+import { KOptions } from "../boot/koptions";
 
 /**
  * Object containing the properties to create a MirageJS server that mocks the

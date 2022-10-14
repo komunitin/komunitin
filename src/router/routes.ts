@@ -1,6 +1,6 @@
-import { RouteConfig } from 'vue-router';
+import { RouteRecordRaw } from 'vue-router';
 
-const routes: RouteConfig[] = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('../layouts/Front.vue'),
@@ -93,7 +93,7 @@ const routes: RouteConfig[] = [
 // Always leave this as last one
 if (process.env.MODE !== 'ssr') {
   routes.push({
-    path: '*',
+    path: '/:catchAll(.*)*',
     component: () => import('../pages/Error404.vue')
   });
 }

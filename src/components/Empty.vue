@@ -8,22 +8,24 @@
     </div>
     <div class="col-12 col-sm-6 col-md-8 q-pa-lg self-center">
       <div class="text-h4 text-onsurface-m">
-        {{ text }}
+        {{ header }}
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
-export default Vue.extend({
+import { defineComponent } from "vue"
+export default defineComponent({
   props: {
     text: {
       type: String,
-      default: function() {
-        // We need to use a function to access the object method $t.
-        return this.$t('nothingHere')
-      },
+      default: "",
       required: false,
+    }
+  },
+  computed: {
+    header() {
+      return this.text == "" ? this.$t('nothingHere') : this.text;
     }
   }
 })

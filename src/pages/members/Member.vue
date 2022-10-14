@@ -28,7 +28,7 @@
           :member="member"
           :tab="tab"
           :transactions="!isMe"
-          @tabChange="tab = $event"
+          @tab-change="onTabChange"
         />
         <q-tab-panels v-model="tab">
           <q-tab-panel
@@ -71,7 +71,7 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 import {mapGetters} from "vuex";
 
 import PageHeader from "../../layouts/PageHeader.vue";
@@ -86,7 +86,7 @@ import TransactionItems from "../transactions/TransactionItems.vue";
 
 import { Member, Currency, Account } from '../../store/model';
 
-export default Vue.extend({
+export default defineComponent({
   name: "Member",
   components: {
     PageHeader,
@@ -142,6 +142,9 @@ export default Vue.extend({
       })
       this.ready = true;
     },
+    onTabChange(tab: string) {
+      this.tab = tab;
+    }
   }
 })
 </script>

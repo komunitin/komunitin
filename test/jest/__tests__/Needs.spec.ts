@@ -2,7 +2,7 @@
 /**
  * @jest-environment jsdom
  */
-import { Wrapper } from "@vue/test-utils";
+import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading, QInfiniteScroll } from "quasar";
@@ -12,17 +12,18 @@ import { seeds } from "src/server";
 
 // See also Offers.spec.ts
 describe("Needs", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
 
   beforeAll(async () => {
     seeds();
     wrapper = await mountComponent(App, { login: true });
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("Loads needs and searches", async () => {
+    await wrapper.vm.$router.push("/login");
     // Wait for login redirect
-    await wrapper.vm.$wait();
+    await flushPromises();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
     expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
     expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
@@ -33,7 +34,7 @@ describe("Needs", () => {
     // already fetched all data.
     expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
     // Category
-    expect(wrapper.findAllComponents(NeedCard).at(1).text()).toContain("build");
+    expect(wrapper.findAllComponents(NeedCard)[1].text()).toContain("build");
 
     wrapper.getComponent(PageHeader).vm.$emit("search","modi");
     await wrapper.vm.$wait();

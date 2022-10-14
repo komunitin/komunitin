@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import PageContainer from "../layouts/PageContainer.vue"
 import PageHeader from "../layouts/PageHeader.vue";
@@ -28,7 +28,7 @@ import ResourceCards from "./ResourceCards.vue"
 /**
  * Generic resource card list.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "ResourceCardList",
   components: {
     PageHeader,
@@ -46,7 +46,7 @@ export default Vue.extend({
   },
   methods: {
     fetchResources(search: string) : void {
-      (this.$refs.resourceCards as Vue & {fetchResources: (s:string) => void}).fetchResources(search);
+      (this.$refs.resourceCards as {fetchResources: (s:string) => void}).fetchResources(search);
     }
   }
   

@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, MessagePayload, Messaging, onMessage } from "firebase/messaging"
-import { KOptions } from "../boot/komunitin"
+import { KOptions } from "../boot/koptions"
 import axios from "axios";
 
 import { Member, NotificationsSubscription, ResourceResponse, User } from "src/store/model";

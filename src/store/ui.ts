@@ -1,5 +1,5 @@
 import { Module, ActionContext } from "vuex";
-interface UIState {
+export interface UIState {
   drawerPersistent: boolean;
   drawerState: boolean;
   notificationsBannerDismissed: boolean;

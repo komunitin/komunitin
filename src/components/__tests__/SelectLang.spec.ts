@@ -1,6 +1,6 @@
 
 import SelectLang from "../SelectLang.vue";
-import { Wrapper } from "@vue/test-utils"
+import { VueWrapper } from "@vue/test-utils"
 import { mountComponent } from "../../../test/jest/utils";
 
 /**
@@ -9,18 +9,18 @@ import { mountComponent } from "../../../test/jest/utils";
  * but also the language logic.
  * **/
 describe("SelectLang", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
   beforeAll(async () => {
     wrapper = await mountComponent(SelectLang);
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("Check language change", async () => {
     expect(wrapper.text()).toContain("Language");
     // Check language on i18n plugin.
-    expect(wrapper.vm.$i18n.locale).toBe("en-us");
+    expect(wrapper.vm.$i18n.locale).toBe("en-US");
     // Check language on quasar.
-    expect(wrapper.vm.$q.lang.isoName).toBe("en-us");
+    expect(wrapper.vm.$q.lang.isoName).toBe("en-US");
     // Don't know how to simulate the click on the menu item,
     // so invocking the method directly.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

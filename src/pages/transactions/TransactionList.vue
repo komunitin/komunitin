@@ -18,13 +18,13 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
 import PageHeader from "../../layouts/PageHeader.vue";
 import TransactionItems from "./TransactionItems.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "MemberList",
   components: {
     PageHeader,
@@ -41,7 +41,7 @@ export default Vue.extend({
   },
   methods: {
     search(query: string) {
-      (this.$refs.transactionItems as Vue & {fetchResources: (s: string) => void}).fetchResources(query);
+      (this.$refs.transactionItems as {fetchResources: (s: string) => void}).fetchResources(query);
     }
   }
 });

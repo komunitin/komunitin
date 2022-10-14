@@ -4,7 +4,7 @@
     active-class="bg-active"
     :active="active"
     :disable="disable"
-    @click="click"
+    @click="itemClick"
   >
     <q-item-section avatar>
       <q-icon
@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 /**
  * List item in the left drawer menu.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "MenuItem",
   props: {
     icon: {
@@ -46,18 +46,21 @@ export default Vue.extend({
       type: String,
       required: false,
       default: null
+    },
+    disable: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
+  emits: ["click"],
   computed: {
     active(): boolean {
       return this.to == this.$route.path
     },
-    disable(): boolean {
-      return !this.to && !this.href && !this.$listeners.click;
-    }
   },
   methods: {
-    click() {
+    itemClick() {
       if (this.to) {
         this.$router.push(this.to);
       } else if (this.href) {
