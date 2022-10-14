@@ -27,10 +27,11 @@
     <!-- Need text -->
     <q-card-section>
       <div
-        v-md2txt="need.attributes.content"
         v-clamp="hasImages ? 3 : 13"
         class="text-body2 text-justify text-onsurface-m"
-      />
+      >
+        {{ md2txt(need.attributes.content) }}
+      </div>
     </q-card-section>
 
     <q-card-actions>
@@ -80,7 +81,6 @@ export default defineComponent({
   },
   directives: {
     clamp,
-    md2txt,
     cardClickTo
   },
   props: {
@@ -92,6 +92,11 @@ export default defineComponent({
     need: {
       type: Object,
       required: true
+    }
+  },
+  setup() {
+    return {
+      md2txt
     }
   },
   data: () => ({

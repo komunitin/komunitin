@@ -1,4 +1,4 @@
-import { VueWrapper } from "@vue/test-utils";
+import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import TransactionList from "../../../src/pages/transactions/TransactionList.vue";
@@ -12,6 +12,7 @@ describe("Transactions", () => {
   beforeAll(async () => {  
     seeds();
     wrapper = await mountComponent(App, { login: true });
+    
   });
   afterAll(() => {
     wrapper.unmount();
@@ -19,11 +20,12 @@ describe("Transactions", () => {
 
   
   it("Loads and searches tansactions", async () => {
+    await wrapper.vm.$router.push("/login");
     // Wait for login redirect
-    await wrapper.vm.$wait();
+    await flushPromises();
     // Click members link
-    wrapper.get("#menu-transactions").trigger("click");
-    await wrapper.vm.$wait();
+    await wrapper.get("#menu-transactions").trigger("click");
+    await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62/transactions");
     // Further wait to load members.
     await wrapper.vm.$wait();

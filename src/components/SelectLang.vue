@@ -29,7 +29,6 @@ export default defineComponent({
   emits: ["language-change"],
   data() {
     return {
-      locale: this.$i18n.locale,
       // Available languages.
       langs
     };

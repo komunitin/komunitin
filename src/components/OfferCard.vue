@@ -32,9 +32,10 @@
       <!-- TODO: Add price -->
       <div
         v-clamp="3"
-        v-md2txt="offer.attributes.content"
         class="text-body2 text-justify text-onsurface-m"
-      />
+      >
+        {{ md2txt(offer.attributes.content) }}
+      </div>
     </q-card-section>
   </q-card>
 </template>
@@ -59,7 +60,6 @@ export default defineComponent({
     Carousel
   },
   directives: {
-    md2txt,
     clamp,
     cardClickTo
   },
@@ -74,6 +74,11 @@ export default defineComponent({
       type: Object,
       required: true,
       default: undefined
+    }
+  },
+  setup() {
+    return {
+      md2txt
     }
   }
 });

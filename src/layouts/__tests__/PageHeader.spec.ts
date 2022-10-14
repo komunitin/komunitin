@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { config, mount, VueWrapper } from "@vue/test-utils";
 import { createStore, Store } from "vuex";
 
@@ -6,7 +8,6 @@ import {
   QHeader,
   QInput,
   QLayout,
-  QScrollObserver,
   Quasar
 } from "quasar";
 import PageHeader from "../PageHeader.vue";
@@ -88,9 +89,6 @@ describe("PageHeader", () => {
     return (button.length > 0) ? button[0] : null;
   }
 
-  async function timeout(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
   it("has back icon", async () => {
     store.commit("drawerExists", false);
     await wrapper.vm.$nextTick();

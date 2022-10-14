@@ -28,7 +28,7 @@
           :member="member"
           :tab="tab"
           :transactions="!isMe"
-          @tab-change="tab = $event"
+          @tab-change="onTabChange"
         />
         <q-tab-panels v-model="tab">
           <q-tab-panel
@@ -142,6 +142,9 @@ export default defineComponent({
       })
       this.ready = true;
     },
+    onTabChange(tab: string) {
+      this.tab = tab;
+    }
   }
 })
 </script>

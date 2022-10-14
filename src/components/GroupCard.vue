@@ -43,10 +43,9 @@
     </q-card-section>
     <!-- Group description -->
     <q-card-section>
-      <div
-        v-clamp="5"
-        v-md2txt="group.attributes.description"
-      />
+      <div v-clamp="5">
+        {{ md2txt(group.attributes.description) }}
+      </div>
     </q-card-section>
     <!-- group actions -->
     <q-card-actions>
@@ -89,7 +88,6 @@ export default defineComponent({
     Avatar
   },
   directives: {
-    md2txt,
     clamp,
     cardClickTo
   },
@@ -97,6 +95,11 @@ export default defineComponent({
     group: {
       type: Object,
       required: true,
+    }
+  },
+  setup() {
+    return {
+      md2txt
     }
   },
   computed: {

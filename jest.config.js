@@ -39,6 +39,8 @@ module.exports = {
     'ts',
     'tsx',
     'vue',
+    'mjs',
+    'cjs'
   ],
   moduleNameMapper: {
     '^quasar$': 'quasar/dist/quasar.esm.prod.js',

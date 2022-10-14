@@ -26,6 +26,7 @@
               <menu-item
                 icon="edit"
                 :title="$t('editProfile')"
+                :disable="true"
               />
               <menu-item
                 ref="logout"

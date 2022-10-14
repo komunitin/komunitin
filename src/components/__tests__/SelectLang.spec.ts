@@ -18,9 +18,9 @@ describe("SelectLang", () => {
   it("Check language change", async () => {
     expect(wrapper.text()).toContain("Language");
     // Check language on i18n plugin.
-    expect(wrapper.vm.$i18n.locale).toBe("en-us");
+    expect(wrapper.vm.$i18n.locale).toBe("en-US");
     // Check language on quasar.
-    expect(wrapper.vm.$q.lang.isoName).toBe("en-us");
+    expect(wrapper.vm.$q.lang.isoName).toBe("en-US");
     // Don't know how to simulate the click on the menu item,
     // so invocking the method directly.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

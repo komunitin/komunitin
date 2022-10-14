@@ -2,7 +2,7 @@
 /**
  * @jest-environment jsdom
  */
-import { VueWrapper } from "@vue/test-utils";
+import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading, QInfiniteScroll } from "quasar";
@@ -21,8 +21,9 @@ describe("Needs", () => {
   afterAll(() => wrapper.unmount());
 
   it("Loads needs and searches", async () => {
+    await wrapper.vm.$router.push("/login");
     // Wait for login redirect
-    await wrapper.vm.$wait();
+    await flushPromises();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
     expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
     expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
