@@ -39,16 +39,18 @@
             </div>
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('updatedAt', {
-                date: $options.filters.date(offer.attributes.updated)
+                date: $formatDate(offer.attributes.updated)
               }) }}</span>
             </div>
+            <!-- eslint-disable vue/no-v-html -->
             <div
-              v-md2html="offer.attributes.content"
               class="col text-body1 text-onsurface"
+              v-html="md2html(offer.attributes.content)"
             />
+            <!-- eslint-enable vue/no-v-html -->
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('expiresAt', {
-                date: $options.filters.date(offer.attributes.expires)
+                date: $formatDate(offer.attributes.expires)
               }) }}</span>
             </div>
             <div class="q-pb-lg row q-col-gutter-md justify-end">
@@ -84,9 +86,9 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 
-import Md2html from "../../plugins/Md2html";
+import md2html from "../../plugins/Md2html";
 
 import OfferLayout from "../../layouts/OfferLayout.vue";
 import PageHeader from "../../layouts/PageHeader.vue";
@@ -98,11 +100,10 @@ import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
 
-import { Offer, Member, Account, Currency } from "../../store/model";
+import { Offer, Member, Account, Currency, Category, Contact } from "../../store/model";
+import FormatCurrency from "src/plugins/FormatCurrency";
 
-Vue.use(Md2html);
-
-export default Vue.extend({
+export default defineComponent({
   components: {
     MemberHeader,
     SimpleMap,
@@ -123,8 +124,13 @@ export default Vue.extend({
       required: true
     }
   },
+  setup() {
+    return {
+      md2html
+    }
+  },
   computed: {
-    offer(): Offer & {member: Member & { account: Account & { currency: Currency } } } {
+    offer(): Offer & {category: Category} & {member: Member & { account: Account & { currency: Currency }, contacts: Contact[] } } {
       return this.$store.getters["offers/current"];
     },
     /**
@@ -138,7 +144,7 @@ export default Vue.extend({
       if (!isNaN(numeric)) {
         // Append the currency symbol if price is just a number.
         const currency = this.offer.member.account.currency
-        return this.$currency(numeric, currency, {scale: false} );
+        return FormatCurrency(numeric, currency, {scale: false} );
       } else {
         return price;
       }

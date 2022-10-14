@@ -24,14 +24,8 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 
-export interface ScrollDetails {
-  position: number;
-  direction: "up" | "down";
-  directionChanged: boolean;
-  inflexionPosition: number;
-}
 
 /**
  * This element provides a second header in a page, with two sections.
@@ -40,7 +34,7 @@ export interface ScrollDetails {
  * 
  * This element must be placed as the first child of the QPage element.
  */
-export default Vue.extend({
+export default defineComponent({
   name: "CollapsibleHeader",
   props: {
     /**
@@ -67,8 +61,8 @@ export default Vue.extend({
     },
   },
   methods: {
-    scrollHandler(details: ScrollDetails) {
-      const newOffset = Math.min(details.position, this.collapsibleHeight);
+    scrollHandler(details: { position: { top: number; }; }) {
+      const newOffset = Math.min(details.position.top, this.collapsibleHeight);
       if (newOffset != this.offset) {
         this.offset = newOffset;
       }

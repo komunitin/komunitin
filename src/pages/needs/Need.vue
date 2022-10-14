@@ -31,16 +31,18 @@
           <template #content>
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('updatedAt', {
-                date: $options.filters.date(need.attributes.updated)
+                date: $formatDate(need.attributes.updated)
               }) }}</span>
             </div>
-            <div
-              v-md2html="need.attributes.content"
+            <!-- eslint-disable vue/no-v-html -->
+            <div 
               class="col text-body1 text-onsurface"
+              v-html="md2html(need.attributes.content)"
             />
+            <!-- eslint-enable vue/no-v-html -->
             <div class="text-body2 text-onsurface-m q-pb-md">
               <span>{{ $t('expiresAt', {
-                date: $options.filters.date(need.attributes.expires)
+                date: $formatDate(need.attributes.expires)
               }) }}</span>
             </div>
             <div class="q-pb-lg row q-col-gutter-md justify-end">
@@ -76,9 +78,9 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-import Md2html from "../../plugins/Md2html";
+import md2html from "../../plugins/Md2html";
 
 import OfferLayout from "../../layouts/OfferLayout.vue";
 import PageHeader from "../../layouts/PageHeader.vue";
@@ -92,9 +94,7 @@ import SimpleMap from "../../components/SimpleMap.vue";
 
 import { Need } from "../../store/model";
 
-Vue.use(Md2html);
-
-export default Vue.extend({
+export default defineComponent({
   components: {
     MemberHeader,
     SimpleMap,
@@ -113,6 +113,11 @@ export default Vue.extend({
     needCode: {
       type: String,
       required: true
+    }
+  },
+  setup() {
+    return {
+      md2html
     }
   },
   computed: {

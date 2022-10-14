@@ -1,40 +1,19 @@
-import { createLocalVue, mount, Wrapper } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import SocialNetworkList from "../SocialNetworkList.vue";
-import {
-  Quasar,
-  QCard,
-  QItem,
-  QAvatar,
-  QIcon,
-  QItemSection,
-  QItemLabel,
-  QList
-} from "quasar";
+import { Quasar } from "quasar";
 import { Contact } from "src/store/model";
+import { config } from '@vue/test-utils';
+
+// Install quasar by default.
+config.global.plugins.unshift([Quasar, {}]);
 
 describe("SocialNetworkList", () => {
   let contacts: Partial<Contact>[];
 
-  let contact: Wrapper<Vue>;
-  let share: Wrapper<Vue>;
+  let contact: VueWrapper;
+  let share: VueWrapper;
 
-  // We use createLocalVue in order not to pollute the global scope.
-  const localVue = createLocalVue();
-
-  // We need to explicitely include the components to be used.
-  localVue.use(Quasar, {
-    components: {
-      QCard,
-      QItem,
-      QAvatar,
-      QIcon,
-      QItemSection,
-      QItemLabel,
-      QList
-    }
-  });
-
-  async function checkClick(wrapper: Wrapper<Vue>, ref: string, url: string) {
+  async function checkClick(wrapper: VueWrapper, ref: string, url: string) {
     // Mock window.open function.
     // delete window.open;
     window.open = jest.fn();
@@ -62,21 +41,19 @@ describe("SocialNetworkList", () => {
     }));
 
     contact = mount(SocialNetworkList, {
-      propsData: {
+      props: {
         contacts,
         type: "contact"
       },
-      localVue
     });
 
     share = mount(SocialNetworkList, {
-      propsData: {
+      props: {
         type: "share",
         title: "Title",
         text: "Text",
         url: "https://example.com"
       },
-      localVue
     });
   });
 

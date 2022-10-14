@@ -10,8 +10,9 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue"
-export default Vue.extend({
+import { defineComponent } from "vue"
+import FormatCurrency from "../../plugins/FormatCurrency"
+export default defineComponent({
   name: "AccountLimits",
   props: {
     account: {
@@ -28,14 +29,14 @@ export default Vue.extend({
     },
     minAmount(): string {
       return this.$t("minAmount", {
-        amount: this.$currency(-this.account.attributes.debitLimit, this.account.currency, {
+        amount: FormatCurrency(-this.account.attributes.debitLimit, this.account.currency, {
           decimals: false
         })
       }) as string;
     },
     maxAmount(): string {
       return this.$t("maxAmount", {
-        amount: this.$currency(this.account.attributes.creditLimit, this.account.currency, {
+        amount: FormatCurrency(this.account.attributes.creditLimit, this.account.currency, {
           decimals: false
         })
       }) as string;

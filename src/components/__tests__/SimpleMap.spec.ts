@@ -1,25 +1,20 @@
 /**
  * @jest-environment jsdom
  */
-import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
+import { shallowMount, VueWrapper } from "@vue/test-utils";
 import SimpleMap from "../SimpleMap.vue";
 
 describe("SimpleMap", () => {
-  let position: [number, number];
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
 
-  // We use createLocalVue in order not to pollute the global scope.
-  const localVue = createLocalVue();
-
-  // Montamos el componente con los props necesarios antes de cada test.
+  // Mount the component before each test.
   beforeEach(() => {
-    position = [41.5922793, 1.8342942];
+    const position = [41.5922793, 1.8342942];
     wrapper = shallowMount(SimpleMap, {
-      propsData: {
+      props: {
         center: position,
         marker: position,
       },
-      localVue
     });
   });
 

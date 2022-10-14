@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Wrapper } from "@vue/test-utils";
+import { VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading, QInfiniteScroll } from "quasar";
@@ -9,13 +9,13 @@ import ApiSerializer from "src/server/ApiSerializer";
 import { seeds } from "src/server";
 
 describe("Offers", () => {
-  let wrapper: Wrapper<Vue>;
+  let wrapper: VueWrapper;
 
   beforeAll(async () => {
     seeds();
     wrapper = await mountComponent(App, { login: true });
   });
-  afterAll(() => wrapper.destroy());
+  afterAll(() => wrapper.unmount());
 
   it("Loads offers", async () => {
     // Wait for login redirect
@@ -33,10 +33,8 @@ describe("Offers", () => {
     (wrapper.findComponent(QInfiniteScroll).vm as QInfiniteScroll).trigger();
     await wrapper.vm.$wait();
     expect(wrapper.findAllComponents(OfferCard).length).toBe(30);
-    // The QInfiniteScroll stopped.
-    expect((wrapper.findComponent(QInfiniteScroll).vm as any).isWorking).toBe(false);
     // Category icon
-    expect(wrapper.findAllComponents(OfferCard).at(0).text()).toContain("accessibility_new");
+    expect(wrapper.findAllComponents(OfferCard)[0].text()).toContain("accessibility_new");
   });
 
   it ("searches offers", async () => {

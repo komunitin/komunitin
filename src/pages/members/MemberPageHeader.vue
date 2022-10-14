@@ -45,7 +45,7 @@
               "
             >
               {{
-                $currency(
+                FormatCurrency(
                   member.account.attributes.balance,
                   member.account.currency
                 )
@@ -66,7 +66,7 @@
         active-color="primary"
         class="bg-surface text-onsurface-m full-width"
         align="justify"
-        @input="tabChange"
+        @update:model-value="tabChange"
       >
         <q-tab
           name="profile"
@@ -76,12 +76,12 @@
         <q-tab
           name="needs"
           icon="loyalty"
-          :label="$tc('nNeeds', member.relationships.needs.meta.count)"
+          :label="$t('nNeeds', member.relationships.needs.meta.count)"
         />
         <q-tab
           name="offers"
           icon="local_offer"
-          :label="$tc('nOffers', member.relationships.offers.meta.count)"
+          :label="$t('nOffers', member.relationships.offers.meta.count)"
         />
         <q-tab
           v-if="transactions"
@@ -94,7 +94,7 @@
   </collapsible-header>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
 import CollapsibleHeader from "../../layouts/CollapsibleHeader.vue";
 
@@ -104,8 +104,9 @@ import Avatar from "src/components/Avatar.vue";
 import FitText from "src/components/FitText.vue";
 
 import { Member } from "../../store/model";
+import FormatCurrency from "../../plugins/FormatCurrency"
 
-export default Vue.extend({
+export default defineComponent({
   name: "MemberPageHeader",
   components: {
     AccountLimits,
@@ -131,6 +132,12 @@ export default Vue.extend({
       default: true
     }
   },
+  emits: ['tab-change'],
+  setup() {
+    return {
+      FormatCurrency
+    }
+  },
   data() {
     return {
       currentTab: this.tab
@@ -149,7 +156,7 @@ export default Vue.extend({
   methods: {
     tabChange(value: string) {
       // Emit the custom event "tabChange" so it can be handled by parent.
-      this.$emit("tabChange", value);
+      this.$emit("tab-change", value);
     }
   }
 });

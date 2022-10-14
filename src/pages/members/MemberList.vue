@@ -36,7 +36,7 @@
                     "
                   >
                     {{
-                      $currency(
+                      FormatCurrency(
                         member.account.attributes.balance,
                         member.account.currency
                       )
@@ -58,7 +58,7 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import FormatCurrency from "../../plugins/FormatCurrency";
 
 import PageHeader from "../../layouts/PageHeader.vue";
@@ -69,10 +69,7 @@ import ResourceCards from "../ResourceCards.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 
 
-
-Vue.use(FormatCurrency);
-
-export default Vue.extend({
+export default defineComponent({
   name: "MemberList",
   components: {
     MemberHeader,
@@ -86,9 +83,12 @@ export default Vue.extend({
       required: true
     }
   },
+  setup() {
+    return { FormatCurrency }
+  },
   methods: {
     search(query: string) {
-      (this.$refs.memberItems as Vue & {fetchResources: (s: string) => void}).fetchResources(query);
+      (this.$refs.memberItems as {fetchResources: (s: string) => void}).fetchResources(query);
     }
   }
 });

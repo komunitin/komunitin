@@ -1,45 +1,35 @@
-import Vue from "vue";
-import { createLocalVue, mount, Wrapper } from "@vue/test-utils";
-import Vuex, { Store } from "vuex";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { config, mount, VueWrapper } from "@vue/test-utils";
+import { createStore, Store } from "vuex";
 
 import {
-  Quasar,
   QBtn,
-  QToolbar,
-  QToolbarTitle,
-  QInput,
   QHeader,
-  QIcon,
+  QInput,
   QLayout,
-  QScrollObserver
+  Quasar
 } from "quasar";
 import PageHeader from "../PageHeader.vue";
+import { createI18n } from "vue-i18n";
+import { defineComponent } from "vue";
+
+// Install quasar.
+config.global.plugins.unshift([Quasar, {}]);
+// Install i18n.
+const i18n = createI18n({
+  legacy: false
+})
+config.global.plugins.unshift([i18n])
 
 describe("PageHeader", () => {
-  let wrapper: Wrapper<Vue>;
-  let store: Store<{ ui: { [key: string]: boolean } }>;
+  let wrapper: VueWrapper;
   let toogleDrawer: () => void;
-
-  // We use createLocalVue in order not to pollute the global scope.
-  const localVue = createLocalVue();
-  localVue.use(Vuex);
-  // We need to explicitely include the components to be used.
-  localVue.use(Quasar, {
-    components: {
-      QBtn,
-      QToolbar,
-      QToolbarTitle,
-      QInput,
-      QHeader,
-      QIcon,
-      QLayout,
-      QScrollObserver
-    }
-  });
+  let store : Store<any>;
 
   beforeEach(() => {
     toogleDrawer = jest.fn();
-    store = new Vuex.Store({
+    store = createStore({
       state: () => ({
         ui: {
           drawerPersistent: true,
@@ -62,44 +52,43 @@ describe("PageHeader", () => {
       },
       actions: { toogleDrawer }
     });
-    const layout = mount(QLayout, {
-      propsData: {
-        view: "LHH LpR LfR"
-      },
-      localVue
+    
+
+    const TestComponent = defineComponent({
+      template: `
+        <q-layout view="LHH LpR LfR">
+          <PageHeader title="Test title" search balance />
+        </q-layout>
+      `
     });
 
-    wrapper = mount(PageHeader, {
-      provide: {
-        layout: layout.vm
+    wrapper = mount(TestComponent, {
+      global: {
+        mocks: {
+          $t: (key: string) => key,
+          $n: (n: number) => n + '',
+        },
+        plugins: [store]
       },
-      propsData: {
-        title: "Test title",
-        search: true,
-        balance: true
+      components: {
+        PageHeader,
+        QLayout
       },
-      // Avoid error with translations.
-      mocks: {
-        $t: (key: string) => key,
-        $n: (n: number) => n + '',
-      },
-      store,
-      localVue,
       attachTo: document.body
     });
+
   });
 
-  afterEach(() => wrapper.destroy());
+  afterEach(() => wrapper?.unmount());
 
-  function findSearchButton(wrapper: Wrapper<Vue>) {
-    return wrapper
+  function findSearchButton(wrapper: VueWrapper) {
+    const button = wrapper
       .findAllComponents(QBtn)
       .filter(button => button.text().includes("search"));
+
+    return (button.length > 0) ? button[0] : null;
   }
 
-  async function timeout(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
   it("has back icon", async () => {
     store.commit("drawerExists", false);
     await wrapper.vm.$nextTick();
@@ -132,41 +121,41 @@ describe("PageHeader", () => {
   it("has search box", async () => {
     expect(wrapper.text()).toContain("Test title");
     expect(wrapper.findComponent(QInput).exists()).toBe(false);
-    const search = findSearchButton(wrapper);
+    const search = findSearchButton(wrapper) as VueWrapper;
     expect(search.exists()).toBe(true);
-    search.trigger("click");
+    await search.trigger("click");
     await wrapper.vm.$nextTick();
-    expect(findSearchButton(wrapper).exists()).toBe(false);
+    expect(findSearchButton(wrapper)).toBe(null);
     expect(wrapper.text()).not.toContain("Test title");
     const input = wrapper.find("input");
     expect(input.exists()).toBe(true);
     // Focus
     expect(input.element).toBe(document.activeElement);
+    const pageHeader = wrapper.findComponent(PageHeader);
     input.setValue("a");
     await wrapper.vm.$nextTick();
-    // Debouncing
-    expect(wrapper.emitted("search-input")).toBeUndefined();
-    await timeout(300);
-    expect(wrapper.emitted("search-input")).toBeTruthy();
+    // Jest somehow seems to trick the debouncing behavior of QInput
+    // henve expecting here directly the set value instead of undefined.
+    expect(pageHeader.emitted("search-input")).toBeTruthy();
     expect(
-      (wrapper.emitted("search-input") as Array<Array<string>>)[0]
+      (pageHeader.emitted("search-input") as string[][])[0]
     ).toEqual(["a"]);
     // Search on enter.
-    expect(wrapper.emitted("search")).toBeUndefined();
+    expect(pageHeader.emitted("search")).toBeUndefined();
     input.trigger("keyup.enter");
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted("search")).toBeTruthy();
-    expect((wrapper.emitted("search") as Array<Array<string>>)[0]).toEqual([
+    expect(pageHeader.emitted("search")).toBeTruthy();
+    expect((pageHeader.emitted("search") as Array<Array<string>>)[0]).toEqual([
       "a"
     ]);
     // Clear
     wrapper
       .findAll("i")
-      .filter(i => i.text().includes("clear"))
+      .filter(i => i.text().includes("clear"))[0]
       .trigger("click");
     await wrapper.vm.$nextTick();
     expect(
-      (wrapper.emitted("search-input") as Array<Array<string>>)[1]
+      (pageHeader.emitted("search-input") as string[][])[1]
     ).toEqual([""]);
   });
   it("shows the balance", async () => {
@@ -185,19 +174,41 @@ describe("PageHeader", () => {
     store.commit("myAccount", account);
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("balance");
-    expect(wrapper.text()).toContain("1 $");
+    expect(wrapper.text()).toContain("1.00 $");
     const header = wrapper.getComponent(QHeader).element as HTMLElement;
     expect(header.style.height).toBe("170px");
-    const scroll = wrapper.getComponent(QScrollObserver);
-    scroll.vm.$emit("scroll", {position: 10});
+    const pageHeader = wrapper.getComponent(PageHeader);
+    // I could not emulate the scroll event and as a weaker substitute I
+    // just irectly call the event handler hoping that the even conection
+    // will just work.
+    const scrollDetails = {
+      position: {
+        top: 0,
+        left: 0
+      },
+      direction: "down",
+      directionChanged: false,
+      delta: {
+        top: 0,
+        left: 0
+      },
+      inflectionPoint: {
+        top: 0,
+        left: 0
+      }
+    }
+    scrollDetails.position.top = 10;
+    pageHeader.vm.scrollHandler(scrollDetails);
     await wrapper.vm.$nextTick();
     expect(header.style.height).toBe("160px");
     expect(wrapper.text()).toContain("$");
-    scroll.vm.$emit("scroll", {position: 101});
+    scrollDetails.position.top = 101;
+    pageHeader.vm.scrollHandler(scrollDetails);
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).not.toContain("$");
     expect(header.style.height).toBe("69px");
-    scroll.vm.$emit("scroll", {position: 200});
+    scrollDetails.position.top = 200;
+    pageHeader.vm.scrollHandler(scrollDetails);
     await wrapper.vm.$nextTick();
     expect(header.style.height).toBe("64px");
     

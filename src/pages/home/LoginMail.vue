@@ -11,7 +11,7 @@
       placeholder="example@example.com"
       :label="$t('email')"
       maxlength="30"
-      :rules="[val => !$v.email.$invalid || $t('invalidEmail')]"
+      :rules="[val => !v$.email.$invalid || $t('invalidEmail')]"
       lazy-rules
     >
       <template #append>
@@ -25,7 +25,7 @@
       :type="isPwd ? 'password' : 'text'"
       :label="$t('password')"
       maxlength="30"
-      :rules="[val => !$v.pass.$invalid || $t('invalidPassword')]"
+      :rules="[val => !v$.pass.$invalid || $t('invalidPassword')]"
       lazy-rules
     >
       <template #append>
@@ -50,13 +50,20 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import { required, email, minLength } from 'vuelidate/lib/validators';
+import { defineComponent } from "vue";
+import { useVuelidate } from "@vuelidate/core";
+import { required, email, minLength } from '@vuelidate/validators';
 import KError, { KErrorCode } from '../../KError';
+import { User } from "src/plugins/Auth";
 
 // Login mail.
-export default Vue.extend({
+export default defineComponent({
   name: 'LoginMail',
+  setup () {
+    return {
+      v$: useVuelidate()
+    }
+  },
   data() {
     return {
       email: '',
@@ -66,7 +73,7 @@ export default Vue.extend({
   },
   computed: {
     loginDisabled() : boolean {
-      return this.$v.$invalid;
+      return this.v$.$invalid;
     }
   },
   validations: {
@@ -82,15 +89,15 @@ export default Vue.extend({
   methods: {
     async submit() {
       // Validate.
-      this.$v.$touch();
-      if (this.$v.$invalid) {
+      this.v$.$touch();
+      if (this.v$.$invalid) {
         // That should not happen, as the submit button should be disabled when the form is not validated.
         throw new KError(KErrorCode.IncorrectCredentials, "Incorrect email or password");
       }
       // Perform authentication request.
       await this.$store.dispatch("login", {email: this.email, password: this.pass});
       if (this.$store.getters.isLoggedIn) {
-        this.$q.notify({type: "positive", message: `Successfully logged in ${this.$store.state.me.userInfo.name} !`});
+        this.$q.notify({type: "positive", message: `Successfully logged in ${(this.$store.state.me.userInfo as User).name} !`});
         
         // If user came here due to a redirect when trying to access a protected route,
         // bring them to where they tried to go. 

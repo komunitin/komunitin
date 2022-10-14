@@ -9,11 +9,11 @@
   />
 </template>
 <script lang="ts">
-import Vue from "vue"
+import { defineComponent } from "vue"
 import ResourceCards from "../ResourceCards.vue";
 import OfferCard from "../../components/OfferCard.vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "MemberOffers",
   components: {
     ResourceCards
@@ -30,7 +30,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      card: OfferCard,
+      card: OfferCard.name,
       filter: {
         member: this.member.id
       }

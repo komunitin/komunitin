@@ -8,7 +8,7 @@
     <!-- Header -->
     <member-header :member="offer.member">
       <template #caption>
-        {{ offer.attributes.updated | date }}
+        {{ $formatDate(offer.attributes.updated) }}
       </template>
       <template #side>
         <category-avatar
@@ -32,34 +32,36 @@
       <!-- TODO: Add price -->
       <div
         v-clamp="3"
-        v-md2txt="offer.attributes.content"
         class="text-body2 text-justify text-onsurface-m"
-      />
+      >
+        {{ md2txt(offer.attributes.content) }}
+      </div>
     </q-card-section>
   </q-card>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 
-import CardClickTo from "../plugins/CardClickTo";
-import Clamp from "../plugins/Clamp";
-import Md2txt from "../plugins/Md2txt";
+import cardClickTo from "../plugins/CardClickTo";
+import clamp from "../plugins/Clamp";
+import md2txt from "../plugins/Md2txt";
 
 import Carousel from "./Carousel.vue";
 import CategoryAvatar from "./CategoryAvatar.vue";
 import MemberHeader from "./MemberHeader.vue";
 
-Vue.use(CardClickTo);
-Vue.use(Clamp);
-Vue.use(Md2txt);
 
-export default Vue.extend({
+export default defineComponent({
   name: "OfferCard",
   components: {
     MemberHeader,
     CategoryAvatar,
     Carousel
+  },
+  directives: {
+    clamp,
+    cardClickTo
   },
   props: {
     // Group code.
@@ -72,6 +74,11 @@ export default Vue.extend({
       type: Object,
       required: true,
       default: undefined
+    }
+  },
+  setup() {
+    return {
+      md2txt
     }
   }
 });

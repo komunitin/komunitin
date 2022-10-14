@@ -1,10 +1,13 @@
+const esModules = ['quasar', 'quasar/lang', 'lodash-es', 'leaflet/dist/leaflet-src.esm'].join('|');
+
 module.exports = {
   globals: {
     __DEV__: true,
     'vue-jest': {
-      babelConfig: true,
-    },
+      pug: { doctype: 'html' },
+    }
   },
+  testEnvironment: 'jsdom',
   setupFiles: [
     '<rootDir>/test/jest/jest.env.ts',
   ],
@@ -13,6 +16,7 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/src/**/*.{ts,vue}',
   ],
+  coveragePathIgnorePatterns: ['/node_modules/', '.d.ts$'],
   coverageReporters: [
     'html',
     'text',
@@ -35,30 +39,40 @@ module.exports = {
     'ts',
     'tsx',
     'vue',
+    'mjs',
+    'cjs'
   ],
   moduleNameMapper: {
-    '^vue$': '<rootDir>/node_modules/vue/dist/vue.common.js',
-    '^test-utils$': '<rootDir>/node_modules/@vue/test-utils/dist/vue-test-utils.js',
-    '^quasar$': '<rootDir>/node_modules/quasar/dist/quasar.common.js',
+    '^quasar$': 'quasar/dist/quasar.esm.prod.js',
     '^~/(.*)$': '<rootDir>/$1',
     '^src/(.*)$': '<rootDir>/src/$1',
-    '.*css$': '<rootDir>/__mocks__/mock.css',
     '^app/(.*)$': '<rootDir>/$1',
+    '^components/(.*)$': '<rootDir>/src/components/$1',
+    '^layouts/(.*)$': '<rootDir>/src/layouts/$1',
+    '^pages/(.*)$': '<rootDir>/src/pages/$1',
+    '^assets/(.*)$': '<rootDir>/src/assets/$1',
+    '^boot/(.*)$': '<rootDir>/src/boot/$1',
+    '.*css$': '<rootDir>/__mocks__/mock.css',
   },
   transform: {
-    '.*\\.vue$': '@vue/vue2-jest',
-    '.*\\.js$': 'babel-jest',
+    '.*\\.vue$': '@vue/vue3-jest',
+    // See https://jestjs.io/docs/en/configuration.html#transformignorepatterns-array-string
+    [`^(${esModules}).+\\.js$`]: 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': ['ts-jest', 
+      // Remove if using `const enums`
+      // See https://huafu.github.io/ts-jest/user/config/isolatedModules#example
+      {
+        isolatedModules: true,
+      }],
   },
-  transformIgnorePatterns: [
-    '<rootDir>/node_modules/(?!(quasar/lang.*|quasar/icon-set.*))',
-  ],
-  snapshotSerializers: [
-    '<rootDir>/node_modules/jest-serializer-vue',
-  ],
+  transformIgnorePatterns: [`node_modules/(?!(${esModules}))`],
+
   moduleDirectories: [
     '<rootDir>/node_modules',
   ],
   preset: 'ts-jest/presets/js-with-babel',
+  testEnvironmentOptions: {
+    customExportConditions: ["node", "node-addons"],
+  },
 }

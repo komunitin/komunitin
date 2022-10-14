@@ -9,11 +9,11 @@
   />
 </template>
 <script lang="ts">
-import Vue from "vue";
+import { defineComponent } from "vue";
 import ResourceCardList from "../ResourceCardList.vue";
 import NeedCard from "../../components/NeedCard.vue";
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ResourceCardList
   },
@@ -24,7 +24,7 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    card: NeedCard
+    card: NeedCard.name
   })
 });
 </script>

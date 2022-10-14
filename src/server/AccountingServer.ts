@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Model, Factory, Server, ModelInstance, belongsTo, hasMany } from "miragejs";
 import faker from "faker";
-import { KOptions } from "../boot/komunitin";
+import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { filter, sort, search } from "./ServerUtils";
 
@@ -151,7 +151,7 @@ export default {
     );
     // Account transfers.
     server.get(`${urlAccounting}/:currency/transfers`,
-      (schema: any, request) => {
+      (schema: any, request: any) => {
         if (request.queryParams["filter[account]"]) {
           // Custom filtering.
           const accountId = request.queryParams["filter[account]"];
@@ -166,7 +166,7 @@ export default {
     );
     // Single transfer
     server.get(`${urlAccounting}/:currency/transfers/:id`,
-      (schema: any, request) => {
+      (schema: any, request: any) => {
         return schema.transfers.find(request.params.id);
       }
     )
