@@ -1,6 +1,8 @@
 import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
 import { Module, ActionContext, Commit, Dispatch } from "vuex";
+import {merge} from "lodash";
+
 import {
   CollectionResponseInclude,
   ErrorObject,
@@ -436,22 +438,23 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     /**
      * Update the current list of resources
      */
-    setList(state: ResourcesState<T>, resources: T[]) {
-      resources.forEach(resource => (state.resources[resource.id] = resource));
+    setList: (state: ResourcesState<T>, resources: T[]) => {
+      resources.forEach(resource => this.setResource(state, resource));
       state.currentList = resources.map(resource => resource.id);
     },
     /**
      * Update the current resource
      */
-    setCurrent(state: ResourcesState<T>, resource: T) {
-      state.resources[resource.id] = resource;
+    setCurrent: (state: ResourcesState<T>, resource: T) => {
+      this.setResource(state, resource);
       state.current = resource.id;
     },
     /**
      * Add a resource to the dictionary without updating the current resource.
      */
-    add(state: ResourcesState<T>, resource: T) {
-      state.resources[resource.id] = resource;
+    add: (state: ResourcesState<T>, resource: T) => {
+      this.setResource(state, resource);
+      
     },
     /**
      * Update the next link.
@@ -475,6 +478,19 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       payload: LoadPayload
     ) => this.load(context, payload)
   };
+  
+  /**
+   * Adds aprticular resource in the resource array. If the resource already exists,
+   * it will merge the new with the old object.
+   */
+  protected async setResource(state: ResourcesState<T>, resource: T) {
+    if (state.resources[resource.id] !== undefined) {
+      merge(state.resources[resource.id], resource)
+    } else {
+      state.resources[resource.id] = resource
+    }
+
+  }
   /**
    * Fetches the current list of resources.
    *

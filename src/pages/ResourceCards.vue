@@ -70,7 +70,7 @@ export default defineComponent({
       required: true
     },
     /**
-     * The item Vue Component Constructor
+     * The item Vue Component Name
      */
     card: {
       type: String,

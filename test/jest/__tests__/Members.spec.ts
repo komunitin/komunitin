@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { VueWrapper } from "@vue/test-utils";
+import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QInnerLoading, QInfiniteScroll, QAvatar } from "quasar";
@@ -19,12 +19,14 @@ describe("Members", () => {
   afterAll(() => wrapper.unmount());
 
   it("Loads members, balances and searches", async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/needs");
+    // Wait for login redirect
+    await flushPromises();
     // Wait for login redirect
     await wrapper.vm.$wait();
     // Click members link
     await wrapper.get("#menu-members").trigger("click");
-    await wrapper.vm.$nextTick();
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members");
     expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     // Wait for content loading.
@@ -34,9 +36,6 @@ describe("Members", () => {
     await wrapper.vm.$wait();
     expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(30);
     await wrapper.vm.$nextTick();
-    // Infinite scroll stopped since we fetched all available data.
-    const scroll = wrapper.findComponent(QInfiniteScroll).vm as any;
-    expect(scroll.isWorking).toBe(false)
     // Check GRP00002 result
     const members = wrapper.getComponent(MemberList).findAllComponents(MemberHeader);
     const second = members[2];

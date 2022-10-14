@@ -10,11 +10,9 @@
     "dev-local": "cross-env QENV=local quasar dev -m pwa",
     "build-demo": "cross-env QENV=demo quasar build -m pwa",
     "build": "cross-env QENV=build quasar build -m pwa",
-    "test": "quasar test --unit jest --dev=\"-m pwa\"",
+    "test": "./node_modules/jest/bin/jest.js .",
     "lint": "eslint --ext .ts,.vue --ignore-path .gitignore --max-warnings 0 ./src",
     "start": "quasar serve --history dist/pwa",
-    "test:coverage": "jest --silent --coverage src/",
-    "test:watch": "jest --watch src/",
     "doc": "typedoc --out docs --tsconfig tsconfig.json src",
     "testAll": "tsc -p tsconfig.json --noEmit && npm run test && npm run lint"
   },
@@ -29,7 +27,8 @@
     "date-fns": "^2.16.1",
     "firebase": "^9.11.0",
     "leaflet": "^1.9.2",
-    "markdown-to-txt": "^1.0.1",
+    "lodash": "^4.17.21",
+    "markdown-to-txt": "^2.0.1",
     "marked": "^4.1.1",
     "quasar": "^2.9.2",
     "vue": "^3.2.40",
@@ -44,6 +43,7 @@
     "@types/faker": "^4.1.12",
     "@types/jest": "^29.1.2",
     "@types/leaflet": "^1.8.0",
+    "@types/lodash": "^4.14.186",
     "@types/marked": "^4.0.7",
     "@types/node": "^12.19.14",
     "@types/resize-observer-browser": "^0.1.5",
@@ -68,6 +68,7 @@
     "ts-jest": "^29.0.3",
     "typedoc": "^0.17.8",
     "typescript": "~4.4",
+    "vue-demi": "^0.13.11",
     "workbox-webpack-plugin": "^6.0.2"
   },
   "engines": {

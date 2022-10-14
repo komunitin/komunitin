@@ -1,4 +1,4 @@
-import { VueWrapper } from "@vue/test-utils";
+import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import { QTab, QInnerLoading } from "quasar";
@@ -19,12 +19,12 @@ describe("Member", () => {
   afterAll(() => wrapper.unmount());
 
   it("Navigation to my account", async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/needs")
     // Wait for the login redirect.
-    await wrapper.vm.$wait();
+    await flushPromises();
     // Click members link
     await wrapper.get("#my-member").trigger("click");
-    await wrapper.vm.$nextTick();
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62");
     // Wait for content.
     await wrapper.vm.$wait();
@@ -57,7 +57,7 @@ describe("Member", () => {
     
     // Offers
     const offersTab = wrapper.findAllComponents(QTab)[2];
-    offersTab.trigger("click");
+    await offersTab.trigger("click");
     await wrapper.vm.$nextTick();
     expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
@@ -65,7 +65,9 @@ describe("Member", () => {
   });
 
   it("Navigation from Members List", async () => {
-    await wrapper.vm.$wait();
+    await wrapper.vm.$router.push("/groups/GRP0/needs")
+    // Wait for the login redirect.
+    await flushPromises();
     wrapper.get("#menu-members").trigger("click");
     await wrapper.vm.$nextTicks();
     await wrapper.vm.$wait();

@@ -161,7 +161,7 @@ export default {
           // Couldn't authorize. Delete credentials so we don't attempt another
           // call next time.
           if (context.state.tokens) {
-            await context.dispatch("logout");
+            context.dispatch("logout");
           }
           throw error;
         }
@@ -170,7 +170,7 @@ export default {
     /**
      * Logout current user.
      */
-    logout: async (context: ActionContext<UserState, never>) => {
+    logout: (context: ActionContext<UserState, never>) => {
       auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);

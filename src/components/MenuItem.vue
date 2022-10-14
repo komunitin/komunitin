@@ -4,7 +4,7 @@
     active-class="bg-active"
     :active="active"
     :disable="disable"
-    @click="click"
+    @click="itemClick"
   >
     <q-item-section avatar>
       <q-icon
@@ -46,6 +46,11 @@ export default defineComponent({
       type: String,
       required: false,
       default: null
+    },
+    disable: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   emits: ["click"],
@@ -53,12 +58,9 @@ export default defineComponent({
     active(): boolean {
       return this.to == this.$route.path
     },
-    disable(): boolean {
-      return !this.to && !this.href && !this.$attrs.onClick;
-    }
   },
   methods: {
-    click() {
+    itemClick() {
       if (this.to) {
         this.$router.push(this.to);
       } else if (this.href) {

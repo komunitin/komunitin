@@ -33,8 +33,6 @@ describe("Offers", () => {
     (wrapper.findComponent(QInfiniteScroll).vm as QInfiniteScroll).trigger();
     await wrapper.vm.$wait();
     expect(wrapper.findAllComponents(OfferCard).length).toBe(30);
-    // The QInfiniteScroll stopped.
-    expect((wrapper.findComponent(QInfiniteScroll).vm as any).isWorking).toBe(false);
     // Category icon
     expect(wrapper.findAllComponents(OfferCard)[0].text()).toContain("accessibility_new");
   });

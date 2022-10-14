@@ -66,7 +66,7 @@
         active-color="primary"
         class="bg-surface text-onsurface-m full-width"
         align="justify"
-        @input="tabChange"
+        @update:model-value="tabChange"
       >
         <q-tab
           name="profile"

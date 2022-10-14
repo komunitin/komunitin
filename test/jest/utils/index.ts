@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue';
-import { mount, MountingOptions, VueWrapper } from "@vue/test-utils";
+import { flushPromises, mount, MountingOptions, VueWrapper } from "@vue/test-utils";
 
 import createStore from 'src/store/index';
 import createRouter from 'src/router/index';
@@ -102,6 +102,7 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
 
   // Add more testing features to Vue.
   app.config.globalProperties.$nextTicks = async function() {
+    await flushPromises();
     await this.$nextTick();
     await this.$nextTick();
     await this.$nextTick();
