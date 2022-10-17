@@ -271,12 +271,6 @@ export interface Currency extends ResourceObject {
     decimals: number;
     scale: number;
     value: number;
-    // TODO: Remove this from here!
-    stats: {
-      transactions: number;
-      exchanges: number;
-      circulation: number;
-    };
   };
 }
 
