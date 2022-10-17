@@ -1,16 +1,5 @@
-# Komunitin
-
-Open System for Exchange Communities
-
-![build status](https://github.com/komunitin/komunitin/workflows/Build/badge.svg)
-
-Komunitin features mutual credit currency management for communities. It is the natural successor of [IntegralCES](https://integralces.net) and it wants to be a useful tool for local communities to build more resilient and sustainable economic structures.
-
-## Demo
-Check the installed version of the current `master` branch at [test.komunitin.org](https://test.komunitin.org). It uses dummy data.
-
-* user: noether@integralces.net
-* password: integralces
+# Komunitin app
+The Progressive Web App with the user interface for the Komunitin system.
 
 ## Develop
 
