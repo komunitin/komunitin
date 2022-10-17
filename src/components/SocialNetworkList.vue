@@ -9,7 +9,7 @@
     >
       <q-item-section avatar>
         <q-avatar size="lg">
-          <img :src="`icons/contacts/${key}.svg`">
+          <img :src="networkIcon(key)">
         </q-avatar>
       </q-item-section>
       <q-item-section v-if="network.name !== undefined">
@@ -132,6 +132,12 @@ export default defineComponent({
           ? SocialNetworks.getContactUrl(net, net.name ?? "")
           : SocialNetworks.getShareUrl(net, this.url, this.title, this.text);
       window.open(url, "_blank");
+    },
+    /**
+     * Return the network icon file, leveraging webpack assets resolution.
+     */
+    networkIcon(key: string) {
+      return require(`../assets/contacts/${key}.svg`)
     }
   }
 });
