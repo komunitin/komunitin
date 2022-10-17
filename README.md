@@ -8,7 +8,7 @@ Komunitin features mutual credit currency management for communities. It is the 
 useful tool for local communities to build more resilient and sustainable economic structures.
 
 ## Demo
-Check the installed version of the current `master` branch at [test.komunitin.org](https://test.komunitin.org). It uses dummy data.
+Check the installed version of the current `master` branch at [test.komunitin.org](https://test.komunitin.org). It uses dummy data from [demo.integralces.net](https://demo.integralces.net)
 
 * user: noether@integralces.net
 * password: integralces
