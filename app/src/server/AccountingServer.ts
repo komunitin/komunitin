@@ -57,11 +57,6 @@ export default {
       decimals: 2,
       value: 100000,
       scale: 4,
-      stats: {
-        transactions: Math.round(Math.random() * 10000),
-        exchanges: Math.round(Math.random() * 10000),
-        circulation: Math.round(Math.random() * 10000)
-      }
     }),
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
