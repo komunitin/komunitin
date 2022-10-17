@@ -197,14 +197,6 @@ export default defineComponent({
     currencyItems(): string[] {
       return [];
       // FIXME: https://github.com/komunitin/komunitin/issues/81
-      /*const stats = this.currency.attributes.stats;
-      return [
-        `${stats.transactions} ${this.$t("transactions")}/${this.$t("year")}`,
-        `${stats.exchanges} ${this.$t("exchanges")}/${this.$t("year")}`,
-        `${stats.circulation} ${this.$t("circulation")}`
-        // Missing the string showing currency value
-        // "1 ECO = 1 EÇ = 0,1 ℏ = 1 tk"
-      ];*/
     },
     offersItems(): string[] {
       return this.buildCategoryItems("offers");
