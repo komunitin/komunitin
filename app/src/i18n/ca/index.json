@@ -85,5 +85,16 @@
   "nothingHere": "Aquí no hi ha res... Encara!",
   "enableNotificationsText": "Activa les notificacions per estar al corrent dels moviments del teu compte i altres notícies importants de la teva xarxa. Pots configurar-les o desactivar-les quan vulguis.",
   "enableNotifications": "Activa les notificacions",
-  "dismiss": "Ignora"
+  "dismiss": "Ignora",
+  "createTransaction": "Crear transacció",
+  "enterTransactionData": "Entra les dades de la transacció",
+  "transactionFormHelpText": "Omple els següents camps per a crear una transacció que transferirà certa quantitat de moneda al teu compte.",
+  "selectPayer": "Escull el pagador o pagadora",
+  "transactionPayerHint": "El compte de la persona o entitat que fa el pagament.",
+  "description": "Descripció",
+  "transactionDescriptionHint": "Breu descripció del concepte de la venda. Per exemple '2kg de patates'.",
+  "amountIn": "Quantitat en {currency}",
+  "transactionAmountHint": "Quantitat de moneda a transferir",
+  "charge": "Cobrar"
+
 }
