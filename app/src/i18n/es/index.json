@@ -85,5 +85,15 @@
   "nothingHere": "Nada por aquí... ¡Aún!",
   "enableNotificationsText": "Activa las notificaciones para conocer los movimientos de tu cuenta y notícias importantes de tu red. Puedes configurarlas o desactivarlas en qualquier momento.",
   "enableNotifications": "Activa las notificaciones",
-  "dismiss": "Ignora"
+  "dismiss": "Ignora",
+  "createTransaction": "Crear transacción",
+  "enterTransactionData": "Entra los datos de la transacción",
+  "transactionFormHelpText": "Rellena los campos siguientes para crear una transacción que transferirá cierta cantidad de moneda a tu cuenta.",
+  "selectPayer": "Escoge el pagador o pagadora",
+  "transactionPayerHint": "La cuenta de la persona o entidad que va a pagar.",
+  "description": "Descripción",
+  "transactionDescriptionHint": "Breve descripción del concepto de la venta. Por ejemplo '2kg de patatas'.",
+  "amountIn": "Cantidad en {currency}",
+  "transactionAmountHint": "Cantidad de moneda a transferir",
+  "charge": "Cobrar"
 }
