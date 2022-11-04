@@ -6,8 +6,10 @@
   "author": "komunitin <komunitinbox@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "cross-env QENV=mirage quasar dev -m pwa",
-    "dev-local": "cross-env QENV=local quasar dev -m pwa",
+    "dev": "cross-env QENV=mirage quasar dev",
+    "dev-pwa": "cross-env QENV=mirage quasar dev -m pwa",
+    "dev-local": "cross-env QENV=local quasar dev",
+    "dev-local-pwa": "cross-env QENV=local quasar dev -m pwa",
     "build-demo": "cross-env QENV=demo quasar build -m pwa",
     "build": "cross-env QENV=build quasar build -m pwa",
     "test": "./node_modules/jest/bin/jest.js .",

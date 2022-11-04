@@ -1,44 +1,81 @@
 <template>
-  <q-field outlined :label="label" :hint="hint" class="cursor-pointer" @click="onClick" ref="fieldRef">
-    <template v-slot:control>
-      <member-header v-if="member" :member="member"/>
+  <q-field
+    ref="fieldRef"
+    v-model="value"
+    v-bind="$attrs"
+    outlined
+    class="cursor-pointer"
+    @click="onClick"
+  >
+    <template #control>
+      <member-header
+        v-if="modelValue"
+        :member="modelValue"
+        clickable
+      />
     </template>
-    <template v-slot:append>
-      <q-icon name="arrow_drop_down"/>
+    <template #append>
+      <q-icon name="arrow_drop_down" />
     </template>
   </q-field>
   <q-dialog v-model="dialog">
     <q-card>
-      <q-toolbar class="text-onsurface-m">
-        <q-btn flat round dense icon="back" />
-        <q-input
-          v-model="searchText"
-          dense
-          outlined
-          class="q-mr-xs full-width q-mx-md"
-          type="search"
-          debounce="250"
-          autofocus
-        >
-          <template #append>
-            <q-icon v-if="searchText === ''" name="search" />
-            <q-icon v-else name="clear" class="cursor-pointer" @click="searchText = ''"/>
-          </template>
-        </q-input>
-        <q-card-section>
-          <resource-cards
-            ref="memberItems"
-            v-slot="slotProps"
-            :code="code"
-            module-name="members"
-            include="contacts,account"
+      <q-card-section class="q-px-none">
+        <q-toolbar class="text-onsurface-m">
+          <q-btn
+            flat
+            round
+            dense
+            icon="arrow_back"
+            @click="dialog = false"
+          />
+          <q-input
+            v-model="searchText"
+            dense
+            outlined
+            class="q-mx-md searchbar"
+            type="search"
+            debounce="250"
+            autofocus
           >
-            <q-list v-if="slotProps.resources" padding>
-              <member-header v-for="member of slotProps.resources" :key="member.id" :member="member" @click="select(member)"/>
-            </q-list>
-          </resource-cards>
-        </q-card-section>
-      </q-toolbar>
+            <template #append>
+              <q-icon
+                v-if="searchText === ''"
+                name="search"
+              />
+              <q-icon
+                v-else
+                name="clear"
+                class="cursor-pointer"
+                @click="searchText = ''"
+              />
+            </template>
+          </q-input>
+        </q-toolbar>
+      </q-card-section>
+      <q-separator />
+      <q-card-section class="members-list scroll">
+        <resource-cards
+          ref="memberItems"
+          v-slot="slotProps"
+          :code="code"
+          module-name="members"
+          include="contacts,account"
+          :query="searchText"
+        >
+          <q-list
+            v-if="slotProps.resources"
+            padding
+          >
+            <member-header
+              v-for="candidate of slotProps.resources"
+              :key="candidate.id"
+              :member="candidate"
+              @click="select(candidate)"
+            />
+          </q-list>
+        </resource-cards>
+      </q-card-section>
     </q-card>
   </q-dialog>
 </template>
@@ -55,32 +92,38 @@ export default defineComponent({
     MemberHeader,
     ResourceCards
   },
+  inheritAttrs: false,
   props: {
-    label: {
-      type: String,
-      required: true
-    },
-    hint: {
-      type: String,
-      default: ''
+    modelValue: {
+      type: Object,
+      required: false,
+      default: undefined
     },
     code: {
       type: String,
       required: true
     }
   },
-  inheritAttrs: false,
-  setup(props, { emit }) {
-    const member = ref<Member>()
-
+  emits: ['update:modelValue'],
+  setup(props, {emit}) {
     const dialog = ref(false)
 
     const onClick = () => { 
       dialog.value = true
       console.log("Click!")
     }
+
+    const value = computed({
+      get() {
+        return props.modelValue
+      },
+      set(value) {
+        emit('update:modelValue', value)
+      }
+    })
     const select = (selectedMember: Member) => {
-      member.value = selectedMember;
+      value.value = selectedMember
+      dialog.value = false
     }
     
     const searchText = ref('')
@@ -90,13 +133,22 @@ export default defineComponent({
     onMounted(() => { (fieldRef.value as QField).$el.onclick = () => (fieldRef.value as QField).$emit('click'); });
     
     return {
-      member,
       onClick,
       dialog,
       searchText,
       select,
-      fieldRef
+      fieldRef,
+      value
     }
   }
 })
 </script>
+<style lang="scss" scoped>
+.members-list {
+  height: 75vh;
+  width: 50vh;
+}
+.searchbar {
+  width: 100%;
+}
+</style>

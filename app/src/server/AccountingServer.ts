@@ -1,10 +1,11 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Model, Factory, Server, ModelInstance, belongsTo, hasMany } from "miragejs";
+import { Model, Factory, Server, ModelInstance, Response, belongsTo, hasMany } from "miragejs";
 import faker from "faker";
 import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { filter, sort, search } from "./ServerUtils";
+
 
 const urlAccounting = KOptions.url.accounting;
 
@@ -163,6 +164,14 @@ export default {
     server.get(`${urlAccounting}/:currency/transfers/:id`,
       (schema: any, request: any) => {
         return schema.transfers.find(request.params.id);
+      }
+    )
+    // Create transfer
+    server.post(`${urlAccounting}/:currency/transfers`,
+      (schema: any, request: any) => {
+        const transfer = JSON.parse(request.requestBody)
+        schema.transfers.create(transfer)
+        return new Response(201, undefined, transfer)
       }
     )
   }
