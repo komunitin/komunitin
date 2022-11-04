@@ -31,6 +31,13 @@ export interface ResourcesState<T extends ResourceObject> {
    */
   next: string | null | undefined;
 }
+export interface CreatePayload {
+  /**
+   * The group where the records belong to.
+   */
+   group: string;
+}
+
 /**
  * Object argument for the `loadList` action.
  */
@@ -192,14 +199,19 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     });
   }
 
-  private async request(context: ActionContext<ResourcesState<T>, S>, url: string) {
+  private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post", data?: object) {
+    if (method == undefined) {
+      method = "get";
+    }
+    const request = async () => this.getHttpClient(context).request({method, url, data})
+    
     try {
-      return await this.getHttpClient(context).get(url)
+      return await request()
     } catch (error) {
       if ((error as AxiosError).code == "401" && (context.rootState as UserState).userId) {
-        // Unauthorized. Try refreshing token.
-        await context.dispatch("authorize");
-        return await this.getHttpClient(context).get(url);
+        // Unauthorized. Refresh token and retry
+        await context.dispatch("authorize")
+        return request()
       }
       throw error;
     }
@@ -476,7 +488,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     load: (
       context: ActionContext<ResourcesState<T>, S>,
       payload: LoadPayload
-    ) => this.load(context, payload)
+    ) => this.load(context, payload),
+    create: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: CreatePayload
+    ) => this.create(context, payload),
   };
   
   /**
@@ -599,6 +615,34 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     } catch (error) {
       throw Resources.getKError(error as AxiosError);
     }
+  }
+  /**
+   * Creates a resource by posting the current resource to the API.
+   */
+  protected async create(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: CreatePayload
+  ) {
+    const url = this.collectionEndpoint(payload.group)
+    const {state} = context;
+    if (state.current == null) {
+      // Throw exception.
+      throw new KError(KErrorCode.ScriptError, "Current transfer is null.");
+    }
+    const transfer = state.resources[state.current]
+    try {
+      const response = await this.request(context, url, "post", transfer)
+      if (response.status == 201) {
+        // Created. Data in the response body.
+        const resource = response.data.data;
+        context.commit("setCurrent", resource);
+      } else {
+        throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
+      }
+    } catch (error) {
+      throw Resources.getKError(error as AxiosError);
+    }
+    
   }
 
 }

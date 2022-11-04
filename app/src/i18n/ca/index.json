@@ -95,6 +95,11 @@
   "transactionDescriptionHint": "Breu descripció del concepte de la venda. Per exemple '2kg de patates'.",
   "amountIn": "Quantitat en {currency}",
   "transactionAmountHint": "Quantitat de moneda a transferir",
-  "charge": "Cobrar"
+  "charge": "Cobrar",
+  "descriptionRequired" : "Entra una descripció de la transacció.",
+  "invalidAmount" : "Quantitat invàlida. Entra un número positiu.",
+  "payerRequired": "Escull el compte pagador",
+  "sucessfulLogin": "Sessió iniciada com a {name}!",
+  "confirm": "confirma"
 
 }

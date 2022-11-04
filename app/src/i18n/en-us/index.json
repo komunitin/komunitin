@@ -95,5 +95,10 @@
   "transactionDescriptionHint": "Brief description of the concept of the sale, for example '2kg of potatoes'.",
   "amountIn": "Amount in {currency}",
   "transactionAmountHint": "Quantity of money to transfer.",
-  "charge": "Charge"
+  "charge": "Charge",
+  "descriptionRequired" : "Transaction description is required.",
+  "invalidAmount" : "Invalid amount. Enter a positive number.",
+  "payerRequired": "Choose the payer member",
+  "sucessfulLogin": "Sucessfully logged in as {name}!",
+  "confirm": "confirm"
 }

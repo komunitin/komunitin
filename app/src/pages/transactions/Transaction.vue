@@ -12,8 +12,8 @@
             {{ $t("payer") }}
           </div>
           <member-header
-            :member="transfer.payee.member"
-            :to="`/groups/${code}/members/${transfer.payee.member.attributes.code}`"
+            :member="transfer.payer.member"
+            :to="`/groups/${code}/members/${transfer.payer.member.attributes.code}`"
           />
         </div>
         <q-separator />
@@ -59,7 +59,7 @@ import { mapGetters } from "vuex";
 import KError, {KErrorCode} from "../../KError";
 import PageHeader from "../../layouts/PageHeader.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
-import {Transfer, Account} from "../../store/model";
+import {ExtendedTransfer} from "../../store/model";
 import FormatCurrency from "../../plugins/FormatCurrency"
 
 export default defineComponent({
@@ -87,7 +87,7 @@ export default defineComponent({
   }),
   computed: {
     ...mapGetters(["myAccount"]),
-    transfer(): Transfer & {payer: Account, payee: Account} {
+    transfer(): ExtendedTransfer {
       return this.$store.getters["transfers/current"];
     },
     state(): string {
