@@ -100,6 +100,9 @@
   "invalidAmount" : "Quantitat invàlida. Entra un número positiu.",
   "payerRequired": "Escull el compte pagador",
   "sucessfulLogin": "Sessió iniciada com a {name}!",
-  "confirm": "confirma"
+  "confirm": "confirma",
+  "transactionCommitted": "Transacció confirmada",
+  "transactionPending": "Transacció pendent d'aprovació",
+  "transactionRejected": "Transacció rebutjada"
 
 }

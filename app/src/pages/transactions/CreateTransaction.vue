@@ -17,7 +17,8 @@
             :code="code"
             :label="$t('selectPayer')"
             :hint="$t('transactionPayerHint')"
-            :rules="[() => !v$.member.$invalid || $t('payerRequired')]"
+            :rules="[() => !v$.member.$error || $t('payerRequired')]"
+            @close-dialog="v$.member.$touch()"
           />
           <q-input 
             v-model="concept" 
@@ -102,7 +103,7 @@ export default defineComponent({
       amount = ref<number>()
     }
     // Validation.
-    const isMember = (value: Member|undefined|null) => (value !== undefined && value != null)
+    const isMember = (member: Member|undefined|null) => (member !== undefined && member !== null && member.id !== undefined)
     const rules = computed(() => ({
       member: { isMember },
       concept: { required },
