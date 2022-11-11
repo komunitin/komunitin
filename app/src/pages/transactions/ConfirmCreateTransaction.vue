@@ -3,7 +3,7 @@
   <q-page-container class="row justify-center">
     <q-page class="q-py-lg col-12 col-sm-8 col-md-6">
       <q-form @submit="onSubmit">
-        <transaction-card :transfer="transfer" >
+        <transaction-card :transfer="transfer">
           <q-separator />
           <q-card-actions class="justify-end">
             <q-btn 
@@ -28,7 +28,7 @@
 </template>
 <script lang="ts">
 import { useQuasar } from "quasar"
-import { computed, defineComponent } from "vue"
+import { defineComponent } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { useStore } from "vuex"

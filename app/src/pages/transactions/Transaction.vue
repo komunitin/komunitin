@@ -1,54 +1,12 @@
 <template>
   <div>
     <page-header :title="$t('transaction')" />
-    <q-page-container class="row justify-center">
+    <q-page-container class="row justify-center bg-light">
       <q-page
         v-if="ready"
         class="q-py-lg col-12 col-sm-8 col-md-6"
       >
-        <div class="q-py-sm">
-          <!-- payer -->
-          <div class="text-overline text-uppercase text-onsurface-d q-pl-md">
-            {{ $t("payer") }}
-          </div>
-          <member-header
-            :member="transfer.payer.member"
-            :to="`/groups/${code}/members/${transfer.payer.member.attributes.code}`"
-          />
-        </div>
-        <q-separator />
-        <div class="q-py-sm">
-          <!-- payee -->
-          <div class="text-overline text-uppercase text-onsurface-d q-pl-md">
-            {{ $t("payee") }}
-          </div>
-          <member-header
-            :member="transfer.payer.member"
-            :to="`/groups/${code}/members/${transfer.payer.member.attributes.code}`"
-          />
-        </div>
-        <q-separator />
-        <div class="text-center q-py-lg">
-          <!-- main section -->
-          <div
-            class="text-h4"
-            :class="positive ? 'positive-amount' : 'negative-amount'"
-          >
-            {{ FormatCurrency((positive ? 1 : -1) * transfer.attributes.amount, transfer.currency) }}
-          </div>
-          <div class="text-subtitle1 text-onsurface-d">
-            {{ $formatDate(transfer.attributes.updated) }}
-          </div>
-          <div class="text-body1">
-            {{ transfer.attributes.meta }}
-          </div>
-        </div>
-        <q-separator />
-        <div class="text-body2 q-pa-md">
-          <!-- details -->
-          <div><span class="text-onsurface-d">{{ $t("state") }}</span><span class="q-pl-sm">{{ state }}</span></div>
-          <div><span class="text-onsurface-d">{{ $t("group") }}</span><span class="q-pl-sm">{{ transfer.currency.group.attributes.name }}</span></div>
-        </div>
+        <transaction-card :transfer="transfer" />
       </q-page>
     </q-page-container>
   </div>
@@ -56,16 +14,15 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
-import KError, {KErrorCode} from "../../KError";
 import PageHeader from "../../layouts/PageHeader.vue";
-import MemberHeader from "../../components/MemberHeader.vue";
 import {ExtendedTransfer} from "../../store/model";
 import FormatCurrency from "../../plugins/FormatCurrency"
+import TransactionCard from "../../components/TransactionCard.vue"
 
 export default defineComponent({
   components: {
     PageHeader,
-    MemberHeader
+    TransactionCard
   },
   props: {
     code: {
@@ -90,29 +47,6 @@ export default defineComponent({
     transfer(): ExtendedTransfer {
       return this.$store.getters["transfers/current"];
     },
-    state(): string {
-      const state = this.transfer.attributes.state;
-      switch(state) {
-        case "new":
-          return this.$t("new").toString();
-        case "pending":
-          return this.$t("pending").toString();
-        case "accepted":
-          return this.$t("accepted").toString();
-        case "committed":
-          return this.$t("committed").toString();
-        case "rejected":
-          return this.$t("rejected").toString();
-        case "deleted":
-          return this.$t("deleted").toString();
-      }
-      throw new KError(KErrorCode.InvalidTransferState);
-    },
-    positive(): boolean {
-      // Note that when the current account is neither the payer nor the payee,
-      // the amount is considered as positive.
-      return this.transfer.payer.id != this.myAccount.id;
-    }
   },
   created() {
     // See comment in analogous function at Group.vue.

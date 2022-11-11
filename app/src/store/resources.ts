@@ -35,7 +35,7 @@ export interface CreatePayload {
   /**
    * The group where the records belong to.
    */
-   group: string;
+  group: string;
 }
 
 /**
@@ -627,11 +627,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     const {state} = context;
     if (state.current == null) {
       // Throw exception.
-      throw new KError(KErrorCode.ScriptError, "Current transfer is null.");
+      throw new KError(KErrorCode.ScriptError, "Current resource is null.");
     }
-    const transfer = state.resources[state.current]
+    const resource = state.resources[state.current]
+    const body = {data: resource};
     try {
-      const response = await this.request(context, url, "post", transfer)
+      const response = await this.request(context, url, "post", body)
       if (response.status == 201) {
         // Created. Data in the response body.
         const resource = response.data.data;
