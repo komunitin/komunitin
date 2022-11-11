@@ -100,5 +100,8 @@
   "invalidAmount" : "Invalid amount. Enter a positive number.",
   "payerRequired": "Choose the payer member",
   "sucessfulLogin": "Sucessfully logged in as {name}!",
-  "confirm": "confirm"
+  "confirm": "confirm",
+  "transactionCommitted": "Transacion committed",
+  "transactionPending": "Transaction pending",
+  "transactionRejected": "Transaction rejected"
 }

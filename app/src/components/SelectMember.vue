@@ -18,7 +18,10 @@
       <q-icon name="arrow_drop_down" />
     </template>
   </q-field>
-  <q-dialog v-model="dialog">
+  <q-dialog 
+    v-model="dialog" 
+    @hide="closeDialog()"
+  >
     <q-card>
       <q-card-section class="q-px-none">
         <q-toolbar class="text-onsurface-m">
@@ -104,7 +107,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['update:modelValue'],
+  emits: ["update:modelValue", "close-dialog"],
   setup(props, {emit}) {
     const dialog = ref(false)
 
@@ -131,14 +134,21 @@ export default defineComponent({
     //https://github.com/quasarframework/quasar/issues/8956
     const fieldRef = ref<QField>();
     onMounted(() => { (fieldRef.value as QField).$el.onclick = () => (fieldRef.value as QField).$emit('click'); });
-    
+    const closeDialog = () => {
+      // Set value so the validation refreshes cache.
+      if (!value.value) {
+        value.value = undefined;
+      }
+      emit("close-dialog");
+    }
     return {
       onClick,
       dialog,
       searchText,
       select,
       fieldRef,
-      value
+      value,
+      closeDialog,
     }
   }
 })

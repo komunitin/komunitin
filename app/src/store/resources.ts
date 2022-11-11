@@ -31,11 +31,16 @@ export interface ResourcesState<T extends ResourceObject> {
    */
   next: string | null | undefined;
 }
-export interface CreatePayload {
+export interface CreatePayload<T extends ResourceObject> {
   /**
    * The group where the records belong to.
    */
   group: string;
+
+  /**
+   * The resource
+   */
+  resource: T;
 }
 
 /**
@@ -491,7 +496,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     ) => this.load(context, payload),
     create: (
       context: ActionContext<ResourcesState<T>, S>,
-      payload: CreatePayload
+      payload: CreatePayload<T>
     ) => this.create(context, payload),
   };
   
@@ -621,15 +626,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   protected async create(
     context: ActionContext<ResourcesState<T>, S>,
-    payload: CreatePayload
+    payload: CreatePayload<T>
   ) {
     const url = this.collectionEndpoint(payload.group)
-    const {state} = context;
-    if (state.current == null) {
-      // Throw exception.
-      throw new KError(KErrorCode.ScriptError, "Current resource is null.");
-    }
-    const resource = state.resources[state.current]
+    const resource = payload.resource;
     const body = {data: resource};
     try {
       const response = await this.request(context, url, "post", body)
