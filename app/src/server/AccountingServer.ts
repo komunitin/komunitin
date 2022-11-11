@@ -169,9 +169,15 @@ export default {
     // Create transfer
     server.post(`${urlAccounting}/:currency/transfers`,
       (schema: any, request: any) => {
-        const transfer = JSON.parse(request.requestBody)
-        schema.transfers.create(transfer)
-        return new Response(201, undefined, transfer)
+        const body = JSON.parse(request.requestBody)
+        const transfer = body.data;
+        const resource = schema.transfers.create({id: transfer.id, type: transfer.type, ...transfer.attributes});
+        resource.update({
+          payer: schema.accounts.find(transfer.relationships.payer.data.id),
+          payee: schema.accounts.find(transfer.relationships.payee.data.id),
+          currency: schema.currencies.find(transfer.relationships.currency.data.id)
+        })
+        return new Response(201, undefined, resource)
       }
     )
   }

@@ -59,8 +59,8 @@
 </template>
 <script lang="ts">
 import useVuelidate from "@vuelidate/core"
-import { minValue, numeric, required } from '@vuelidate/validators'
-import { uniqueId } from "lodash"
+import { minValue, numeric, required } from "@vuelidate/validators"
+import { v4 as uuid } from "uuid"
 import { computed, defineComponent, Ref, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useStore } from "vuex"
@@ -115,7 +115,7 @@ export default defineComponent({
     const onSubmit = () => {
       // Build transfer object
       const transfer = {
-        id: uniqueId(),
+        id: uuid(),
         attributes: {
           amount: (amount.value as number) * Math.pow(10, currency.attributes.scale),
           meta: concept.value,

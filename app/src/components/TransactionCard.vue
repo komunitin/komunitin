@@ -1,5 +1,8 @@
 <template>
-  <q-card flat bordered>
+  <q-card 
+    flat 
+    bordered
+  >
     <q-card-section>
       <!-- payer -->
       <div class="text-overline text-uppercase text-onsurface-d q-pl-md">
