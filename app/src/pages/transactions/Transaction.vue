@@ -1,6 +1,9 @@
 <template>
   <div>
-    <page-header :title="$t('transaction')" />
+    <page-header 
+      :title="$t('transaction')"
+      balance 
+    />
     <q-page-container class="row justify-center bg-light">
       <q-page
         v-if="ready"
