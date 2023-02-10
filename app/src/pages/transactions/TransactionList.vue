@@ -1,18 +1,19 @@
 <template>
   <div>
     <page-header
-      search
-      :title="$t('transactions')"
+      :title="$t('transactions')" 
+      search 
       balance
-      @search="search"
+      @search="search" 
     />
     <q-page-container>
       <q-page>
         <transaction-items
           ref="transactionItems"
           :code="code"
-          :member="myMember"
+          :member="myMember" 
         />
+        <create-transaction-btn />
       </q-page>
     </q-page-container>
   </div>
@@ -22,13 +23,15 @@ import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
 import PageHeader from "../../layouts/PageHeader.vue";
+import CreateTransactionBtn from "../../components/CreateTransactionBtn.vue";
 import TransactionItems from "./TransactionItems.vue";
 
 export default defineComponent({
   name: "MemberList",
   components: {
     PageHeader,
-    TransactionItems
+    TransactionItems,
+    CreateTransactionBtn
   },
   props: {
     code: {
@@ -41,7 +44,7 @@ export default defineComponent({
   },
   methods: {
     search(query: string) {
-      (this.$refs.transactionItems as {fetchResources: (s: string) => void}).fetchResources(query);
+      (this.$refs.transactionItems as { fetchResources: (s: string) => void }).fetchResources(query);
     }
   }
 });
