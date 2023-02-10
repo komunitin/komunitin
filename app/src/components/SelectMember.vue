@@ -113,7 +113,6 @@ export default defineComponent({
 
     const onClick = () => { 
       dialog.value = true
-      console.log("Click!")
     }
 
     const value = computed({
