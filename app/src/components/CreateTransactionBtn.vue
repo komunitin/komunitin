@@ -4,6 +4,7 @@
     :offset="[0, 24]"
   >
     <q-btn
+      id="create-transaction"
       fab
       icon="add"
       color="primary"

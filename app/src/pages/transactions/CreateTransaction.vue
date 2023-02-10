@@ -13,6 +13,7 @@
             </div>
           </div>
           <select-member
+            id="payer"
             v-model="member"
             :code="code"
             :label="$t('selectPayer')"
@@ -21,6 +22,7 @@
             @close-dialog="v$.member.$touch()"
           />
           <q-input 
+            id="description"
             v-model="concept" 
             :label="$t('description')" 
             :hint="$t('transactionDescriptionHint')" 
@@ -34,6 +36,7 @@
             </template>
           </q-input>
           <q-input 
+            id="amount"
             v-model="amount"
             :label="$t('amountIn', {currency: myAccount.currency.attributes.namePlural})"
             :hint="$t('transactionAmountHint')"
