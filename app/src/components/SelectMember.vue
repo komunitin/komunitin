@@ -13,6 +13,11 @@
         :member="modelValue"
         clickable
       />
+      <div
+        v-else 
+        tabindex="0" 
+        @keydown.enter="onClick"
+      />
     </template>
     <template #append>
       <q-icon name="arrow_drop_down" />
@@ -20,6 +25,7 @@
   </q-field>
   <q-dialog 
     v-model="dialog" 
+    :maximized="$q.screen.lt.sm"
     @hide="closeDialog()"
   >
     <q-card>
@@ -153,9 +159,11 @@ export default defineComponent({
 })
 </script>
 <style lang="scss" scoped>
-.members-list {
-  height: 75vh;
-  width: 50vh;
+@media (min-width: $breakpoint-sm-min) {
+  .members-list {
+    height: 75vh;
+    width: 50vw;
+  }
 }
 .searchbar {
   width: 100%;
