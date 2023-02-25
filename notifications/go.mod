@@ -9,6 +9,6 @@ require (
 	github.com/komunitin/jsonapi v1.0.1-0.20211229153711-3ec5fff38921
 	github.com/rs/cors v1.8.0
 	github.com/rs/xid v1.3.0
-	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/text v0.3.7
 )
