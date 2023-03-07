@@ -129,6 +129,14 @@ export default defineComponent({
       type: Boolean,
       required: false,
       default: true,
+    },
+    /**
+     * Search query
+     */
+    query: {
+      type: String,
+      required: false,
+      default: ""
     }
   },
   emits: ['after-load'],
@@ -152,7 +160,8 @@ export default defineComponent({
   // to be able to fetch resources after locate.
   created: async function() {
     await this.$store.dispatch("locate");
-    await this.fetchResources();
+    await this.fetchResources(this.query);
+    this.$watch(() => this.query, (newQuery: string) => this.fetchResources(newQuery))
   },
   methods: {
     /**

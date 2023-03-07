@@ -3,8 +3,10 @@ import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import TransactionList from "../../../src/pages/transactions/TransactionList.vue";
 import MemberHeader from "../../../src/components/MemberHeader.vue";
+import SelectMember from "../../../src/components/SelectMember.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import { seeds } from "src/server";
+import { QDialog, QList } from "quasar";
 
 describe("Transactions", () => {
   let wrapper: VueWrapper;
@@ -23,7 +25,7 @@ describe("Transactions", () => {
     await wrapper.vm.$router.push("/login");
     // Wait for login redirect
     await flushPromises();
-    // Click members link
+    // Click transactions link
     await wrapper.get("#menu-transactions").trigger("click");
     await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62/transactions");
@@ -61,5 +63,36 @@ describe("Transactions", () => {
     expect(text).toContain("Inverse");
     expect(text).toContain("Committed");
     expect(text).toContain("Group 0");
+  })
+  it("creates new transaction", async () =>  {
+    await wrapper.vm.$router.push("/login");
+    await flushPromises();
+    // Click transactions link
+    await wrapper.get("#menu-transactions").trigger("click");
+    await flushPromises();
+    await wrapper.get("#create-transaction").trigger("click");
+    await flushPromises();
+    await wrapper.getComponent(SelectMember).get('div').trigger("click");
+    await flushPromises()
+    await wrapper.vm.$wait()
+    const list = wrapper.getComponent(QDialog).getComponent(QList)
+    expect(list.text()).toContain("Cameron")
+    const payer = list.findAllComponents(MemberHeader)[2]
+    await payer.trigger("click")
+    await flushPromises();
+    await wrapper.get("[name='description']").setValue("Test transaction description.")
+    await wrapper.get("[name='amount']").setValue("123")
+    await wrapper.get("button[type='submit']").trigger("click")
+    await flushPromises();
+    const text = wrapper.text();
+    expect(text).toContain("Cameron");
+    expect(text).toContain("Tomasa");
+    expect(text).toContain("123");
+    expect(text).toContain("Test transaction description.");
+    expect(text).toContain("today")
+    await wrapper.get("button[type='submit']").trigger("click")
+    await wrapper.vm.$wait();
+    expect(wrapper.text()).toContain("Committed")
+
   })
 })

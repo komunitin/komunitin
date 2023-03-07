@@ -309,6 +309,16 @@ export interface Transfer extends ResourceObject {
   }
 }
 
+export interface ExtendedTransfer extends Transfer {
+  payer: ExtendedAccount;
+  payee: ExtendedAccount;
+  currency: Currency
+}
+
+export interface ExtendedAccount extends Account {
+  member: Member;
+}
+
 /**
  * Offer model.
  */

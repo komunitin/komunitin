@@ -63,15 +63,7 @@ import FormatCurrency from "../../plugins/FormatCurrency";
 import ResourceCards from "../ResourceCards.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 
-import { Transfer, Member, Account } from "../../store/model";
-
-interface ExtendedTransfer extends Transfer {
-  payer: ExtendedAccount;
-  payee: ExtendedAccount;
-}
-interface ExtendedAccount extends Account {
-  member: Member;
-}
+import { ExtendedTransfer, Member, Account } from "../../store/model";
 
 export default defineComponent({
   name:"TransactionItems",

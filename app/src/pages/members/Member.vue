@@ -66,6 +66,7 @@
             />
           </q-tab-panel>
         </q-tab-panels>
+        <create-transaction-btn v-if="!isMe" />
       </q-page>
     </q-page-container>
   </div>
@@ -82,6 +83,7 @@ import MemberOffers from "./MemberOffers.vue";
 import MemberPageHeader from "./MemberPageHeader.vue";
 import MemberProfile from "./MemberProfile.vue";
 import ShareButton from "../../components/ShareButton.vue";
+import CreateTransactionBtn from "../../components/CreateTransactionBtn.vue";
 import TransactionItems from "../transactions/TransactionItems.vue";
 
 import { Member, Currency, Account } from '../../store/model';
@@ -96,7 +98,8 @@ export default defineComponent({
     MemberProfile,
     MemberNeeds,
     MemberOffers,
-    TransactionItems
+    TransactionItems,
+    CreateTransactionBtn
   },
   props: {
     code: {

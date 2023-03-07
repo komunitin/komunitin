@@ -54,7 +54,6 @@ import { defineComponent } from "vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required, email, minLength } from '@vuelidate/validators';
 import KError, { KErrorCode } from '../../KError';
-import { User } from "src/plugins/Auth";
 
 // Login mail.
 export default defineComponent({
@@ -97,7 +96,8 @@ export default defineComponent({
       // Perform authentication request.
       await this.$store.dispatch("login", {email: this.email, password: this.pass});
       if (this.$store.getters.isLoggedIn) {
-        this.$q.notify({type: "positive", message: `Successfully logged in ${(this.$store.state.me.userInfo as User).name} !`});
+        const name = this.$store.state.me.userInfo?.name;
+        this.$q.notify({type: "positive", message: this.$t('sucessfulLogin', {name})});
         
         // If user came here due to a redirect when trying to access a protected route,
         // bring them to where they tried to go. 
