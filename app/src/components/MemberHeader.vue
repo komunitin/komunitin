@@ -1,7 +1,7 @@
 <template>
   <q-item
     v-bind="$attrs"
-    :clickable="to && !active"
+    :clickable="clickable || ((to != '') && !active)"
     :active="active"
     @click="click"
   >
@@ -50,6 +50,11 @@ export default defineComponent({
       type: String,
       required: false,
       default: null
+    },
+    clickable: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   emits: ["click"],
