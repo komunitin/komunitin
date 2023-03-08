@@ -120,6 +120,7 @@ export default defineComponent({
       // Build transfer object
       const transfer = {
         id: uuid(),
+        type: "transfers",
         attributes: {
           amount: (amount.value as number) * Math.pow(10, currency.attributes.scale),
           meta: concept.value,
