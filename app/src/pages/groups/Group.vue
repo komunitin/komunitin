@@ -2,7 +2,7 @@
   <div>
     <page-header
       :title="group ? group.attributes.name : ''"
-      balance
+      :back="!own" 
     >
       <template #buttons>
         <contact-button
@@ -193,7 +193,9 @@ export default defineComponent({
     currency(): Currency {
       return this.$store.getters["currencies/current"];
     },
-
+    own(): boolean {
+      return this.group && this.$store.getters["myMember"] && this.group.id == this.$store.getters["myMember"].group.id
+    },
     currencyItems(): string[] {
       return [];
       // FIXME: https://github.com/komunitin/komunitin/issues/81
@@ -208,7 +210,7 @@ export default defineComponent({
       return this.group?.attributes.location.coordinates;
     },
     marker(): [number, number] | undefined {
-      return this.group?.attributes.location.coordinates;
+      return this.center
     }
   },
   created() {

@@ -2,11 +2,15 @@
   <div>
     <page-header 
       :title="$t('transaction')"
-      balance 
+      back
+      balance
     />
-    <q-page-container class="row justify-center bg-light">
+    <q-page-container 
+      class="row justify-center bg-light"
+    >
       <q-page
         v-if="ready"
+        padding
         class="q-py-lg col-12 col-sm-8 col-md-6"
       >
         <transaction-card :transfer="transfer" />

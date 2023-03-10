@@ -153,6 +153,13 @@ export default defineComponent({
     balance: {
       type: Boolean,
       default: false
+    },
+    /**
+     * Whether to show the back button instead of the menu button.
+     */
+    back: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['search-input', 'search'],
@@ -175,7 +182,7 @@ export default defineComponent({
      * Show the back button.
      */
     showBack(): boolean {
-      return !this.$store.getters.drawerExists;
+      return this.back || !this.$store.getters.drawerExists;
     },
     /**
      * Show the menu button.
