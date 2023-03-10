@@ -1,6 +1,9 @@
 <template>
   <div>
-    <page-header :title="$t('need')" />
+    <page-header 
+      :title="$t('need')" 
+      back
+    />
     <q-page-container>
       <q-page
         v-if="need"

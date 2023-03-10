@@ -1,6 +1,9 @@
 <template>
   <div>
-    <page-header :title="$t('offer')" />
+    <page-header 
+      :title="$t('offer')" 
+      back
+    />
     <q-page-container>
       <q-page
         v-if="offer"

@@ -1,6 +1,9 @@
 <template>
   <div v-if="ready">
-    <page-header :title="member.attributes.name">
+    <page-header 
+      :title="member.attributes.name"
+      back
+    >
       <template #buttons>
         <contact-button
           icon="message"
