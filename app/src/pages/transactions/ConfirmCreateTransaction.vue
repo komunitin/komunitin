@@ -1,6 +1,10 @@
 <template>
-  <page-header :title="$t('createTransaction')" />
-  <q-page-container class="row justify-center">
+  <page-header 
+    :title="$t('createTransaction')" 
+    balance 
+    back
+  />
+  <q-page-container class="row justify-center bg-light">
     <q-page class="q-py-lg col-12 col-sm-8 col-md-6">
       <q-form @submit="onSubmit">
         <transaction-card :transfer="transfer">
