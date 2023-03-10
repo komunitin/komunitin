@@ -1,7 +1,14 @@
 <template>
-  <page-header :title="$t('createTransaction')" />
+  <page-header 
+    :title="$t('createTransaction')" 
+    balance 
+    back
+  />
   <q-page-container class="row justify-center">
-    <q-page class="q-py-lg col-12 col-sm-8 col-md-6">
+    <q-page 
+      padding 
+      class="q-py-lg col-12 col-sm-8 col-md-6"
+    >
       <q-form @submit="onSubmit">
         <div class="q-gutter-y-lg column">  
           <div>
