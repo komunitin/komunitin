@@ -15,7 +15,7 @@ jobs:
       run:
         working-directory: ./app
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Build app
       run: docker build --build-arg QENV=mirage --target komunitin-app-build --tag komunitin-app-build:mirage .
