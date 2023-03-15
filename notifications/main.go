@@ -23,7 +23,11 @@ func main() {
 		AllowedOrigins: []string{
 			"http://localhost:8080",
 			"https://localhost:2030",
+			"https://integralces.net",
+			"https://www.integralces.net",
+			"https://demo.integralces.net",
 			"https://demo.komunitin.org",
+			"https://test.komunitin.org",
 			"https://komunitin.org",
 		},
 		AllowedHeaders: []string{"Authorization", "Content-Type"},
