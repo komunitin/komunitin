@@ -29,8 +29,6 @@ CMD dlv debug github.com/komunitin/komunitin/notifications -l 0.0.0.0:40000 --he
 FROM ubuntu:bionic as notifications
 
 COPY --from=notifications-build /opt/notifications/main /opt/notifications/main
-COPY --from=notifications-build /opt/notifications/komunitin-project-firebase-adminsdk.json /opt/notifications/komunitin-project-firebase-adminsdk.json
-
 ENV GOOGLE_APPLICATION_CREDENTIALS=/opt/notifications/komunitin-project-firebase-adminsdk.json
 
 WORKDIR /opt/notifications

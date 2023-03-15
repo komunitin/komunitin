@@ -1,9 +1,11 @@
 version: "3.2"
 services:
   redis:
-    image: redis:alpine    
+    image: redis:7    
 
   notifications:
+    depends_on:
+      - redis
     build: .
     ports:
      - 2028:2028 
@@ -14,6 +16,9 @@ services:
       - KOMUNITIN_APP_URL=https://localhost:2030
       - NOTIFICATIONS_CLIENT_ID=notifications-service
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
+    volumes:
+      - "./komunitin-project-firebase-adminsdk.json:/opt/notifications/komunitin-project-firebase-adminsdk.json"
+
     profiles:
      - "run"
   
