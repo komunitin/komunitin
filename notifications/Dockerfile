@@ -28,6 +28,8 @@ CMD dlv debug github.com/komunitin/komunitin/notifications -l 0.0.0.0:40000 --he
 # Build minimal production image
 FROM ubuntu:bionic as notifications
 
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+
 COPY --from=notifications-build /opt/notifications/main /opt/notifications/main
 ENV GOOGLE_APPLICATION_CREDENTIALS=/opt/notifications/komunitin-project-firebase-adminsdk.json
 
