@@ -101,6 +101,15 @@ func getResource(ctx context.Context, url string) (*http.Response, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	return http.DefaultClient.Do(req)
 }
+func findMemberByAccountId(items []interface{}, accountId string) *Member {
+	for _, item := range items {
+		member := item.(*Member)
+		if member.Account.Id == accountId {
+			return member
+		}
+	}
+	return nil
+}
 func handleTransferCommitted(ctx context.Context, value map[string]interface{}) error {
 	// Get full transfer object.
 	res, err := getResource(ctx, value["transfer"].(string)+"?include=currency")
@@ -137,8 +146,8 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 		return err
 	}
 
-	payerMember := members[0].(*Member)
-	payeeMember := members[1].(*Member)
+	payerMember := findMemberByAccountId(members, payer.Id)
+	payeeMember := findMemberByAccountId(members, payee.Id)
 
 	iconUrl := appUrl + "/icons/icon-512x512.png"
 	transferUrl := appUrl + "/groups/" + code + "/transactions/" + transfer.Id
