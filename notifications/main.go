@@ -31,7 +31,7 @@ func main() {
 			"https://komunitin.org",
 		},
 		AllowedHeaders: []string{"Authorization", "Content-Type"},
-		Debug:          true,
+		Debug:          false,
 	}).Handler(http.DefaultServeMux)
 
 	log.Println("Starting web service...")
