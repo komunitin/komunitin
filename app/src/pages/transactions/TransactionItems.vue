@@ -63,6 +63,7 @@ import ResourceCards from "../ResourceCards.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 
 import { ExtendedTransfer, Member, Account } from "../../store/model";
+import { LoadListPayload } from "src/store/resources";
 
 export default defineComponent({
   name:"TransactionItems",
@@ -125,8 +126,9 @@ export default defineComponent({
         group: this.code,
         filter: {
           account: Array.from(accountIds).join(",")
-        }
-      });
+        },
+        onlyResources: true
+      } as LoadListPayload);
       transfers.forEach((transfer: ExtendedTransfer) => {
         this.transferLoaded[transfer.id] = true
       });
