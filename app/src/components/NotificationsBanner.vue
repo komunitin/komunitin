@@ -40,9 +40,16 @@ export default defineComponent({
   },
   created: async function()  {
     if (this.isLoggedIn && this.isAuthorized()) {
-      await this.$store.dispatch("subscribe");
+      try {
+        await this.$store.dispatch("subscribe");
+        this.ready = true;
+      } catch (err) {
+        // Something happened with subscription, probably subscribe service not available.
+        console.error(err)
+      }
+    } else {
+      this.ready = true;
     }
-    this.ready = true;
   },
   methods: {
     dismiss(): void {
