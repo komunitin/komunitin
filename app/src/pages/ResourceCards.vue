@@ -1,16 +1,13 @@
 <template>
   <div>
-    <q-inner-loading
-      :showing="isLoading"
-      color="icon-dark"
-    />
     <q-infinite-scroll
-      :disable="!autoload || disableScrollLoad"
+      v-if="!isLoading"
+      :disable="disableScrollLoad"
       @load="loadNext"
     >
-      <empty v-if="isEmpty && !isLoading" />
+      <empty v-if="isEmpty" />
       <slot
-        v-else-if="!isLoading"
+        v-else
         :resources="resources"
       >
         <div class="q-pa-md row q-col-gutter-md">
@@ -40,6 +37,10 @@
         </div>
       </template>
     </q-infinite-scroll>
+    <q-inner-loading
+      :showing="isLoading"
+      color="icon-dark"
+    />
   </div>
 </template>
 
@@ -47,6 +48,7 @@
 import { defineComponent } from "vue";
 import Empty from "../components/Empty.vue";
 import { ResourceObject } from "../store/model";
+import { ResourcesState } from "../store/resources"
 import NeedCard from "../components/NeedCard.vue";
 import OfferCard from "../components/OfferCard.vue";
 import GroupCard from "../components/GroupCard.vue"
@@ -119,18 +121,6 @@ export default defineComponent({
       default: () => ({})
     },
     /**
-     * Enable autoloading feature. Default to true.
-     * 
-     * Useful if you want to temporaly deactivate autoloading while 
-     * performing operations between loading the resources and being 
-     * able to display them.
-     */
-    autoload: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    /**
      * Search query
      */
     query: {
@@ -139,58 +129,70 @@ export default defineComponent({
       default: ""
     }
   },
-  emits: ['after-load'],
+  emits: ['page-loaded'],
   data() {
     return {
-      isLoading: true,
-      disableScrollLoad: true,
-      resources: [] as ResourceObject[]
+      disableScrollLoad: true
     };
   },
   computed: {
+    storeState(): ResourcesState<ResourceObject> {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (this.$store.state as any)[this.moduleName]
+    },
     location(): [number, number] | undefined {
       return this.$store.state.me.location;
     },
     isEmpty() : boolean {
-      return this.resources.length == 0;
+      return this.resources.length === 0;
+    },
+    resources() : ResourceObject[] {
+      const resources = []
+      const state = this.storeState;
+      if (state.currentPage !== null) {
+        for (let i = 0; i <= state.currentPage; i++) {
+          const page = this.$store.getters[this.moduleName + '/page'](i)
+          if (page) {
+            resources.push(...page)
+          }
+        }
+      }
+      
+      return resources
+    },
+    /**
+     * Return true if still don't have any content and we're waiting for data do be fetched.
+     * Return false if we already have some data, even if is from cache and being revalidated.
+     */
+    isLoading() : boolean {
+      const state = this.storeState
+      return (state.currentPage === null || state.currentPage === 0 && state.next === undefined && this.isEmpty)
     }
   },
   // Note that even if this is marked async, Vue does not wait for the
   // promise to be resolved to continue the rendering. It is done just
   // to be able to fetch resources after locate.
   created: async function() {
-    await this.$store.dispatch("locate");
-    await this.fetchResources(this.query);
+    await this.$store.dispatch("locate")
+    await this.fetchResources(this.query)
     this.$watch(() => this.query, (newQuery: string) => this.fetchResources(newQuery))
+    // Set the current page to 0 in fetchResources before enabling scroll load.
+    this.disableScrollLoad = false
   },
   methods: {
     /**
      * Load groups ordered by location, if available. Optionally filter them by a search
      */
     async fetchResources(search?: string) {
-      try {
-        this.isLoading = true;
-        this.disableScrollLoad = true;
-        this.resources = [];
-        await this.$store.dispatch(this.moduleName + "/loadList", {
-          location: this.location,
-          search,
-          include: this.include,
-          group: this.code,
-          filter: this.filter,
-          sort: this.sort,
-        });
-        this.resources.push(...this.$store.getters[this.moduleName + "/currentList"]);
-        this.$emit("after-load");
-      } finally {
-        this.isLoading = false;
-        // Delay one tick before enabling infinite-scroll loading in order to allow the
-        // fetched content to be displyed before checking the scroll position.
-        await this.$nextTick();
-        if (this.$store.getters[this.moduleName + "/hasNext"]) {
-          this.disableScrollLoad = false;
-        }
-      }
+      await this.$store.dispatch(this.moduleName + "/loadList", {
+        location: this.location,
+        search,
+        include: this.include,
+        group: this.code,
+        filter: this.filter,
+        sort: this.sort,
+      });
+      this.$emit("page-loaded", 0);
     },
     /**
      * Implementation of the QInfiniteScroll load callback.
@@ -202,8 +204,7 @@ export default defineComponent({
           include: this.include,
           sort: this.sort,
         });
-        this.resources.push(...this.$store.getters[ this.moduleName + "/currentList"]);
-        this.$emit("after-load");
+        this.$emit("page-loaded", this.storeState.currentPage);
       }
       done(!this.$store.getters[this.moduleName + "/hasNext"]);
     }
