@@ -40,13 +40,9 @@ export default defineComponent({
   },
   created: async function()  {
     if (this.isLoggedIn && this.isAuthorized()) {
-      try {
-        await this.$store.dispatch("subscribe");
-        this.ready = true;
-      } catch (err) {
-        // Something happened with subscription, probably subscribe service not available.
-        console.error(err)
-      }
+      await this.$store.dispatch("subscribe");
+      // Note that ready will not be true if the promise rejects.
+      this.ready = true;
     } else {
       this.ready = true;
     }
