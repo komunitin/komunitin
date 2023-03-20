@@ -18,18 +18,21 @@ export interface ResourcesState<T extends ResourceObject> {
    */
   resources: { [id: string]: T };
   /**
+   * Array of pages. Each element is a page represented by an array of resource Id's.
+   */
+  pages: string[][]
+  /**
    * Id of current resource.
    */
   current: string | null;
   /**
-   * Array of ids of current list of resources. Note that for paginated responses,
-   * this list contains the current chunk.
-   */
-  currentList: string[];
-  /**
    * The url of the next page. null means no next page, undefined means unknown.
    */
   next: string | null | undefined;
+  /**
+   * The index of the current page. Note that currentList = pages[currentPage].
+   */
+  currentPage: number | null;
 }
 export interface CreatePayload<T extends ResourceObject> {
   /**
@@ -279,14 +282,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     group: string
   ) {
     const {commit, dispatch} = context;
-    // Commit mutation(s).
     const result = response.data;
-    commit("setList", result.data);
-    commit("setNext", result.links.next);
+    
     // Commit included resources.
     if (result.included) {
       await Resources.handleIncluded(result.included, group, commit, dispatch);
     }
+
+    // Commit mutation(s) after commiting included and eventualy fetched external resources.
+    commit("setNext", result.links.next);
+    commit("setList", result.data);
   }
   /**
    * Handle error from the API.
@@ -372,9 +377,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
   state = {
     resources: {},
+    pages: [],
     current: null,
-    currentList: [],
-    next: undefined
+    next: undefined,
+    currentPage: null
   } as ResourcesState<T>;
 
   getters = {
@@ -435,17 +441,32 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     /**
      * Gets the current list of resources.
      */
-    currentList: (
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    currentList: (state: ResourcesState<T>, getters: any) => {
+      if (state.currentPage !== null) {
+        return getters.page(state.currentPage)
+      } else {
+        return undefined
+      }
+    },
+
+    page: (
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
       rootGetters: Record<string, Getter>
-    ) =>
-      state.currentList
-        .map(id => state.resources[id])
-        .map(resource => this.relatedGetters(rootGetters, resource)),
+    ) => (index: number) => {
+      if (state.pages[index]) {
+        return state.pages[index]
+          .map(id => state.resources[id])
+          .map(resource => this.relatedGetters(rootGetters, resource))
+      } else {
+        return undefined;
+      }
+    },
+       
     /**
-     * Returns whether the current list has more resources to be fetched.
+     * Returns whether the current list has more resources to be fetched, or undefined if not known.
      */
     hasNext: (state: ResourcesState<T>) =>
       state.next === undefined ? undefined : state.next !== null
@@ -457,7 +478,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      */
     setList: (state: ResourcesState<T>, resources: T[]) => {
       resources.forEach(resource => this.setResource(state, resource));
-      state.currentList = resources.map(resource => resource.id);
+      const page = state.currentPage as number // At this point currentPage must not be null.
+      state.pages[page] = resources.map(resource => resource.id);
     },
     /**
      * Update the current resource
@@ -471,13 +493,20 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      */
     add: (state: ResourcesState<T>, resource: T) => {
       this.setResource(state, resource);
-      
     },
     /**
      * Update the next link.
      */
-    setNext(state: ResourcesState<T>, next: string | null) {
+    setNext(state: ResourcesState<T>, next: string | null | undefined) {
       state.next = next;
+    },
+    /**
+     * Update the current page index.
+     * @param state 
+     * @param index 
+     */
+    setCurrentPage(state: ResourcesState<T>, index: number | null) {
+      state.currentPage = index
     }
   };
 
@@ -504,7 +533,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * Adds aprticular resource in the resource array. If the resource already exists,
    * it will merge the new with the old object.
    */
-  protected async setResource(state: ResourcesState<T>, resource: T) {
+  protected setResource(state: ResourcesState<T>, resource: T) {
     if (state.resources[resource.id] !== undefined) {
       merge(state.resources[resource.id], resource)
     } else {
@@ -521,6 +550,13 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     context: ActionContext<ResourcesState<T>, S>,
     payload: LoadListPayload
   ) {
+    // Initialize the state to the first page.
+    context.commit("setCurrentPage", 0)
+    context.commit("setNext", undefined)
+    
+    // At this point the data may already be cached and hence available to the UI. 
+    // However we revalidate the data by doing the request.
+
     // Build query string.
     const params = new URLSearchParams();
     if (payload.search) {
@@ -567,20 +603,26 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadNextPayload
   ) {
     try {
+      if (context.state.next === undefined || context.state.currentPage === null) {
+        throw new KError(
+          KErrorCode.ScriptError,
+          "Unexpected call to 'loadNext' resource action before calling to loadList."
+        );
+      }
+      // Increase current page number.
+      context.commit("setCurrentPage", context.state.currentPage + 1)
+
+      // At this point the data may be already cached and available for the UI. We however 
+      // revalidate that by calling the endpoint.
+
+      // Well, if the endpoint is null it means that there's no next page.
       if (context.state.next === null) {
-        // There are no more results.
         context.commit("setList", []);
         return;
       }
-      if (context.state.next === undefined) {
-        // We can't do the loadNext call yet, since we don't have any next link. A loadList action should be called first.
-        throw new KError(
-          KErrorCode.ScriptError,
-          "Unexpected call to 'loadNext' resource action with undefined next link."
-        );
-      }
+      
+      // Perform the request.
       const response = await this.request(context, context.state.next);
-
       await this.handleCollectionResponse(
         response,
         context,

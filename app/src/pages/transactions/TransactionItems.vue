@@ -8,8 +8,7 @@
     include="currency,payer,payee"
     sort="-updated"
     :filter="{ account: account.id }"
-    :autoload="autoload"
-    @after-load="fetchMembers"
+    @page-loaded="fetchMembers"
   >
     <q-list
       v-if="slotProps.resources"
@@ -88,17 +87,9 @@ export default defineComponent({
   data: () => ({
     /**
      * A dictionary transfer id => true, for transfers such that the
-     * related member is aleready laoded.
-     * 
-     * See hasMember() method for further details.
+     * related member is aleready loaded.
      */
     transferLoaded: {} as Record<string, boolean>,
-    /**
-     * Whether to activate the autoloading feature of ResourceCardList.
-     * 
-     * We use this variable to disable autoloading while fetching transfer members.
-     */
-    autoload: true,
   }),
   computed: {
     account() : Account {
@@ -122,9 +113,8 @@ export default defineComponent({
      * Note that members can't be loaded using the regular inclusion pattern of JSON:API 
      * because the relationship account=>member is inverse.
      */
-    async fetchMembers() {
-      this.autoload = false;
-      const transfers = this.$store.getters["transfers/currentList"];
+    async fetchMembers(page: number) {
+      const transfers = this.$store.getters["transfers/page"](page);
       const accountIds = new Set<string>();
       transfers
         .forEach((transfer: ExtendedTransfer) => {
@@ -140,7 +130,6 @@ export default defineComponent({
       transfers.forEach((transfer: ExtendedTransfer) => {
         this.transferLoaded[transfer.id] = true
       });
-      this.autoload = true;
     },
     /**
      * Filter the transfer list to those that are fully loaded.
@@ -152,7 +141,7 @@ export default defineComponent({
      * which does have the reactive properties.
      */
     loadedTransfers(transfers: ExtendedTransfer[]): ExtendedTransfer[] {
-      return transfers.filter(transfer => this.transferLoaded[transfer.id]);
+      return transfers.filter(transfer => this.transferLoaded[transfer.id] || (transfer.payer.member && transfer.payee.member));
     },
     fetchResources(search: string): void {
       (this.$refs.resourceCards as {fetchResources: (s: string) => void}).fetchResources(search);

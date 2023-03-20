@@ -89,7 +89,7 @@ export class Notifications {
 
     } catch (err) {
       // The user doesn't grant the app to receive notifications.
-      throw new KError(KErrorCode.NotificationsPermissionDenied, 'An error occurred while retrieving token.' + err);
+      throw new KError(KErrorCode.NotificationsPermissionDenied, 'An error occurred with notifications subscription.' + err);
     }
   }
 
