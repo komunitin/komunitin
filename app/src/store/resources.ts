@@ -74,6 +74,12 @@ export interface LoadListPayload {
    * Inlude related resources.
    */
   include?: string;
+  /**
+   * Updates current page and page set.
+   * 
+   * Set to false in calls to load auxiliar resources (not the current main list).
+   */
+  onlyResources?: boolean
 }
 /**
  * Object argument for the `load` action.
@@ -263,7 +269,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           group,
           filter: {
             id: ids
-          }
+          },
+          onlyResources: true
         } as LoadListPayload,
         { root: true }
       );
@@ -279,7 +286,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   protected async handleCollectionResponse(
     response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
     context: ActionContext<ResourcesState<T>, S>,
-    group: string
+    group: string,
+    onlyResources?: boolean
   ) {
     const {commit, dispatch} = context;
     const result = response.data;
@@ -290,8 +298,13 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
 
     // Commit mutation(s) after commiting included and eventualy fetched external resources.
-    commit("setNext", result.links.next);
-    commit("setList", result.data);
+    if (!onlyResources) {
+      commit("setNext", result.links.next);
+      commit("setList", result.data);
+    } else {
+      commit("addResources", result.data)
+    }
+    
   }
   /**
    * Handle error from the API.
@@ -482,6 +495,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state.pages[page] = resources.map(resource => resource.id);
     },
     /**
+     * Add the given resources to the resource list, without modifying current resource pointers.
+     */
+    addResources: (state: ResourcesState<T>, resources: T[]) => {
+      resources.forEach(resource => this.setResource(state, resource));
+    },
+    /**
      * Update the current resource
      */
     setCurrent: (state: ResourcesState<T>, resource: T) => {
@@ -551,8 +570,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadListPayload
   ) {
     // Initialize the state to the first page.
-    context.commit("setCurrentPage", 0)
-    context.commit("setNext", undefined)
+    if (!payload.onlyResources) {
+      context.commit("setCurrentPage", 0)
+      context.commit("setNext", undefined)
+    }
     
     // At this point the data may already be cached and hence available to the UI. 
     // However we revalidate the data by doing the request.
@@ -592,7 +613,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       await this.handleCollectionResponse(
         response,
         context,
-        payload.group
+        payload.group,
+        payload.onlyResources
       );
     } catch (error) {
       throw Resources.getKError(error as AxiosError);
