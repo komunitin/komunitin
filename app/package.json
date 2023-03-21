@@ -28,6 +28,7 @@
     "date-fns": "^2.16.1",
     "firebase": "^9.17.2",
     "leaflet": "^1.9.3",
+    "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "markdown-to-txt": "^2.0.1",
     "marked": "^4.1.1",
