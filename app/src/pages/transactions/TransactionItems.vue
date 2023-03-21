@@ -119,8 +119,11 @@ export default defineComponent({
       const accountIds = new Set<string>();
       transfers
         .forEach((transfer: ExtendedTransfer) => {
-          accountIds.add(transfer.payer.id);
-          accountIds.add(transfer.payee.id);
+          [transfer.payer.id, transfer.payee.id].forEach(id => {
+            if (id !== this.account.id) {
+              accountIds.add(id);
+            }
+          })
         });
       await this.$store.dispatch("members/loadList", {
         group: this.code,

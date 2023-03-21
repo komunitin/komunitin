@@ -35,7 +35,7 @@ function showError(error: KError) {
  */
 function logError(error: KError) {
   // eslint-disable-next-line no-console
-  console.error(`[${error.code}] ${error}`);
+  console.error(`[${error.code}] ${error.message}`);
 }
 
 /**
@@ -48,7 +48,7 @@ function logErrorHandling(error: Error) {
 
 export function handleError(error: KError): void {
   logError(error);
-  showError(error);
+  //showError(error);
 }
 
 function vueWarnHandler(message: string, instance: ComponentPublicInstance | null, trace: string) {

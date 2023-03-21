@@ -182,7 +182,6 @@ export default defineComponent({
   },
   data() {
     return {
-      isLoading: true,
       socialButtonsView: false
     };
   },
@@ -201,22 +200,25 @@ export default defineComponent({
       // FIXME: https://github.com/komunitin/komunitin/issues/81
     },
     offersItems(): string[] {
-      return this.buildCategoryItems("offers");
+      return this.group.categories ? this.buildCategoryItems("offers") : []
     },
     needsItems(): string[] {
-      return this.buildCategoryItems("needs");
+      return this.group.categories ? this.buildCategoryItems("needs") : []
     },
     center(): [number, number] | undefined {
       return this.group?.attributes.location.coordinates;
     },
     marker(): [number, number] | undefined {
       return this.center
+    },
+    isLoading(): boolean {
+      return !(this.currency !== undefined && this.group !== undefined && this.group.contacts !== undefined && this.group.categories !== undefined);
     }
   },
   created() {
     // If I just call the fetch functions in created or mounted hook, then navigation from
     // `/groups/GRP1` to `/groups/GRP2` doesn't trigger the action since the
-    // component is reused. If I otherwise add the `wath` Vue component member, the
+    // component is reused. If I otherwise add the `watch` Vue component member, the
     // tests fail and give "You may have an infinite update loop in a component
     // render function". So that's the way I found to make it work.
     //
@@ -225,16 +227,12 @@ export default defineComponent({
   },
   methods: {
     async fetchData(code: string) {
-      this.isLoading = true;
-      try {
-        // We are using the fact that a group and its related currency
-        // share the same unique code. This way we can make the two calls 
-        // in parallel. Another option, formally more robust but less 
-        // efficient would be to get the currency url from the group data.
-        await Promise.all([this.fetchGroup(code), this.fetchCurrency(code)]);
-      } finally {
-        this.isLoading = false;
-      }
+      // We are using the fact that a group and its related currency
+      // share the same unique code. This way we can make the two calls 
+      // in parallel. Another option, formally more robust but less 
+      // efficient would be to get the currency url from the group data.
+      await Promise.all([this.fetchGroup(code), this.fetchCurrency(code)]);
+      
     },
     // Group info.
     async fetchGroup(code: string) {
@@ -249,7 +247,7 @@ export default defineComponent({
     },
     // Categories info.
     buildCategoryItems(type: "offers" | "needs"): string[] {
-      // Copy original arrray not to modify it when sorting.
+      // Copy original array not to modify it when sorting.
       const items: string[] = this.group.categories
         .slice()
         .sort(
