@@ -24,7 +24,7 @@ export interface ResourcesState<T extends ResourceObject> {
   /**
    * Id of current resource.
    */
-  current: string | null;
+  currentId: string | null;
   /**
    * The url of the next page. null means no next page, undefined means unknown.
    */
@@ -222,7 +222,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     try {
       return await request()
     } catch (error) {
-      if ((error as AxiosError).code == "401" && (context.rootState as UserState).userId) {
+      if ((error as AxiosError).code == "401" && (context.rootState as UserState).myUserId) {
         // Unauthorized. Refresh token and retry
         await context.dispatch("authorize")
         return request()
@@ -251,7 +251,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     included.forEach(resource => {
       if (!(resource as ExternalResourceObject).meta?.external) {
         // Standard included resource. Commit change!
-        commit(resource.type + "/add", resource, { root: true });
+        commit(resource.type + "/addResource", resource, { root: true });
       } else {
         // External included resource.
         if (!external[resource.type]) {
@@ -299,8 +299,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
     // Commit mutation(s) after commiting included and eventualy fetched external resources.
     if (!onlyResources) {
-      commit("setNext", result.links.next);
-      commit("setList", result.data);
+      commit("next", result.links.next)
+      this.setCurrentPageResources(context, result.data)
     } else {
       commit("addResources", result.data)
     }
@@ -391,7 +391,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   state = {
     resources: {},
     pages: [],
-    current: null,
+    currentId: null,
     next: undefined,
     currentPage: null
   } as ResourcesState<T>;
@@ -448,8 +448,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       _rootState: unknown,
       rootGetters: Record<string, Getter>
     ) =>
-      state.current != null
-        ? this.relatedGetters(rootGetters, state.resources[state.current])
+      state.currentId != null
+        ? this.relatedGetters(rootGetters, state.resources[state.currentId])
         : undefined,
     /**
      * Gets the current list of resources.
@@ -489,42 +489,39 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     /**
      * Update the current list of resources
      */
-    setList: (state: ResourcesState<T>, resources: T[]) => {
-      resources.forEach(resource => this.setResource(state, resource));
-      const page = state.currentPage as number // At this point currentPage must not be null.
-      state.pages[page] = resources.map(resource => resource.id);
+    setPageIds: (state: ResourcesState<T>, {page, ids}: {page: number, ids: string[]}) => {
+      state.pages[page] = ids;
+    },
+    /**
+     * Add a resource to the dictionary without updating the current resource.
+     */
+    addResource: (state: ResourcesState<T>, resource: T) => {
+      state.resources[resource.id] = resource
     },
     /**
      * Add the given resources to the resource list, without modifying current resource pointers.
      */
     addResources: (state: ResourcesState<T>, resources: T[]) => {
-      resources.forEach(resource => this.setResource(state, resource));
+      resources.forEach(resource => {
+        state.resources[resource.id] = resource
+      });
     },
     /**
-     * Update the current resource
+     * Update the current resource pointer.
      */
-    setCurrent: (state: ResourcesState<T>, resource: T) => {
-      this.setResource(state, resource);
-      state.current = resource.id;
-    },
-    /**
-     * Add a resource to the dictionary without updating the current resource.
-     */
-    add: (state: ResourcesState<T>, resource: T) => {
-      this.setResource(state, resource);
+    currentId: (state: ResourcesState<T>, id: string) => {
+      state.currentId = id;
     },
     /**
      * Update the next link.
      */
-    setNext(state: ResourcesState<T>, next: string | null | undefined) {
+    next(state: ResourcesState<T>, next: string | null | undefined) {
       state.next = next;
     },
     /**
      * Update the current page index.
-     * @param state 
-     * @param index 
      */
-    setCurrentPage(state: ResourcesState<T>, index: number | null) {
+    currentPage(state: ResourcesState<T>, index: number | null) {
       state.currentPage = index
     }
   };
@@ -546,20 +543,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context: ActionContext<ResourcesState<T>, S>,
       payload: CreatePayload<T>
     ) => this.create(context, payload),
+    setCurrent: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: T
+    ) => this.setCurrent(context, payload)
   };
-  
-  /**
-   * Adds aprticular resource in the resource array. If the resource already exists,
-   * it will merge the new with the old object.
-   */
-  protected setResource(state: ResourcesState<T>, resource: T) {
-    if (state.resources[resource.id] !== undefined) {
-      merge(state.resources[resource.id], resource)
-    } else {
-      state.resources[resource.id] = resource
-    }
 
-  }
   /**
    * Fetches the current list of resources.
    *
@@ -571,8 +560,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   ) {
     // Initialize the state to the first page.
     if (!payload.onlyResources) {
-      context.commit("setCurrentPage", 0)
-      context.commit("setNext", undefined)
+      context.commit("currentPage", 0)
+      context.commit("next", undefined)
     }
     
     // At this point the data may already be cached and hence available to the UI. 
@@ -632,14 +621,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         );
       }
       // Increase current page number.
-      context.commit("setCurrentPage", context.state.currentPage + 1)
+      const page = context.state.currentPage + 1;
+      context.commit("currentPage", page)
 
       // At this point the data may be already cached and available for the UI. We however 
       // revalidate that by calling the endpoint.
 
       // Well, if the endpoint is null it means that there's no next page.
       if (context.state.next === null) {
-        context.commit("setList", []);
+        context.commit("setPageIds", {page, ids:[]});
         return;
       }
       
@@ -672,7 +662,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       const response = await this.request(context, url);
       // Commit mutation(s).
       const resource = response.data.data;
-      context.commit("setCurrent", resource);
+      this.setCurrent(context, resource)
       if (response.data.included) {
         await Resources.handleIncluded(
           response.data.included,
@@ -699,8 +689,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       const response = await this.request(context, url, "post", body)
       if (response.status == 201) {
         // Created. Data in the response body.
-        const resource = response.data.data;
-        context.commit("setCurrent", resource);
+        const resource = response.data.data
+        this.setCurrent(context, resource)
       } else {
         throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
       }
@@ -708,6 +698,39 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       throw Resources.getKError(error as AxiosError);
     }
     
+  }
+  /**
+   * Sets the current resource. Use this action when setting a resource created 
+   * from the client and not fetched from the API, or internally from other actions.
+   */
+  protected setCurrent(context: ActionContext<ResourcesState<T>, S>, resource: T) {
+    context.commit("addResource", this.updatedResource(context.state, resource))
+    context.commit("currentId", resource.id)
+  }
+
+  /**
+   * Use internally from other actions when adding new resources and updating the page ids list. 
+   */
+  protected setCurrentPageResources(context: ActionContext<ResourcesState<T>, S>, resources: T[]) {
+    context.commit("addResources", this.updatedResources(context.state, resources))
+    context.commit("setPageIds", {page: context.state.currentPage, ids: resources.map(resource => resource.id)})
+  }
+  
+  /**
+   * Array version of updatedResource().
+   */
+  protected updatedResources(state: ResourcesState<T>, resources: T[]) {
+    return resources.map((resource) => this.updatedResource(state, resource))
+  }
+  /**
+   * If the resource already exists, it will merge the new with the old object.
+   * Note: this architecture may be buggy if an update happens to delete some
+   * object property, but so far this does not seem to be a problem.
+   */
+  protected updatedResource(state: ResourcesState<T>, resource: T) {
+    return state.resources[resource.id] !== undefined ?
+      merge({...state.resources[resource.id]}, resource) :
+      resource
   }
 
 }

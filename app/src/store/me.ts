@@ -21,7 +21,7 @@ export interface LoginPayload {
 export interface UserState {
   userInfo?: User;
   tokens?: AuthData;
-  userId?: string;
+  myUserId?: string;
   /**
    * Current location, provided by device.
    */
@@ -68,7 +68,7 @@ async function loadUserData(accessToken: string,
 
   // Fetch currency and account from accounting API.
   await dispatch("accounts/load", {group: currencyCode, code: accountCode, include: "currency"});
-  commit("myUser", user.id);
+  commit("myUserId", user.id);
 }
 
 /**
@@ -96,21 +96,21 @@ export default {
     tokens: auth.getStoredTokens(),
     // It is important to define the properties even if undefined in order to add the reactivity.
     userInfo: undefined,
-    userId: undefined,
+    myUserId: undefined,
     accountId: undefined,
     location: undefined,
     subscriptionToken: undefined
-  }),
+  } as UserState),
   getters: {
     isLoggedIn: state =>
       state.userInfo !== undefined &&
-      state.userId !== undefined &&
+      state.myUserId !== undefined &&
       auth.isAuthorized(state.tokens),
     isSubscribed: state =>
       state.subscriptionToken !== undefined,
     myUser: (state, getters, rootState, rootGetters) => {
-      if (state.userId !== undefined) {
-        return rootGetters["users/one"](state.userId);
+      if (state.myUserId !== undefined) {
+        return rootGetters["users/one"](state.myUserId);
       }
       return undefined;
     },
@@ -130,9 +130,9 @@ export default {
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
-    myUser: (state, userId) => (state.userId = userId),
+    myUserId: (state, myUserId) => (state.myUserId = myUserId),
     location: (state, location) => (state.location = location),
-    subscription: (state, subscriptionToken) => (state.subscriptionToken = subscriptionToken)
+    subscriptionToken: (state, subscriptionToken) => (state.subscriptionToken = subscriptionToken)
   },
 
   actions: {
@@ -174,7 +174,7 @@ export default {
       auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
-      context.commit("myUser", undefined);
+      context.commit("myUserId", undefined);
     },
     /**
      * Get the current location from the device.
@@ -223,7 +223,7 @@ export default {
             locale: useI18n().locale.value
           },
           context.getters.accessToken);
-        context.commit("subscription", token);
+        context.commit("subscriptionToken", token);
       }
     }
   }
