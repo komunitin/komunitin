@@ -1,7 +1,7 @@
 import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
 import { Module, ActionContext, Commit, Dispatch } from "vuex";
-import {merge} from "lodash";
+import {cloneDeep, merge} from "lodash";
 
 import {
   CollectionResponseInclude,
@@ -429,7 +429,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
               return resource.attributes[field] == value;
             }
             // Check that the relationship is defined and is to-one.
-            else if (typeof resource.relationships?.[field].data == "object") {
+            else if (typeof resource.relationships?.[field]?.data == "object") {
               return (resource.relationships[field].data as ResourceIdentifierObject).id == value
             }
             return false;
@@ -644,6 +644,25 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       throw Resources.getKError(error as AxiosError);
     }
   }
+  protected loadCached (
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadPayload
+  ) {
+    let id = null
+    // transaction code is the resource id.
+    if (context.state.resources[payload.code]) {
+      id = payload.code
+    } else {
+    // in other resources the code is an attribute.
+      const cached = context.getters['find']({
+        code: payload.code,
+      })
+      if (cached) {
+        id = cached.id
+      }
+    }
+    context.commit("currentId", id)
+  }
   /**
    * Fetches the current reaource.
    */
@@ -651,6 +670,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     context: ActionContext<ResourcesState<T>, S>,
     payload: LoadPayload
   ) {
+    // First, try to find the required resource in cache so we can render
+    // some content before hitting the API.
+    this.loadCached(context, payload)
+    
+    // Fetch (or revalidate) the content.
     let url = this.resourceEndpoint(payload.code, payload.group);
     if (payload.include) {
       const params = new URLSearchParams();
@@ -729,7 +753,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   protected updatedResource(state: ResourcesState<T>, resource: T) {
     return state.resources[resource.id] !== undefined ?
-      merge({...state.resources[resource.id]}, resource) :
+      merge(cloneDeep(state.resources[resource.id]), resource) :
       resource
   }
 
