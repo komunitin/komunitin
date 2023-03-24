@@ -20,7 +20,7 @@ export interface ResourcesState<T extends ResourceObject> {
   /**
    * Array of pages. Each element is a page represented by an array of resource Id's.
    */
-  pages: string[][]
+  pages: {[key: string]: string[][]}
   /**
    * Id of current resource.
    */
@@ -30,9 +30,13 @@ export interface ResourcesState<T extends ResourceObject> {
    */
   next: string | null | undefined;
   /**
-   * The index of the current page. Note that currentList = pages[currentPage].
+   * The index of the current page. Note that currentList = [pages][currentQueryKey][currentPage].
    */
   currentPage: number | null;
+  /**
+   * The cache key for this list.
+   */
+  currentQueryKey: string | null;
 }
 export interface CreatePayload<T extends ResourceObject> {
   /**
@@ -390,10 +394,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
   state = {
     resources: {},
-    pages: [],
+    pages: {},
     currentId: null,
     next: undefined,
-    currentPage: null
+    currentPage: null,
+    currentQueryKey: null
   } as ResourcesState<T>;
 
   getters = {
@@ -469,8 +474,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       _rootState: unknown,
       rootGetters: Record<string, Getter>
     ) => (index: number) => {
-      if (state.pages[index]) {
-        return state.pages[index]
+      if (state.currentQueryKey !== null && state.pages[state.currentQueryKey] && state.pages[state.currentQueryKey][index]) {
+        return state.pages[state.currentQueryKey][index]
           .map(id => state.resources[id])
           .map(resource => this.relatedGetters(rootGetters, resource))
       } else {
@@ -489,8 +494,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     /**
      * Update the current list of resources
      */
-    setPageIds: (state: ResourcesState<T>, {page, ids}: {page: number, ids: string[]}) => {
-      state.pages[page] = ids;
+    setPageIds: (state: ResourcesState<T>, {key, page, ids}: {key: string, page: number, ids: string[]}) => {
+      if (state.pages[key] === undefined) {
+        state.pages[key] = []
+      }
+      state.pages[key][page] = ids;
     },
     /**
      * Add a resource to the dictionary without updating the current resource.
@@ -523,6 +531,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      */
     currentPage(state: ResourcesState<T>, index: number | null) {
       state.currentPage = index
+    },
+    /**
+     * Update the current query key.
+     */
+    currentQueryKey(state: ResourcesState<T>, key: string) {
+      state.currentQueryKey = key
     }
   };
 
@@ -550,23 +564,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   };
 
   /**
-   * Fetches the current list of resources.
-   *
-   * @param payload Configure the request by filtering the results, including related resources, including the current location, sorting.
+   * Creates the API query string for this list filters.
    */
-  protected async loadList(
-    context: ActionContext<ResourcesState<T>, S>,
-    payload: LoadListPayload
-  ) {
-    // Initialize the state to the first page.
-    if (!payload.onlyResources) {
-      context.commit("currentPage", 0)
-      context.commit("next", undefined)
-    }
-    
-    // At this point the data may already be cached and hence available to the UI. 
-    // However we revalidate the data by doing the request.
-
+  protected buildQuery(payload: LoadListPayload): string {
     // Build query string.
     const params = new URLSearchParams();
     if (payload.search) {
@@ -593,8 +593,49 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (payload.include) {
       params.set("include", payload.include);
     }
+    return params.toString()
+  }
+
+  /**
+   * Creates a string that identifies this list filters for caching purposes.
+   */
+  protected buildQueryKey(payload: LoadListPayload): string {
+    const params = new URLSearchParams()
+    if (payload.search) {
+      params.set("search", payload.search)
+    }
+    if (payload.filter) {
+      Object.entries(payload.filter).map(([field, value]) => {
+        params.set(`filter[${field}]`, value);
+      });
+    }
+    if (payload.sort) {
+      params.set("sort", payload.sort);
+    }
+    return params.toString()
+  }
+
+  /**
+   * Fetches the current list of resources.
+   *
+   * @param payload Configure the request by filtering the results, including related resources, including the current location, sorting.
+   */
+  protected async loadList(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadListPayload
+  ) {
+    // Initialize the state to the first page.
+    if (!payload.onlyResources) {
+      context.commit("currentQueryKey", this.buildQueryKey(payload))
+      context.commit("currentPage", 0)
+      context.commit("next", undefined)
+    }
+    
+    // At this point the data may already be cached and hence available to the UI. 
+    // However we revalidate the data by doing the request.
+
     let url = this.collectionEndpoint(payload.group);
-    const query = params.toString();
+    const query = this.buildQuery(payload);
     if (query.length > 0) url += "?" + query;
     // Call API
     try {
@@ -614,7 +655,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadNextPayload
   ) {
     try {
-      if (context.state.next === undefined || context.state.currentPage === null) {
+      if (context.state.next === undefined || context.state.currentPage === null || context.state.currentQueryKey == null) {
         throw new KError(
           KErrorCode.ScriptError,
           "Unexpected call to 'loadNext' resource action before calling to loadList."
@@ -629,7 +670,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
       // Well, if the endpoint is null it means that there's no next page.
       if (context.state.next === null) {
-        context.commit("setPageIds", {page, ids:[]});
+        context.commit("setPageIds", {key: context.state.currentQueryKey, page, ids:[]});
         return;
       }
       
@@ -737,7 +778,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   protected setCurrentPageResources(context: ActionContext<ResourcesState<T>, S>, resources: T[]) {
     context.commit("addResources", this.updatedResources(context.state, resources))
-    context.commit("setPageIds", {page: context.state.currentPage, ids: resources.map(resource => resource.id)})
+    context.commit("setPageIds", {key: context.state.currentQueryKey, page: context.state.currentPage, ids: resources.map(resource => resource.id)})
   }
   
   /**
