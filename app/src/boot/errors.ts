@@ -2,8 +2,8 @@ import { ComponentPublicInstance } from 'vue';
 
 import KError, { KErrorCode } from '../KError';
 import { Notify } from 'quasar'
-import { useI18n } from 'vue-i18n';
 import { boot } from 'quasar/wrappers';
+import {i18n} from './i18n'
 
 
 /**
@@ -12,7 +12,8 @@ import { boot } from 'quasar/wrappers';
  * @param error The error.
  */
 function getLocalizedMessage(error: KError): string {
-  return useI18n().t(error.getTranslationKey()).toString();
+  const {t} = i18n.global
+  return t(error.getTranslationKey()).toString();
 }
 
 /**
@@ -48,7 +49,7 @@ function logErrorHandling(error: Error) {
 
 export function handleError(error: KError): void {
   logError(error);
-  //showError(error);
+  showError(error);
 }
 
 function vueWarnHandler(message: string, instance: ComponentPublicInstance | null, trace: string) {
