@@ -200,7 +200,7 @@ export default {
             codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied;
             const kerror = new KError(codes[error.code], error.message, error);
             // Don't crash the application on location error. Just log it and continue.
-            // The app should be able to continue without location info.
+            // The app should be able to continue without updated location info.
             handleError(kerror);
             resolve(undefined);
           },

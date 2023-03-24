@@ -2,7 +2,6 @@
   <div>
     <q-infinite-scroll
       v-if="!isLoading"
-      :disable="disableScrollLoad"
       @load="loadNext"
     >
       <empty v-if="isEmpty" />
@@ -132,7 +131,7 @@ export default defineComponent({
   emits: ['page-loaded'],
   data() {
     return {
-      disableScrollLoad: true
+      ready: false
     };
   },
   computed: {
@@ -166,7 +165,7 @@ export default defineComponent({
      */
     isLoading() : boolean {
       const state = this.storeState
-      return (state.currentPage === null || state.currentPage === 0 && state.next === undefined && this.isEmpty)
+      return (!this.ready || state.currentPage === null || state.currentPage === 0 && state.next === undefined && this.isEmpty)
     }
   },
   // Note that even if this is marked async, Vue does not wait for the
@@ -174,10 +173,10 @@ export default defineComponent({
   // to be able to fetch resources after locate.
   created: async function() {
     await this.$store.dispatch("locate")
-    await this.fetchResources(this.query)
+    this.fetchResources(this.query)
     this.$watch(() => this.query, (newQuery: string) => this.fetchResources(newQuery))
-    // Set the current page to 0 in fetchResources before enabling scroll load.
-    this.disableScrollLoad = false
+    // Set the current page to 0 etc in fetchResources before enabling scroll load.
+    this.ready = true
   },
   methods: {
     /**

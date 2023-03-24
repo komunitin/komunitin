@@ -18,6 +18,25 @@ export default function createPersistPlugin<T>(name: string) {
   
   const storage = localForage.createInstance({name})
 
+  // Is this key a page ids value? /pages/key/index
+  const isPage = (index: string[]) => index.length >= 3 && index[index.length-3] == 'pages'
+
+  // Helper function to set the value in the proper place on the state tree.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buildState = (state: any, index: string[], value: any, end: number = index.length) => {
+    let current = state;
+    for (let i = 0; i < end - 1; i++) {
+      if (current[index[i]] === undefined) {
+        current[index[i]] = {};
+      }
+      current = current[index[i]]
+    }
+    // last iteration set value instead of {}
+    current[index[end - 1]] = value
+
+    return value
+  }
+
 
   return (store: Store<T>) => {
     // Restore state
@@ -25,32 +44,11 @@ export default function createPersistPlugin<T>(name: string) {
     const state: any = {}
     storage.iterate((value, key) => {
       const index = key.split('/');
-      let current = state;
-      // Create module tree structure until level -2.
-      for (let i = 0; i < index.length - 2; i++) {
-        if (current[index[i]] === undefined) {
-          current[index[i]] = {};
-        }
-        current = current[index[i]]
-      }
-      // Do the level - 2
-      if (index.length >= 2) {
-        const id = index[index.length - 2]
-        if (current[id] === undefined) {
-          if (id === 'pages') {
-            current[id] = []
-          } else {
-            current[id] = {}
-          }
-        }
-        current = current[id]
-      }
-      // Finally do the assignment.
-      const id = index[index.length - 1]
-      if (current instanceof Array) {
-        current[parseInt(id)] = value
+      if (isPage(index)) {
+        const current = buildState(state, index, [], index.length - 1)
+        current[parseInt(index[index.length - 1])] = value
       } else {
-        current[id] = value
+        buildState(state, index, value)
       }
     }).then(() => {
       store.replaceState(merge(state, store.state))
@@ -74,8 +72,8 @@ export default function createPersistPlugin<T>(name: string) {
         const resource = value as ResourceObject
         save([...index, 'resources', resource.id], resource)
       } else if (op == 'setPageIds') {
-        const {page, ids} = value as {page: number, ids: string[]}
-        save([...index, 'pages', page + ""], ids)
+        const {key, page, ids} = value as {key: string, page: number, ids: string[]}
+        save([...index, 'pages', key, page + ""], ids)
       } else {
         save([...index, op], value)
       }
