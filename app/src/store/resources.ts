@@ -1,7 +1,7 @@
 import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
 import { Module, ActionContext, Commit, Dispatch } from "vuex";
-import {merge} from "lodash";
+import {cloneDeep, merge} from "lodash";
 
 import {
   CollectionResponseInclude,
@@ -18,18 +18,25 @@ export interface ResourcesState<T extends ResourceObject> {
    */
   resources: { [id: string]: T };
   /**
+   * Array of pages. Each element is a page represented by an array of resource Id's.
+   */
+  pages: {[key: string]: string[][]}
+  /**
    * Id of current resource.
    */
-  current: string | null;
-  /**
-   * Array of ids of current list of resources. Note that for paginated responses,
-   * this list contains the current chunk.
-   */
-  currentList: string[];
+  currentId: string | null;
   /**
    * The url of the next page. null means no next page, undefined means unknown.
    */
   next: string | null | undefined;
+  /**
+   * The index of the current page. Note that currentList = [pages][currentQueryKey][currentPage].
+   */
+  currentPage: number | null;
+  /**
+   * The cache key for this list.
+   */
+  currentQueryKey: string | null;
 }
 export interface CreatePayload<T extends ResourceObject> {
   /**
@@ -71,6 +78,12 @@ export interface LoadListPayload {
    * Inlude related resources.
    */
   include?: string;
+  /**
+   * Updates current page and page set.
+   * 
+   * Set to false in calls to load auxiliar resources (not the current main list).
+   */
+  onlyResources?: boolean
 }
 /**
  * Object argument for the `load` action.
@@ -213,7 +226,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     try {
       return await request()
     } catch (error) {
-      if ((error as AxiosError).code == "401" && (context.rootState as UserState).userId) {
+      if ((error as AxiosError).code == "401" && (context.rootState as UserState).myUserId) {
         // Unauthorized. Refresh token and retry
         await context.dispatch("authorize")
         return request()
@@ -242,7 +255,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     included.forEach(resource => {
       if (!(resource as ExternalResourceObject).meta?.external) {
         // Standard included resource. Commit change!
-        commit(resource.type + "/add", resource, { root: true });
+        commit(resource.type + "/addResource", resource, { root: true });
       } else {
         // External included resource.
         if (!external[resource.type]) {
@@ -260,7 +273,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           group,
           filter: {
             id: ids
-          }
+          },
+          onlyResources: true
         } as LoadListPayload,
         { root: true }
       );
@@ -276,17 +290,25 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   protected async handleCollectionResponse(
     response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
     context: ActionContext<ResourcesState<T>, S>,
-    group: string
+    group: string,
+    onlyResources?: boolean
   ) {
     const {commit, dispatch} = context;
-    // Commit mutation(s).
     const result = response.data;
-    commit("setList", result.data);
-    commit("setNext", result.links.next);
+    
     // Commit included resources.
     if (result.included) {
       await Resources.handleIncluded(result.included, group, commit, dispatch);
     }
+
+    // Commit mutation(s) after commiting included and eventualy fetched external resources.
+    if (!onlyResources) {
+      commit("next", result.links.next)
+      this.setCurrentPageResources(context, result.data)
+    } else {
+      commit("addResources", result.data)
+    }
+    
   }
   /**
    * Handle error from the API.
@@ -372,9 +394,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
   state = {
     resources: {},
-    current: null,
-    currentList: [],
-    next: undefined
+    pages: {},
+    currentId: null,
+    next: undefined,
+    currentPage: null,
+    currentQueryKey: null
   } as ResourcesState<T>;
 
   getters = {
@@ -410,7 +434,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
               return resource.attributes[field] == value;
             }
             // Check that the relationship is defined and is to-one.
-            else if (typeof resource.relationships?.[field].data == "object") {
+            else if (typeof resource.relationships?.[field]?.data == "object") {
               return (resource.relationships[field].data as ResourceIdentifierObject).id == value
             }
             return false;
@@ -429,23 +453,38 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       _rootState: unknown,
       rootGetters: Record<string, Getter>
     ) =>
-      state.current != null
-        ? this.relatedGetters(rootGetters, state.resources[state.current])
+      state.currentId != null
+        ? this.relatedGetters(rootGetters, state.resources[state.currentId])
         : undefined,
     /**
      * Gets the current list of resources.
      */
-    currentList: (
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    currentList: (state: ResourcesState<T>, getters: any) => {
+      if (state.currentPage !== null) {
+        return getters.page(state.currentPage)
+      } else {
+        return undefined
+      }
+    },
+
+    page: (
       state: ResourcesState<T>,
       _getters: unknown,
       _rootState: unknown,
       rootGetters: Record<string, Getter>
-    ) =>
-      state.currentList
-        .map(id => state.resources[id])
-        .map(resource => this.relatedGetters(rootGetters, resource)),
+    ) => (index: number) => {
+      if (state.currentQueryKey !== null && state.pages[state.currentQueryKey] && state.pages[state.currentQueryKey][index]) {
+        return state.pages[state.currentQueryKey][index]
+          .map(id => state.resources[id])
+          .map(resource => this.relatedGetters(rootGetters, resource))
+      } else {
+        return undefined;
+      }
+    },
+       
     /**
-     * Returns whether the current list has more resources to be fetched.
+     * Returns whether the current list has more resources to be fetched, or undefined if not known.
      */
     hasNext: (state: ResourcesState<T>) =>
       state.next === undefined ? undefined : state.next !== null
@@ -455,29 +494,49 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     /**
      * Update the current list of resources
      */
-    setList: (state: ResourcesState<T>, resources: T[]) => {
-      resources.forEach(resource => this.setResource(state, resource));
-      state.currentList = resources.map(resource => resource.id);
-    },
-    /**
-     * Update the current resource
-     */
-    setCurrent: (state: ResourcesState<T>, resource: T) => {
-      this.setResource(state, resource);
-      state.current = resource.id;
+    setPageIds: (state: ResourcesState<T>, {key, page, ids}: {key: string, page: number, ids: string[]}) => {
+      if (state.pages[key] === undefined) {
+        state.pages[key] = []
+      }
+      state.pages[key][page] = ids;
     },
     /**
      * Add a resource to the dictionary without updating the current resource.
      */
-    add: (state: ResourcesState<T>, resource: T) => {
-      this.setResource(state, resource);
-      
+    addResource: (state: ResourcesState<T>, resource: T) => {
+      state.resources[resource.id] = resource
+    },
+    /**
+     * Add the given resources to the resource list, without modifying current resource pointers.
+     */
+    addResources: (state: ResourcesState<T>, resources: T[]) => {
+      resources.forEach(resource => {
+        state.resources[resource.id] = resource
+      });
+    },
+    /**
+     * Update the current resource pointer.
+     */
+    currentId: (state: ResourcesState<T>, id: string) => {
+      state.currentId = id;
     },
     /**
      * Update the next link.
      */
-    setNext(state: ResourcesState<T>, next: string | null) {
+    next(state: ResourcesState<T>, next: string | null | undefined) {
       state.next = next;
+    },
+    /**
+     * Update the current page index.
+     */
+    currentPage(state: ResourcesState<T>, index: number | null) {
+      state.currentPage = index
+    },
+    /**
+     * Update the current query key.
+     */
+    currentQueryKey(state: ResourcesState<T>, key: string) {
+      state.currentQueryKey = key
     }
   };
 
@@ -498,29 +557,16 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context: ActionContext<ResourcesState<T>, S>,
       payload: CreatePayload<T>
     ) => this.create(context, payload),
+    setCurrent: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: T
+    ) => this.setCurrent(context, payload)
   };
-  
-  /**
-   * Adds aprticular resource in the resource array. If the resource already exists,
-   * it will merge the new with the old object.
-   */
-  protected async setResource(state: ResourcesState<T>, resource: T) {
-    if (state.resources[resource.id] !== undefined) {
-      merge(state.resources[resource.id], resource)
-    } else {
-      state.resources[resource.id] = resource
-    }
 
-  }
   /**
-   * Fetches the current list of resources.
-   *
-   * @param payload Configure the request by filtering the results, including related resources, including the current location, sorting.
+   * Creates the API query string for this list filters.
    */
-  protected async loadList(
-    context: ActionContext<ResourcesState<T>, S>,
-    payload: LoadListPayload
-  ) {
+  protected buildQuery(payload: LoadListPayload): string {
     // Build query string.
     const params = new URLSearchParams();
     if (payload.search) {
@@ -547,8 +593,49 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (payload.include) {
       params.set("include", payload.include);
     }
+    return params.toString()
+  }
+
+  /**
+   * Creates a string that identifies this list filters for caching purposes.
+   */
+  protected buildQueryKey(payload: LoadListPayload): string {
+    const params = new URLSearchParams()
+    if (payload.search) {
+      params.set("search", payload.search)
+    }
+    if (payload.filter) {
+      Object.entries(payload.filter).map(([field, value]) => {
+        params.set(`filter[${field}]`, value);
+      });
+    }
+    if (payload.sort) {
+      params.set("sort", payload.sort);
+    }
+    return params.toString()
+  }
+
+  /**
+   * Fetches the current list of resources.
+   *
+   * @param payload Configure the request by filtering the results, including related resources, including the current location, sorting.
+   */
+  protected async loadList(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadListPayload
+  ) {
+    // Initialize the state to the first page.
+    if (!payload.onlyResources) {
+      context.commit("currentQueryKey", this.buildQueryKey(payload))
+      context.commit("currentPage", 0)
+      context.commit("next", undefined)
+    }
+    
+    // At this point the data may already be cached and hence available to the UI. 
+    // However we revalidate the data by doing the request.
+
     let url = this.collectionEndpoint(payload.group);
-    const query = params.toString();
+    const query = this.buildQuery(payload);
     if (query.length > 0) url += "?" + query;
     // Call API
     try {
@@ -556,7 +643,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       await this.handleCollectionResponse(
         response,
         context,
-        payload.group
+        payload.group,
+        payload.onlyResources
       );
     } catch (error) {
       throw Resources.getKError(error as AxiosError);
@@ -567,20 +655,27 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadNextPayload
   ) {
     try {
-      if (context.state.next === null) {
-        // There are no more results.
-        context.commit("setList", []);
-        return;
-      }
-      if (context.state.next === undefined) {
-        // We can't do the loadNext call yet, since we don't have any next link. A loadList action should be called first.
+      if (context.state.next === undefined || context.state.currentPage === null || context.state.currentQueryKey == null) {
         throw new KError(
           KErrorCode.ScriptError,
-          "Unexpected call to 'loadNext' resource action with undefined next link."
+          "Unexpected call to 'loadNext' resource action before calling to loadList."
         );
       }
-      const response = await this.request(context, context.state.next);
+      // Increase current page number.
+      const page = context.state.currentPage + 1;
+      context.commit("currentPage", page)
 
+      // At this point the data may be already cached and available for the UI. We however 
+      // revalidate that by calling the endpoint.
+
+      // Well, if the endpoint is null it means that there's no next page.
+      if (context.state.next === null) {
+        context.commit("setPageIds", {key: context.state.currentQueryKey, page, ids:[]});
+        return;
+      }
+      
+      // Perform the request.
+      const response = await this.request(context, context.state.next);
       await this.handleCollectionResponse(
         response,
         context,
@@ -590,6 +685,25 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       throw Resources.getKError(error as AxiosError);
     }
   }
+  protected loadCached (
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadPayload
+  ) {
+    let id = null
+    // transaction code is the resource id.
+    if (context.state.resources[payload.code]) {
+      id = payload.code
+    } else {
+    // in other resources the code is an attribute.
+      const cached = context.getters['find']({
+        code: payload.code,
+      })
+      if (cached) {
+        id = cached.id
+      }
+    }
+    context.commit("currentId", id)
+  }
   /**
    * Fetches the current reaource.
    */
@@ -597,6 +711,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     context: ActionContext<ResourcesState<T>, S>,
     payload: LoadPayload
   ) {
+    // First, try to find the required resource in cache so we can render
+    // some content before hitting the API.
+    this.loadCached(context, payload)
+    
+    // Fetch (or revalidate) the content.
     let url = this.resourceEndpoint(payload.code, payload.group);
     if (payload.include) {
       const params = new URLSearchParams();
@@ -608,7 +727,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       const response = await this.request(context, url);
       // Commit mutation(s).
       const resource = response.data.data;
-      context.commit("setCurrent", resource);
+      this.setCurrent(context, resource)
       if (response.data.included) {
         await Resources.handleIncluded(
           response.data.included,
@@ -635,8 +754,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       const response = await this.request(context, url, "post", body)
       if (response.status == 201) {
         // Created. Data in the response body.
-        const resource = response.data.data;
-        context.commit("setCurrent", resource);
+        const resource = response.data.data
+        this.setCurrent(context, resource)
       } else {
         throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
       }
@@ -644,6 +763,39 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       throw Resources.getKError(error as AxiosError);
     }
     
+  }
+  /**
+   * Sets the current resource. Use this action when setting a resource created 
+   * from the client and not fetched from the API, or internally from other actions.
+   */
+  protected setCurrent(context: ActionContext<ResourcesState<T>, S>, resource: T) {
+    context.commit("addResource", this.updatedResource(context.state, resource))
+    context.commit("currentId", resource.id)
+  }
+
+  /**
+   * Use internally from other actions when adding new resources and updating the page ids list. 
+   */
+  protected setCurrentPageResources(context: ActionContext<ResourcesState<T>, S>, resources: T[]) {
+    context.commit("addResources", this.updatedResources(context.state, resources))
+    context.commit("setPageIds", {key: context.state.currentQueryKey, page: context.state.currentPage, ids: resources.map(resource => resource.id)})
+  }
+  
+  /**
+   * Array version of updatedResource().
+   */
+  protected updatedResources(state: ResourcesState<T>, resources: T[]) {
+    return resources.map((resource) => this.updatedResource(state, resource))
+  }
+  /**
+   * If the resource already exists, it will merge the new with the old object.
+   * Note: this architecture may be buggy if an update happens to delete some
+   * object property, but so far this does not seem to be a problem.
+   */
+  protected updatedResource(state: ResourcesState<T>, resource: T) {
+    return state.resources[resource.id] !== undefined ?
+      merge(cloneDeep(state.resources[resource.id]), resource) :
+      resource
   }
 
 }

@@ -22,6 +22,18 @@ const DEFAULT_LANG = "en-US";
 const LOCALE_KEY = "lang";
 
 /**
+ * Export vue-i18 instance for use outside components.
+ */
+export const i18n = createI18n({
+  locale: DEFAULT_LANG,
+  fallbackLocale: DEFAULT_LANG,
+  messages: {
+    [DEFAULT_LANG as string]: DefaultMessages
+  },
+  legacy: false
+});
+
+/**
  * THe current date locale.
  */
 let dateLocale = undefined as Locale | undefined;
@@ -52,15 +64,6 @@ function getCurrentLocale($q: QVueGlobals): string {
 
 // Default export for Quasar boot files.
 export default boot(async ({ app }) => {
-  const locale: string = DEFAULT_LANG;
-  const i18n = createI18n({
-    locale: locale,
-    fallbackLocale: locale,
-    messages: {
-      [locale]: DefaultMessages
-    },
-    legacy: false
-  });
   // Install 'vue-i18n' plugin.
   app.use(i18n);
   
