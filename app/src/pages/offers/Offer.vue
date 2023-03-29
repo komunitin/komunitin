@@ -6,7 +6,7 @@
     />
     <q-page-container>
       <q-page
-        v-if="offer"
+        v-if="ready"
         class="q-pa-lg"
       >
         <offer-layout :num-images="offer.attributes.images.length">
@@ -136,6 +136,11 @@ export default defineComponent({
     offer(): Offer & {category: Category} & {member: Member & { account: Account & { currency: Currency }, contacts: Contact[] } } {
       return this.$store.getters["offers/current"];
     },
+    ready(): boolean {
+      return !!(this.offer && this.offer.category && this.offer.member 
+        && this.offer.member.contacts && this.offer.member.account 
+        && this.offer.member.account.currency)
+    },
     /**
      * If price is a number, format it following the currency format,
      * otherwise just return the offer.price string.
@@ -144,7 +149,7 @@ export default defineComponent({
       const price = this.offer.attributes.price;
       // Parse string to number.
       const numeric = Number(price);
-      if (!isNaN(numeric)) {
+      if (!isNaN(numeric) && this.ready) {
         // Append the currency symbol if price is just a number.
         const currency = this.offer.member.account.currency
         return FormatCurrency(numeric, currency, {scale: false} );

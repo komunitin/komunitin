@@ -127,7 +127,7 @@ export default defineComponent({
       return this.member && this.myMember && this.member.id == this.myMember.id;
     },
     isLoading() : boolean {
-      return !(this.member !== undefined && this.member.offers !== undefined && this.member.needs !== undefined && this.member.account !== undefined && this.member.contacts !== undefined);
+      return !(this.member && this.member.offers && this.member.needs && this.member.account && this.member.contacts);
     }
   },
   created() {
