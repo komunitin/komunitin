@@ -50,7 +50,7 @@ export default defineComponent({
       return this.$store.getters["transfers/current"];
     },
     isLoading(): boolean {
-      return !(this.transfer !== undefined && this.transfer.payee.member !== undefined && this.transfer.payer.member !== undefined)
+      return !(this.transfer && this.transfer.payee.member && this.transfer.payer.member)
     }
   },
   created() {

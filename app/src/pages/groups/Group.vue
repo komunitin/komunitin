@@ -212,7 +212,7 @@ export default defineComponent({
       return this.center
     },
     isLoading(): boolean {
-      return !(this.currency !== undefined && this.group !== undefined && this.group.contacts !== undefined && this.group.categories !== undefined);
+      return !(this.currency && this.group && this.group.contacts && this.group.categories);
     }
   },
   created() {

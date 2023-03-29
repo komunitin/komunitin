@@ -6,7 +6,7 @@
     />
     <q-page-container>
       <q-page
-        v-if="need"
+        v-if="ready"
         class="q-pa-lg"
       >
         <offer-layout :num-images="need.attributes.images.length">
@@ -54,7 +54,7 @@
                 color="primary"
                 :label="$t('share')"
                 :title="$t('checkThisNeed', {member: need.member.attributes.name})"
-                :text="need.attributes.text"
+                :text="need.attributes.content"
               />
               <contact-button
                 unelevated
@@ -95,7 +95,7 @@ import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
 
-import { Need } from "../../store/model";
+import { Need, Member, Category, Contact } from "../../store/model";
 
 export default defineComponent({
   components: {
@@ -124,9 +124,12 @@ export default defineComponent({
     }
   },
   computed: {
-    need(): Need {
-      return this.$store.getters["needs/current"];
+    need(): Need & {member: Member & {contacts: Contact[] }, category: Category } {
+      return this.$store.getters["needs/current"]
     },
+    ready(): boolean {
+      return !!(this.need && this.need.member && this.need.member.contacts && this.need.category)
+    }
     
   },
   created() {
