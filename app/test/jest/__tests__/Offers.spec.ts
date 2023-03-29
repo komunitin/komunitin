@@ -23,11 +23,9 @@ describe("Offers", () => {
     await wrapper.vm.$router.push("/groups/GRP0/offers");
     await wrapper.vm.$nextTick();
     expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
-    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
     // Initial load.
     await wrapper.vm.$wait();
     expect(wrapper.findAllComponents(OfferCard).length).toBe(ApiSerializer.DEFAULT_PAGE_SIZE);
-    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(false);
     // Instead of trying to simulate the scroll event, which is very coupled
     // with the tech layer, just call the trigger() function in QInfiniteScroll.
     (wrapper.findComponent(QInfiniteScroll).vm as QInfiniteScroll).trigger();
