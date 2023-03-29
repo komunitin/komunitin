@@ -41,8 +41,11 @@ export default defineComponent({
   created: async function()  {
     if (this.isLoggedIn && this.isAuthorized()) {
       await this.$store.dispatch("subscribe");
+      // Note that ready will not be true if the promise rejects.
+      this.ready = true;
+    } else {
+      this.ready = true;
     }
-    this.ready = true;
   },
   methods: {
     dismiss(): void {

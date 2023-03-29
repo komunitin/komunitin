@@ -9,7 +9,7 @@
       class="row justify-center bg-light"
     >
       <q-page
-        v-if="ready"
+        v-if="!isLoading"
         padding
         class="q-py-lg col-12 col-sm-8 col-md-6"
       >
@@ -44,16 +44,14 @@ export default defineComponent({
   setup() {
     return { FormatCurrency }
   },
-  data: () => ({
-    // We need to explicitely warn Vue on when the data is ready since the dependencies 
-    // of the fetched (transfer.payer.member) object are not reactive.
-    ready: false
-  }),
   computed: {
     ...mapGetters(["myAccount"]),
     transfer(): ExtendedTransfer {
       return this.$store.getters["transfers/current"];
     },
+    isLoading(): boolean {
+      return !(this.transfer && this.transfer.payee.member && this.transfer.payer.member)
+    }
   },
   created() {
     // See comment in analogous function at Group.vue.
@@ -73,9 +71,9 @@ export default defineComponent({
         group: this.code,
         filter: {
           account: this.transfer.payee.id + "," + this.transfer.payer.id
-        }
+        },
+        onlyResources: true
       })
-      this.ready = true;
     }
   }
 })

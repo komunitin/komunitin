@@ -26,9 +26,8 @@ registerRoute(
       new CacheableResponsePlugin({
         statuses: [200],
       }),
-      // Don't cache more than 50 items, and expire them after 30 days
+      // Expire them after 30 days
       new ExpirationPlugin({
-        maxEntries: 50,
         maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
       }),
     ],

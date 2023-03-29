@@ -1,11 +1,12 @@
 <template>
-  <div v-if="ready">
+  <div v-if="!isLoading">
     <page-header 
       :title="member.attributes.name"
       back
     >
       <template #buttons>
         <contact-button
+          v-if="member.contacts"
           icon="message"
           round
           flat
@@ -18,7 +19,7 @@
           :text="
             $t('shareMember', {
               member: member.attributes.name,
-              bio: member.attributes.bio
+              bio: member.attributes.description
             })
           "
           :title="member.attributes.name"
@@ -89,7 +90,7 @@ import ShareButton from "../../components/ShareButton.vue";
 import CreateTransactionBtn from "../../components/CreateTransactionBtn.vue";
 import TransactionItems from "../transactions/TransactionItems.vue";
 
-import { Member, Currency, Account } from '../../store/model';
+import { Member, Currency, Account, Contact, Offer, Need } from '../../store/model';
 
 export default defineComponent({
   name: "Member",
@@ -116,15 +117,17 @@ export default defineComponent({
   },
   data: () => ({
     tab: "profile",
-    ready : false
   }),
   computed: {
     ...mapGetters(["myMember"]),
-    member() : Member & {account: Account & {currency: Currency}} {
+    member() : Member & {account: Account & {currency: Currency}, contacts?: Contact[], offers?: Offer[], needs?: Need[]} {
       return this.$store.getters['members/current'];
     },
     isMe() : boolean {
       return this.member && this.myMember && this.member.id == this.myMember.id;
+    },
+    isLoading() : boolean {
+      return !(this.member && this.member.offers && this.member.needs && this.member.account && this.member.contacts);
     }
   },
   created() {
@@ -133,20 +136,20 @@ export default defineComponent({
   },
   methods: {
     async fetchData(memberCode: string) {
-      this.ready = false;
+      //this.ready = false;
       await this.$store.dispatch("members/load", {
         code: memberCode,
         group: this.code,
-        include: "contacts,offers,needs"
+        include: "contacts,offers,needs,account"
       });
-      await this.$store.dispatch("accounts/loadList", {
+      /*await this.$store.dispatch("accounts/loadList", {
         group: this.code,
         filter: {
           id: this.member.relationships.account.data.id
         },
         include: "currency"
-      })
-      this.ready = true;
+      })*/
+      //this.ready = true;
     },
     onTabChange(tab: string) {
       this.tab = tab;

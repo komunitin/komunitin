@@ -16,6 +16,7 @@ import {
 // Import logged-in user module
 import me, { UserState } from "./me";
 import ui, { UIState } from "./ui";
+import createPersistPlugin from "./persist";
 
 // Build modules for Social API:
 const socialUrl = KOptions.url.social;
@@ -106,7 +107,8 @@ export default function(/* { ssrContext } */): Store<never> {
       transfers
     },
     // enable strict mode (adds overhead!) for dev mode only
-    strict: process.env.DEV === "true"
+    strict: process.env.DEV === "true",
+    plugins: [createPersistPlugin("komunitin")]
   });
 
   return store;

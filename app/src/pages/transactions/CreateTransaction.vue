@@ -142,7 +142,7 @@ export default defineComponent({
         }
       };
       // Store transfer object as current store object.
-      store.commit("transfers/setCurrent", transfer)
+      store.dispatch("transfers/setCurrent", transfer)
       // Go to confirm page.
       router.push({
         name: "ConfirmCreateTransaction", 
