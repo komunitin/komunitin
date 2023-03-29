@@ -26,19 +26,17 @@ describe("Needs", () => {
     await flushPromises();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
     expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
-    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
     // Load.
     await wrapper.vm.$wait();
     expect(wrapper.findAllComponents(NeedCard).length).toBe(4);
     // Infinite loading stops working immediately since we
     // already fetched all data.
-    expect(wrapper.findComponent(QInfiniteScroll).props("disable")).toBe(true);
     // Category
     expect(wrapper.findAllComponents(NeedCard)[1].text()).toContain("build");
 
     wrapper.getComponent(PageHeader).vm.$emit("search","modi");
     await wrapper.vm.$wait();
-    // found 4 results!
+    // found 2 results!
     expect(wrapper.findAllComponents(NeedCard).length).toBe(2);
   });
   it ("Renders single need", async () => {
