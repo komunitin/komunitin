@@ -18,7 +18,7 @@ describe("SelectLang", () => {
   it("Check language change", async () => {
     expect(wrapper.text()).toContain("Language");
     // Check language on i18n plugin.
-    expect(wrapper.vm.$i18n.locale).toBe("en-US");
+    expect(wrapper.vm.$i18n.locale).toBe("en-us");
     // Check language on quasar.
     expect(wrapper.vm.$q.lang.isoName).toBe("en-US");
     // Don't know how to simulate the click on the menu item,

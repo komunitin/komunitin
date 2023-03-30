@@ -1,7 +1,7 @@
 import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
 import { Module, ActionContext, Commit, Dispatch } from "vuex";
-import {cloneDeep, merge} from "lodash";
+import {cloneDeep, merge} from "lodash-es";
 
 import {
   CollectionResponseInclude,

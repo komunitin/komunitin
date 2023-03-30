@@ -5,6 +5,9 @@ const { configure } = require('quasar/wrappers')
 const ESLintPlugin = require('eslint-webpack-plugin')
 const qenv = require('./.quasar.env.json');
 const environment = qenv[process.env.QENV];
+const IgnorePlugin = require("webpack").IgnorePlugin
+
+//const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
 
 console.log("Environment:")
 console.log(environment);
@@ -93,6 +96,19 @@ module.exports = configure(function(ctx) {
         chain
           .plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: ['ts', 'vue'] }])
+        // Ignore "leaflet" import since both we and the vue-leaflet module are using the 
+        // leaflet.esm.js file, but in one place vue-leaflet conditionally loads "leaflet"
+        // and we would end up with duplicated library (hence innecessarily bloating bundle 
+        // size).
+        chain
+          .plugin('webpack-ignore-plugin')
+          .use(IgnorePlugin, [{ resourceRegExp: /^leaflet$/}])
+        /*
+        chain
+          .plugin('statoscope-webpack-plugin')
+          .use(StatoscopeWebpackPlugin, [{saveReportTo: "statoscope-report-[name]-[hash].html"}])
+        */
+
       },
       env: environment
     },
