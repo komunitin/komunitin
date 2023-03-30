@@ -47,3 +47,6 @@ src/debug.log
 notifications/__debug_bin
 notifications/komunitin-project-firebase-adminsdk.json
 tmp
+
+# Bundle reports
+statoscope-report-*.html
