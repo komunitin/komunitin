@@ -1,7 +1,7 @@
 import { boot } from "quasar/wrappers";
 import {createI18n} from "vue-i18n";
 import DefaultMessages from "src/i18n/en-us/index.json";
-import langs from "src/i18n";
+import langs, {LangName} from "src/i18n";
 import { LocalStorage, QVueGlobals } from "quasar";
 import { formatRelative, Locale } from "date-fns";
 
@@ -15,7 +15,7 @@ declare module "@vue/runtime-core" {
 /**
  * Default to english language.
  */
-const DEFAULT_LANG = "en-US";
+const DEFAULT_LANG = "en-us";
 /**
  * LocalStorage key for the saved locale.
  */
@@ -42,8 +42,8 @@ let dateLocale = undefined as Locale | undefined;
  * Return locale if it is a defined language for this app,
  * or the default language code (English) instead.
  * **/
-function normalizeLocale(locale: string): string {
-  return (locale in langs) ? locale : DEFAULT_LANG;
+function normalizeLocale(locale: string): LangName {
+  return (locale in langs) ? locale as LangName : DEFAULT_LANG;
 }
 
 /**
@@ -60,8 +60,6 @@ function getCurrentLocale($q: QVueGlobals): string {
   return normalizeLocale(quasarLang);
 }
 
-
-
 // Default export for Quasar boot files.
 export default boot(async ({ app }) => {
   // Install 'vue-i18n' plugin.
@@ -72,26 +70,26 @@ export default boot(async ({ app }) => {
    * **/  
   app.config.globalProperties.$setLocale = async function(locale: string) {
     // Set VueI18n lang.
-    const setI18nLocale = async (locale: string) => {
+    const setI18nLocale = async (locale: LangName) => {
       if (i18n.global.locale.value !== locale) {
-        const messages = (await import(`src/i18n/${locale}`)).default;
+        const definition = langs[locale]
+        const messages = await definition.loadMessages();
         i18n.global.setLocaleMessage(locale, messages);
         i18n.global.locale.value = locale;
       }
     }
 
     // Set Quasar lang.
-    const setQuasarLang = async ( locale: string) => {
-      const messages = (await import(`quasar/lang/${locale}`)).default;
+    const setQuasarLang = async (locale: LangName) => {
+      const messages = await langs[locale].loadQuasar()
       this.$q.lang.set(messages);
     }
 
-    const setDateLocale = async (locale: string) => {
-      if (locale.includes("-")) {
-        locale = locale.split("-",2).map((value, index) => (index > 0 ? value.toUpperCase() : value)).join("-");
-      }
-      dateLocale = (await import(`date-fns/locale/${locale}/index.js`)).default;
+    // Set date-fns lang.
+    const setDateLocale = async (locale: LangName) => {
+      dateLocale = await langs[locale].loadDateFNS()
     }
+
     const lang = normalizeLocale(locale);
     await Promise.all([
       setI18nLocale(lang),
