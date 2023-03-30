@@ -1,7 +1,7 @@
 import { Store } from "vuex"
 import localForage from "localforage"
 import { ResourceObject } from "./model"
-import { cloneDeep, merge } from "lodash"
+import { cloneDeep, merge } from "lodash-es"
 import { toRaw } from "vue"
 
 /**
