@@ -18,7 +18,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
+import type { PointExpression, LatLngExpression} from "leaflet";
+import { icon } from "leaflet/dist/leaflet-src.esm"
 import "leaflet/dist/leaflet.css";
+
 
 interface SimpleMapData {
   url: string,
@@ -67,16 +70,13 @@ export default defineComponent({
     // Leaflet expects [latitude, longitude] while GeoJSON
     // is the opposite.
     centerLatLng() {
-      return this.center?.slice().reverse();
+      return this.center?.slice().reverse() as PointExpression;
     },
     markerLatLng() {
-      return this.marker?.slice().reverse();
+      return this.marker?.slice().reverse() as LatLngExpression;
     },
   },
   async beforeMount() {
-    // See here on why we're not just importing leaflet at the beggining of the file:
-    // https://github.com/vue-leaflet/vue-leaflet#working-with-leaflet
-    const { icon } = await import("leaflet/dist/leaflet-src.esm")
     this.markerIcon = icon({
       iconUrl: require("../assets/icons/marker.png"),
       shadowUrl: require("../assets/icons/marker-shadow.png"),
