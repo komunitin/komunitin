@@ -139,7 +139,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 import md2html from "../../plugins/Md2html";
 
@@ -173,11 +173,13 @@ export default defineComponent({
     }
   },
   setup() {
+    const ready = ref(false)
     return {
       link(link: string): string {
         return link.replace(/(https|http):\/\//, "");
       },
-      md2html
+      md2html,
+      ready
     }
   },
   data() {
@@ -212,7 +214,7 @@ export default defineComponent({
       return this.center
     },
     isLoading(): boolean {
-      return !(this.currency && this.group && this.group.contacts && this.group.categories);
+      return !(this.ready || this.currency && this.group && this.group.contacts && this.group.categories);
     }
   },
   created() {
@@ -232,7 +234,7 @@ export default defineComponent({
       // in parallel. Another option, formally more robust but less 
       // efficient would be to get the currency url from the group data.
       await Promise.all([this.fetchGroup(code), this.fetchCurrency(code)]);
-      
+      this.ready = true
     },
     // Group info.
     async fetchGroup(code: string) {

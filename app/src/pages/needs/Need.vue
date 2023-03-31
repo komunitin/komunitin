@@ -6,7 +6,7 @@
     />
     <q-page-container>
       <q-page
-        v-if="ready"
+        v-if="!isLoading"
         class="q-pa-lg"
       >
         <offer-layout :num-images="need.attributes.images.length">
@@ -81,7 +81,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 import md2html from "../../plugins/Md2html";
 
@@ -119,16 +119,18 @@ export default defineComponent({
     }
   },
   setup() {
+    const ready = ref(false)
     return {
-      md2html
+      md2html,
+      ready
     }
   },
   computed: {
     need(): Need & {member: Member & {contacts: Contact[] }, category: Category } {
       return this.$store.getters["needs/current"]
     },
-    ready(): boolean {
-      return !!(this.need && this.need.member && this.need.member.contacts && this.need.category)
+    isLoading(): boolean {
+      return !(this.ready || this.need && this.need.member && this.need.member.contacts && this.need.category)
     }
     
   },
@@ -138,11 +140,12 @@ export default defineComponent({
   },
   methods: {
     async fetchData(needCode: string) {
-      return this.$store.dispatch("needs/load", {
+      await this.$store.dispatch("needs/load", {
         code: needCode,
         group: this.code,
         include: "category,member,member.contacts,member.account"
       });
+      this.ready = true
     }
   }
 })

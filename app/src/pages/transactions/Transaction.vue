@@ -19,7 +19,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import { mapGetters } from "vuex";
 import PageHeader from "../../layouts/PageHeader.vue";
 import {ExtendedTransfer} from "../../store/model";
@@ -42,7 +42,8 @@ export default defineComponent({
     }
   },
   setup() {
-    return { FormatCurrency }
+    const ready = ref(false)
+    return { FormatCurrency, ready}
   },
   computed: {
     ...mapGetters(["myAccount"]),
@@ -50,7 +51,8 @@ export default defineComponent({
       return this.$store.getters["transfers/current"];
     },
     isLoading(): boolean {
-      return !(this.transfer && this.transfer.payee.member && this.transfer.payer.member)
+      // Use explicit ready to force update.
+      return !(this.ready || this.transfer && this.transfer.payee.member && this.transfer.payer.member)
     }
   },
   created() {
@@ -64,7 +66,7 @@ export default defineComponent({
         code: transferCode,
         group: this.code,
         include: "payer,payee,currency"
-      });
+      })
       // fetch account members in a separate call, since the relation
       // account => member does not exist, only the member => account relation.
       await this.$store.dispatch("members/loadList", {
@@ -74,6 +76,7 @@ export default defineComponent({
         },
         onlyResources: true
       })
+      this.ready = true
     }
   }
 })
