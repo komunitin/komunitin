@@ -80,7 +80,7 @@
           :label="$t('nNeeds', nNeeds)"
         />
         <q-tab
-        v-if="nOffers !== undefined"
+          v-if="nOffers !== undefined"
           name="offers"
           icon="local_offer"
           :label="$t('nOffers', nOffers)"
