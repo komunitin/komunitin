@@ -142,7 +142,7 @@ export default defineComponent({
       await this.$store.dispatch("members/load", {
         code: memberCode,
         group: this.code,
-        include: "contacts,offers,needs,account"
+        include: "contacts,account"
       });
       this.fetched = true;
     },
