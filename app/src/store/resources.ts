@@ -359,10 +359,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           if (Array.isArray(value.data)) {
             Object.defineProperty(main, name, {
               get: function() {
-                return (value.data as ResourceIdentifierObject[]).map(
+                const items = (value.data as ResourceIdentifierObject[]).map(
                   resourceId =>
-                    rootGetters[resourceId.type + "/one"](resourceId.id)
+                    rootGetters[resourceId.type + "/one"](resourceId.id) as ResourceObject | null
                 );
+                // Return either all or no objects.
+                return items.includes(null) ? null : items;
               }
             });
           } else {
