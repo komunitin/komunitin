@@ -117,6 +117,7 @@ export default defineComponent({
   },
   data: () => ({
     tab: "profile",
+    fetched: false
   }),
   computed: {
     ...mapGetters(["myMember"]),
@@ -127,7 +128,9 @@ export default defineComponent({
       return this.member && this.myMember && this.member.id == this.myMember.id;
     },
     isLoading() : boolean {
-      return !(this.member && this.member.offers && this.member.needs && this.member.account && this.member.contacts);
+      // We need the explicit fetched boolean to force trigger update that may not
+      // trigger due to the structure of relatinship links of resource objects.
+      return !(this.fetched || this.member && this.member.account !== null && this.member.contacts !== null);
     }
   },
   created() {
@@ -136,20 +139,12 @@ export default defineComponent({
   },
   methods: {
     async fetchData(memberCode: string) {
-      //this.ready = false;
       await this.$store.dispatch("members/load", {
         code: memberCode,
         group: this.code,
         include: "contacts,offers,needs,account"
       });
-      /*await this.$store.dispatch("accounts/loadList", {
-        group: this.code,
-        filter: {
-          id: this.member.relationships.account.data.id
-        },
-        include: "currency"
-      })*/
-      //this.ready = true;
+      this.fetched = true;
     },
     onTabChange(tab: string) {
       this.tab = tab;
