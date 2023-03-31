@@ -130,7 +130,7 @@ export default defineComponent({
     isLoading() : boolean {
       // We need the explicit fetched boolean to force trigger update that may not
       // trigger due to the structure of relatinship links of resource objects.
-      return !(this.fetched || this.member && this.member.account && this.member.contacts);
+      return !(this.fetched || this.member && this.member.account !== null && this.member.contacts !== null);
     }
   },
   created() {
