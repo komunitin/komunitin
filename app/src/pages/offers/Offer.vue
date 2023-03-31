@@ -6,7 +6,7 @@
     />
     <q-page-container>
       <q-page
-        v-if="ready"
+        v-if="!isLoading"
         class="q-pa-lg"
       >
         <offer-layout :num-images="offer.attributes.images.length">
@@ -89,7 +89,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent, ref } from "vue"
 
 import md2html from "../../plugins/Md2html";
 
@@ -128,16 +128,18 @@ export default defineComponent({
     }
   },
   setup() {
+    const ready = ref(false)
     return {
-      md2html
+      md2html,
+      ready
     }
   },
   computed: {
     offer(): Offer & {category: Category} & {member: Member & { account: Account & { currency: Currency }, contacts: Contact[] } } {
       return this.$store.getters["offers/current"];
     },
-    ready(): boolean {
-      return !!(this.offer && this.offer.category && this.offer.member 
+    isLoading(): boolean {
+      return !(this.ready || this.offer && this.offer.category && this.offer.member 
         && this.offer.member.contacts && this.offer.member.account 
         && this.offer.member.account.currency)
     },
@@ -149,7 +151,7 @@ export default defineComponent({
       const price = this.offer.attributes.price;
       // Parse string to number.
       const numeric = Number(price);
-      if (!isNaN(numeric) && this.ready) {
+      if (!isNaN(numeric) && !this.isLoading) {
         // Append the currency symbol if price is just a number.
         const currency = this.offer.member.account.currency
         return FormatCurrency(numeric, currency, {scale: false} );
@@ -165,11 +167,12 @@ export default defineComponent({
   },
   methods: {
     async fetchData(offerCode: string) {
-      return this.$store.dispatch("offers/load", {
+      await this.$store.dispatch("offers/load", {
         code: offerCode,
         group: this.code,
         include: "category,member,member.contacts,member.account,member.account.currency"
       });
+      this.ready = true
     }
   }
 })
