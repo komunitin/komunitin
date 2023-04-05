@@ -100,5 +100,6 @@
   "invalidAmount" : "Cantidad inválida. Entra un número positivo.",
   "payerRequired": "Escoge la cuenta pagadora.",
   "sucessfulLogin": "Sessión iniciada como {name}!",
-  "confirm": "Confirmar"
+  "confirm": "Confirmar",
+  "ErrorAuthNoCredentials": "Error: email o password incorrectos"
 }
