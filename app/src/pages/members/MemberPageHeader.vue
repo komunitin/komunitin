@@ -154,10 +154,10 @@ export default defineComponent({
       };
       return labels[(this.member as Member).attributes.type];
     },
-    nNeeds() : number {
+    nNeeds() : number | undefined {
       return this.member.relationships.needs?.meta.count
     },
-    nOffers(): number {
+    nOffers(): number | undefined {
       return this.member.relationships.offers?.meta.count
     }
   },
