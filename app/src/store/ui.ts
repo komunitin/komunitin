@@ -3,6 +3,7 @@ export interface UIState {
   drawerPersistent: boolean;
   drawerState: boolean;
   notificationsBannerDismissed: boolean;
+  locationBannerDismissed: boolean;
 }
 
 export default {
@@ -10,6 +11,7 @@ export default {
     drawerPersistent: true,
     drawerState: true,
     notificationsBannerDismissed: false,
+    locationBannerDismissed: false,
   }),
   getters: {
     drawerExists: (state, getters, rootState, rootGetters) =>
@@ -19,7 +21,8 @@ export default {
     drawerPersistent: (state, value: boolean) =>
       (state.drawerPersistent = value),
     drawerState: (state, value: boolean) => (state.drawerState = value),
-    notificationsBannerDismissed: (state, value: boolean) => (state.notificationsBannerDismissed = value)
+    notificationsBannerDismissed: (state, value: boolean) => (state.notificationsBannerDismissed = value),
+    locationBannerDismissed: (state, value: boolean) => (state.locationBannerDismissed = value)
   },
   actions: {
     toogleDrawer: ({ state, commit }: ActionContext<UIState, never>) =>
