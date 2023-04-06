@@ -84,6 +84,7 @@
   "komunitinProject": "Proyecto Komunitin",
   "nothingHere": "Nada por aquí... ¡Aún!",
   "enableNotificationsText": "Activa las notificaciones para conocer los movimientos de tu cuenta y notícias importantes de tu red. Puedes configurarlas o desactivarlas en qualquier momento.",
+  "deniedNotificationsText": "Este dispositivo bloquea nuestras notificaciones. Puedes solucionarlo permitiendo las notificaciones de Komunitin des de la configuración de tu navegador.",
   "enableNotifications": "Activa las notificaciones",
   "dismiss": "Ignora",
   "createTransaction": "Crear transacción",
