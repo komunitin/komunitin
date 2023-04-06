@@ -1,6 +1,6 @@
 <template>
   <l-map
-    :options="{ zoomControl: false, dragging: interactive }"
+    :options="{ zoomControl: false, dragging: interactive, attributionControl: false }"
     style="height: 200px; width: 100% ; margin: 0; z-index:0;"
     :zoom="zoom"
     :center="centerLatLng"
@@ -63,7 +63,7 @@ export default defineComponent({
   data() : SimpleMapData {
     return {
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      zoom: 3,
+      zoom: 12,
     };
   },
   computed: {
@@ -80,6 +80,8 @@ export default defineComponent({
     this.markerIcon = icon({
       iconUrl: require("../assets/icons/marker.png"),
       shadowUrl: require("../assets/icons/marker-shadow.png"),
+      iconSize: [25, 41],
+      iconAnchor: [13, 41]
     })
   }
 });

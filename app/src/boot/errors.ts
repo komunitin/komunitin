@@ -52,14 +52,18 @@ export function handleError(error: KError): void {
   showError(error);
 }
 
+function vueErrorHandler(error: unknown, instance: ComponentPublicInstance | null, info: string) {
+  if (error instanceof KError) {
+    handleError(error)
+  } else if (error instanceof Error){
+    handleError(new KError(KErrorCode.UnknownVueError, error.message, {error: error, info}))
+  } else {
+    handleError(new KError(KErrorCode.UnknownVueError, "Unknown error", {info}))
+  }
+}
 function vueWarnHandler(message: string, instance: ComponentPublicInstance | null, trace: string) {
   const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, instance});
-  try {
-    handleError(error);
-  }
-  catch (exception) {
-    logErrorHandling(error);
-  }
+  handleError(error);
 }
 
 /**
@@ -99,6 +103,7 @@ export default boot(({app}) => {
   app.config.globalProperties.$handleError = handleError;
   // Set Vue warning handler.
   app.config.warnHandler = vueWarnHandler;
+  app.config.errorHandler = vueErrorHandler;
 });
 
 declare module "@vue/runtime-core" {

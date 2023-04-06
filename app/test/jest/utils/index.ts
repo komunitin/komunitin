@@ -65,7 +65,7 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
   const store = createStore();
   // Set the router mode to "history", as we have in our Quasar config file.
   process.env.VUE_ROUTER_MODE = "history";
-  const router = createRouter();
+  const router = createRouter({store});
   
   // Install quasar
   const quasar = [Quasar, {plugins: LocalStorage}];

@@ -1,9 +1,13 @@
 <template>
   <q-banner
     v-if="show"
-    class="text-onsurface-m"
+    class="text-onsurface-m banner"
   >
-    {{ $t("enableNotificationsText") }}
+    <template #avatar>
+      <q-icon name="notifications" />
+    </template>
+
+    {{ isDenied ? $t("deniedNotificationsText") : $t("enableNotificationsText") }}
     <template #action>
       <q-btn
         flat
@@ -12,6 +16,7 @@
         @click="dismiss"
       />
       <q-btn
+        v-if="!isDenied"
         flat
         color="primary"
         :label="$t('enableNotifications')"
@@ -20,46 +25,48 @@
     </template>
   </q-banner>
 </template>
-<script lang="ts">
-import { defineComponent } from "vue";
-import {mapGetters} from "vuex";
+<script setup lang="ts">
+import { ref, computed, onBeforeMount, watch } from "vue";
+import { useStore } from "vuex";
 
-export default defineComponent({
-  name: "NotificationsBanner",
-  data: () => ({
-    ready: false,
-  }),
-  computed: {
-    ...mapGetters(["isLoggedIn", "isSubscribed"]),
-    dismissed(): boolean {
-      return this.$store.state.ui.notificationsBannerDismissed;
-    },
-    show(): boolean {
-      return this.ready && this.isLoggedIn && !this.isSubscribed && !this.dismissed;
-    }
-  },
-  created: async function()  {
-    if (this.isLoggedIn && this.isAuthorized()) {
-      await this.$store.dispatch("subscribe");
-      // Note that ready will not be true if the promise rejects.
-      this.ready = true;
-    } else {
-      this.ready = true;
-    }
-  },
-  methods: {
-    dismiss(): void {
-      this.$store.commit("notificationsBannerDismissed", true);
-    },
-    async subscribe() {
-      const permission = await Notification.requestPermission()
-      if (permission == "granted") {
-        return this.$store.dispatch("subscribe");
-      }
-    },
-    isAuthorized(): boolean {
-      return Notification.permission == 'granted';
-    }
+const emit = defineEmits(["showChange"])
+
+const ready = ref(false);
+
+const store = useStore()
+const dismissed = computed(() => store.state.ui.notificationsBannerDismissed)
+const isLoggedIn = computed(() => store.getters.isLoggedIn)
+const permission = ref(Notification.permission)
+const isAuthorized = computed(() => permission.value == 'granted')
+const isDenied = computed(() => permission.value == 'denied')
+
+const show = computed(() => ready.value && isLoggedIn.value && !isAuthorized.value && !dismissed.value)
+
+watch(show, (oldShow, newShow) => {
+  if (oldShow != newShow) {
+    emit("showChange", show.value)
   }
-});
+})
+
+const dismiss = () => store.commit("notificationsBannerDismissed", true)
+const subscribe = async () => {
+  permission.value = await Notification.requestPermission()
+  if (permission.value == 'granted') {
+    store.dispatch("subscribe");
+  }
+}
+
+// Initialization.
+onBeforeMount(async () => {
+  if (isLoggedIn.value && isAuthorized.value) {
+    await store.dispatch("subscribe");
+  }
+  ready.value = true
+})
+
 </script>
+<style lang="scss" scoped>
+.banner {
+  border-bottom: solid 1px $separator-color;
+}
+</style>

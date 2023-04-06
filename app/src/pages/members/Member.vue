@@ -2,7 +2,7 @@
   <div v-if="!isLoading">
     <page-header 
       :title="member.attributes.name"
-      back
+      :back="`/groups/${code}/members`"
     >
       <template #buttons>
         <contact-button

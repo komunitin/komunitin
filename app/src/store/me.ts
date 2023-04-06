@@ -2,9 +2,10 @@ import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/koptions";
 import KError, { KErrorCode } from "src/KError";
-import { handleError } from "../boot/errors";
 import { Notifications } from "src/plugins/Notifications";
 import { useI18n } from "vue-i18n"
+import locate from "src/plugins/Location";
+import {Member} from "./model"
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -45,7 +46,7 @@ async function loadUserInfo(accessToken: string, { commit }: ActionContext<UserS
  * Load member and account resources for current user.
  */
 async function loadUserData(accessToken: string,
-  { commit, dispatch, rootGetters }: ActionContext<UserState, never>
+  { commit, dispatch, state, getters, rootGetters }: ActionContext<UserState, never>
 ) {
   // Resource actions allow including external relationships such as members.account,
   // but we can't use it right here because we still don't know the group code, which
@@ -69,6 +70,12 @@ async function loadUserData(accessToken: string,
   // Fetch currency and account from accounting API.
   await dispatch("accounts/load", {group: currencyCode, code: accountCode, include: "currency"});
   commit("myUserId", user.id);
+  
+  // If we don't have the user location yet, initialize to the member configured location.
+  if (state.location == undefined) {
+    const member = getters["myMember"] as Member
+    commit("location", member.attributes.location.coordinates)
+  }
 }
 
 /**
@@ -180,34 +187,19 @@ export default {
      * Get the current location from the device.
      */
     locate: async ({ commit }: ActionContext<UserState, never>) => {
-      // Promisify navigator.geolocation API.
-      const location = await new Promise(resolve => {
-        navigator.geolocation.getCurrentPosition(
-          // Success handler.
-          (position: GeolocationPosition) => {
-            const location = [
-              position.coords.longitude,
-              position.coords.latitude
-            ];
-            // Resolve promise with location array.
-            resolve(location);
-          },
-          // Error handler
-          (error: GeolocationPositionError) => {
-            const codes = [] as KErrorCode[];
-            codes[error.TIMEOUT] = KErrorCode.PositionTimeout;
-            codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable;
-            codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied;
-            const kerror = new KError(codes[error.code], error.message, error);
-            // Don't crash the application on location error. Just log it and continue.
-            // The app should be able to continue without updated location info.
-            handleError(kerror);
-            resolve(undefined);
-          },
-          { maximumAge: 1500000, timeout: 100000 }
-        );
-      });
-      commit("location", location);
+      try {
+        const location = await locate()
+        commit("location", location);
+      } catch (error) {
+        if (error instanceof GeolocationPositionError) {
+          const codes = [] as KErrorCode[]
+          codes[error.TIMEOUT] = KErrorCode.PositionTimeout
+          codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable
+          codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied
+          const kerror = new KError(codes[error.code], error.message, error)
+          throw kerror
+        }
+      }
     },
     /**
      * Subscribe to push notifications

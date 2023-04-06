@@ -94,7 +94,9 @@ export default defineComponent({
         throw new KError(KErrorCode.IncorrectCredentials, "Incorrect email or password");
       }
       // Perform authentication request.
+      
       await this.$store.dispatch("login", {email: this.email, password: this.pass});
+      
       if (this.$store.getters.isLoggedIn) {
         const name = this.$store.state.me.userInfo?.name;
         this.$q.notify({type: "positive", message: this.$t('sucessfulLogin', {name})});

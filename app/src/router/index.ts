@@ -1,6 +1,7 @@
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory, Router } from 'vue-router'
 import routes from "./routes";
-
+import { Store } from 'vuex';
+import { State } from 'vue';
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -10,7 +11,7 @@ import routes from "./routes";
  * with the Router instance.
  */
 
-export default function(/* { store, ssrContext } */): Router {
+export default function( { store } : {store: Store<State>} ): Router {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory
@@ -24,6 +25,21 @@ export default function(/* { store, ssrContext } */): Router {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
   });
+
+  store.commit("previousRoute", undefined)
+  
+  let first = true;
+  
+  router.afterEach((to, from, failure) => {
+    if (!failure) {
+      if(!first) {
+        // there is a first call to this guard at the first page that we want to ignore.
+        store.commit("previousRoute", from.fullPath)
+      } else {
+        first = false
+      } 
+    }
+  })
 
   return router;
 }
