@@ -63,7 +63,7 @@ export default defineComponent({
   data() : SimpleMapData {
     return {
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      zoom: 3,
+      zoom: 12,
     };
   },
   computed: {
@@ -80,6 +80,8 @@ export default defineComponent({
     this.markerIcon = icon({
       iconUrl: require("../assets/icons/marker.png"),
       shadowUrl: require("../assets/icons/marker-shadow.png"),
+      iconSize: [25, 41],
+      iconAnchor: [13, 41]
     })
   }
 });
