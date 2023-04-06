@@ -6,7 +6,7 @@
       balance
       @search="search" 
     />
-    <q-page-container>
+    <page-container>
       <q-page>
         <transaction-items
           ref="transactionItems"
@@ -15,7 +15,7 @@
         />
         <create-transaction-btn />
       </q-page>
-    </q-page-container>
+    </page-container>
   </div>
 </template>
 <script lang="ts">
@@ -25,13 +25,15 @@ import { mapGetters } from "vuex";
 import PageHeader from "../../layouts/PageHeader.vue";
 import CreateTransactionBtn from "../../components/CreateTransactionBtn.vue";
 import TransactionItems from "./TransactionItems.vue";
+import PageContainer from "../../layouts/PageContainer.vue";
 
 export default defineComponent({
   name: "MemberList",
   components: {
     PageHeader,
     TransactionItems,
-    CreateTransactionBtn
+    CreateTransactionBtn,
+    PageContainer
   },
   props: {
     code: {

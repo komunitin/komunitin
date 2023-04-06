@@ -6,7 +6,7 @@
       balance
       @search="search"
     />
-    <q-page-container>
+    <page-container>
       <q-page>
         <resource-cards
           ref="memberItems"
@@ -54,7 +54,7 @@
           </q-list>
         </resource-cards>
       </q-page>
-    </q-page-container>
+    </page-container>
   </div>
 </template>
 <script lang="ts">
@@ -67,6 +67,7 @@ import AccountLimits from "./AccountLimits.vue";
 import ResourceCards from "../ResourceCards.vue";
 
 import MemberHeader from "../../components/MemberHeader.vue";
+import PageContainer from "../../layouts/PageContainer.vue"
 
 
 export default defineComponent({
@@ -75,7 +76,8 @@ export default defineComponent({
     MemberHeader,
     ResourceCards,
     PageHeader,
-    AccountLimits
+    AccountLimits,
+    PageContainer
   },
   props: {
     code: {

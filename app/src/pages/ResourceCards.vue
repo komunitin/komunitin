@@ -172,11 +172,12 @@ export default defineComponent({
   // promise to be resolved to continue the rendering. It is done just
   // to be able to fetch resources after locate.
   created: async function() {
-    await this.$store.dispatch("locate")
     this.fetchResources(this.query)
-    this.$watch(() => this.query, (newQuery: string) => this.fetchResources(newQuery))
     // Set the current page to 0 etc in fetchResources before enabling scroll load.
     this.ready = true
+    // Refresh results if search query or current location change.
+    this.$watch(() => this.query, (newQuery: string) => this.fetchResources(newQuery))
+    this.$watch(() => this.location, () => this.fetchResources(this.query))
   },
   methods: {
     /**

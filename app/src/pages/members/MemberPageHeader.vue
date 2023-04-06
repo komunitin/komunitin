@@ -74,16 +74,14 @@
           :label="$t('profile')"
         />
         <q-tab
-          v-if="nNeeds !== undefined"
           name="needs"
           icon="loyalty"
-          :label="$t('nNeeds', nNeeds)"
+          :label="$t('nNeeds', nNeeds ?? 0)"
         />
         <q-tab
-          v-if="nOffers !== undefined"
           name="offers"
           icon="local_offer"
-          :label="$t('nOffers', nOffers)"
+          :label="$t('nOffers', nOffers ?? 0)"
         />
         <q-tab
           v-if="transactions"
@@ -154,10 +152,10 @@ export default defineComponent({
       };
       return labels[(this.member as Member).attributes.type];
     },
-    nNeeds() : number {
+    nNeeds() : number | undefined {
       return this.member.relationships.needs?.meta.count
     },
-    nOffers(): number {
+    nOffers(): number | undefined {
       return this.member.relationships.offers?.meta.count
     }
   },

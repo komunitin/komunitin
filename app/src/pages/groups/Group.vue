@@ -2,7 +2,7 @@
   <div>
     <page-header
       :title="group ? group.attributes.name : ''"
-      :back="!own" 
+      :back="own ? '' : '/groups'" 
     >
       <template #buttons>
         <contact-button
