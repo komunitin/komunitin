@@ -19,7 +19,7 @@
           round
           icon="arrow_back"
           :aria-label="$t('back')"
-          @click="$router.back()"
+          @click="goUp"
         />
         <q-btn
           v-if="showMenu"
@@ -158,8 +158,8 @@ export default defineComponent({
      * Whether to show the back button instead of the menu button.
      */
     back: {
-      type: Boolean,
-      default: false
+      type: String,
+      default: ""
     }
   },
   emits: ['search-input', 'search'],
@@ -182,7 +182,7 @@ export default defineComponent({
      * Show the back button.
      */
     showBack(): boolean {
-      return this.back || !this.$store.getters.drawerExists;
+      return this.back != "" || !this.$store.getters.drawerExists;
     },
     /**
      * Show the menu button.
@@ -242,6 +242,13 @@ export default defineComponent({
     },
     onSearch() {
       this.$emit('search', this.searchText);
+    },
+    goUp() {
+      if (this.$store.state.ui.previousRoute !== undefined) {
+        this.$router.back()
+      } else {
+        this.$router.push(this.back)
+      }
     }
   }
 });

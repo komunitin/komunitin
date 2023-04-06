@@ -2,7 +2,7 @@
   <div>
     <page-header 
       :title="$t('transaction')"
-      back
+      :back="`/groups/${code}/members/${myMember.attributes.code}/transactions`"
       balance
     />
     <q-page-container 
@@ -46,7 +46,7 @@ export default defineComponent({
     return { FormatCurrency, ready}
   },
   computed: {
-    ...mapGetters(["myAccount"]),
+    ...mapGetters(["myAccount","myMember"]),
     transfer(): ExtendedTransfer {
       return this.$store.getters["transfers/current"];
     },

@@ -2,7 +2,7 @@
   <div>
     <page-header 
       :title="$t('need')" 
-      back
+      :back="`/groups/${code}/needs`"
     />
     <q-page-container>
       <q-page
