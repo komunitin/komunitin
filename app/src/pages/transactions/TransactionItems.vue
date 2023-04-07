@@ -14,22 +14,29 @@
       v-if="slotProps.resources"
       padding
     >
-      <member-header
+      <template 
         v-for="transfer of loadedTransfers(slotProps.resources)"
         :key="transfer.id"
+      >
+      <q-separator/>
+      <member-header
         :member="otherMember(transfer)"
         clickable
         :class="transfer.attributes.state"
         :to="`/groups/${code}/transactions/${transfer.id}`"
       >
-        <template #caption>
-          {{ transfer.attributes.meta }}
+        <template #extra>
+          <q-item-section>
+            <q-item-label lines="2">
+              {{ transfer.attributes.meta }}
+            </q-item-label>
+          </q-item-section>
         </template>
         <template #side>
           <div class="column items-end">
             <q-item-label
               caption
-              class="col"
+              class="col top-right-label"
             >
               <span v-if="transfer.attributes.state == 'pending'">
                 {{ $t("pending") }}
@@ -51,6 +58,8 @@
           </div>
         </template>
       </member-header>
+      </template>
+      <q-separator/>
     </q-list>
   </resource-cards>
 </template>
@@ -161,5 +170,11 @@ export default defineComponent({
    */
   .transaction-amount {
     margin-top: -12px;
-  } 
+  }
+  .pending {
+    background-color: $light-error;
+    .top-right-label{
+      color: $error;
+    }
+  }
 </style>

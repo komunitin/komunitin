@@ -13,7 +13,28 @@
         padding
         class="q-py-lg col-12 col-sm-8 col-md-6"
       >
-        <transaction-card :transfer="transfer" />
+        <transaction-card :transfer="transfer" >
+          <div v-if="isPending">
+            <q-separator />
+            <q-card-actions class="justify-end">
+              <q-btn 
+                :label="$t('Reject')"
+                color="primary"
+                flat
+                padding="xs lg"
+                @click="reject"
+              />
+              <q-btn
+                :label="$t('Accept')"
+                type="submit"
+                color="primary"
+                padding="xs lg"
+                unelevated
+                @click="accept"
+              />
+            </q-card-actions>  
+          </div>
+        </transaction-card>
       </q-page>
     </q-page-container>
   </div>
@@ -25,6 +46,7 @@ import PageHeader from "../../layouts/PageHeader.vue";
 import {ExtendedTransfer} from "../../store/model";
 import FormatCurrency from "../../plugins/FormatCurrency"
 import TransactionCard from "../../components/TransactionCard.vue"
+import KError, { KErrorCode } from "src/KError";
 
 export default defineComponent({
   components: {
@@ -43,7 +65,9 @@ export default defineComponent({
   },
   setup() {
     const ready = ref(false)
-    return { FormatCurrency, ready}
+    const accept = () => { throw new KError(KErrorCode.NotImplemented)}
+    const reject = () => { throw new KError(KErrorCode.NotImplemented)}
+    return { FormatCurrency, ready, accept, reject}
   },
   computed: {
     ...mapGetters(["myAccount","myMember"]),
@@ -53,7 +77,11 @@ export default defineComponent({
     isLoading(): boolean {
       // Use explicit ready to force update.
       return !(this.ready || this.transfer && this.transfer.payee.member && this.transfer.payer.member)
+    },
+    isPending(): boolean {
+      return this.transfer?.attributes.state == 'pending'
     }
+
   },
   created() {
     // See comment in analogous function at Group.vue.
