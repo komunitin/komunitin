@@ -3,7 +3,7 @@ import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/koptions";
 import KError, { KErrorCode } from "src/KError";
 import { Notifications } from "src/plugins/Notifications";
-import { useI18n } from "vue-i18n"
+import {i18n} from '../boot/i18n'
 import locate from "src/plugins/Location";
 import {Member} from "./model"
 
@@ -212,7 +212,7 @@ export default {
           context.getters.myUser, 
           context.getters.myMember,
           {
-            locale: useI18n().locale.value
+            locale: i18n.global.locale.value
           },
           context.getters.accessToken);
         context.commit("subscriptionToken", token);
