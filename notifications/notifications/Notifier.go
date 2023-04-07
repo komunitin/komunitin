@@ -177,18 +177,18 @@ func handleTransferPending(ctx context.Context, value map[string]interface{}) er
 		return err
 	}
 	code := value["code"].(string)
-	payer := transfer.Payer
-	members, err := getAccountMembers(ctx, code, []*Account{payer})
+	payee := transfer.Payee
+	members, err := getAccountMembers(ctx, code, []*Account{payee})
 	if err != nil {
 		return err
 	}
-	payerMember := members[0]
+	payeeMember := members[0]
 	amount := formatAmount(transfer.Amount, transfer.Currency)
 
-	err = notifyMember(ctx, payerMember, func(l i18n.Localizer) Message {
+	err = notifyMember(ctx, payeeMember, func(l i18n.Localizer) Message {
 		return Message{
 			Title: l.Sprintf("paymentPending"),
-			Body:  l.Sprintf("paymentPendingText", amount, payerMember.Name),
+			Body:  l.Sprintf("paymentPendingText", amount, payeeMember.Name),
 			Icon:  iconUrl(),
 			Link:  transferUrl(code, transfer),
 		}
