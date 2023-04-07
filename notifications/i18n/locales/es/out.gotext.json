@@ -25,7 +25,7 @@
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 2,
-                    "expr": "payerMember.Name"
+                    "expr": "payeeMember.Name"
                 }
             ]
         },
@@ -53,7 +53,35 @@
                     "type": "string",
                     "underlyingType": "string",
                     "argNum": 2,
-                    "expr": "payeeMember.Name"
+                    "expr": "payerMember.Name"
+                }
+            ]
+        },
+        {
+            "id": "paymentPending",
+            "message": "paymentPending",
+            "translation": "Nuevo pago pendiente"
+        },
+        {
+            "id": "paymentPendingText",
+            "message": "paymentPendingText",
+            "translation": "Tienes un nuevo pago de {Amount} para {Name}. Por favor acepta o rechaza la transacción lo más pronto posible.",
+            "placeholders": [
+                {
+                    "id": "Amount",
+                    "string": "%[1]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 1,
+                    "expr": "amount"
+                },
+                {
+                    "id": "Name",
+                    "string": "%[2]v",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "payerMember.Name"
                 }
             ]
         }
