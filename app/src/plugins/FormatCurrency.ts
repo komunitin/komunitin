@@ -1,5 +1,5 @@
 import { Currency } from "src/store/model";
-import { useI18n } from "vue-i18n";
+import { i18n } from "../boot/i18n";
 
 export interface CurrencyFormat {
   /**
@@ -24,6 +24,7 @@ export default function (
   currency: Currency,
   options?: CurrencyFormat
 ): string {
+  const {n} = i18n.global
   // Decimals and scale are true if undefined.
   const decimals = options?.decimals ?? true;
   const scale = options?.scale ?? true;
@@ -31,11 +32,11 @@ export default function (
     amount = amount / 10 ** currency.attributes.scale;
   }
   const amountString = decimals
-    ? useI18n().n(amount, {
+    ? n(amount, {
       minimumFractionDigits: currency.attributes.decimals,
       maximumFractionDigits: currency.attributes.decimals,
     })
-    : useI18n().n(amount);
+    : n(amount);
 
   // Use vue-i18n $n to localize the number and append the currency symbol.
   return `${amountString} ${currency.attributes.symbol}`;
