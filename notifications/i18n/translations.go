@@ -14,4 +14,4 @@ package i18n
 //Need to import this package here to avoid an unexpected error on generate command.
 import _ "golang.org/x/text/message"
 
-//go:generate gotext update -out catalog.go -lang=ca,en,es github.com/komunitin/komunitin/notifications
+//go:generate gotext -srclang=en update -out catalog.go -lang=ca,en,es github.com/komunitin/komunitin/notifications
