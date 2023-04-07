@@ -23,6 +23,7 @@ import (
 
 const (
 	TransferCommitted = "TransferCommitted"
+	TransferPending   = "TransferPending"
 )
 
 // These configuration parameters are set docker-compose.xml file.
@@ -78,6 +79,8 @@ func handleEvent(ctx context.Context, value map[string]interface{}) error {
 	switch event {
 	case TransferCommitted:
 		return handleTransferCommitted(ctx, value)
+	case TransferPending:
+		return handleTransferPending(ctx, value)
 	default:
 		log.Printf("Unkown event type %v\n", event)
 	}
@@ -85,7 +88,8 @@ func handleEvent(ctx context.Context, value map[string]interface{}) error {
 }
 
 func fixUrl(url string) string {
-	url = strings.Replace(url, "/localhost", "/host.docker.internal", 1)
+	// This is for development purposes only.
+	url = strings.Replace(url, "/localhost:2029/", "/integralces:2029/", 1)
 	return url
 }
 func getResource(ctx context.Context, url string) (*http.Response, error) {
@@ -98,6 +102,7 @@ func getResource(ctx context.Context, url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	return http.DefaultClient.Do(req)
 }
@@ -111,54 +116,33 @@ func findMemberByAccountId(items []interface{}, accountId string) *Member {
 	return nil
 }
 func handleTransferCommitted(ctx context.Context, value map[string]interface{}) error {
-	// Get full transfer object.
-	res, err := getResource(ctx, value["transfer"].(string)+"?include=currency")
+	transfer, err := getRelatedTransfer(ctx, value["transfer"].(string))
 	if err != nil {
 		return err
 	}
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error getting transfer object: %s", res.Status)
-	}
-	transfer := new(Transfer)
-	err = jsonapi.UnmarshalPayload(res.Body, transfer)
-	if err != nil {
-		return err
-	}
-
 	code := value["code"].(string)
 	// Get payer and payee accounts.
 	payer := transfer.Payer
 	payee := transfer.Payee
 
 	// Get the members related to these accounts.
-	url := socialUrl + "/" + code + "/members?filter[account]=" + payer.Id + "," + payee.Id
-	res, err = getResource(ctx, url)
+	members, err := getAccountMembers(ctx, code, []*Account{payer, payee})
 	if err != nil {
 		return err
 	}
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error getting member objects: %s", res.Status)
-	}
+	payerMember := members[0]
+	payeeMember := members[1]
 
-	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*Member)(nil)))
-
-	if err != nil {
-		return err
-	}
-
-	payerMember := findMemberByAccountId(members, payer.Id)
-	payeeMember := findMemberByAccountId(members, payee.Id)
-
-	iconUrl := appUrl + "/icons/icon-512x512.png"
-	transferUrl := appUrl + "/groups/" + code + "/transactions/" + transfer.Id
 	amount := formatAmount(transfer.Amount, transfer.Currency)
+
+	// TODO: notify only the users that have not performed the action.
 
 	err = notifyMember(ctx, payerMember, func(l i18n.Localizer) Message {
 		return Message{
 			Title: l.Sprintf("newPurchase"),
 			Body:  l.Sprintf("newPurchaseText", amount, payeeMember.Name),
-			Icon:  iconUrl,
-			Link:  transferUrl,
+			Icon:  iconUrl(),
+			Link:  transferUrl(code, transfer),
 		}
 	})
 
@@ -166,20 +150,100 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 		return err
 	}
 
-	notifyMember(ctx, payeeMember, func(l i18n.Localizer) Message {
+	err = notifyMember(ctx, payeeMember, func(l i18n.Localizer) Message {
 		return Message{
 			Title: l.Sprintf("paymentReceived"),
 			Body:  l.Sprintf("paymentReceivedText", amount, payerMember.Name),
-			Icon:  iconUrl,
-			Link:  transferUrl,
+			Icon:  iconUrl(),
+			Link:  transferUrl(code, transfer),
 		}
 	})
 
+	return err
+}
+
+func iconUrl() string {
+	return appUrl + "/icons/icon-512x512.png"
+}
+func transferUrl(code string, transfer *Transfer) string {
+	return appUrl + "/groups/" + code + "/transactions/" + transfer.Id
+}
+
+// Process Transfer Pending event by notifying the payer that they need to accept
+// or reject the transfer.
+func handleTransferPending(ctx context.Context, value map[string]interface{}) error {
+	transfer, err := getRelatedTransfer(ctx, value["transfer"].(string))
 	if err != nil {
 		return err
 	}
+	code := value["code"].(string)
+	payer := transfer.Payer
+	members, err := getAccountMembers(ctx, code, []*Account{payer})
+	if err != nil {
+		return err
+	}
+	payerMember := members[0]
+	amount := formatAmount(transfer.Amount, transfer.Currency)
 
-	return nil
+	err = notifyMember(ctx, payerMember, func(l i18n.Localizer) Message {
+		return Message{
+			Title: l.Sprintf("paymentPending"),
+			Body:  l.Sprintf("paymentPendingText", amount, payerMember.Name),
+			Icon:  iconUrl(),
+			Link:  transferUrl(code, transfer),
+		}
+	})
+
+	return err
+}
+
+func getAccountMembers(ctx context.Context, code string, accounts []*Account) ([]*Member, error) {
+	// Build API url.
+	ids := ""
+	for i, account := range accounts {
+		if i > 0 {
+			ids += ","
+		}
+		ids += account.Id
+	}
+	url := socialUrl + "/" + code + "/members?filter[account]=" + ids
+
+	res, err := getResource(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error getting member objects: %s", res.Status)
+	}
+
+	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*Member)(nil)))
+
+	if err != nil {
+		return nil, err
+	}
+
+	ordered := make([]*Member, len(accounts))
+	for i, account := range accounts {
+		ordered[i] = findMemberByAccountId(members, account.Id)
+	}
+	return ordered, nil
+}
+
+func getRelatedTransfer(ctx context.Context, url string) (*Transfer, error) {
+	// Get full transfer object.
+	res, err := getResource(ctx, url+"?include=currency")
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error getting transfer object: %s", res.Status)
+	}
+	transfer := new(Transfer)
+	err = jsonapi.UnmarshalPayload(res.Body, transfer)
+	if err != nil {
+		return nil, err
+	}
+	return transfer, nil
 }
 
 // Format a currency amount for human readability.
