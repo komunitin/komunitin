@@ -22,18 +22,28 @@
         <member-header
           :member="otherMember(transfer)"
           clickable
+          class="transaction-item"
           :class="transfer.attributes.state"
           :to="`/groups/${code}/transactions/${transfer.id}`"
         >
-          <template #extra>
-            <q-item-section>
+          <template
+            v-if="$q.screen.lt.md" 
+            #caption
+          >
+            {{ transfer.attributes.meta }}
+          </template>
+          <template 
+            v-if="$q.screen.gt.sm" 
+            #extra
+          >
+            <q-item-section class="section-extra">
               <q-item-label lines="2">
                 {{ transfer.attributes.meta }}
               </q-item-label>
             </q-item-section>
           </template>
           <template #side>
-            <div class="column items-end">
+            <div class="column items-end section-right">
               <q-item-label
                 caption
                 class="col top-right-label"
@@ -175,6 +185,14 @@ export default defineComponent({
     background-color: $light-error;
     .top-right-label{
       color: $error;
+    }
+  }
+  .transaction-item {
+    .section-extra{
+      flex: 20000 1 0%;
+    }
+    .section-right {
+      width: 200px;
     }
   }
 </style>
