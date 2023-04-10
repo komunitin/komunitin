@@ -38,6 +38,7 @@ import { useRouter } from "vue-router"
 import { useStore } from "vuex"
 import TransactionCard from '../../components/TransactionCard.vue'
 import PageHeader from "../../layouts/PageHeader.vue"
+import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
 
 export default defineComponent({
   components: {
@@ -57,7 +58,6 @@ export default defineComponent({
   setup(props) {
     const store = useStore()
     const router = useRouter()
-    const $q = useQuasar()
     const {t} = useI18n()
 
     const transfer = store.getters["transfers/current"]
@@ -68,18 +68,9 @@ export default defineComponent({
         group: props.code,
         resource: transfer
       });
-      const state = transfer.attributes.state;
-      switch(state) {
-        case "committed":
-          $q.notify({type: "positive", message: t("transactionCommitted")});
-          break;
-        case "pending":
-          $q.notify({type: "ongoing", message: t("transactionPending")});
-          break;
-        case "rejected":
-          $q.notify({type: "negative", message: t("transactionRejected")});
-          break;
-      }
+      
+      notifyTransactionState(transfer.attributes.state, t)
+
       router.push({
         name: "Transaction",
         params: {
