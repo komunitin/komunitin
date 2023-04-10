@@ -293,11 +293,13 @@ export interface Account extends ResourceObject {
   }
 }
 
+export type TransferState = "new" | "pending" | "accepted" | "committed" | "rejected" | "deleted"
+
 export interface Transfer extends ResourceObject {
   attributes: {
     amount: number,
     meta: string,
-    state: "new" | "pending" | "accepted" | "committed" | "rejected" | "deleted";
+    state: TransferState;
     expires?: string;
     created: string;
     updated: string;
