@@ -2,7 +2,7 @@
   <page-header 
     :title="$t('createTransaction')" 
     balance 
-    back
+    :back="`/groups/${code}/members/${memberCode}/transactions/new`"
   />
   <q-page-container class="row justify-center bg-light">
     <q-page class="q-py-lg col-12 col-sm-8 col-md-6">
@@ -91,7 +91,7 @@ export default defineComponent({
     const onBack = () => {
       router.back()
     }
-    return { transfer, onSubmit, onBack }
+    return { transfer, onSubmit, onBack, ...props }
   }
 })
 </script>
