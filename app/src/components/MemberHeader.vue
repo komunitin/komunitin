@@ -26,7 +26,7 @@
         </slot>
       </q-item-label>
     </q-item-section>
-    <slot name="extra"/>
+    <slot name="extra" />
     <q-item-section side>
       <!-- No content by default on the side slot -->
       <slot name="side" />
