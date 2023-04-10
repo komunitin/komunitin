@@ -51,6 +51,9 @@
                 <span v-if="transfer.attributes.state == 'pending'">
                   {{ $t("pending") }}
                 </span>
+                <span v-else-if="transfer.attributes.state == 'rejected'">
+                  {{ $t("rejected") }}
+                </span>
                 <span v-else>
                   {{ $formatDate(transfer.attributes.updated) }}
                 </span>
@@ -185,6 +188,12 @@ export default defineComponent({
     background-color: $light-error;
     .top-right-label{
       color: $error;
+    }
+  }
+  .rejected {
+    background: $light-background;
+    .positive-amount, .negative-amount, .section-extra {
+      color: $onsurface-d;
     }
   }
   .transaction-item {
