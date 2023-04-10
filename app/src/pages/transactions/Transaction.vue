@@ -18,14 +18,14 @@
             <q-separator />
             <q-card-actions class="justify-end">
               <q-btn 
-                :label="$t('Reject')"
+                :label="$t('reject')"
                 color="primary"
                 flat
                 padding="xs lg"
                 @click="updateTransactionState('rejected')"
               />
               <q-btn
-                :label="$t('Accept')"
+                :label="$t('accept')"
                 type="submit"
                 color="primary"
                 padding="xs lg"

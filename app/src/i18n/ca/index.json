@@ -108,6 +108,8 @@
   "transactionCommitted": "Transacció confirmada",
   "transactionPending": "Transacció pendent d'aprovació",
   "transactionRejected": "Transacció rebutjada",
+  "accept": "Accepta",
+  "reject": "Rebutja",
   "ErrorAuthNoCredentials": "Error: email o password incorrectes"
 
 }

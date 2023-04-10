@@ -105,5 +105,7 @@
   "payerRequired": "Escoge la cuenta pagadora.",
   "sucessfulLogin": "Sessión iniciada como {name}!",
   "confirm": "Confirmar",
+  "accept": "Acceptar",
+  "reject": "Rechazar",
   "ErrorAuthNoCredentials": "Error: email o password incorrectos"
 }
