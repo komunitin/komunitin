@@ -108,6 +108,8 @@
   "transactionCommitted": "Transacion committed",
   "transactionPending": "Transaction pending",
   "transactionRejected": "Transaction rejected",
+  "accept": "Accept",
+  "reject": "Reject",
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
   "ErrorServerNoResponse": "Error: Server do not respond",

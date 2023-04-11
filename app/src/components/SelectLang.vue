@@ -6,7 +6,7 @@
   >
     <q-list>
       <q-item
-        v-for="(label, lang) in langs"
+        v-for="(item, lang) in langs"
         :key="lang"
         :ref="lang"
         v-close-popup
@@ -14,7 +14,7 @@
         @click="changeLanguage(lang)"
       >
         <q-item-section>
-          <q-item-label>{{ label }}</q-item-label>
+          <q-item-label>{{ item.label }}</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>

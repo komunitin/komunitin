@@ -14,43 +14,65 @@
       v-if="slotProps.resources"
       padding
     >
-      <member-header
+      <template 
         v-for="transfer of loadedTransfers(slotProps.resources)"
         :key="transfer.id"
-        :member="otherMember(transfer)"
-        clickable
-        :class="transfer.attributes.state"
-        :to="`/groups/${code}/transactions/${transfer.id}`"
       >
-        <template #caption>
-          {{ transfer.attributes.meta }}
-        </template>
-        <template #side>
-          <div class="column items-end">
-            <q-item-label
-              caption
-              class="col"
-            >
-              <span v-if="transfer.attributes.state == 'pending'">
-                {{ $t("pending") }}
-              </span>
-              <span v-else>
-                {{ $formatDate(transfer.attributes.updated) }}
-              </span>
-            </q-item-label>
-            <div
-              class="col transaction-amount text-h6"
-              :class="
-                signedAmount(transfer) >= 0
-                  ? 'positive-amount'
-                  : 'negative-amount'
-              "
-            >
-              {{ FormatCurrency(signedAmount(transfer), transfer.currency) }}
+        <q-separator />
+        <member-header
+          :member="otherMember(transfer)"
+          clickable
+          class="transaction-item"
+          :class="transfer.attributes.state"
+          :to="`/groups/${code}/transactions/${transfer.id}`"
+        >
+          <template
+            v-if="$q.screen.lt.md" 
+            #caption
+          >
+            {{ transfer.attributes.meta }}
+          </template>
+          <template 
+            v-if="$q.screen.gt.sm" 
+            #extra
+          >
+            <q-item-section class="section-extra">
+              <q-item-label lines="2">
+                {{ transfer.attributes.meta }}
+              </q-item-label>
+            </q-item-section>
+          </template>
+          <template #side>
+            <div class="column items-end section-right">
+              <q-item-label
+                caption
+                class="col top-right-label"
+              >
+                <span v-if="transfer.attributes.state == 'pending'">
+                  {{ $t("pending") }}
+                </span>
+                <span v-else-if="transfer.attributes.state == 'rejected'">
+                  {{ $t("rejected") }}
+                </span>
+                <span v-else>
+                  {{ $formatDate(transfer.attributes.updated) }}
+                </span>
+              </q-item-label>
+              <div
+                class="col transaction-amount text-h6"
+                :class="
+                  signedAmount(transfer) >= 0
+                    ? 'positive-amount'
+                    : 'negative-amount'
+                "
+              >
+                {{ FormatCurrency(signedAmount(transfer), transfer.currency) }}
+              </div>
             </div>
-          </div>
-        </template>
-      </member-header>
+          </template>
+        </member-header>
+      </template>
+      <q-separator />
     </q-list>
   </resource-cards>
 </template>
@@ -161,5 +183,25 @@ export default defineComponent({
    */
   .transaction-amount {
     margin-top: -12px;
-  } 
+  }
+  .pending {
+    background-color: $light-error;
+    .top-right-label{
+      color: $error;
+    }
+  }
+  .rejected {
+    background: $light-background;
+    .positive-amount, .negative-amount, .section-extra {
+      color: $onsurface-d;
+    }
+  }
+  .transaction-item {
+    .section-extra{
+      flex: 20000 1 0%;
+    }
+    .section-right {
+      width: 200px;
+    }
+  }
 </style>

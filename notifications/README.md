@@ -2,11 +2,9 @@
 This microservice implements the Komunitin Notifications API.
 
 ## Build and run with docker
-1. Startup RabbitMQ message broker and the Notifications service:
+Execute the Notifications services locally:
+1. Be sure that you have the `komunitin-project-firebase-adminsdk.json` credentials file in the project root.
+2. Stand up services for dev purposes.
 ```
-$ docker compose up -d
-```
-2. Send test messages to the message broker:
-```
-$ docker compose exec notifications 
+$ docker-compose --profile run up --build
 ```

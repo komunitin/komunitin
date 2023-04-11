@@ -8,6 +8,7 @@ package notifications
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -46,6 +47,9 @@ func getAuthorizationToken(ctx context.Context) (string, error) {
 	})
 	if err != nil {
 		return "", err
+	}
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("error getting authorization token: %s", res.Status)
 	}
 	response := new(tokenResponse)
 	err = json.NewDecoder(res.Body).Decode(&response)

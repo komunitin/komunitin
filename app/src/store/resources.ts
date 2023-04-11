@@ -50,6 +50,25 @@ export interface CreatePayload<T extends ResourceObject> {
   resource: T;
 }
 
+type DeepPartial<T> = T extends object ? {
+  [P in keyof T]?: DeepPartial<T[P]>;
+} : T;
+
+export interface UpdatePayload<T extends ResourceObject> {
+  /**
+   * The resource code.
+   */
+  code: string
+  /**
+   * The group where the record belongs to.
+   */
+  group: string;
+  /**
+   * The updated fields for the resource.
+   */
+  resource: DeepPartial<T> & ResourceIdentifierObject
+}
+
 /**
  * Object argument for the `loadList` action.
  */
@@ -217,7 +236,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     });
   }
 
-  private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post", data?: object) {
+  private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post"|"patch", data?: object) {
     if (method == undefined) {
       method = "get";
     }
@@ -559,6 +578,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context: ActionContext<ResourcesState<T>, S>,
       payload: CreatePayload<T>
     ) => this.create(context, payload),
+    update: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: UpdatePayload<T>
+    ) => this.update(context, payload),
     setCurrent: (
       context: ActionContext<ResourcesState<T>, S>,
       payload: T
@@ -743,7 +766,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
   }
   /**
-   * Creates a resource by posting the current resource to the API.
+   * Creates a resource by posting the given resource to the API.
+   * The response is updated to the current resource.
    */
   protected async create(
     context: ActionContext<ResourcesState<T>, S>,
@@ -766,6 +790,31 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     
   }
+  /**
+   * Updates a resource by patching the given resource to the API.
+   * The responsi is updated in the current resource.
+   */
+  protected async update(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: UpdatePayload<T>
+  ) {
+    const url = this.resourceEndpoint(payload.code, payload.group);
+    const resource = payload.resource;
+    const body = {data: resource};
+    try {
+      const response = await this.request(context, url, "patch", body) 
+      if (response.status == 200) {
+        // Updated. Data in the response body.
+        const resource = response.data.data
+        this.setCurrent(context, resource)
+      } else {
+        throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
+      }
+    } catch (error) {
+      throw Resources.getKError(error as AxiosError);
+    }
+  }
+
   /**
    * Sets the current resource. Use this action when setting a resource created 
    * from the client and not fetched from the API, or internally from other actions.
