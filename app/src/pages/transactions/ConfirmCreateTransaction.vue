@@ -2,7 +2,7 @@
   <page-header 
     :title="$t('createTransaction')" 
     balance 
-    back
+    :back="`/groups/${code}/members/${memberCode}/transactions/new`"
   />
   <q-page-container class="row justify-center bg-light">
     <q-page class="q-py-lg col-12 col-sm-8 col-md-6">
@@ -31,13 +31,13 @@
   </q-page-container>
 </template>
 <script lang="ts">
-import { useQuasar } from "quasar"
 import { defineComponent } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { useStore } from "vuex"
 import TransactionCard from '../../components/TransactionCard.vue'
 import PageHeader from "../../layouts/PageHeader.vue"
+import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
 
 export default defineComponent({
   components: {
@@ -57,7 +57,6 @@ export default defineComponent({
   setup(props) {
     const store = useStore()
     const router = useRouter()
-    const $q = useQuasar()
     const {t} = useI18n()
 
     const transfer = store.getters["transfers/current"]
@@ -68,18 +67,9 @@ export default defineComponent({
         group: props.code,
         resource: transfer
       });
-      const state = transfer.attributes.state;
-      switch(state) {
-        case "committed":
-          $q.notify({type: "positive", message: t("transactionCommitted")});
-          break;
-        case "pending":
-          $q.notify({type: "ongoing", message: t("transactionPending")});
-          break;
-        case "rejected":
-          $q.notify({type: "negative", message: t("transactionRejected")});
-          break;
-      }
+      
+      notifyTransactionState(transfer.attributes.state, t)
+
       router.push({
         name: "Transaction",
         params: {
@@ -91,7 +81,7 @@ export default defineComponent({
     const onBack = () => {
       router.back()
     }
-    return { transfer, onSubmit, onBack }
+    return { transfer, onSubmit, onBack, ...props }
   }
 })
 </script>

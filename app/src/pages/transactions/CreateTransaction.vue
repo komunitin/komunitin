@@ -2,7 +2,7 @@
   <page-header 
     :title="$t('createTransaction')" 
     balance 
-    back
+    :back="`/groups/${code}/members/${memberCode}/transactions`"
   />
   <q-page-container class="row justify-center">
     <q-page 
@@ -156,7 +156,8 @@ export default defineComponent({
       amount,
       myAccount: store.getters.myAccount,
       v$,
-      onSubmit
+      onSubmit,
+      ...props
     }
   }
 })

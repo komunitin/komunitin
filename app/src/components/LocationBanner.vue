@@ -27,7 +27,7 @@
 </template>
 <script setup lang="ts">
 import KError, { KErrorCode } from "src/KError";
-import { ref, computed, onBeforeMount, watch, defineEmits } from "vue";
+import { ref, computed, onBeforeMount, watch } from "vue";
 import { useStore } from "vuex";
 
 const emit = defineEmits(["showChange"])
