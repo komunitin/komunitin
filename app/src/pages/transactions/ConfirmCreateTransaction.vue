@@ -31,7 +31,6 @@
   </q-page-container>
 </template>
 <script lang="ts">
-import { useQuasar } from "quasar"
 import { defineComponent } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
