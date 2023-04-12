@@ -2,6 +2,10 @@ version: "3.5"
 services:
   redis:
     image: redis:7
+    command: redis-server --save 600 1 20 100 --appendonly yes
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
     networks:
       - komunitin  
 
@@ -9,6 +13,7 @@ services:
     depends_on:
       - redis
     build: .
+    restart: unless-stopped
     ports:
      - 2028:2028 
     environment:
@@ -30,7 +35,7 @@ services:
   notifications-dev:
     build:
       context: .
-      target: notifications-dev 
+      target: notifications-dev
     ports: 
       - "2028:2028"
       - "40000:40000"
@@ -50,7 +55,7 @@ services:
       
   redis-commander:
     image: rediscommander/redis-commander:latest
-    restart: always
+    restart: unless-stopped
     environment:
      - REDIS_HOSTS=local:redis:6379
     ports:
@@ -60,6 +65,8 @@ services:
     networks:
       - komunitin
 
+volumes:
+  redisdata:
 networks:
   komunitin:
     driver: bridge
