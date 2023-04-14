@@ -31,7 +31,7 @@
   </q-page-container>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue"
+import { defineComponent, computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { useStore } from "vuex"
@@ -59,22 +59,22 @@ export default defineComponent({
     const router = useRouter()
     const {t} = useI18n()
 
-    const transfer = store.getters["transfers/current"]
+    const transfer = computed(() => store.getters["transfers/current"])
     
     const onSubmit = async () => {
-      transfer.attributes.state = "committed"
+      transfer.value.attributes.state = "committed"
       await store.dispatch("transfers/create", {
         group: props.code,
-        resource: transfer
+        resource: transfer.value
       });
       
-      notifyTransactionState(transfer.attributes.state, t)
+      notifyTransactionState(transfer.value.attributes.state, t)
 
       router.push({
         name: "Transaction",
         params: {
           code: props.code,
-          transferCode: transfer.id
+          transferCode: transfer.value.id
         }
       })
     }
