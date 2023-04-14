@@ -6,7 +6,7 @@ export const notifyTransactionState = (state: string, t: (m: string) => string) 
       Notify.create({type: "positive", message: t("transactionCommitted")});
       break;
     case "pending":
-      Notify.create({type: "ongoing", message: t("transactionPending")});
+      Notify.create({type: "info", message: t("transactionPending")});
       break;
     case "rejected":
       Notify.create({type: "negative", message: t("transactionRejected")});

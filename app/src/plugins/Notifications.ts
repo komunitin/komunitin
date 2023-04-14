@@ -7,6 +7,8 @@ import { Member, NotificationsSubscription, ResourceResponse, User } from "src/s
 import KError, { KErrorCode } from "src/KError";
 
 import firebaseConfig from "./FirebaseConfig";
+import { Notify } from "quasar";
+import { i18n } from "src/boot/i18n";
 
 export interface SubscriptionSettings {
   locale: string
@@ -93,11 +95,22 @@ export class Notifications {
     }
   }
 
- 
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private onMessage(payload: MessagePayload) : void {
-    // TODO
-    // console.log("Received foreground message.", payload);
+    const actions = []
+    if (payload.fcmOptions?.link) {
+      actions.push({
+        label: i18n.global.t('View'),
+        color: "white",
+        handler: () => {
+          window.location.href = payload.fcmOptions?.link as string
+        },
+      })
+    }
+    Notify.create({
+      type: "info",
+      message: payload.notification?.body,
+      timeout: 0,
+      actions
+    });
   }
 }
