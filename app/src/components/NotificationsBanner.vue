@@ -7,7 +7,7 @@
       <q-icon name="notifications" />
     </template>
 
-    {{ isDenied ? $t("deniedNotificationsText") : $t("enableNotificationsText") }}
+    {{ text }}
     <template #action>
       <q-btn
         flat
@@ -16,7 +16,7 @@
         @click="dismiss"
       />
       <q-btn
-        v-if="!isDenied"
+        v-if="isCompatible && !isDenied"
         flat
         color="primary"
         :label="$t('enableNotifications')"
@@ -27,7 +27,9 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onBeforeMount, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useStore } from "vuex";
+const {t} = useI18n()
 
 const emit = defineEmits(["showChange"])
 
@@ -36,9 +38,17 @@ const ready = ref(false);
 const store = useStore()
 const dismissed = computed(() => store.state.ui.notificationsBannerDismissed)
 const isLoggedIn = computed(() => store.getters.isLoggedIn)
-const permission = ref(Notification.permission)
+const isCompatible = computed(() => Notification !== undefined)
+const permission = ref(isCompatible.value && Notification.permission)
 const isAuthorized = computed(() => permission.value == 'granted')
 const isDenied = computed(() => permission.value == 'denied')
+const text = computed(() => {
+  if (isCompatible.value) {
+    return isDenied.value ? t("deniedNotificationsText") : t("enableNotificationsText")
+  } else {
+    return t("incompatibleNotificationsText")
+  }
+})
 
 const show = computed(() => ready.value && isLoggedIn.value && !isAuthorized.value && !dismissed.value)
 
