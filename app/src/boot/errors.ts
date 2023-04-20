@@ -35,8 +35,12 @@ function showError(error: KError) {
  * @param error The error to be logged.
  */
 function logError(error: KError) {
+  let msg = `[${error.code}] ${error.message}`;
+  if (error.debugInfo) {
+    msg += "\n" + JSON.stringify(error.debugInfo)
+  }
   // eslint-disable-next-line no-console
-  console.error(`[${error.code}] ${error.message}`);
+  console.error(msg)
 }
 
 /**
