@@ -86,6 +86,7 @@
   "enableNotificationsText": "Activa les notificacions per estar al corrent dels moviments del teu compte i altres notícies importants de la teva xarxa. Pots configurar-les o desactivar-les quan vulguis.",
   "deniedNotificationsText": "Aquest dispositiu bloqueja les nostres notificacions. Pots solucionar-ho permetent les notificacions de Komunitin a la configuració del teu navegador.",
   "enableNotifications": "Activa les notificacions",
+  "incompatibleNotificationsText": "Aquest dispositiu no és compatible amb les notificacions Web Push. Si estas en Safari pots actualitzar a la versió 16.4.",
   "enableLocationText": "Activa la localització per a que Komunitin pugui mostrar-te els recursos que estan més a prop de tu.",
   "deniedLocationText": "Aques dispositiu bloqueja l'accés a la teva localització pel que Komunitin no pot ordenar els recursos per proximitat. Pots solucionar-ho des de la configuració del teu navegador.",
   "enableLocation": "Activa la localizació",
