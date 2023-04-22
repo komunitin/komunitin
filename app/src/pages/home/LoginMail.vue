@@ -68,6 +68,7 @@ export default defineComponent({
       email: '',
       pass: '',
       isPwd: true,
+      waiting: false
     };
   },
   computed: {
@@ -94,8 +95,15 @@ export default defineComponent({
         throw new KError(KErrorCode.IncorrectCredentials, "Incorrect email or password");
       }
       // Perform authentication request.
-      
-      await this.$store.dispatch("login", {email: this.email, password: this.pass});
+      try {
+        this.$q.loading.show({
+          delay: 200
+        })
+        await this.$store.dispatch("login", {email: this.email, password: this.pass});
+      }
+      finally {
+        this.$q.loading.hide()
+      }
       
       if (this.$store.getters.isLoggedIn) {
         const name = this.$store.state.me.userInfo?.name;
