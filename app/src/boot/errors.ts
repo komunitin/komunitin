@@ -76,9 +76,13 @@ function vueWarnHandler(message: string, instance: ComponentPublicInstance | nul
 if (window !== undefined) {
   window.addEventListener('error', function(event: ErrorEvent) {
     // This error is thrown but is harmless, so we can safely ignore it.
-    // In fact, it is mandatory that we ignore it since otherwise we enter 
-    // in an infinite loop due to the notification widget.
-    if (event.message.includes("ResizeObserver loop limit exceeded")) {
+    // In fact, it is mandatory that we ignore it since otherwise we show
+    // very annoying error messages to users. Note that in chrome this 
+    // error is 
+    // "ResizeObserver loop limit exceeded" 
+    // and  in Safari it is:
+    // "ResizeObserver loop completed with undelivered notifications."
+    if (event.message.includes("ResizeObserver loop")) {
       // TODO: Maybe remove this warning in production.
       if (process.env.DEV) {
         // eslint-disable-next-line no-console
