@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-outside column">
+  <div class="bg-outside column full-height">
     <div
       id="container"
       class="q-mx-auto bg-surface"
@@ -68,13 +68,13 @@ export default defineComponent({
   // The 18px is an estimation of the scroll-bar width.
   @media (min-width: $width + 18px) {
     width: $width;
-    height: calc(100vh - 24px);
+    height: calc(100% - 24px);
     margin-top: 24px;
   }
 }
 #container {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   &.with-drawer {
     @include wrap-main-container(1280px);
   }
