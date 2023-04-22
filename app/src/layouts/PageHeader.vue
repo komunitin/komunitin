@@ -3,7 +3,7 @@
     <q-header
       id="header"
       class="bg-primary"
-      :class="showBalance ? 'column' : 'row'"
+      :class="showBalance ? '' : 'row'"
       :style="`height: ${computedHeight}px;`"
     >
       <q-toolbar
