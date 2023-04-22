@@ -15,7 +15,7 @@
       </div>
       <q-scroll-observer
         ref="scrollObserver"
-        @scroll.passive="scrollHandler"
+        @scroll="scrollHandler"
       />
       <slot name="fixed" />
     </q-page-sticky>
