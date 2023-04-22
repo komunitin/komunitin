@@ -196,12 +196,15 @@ export default defineComponent({
       color: $onsurface-d;
     }
   }
-  .transaction-item {
+  @media (min-width: $breakpoint-sm-min) {
+    .transaction-item {
     .section-extra{
       flex: 20000 1 0%;
     }
     .section-right {
       width: 200px;
     }
+  }  
   }
+  
 </style>
