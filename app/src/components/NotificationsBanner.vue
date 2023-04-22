@@ -38,7 +38,7 @@ const ready = ref(false);
 const store = useStore()
 const dismissed = computed(() => store.state.ui.notificationsBannerDismissed)
 const isLoggedIn = computed(() => store.getters.isLoggedIn)
-const isCompatible = computed(() => Notification !== undefined)
+const isCompatible = computed(() => (window && 'Notification' in window))
 const permission = ref(isCompatible.value && Notification.permission)
 const isAuthorized = computed(() => permission.value == 'granted')
 const isDenied = computed(() => permission.value == 'denied')

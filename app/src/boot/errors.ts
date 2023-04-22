@@ -82,7 +82,8 @@ if (window !== undefined) {
     // "ResizeObserver loop limit exceeded" 
     // and  in Safari it is:
     // "ResizeObserver loop completed with undelivered notifications."
-    if (event.message.includes("ResizeObserver loop")) {
+    // furthermore, safari may hide the error details from the script, just giving "Script error"
+    if (event.message.includes("ResizeObserver loop") || event.message == "Script error.") {
       // TODO: Maybe remove this warning in production.
       if (process.env.DEV) {
         // eslint-disable-next-line no-console
