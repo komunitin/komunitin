@@ -4,7 +4,7 @@ import { flushPromises, mount, MountingOptions, VueWrapper } from "@vue/test-uti
 import createStore from 'src/store/index';
 import createRouter from 'src/router/index';
 
-import {Quasar, LocalStorage, Notify} from 'quasar';
+import {Quasar, LocalStorage, Notify, Loading} from 'quasar';
 
 // Boot files.
 import bootKomunitin from '../../../src/boot/koptions';
@@ -68,7 +68,7 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
   const router = createRouter({store});
   
   // Install quasar
-  const quasar = [Quasar, {plugins: LocalStorage}];
+  const quasar = [Quasar, {plugins: [LocalStorage, Loading]}];
 
   const mountOptions: any = {
     global: {
