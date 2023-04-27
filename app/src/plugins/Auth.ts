@@ -106,27 +106,29 @@ export class Auth {
   }
 
   /**
-   * If the client is not yet authorized, tries to silently authorize it using
-   * a stored refresh token. Otherwise rejects the promise (throws exception).
+   * Try to silently authorize it using stored refresh token.
+   * If can't suceed it rejects the promise (throws exception).
    */
   public async authorize(tokens: AuthData | undefined): Promise<AuthData> {
-    if (!this.isAuthorized(tokens)) {
-      // Either don't have any data or access token is expired.
-      if (tokens !== undefined) {
-        // Try use refresh token.
-        try {
-          tokens = await this.refresh(tokens);
-        } catch (error) {
-          throw new KError(
-            KErrorCode.AuthNoCredentials,
-            "Credentails are no longer valid, login again."
-          );
+    // 1. Maybe we're already authorized.
+    if (this.isAuthorized(tokens)) {
+      return tokens as AuthData
+    }
+    // 2. Maybe we can use the refresh token.
+    if (tokens != undefined) {
+      try {
+        tokens = await this.refresh(tokens)
+        return tokens
+      } catch (error)  {
+        if (!(error instanceof KError && error.code == KErrorCode.AuthNoCredentials)) {
+          // This is an unexpected error, including network error, 400, 403, or 5XX response, 
+          throw error
         }
-      } else {
-        throw new KError(KErrorCode.AuthNoCredentials, "Missing credentials.");
       }
     }
-    return tokens as AuthData;
+    // 3. At this point we could try to use the Credentials Management API, but
+    // I finally have not done it due to lack of cross-browser compatibility.
+    throw new KError(KErrorCode.AuthNoCredentials, "Missing credentials.");
   }
 
   /**
@@ -136,12 +138,14 @@ export class Auth {
    * @param password The user password
    */
   public async login(email: string, password: string): Promise<AuthData> {
-    return this.tokenRequest({
+    const tokens = await this.tokenRequest({
       username: email,
       password: password,
       grant_type: "password",
       scope: Auth.SCOPES
     });
+
+    return tokens;
   }
 
   /**
@@ -209,12 +213,12 @@ export class Auth {
   /**
    * Get new access token using saved refresh token.
    */
-  private async refresh(tokens: AuthData) {
+  private async refresh(tokens: AuthData): Promise<AuthData> {
     if (!tokens) {
       // Should never happen, as callers must be sure that this.data is set.
       throw new KError(KErrorCode.Unknown, "Missing authentication data.");
     }
-    return this.tokenRequest({
+    return await this.tokenRequest({
       grant_type: "refresh_token",
       refresh_token: tokens.refreshToken
     });
@@ -250,7 +254,7 @@ export class Auth {
   public processTokenResponse(response: TokenResponse): AuthData {
     // Set data object from response.
     const expire = new Date();
-    expire.setSeconds(expire.getSeconds() + response.expires_in);
+    expire.setSeconds(expire.getSeconds() + Number(response.expires_in));
 
     const data = {
       accessToken: response.access_token,
