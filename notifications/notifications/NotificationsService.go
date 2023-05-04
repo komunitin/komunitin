@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/komunitin/jsonapi"
+	"github.com/komunitin/komunitin/notifications/model"
 	"github.com/komunitin/komunitin/notifications/service"
 	"github.com/komunitin/komunitin/notifications/store"
 	"github.com/rs/xid"
@@ -19,15 +20,8 @@ type Subscription struct {
 	Token string `jsonapi:"attr,token" json:"token"`
 	// jsonapi lib doesn't support typed embedded structs.
 	Settings map[string]interface{} `jsonapi:"attr,settings" json:"settings"`
-	User     *ExternalUser          `jsonapi:"relation,user" json:"user"`
-	Member   *ExternalMember        `jsonapi:"relation,member" json:"member"`
-}
-
-func (object ExternalResourceObject) JSONAPIMeta() *jsonapi.Meta {
-	return &jsonapi.Meta{
-		"external": object.External,
-		"href":     object.Href,
-	}
+	User     *model.ExternalUser    `jsonapi:"relation,user" json:"user"`
+	Member   *model.ExternalMember  `jsonapi:"relation,member" json:"member"`
 }
 
 func subscriptionsHandler(store *store.Store) http.HandlerFunc {

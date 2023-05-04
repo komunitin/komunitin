@@ -18,6 +18,7 @@ import (
 	"github.com/komunitin/jsonapi"
 	"github.com/komunitin/komunitin/notifications/events"
 	"github.com/komunitin/komunitin/notifications/i18n"
+	"github.com/komunitin/komunitin/notifications/model"
 	"github.com/komunitin/komunitin/notifications/store"
 )
 
@@ -106,9 +107,9 @@ func getResource(ctx context.Context, url string) (*http.Response, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	return http.DefaultClient.Do(req)
 }
-func findMemberByAccountId(items []interface{}, accountId string) *Member {
+func findMemberByAccountId(items []interface{}, accountId string) *model.Member {
 	for _, item := range items {
-		member := item.(*Member)
+		member := item.(*model.Member)
 		if member.Account.Id == accountId {
 			return member
 		}
@@ -126,7 +127,7 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 	payee := transfer.Payee
 
 	// Get the members related to these accounts.
-	members, err := getAccountMembers(ctx, code, []*Account{payer, payee})
+	members, err := getAccountMembers(ctx, code, []*model.Account{payer, payee})
 	if err != nil {
 		return err
 	}
@@ -134,10 +135,9 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 	payeeMember := members[1]
 
 	amount := formatAmount(transfer.Amount, transfer.Currency)
+	exludeUser := value["user"].(string)
 
-	// TODO: notify only the users that have not performed the action.
-
-	err = notifyMember(ctx, payerMember, func(l i18n.Localizer) Message {
+	err = notifyMember(ctx, payerMember, exludeUser, func(l i18n.Localizer) Message {
 		return Message{
 			Title: l.Sprintf("newPurchase"),
 			Body:  l.Sprintf("newPurchaseText", amount, payeeMember.Name),
@@ -150,7 +150,7 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 		return err
 	}
 
-	err = notifyMember(ctx, payeeMember, func(l i18n.Localizer) Message {
+	err = notifyMember(ctx, payeeMember, exludeUser, func(l i18n.Localizer) Message {
 		return Message{
 			Title: l.Sprintf("paymentReceived"),
 			Body:  l.Sprintf("paymentReceivedText", amount, payerMember.Name),
@@ -165,7 +165,7 @@ func handleTransferCommitted(ctx context.Context, value map[string]interface{}) 
 func iconUrl() string {
 	return appUrl + "/icons/icon-512x512.png"
 }
-func transferUrl(code string, transfer *Transfer) string {
+func transferUrl(code string, transfer *model.Transfer) string {
 	return appUrl + "/groups/" + code + "/transactions/" + transfer.Id
 }
 
@@ -178,14 +178,15 @@ func handleTransferPending(ctx context.Context, value map[string]interface{}) er
 	}
 	code := value["code"].(string)
 	payee := transfer.Payee
-	members, err := getAccountMembers(ctx, code, []*Account{payee})
+	members, err := getAccountMembers(ctx, code, []*model.Account{payee})
 	if err != nil {
 		return err
 	}
 	payeeMember := members[0]
 	amount := formatAmount(transfer.Amount, transfer.Currency)
+	exludeUser := value["user"].(string)
 
-	err = notifyMember(ctx, payeeMember, func(l i18n.Localizer) Message {
+	err = notifyMember(ctx, payeeMember, exludeUser, func(l i18n.Localizer) Message {
 		return Message{
 			Title: l.Sprintf("paymentPending"),
 			Body:  l.Sprintf("paymentPendingText", amount, payeeMember.Name),
@@ -197,7 +198,7 @@ func handleTransferPending(ctx context.Context, value map[string]interface{}) er
 	return err
 }
 
-func getAccountMembers(ctx context.Context, code string, accounts []*Account) ([]*Member, error) {
+func getAccountMembers(ctx context.Context, code string, accounts []*model.Account) ([]*model.Member, error) {
 	// Build API url.
 	ids := ""
 	for i, account := range accounts {
@@ -216,20 +217,20 @@ func getAccountMembers(ctx context.Context, code string, accounts []*Account) ([
 		return nil, fmt.Errorf("error getting member objects: %s", res.Status)
 	}
 
-	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*Member)(nil)))
+	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*model.Member)(nil)))
 
 	if err != nil {
 		return nil, err
 	}
 
-	ordered := make([]*Member, len(accounts))
+	ordered := make([]*model.Member, len(accounts))
 	for i, account := range accounts {
 		ordered[i] = findMemberByAccountId(members, account.Id)
 	}
 	return ordered, nil
 }
 
-func getRelatedTransfer(ctx context.Context, url string) (*Transfer, error) {
+func getRelatedTransfer(ctx context.Context, url string) (*model.Transfer, error) {
 	// Get full transfer object.
 	res, err := getResource(ctx, url+"?include=currency")
 	if err != nil {
@@ -238,7 +239,7 @@ func getRelatedTransfer(ctx context.Context, url string) (*Transfer, error) {
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error getting transfer object: %s", res.Status)
 	}
-	transfer := new(Transfer)
+	transfer := new(model.Transfer)
 	err = jsonapi.UnmarshalPayload(res.Body, transfer)
 	if err != nil {
 		return nil, err
@@ -247,12 +248,13 @@ func getRelatedTransfer(ctx context.Context, url string) (*Transfer, error) {
 }
 
 // Format a currency amount for human readability.
-func formatAmount(amount int, currency *Currency) string {
+func formatAmount(amount int, currency *model.Currency) string {
 	format := fmt.Sprint("%.", currency.Decimals, "f%s") // "%.2f%s"
 	return fmt.Sprintf(format, float64(amount)/math.Pow(10, float64(currency.Scale)), currency.Symbol)
 }
 
-func getMemberSubscriptions(ctx context.Context, member *Member) ([]Subscription, error) {
+// Return the subscriptions of given member, excluding the ones related to the given user id.
+func getMemberSubscriptions(ctx context.Context, member *model.Member, excludeUser string) ([]Subscription, error) {
 	// Get connection to DB.
 	store, err := store.NewStore()
 	if err != nil {
@@ -265,17 +267,20 @@ func getMemberSubscriptions(ctx context.Context, member *Member) ([]Subscription
 		return nil, err
 	}
 
-	// Just change types from []interface{} to []Subscription.
-	subscriptions := make([]Subscription, len(res))
-	for i, sub := range res {
+	// Change types from []interface{} to []Subscription and remove subcriptions from the user that originated the event.
+	subscriptions := []Subscription{}
+	for _, sub := range res {
 		// Convert to *Subscription and dereference.
-		subscriptions[i] = *(sub.(*Subscription))
+		subscription := *(sub.(*Subscription))
+		if subscription.User.Id != excludeUser {
+			subscriptions = append(subscriptions, subscription)
+		}
 	}
 	return subscriptions, nil
 }
 
-func notifyMember(ctx context.Context, member *Member, msgBuilder MessageBuilder) error {
-	payerSubs, err := getMemberSubscriptions(ctx, member)
+func notifyMember(ctx context.Context, member *model.Member, excludeUser string, msgBuilder MessageBuilder) error {
+	payerSubs, err := getMemberSubscriptions(ctx, member, excludeUser)
 	if err != nil {
 		return err
 	}
