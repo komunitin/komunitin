@@ -8,8 +8,8 @@
         },
         {
             "id": "newPurchaseText",
-            "message": "Purchase of {Amount} from {Name}.",
-            "translation": "Purchase of {Amount} from {Name}.",
+            "message": "Done payment of {Amount} to {Name}.",
+            "translation": "Done payment of {Amount} to {Name}.",
             "placeholders": [
                 {
                     "id": "Amount",
