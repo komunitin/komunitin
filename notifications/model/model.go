@@ -1,9 +1,11 @@
-package notifications
+package model
 
 // Komunitin API object models.
 
 import (
 	"time"
+
+	"github.com/komunitin/jsonapi"
 )
 
 type Member struct {
@@ -67,3 +69,29 @@ type ExternalAccount struct {
 	ExternalResourceObject
 	Id string `jsonapi:"primary,accounts" json:"id"`
 }
+
+// https://pkg.go.dev/github.com/google/jsonapi#readme-meta
+func (object *ExternalResourceObject) JSONAPIMeta() *jsonapi.Meta {
+	return &jsonapi.Meta{
+		"external": object.External,
+		"href":     object.Href,
+	}
+}
+
+// For a reason that I don't understand, this does not work properly
+// when I embed the ExternalResourceObject here, so I need to explicitly
+// repeat the Href and External fields.
+type ExternalTransfer struct {
+	ExternalResourceObject
+	Id string `jsonapi:"primary,transfers" json:"id"`
+}
+
+// Implement the Metable interface for ExternalTransfer.
+
+/*func (object ExternalTransfer) JSONAPIMeta() *jsonapi.Meta {
+	return &jsonapi.Meta{
+		"external": object.External,
+		"href":     object.Href,
+	}
+}
+*/
