@@ -50,48 +50,46 @@ type Currency struct {
 	Value      int    `jsonapi:"attr,value"`
 }
 
-type ExternalResourceObject struct {
+// The jonapi library does not support embedded structs. There
+// is a branch with this feature in the repo but it is inactive
+// and not merged. So we need to repeat all the fields for each type.
+// For some types we're just using the id and then we don't need to
+// implement the meta part so far.
+
+type ExternalMember struct {
+	Id string `jsonapi:"primary,members" json:"id"`
+}
+
+type ExternalAccount struct {
+	Id string `jsonapi:"primary,accounts" json:"id"`
+}
+
+// External User.
+type ExternalUser struct {
+	Id       string `jsonapi:"primary,users" json:"id"`
 	Href     string `jsonapi:"meta,href" json:"href"`
 	External bool   `jsonapi:"meta,external" json:"external"`
 }
 
-type ExternalMember struct {
-	ExternalResourceObject
-	Id string `jsonapi:"primary,members" json:"id"`
-}
-
-type ExternalUser struct {
-	ExternalResourceObject
-	Id string `jsonapi:"primary,users" json:"id"`
-}
-
-type ExternalAccount struct {
-	ExternalResourceObject
-	Id string `jsonapi:"primary,accounts" json:"id"`
-}
-
-// https://pkg.go.dev/github.com/google/jsonapi#readme-meta
-func (object *ExternalResourceObject) JSONAPIMeta() *jsonapi.Meta {
+func (object ExternalUser) JSONAPIMeta() *jsonapi.Meta {
 	return &jsonapi.Meta{
 		"external": object.External,
 		"href":     object.Href,
 	}
 }
 
-// For a reason that I don't understand, this does not work properly
-// when I embed the ExternalResourceObject here, so I need to explicitly
-// repeat the Href and External fields.
+// External Transfer object. Use the href URL to fetch the actual transfer object.
 type ExternalTransfer struct {
-	ExternalResourceObject
-	Id string `jsonapi:"primary,transfers" json:"id"`
+	Id       string `jsonapi:"primary,transfers" json:"id"`
+	Href     string `jsonapi:"meta,href" json:"href"`
+	External bool   `jsonapi:"meta,external" json:"external"`
 }
 
 // Implement the Metable interface for ExternalTransfer.
-
-/*func (object ExternalTransfer) JSONAPIMeta() *jsonapi.Meta {
+// https://pkg.go.dev/github.com/google/jsonapi#readme-meta
+func (object ExternalTransfer) JSONAPIMeta() *jsonapi.Meta {
 	return &jsonapi.Meta{
 		"external": object.External,
 		"href":     object.Href,
 	}
 }
-*/
