@@ -7,8 +7,10 @@ package events
 
 import (
 	"context"
+	"crypto/subtle"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/komunitin/jsonapi"
@@ -32,9 +34,33 @@ type Event struct {
 	Transfer *model.ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
 }
 
+var (
+	expectedUser = os.Getenv("NOTIFICATIONS_EVENTS_USERNAME")
+	expectedPass = os.Getenv("NOTIFICATIONS_EVENTS_PASSWORD")
+)
+
+func checkBasicAuth(w http.ResponseWriter, r *http.Request) bool {
+	user, pass, ok := r.BasicAuth()
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+	}
+	usermatch := subtle.ConstantTimeCompare([]byte(user), []byte(expectedUser)) == 1
+	passmatch := subtle.ConstantTimeCompare([]byte(pass), []byte(expectedPass)) == 1
+	if usermatch && passmatch {
+		return true
+	} else {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return false
+	}
+}
+
 // Return the handler for requests to /events
 func eventsHandler(stream store.Stream) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Check authentication by asking the caller to use notification client_id/client_secret pair as basic auth.
+		if !checkBasicAuth(w, r) {
+			return
+		}
 		// Validate request and get event.
 		err := service.ValidatePost(w, r)
 		if err != nil {
@@ -50,6 +76,7 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 			http.Error(w, "Missing 'user' relationship", http.StatusBadRequest)
 			return
 		}
+		// TODO authorize request.
 
 		value := map[string]interface{}{
 			"name":   event.Name,
