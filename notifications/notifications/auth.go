@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"strconv"
@@ -69,7 +70,10 @@ func getAuthorizationToken(ctx context.Context) (string, error) {
 		return "", err
 	}
 	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("error getting authorization token: %s", res.Status)
+
+		resp, _ := httputil.DumpResponse(res, true)
+		return "", fmt.Errorf("error getting authorization token:%s\n%s\n%s\n%s", authUrl, clientId, clientSecret, resp)
+
 	}
 	response := new(tokenResponse)
 	err = json.NewDecoder(res.Body).Decode(&response)

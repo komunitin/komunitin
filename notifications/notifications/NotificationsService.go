@@ -3,9 +3,12 @@ package notifications
 // Implements the /subscriptions Notifications API endpoint.
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/komunitin/jsonapi"
 	"github.com/komunitin/komunitin/notifications/model"
@@ -24,10 +27,46 @@ type Subscription struct {
 	Member   *model.ExternalMember  `jsonapi:"relation,member" json:"member"`
 }
 
+// Checks that the token present in Authorization header is valid and
+// matches the given user. Also checks that the member belongs to the
+// given user. Calls the social api to perform these checks.
+func validateAuthorization(w http.ResponseWriter, r *http.Request, user *model.ExternalUser, member *model.ExternalMember) error {
+	token := strings.Trim(r.Header.Get("Authorization"), " ")
+	prefix := "Bearer "
+	if !strings.HasPrefix(token, prefix) {
+		msg := http.StatusText(http.StatusUnauthorized)
+		http.Error(w, msg, http.StatusUnauthorized)
+		return errors.New(msg)
+	}
+	token = strings.Trim(token[len(prefix):], " ")
+	fetchedUser, err := getUserByToken(r.Context(), token)
+	if err != nil {
+		http.Error(w, "Error fetching the user resource with given token.", http.StatusUnauthorized)
+		return err
+	}
+	// check that the fetched user is the one that should.
+	if fetchedUser.Id != user.Id {
+		msg := "the token provided authorizes another user"
+		http.Error(w, msg, http.StatusForbidden)
+		return fmt.Errorf(msg)
+
+	}
+	found := false
+	for _, m := range fetchedUser.Members {
+		if m.Id == member.Id {
+			found = true
+		}
+	}
+	if !found {
+		msg := "the user doesn't have the required member"
+		http.Error(w, msg, http.StatusForbidden)
+		return fmt.Errorf(msg)
+	}
+	return nil
+}
+
 func subscriptionsHandler(store *store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Validate authorization token.
-
 		// Validate request and get subscription.
 		err := service.ValidatePost(w, r)
 		if err != nil {
@@ -45,7 +84,9 @@ func subscriptionsHandler(store *store.Store) http.HandlerFunc {
 			http.Error(w, "Missing member and/or user relationships.", http.StatusBadRequest)
 			return
 		}
-		// TODO: Validate that provided user/member matches the one privided in authorization.
+		if validateAuthorization(w, r, subscription.User, subscription.Member) != nil {
+			return
+		}
 
 		// Check if provided subscription already exists.
 		existing, err := store.GetByIndex(r.Context(), "subscriptions", reflect.TypeOf(subscription), "member", subscription.Member.Id)

@@ -8,6 +8,11 @@ import (
 	"github.com/komunitin/jsonapi"
 )
 
+type User struct {
+	Id      string    `jsonapi:"primary,users"`
+	Members []*Member `jsonapi:"relation,members"`
+	// Ommitted other fields.
+}
 type Member struct {
 	Id      string           `jsonapi:"primary,members"`
 	Code    string           `jsonapi:"attr,code"`
