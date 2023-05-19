@@ -23,6 +23,8 @@ services:
       - KOMUNITIN_APP_URL=https://localhost:2030
       - NOTIFICATIONS_CLIENT_ID=notifications-service
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
+      - NOTIFICATIONS_EVENTS_USERNAME=integralces
+      - NOTIFICATIONS_EVENTS_PASSWORD=komunitin
     volumes:
       - "./komunitin-project-firebase-adminsdk.json:/opt/notifications/komunitin-project-firebase-adminsdk.json"
 
@@ -48,6 +50,8 @@ services:
       - KOMUNITIN_APP_URL=https://localhost:2030
       - NOTIFICATIONS_CLIENT_ID=notifications-service
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
+      - NOTIFICATIONS_EVENTS_USERNAME=integralces
+      - NOTIFICATIONS_EVENTS_PASSWORD=komunitin
     profiles:
       - "dev"
     networks:

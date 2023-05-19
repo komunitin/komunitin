@@ -7,11 +7,14 @@ package events
 
 import (
 	"context"
+	"crypto/subtle"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/komunitin/jsonapi"
+	"github.com/komunitin/komunitin/notifications/model"
 	"github.com/komunitin/komunitin/notifications/service"
 	"github.com/komunitin/komunitin/notifications/store"
 )
@@ -20,33 +23,44 @@ const (
 	EventStream = "events"
 )
 
-type ExternalTransfer struct {
-	Id       string `jsonapi:"primary,transfers"`
-	Href     string `jsonapi:"meta,href"`
-	External bool   `jsonapi:"meta,external"`
-}
-
 type Event struct {
 	// The type of the event
-	Id       string            `jsonapi:"primary,events"`
-	Name     string            `jsonapi:"attr,name"`
-	Source   string            `jsonapi:"attr,source"`
-	Code     string            `jsonapi:"attr,code"`
-	Time     time.Time         `jsonapi:"attr,time,iso8601"`
-	Transfer *ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
+	Id       string                  `jsonapi:"primary,events"`
+	Name     string                  `jsonapi:"attr,name"`
+	Source   string                  `jsonapi:"attr,source"`
+	Code     string                  `jsonapi:"attr,code"`
+	Time     time.Time               `jsonapi:"attr,time,iso8601"`
+	User     *model.ExternalUser     `jsonapi:"relation,user"`
+	Transfer *model.ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
 }
 
-// Implement Metable interface in Transfer object to declare that it is an external object.
-func (transfer ExternalTransfer) JSONAPIMeta() *jsonapi.Meta {
-	return &jsonapi.Meta{
-		"external": true,
-		"href":     transfer.Href,
+var (
+	expectedUser = os.Getenv("NOTIFICATIONS_EVENTS_USERNAME")
+	expectedPass = os.Getenv("NOTIFICATIONS_EVENTS_PASSWORD")
+)
+
+func checkBasicAuth(w http.ResponseWriter, r *http.Request) bool {
+	user, pass, ok := r.BasicAuth()
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+	}
+	usermatch := subtle.ConstantTimeCompare([]byte(user), []byte(expectedUser)) == 1
+	passmatch := subtle.ConstantTimeCompare([]byte(pass), []byte(expectedPass)) == 1
+	if usermatch && passmatch {
+		return true
+	} else {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return false
 	}
 }
 
 // Return the handler for requests to /events
 func eventsHandler(stream store.Stream) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Check authentication by asking the caller to use notification client_id/client_secret pair as basic auth.
+		if !checkBasicAuth(w, r) {
+			return
+		}
 		// Validate request and get event.
 		err := service.ValidatePost(w, r)
 		if err != nil {
@@ -57,15 +71,25 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 		if err != nil {
 			return
 		}
+		// Validate provided data.
+		if event.User == nil {
+			http.Error(w, "Missing 'user' relationship", http.StatusBadRequest)
+			return
+		}
+		// TODO authorize request.
+
 		value := map[string]interface{}{
 			"name":   event.Name,
 			"source": event.Source,
+			"user":   event.User.Id,
 			"time":   event.Time.String(),
 			"code":   event.Code,
 		}
+
 		if event.Transfer != nil {
 			value["transfer"] = event.Transfer.Href
 		}
+
 		// Enqueue event to the stream.
 		id, err := stream.Add(r.Context(), value)
 		if err != nil {
