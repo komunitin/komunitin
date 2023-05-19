@@ -10,8 +10,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -24,10 +26,29 @@ var (
 )
 
 type tokenResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int64  `json:"expires_in"`
-	TokenType   string `json:"token_type"`
-	Scope       string `json:"scope"`
+	AccessToken string        `json:"access_token"`
+	ExpiresIn   intFromString `json:"expires_in"`
+	TokenType   string        `json:"token_type"`
+	Scope       string        `json:"scope"`
+}
+
+type intFromString int64
+
+// Unmarshal expires_in both from string and from int.
+func (expires *intFromString) UnmarshalJSON(b []byte) error {
+	if b[0] != '"' {
+		return json.Unmarshal(b, (*int64)(expires))
+	}
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return err
+	}
+	*expires = intFromString(i)
+	return nil
 }
 
 // Return the authorization token to call the social and accounting komunitin API.
@@ -49,7 +70,10 @@ func getAuthorizationToken(ctx context.Context) (string, error) {
 		return "", err
 	}
 	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("error getting authorization token: %s", res.Status)
+
+		resp, _ := httputil.DumpResponse(res, true)
+		return "", fmt.Errorf("error getting authorization token:%s\n%s\n%s\n%s", authUrl, clientId, clientSecret, resp)
+
 	}
 	response := new(tokenResponse)
 	err = json.NewDecoder(res.Body).Decode(&response)
