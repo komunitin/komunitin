@@ -14,7 +14,7 @@
         </q-card-section>
         <q-card-section class="q-pt-none">
           <social-network-list
-            :url="url"
+            :url="pageurl"
             :title="title"
             :text="text"
           />
@@ -40,7 +40,7 @@ export default defineComponent({
   props: {
     url : {
       type: String,
-      default: window?.location.href ?? ''
+      default: ''
     },
     title: {
       type: String,
@@ -58,7 +58,10 @@ export default defineComponent({
     };
   },
   computed: {
-    navigatorShare: () => navigatorShare
+    navigatorShare: () => navigatorShare,
+    pageurl() {
+      return this.url || window.location.href
+    }
   },
   methods: {
     // Main share button click handler.
@@ -68,7 +71,7 @@ export default defineComponent({
         (navigator as any).share({
           title: this.title,
           text: this.text,
-          url: this.url
+          url: this.pageurl
         });
       }
       else {
