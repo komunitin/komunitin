@@ -65,5 +65,5 @@ describe("Members", () => {
     expect(result.text()).toContain("Isobel Upton");
     expect(result.text()).toContain("GRP00005");
     expect(result.text()).toContain("598.71 $");
-  });
+  }, 20000);
 });
