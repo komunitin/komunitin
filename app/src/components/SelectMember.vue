@@ -5,7 +5,6 @@
     v-bind="$attrs"
     outlined
     class="cursor-pointer"
-    @click="onClick"
   >
     <template #control>
       <member-header
@@ -136,9 +135,11 @@ export default defineComponent({
     
     const searchText = ref('')
 
-    //https://github.com/quasarframework/quasar/issues/8956
+    // https://github.com/quasarframework/quasar/issues/8956
+    // We don't emit the click from QField component to aviod a Vue warning.
     const fieldRef = ref<QField>();
-    onMounted(() => { (fieldRef.value as QField).$el.onclick = () => (fieldRef.value as QField).$emit('click'); });
+    onMounted(() => { (fieldRef.value as QField).$el.onclick = onClick });
+
     const closeDialog = () => {
       // Set value so the validation refreshes cache.
       if (!value.value) {
