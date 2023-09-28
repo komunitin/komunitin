@@ -53,8 +53,19 @@ func (store *Store) Set(ctx context.Context, class string, id string, value inte
 	})
 	return err
 }
-func (store *Store) Get(ctx context.Context, class string, id string) (interface{}, error) {
-	return store.client.Get(ctx, key(class, id)).Result()
+
+// Get the given object from the store.
+func (store *Store) Get(ctx context.Context, class string, id string, v interface{}) error {
+	encoded, err := store.client.Get(ctx, key(class, id)).Result()
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal([]byte(encoded), v)
+}
+
+// Delete the given object from the store.
+func (store *Store) Delete(ctx context.Context, class string, id string) error {
+	return store.client.Del(ctx, key(class, id)).Err()
 }
 
 // Return the values of given store class that match the given index. Values are unmarshaled using the provided struct pointer type

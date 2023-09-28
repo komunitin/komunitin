@@ -2,10 +2,10 @@
   <div>
     <page-header 
       :title="$t('transaction')"
-      :back="`/groups/${code}/members/${myMember.attributes.code}/transactions`"
+      :back="`/groups/${code}/members/${myMember?.attributes.code}/transactions`"
       balance
     />
-    <q-page-container 
+    <page-container 
       class="row justify-center bg-light"
     >
       <q-page
@@ -36,13 +36,14 @@
           </div>
         </transaction-card>
       </q-page>
-    </q-page-container>
+    </page-container>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { mapGetters } from "vuex";
 import PageHeader from "../../layouts/PageHeader.vue";
+import PageContainer from "../../layouts/PageContainer.vue";
 import {ExtendedTransfer, Transfer, TransferState} from "../../store/model";
 import FormatCurrency from "../../plugins/FormatCurrency"
 import TransactionCard from "../../components/TransactionCard.vue"
@@ -52,7 +53,8 @@ import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
 export default defineComponent({
   components: {
     PageHeader,
-    TransactionCard
+    TransactionCard,
+    PageContainer
   },
   props: {
     code: {

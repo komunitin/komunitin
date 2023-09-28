@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/komunitin/jsonapi"
 	"github.com/komunitin/komunitin/notifications/model"
 	"github.com/komunitin/komunitin/notifications/service"
@@ -134,10 +135,61 @@ func subscriptionsHandler(store *store.Store) http.HandlerFunc {
 	}
 }
 
+func deleteSubscriptionHandler(store *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := service.ValidateDelete(w, r)
+		if err != nil {
+			// Http error already sent by called function.
+			return
+		}
+		// Get id from url.
+		vars := mux.Vars(r)
+		id := vars["id"]
+		if id == "" {
+			http.Error(w, "Missing subscription id.", http.StatusBadRequest)
+			return
+		}
+		// Get subscription from store.
+		subscription := Subscription{}
+		err = store.Get(r.Context(), "subscriptions", id, &subscription)
+		if err != nil {
+			http.Error(w, "Subscription not found.", http.StatusNotFound)
+			return
+		}
+
+		// We could skip this check and just delete the subscription, since the validation
+		// involves an API call and guessing a UID is not very probable, but we are cautious
+		// by now. A better approach would be to use JWT tokens.
+		if validateAuthorization(w, r, subscription.User, subscription.Member) != nil {
+			return
+		}
+		// Delete subscription.
+		err = store.Delete(r.Context(), "subscriptions", id)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Println(err)
+			return
+		}
+		log.Printf("Deleted subscription %s.\n", id)
+
+		// Return success following JSON:API spec https://jsonapi.org/format/#crud-deleting-responses.
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
 func InitService() {
 	store, err := store.NewStore()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Set handler for create subscription at /subscriptions
+	// We don't use gorilla mux here because the server issues a 301 redirect from /subscriptions
+	// to /subscriptions/ which is not what we want.
 	http.HandleFunc("/subscriptions", subscriptionsHandler(store))
+
+	// Set handler for delete subscription at /subscriptions/{id}
+	// We use gorilla mux here for convenient handling of path parameters.
+	r := mux.NewRouter()
+	r.Path("/subscriptions/{id}").Methods(http.MethodDelete).HandlerFunc(deleteSubscriptionHandler(store))
+	http.Handle("/subscriptions/", r)
 }

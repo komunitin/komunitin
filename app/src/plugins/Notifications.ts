@@ -95,6 +95,18 @@ export class Notifications {
     }
   }
 
+  /**
+   * Unsubscribe the current device, user and member from push notifications.
+   */
+  public async unsubscribe(subscription: NotificationsSubscription, accessToken: string): Promise<void> {
+    await axios.delete(KOptions.url.notifications + '/subscriptions/' + subscription.id, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+  }
+
+
   private onMessage(payload: MessagePayload) : void {
     const actions = []
     if (payload.fcmOptions?.link) {

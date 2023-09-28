@@ -40,7 +40,8 @@ function logError(error: KError) {
     msg += "\n" + JSON.stringify(error.debugInfo)
   }
   // eslint-disable-next-line no-console
-  console.error(msg)
+  console.error(msg);
+  console.error(error);
 }
 
 /**
