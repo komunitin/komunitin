@@ -5,7 +5,7 @@ import KError, { KErrorCode } from "src/KError";
 import { Notifications } from "src/plugins/Notifications";
 import {i18n} from '../boot/i18n'
 import locate from "src/plugins/Location";
-import {Member} from "./model"
+import {Member, NotificationsSubscription} from "./model"
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -30,7 +30,7 @@ export interface UserState {
   /**
    * Subscription to push notifications.
    */
-  subscriptionToken?: string;
+  subscription?: NotificationsSubscription;
 }
 
 /**
@@ -106,7 +106,7 @@ export default {
     myUserId: undefined,
     accountId: undefined,
     location: undefined,
-    subscriptionToken: undefined
+    subscription: undefined,
   } as UserState),
   getters: {
     isLoggedIn: state =>
@@ -114,7 +114,7 @@ export default {
       state.myUserId !== undefined &&
       auth.isAuthorized(state.tokens),
     isSubscribed: state =>
-      state.subscriptionToken !== undefined,
+      state.subscription !== undefined,
     myUser: (state, getters, rootState, rootGetters) => {
       if (state.myUserId !== undefined) {
         return rootGetters["users/one"](state.myUserId);
@@ -139,7 +139,7 @@ export default {
     userInfo: (state, userInfo) => (state.userInfo = userInfo),
     myUserId: (state, myUserId) => (state.myUserId = myUserId),
     location: (state, location) => (state.location = location),
-    subscriptionToken: (state, subscriptionToken) => (state.subscriptionToken = subscriptionToken)
+    subscription: (state, subscription) => (state.subscription = subscription),
   },
 
   actions: {
@@ -177,7 +177,8 @@ export default {
     /**
      * Logout current user.
      */
-    logout: (context: ActionContext<UserState, never>) => {
+    logout: async (context: ActionContext<UserState, never>) => {
+      await context.dispatch("unsubscribe");
       auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
@@ -208,14 +209,24 @@ export default {
       if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
         const notifications = new Notifications();
 
-        const token = await notifications.subscribe(
+        const subscription = await notifications.subscribe(
           context.getters.myUser, 
           context.getters.myMember,
           {
             locale: i18n.global.locale.value
           },
           context.getters.accessToken);
-        context.commit("subscriptionToken", token);
+        context.commit("subscription", subscription);
+      }
+    },
+    /**
+     * Unsubscribe from push notifications.
+     */
+    unsubscribe: async (context: ActionContext<UserState, never>) => {
+      if (context.state.subscription) {
+        const notifications = new Notifications();
+        await notifications.unsubscribe(context.state.subscription, context.getters.accessToken);
+        context.commit("subscription", undefined);
       }
     }
   }

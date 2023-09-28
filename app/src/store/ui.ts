@@ -14,6 +14,7 @@ export default {
     notificationsBannerDismissed: false,
     locationBannerDismissed: false,
     previousRoute: undefined,
+    loggingOut: false
   }),
   getters: {
     drawerExists: (state, getters, rootState, rootGetters) =>
@@ -25,7 +26,7 @@ export default {
     drawerState: (state, value: boolean) => (state.drawerState = value),
     notificationsBannerDismissed: (state, value: boolean) => (state.notificationsBannerDismissed = value),
     locationBannerDismissed: (state, value: boolean) => (state.locationBannerDismissed = value),
-    previousRoute: (state, previousRoute: string) => (state.previousRoute = previousRoute)
+    previousRoute: (state, previousRoute: string) => (state.previousRoute = previousRoute),
   },
   actions: {
     toogleDrawer: ({ state, commit }: ActionContext<UIState, never>) =>
