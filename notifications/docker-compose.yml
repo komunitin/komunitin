@@ -17,9 +17,9 @@ services:
     ports:
      - 2028:2028 
     environment:
-      - KOMUNITIN_ACCOUNTING_URL=http://integralces:2029/ces/api/accounting
-      - KOMUNITIN_SOCIAL_URL=http://integralces:2029/ces/api/social
-      - KOMUNITIN_AUTH_URL=http://integralces:2029/oauth2
+      - KOMUNITIN_ACCOUNTING_URL=http://integralces/ces/api/accounting
+      - KOMUNITIN_SOCIAL_URL=http://integralces/ces/api/social
+      - KOMUNITIN_AUTH_URL=http://integralces/oauth2
       - KOMUNITIN_APP_URL=https://localhost:2030
       - NOTIFICATIONS_CLIENT_ID=notifications-service
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
@@ -44,9 +44,9 @@ services:
     volumes:
       - .:/opt/notifications
     environment:
-      - KOMUNITIN_ACCOUNTING_URL=http://integralces:2029/ces/api/accounting
-      - KOMUNITIN_SOCIAL_URL=http://integralces:2029/ces/api/social
-      - KOMUNITIN_AUTH_URL=http://integralces:2029/oauth2
+      - KOMUNITIN_ACCOUNTING_URL=http://integralces/ces/api/accounting
+      - KOMUNITIN_SOCIAL_URL=http://integralces/ces/api/social
+      - KOMUNITIN_AUTH_URL=http://integralces/oauth2
       - KOMUNITIN_APP_URL=https://localhost:2030
       - NOTIFICATIONS_CLIENT_ID=notifications-service
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
@@ -71,7 +71,8 @@ services:
 
 volumes:
   redisdata:
+
 networks:
   komunitin:
-    driver: bridge
     name: komunitin
+    external: true

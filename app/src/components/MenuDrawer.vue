@@ -141,9 +141,9 @@ export default defineComponent({
   },
   methods: {
     async logout() {
-      await this.$store.dispatch("logout");
-      this.$q.notify({ type: "positive", message: "Successfully logged out!" });
-      this.$router.push("/");
+      await this.$store.dispatch("logout")
+      await this.$router.push("/")
+      this.$q.notify({ type: "positive", message: "Successfully logged out!" })
     }
   }
 });

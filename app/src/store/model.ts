@@ -365,7 +365,7 @@ export interface NotificationsSubscription extends ResourceObject {
   attributes: {
     token: string;
     // Here it goes the notification settings as an embedded map.
-    // settings: NotiifcationSettings
+    // settings: NotificationsSettings
   };
   relationships: {
     user: RelatedResource;

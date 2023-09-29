@@ -245,7 +245,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     try {
       return await request()
     } catch (error) {
-      if ((error as AxiosError).code == "401" && (context.rootState as UserState).myUserId) {
+      if ((error as AxiosError).code == "401" && (context.rootState as unknown as UserState).myUserId) {
         // Unauthorized. Refresh token and retry
         await context.dispatch("authorize")
         return request()
