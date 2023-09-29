@@ -35,6 +35,17 @@ func ValidatePost(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+// Validates the request is DELETE.
+func ValidateDelete(w http.ResponseWriter, r *http.Request) error {
+	// Validate HTTP DELETE Method.
+	if r.Method != http.MethodDelete {
+		msg := http.StatusText(http.StatusMethodNotAllowed)
+		http.Error(w, msg, http.StatusMethodNotAllowed)
+		return errors.New(msg)
+	}
+	return nil
+}
+
 // Decodes the request body into JSON and reports any encoding error.
 func ValidateJson(w http.ResponseWriter, r *http.Request, res interface{}) error {
 	// Use http.MaxBytesReader to enforce a maximum read of 16KB from the

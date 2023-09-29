@@ -13,7 +13,7 @@ import (
 
 func fixUrl(url string) string {
 	// This is for development purposes only.
-	url = strings.Replace(url, "/localhost:2029/", "/integralces:2029/", 1)
+	url = strings.Replace(url, "/localhost:2029/", "/integralces/", 1)
 	return url
 }
 
