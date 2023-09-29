@@ -41,6 +41,7 @@ function logError(error: KError) {
   }
   // eslint-disable-next-line no-console
   console.error(msg);
+  // eslint-disable-next-line no-console
   console.error(error);
 }
 
