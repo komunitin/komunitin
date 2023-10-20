@@ -128,5 +128,15 @@
   "ErrorIncorrectCredentials": "Error: Incorrect email or password",
   "ErrorAuthNoCredentials": "Error: Incorrect email or password",
   "ErrorNotImplemented": "Error: Not Implemented",
-  "ErrorInvalidTransferState": "Error: Invalid Transfer State"
+  "ErrorInvalidTransferState": "Error: Invalid Transfer State",
+  "createNeed": "Create need",
+  "enterNeedData": "Enter need data",
+  "needFormHelpText": "Fill the details of your new need.",
+  "uploadImages": "Upload images",
+  "uploadNeedImagesHint": "Adding a picture to a need makes it more attractive",
+  "title": "Title",
+  "needTitleHint": "A short title for your need",
+  "needDescriptionHint": "Provide here all the details for other members to understand your need",
+  "category": "Category"
+
 }

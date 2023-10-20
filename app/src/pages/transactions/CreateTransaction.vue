@@ -29,7 +29,7 @@
             @close-dialog="v$.member.$touch()"
           />
           <q-input 
-            v-model="concept"   
+            v-model="concept"
             name="description"  
             :label="$t('description')" 
             :hint="$t('transactionDescriptionHint')" 

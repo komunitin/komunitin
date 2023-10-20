@@ -87,6 +87,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/offers/Offer.vue')
       },
       {
+        path: '/groups/:code/needs/new',
+        props: true,
+        name: 'CreateNeed',
+        component: () => import('../pages/needs/CreateNeed.vue')
+      },
+      {
         path: '/groups/:code/needs/:needCode',
         props: true,
         name: 'Need',

@@ -1,0 +1,133 @@
+<template>
+  <page-header 
+    :title="$t('createNeed')" 
+    balance 
+    :back="`/groups/${code}/needs`"
+  />
+  <page-container class="row justify-center">
+    <q-page 
+      padding 
+      class="q-py-lg col-12 col-sm-8 col-md-6"
+    >
+      <q-form @submit="onSubmit">
+        <div class="q-gutter-y-lg column">
+          <div>
+            <div class="text-subtitle1">
+              {{ $t('enterNeedData') }}
+            </div>
+            <div class="text-onsurface-m">
+              {{ $t('needFormHelpText') }}
+            </div>
+          </div>
+          <image-field
+            v-model="images"
+            :label="$t('uploadImages')" 
+            :hint="$t('uploadNeedImagesHint')"
+          />
+          <!--q-input
+            v-model="title"
+            name="title"
+            :label="$t('title')"
+            :hint="$t('needTitleHint')"
+            outlined
+            required
+          >
+            <template #append>
+              <q-icon name="title" />
+            </template> 
+          </q-input-->
+          <q-input 
+            v-model="description"
+            type="textarea"
+            name="description"  
+            :label="$t('description')" 
+            :hint="$t('needDescriptionHint')" 
+            outlined 
+            autogrow 
+            required
+            input-style="min-height: 100px;"
+            :rules="[() => !v$.description.$invalid || $t('descriptionRequired')]"
+          >
+            <template #append>
+              <q-icon name="notes" />
+            </template>
+          </q-input>
+          <select-category
+            v-model="category" 
+            :code="code"
+            :label="$t('category')"
+            :hint="$t('needCategoryHint')"
+            required
+          />
+          <date-field
+            v-model="expiration"
+            :label="$t('expirationDate')"
+            :hint="$t('needExpirationDateHint')"
+          />
+          <q-btn
+            :label="$t('preview')"
+            type="submit"
+            color="primary"
+            unelevated
+          />
+        </div>
+      </q-form>
+    </q-page>
+  </page-container>
+</template>
+<script setup lang="ts">
+import PageHeader from "../../layouts/PageHeader.vue"
+import PageContainer from "../../layouts/PageContainer.vue"
+import ImageField from "../../components/ImageField.vue"
+import SelectCategory from "../../components/SelectCategory.vue"
+import DateField from "../../components/DateField.vue"
+import { computed, ref } from "vue"
+import useVuelidate from "@vuelidate/core"
+import { required,  } from "@vuelidate/validators"
+import { Category, Need } from "src/store/model"
+import { DeepPartial } from "quasar"
+import { useStore } from "vuex"
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const props = defineProps<{
+  code: string
+}>()
+
+const images = ref([])
+const description = ref("")
+const category = ref<Category|null>(null)
+
+// Set expiry date in one week by default
+const date = new Date()
+date.setDate(date.getDate() + 7)
+const expiration = ref(date)
+
+const rules = {
+  description: { required },
+  category: { required },
+  expiration: { required }
+}
+const v$ = useVuelidate(rules, {images, description, category, expiration})
+
+const store = useStore()
+const myMember = computed(() => store.getters["members/myMember"])
+
+const onSubmit = () => {
+  // Post hidden need object.
+  const need : DeepPartial<Need> = {
+    type: "needs",
+    attributes: {
+      content: description.value,
+      expires: expiration.value.toISOString(),
+      access: "group",
+      images: images.value,
+      state: "hidden"
+    },
+    relationships: {
+      category: { data: { type: "categories", id: category.value!.id } },
+      member: { data: { type: "members", id: myMember.value.id}}
+    }
+  }
+
+}
+</script>

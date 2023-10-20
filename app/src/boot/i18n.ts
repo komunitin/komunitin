@@ -39,6 +39,11 @@ export const i18n = createI18n({
 let dateLocale = undefined as Locale | undefined;
 
 /**
+ * Return the date-fns Locale object for other operations than formatDate.
+ */
+export const getDateLocale = () => dateLocale;
+
+/**
  * Return locale if it is a defined language for this app,
  * or the default language code (English) instead.
  * **/
