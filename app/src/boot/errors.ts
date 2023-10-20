@@ -68,7 +68,7 @@ function vueErrorHandler(error: unknown, instance: ComponentPublicInstance | nul
   }
 }
 function vueWarnHandler(message: string, instance: ComponentPublicInstance | null, trace: string) {
-  const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, instance});
+  const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, component: instance?.$options.name});
   handleError(error);
 }
 
