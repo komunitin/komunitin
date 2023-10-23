@@ -23,8 +23,8 @@ const emit = defineEmits<{
 }>()
 
 const category = computed({
-  get: () => props.modelValue?.id ?? null,
-  set: (id) => emit("update:modelValue", categories.value.find((c: Category) => c.id == id) ?? null)
+  get: () => props.modelValue ? {label: props.modelValue.attributes.name, value: props.modelValue.id} : null,
+  set: (option: {label: string, value: string} | null) => emit("update:modelValue", option ? categories.value.find((c: Category) => c.id == option.value) : null)
 })
 const store = useStore()
 

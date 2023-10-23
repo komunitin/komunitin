@@ -129,14 +129,22 @@
   "ErrorAuthNoCredentials": "Error: Incorrect email or password",
   "ErrorNotImplemented": "Error: Not Implemented",
   "ErrorInvalidTransferState": "Error: Invalid Transfer State",
+
   "createNeed": "Create need",
   "enterNeedData": "Enter need data",
   "needFormHelpText": "Fill the details of your new need.",
-  "uploadImages": "Upload images",
+  "uploadImages": "Add images",
   "uploadNeedImagesHint": "Adding a picture to a need makes it more attractive",
   "title": "Title",
   "needTitleHint": "A short title for your need",
   "needDescriptionHint": "Provide here all the details for other members to understand your need",
-  "category": "Category"
-
+  "category": "Category",
+  "needCategoryHint": "Select the category that best describes your need",
+  "expirationDate": "Expiration date",
+  "needExpirationDateHint": "The date when your need will expire",
+  "preview": "Preview",
+  "previewNeed": "Preview need",
+  "needDescriptionRequired": "Explain your need with some detail",
+  "publishNeed": "Publish need",
+  "needPublished": "Your need has been published!"
 }

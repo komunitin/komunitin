@@ -10,7 +10,7 @@
       class="q-py-lg col-12 col-sm-8 col-md-6"
     >
       <q-form @submit="onSubmit">
-        <div class="q-gutter-y-lg column">
+        <div class="q-gutter-y-lg">
           <div>
             <div class="text-subtitle1">
               {{ $t('enterNeedData') }}
@@ -21,21 +21,10 @@
           </div>
           <image-field
             v-model="images"
+            ref="imageField"
             :label="$t('uploadImages')" 
             :hint="$t('uploadNeedImagesHint')"
           />
-          <!--q-input
-            v-model="title"
-            name="title"
-            :label="$t('title')"
-            :hint="$t('needTitleHint')"
-            outlined
-            required
-          >
-            <template #append>
-              <q-icon name="title" />
-            </template> 
-          </q-input-->
           <q-input 
             v-model="description"
             type="textarea"
@@ -46,7 +35,7 @@
             autogrow 
             required
             input-style="min-height: 100px;"
-            :rules="[() => !v$.description.$invalid || $t('descriptionRequired')]"
+            :rules="[() => !v$.description.$invalid || $t('needDescriptionRequired')]"
           >
             <template #append>
               <q-icon name="notes" />
@@ -69,6 +58,8 @@
             type="submit"
             color="primary"
             unelevated
+            class="full-width"
+            :disabled="v$.$invalid"
           />
         </div>
       </q-form>
@@ -83,10 +74,11 @@ import SelectCategory from "../../components/SelectCategory.vue"
 import DateField from "../../components/DateField.vue"
 import { computed, ref } from "vue"
 import useVuelidate from "@vuelidate/core"
-import { required,  } from "@vuelidate/validators"
+import { minLength, required } from "@vuelidate/validators"
 import { Category, Need } from "src/store/model"
 import { DeepPartial } from "quasar"
 import { useStore } from "vuex"
+import { useRouter } from "vue-router"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
@@ -103,18 +95,25 @@ date.setDate(date.getDate() + 7)
 const expiration = ref(date)
 
 const rules = {
-  description: { required },
+  description: { required, minLength: minLength(10) },
   category: { required },
   expiration: { required }
 }
 const v$ = useVuelidate(rules, {images, description, category, expiration})
-
 const store = useStore()
-const myMember = computed(() => store.getters["members/myMember"])
+const myMember = computed(() => store.getters.myMember)
+const router = useRouter()
 
-const onSubmit = () => {
+const imageField = ref<typeof ImageField>()
+
+const onSubmit = async () => {
+  const isFormCorrect = await v$.value.$validate()
+  if (!isFormCorrect) {
+    return
+  }
+
   // Post hidden need object.
-  const need : DeepPartial<Need> = {
+  const resource : DeepPartial<Need> = {
     type: "needs",
     attributes: {
       content: description.value,
@@ -124,10 +123,25 @@ const onSubmit = () => {
       state: "hidden"
     },
     relationships: {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       category: { data: { type: "categories", id: category.value!.id } },
       member: { data: { type: "members", id: myMember.value.id}}
     }
   }
+  
+  await store.dispatch("needs/create", {
+    group: props.code,
+    resource
+  })
 
+  const need = store.getters["needs/current"]
+  // Go to needs page.
+  router.push({
+    name: "PreviewNeed",
+    params: {
+      code: props.code,
+      needCode: need.attributes.code
+    }
+  })
 }
 </script>

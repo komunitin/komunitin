@@ -1,7 +1,7 @@
 <template>
   <div>
     <page-header 
-      :title="$t('need')" 
+      :title="title ?? $t('need')" 
       :back="`/groups/${code}/needs`"
     />
     <q-page-container>
@@ -76,6 +76,10 @@
             </div>
           </template>
         </offer-layout>
+        <slot 
+          name="after" 
+          :need="need" 
+        />
       </q-page>
     </q-page-container>
   </div>
@@ -116,6 +120,11 @@ export default defineComponent({
     needCode: {
       type: String,
       required: true
+    },
+    title: {
+      type: String,
+      required: false,
+      default: null
     }
   },
   setup() {
