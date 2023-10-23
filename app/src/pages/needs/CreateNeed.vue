@@ -21,7 +21,6 @@
           </div>
           <image-field
             v-model="images"
-            ref="imageField"
             :label="$t('uploadImages')" 
             :hint="$t('uploadNeedImagesHint')"
           />
@@ -103,8 +102,6 @@ const v$ = useVuelidate(rules, {images, description, category, expiration})
 const store = useStore()
 const myMember = computed(() => store.getters.myMember)
 const router = useRouter()
-
-const imageField = ref<typeof ImageField>()
 
 const onSubmit = async () => {
   const isFormCorrect = await v$.value.$validate()

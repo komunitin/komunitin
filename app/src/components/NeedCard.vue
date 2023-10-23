@@ -4,6 +4,7 @@
     v-card-click-to="`/groups/${code}/needs/${need.attributes.code}`"
     flat
     bordered
+    :class="[need.attributes.state == 'hidden' ? 'not-published' : '', new Date(need.attributes.expired) < new Date() ? 'expired' : '' ]"
   >
     <!-- Header -->
     <member-header :member="need.member">
@@ -115,3 +116,12 @@ export default defineComponent({
   }
 });
 </script>
+<style lang="scss" scoped>
+  .not-published {
+    opacity: 0.5;
+  }
+  .expired {
+    opacity: 0.5;
+    background-color: $light-error;
+  }
+</style>
