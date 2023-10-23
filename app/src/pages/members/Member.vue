@@ -49,6 +49,13 @@
               :member="member"
               :group-code="code"
             />
+            <floating-btn
+              v-if="isMe"
+              icon="add"
+              color="kred"
+              :to="`/groups/${code}/needs/new`"
+              :label="$t('createNeed')"
+            />
           </q-tab-panel>
           <q-tab-panel
             name="offers"
@@ -89,6 +96,7 @@ import MemberProfile from "./MemberProfile.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import CreateTransactionBtn from "../../components/CreateTransactionBtn.vue";
 import TransactionItems from "../transactions/TransactionItems.vue";
+import FloatingBtn from "src/components/FloatingBtn.vue";
 
 import { Member, Currency, Account, Contact, Offer, Need } from '../../store/model';
 
@@ -103,7 +111,8 @@ export default defineComponent({
     MemberNeeds,
     MemberOffers,
     TransactionItems,
-    CreateTransactionBtn
+    CreateTransactionBtn,
+    FloatingBtn
   },
   props: {
     code: {

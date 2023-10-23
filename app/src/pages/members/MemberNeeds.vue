@@ -32,8 +32,10 @@ export default defineComponent({
     return {
       card: NeedCard.name,
       filter: {
-        member: this.member.id
-      }
+        member: this.member.id,
+        expired: 'true,false' ,
+        state: 'hidden,published'
+      },
     }
   }
 })

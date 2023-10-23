@@ -27,7 +27,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { KOptions } from 'src/boot/koptions'
 import { useStore } from 'vuex'
 import { QUploader } from 'quasar'
