@@ -3,7 +3,24 @@
     <page-header 
       :title="title ?? $t('need')" 
       :back="`/groups/${code}/needs`"
-    />
+    >
+      <template #buttons>
+        <q-btn
+          v-if="isMine"
+          round
+          flat
+          icon="edit"
+          :to="`/groups/${code}/needs/${needCode}/edit`"
+        />
+        <q-btn
+          v-if="isMine"
+          round
+          flat
+          icon="delete"
+          @click="deleteNeed"
+        />
+      </template>
+    </page-header>
     <q-page-container>
       <q-page
         v-if="!isLoading"
@@ -140,6 +157,9 @@ export default defineComponent({
     },
     isLoading(): boolean {
       return !(this.ready || this.need && this.need.member && this.need.member.contacts && this.need.category)
+    },
+    isMine(): boolean {
+      return this.need && this.need.member && this.need.member.id === this.$store.getters.myMember.id
     }
     
   },
@@ -155,6 +175,12 @@ export default defineComponent({
         include: "category,member,member.contacts,member.account"
       });
       this.ready = true
+    },
+    deleteNeed() {
+      this.$q.notify({
+        message: "Not implemented yet",
+        color: "negative"
+      })
     }
   }
 })
