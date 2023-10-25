@@ -105,6 +105,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../pages/needs/PreviewNeed.vue")
       },
       {
+        path: '/groups/:code/needs/:needCode/edit',
+        props: true,
+        name: 'EditNeed',
+        component: () => import("../pages/needs/EditNeed.vue")
+      },
+      {
         path: '/groups/:code/transactions/:transferCode',
         props: true,
         name: 'Transaction',

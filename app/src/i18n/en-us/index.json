@@ -146,5 +146,9 @@
   "previewNeed": "Preview need",
   "needDescriptionRequired": "Explain your need with some detail",
   "publishNeed": "Publish need",
-  "needPublished": "Your need has been published!"
+  "needPublished": "Your need has been published!",
+  "editNeed": "Edit need",
+  "published": "Published",
+  "needPublishedHint": "Make this need visible to other members",
+  "save": "Save"
 }
