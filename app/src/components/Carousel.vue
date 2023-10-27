@@ -72,7 +72,11 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 .thumbnail {
-  width: 100%
+  width: 100%;
+  max-height: 64px;
+  object-fit: cover;
+  object-position: center;
+  overflow: clip;
 }
 .thumbnail-inactive {
   opacity: 0.5;

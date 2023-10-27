@@ -1,9 +1,25 @@
 <template>
   <div>
     <page-header 
-      :title="$t('need')" 
+      :title="title ?? $t('need')" 
       :back="`/groups/${code}/needs`"
-    />
+    >
+      <template #buttons>
+        <q-btn
+          v-if="isMine"
+          round
+          flat
+          icon="edit"
+          :to="`/groups/${code}/needs/${needCode}/edit`"
+        />
+        <delete-need-btn 
+          v-if="isMine"
+          :code="code"
+          :need="need"          
+          :to="`/groups/${code}/needs`"
+        />
+      </template>
+    </page-header>
     <q-page-container>
       <q-page
         v-if="!isLoading"
@@ -48,7 +64,7 @@
                 date: $formatDate(need.attributes.expires)
               }) }}</span>
             </div>
-            <div class="q-pb-lg row q-col-gutter-md justify-end">
+            <div class="q-pb-lg row q-gutter-x-md justify-end">
               <share-button 
                 flat
                 color="primary"
@@ -76,6 +92,10 @@
             </div>
           </template>
         </offer-layout>
+        <slot 
+          name="after" 
+          :need="need" 
+        />
       </q-page>
     </q-page-container>
   </div>
@@ -94,8 +114,10 @@ import ContactButton from "../../components/ContactButton.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
+import DeleteNeedBtn from "../../components/DeleteNeedBtn.vue";
 
 import { Need, Member, Category, Contact } from "../../store/model";
+
 
 export default defineComponent({
   components: {
@@ -106,7 +128,8 @@ export default defineComponent({
     ShareButton,
     ContactButton,
     Carousel,
-    OfferLayout
+    OfferLayout,
+    DeleteNeedBtn
   },
   props: {
     code: {
@@ -116,6 +139,11 @@ export default defineComponent({
     needCode: {
       type: String,
       required: true
+    },
+    title: {
+      type: String,
+      required: false,
+      default: null
     }
   },
   setup() {
@@ -130,7 +158,12 @@ export default defineComponent({
       return this.$store.getters["needs/current"]
     },
     isLoading(): boolean {
-      return !(this.ready || this.need && this.need.member && this.need.member.contacts && this.need.category)
+      // We need the explicit fetched boolean to force trigger update that may not
+      // trigger due to the structure of relatinship links of resource objects.
+      return !(this.need && this.need.member && this.need.member.contacts && this.need.category) && (this.ready || !this.ready)
+    },
+    isMine(): boolean {
+      return this.need && this.need.member && this.need.member.id === this.$store.getters.myMember.id
     }
     
   },

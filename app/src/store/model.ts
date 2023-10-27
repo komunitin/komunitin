@@ -342,6 +342,8 @@ export interface Offer extends ResourceObject {
   };
 }
 
+export type NeedState = "hidden" | "published";
+
 /**
  * Need model
  */
@@ -354,10 +356,11 @@ export interface Need extends ResourceObject {
     expires: string;
     created: string;
     updated: string;
+    state: NeedState;
   };
   relationships: {
     category: RelatedResource;
-    author: RelatedResource;
+    member: RelatedResource;
   };
 }
 

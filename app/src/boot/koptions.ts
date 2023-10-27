@@ -21,7 +21,11 @@ const KOptions = {
     /**
      * Notifications API URL.
      */
-    notifications: process.env.NOTIFICATIONS_URL ?? "http://localhost:8080/notifications"
+    notifications: process.env.NOTIFICATIONS_URL ?? "http://localhost:8080/notifications",
+    /**
+     * Files API URL.
+     */
+    files: process.env.FILES_URL ?? "http://localhost:8080/files"
   },
   oauth: {
     /**

@@ -12,6 +12,7 @@
           ref="resourceCards"
           v-bind="$attrs"
         />
+        <slot name="after" />
       </q-page>
     </page-container>
   </div>
