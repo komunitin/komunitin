@@ -43,6 +43,7 @@
         :hint="$t('needExpirationDateHint')"
       />
       <q-item
+        v-if="showState"
         tag="label"
         style="padding-left: 12px; padding-right: 12px;"
       >
@@ -56,7 +57,6 @@
         </q-item-section>
         <q-item-section avatar>
           <q-toggle
-            v-if="showState"
             v-model="state"
             true-value="published"
             false-value="hidden"
@@ -75,7 +75,7 @@
   </q-form>
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from "vue"
+import { ref } from "vue"
 import DateField from "../../components/DateField.vue"
 import ImageField from "../../components/ImageField.vue"
 import SelectCategory from "../../components/SelectCategory.vue"

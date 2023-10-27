@@ -152,6 +152,7 @@
   "needPublishedHint": "Make this need visible to other members",
   "save": "Save",
   "deleteNeed": "Do you want to delete the need {name}?",
+  "cancel": "Cancel",
   "cantBeUndone": "This action can't be undone.",
   "needDeleted": "The need has been deleted"
 }
