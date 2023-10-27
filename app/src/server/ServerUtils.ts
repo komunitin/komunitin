@@ -25,6 +25,7 @@ export function filter(records: any, request: any) {
   const regex = /filter\[(.+)\]/;
   Object.entries(request.queryParams)
     .filter(([name, ]) => name != "filter[search]")
+    .filter(([name, ]) => name != "filter[expired]")
     .filter(([name, ]) => regex.test(name))
     .map(([name, value]) => ([(name.match(regex) as string[])[1], value]) as [string,string])
     .forEach(([name, value] ) => {

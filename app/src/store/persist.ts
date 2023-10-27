@@ -9,7 +9,7 @@ import { toRaw } from "vue"
  * state when executing this function at init.
  * 
  * In order for this plugin to properly work, the commit name must be the same as the state 
- * property, except for some special commits: addResources, addResource and setPageIds.
+ * property, except for some special commits: addResources, addResource, removeResource and setPageIds.
  * 
  * @param name The unique key for this database.
  * @returns Vuex plugin.
@@ -63,8 +63,9 @@ export default function createPersistPlugin<T>(name: string) {
       const parts = type.split("/")
       const index = parts.slice(0, parts.length - 1)
       const op = parts[parts.length - 1]
-      // setItem is asynchronous but we don't wait for the result (or error).
+      // storage methods are asynchronous but we don't wait for the result (or error).
       const save = (i: string[], item: unknown) => storage.setItem(i.join('/'), item)
+      const remove = (i: string[]) => storage.removeItem(i.join('/'))
       if (op == 'addResources') {
         const resources = value as ResourceObject[]
         resources.forEach(resource => save([...index, 'resources', resource.id], toRaw(resource)))
@@ -74,6 +75,8 @@ export default function createPersistPlugin<T>(name: string) {
       } else if (op == 'setPageIds') {
         const {key, page, ids} = value as {key: string, page: number, ids: string[]}
         save([...index, 'pages', key, page + ""], ids)
+      } else if (op == 'removeResource') {
+        remove([...index, 'resources', value as string])
       } else {
         save([...index, op], value)
       }

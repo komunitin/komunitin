@@ -277,6 +277,7 @@ export default {
           (v: never, j: number) => fakeImage(`product${i}-${j}`),
         ),
       access: "public",
+      state: "published",
       expires: () => faker.date.future().toJSON(),
       created: () => faker.date.past().toJSON(),
       updated: () => faker.date.recent().toJSON()
@@ -292,6 +293,7 @@ export default {
         (v: never, j: number) => fakeImage(`need${i}-${j}`)
       ),
       access: "public",
+      state: "published",
       expires: () => faker.date.future().toJSON(),
       created: () => faker.date.past().toJSON(),
       updated: () => faker.date.recent().toJSON()
@@ -395,6 +397,40 @@ export default {
     server.get(urlSocial + "/:code/needs/:need", (schema: any, request: any) => {
       return schema.needs.findBy({ code: request.params.need });
     });
+
+    // Create need
+    server.post(urlSocial + "/:code/needs", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const need = {
+        ...body.data.attributes,
+        code: faker.helpers.slugify(body.data.attributes.content.substr(0, 10)),
+        created: new Date().toJSON(),
+        updated: new Date().toJSON(),
+        groupId: schema.groups.findBy({ code: request.params.code }).id,
+        memberId: body.data.relationships.member.data.id,
+        categoryId: body.data.relationships.category.data.id,
+      }
+      
+      return schema.needs.create(need);
+    })
+
+    // Update need
+    server.patch(urlSocial + "/:code/needs/:need", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const need = schema.needs.findBy({ code: request.params.need });
+      need.update({
+        ...body.data.attributes,
+        updated: new Date().toJSON(),
+      })
+      return need;
+    })
+
+    // Delete need
+    server.delete(urlSocial + "/:code/needs/:need", (schema: any, request: any) => {
+      const need = schema.needs.findBy({ code: request.params.need });
+      need.destroy();
+      return undefined as any
+    })
 
 
     // Logged-in User
