@@ -55,6 +55,22 @@
         :title="$t('checkThisNeed', { member: need.member.attributes.name })"
         :text="need.attributes.content"
       />
+      <q-btn
+        v-if="isMine"
+        icon="edit"
+        flat
+        round
+        color="icon-dark"
+        :to="`/groups/${code}/needs/${need.attributes.code}/edit`"
+        class="q-ml-none"
+      />
+      <delete-need-btn
+        v-if="isMine"
+        :code="code"
+        :need="need"
+        color="icon-dark"
+        class="q-ml-none"
+      />
     </q-card-actions>
   </q-card>
 </template>
@@ -70,6 +86,7 @@ import CategoryAvatar from "./CategoryAvatar.vue";
 import ContactButton from "./ContactButton.vue";
 import MemberHeader from "./MemberHeader.vue";
 import ShareButton from "./ShareButton.vue";
+import DeleteNeedBtn from "./DeleteNeedBtn.vue";
 
 export default defineComponent({
   name: "NeedCard",
@@ -78,7 +95,8 @@ export default defineComponent({
     ShareButton,
     ContactButton,
     CategoryAvatar,
-    Carousel
+    Carousel,
+    DeleteNeedBtn
   },
   directives: {
     clamp,
@@ -112,6 +130,9 @@ export default defineComponent({
       return (
         base + this.$router.resolve("needs/" + this.need.attributes.code).href
       );
+    },
+    isMine(): boolean {
+      return this.need.member.id == this.$store.getters.myMember.id
     }
   }
 });
@@ -123,5 +144,8 @@ export default defineComponent({
   .expired {
     opacity: 0.5;
     background-color: $light-error;
+  }
+  .q-ml-none {
+    margin-left: 0 !important;
   }
 </style>

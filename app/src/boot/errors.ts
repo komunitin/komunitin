@@ -37,7 +37,11 @@ function showError(error: KError) {
 function logError(error: KError) {
   let msg = `[${error.code}] ${error.message}`;
   if (error.debugInfo) {
-    msg += "\n" + JSON.stringify(error.debugInfo)
+    try {
+      msg += "\n" + JSON.stringify(error.debugInfo)
+    } catch (error) {
+      msg + "\n" + "Error while serializing debug info."
+    }
   }
   // eslint-disable-next-line no-console
   console.error(msg);

@@ -1,7 +1,7 @@
 import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
 import { Module, ActionContext, Commit, Dispatch } from "vuex";
-import {cloneDeep, merge} from "lodash-es";
+import {cloneDeep} from "lodash-es";
 
 import {
   CollectionResponseInclude,
@@ -67,6 +67,17 @@ export interface UpdatePayload<T extends ResourceObject> {
    * The updated fields for the resource.
    */
   resource: DeepPartial<T> & ResourceIdentifierObject
+}
+
+export interface DeletePayload {
+  /**
+   * The resource code.
+   */
+  code: string
+  /**
+   * The group where the record belongs to.
+   */
+  group: string;
 }
 
 /**
@@ -236,7 +247,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     });
   }
 
-  private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post"|"patch", data?: object) {
+  private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post"|"patch"|"delete", data?: object) {
     if (method == undefined) {
       method = "get";
     }
@@ -536,9 +547,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       });
     },
     /**
+     * Removes resource from list.
+     */
+    removeResource: (state: ResourcesState<T>, id: string) => {
+      delete state.resources[id]
+    },
+    /**
      * Update the current resource pointer.
      */
-    currentId: (state: ResourcesState<T>, id: string) => {
+    currentId: (state: ResourcesState<T>, id: string|null) => {
       state.currentId = id;
     },
     /**
@@ -582,6 +599,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context: ActionContext<ResourcesState<T>, S>,
       payload: UpdatePayload<T>
     ) => this.update(context, payload),
+    delete: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: DeletePayload
+    ) => this.delete(context, payload),
     setCurrent: (
       context: ActionContext<ResourcesState<T>, S>,
       payload: T
@@ -792,7 +813,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   }
   /**
    * Updates a resource by patching the given resource to the API.
-   * The responsi is updated in the current resource.
+   * The response is updated in the current resource.
    */
   protected async update(
     context: ActionContext<ResourcesState<T>, S>,
@@ -813,6 +834,54 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     } catch (error) {
       throw Resources.getKError(error as AxiosError);
     }
+  }
+
+  /**
+   * Deletes a resource by calling the API. The resource is removed from the store, 
+   * and if it was the current resource, then it is unset.
+   */
+  protected async delete(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: DeletePayload
+  ) {
+    const resource = context.getters.find({code: payload.code})
+    const id = resource.id
+    const url = this.resourceEndpoint(payload.code, payload.group)
+    try {
+      const response = await this.request(context, url, "delete")
+      if (response.status === 204) {
+        // Deleted.
+        // Remove from current pointer.
+        if (context.state.currentId == id) {
+          context.commit("currentId", null)
+        }
+        // Remove from pages.
+        for (const key in context.state.pages) {
+          const pages = context.state.pages[key]
+          let afterDelete = false
+          for (let i = 0; i < pages.length; i++) {
+            // Remove the id from the page
+            if (pages[i].includes(id)) {
+              pages[i] = pages[i].filter(rid => rid != id)
+              afterDelete = true
+            }
+            // From the altered page onwards, shift one id to the left.
+            if (afterDelete) {
+              if (i < pages.length - 1 && pages[i+1].length > 0) {
+                pages[i].push(pages[i+1].shift() as string)
+              }
+              context.commit("setPageIds", {key, page: i, ids: pages[i]})
+            }
+          }
+        }
+        // Remove from store.
+        context.commit("removeResource", id)
+      } else {
+        throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
+      }
+    } catch (error) {
+      throw Resources.getKError(error as AxiosError);
+    }  
   }
 
   /**
@@ -844,9 +913,17 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * object property, but so far this does not seem to be a problem.
    */
   protected updatedResource(state: ResourcesState<T>, resource: T) {
-    return state.resources[resource.id] !== undefined ?
-      merge(cloneDeep(state.resources[resource.id]), resource) :
-      resource
+    if (state.resources[resource.id] === undefined) {
+      return resource
+    } else {
+      // We're merging the existing object with the new one, but only on the
+      // first level. This means that we're just not losing the included loaded
+      // relations while overwriting all attributes.
+      return {
+        ...cloneDeep(state.resources[resource.id]),
+        ...resource
+      }
+    }
   }
 
 }

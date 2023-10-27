@@ -12,12 +12,11 @@
           icon="edit"
           :to="`/groups/${code}/needs/${needCode}/edit`"
         />
-        <q-btn
+        <delete-need-btn 
           v-if="isMine"
-          round
-          flat
-          icon="delete"
-          @click="deleteNeed"
+          :code="code"
+          :need="need"          
+          :to="`/groups/${code}/needs`"
         />
       </template>
     </page-header>
@@ -65,7 +64,7 @@
                 date: $formatDate(need.attributes.expires)
               }) }}</span>
             </div>
-            <div class="q-pb-lg row q-col-gutter-md justify-end">
+            <div class="q-pb-lg row q-gutter-x-md justify-end">
               <share-button 
                 flat
                 color="primary"
@@ -115,8 +114,10 @@ import ContactButton from "../../components/ContactButton.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
+import DeleteNeedBtn from "../../components/DeleteNeedBtn.vue";
 
 import { Need, Member, Category, Contact } from "../../store/model";
+
 
 export default defineComponent({
   components: {
@@ -127,7 +128,8 @@ export default defineComponent({
     ShareButton,
     ContactButton,
     Carousel,
-    OfferLayout
+    OfferLayout,
+    DeleteNeedBtn
   },
   props: {
     code: {
@@ -156,7 +158,9 @@ export default defineComponent({
       return this.$store.getters["needs/current"]
     },
     isLoading(): boolean {
-      return !(this.ready || this.need && this.need.member && this.need.member.contacts && this.need.category)
+      // We need the explicit fetched boolean to force trigger update that may not
+      // trigger due to the structure of relatinship links of resource objects.
+      return !(this.need && this.need.member && this.need.member.contacts && this.need.category) && (this.ready || !this.ready)
     },
     isMine(): boolean {
       return this.need && this.need.member && this.need.member.id === this.$store.getters.myMember.id
@@ -175,12 +179,6 @@ export default defineComponent({
         include: "category,member,member.contacts,member.account"
       });
       this.ready = true
-    },
-    deleteNeed() {
-      this.$q.notify({
-        message: "Not implemented yet",
-        color: "negative"
-      })
     }
   }
 })
