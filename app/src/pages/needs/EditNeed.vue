@@ -1,5 +1,5 @@
 <template>
-<page-header 
+  <page-header 
     :title="$t('editNeed')" 
     balance 
     :back="`/groups/${code}/needs/${needCode}`"
@@ -12,10 +12,10 @@
       <need-form 
         v-if="need"
         :code="code"
-        @submit="onSubmit"
         :model-value="need"
-        showState
-        :submitLabel="$t('save')"
+        show-state
+        :submit-label="$t('save')"
+        @submit="onSubmit"
       />
     </q-page>
   </page-container>

@@ -1,16 +1,18 @@
 <template>
-  <span>
-    <q-btn
-      v-bind="$attrs"
-      @click="share"
-    />
+  <q-btn
+    v-bind="$attrs"
+    @click="share"
+  >
+    <slot />
     <q-dialog
       v-if="!navigatorShare"
       v-model="dialog"
     >
       <q-card>
         <q-card-section>
-          <div class="text-h6">{{ $t('share') }}</div>
+          <div class="text-h6">
+            {{ $t('share') }}
+          </div>
         </q-card-section>
         <q-card-section class="q-pt-none">
           <social-network-list
@@ -21,7 +23,7 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-  </span>
+  </q-btn>
 </template>
 <script lang="ts">
 

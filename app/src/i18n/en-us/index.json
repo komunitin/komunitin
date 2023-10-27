@@ -150,5 +150,8 @@
   "editNeed": "Edit need",
   "published": "Published",
   "needPublishedHint": "Make this need visible to other members",
-  "save": "Save"
+  "save": "Save",
+  "deleteNeed": "Do you want to delete the need {name}?",
+  "cantBeUndone": "This action can't be undone.",
+  "needDeleted": "The need has been deleted"
 }

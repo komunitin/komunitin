@@ -1,71 +1,78 @@
 <template>
-<q-form @submit="onSubmit">
-  <div class="q-gutter-y-lg">
-    <div>
-      <div class="text-subtitle1">
-        {{ $t('enterNeedData') }}
+  <q-form @submit="onSubmit">
+    <div class="q-gutter-y-lg">
+      <div>
+        <div class="text-subtitle1">
+          {{ $t('enterNeedData') }}
+        </div>
+        <div class="text-onsurface-m">
+          {{ $t('needFormHelpText') }}
+        </div>
       </div>
-      <div class="text-onsurface-m">
-        {{ $t('needFormHelpText') }}
-      </div>
+      <image-field
+        v-model="images"
+        :label="$t('uploadImages')" 
+        :hint="$t('uploadNeedImagesHint')"
+      />
+      <q-input 
+        v-model="description"
+        type="textarea"
+        name="description"  
+        :label="$t('description')" 
+        :hint="$t('needDescriptionHint')" 
+        outlined 
+        autogrow 
+        required
+        input-style="min-height: 100px;"
+        :rules="[() => !v$.description.$invalid || $t('needDescriptionRequired')]"
+      >
+        <template #append>
+          <q-icon name="notes" />
+        </template>
+      </q-input>
+      <select-category
+        v-model="category" 
+        :code="code"
+        :label="$t('category')"
+        :hint="$t('needCategoryHint')"
+        required
+      />
+      <date-field
+        v-model="expiration"
+        :label="$t('expirationDate')"
+        :hint="$t('needExpirationDateHint')"
+      />
+      <q-item
+        tag="label"
+        style="padding-left: 12px; padding-right: 12px;"
+      >
+        <q-item-section>
+          <q-item-label>
+            {{ $t('published') }}
+          </q-item-label>
+          <q-item-label caption>
+            {{ $t('needPublishedHint') }}
+          </q-item-label>
+        </q-item-section>
+        <q-item-section avatar>
+          <q-toggle
+            v-if="showState"
+            v-model="state"
+            true-value="published"
+            false-value="hidden"
+          />
+        </q-item-section>
+      </q-item>
+      <q-btn
+        :label="submitLabel ?? $t('preview')"
+        type="submit"
+        color="primary"
+        unelevated
+        class="full-width"
+        :disabled="v$.$invalid"
+      />
     </div>
-    <image-field
-      v-model="images"
-      :label="$t('uploadImages')" 
-      :hint="$t('uploadNeedImagesHint')"
-    />
-    <q-input 
-      v-model="description"
-      type="textarea"
-      name="description"  
-      :label="$t('description')" 
-      :hint="$t('needDescriptionHint')" 
-      outlined 
-      autogrow 
-      required
-      input-style="min-height: 100px;"
-      :rules="[() => !v$.description.$invalid || $t('needDescriptionRequired')]"
-    >
-      <template #append>
-        <q-icon name="notes" />
-      </template>
-    </q-input>
-    <select-category
-      v-model="category" 
-      :code="code"
-      :label="$t('category')"
-      :hint="$t('needCategoryHint')"
-      required
-    />
-    <date-field
-      v-model="expiration"
-      :label="$t('expirationDate')"
-      :hint="$t('needExpirationDateHint')"
-    />
-    <q-item tag="label" style="padding-left: 12px; padding-right: 12px;">
-      <q-item-section>
-        <q-item-label>{{ $t('published') }}</q-item-label>
-        <q-item-label caption>{{ $t('needPublishedHint') }}</q-item-label>
-      </q-item-section>
-      <q-item-section avatar>
-        <q-toggle
-          v-if="showState"
-          v-model="state"
-          true-value="published"
-          false-value="hidden"
-        />
-      </q-item-section>
-    </q-item>
-    <q-btn
-      :label="submitLabel ?? $t('preview')"
-      type="submit"
-      color="primary"
-      unelevated
-      class="full-width"
-      :disabled="v$.$invalid"
-    />
-  </div>
-</q-form>
+  </q-form>
 </template>
 <script setup lang="ts">
 import { defineProps, defineEmits, ref } from "vue"
@@ -128,6 +135,7 @@ const onSubmit = async () => {
       },
       relationships: {
         ...props.modelValue?.relationships,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         category: { data: { type: "categories", id: category.value!.id } },
         member: { data: { type: "members", id: store.getters.myMember.id} }
       }
