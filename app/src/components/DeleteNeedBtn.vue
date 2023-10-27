@@ -1,6 +1,9 @@
 <template>
   <delete-btn @confirm="deleteNeed">
-    <i18n-t keypath="deleteNeed" scope="global">
+    <i18n-t
+      keypath="deleteNeed"
+      scope="global"
+    >
       <template #name>
         <b>
           {{ name }}
