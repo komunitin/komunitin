@@ -31,7 +31,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { defineProps } from 'vue'
 interface ImageFile {
   name: string,
   __sizeLabel: string,
