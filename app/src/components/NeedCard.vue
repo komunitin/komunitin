@@ -139,7 +139,7 @@ export default defineComponent({
       );
     },
     isMine(): boolean {
-      return this.need.member.id == this.$store.getters.myMember.id
+      return this.need.member?.id == this.$store.getters.myMember?.id
     },
     hidden(): boolean {
       return this.need.attributes.state == "hidden"
