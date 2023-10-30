@@ -136,6 +136,9 @@
   "cancel": "Cancel",
   "cantBeUndone": "This action can't be undone.",
   "needDeleted": "The need has been deleted",
+  "expired": "Expired",
+  "hidden": "Hidden",
+  
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
   "ErrorServerNoResponse": "Error: Server do not respond",

@@ -131,6 +131,8 @@
   "cancel": "Cancelar",
   "cantBeUndone": "Esta acción no se puede deshacer.",
   "needDeleted": "Necessidad eliminada",
+  "expired": "Caducada",
+  "hidden": "Oculta",
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectos"
 }

@@ -134,6 +134,8 @@
   "cancel": "Cancel·la",
   "cantBeUndone": "Aquesta acció no es pot desfer.",
   "needDeleted": "Necessitat eliminada",
+  "expired": "Caducada",
+  "hidden": "Amagada",
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectes"
 }
