@@ -14,6 +14,7 @@
     "build": "cross-env QENV=build quasar build -m pwa",
     "test": "./node_modules/jest/bin/jest.js .",
     "lint": "eslint --ext .ts,.vue --ignore-path .gitignore --max-warnings 0 ./src",
+    "lint-fix": "eslint --ext .ts,.vue --ignore-path .gitignore --fix ./src",
     "start": "quasar serve --history dist/pwa",
     "testAll": "tsc -p tsconfig.json --noEmit && npm run test && npm run lint"
   },
