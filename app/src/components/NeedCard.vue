@@ -4,7 +4,7 @@
     v-card-click-to="`/groups/${code}/needs/${need.attributes.code}`"
     flat
     bordered
-    :class="[need.attributes.state == 'hidden' ? 'not-published' : '', new Date(need.attributes.expired) < new Date() ? 'expired' : '' ]"
+    :class="[hidden ? 'not-published' : '', expired ? 'expired' : '' ]"
   >
     <!-- Header -->
     <member-header :member="need.member">
@@ -37,6 +37,7 @@
 
     <q-card-actions>
       <contact-button
+        v-if="!expired && !hidden"
         flat
         color="primary"
         :contacts="need.member.contacts"
@@ -45,6 +46,12 @@
           $t("reply")
         }}
       </contact-button>
+      <div 
+        v-else
+        class="text-subtitle2 text-onsurface-m text-uppercase q-ml-sm text-negative"
+      >
+        {{ expired ? $t('expired') : $t('hidden') }}
+      </div>
       <q-space />
       <share-button
         icon="share"
@@ -133,18 +140,21 @@ export default defineComponent({
     },
     isMine(): boolean {
       return this.need.member.id == this.$store.getters.myMember.id
+    },
+    hidden(): boolean {
+      return this.need.attributes.state == "hidden"
+    },
+    expired(): boolean {
+      return new Date(this.need.attributes.expires) < new Date()
     }
   }
 });
 </script>
 <style lang="scss" scoped>
-  .not-published {
-    opacity: 0.5;
+  .not-published, .expired {
+    opacity: 0.54;
   }
-  .expired {
-    opacity: 0.5;
-    background-color: $light-error;
-  }
+
   .q-ml-none {
     margin-left: 0 !important;
   }
