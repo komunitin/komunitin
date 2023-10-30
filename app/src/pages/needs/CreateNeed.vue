@@ -11,6 +11,8 @@
     >
       <need-form 
         :code="code"
+        :show-state="false"
+        :model-value="need"
         @submit="onSubmit"
       />
     </q-page>
@@ -20,10 +22,11 @@
 import PageHeader from "../../layouts/PageHeader.vue"
 import PageContainer from "../../layouts/PageContainer.vue"
 import NeedForm from "./NeedForm.vue"
-import { Need } from "src/store/model"
+import { Category, Need } from "src/store/model"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { DeepPartial } from "quasar"
+import { ref } from "vue"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
@@ -33,14 +36,31 @@ const props = defineProps<{
 const store = useStore()
 const router = useRouter()
 
-const onSubmit = async (resource: DeepPartial<Need>) => {
+const need = ref<Need & {category: Category} | undefined>(undefined)
 
-  await store.dispatch("needs/create", {
-    group: props.code,
-    resource
-  })
+// Load initial values from current resource only if we are comming 
+// from the preview page.
+const forwardUrl = router.options.history.state.forward
+if (typeof forwardUrl === "string" && forwardUrl.endsWith("/preview")) {
+  need.value = store.getters["needs/current"] 
+}
+
+const onSubmit = async (resource: DeepPartial<Need>) => {
+  if (resource.id === undefined) {
+    await store.dispatch("needs/create", {
+      group: props.code,
+      resource
+    })
+  } else {
+    await store.dispatch("needs/update", {
+      group: props.code,
+      code: resource.attributes?.code,
+      resource
+    })
+  }
 
   const need = store.getters["needs/current"]
+
   // Go to needs page.
   router.push({
     name: "PreviewNeed",
