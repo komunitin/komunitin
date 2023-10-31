@@ -3,7 +3,23 @@
     <page-header 
       :title="$t('offer')" 
       :back="`/groups/${code}/offers`"
-    />
+    >
+      <template #buttons>
+        <q-btn
+          v-if="isMine"
+          round
+          flat
+          icon="edit"
+          :to="`/groups/${code}/offers/${offerCode}/edit`"
+        />
+        <delete-offer-btn 
+          v-if="isMine"
+          :code="code"
+          :offer="offer"          
+          :to="`/groups/${code}/offers`"
+        />
+      </template>
+    </page-header>
     <q-page-container>
       <q-page
         v-if="!isLoading"
@@ -56,7 +72,7 @@
                 date: $formatDate(offer.attributes.expires)
               }) }}</span>
             </div>
-            <div class="q-pb-lg row q-col-gutter-md justify-end">
+            <div class="q-pb-lg row q-gutter-x-md justify-end">
               <share-button 
                 flat
                 color="primary"
@@ -84,6 +100,10 @@
             </div>
           </template>
         </offer-layout>
+        <slot 
+          name="after" 
+          :offer="offer" 
+        />
       </q-page>
     </q-page-container>
   </div>
@@ -102,9 +122,10 @@ import ContactButton from "../../components/ContactButton.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
+import DeleteOfferBtn from "../../components/DeleteOfferBtn.vue"
 
 import { Offer, Member, Account, Currency, Category, Contact } from "../../store/model";
-import FormatCurrency from "src/plugins/FormatCurrency";
+import {formatPrice} from "src/plugins/FormatCurrency";
 
 export default defineComponent({
   components: {
@@ -115,7 +136,8 @@ export default defineComponent({
     ShareButton,
     ContactButton,
     Carousel,
-    OfferLayout
+    OfferLayout,
+    DeleteOfferBtn
   },
   props: {
     code: {
@@ -148,16 +170,10 @@ export default defineComponent({
      * otherwise just return the offer.price string.
      */
     price(): string {
-      const price = this.offer.attributes.price;
-      // Parse string to number.
-      const numeric = Number(price);
-      if (!isNaN(numeric) && !this.isLoading) {
-        // Append the currency symbol if price is just a number.
-        const currency = this.offer.member.account.currency
-        return FormatCurrency(numeric, currency, {scale: false} );
-      } else {
-        return price;
-      }
+      return formatPrice(this.offer.attributes.price, this.offer.member.account.currency)
+    },
+    isMine(): boolean {
+      return this.offer && this.offer.member && this.offer.member.id == this.$store.getters.myMember.id
     }
   },
   created() {
