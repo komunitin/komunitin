@@ -41,8 +41,8 @@ export default function formatCurrency(
   // Append or prepend the currency symbol depending on the locale.
   const sampleCurrency = n(1, {style: 'currency', currency: 'USD'})
   return sampleCurrency.startsWith('1') 
-    ? `${amountString} ${currency.attributes.symbol}` 
-    : `${currency.attributes.symbol} ${amountString}`
+    ? `${amountString}${currency.attributes.symbol}` 
+    : `${currency.attributes.symbol}${amountString}`
 }
 
 /**

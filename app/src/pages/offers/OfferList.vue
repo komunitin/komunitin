@@ -5,7 +5,7 @@
     :title="$t('offers')"
     prop-name="offer"
     module-name="offers"
-    include="member,category"
+    include="category,member,member.group,member.group.currency"
   >
     <template #after>
       <floating-btn

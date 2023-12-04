@@ -31,8 +31,8 @@ describe("Member", () => {
     const text = wrapper.text();
     expect(text).toContain("GRP0000");
     expect(text).toContain("Public account");
-    expect(text).toContain("655.92 $");
-    expect(text).toContain("Min -500 $");
+    expect(text).toContain("$655.92");
+    expect(text).toContain("Min $-500");
     // Tabs
     expect(text).toContain("Profile");
     expect(text).toContain("1 Need");
@@ -78,7 +78,7 @@ describe("Member", () => {
     const text = wrapper.text();
     expect(text).toContain("Magali");
     expect(text).toContain("GRP00001");
-    expect(text).toContain("-199.78 $");
+    expect(text).toContain("$-199.78");
     expect(text).toContain("Nisi");
     expect(text).toContain("@yahoo.com");
     expect(text).toContain("No Needs");

@@ -41,7 +41,7 @@ describe('AccountLimits.vue', () => {
         mocks
       }
     });
-    expect(wrapper.text()).toBe("maxAmount 50 %");
+    expect(wrapper.text()).toBe("maxAmount %50");
     expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
   });
 
@@ -61,7 +61,7 @@ describe('AccountLimits.vue', () => {
         mocks
       }
     });
-    expect(wrapper.text()).toBe("minAmount -50 %");
+    expect(wrapper.text()).toBe("minAmount %-50");
     expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
   });
 
@@ -81,8 +81,8 @@ describe('AccountLimits.vue', () => {
         mocks
       }
     });
-    expect(wrapper.text()).toContain("minAmount -50 %");
-    expect(wrapper.text()).toContain("maxAmount 60 %");
+    expect(wrapper.text()).toContain("minAmount %-50");
+    expect(wrapper.text()).toContain("maxAmount %60");
     expect(wrapper.findComponent(QSeparator).exists()).toBe(true);
   });
 
