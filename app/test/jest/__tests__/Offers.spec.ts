@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { VueWrapper } from "@vue/test-utils";
+import { VueWrapper, flushPromises } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
-import { QInnerLoading, QInfiniteScroll } from "quasar";
+import { QInnerLoading, QInfiniteScroll, QSelect, QItem } from "quasar";
 import OfferCard from "../../../src/components/OfferCard.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import ApiSerializer from "src/server/ApiSerializer";
 import { seeds } from "src/server";
+import SelectCategory from "src/components/SelectCategory.vue";
+
 
 describe("Offers", () => {
   let wrapper: VueWrapper;
@@ -56,6 +58,39 @@ describe("Offers", () => {
     expect(text).toContain("GRP00001");
     expect(text).toContain("$0.88");
     expect(text).toContain("Updated yesterday");
+  })
+
+  it ("creates an offer", async() => {
+    await wrapper.vm.$router.push("/groups/GRP0/offers/new")
+    await wrapper.vm.$wait();
+
+    const select = wrapper.getComponent(SelectCategory).getComponent(QSelect)
+    await select.trigger("click");
+    await wrapper.vm.$wait();
+    const menu = select.findAllComponents(QItem);
+    menu[1].trigger("click");
+    await flushPromises();
+
+    await wrapper.get("[name='title']").setValue("The Offer")
+    await wrapper.get("[name='description']").setValue("This offer is a mirage.")
+    await wrapper.get("[name='price']").setValue("10")
+
+
+    await wrapper.get("[type='submit']").trigger("click");
+    await wrapper.vm.$wait();
+    
+    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/offers/The-Offer/preview");
+    const text = wrapper.text();
+    expect(text).toContain("This offer is a mirage.");
+    expect(text).toContain("Updated today");
+    expect(text).toContain("Computers");
+    await wrapper.get(".q-btn--fab").trigger("click");
+    await wrapper.vm.$wait();
+    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/offers");
+    await wrapper.vm.$router.push("/groups/GRP0/offers/The-Offer")
+    expect(wrapper.text()).toContain("The Offer");
+    expect(wrapper.text()).toContain("$10.00");
+
   })
 
 });
