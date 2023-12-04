@@ -19,7 +19,7 @@ export interface CurrencyFormat {
  * @param currency The currency
  * @param options Format options.
  */
-export default function (
+export default function formatCurrency(
   amount: number,
   currency: Currency,
   options?: CurrencyFormat
@@ -38,6 +38,26 @@ export default function (
     })
     : n(amount);
 
-  // Use vue-i18n $n to localize the number and append the currency symbol.
-  return `${amountString} ${currency.attributes.symbol}`;
+  // Append or prepend the currency symbol depending on the locale.
+  const sampleCurrency = n(1, {style: 'currency', currency: 'USD'})
+  return sampleCurrency.startsWith('1') 
+    ? `${amountString}${currency.attributes.symbol}` 
+    : `${currency.attributes.symbol}${amountString}`
+}
+
+/**
+ * Formats price as a currency only if it is numeric.
+ */
+export function formatPrice(price: string, currency: Currency, options?: CurrencyFormat): string {
+  const actualOptions = {
+    decimals: true,
+    scale: false,
+    ...options
+  }
+  const numeric = Number(price)
+  if (!isNaN(numeric)) {
+    return formatCurrency(numeric, currency, actualOptions)
+  } else {
+    return price
+  }
 }

@@ -5,17 +5,28 @@
     :title="$t('offers')"
     prop-name="offer"
     module-name="offers"
-    include="member,category"
-  />
+    include="category,member,member.group,member.group.currency"
+  >
+    <template #after>
+      <floating-btn
+        :label="$t('createOffer')"
+        icon="add"
+        color="kblue"
+        :to="`/groups/${code}/offers/new`"
+      />
+    </template>
+  </resource-card-list>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
 import ResourceCardList from "../ResourceCardList.vue";
+import FloatingBtn from "../../components/FloatingBtn.vue";
 import OfferCard from "../../components/OfferCard.vue";
 
 export default defineComponent({
   components: {
-    ResourceCardList
+    ResourceCardList,
+    FloatingBtn
   },
   props: {
     code: {

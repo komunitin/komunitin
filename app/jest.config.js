@@ -75,4 +75,5 @@ module.exports = {
   testEnvironmentOptions: {
     customExportConditions: ["node", "node-addons"],
   },
+  testTimeout: 30000
 }

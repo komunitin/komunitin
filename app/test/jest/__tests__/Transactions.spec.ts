@@ -36,13 +36,13 @@ describe("Transactions", () => {
     const first = transactions[0];
     expect(first.text()).toContain("Pending");
     expect(first.text()).toContain("Magali");
-    expect(first.text()).toContain("-8.00 $");
+    expect(first.text()).toContain("$-8.00");
     expect(first.text()).toContain("Persevering");
 
     const second = transactions[1];
     expect(second.text()).toContain("today");
     expect(second.text()).toContain("Isobel");
-    expect(second.text()).toContain("70.72 $");
+    expect(second.text()).toContain("$70.72");
     expect(second.text()).toContain("Inverse");
     // Search
     wrapper.getComponent(PageHeader).vm.$emit("search", "desk");
@@ -58,7 +58,7 @@ describe("Transactions", () => {
     expect(text).toContain("GRP00000");
     expect(text).toContain("Isobel");
     expect(text).toContain("GRP00005");
-    expect(text).toContain("70.72 $");
+    expect(text).toContain("$70.72");
     expect(text).toContain("today at");
     expect(text).toContain("Inverse");
     expect(text).toContain("Committed");
