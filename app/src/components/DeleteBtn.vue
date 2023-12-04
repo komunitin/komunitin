@@ -34,7 +34,7 @@
             v-close-popup
             unelevated
             fill
-            label="Delete"
+            :label="$t('delete')"
             color="negative"
             @click="emit('confirm')"
           />

@@ -393,6 +393,40 @@ export default {
       return schema.offers.findBy({ code: request.params.offer });
     });
 
+    // Create offer
+    server.post(urlSocial + "/:code/offers", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const offer = {
+        ...body.data.attributes,
+        code: faker.helpers.slugify(body.data.attributes.name.substr(0, 10)),
+        created: new Date().toJSON(),
+        updated: new Date().toJSON(),
+        groupId: schema.groups.findBy({ code: request.params.code }).id,
+        memberId: body.data.relationships.member.data.id,
+        categoryId: body.data.relationships.category.data.id,
+      }
+      
+      return schema.offers.create(offer);
+    })
+
+    // Update offer
+    server.patch(urlSocial + "/:code/offers/:offer", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const offer = schema.offers.findBy({ code: request.params.offer });
+      offer.update({
+        ...body.data.attributes,
+        updated: new Date().toJSON(),
+      })
+      return offer;
+    })
+
+    // Delete offer
+    server.delete(urlSocial + "/:code/offers/:offer", (schema: any, request: any) => {
+      const offer = schema.offers.findBy({ code: request.params.offer });
+      offer.destroy();
+      return undefined as any
+    })
+
     // Single need
     server.get(urlSocial + "/:code/needs/:need", (schema: any, request: any) => {
       return schema.needs.findBy({ code: request.params.need });

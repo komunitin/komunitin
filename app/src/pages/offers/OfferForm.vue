@@ -3,44 +3,71 @@
     <div class="q-gutter-y-lg">
       <div>
         <div class="text-subtitle1">
-          {{ $t('enterNeedData') }}
+          {{ $t('enterOfferData') }}
         </div>
         <div class="text-onsurface-m">
-          {{ $t('needFormHelpText') }}
+          {{ $t('offerFormHelpText') }}
         </div>
       </div>
       <image-field
         v-model="images"
         :label="$t('uploadImages')" 
-        :hint="$t('uploadNeedImagesHint')"
+        :hint="$t('uploadOfferImagesHint')"
       />
+      <select-category
+        v-model="category" 
+        :code="code"
+        :label="$t('category')"
+        :hint="$t('offerCategoryHint')"
+        required
+      />
+      <q-input
+        v-model="title"
+        type="text"
+        name="title"
+        :label="$t('title')"
+        :hint="$t('offerTitleHint')"
+        outlined
+        required
+        :rules="[() => !v$.title.$invalid || $t('offerTitleRequired')]"
+      >
+        <template #append>
+          <q-icon name="lightbulb" />
+        </template>
+      </q-input>
       <q-input 
         v-model="description"
         type="textarea"
         name="description"  
         :label="$t('description')" 
-        :hint="$t('needDescriptionHint')" 
+        :hint="$t('offerDescriptionHint')" 
         outlined 
         autogrow 
         required
         input-style="min-height: 100px;"
-        :rules="[() => !v$.description.$invalid || $t('needDescriptionRequired')]"
+        :rules="[() => !v$.description.$invalid || $t('offerDescriptionRequired')]"
       >
         <template #append>
           <q-icon name="notes" />
         </template>
       </q-input>
-      <select-category
-        v-model="category" 
-        :code="code"
-        :label="$t('category')"
-        :hint="$t('needCategoryHint')"
-        required
-      />
+      <q-input
+        v-model="price"
+        type="text"
+        name="price"
+        :label="$t('price')"
+        :hint="$t('offerPriceHint')"
+        outlined
+        :rules="[() => !v$.price.$invalid || $t('offerPriceRequired')]"
+      >
+        <template #append>
+          <span class="text-h6 text-onsurface-m">{{ myAccount.currency.attributes.symbol }}</span>
+        </template>
+      </q-input>
       <date-field
         v-model="expiration"
         :label="$t('expirationDate')"
-        :hint="$t('needExpirationDateHint')"
+        :hint="$t('offerExpirationDateHint')"
       />
       <q-item
         v-if="showState"
@@ -52,7 +79,7 @@
             {{ $t('published') }}
           </q-item-label>
           <q-item-label caption>
-            {{ $t('needPublishedHint') }}
+            {{ $t('offerPublishedHint') }}
           </q-item-label>
         </q-item-section>
         <q-item-section avatar>
@@ -75,11 +102,11 @@
   </q-form>
 </template>
 <script setup lang="ts">
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import DateField from "../../components/DateField.vue"
 import ImageField from "../../components/ImageField.vue"
 import SelectCategory from "../../components/SelectCategory.vue"
-import { Category, Need, NeedState } from "src/store/model"
+import { Category, Offer, OfferState } from "src/store/model"
 import useVuelidate from "@vuelidate/core"
 import { minLength, required } from "@vuelidate/validators"
 import { DeepPartial } from "quasar"
@@ -87,50 +114,58 @@ import { useStore } from "vuex"
 
 const props = defineProps<{
   code: string
-  modelValue?: DeepPartial<Need> & {category: Category}
+  modelValue?: DeepPartial<Offer> & {category: Category}
   showState?: boolean
   submitLabel?: string
 }>()
 const emit = defineEmits<{
-  (e: "submit", value: DeepPartial<Need>): void
+  (e: "submit", value: DeepPartial<Offer>): void
 }>()
 
 const images = ref<string[]>(props.modelValue?.attributes?.images || [])
+const title = ref(props.modelValue?.attributes?.name || "")
 const description = ref(props.modelValue?.attributes?.content || "")
 const category = ref<Category|null>(props.modelValue?.category || null)
+const price = ref(props.modelValue?.attributes?.price || "")
 
 let date: Date
 if (props.modelValue?.attributes?.expires) {
   date = new Date(props.modelValue?.attributes?.expires)
 } else {
-  // Set expiry date in one week by default
+  // Set expiry date in one year by default
   date = new Date()
-  date.setDate(date.getDate() + 7)
+  date.setFullYear(date.getFullYear() + 1)
 }
 const expiration = ref(date)
 
-const state = ref<NeedState>(props.modelValue?.attributes?.state || "published")
+const state = ref<OfferState>(props.modelValue?.attributes?.state || "published")
 
 // Validation
 const rules = {
   description: { required, minLength: minLength(10) },
   category: { required },
-  expiration: { required }
+  expiration: { required },
+  title: { required },
+  price: { required }
 }
-const v$ = useVuelidate(rules, {images, description, category, expiration})
+const v$ = useVuelidate(rules, {images, description, category, expiration, title, price})
 const store = useStore()
+
+const myAccount = computed(() => store.getters.myAccount)
 
 const onSubmit = async () => {
   const isFormCorrect = await v$.value.$validate()
   if (isFormCorrect) {
     emit("submit", {
       ...props.modelValue,
-      type: "needs",
+      type: "offers",
       attributes: {
         ...props.modelValue?.attributes,
+        name: title.value,
         content: description.value,
         expires: expiration.value.toISOString(),
         images: images.value,
+        price: price.value,
         state: state.value
       },
       relationships: {

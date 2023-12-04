@@ -65,6 +65,13 @@
               :member="member"
               :group-code="code"
             />
+            <floating-btn
+              v-if="isMe"
+              icon="add"
+              color="kblue"
+              :to="`/groups/${code}/offers/new`"
+              :label="$t('createOffer')"
+            />
           </q-tab-panel>
           <q-tab-panel
             v-if="!isMe"

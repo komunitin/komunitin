@@ -4,6 +4,7 @@
     v-card-click-to="`/groups/${code}/offers/${offer.attributes.code}`"
     flat
     bordered
+    :class="{hidden, expired}"
   >
     <!-- Header -->
     <member-header :member="offer.member">
@@ -30,6 +31,11 @@
         {{ offer.attributes.name }}
       </div>
       <!-- TODO: Add price -->
+      <div class="text-subtitle2 q-mb-xs">
+        <span class="text-onsurface-m">{{ $t('price') }}</span>
+        <span>&nbsp;</span>
+        <span class="negative-amount">{{ price }}</span>
+      </div>
       <div
         v-clamp="3"
         class="text-body2 text-justify text-onsurface-m"
@@ -37,11 +43,32 @@
         {{ md2txt(offer.attributes.content) }}
       </div>
     </q-card-section>
+    <q-card-section 
+      v-if="isMine"
+      class="row justify-end items-center"
+    >
+      <q-btn
+        v-if="isMine"
+        icon="edit"
+        flat
+        round
+        color="icon-dark"
+        :to="`/groups/${code}/offers/${offer.attributes.code}/edit`"
+        class="q-ml-none"
+      />
+      <delete-offer-btn
+        v-if="isMine"
+        :code="code"
+        :offer="offer"
+        color="icon-dark"
+        class="q-ml-none"
+      />
+    </q-card-section>
   </q-card>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
 
 import cardClickTo from "../plugins/CardClickTo";
 import clamp from "../plugins/Clamp";
@@ -50,36 +77,55 @@ import md2txt from "../plugins/Md2txt";
 import Carousel from "./Carousel.vue";
 import CategoryAvatar from "./CategoryAvatar.vue";
 import MemberHeader from "./MemberHeader.vue";
+import DeleteOfferBtn from "./DeleteOfferBtn.vue";
 
+import { formatPrice } from "../plugins/FormatCurrency"
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "OfferCard",
   components: {
     MemberHeader,
     CategoryAvatar,
-    Carousel
+    Carousel,
+    DeleteOfferBtn
   },
   directives: {
-    clamp,
-    cardClickTo
+    cardClickTo,
+    clamp
   },
   props: {
     // Group code.
     code: {
       type: String,
-      required: true,
+      required: true
     },
-    // Offer object with member and category assotiations.
     offer: {
       type: Object,
-      required: true,
-      default: undefined
+      required: true
     }
   },
-  setup() {
+  setup(props) {
+    const store = useStore()
+
+    const price = computed(() => formatPrice(props.offer.attributes.price, props.offer.member.group.currency))
+    const isMine = computed(() => props.offer.member.id === store.getters.myMember.id)
+    const hidden = computed(() => props.offer.attributes.state === "hidden")
+    const expired = computed(() => new Date(props.offer.attributes.expires) < new Date())
+
     return {
-      md2txt
+      price,
+      isMine,
+      md2txt,
+      hidden,
+      expired
     }
   }
-});
+})
+
 </script>
+<style lang="scss" scoped>
+  .hidden, .expired {
+    opacity: 0.54;
+  }
+</style>
