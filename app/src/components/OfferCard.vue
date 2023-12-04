@@ -108,7 +108,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore()
 
-    const price = computed(() => formatPrice(props.offer.attributes.price, props.offer.member.account.currency))
+    const price = computed(() => formatPrice(props.offer.attributes.price, props.offer.member.group.currency))
     const isMine = computed(() => props.offer.member.id === store.getters.myMember.id)
     const hidden = computed(() => props.offer.attributes.state === "hidden")
     const expired = computed(() => new Date(props.offer.attributes.expires) < new Date())

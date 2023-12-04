@@ -174,7 +174,7 @@ describe("PageHeader", () => {
     store.commit("myAccount", account);
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("balance");
-    expect(wrapper.text()).toContain("1.00 $");
+    expect(wrapper.text()).toContain("$1.00");
     const header = wrapper.getComponent(QHeader).element as HTMLElement;
     expect(header.style.height).toBe("170px");
     const pageHeader = wrapper.getComponent(PageHeader);

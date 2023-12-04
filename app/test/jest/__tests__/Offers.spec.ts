@@ -54,7 +54,7 @@ describe("Offers", () => {
     expect(text).toContain("Tuna");
     expect(text).toContain("Magali");
     expect(text).toContain("GRP00001");
-    expect(text).toContain("0.88 $");
+    expect(text).toContain("$0.88");
     expect(text).toContain("Updated yesterday");
   })
 
