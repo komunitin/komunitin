@@ -4,6 +4,7 @@ package notifications
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -22,6 +23,9 @@ import (
 const (
 	TransferCommitted = "TransferCommitted"
 	TransferPending   = "TransferPending"
+	NeedPublished     = "NeedPublished"
+	OfferPublished    = "OfferPublished"
+	MemberJoined      = "MemberJoined"
 )
 
 // These configuration parameters are set docker-compose.xml file.
@@ -46,9 +50,9 @@ func Notifier(ctx context.Context) error {
 	//  - error at reading could be reattempted after X seconds
 	//  - erroneous events/notifications could be moved to a seaparate stream
 
-	// TOO: For far greather throughtput we can decouple reading events from
-	// sending notifications by reading events ino a channel and then having
-	// different goroutines consuming he channel and performing the notifications.
+	// TODO: For far greather throughtput we can decouple reading events from
+	// sending notifications by reading events into a channel and then having
+	// different goroutines consuming the channel and performing the notifications.
 
 	stream, err := store.NewStream(ctx, events.EventStream)
 	if err != nil {
@@ -79,6 +83,12 @@ func handleEvent(ctx context.Context, value map[string]interface{}) error {
 		return handleTransferCommitted(ctx, value)
 	case TransferPending:
 		return handleTransferPending(ctx, value)
+	case NeedPublished:
+		return handleGroupEvent(ctx, value)
+	case OfferPublished:
+		return handleGroupEvent(ctx, value)
+	case MemberJoined:
+		return handleGroupEvent(ctx, value)
 	default:
 		log.Printf("Unkown event type %v\n", event)
 	}
@@ -174,6 +184,69 @@ func formatAmount(amount int, currency *model.Currency) string {
 	return fmt.Sprintf(format, float64(amount)/math.Pow(10, float64(currency.Scale)), currency.Symbol)
 }
 
+func handleGroupEvent(ctx context.Context, value map[string]interface{}) error {
+
+	// Get group members
+	code := value["code"].(string)
+	members, err := getGroupMembers(ctx, code)
+
+	if err != nil {
+		return err
+	}
+	exludeUser := value["user"].(string)
+	tokens := []string{}
+
+	for _, member := range members {
+		subscriptions, err := getMemberSubscriptions(ctx, member, exludeUser)
+		if err != nil {
+			return err
+		}
+		for _, sub := range subscriptions {
+			tokens = append(tokens, sub.Token)
+		}
+	}
+
+	if len(tokens) == 0 {
+		return nil
+	}
+
+	data := make(map[string]string)
+	data["event"] = value["name"].(string)
+	data["code"] = value["code"].(string)
+	data["user"] = value["user"].(string)
+
+	decoded := make(map[string]interface{})
+	err = json.Unmarshal([]byte(value["data"].(string)), &decoded)
+	if err != nil {
+		return err
+	}
+
+	for key, value := range decoded {
+		data[key] = value.(string)
+	}
+
+	// Break tokens in groups of 500 and send the message because of firebase limitations.
+	for i := 0; i < len(tokens); i += 500 {
+		end := i + 500
+		if end > len(tokens) {
+			end = len(tokens)
+		}
+
+		// Send notification
+		message := &messaging.MulticastMessage{
+			Tokens: tokens[i:end],
+			Data:   data,
+		}
+
+		err = sendMessage(ctx, message)
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Return the subscriptions of given member, excluding the ones related to the given user id.
 func getMemberSubscriptions(ctx context.Context, member *model.Member, excludeUser string) ([]Subscription, error) {
 	// Get connection to DB.
@@ -222,16 +295,6 @@ func getLocalizationFromSubscription(subs Subscription) i18n.Localizer {
 }
 
 func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscription) error {
-	// Credentials are implicitly loaded from a JSON file identifyed by the environment
-	// variable GOOGLE_APPLICATION_CREDENTIALS.
-	app, err := firebase.NewApp(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("error initializing firebase: %v", err)
-	}
-	client, err := app.Messaging(ctx)
-	if err != nil {
-		return fmt.Errorf("error getting firebase messaging client: %v", err)
-	}
 
 	// Build array of registration tokens
 	tokens := make([]string, len(subscriptions))
@@ -254,6 +317,21 @@ func notifyDevices(ctx context.Context, msg Message, subscriptions []Subscriptio
 				Link: msg.Link,
 			},
 		},
+	}
+
+	return sendMessage(ctx, message)
+}
+
+func sendMessage(ctx context.Context, message *messaging.MulticastMessage) error {
+	// Credentials are implicitly loaded from a JSON file identifyed by the environment
+	// variable GOOGLE_APPLICATION_CREDENTIALS.
+	app, err := firebase.NewApp(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("error initializing firebase: %v", err)
+	}
+	client, err := app.Messaging(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting firebase messaging client: %v", err)
 	}
 
 	// Send the message!

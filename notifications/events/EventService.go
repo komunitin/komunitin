@@ -8,6 +8,7 @@ package events
 import (
 	"context"
 	"crypto/subtle"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -30,6 +31,7 @@ type Event struct {
 	Source   string                  `jsonapi:"attr,source"`
 	Code     string                  `jsonapi:"attr,code"`
 	Time     time.Time               `jsonapi:"attr,time,iso8601"`
+	Data     map[string]interface{}  `jsonapi:"attr,data"`
 	User     *model.ExternalUser     `jsonapi:"relation,user"`
 	Transfer *model.ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
 }
@@ -78,12 +80,19 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 		}
 		// TODO authorize request.
 
+		data, err := json.Marshal(event.Data)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Println(err.Error())
+			return
+		}
 		value := map[string]interface{}{
 			"name":   event.Name,
 			"source": event.Source,
 			"user":   event.User.Id,
 			"time":   event.Time.String(),
 			"code":   event.Code,
+			"data":   data,
 		}
 
 		if event.Transfer != nil {
