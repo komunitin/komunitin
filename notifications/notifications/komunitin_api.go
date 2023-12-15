@@ -17,7 +17,7 @@ func fixUrl(url string) string {
 	return url
 }
 
-// TODO make that parse the result!
+// TODO make that check errors and add an opt-in cache layer!
 func getResource(ctx context.Context, url string) (*http.Response, error) {
 	token, err := getAuthorizationToken(ctx)
 	if err != nil {
@@ -110,4 +110,25 @@ func getUserByToken(ctx context.Context, token string) (*model.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func getGroupMembers(ctx context.Context, code string) ([]*model.Member, error) {
+	url := socialUrl + "/" + code + "/members"
+	res, err := getResource(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error fetching members: %s", res.Status)
+	}
+	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*model.Member)(nil)))
+	if err != nil {
+		return nil, err
+	}
+	// Fix members type.
+	result := make([]*model.Member, len(members))
+	for i, member := range members {
+		result[i] = member.(*model.Member)
+	}
+	return result, nil
 }
