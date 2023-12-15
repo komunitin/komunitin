@@ -1,8 +1,8 @@
-import axios, { AxiosError } from "axios";
 import { KOptions } from "../boot/koptions";
 import KError, { KErrorCode } from "src/KError";
 //https://quasar.dev/quasar-plugins/web-storage
-import { LocalStorage } from "quasar";
+
+import LocalStorage from "./LocalStorage";
 
 /**
  * User data fetched from OIDC /userinfo endpoint.
@@ -76,9 +76,9 @@ export class Auth {
   /**
    * Retrieve AuthData stored in LocalStorage.
    */
-  public getStoredTokens(): AuthData | undefined {
-    if (LocalStorage.has(Auth.STORAGE_KEY)) {
-      const data = LocalStorage.getItem(Auth.STORAGE_KEY) as {accessTokenExpire: string | Date};
+  public async getStoredTokens(): Promise<AuthData | undefined> {
+    const data = await LocalStorage.getItem(Auth.STORAGE_KEY)
+    if (data !== null) {
       data.accessTokenExpire = new Date(data.accessTokenExpire);
       return data as AuthData;
     }
@@ -90,9 +90,9 @@ export class Auth {
    * Actually, it just deletes the saved token but in future it could do server
    * side operations.
    */
-  public logout(): void {
-    if (LocalStorage.has(Auth.STORAGE_KEY)) {
-      LocalStorage.remove(Auth.STORAGE_KEY);
+  public async logout() {
+    if (await LocalStorage.has(Auth.STORAGE_KEY)) {
+      await LocalStorage.remove(Auth.STORAGE_KEY);
     }
   }
   /**
@@ -158,34 +158,33 @@ export class Auth {
     );
   }
 
-  private getKError(error: AxiosError): KError {
-    if (error.response) {
-      const status = error.response.status;
-      if (status == 401) {
-        return new KError(
+  /**
+   * Throws KError if the response is not OK.
+   * @param response 
+   */
+  private checkResponse(response: Response) {
+    if (!response.ok) {
+      if (response.status == 401) {
+        throw new KError(
           KErrorCode.AuthNoCredentials,
           "Missing or invalid credentials",
-          error
+          response
         );
-      } else if (status == 403) {
-        return new KError(
+      } else if (response.status == 403) {
+        throw new KError(
           KErrorCode.IncorrectCredentials,
           "Access forbidden with given credentials",
-          error
+          response
         );
-      } else if (400 <= status && status < 500) {
-        return new KError(
+      } else if (400 <= response.status && response.status < 500) {
+        throw new KError(
           KErrorCode.IncorrectRequest,
           "Invalid request",
-          error
+          response
         );
       } else {
-        return new KError(KErrorCode.ServerBadResponse, "Server error", error);
+        throw new KError(KErrorCode.ServerBadResponse, `Server error ${response.status}`, {error: response.statusText});
       }
-    } else if (error.isAxiosError) {
-      return new KError(KErrorCode.ServerNoResponse, error.message, error);
-    } else {
-      return new KError(KErrorCode.UnknownScript, "Unexpected error", error);
     }
   }
   /**
@@ -193,20 +192,22 @@ export class Auth {
    */
   public async getUserInfo(accessToken: string): Promise<User> {
     try {
-      const response = await axios.get(this.userInfoEndpoint, {
+      const response = await fetch(this.userInfoEndpoint, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
+      this.checkResponse(response)
+      const data = await response.json();
       const userInfo = {
-        sub: response.data.sub,
-        email: response.data.email,
-        emailVerified: response.data.email_verified,
-        name: response.data.name,
-        preferredUsername: response.data.preferred_username,
-        zoneinfo: response.data.zoneinfo
+        sub: data.sub,
+        email: data.email,
+        emailVerified: data.email_verified,
+        name: data.name,
+        preferredUsername: data.preferred_username,
+        zoneinfo: data.zoneinfo
       };
       return userInfo;
     } catch (error) {
-      throw this.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }
   }
 
@@ -234,14 +235,16 @@ export class Auth {
     const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => params.append(key, value));
     try {
-      const response = await axios.post<TokenResponse>(
-        this.tokenEndpoint,
-        params,
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
-      return this.processTokenResponse(response.data);
+      const response = await fetch(this.tokenEndpoint, {
+        method: "POST",
+        body: params,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      });
+      this.checkResponse(response)
+      const data = await response.json();
+      return this.processTokenResponse(data);
     } catch (error) {
-      throw this.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }
   }
 
