@@ -100,7 +100,7 @@ async function loadUser(
 
 export default {
   state: () => ({
-    tokens: auth.getStoredTokens(),
+    tokens: undefined,
     // It is important to define the properties even if undefined in order to add the reactivity.
     userInfo: undefined,
     myUserId: undefined,
@@ -161,7 +161,8 @@ export default {
     authorize: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isLoggedIn) {
         try {
-          const tokens = await auth.authorize(context.state.tokens);
+          const storedTokens = await auth.getStoredTokens();
+          const tokens = await auth.authorize(storedTokens);
           context.commit("tokens", tokens);
           await loadUser(tokens.accessToken, context);
         } catch (error) {
@@ -179,7 +180,7 @@ export default {
      */
     logout: async (context: ActionContext<UserState, never>) => {
       await context.dispatch("unsubscribe");
-      auth.logout();
+      await auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
       context.commit("myUserId", undefined);

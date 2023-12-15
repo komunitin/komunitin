@@ -1,16 +1,14 @@
-import Axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import KError, { KErrorCode } from "src/KError";
 import { Module, ActionContext, Commit, Dispatch } from "vuex";
-import {cloneDeep} from "lodash-es";
+import { cloneDeep } from "lodash-es";
 
 import {
   CollectionResponseInclude,
-  ErrorObject,
   ResourceIdentifierObject,
   ResourceObject,
-  ExternalResourceObject
+  ExternalResourceObject,
+  ErrorObject
 } from "src/store/model";
-import { UserState } from "./me";
 
 export interface ResourcesState<T extends ResourceObject> {
   /**
@@ -235,34 +233,38 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     return {};
   }
 
-  private getHttpClient(context: ActionContext<ResourcesState<T>, S>): AxiosInstance {
-    return Axios.create({
-      baseURL: this.baseUrl,
-      withCredentials: true,
+  private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post"|"patch"|"delete", data?: object) {
+    if (method == undefined) {
+      method = "get";
+    }
+    const request = async () => fetch(this.baseUrl + url, {
+      method: method?.toUpperCase() ?? "GET",
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
       headers: {
         Accept: "application/vnd.api+json",
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${context.rootGetters['accessToken']}`
       }
-    });
-  }
-
-  private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post"|"patch"|"delete", data?: object) {
-    if (method == undefined) {
-      method = "get";
-    }
-    const request = async () => this.getHttpClient(context).request({method, url, data})
-    
+    })
     try {
-      return await request()
-    } catch (error) {
-      if ((error as AxiosError).code == "401" && (context.rootState as unknown as UserState).myUserId) {
+      let response = await request()
+      if (!response.ok && response.status == 401) {
         // Unauthorized. Refresh token and retry
-        await context.dispatch("authorize")
-        return request()
+        await context.dispatch("authorize", null, {root: true})
+        response = await request()
       }
-      throw error;
+      await this.checkResponse(response)
+      // No content
+      if (response.status == 204) {
+        return null
+      } else {
+        return await response.json()
+      }
+    } catch (error) {
+      throw KError.getKError(error);
     }
+    
   }
 
   /**
@@ -318,25 +320,24 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * the external relationships.
    */
   protected async handleCollectionResponse(
-    response: AxiosResponse<CollectionResponseInclude<T, ResourceObject>>,
+    data: CollectionResponseInclude<T, ResourceObject>,
     context: ActionContext<ResourcesState<T>, S>,
     group: string,
     onlyResources?: boolean
   ) {
     const {commit, dispatch} = context;
-    const result = response.data;
     
     // Commit included resources.
-    if (result.included) {
-      await Resources.handleIncluded(result.included, group, commit, dispatch);
+    if (data.included) {
+      await Resources.handleIncluded(data.included, group, commit, dispatch);
     }
 
     // Commit mutation(s) after commiting included and eventualy fetched external resources.
     if (!onlyResources) {
-      commit("next", result.links.next)
-      this.setCurrentPageResources(context, result.data)
+      commit("next", data.links.next)
+      this.setCurrentPageResources(context, data.data)
     } else {
-      commit("addResources", result.data)
+      commit("addResources", data.data)
     }
     
   }
@@ -345,23 +346,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    *
    * @param error The Network error.
    */
-  protected static getKError(error: AxiosError<ErrorObject>) {
-    if (error.response) {
-      // Server returned error. Use code from server response.
-      const apiError = error.response.data;
+  protected async checkResponse(response: Response) {
+    if (!response.ok) {
+      const data = await response.json() as ErrorObject
       // Check that the code is actually known.
       const code =
-        apiError.code in KErrorCode
-          ? (apiError.code as KErrorCode)
+        data.code in KErrorCode
+          ? (data.code as KErrorCode)
           : KErrorCode.UnknownServer;
-
-      return new KError(code, apiError.title, error);
-    } else if (error.request) {
-      // Server didn't respond.
-      return new KError(KErrorCode.ServerNoResponse, error.message, error);
-    } else {
-      // Request could not be prepared.
-      return new KError(KErrorCode.IncorrectRequest, error.message, error);
+      throw new KError(code, data.title);
     }
   }
 
@@ -685,15 +678,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (query.length > 0) url += "?" + query;
     // Call API
     try {
-      const response = await this.request(context, url);
+      const data = await this.request(context, url);
       await this.handleCollectionResponse(
-        response,
+        data,
         context,
         payload.group,
         payload.onlyResources
       );
     } catch (error) {
-      throw Resources.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }
   }
   protected async loadNext(
@@ -721,14 +714,14 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       }
       
       // Perform the request.
-      const response = await this.request(context, context.state.next);
+      const data = await this.request(context, context.state.next);
       await this.handleCollectionResponse(
-        response,
+        data,
         context,
         payload.group,
       );
     } catch (error) {
-      throw Resources.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }
   }
   protected loadCached (
@@ -770,20 +763,19 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     // Call API
     try {
-      const response = await this.request(context, url);
+      const data = await this.request(context, url);
       // Commit mutation(s).
-      const resource = response.data.data;
-      this.setCurrent(context, resource)
-      if (response.data.included) {
+      this.setCurrent(context, data.data)
+      if (data.included) {
         await Resources.handleIncluded(
-          response.data.included,
+          data.included,
           payload.group,
           context.commit,
           context.dispatch
         );
       }
     } catch (error) {
-      throw Resources.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }
   }
   /**
@@ -798,16 +790,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     const resource = payload.resource;
     const body = {data: resource};
     try {
-      const response = await this.request(context, url, "post", body)
-      if (response.status == 201) {
-        // Created. Data in the response body.
-        const resource = response.data.data
-        this.setCurrent(context, resource)
-      } else {
-        throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
-      }
+      const data = await this.request(context, url, "post", body)
+      const resource = data.data
+      this.setCurrent(context, resource)
     } catch (error) {
-      throw Resources.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }
     
   }
@@ -823,16 +810,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     const resource = payload.resource;
     const body = {data: resource};
     try {
-      const response = await this.request(context, url, "patch", body) 
-      if (response.status == 200) {
-        // Updated. Data in the response body.
-        const resource = response.data.data
-        this.setCurrent(context, resource)
-      } else {
-        throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
-      }
+      const data = await this.request(context, url, "patch", body) 
+      const resource = data.data
+      this.setCurrent(context, resource)
     } catch (error) {
-      throw Resources.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }
   }
 
@@ -848,39 +830,34 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     const id = resource.id
     const url = this.resourceEndpoint(payload.code, payload.group)
     try {
-      const response = await this.request(context, url, "delete")
-      if (response.status === 204) {
-        // Deleted.
-        // Remove from current pointer.
-        if (context.state.currentId == id) {
-          context.commit("currentId", null)
-        }
-        // Remove from pages.
-        for (const key in context.state.pages) {
-          const pages = context.state.pages[key]
-          let afterDelete = false
-          for (let i = 0; i < pages.length; i++) {
-            // Remove the id from the page
-            if (pages[i].includes(id)) {
-              pages[i] = pages[i].filter(rid => rid != id)
-              afterDelete = true
+      await this.request(context, url, "delete")
+      // Remove from current pointer.
+      if (context.state.currentId == id) {
+        context.commit("currentId", null)
+      }
+      // Remove from pages.
+      for (const key in context.state.pages) {
+        const pages = context.state.pages[key]
+        let afterDelete = false
+        for (let i = 0; i < pages.length; i++) {
+          // Remove the id from the page
+          if (pages[i].includes(id)) {
+            pages[i] = pages[i].filter(rid => rid != id)
+            afterDelete = true
+          }
+          // From the altered page onwards, shift one id to the left.
+          if (afterDelete) {
+            if (i < pages.length - 1 && pages[i+1].length > 0) {
+              pages[i].push(pages[i+1].shift() as string)
             }
-            // From the altered page onwards, shift one id to the left.
-            if (afterDelete) {
-              if (i < pages.length - 1 && pages[i+1].length > 0) {
-                pages[i].push(pages[i+1].shift() as string)
-              }
-              context.commit("setPageIds", {key, page: i, ids: pages[i]})
-            }
+            context.commit("setPageIds", {key, page: i, ids: pages[i]})
           }
         }
-        // Remove from store.
-        context.commit("removeResource", id)
-      } else {
-        throw new KError(KErrorCode.UnknownServer, "Got unexpected response status from server: " + response.status, response);
       }
+      // Remove from store.
+      context.commit("removeResource", id)
     } catch (error) {
-      throw Resources.getKError(error as AxiosError);
+      throw KError.getKError(error);
     }  
   }
 

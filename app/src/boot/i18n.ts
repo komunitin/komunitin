@@ -1,8 +1,9 @@
 import { boot } from "quasar/wrappers";
-import {createI18n} from "vue-i18n";
+import { createI18n } from "vue-i18n";
 import DefaultMessages from "src/i18n/en-us/index.json";
 import langs, {LangName} from "src/i18n";
-import { LocalStorage, QVueGlobals } from "quasar";
+import { QVueGlobals } from "quasar";
+import LocalStorage from "../plugins/LocalStorage";
 import { formatRelative, Locale } from "date-fns";
 
 declare module "@vue/runtime-core" {
@@ -54,9 +55,9 @@ function normalizeLocale(locale: string): LangName {
 /**
  * Return the user locale based on previous session or browser.
  */
-function getCurrentLocale($q: QVueGlobals): string {
+async function getCurrentLocale($q: QVueGlobals) {
   // Option 1: Locale saved in LocalStorage from previous session.
-  const savedLang = LocalStorage.getItem(LOCALE_KEY);
+  const savedLang = await LocalStorage.getItem(LOCALE_KEY);
   if (savedLang !== null) {
     return savedLang as string;
   }
@@ -99,9 +100,9 @@ export default boot(async ({ app }) => {
     await Promise.all([
       setI18nLocale(lang),
       setQuasarLang(lang),
-      setDateLocale(lang)
+      setDateLocale(lang),
+      LocalStorage.set(LOCALE_KEY, locale)
     ]);
-    localStorage.setItem(LOCALE_KEY, locale);
   };
 
   // Add date filter to Vue.
@@ -111,6 +112,7 @@ export default boot(async ({ app }) => {
     })
 
   // Initially set the current locale.
-  app.config.globalProperties.$setLocale(getCurrentLocale(app.config.globalProperties.$q));
+  const locale = await getCurrentLocale(app.config.globalProperties.$q)
+  app.config.globalProperties.$setLocale(locale);
 });
 
