@@ -153,6 +153,7 @@
   "offerPublished": "Oferta publicada!",
   "deleteOffer": "Quieres borrar la oferta {name}?",
   "delete": "Borrar",
+  "title": "Título",
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectos"
 }

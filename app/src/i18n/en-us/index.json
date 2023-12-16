@@ -156,7 +156,7 @@
   "offerPublished": "Your offer has been published!",
   "deleteOffer": "Do you want to delete the offer {name}?",
   "delete": "Delete",
-  
+
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
   "ErrorServerNoResponse": "Error: Server do not respond",

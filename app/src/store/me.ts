@@ -2,8 +2,7 @@ import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/koptions";
 import KError, { KErrorCode } from "src/KError";
-import { Notifications } from "src/plugins/Notifications";
-import {i18n} from '../boot/i18n'
+import { notifications } from "src/plugins/Notifications";
 import locate from "src/plugins/Location";
 import {Member, NotificationsSubscription} from "./model"
 
@@ -23,6 +22,7 @@ export interface UserState {
   userInfo?: User;
   tokens?: AuthData;
   myUserId?: string;
+  lang?: string;
   /**
    * Current location, provided by device.
    */
@@ -107,6 +107,7 @@ export default {
     accountId: undefined,
     location: undefined,
     subscription: undefined,
+    lang: undefined
   } as UserState),
   getters: {
     isLoggedIn: state =>
@@ -140,6 +141,7 @@ export default {
     myUserId: (state, myUserId) => (state.myUserId = myUserId),
     location: (state, location) => (state.location = location),
     subscription: (state, subscription) => (state.subscription = subscription),
+    lang: (state, lang) => (state.lang = lang)
   },
 
   actions: {
@@ -208,13 +210,11 @@ export default {
     */
     subscribe: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
-        const notifications = new Notifications();
-
         const subscription = await notifications.subscribe(
           context.getters.myUser, 
           context.getters.myMember,
           {
-            locale: i18n.global.locale.value
+            locale: context.state.lang as string
           },
           context.getters.accessToken);
         context.commit("subscription", subscription);
@@ -225,7 +225,6 @@ export default {
      */
     unsubscribe: async (context: ActionContext<UserState, never>) => {
       if (context.state.subscription) {
-        const notifications = new Notifications();
         await notifications.unsubscribe(context.state.subscription, context.getters.accessToken);
         context.commit("subscription", undefined);
       }

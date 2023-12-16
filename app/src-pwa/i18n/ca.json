@@ -1,0 +1,14 @@
+{
+  "newOfferFrom": "Nova oferta de {name}",
+  "newNeedFrom": "Nova necessitat de {name}",
+  "newMemberInGroup": "{name} s'ha unit a {group}",
+  "newMemberLocation": "Nou membre de {location}. Vés el seu perfil",
+  "newPurchase": "Nova compra",
+  "newPurchaseText": "Compra de {amount} a {name}.",
+  "paymentPending": "Nou pagament pendent",
+  "paymentPendingText": "Tens un nou pagament de {amount} per a {name}. Sisplau accepta o rebutja el pagament el més aviat possible.",
+  "paymentReceived": "Pagament rebut",
+  "paymentReceivedText": "Has rebut {amount} de {name}.",
+  "paymentRejected": "Pagament rebutjat",
+  "paymentRejectedText": "{name} ha rebutjat un pagament de {amount}."
+}

@@ -78,6 +78,7 @@ module.exports = configure(function(ctx) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
+      transpile: false,
       scopeHoisting: true,
       vueRouterMode: "history", // available values: 'hash', 'history'
       showProgress: true,
@@ -103,11 +104,13 @@ module.exports = configure(function(ctx) {
         chain
           .plugin('webpack-ignore-plugin')
           .use(IgnorePlugin, [{ resourceRegExp: /^leaflet$/}])
+        
         /*
         chain
           .plugin('statoscope-webpack-plugin')
           .use(StatoscopeWebpackPlugin, [{saveReportTo: "statoscope-report-[name]-[hash].html"}])
-        */
+          */
+        
 
       },
       env: environment
