@@ -1,0 +1,14 @@
+{
+  "newOfferFrom": "Nueva oferta de {name}",
+  "newNeedFrom": "Nueva necesidad de {name}",
+  "newMemberInGroup": "{name} se ha unido a {group}",
+  "newMemberLocation": "Nuevo miembro des de {location}. Mira su perfil.",
+  "newPurchase": "Nueva compra",
+  "newPurchaseText": "Compra de {amount} a {name}.",
+  "paymentPending": "Nuevo pago pendiente",
+  "paymentPendingText": "Tienes un nuevo pago de {amount} para {name}. Por favor acepta o rechaza la transacción lo más pronto posible.",
+  "paymentReceived": "Pago recibido",
+  "paymentReceivedText": "Has recibido {amount} de {name}.",
+  "paymentRejected": "Pago rechazado",
+  "paymentRejectedText": "{name} ha rechazado un pago de {amount}."
+}

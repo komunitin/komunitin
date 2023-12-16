@@ -67,7 +67,7 @@ async function getCurrentLocale($q: QVueGlobals) {
 }
 
 // Default export for Quasar boot files.
-export default boot(async ({ app }) => {
+export default boot(async ({ app, store }) => {
   // Install 'vue-i18n' plugin.
   app.use(i18n);
   
@@ -97,6 +97,8 @@ export default boot(async ({ app }) => {
     }
 
     const lang = normalizeLocale(locale);
+    store.commit("lang", lang)
+    
     await Promise.all([
       setI18nLocale(lang),
       setQuasarLang(lang),

@@ -10,5 +10,5 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/komunitin/jsonapi v1.0.1-0.20211229153711-3ec5fff38921
 	github.com/rs/xid v1.3.0
-	golang.org/x/text v0.3.8
+	golang.org/x/text v0.3.8 // indirect
 )

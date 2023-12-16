@@ -1,7 +1,7 @@
 import { defineComponent } from 'vue';
 import { flushPromises, mount, MountingOptions, VueWrapper } from "@vue/test-utils";
 
-import createStore from 'src/store/index';
+import store from 'src/store/index';
 import createRouter from 'src/router/index';
 
 import {Quasar, LocalStorage, Notify, Loading} from 'quasar';
@@ -61,8 +61,6 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
     auth.processTokenResponse(mockToken(Auth.SCOPES));
   }
 
-  // Create store and router
-  const store = createStore();
   // Set the router mode to "history", as we have in our Quasar config file.
   process.env.VUE_ROUTER_MODE = "history";
   const router = createRouter({store});

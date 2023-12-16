@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, MessagePayload, Messaging, onMessage } from "firebase/messaging"
+import { FirebaseApp, initializeApp } from "firebase/app";
+import { getMessaging, getToken, Messaging } from "firebase/messaging"
 import { KOptions } from "../boot/koptions"
 
 import { Member, NotificationsSubscription, User } from "src/store/model";
@@ -7,21 +7,25 @@ import KError, { KErrorCode } from "src/KError";
 
 import firebaseConfig from "./FirebaseConfig";
 
-import { i18n } from "src/boot/i18n";
-
 export interface SubscriptionSettings {
   locale: string
 }
 
-export class Notifications {
+class Notifications {
 
+  private app: FirebaseApp | null = null
+  private messaging: Messaging | null = null
   /**
    * @returns The Firebase Messaging class, to be called from the main thread.
    */
-  private getMessaging() : Messaging {
-    const app = initializeApp(firebaseConfig);
-    const messaging = getMessaging(app);
-    return messaging;
+  public getMessaging() : Messaging {
+    if (this.app === null) {
+      this.app = initializeApp(firebaseConfig)
+    }
+    if (this.messaging === null) {
+      this.messaging = getMessaging(this.app)
+    }
+    return this.messaging;
   }
 
   /**
@@ -80,12 +84,7 @@ export class Notifications {
           Authorization: `Bearer ${accessToken}` 
         }
       })
-      const data = await response.json()
-
-      /**
-       * Push Message handler.
-       */
-      onMessage(messaging, this.onMessage)
+      const data = await response.json();
 
       return data.data
 
@@ -106,32 +105,6 @@ export class Notifications {
       }
     })
   }
-
-
-  private async onMessage(payload: MessagePayload) {
-    // Data push message.
-    /*if (payload.data) {
-      console.log("Message received. ", JSON.stringify(payload.data))
-    }*/
-    // Notification push message.
-    if (payload.notification && payload.notification.title) {
-      const actions = []
-      if (payload.fcmOptions?.link) {
-        actions.push({
-          label: i18n.global.t('View'),
-          color: "white",
-          handler: () => {
-            window.location.href = payload.fcmOptions?.link as string
-          },
-        })
-      }
-      const { Notify } = await import("quasar") 
-      Notify.create({
-        type: "info",
-        message: payload.notification?.body,
-        timeout: 0,
-        actions
-      });
-    }
-  }
 }
+
+export const notifications = new Notifications()

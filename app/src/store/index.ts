@@ -79,40 +79,37 @@ const transfers = new Resources<Transfer, unknown>("transfers", accountingUrl);
  * async/await or return a Promise which resolves
  * with the Store instance.
  */
-export default function(/* { ssrContext } */): Store<never> {
-  const store = createStore({
-    modules: {
-      // Logged-in user module
-      me,
-      // User interface module.
-      ui,
 
-      // Resource modules:
+export default createStore({
+  modules: {
+    // Logged-in user module
+    me,
+    // User interface module.
+    ui,
 
-      // Remark: The names of the resource modules must
-      // be equal to the type property of the resources they
-      // represent.
+    // Resource modules:
 
-      // Social API resource modules.
-      users,
-      groups,
-      contacts,
-      members,
-      offers,
-      needs,
-      categories,
-      // Accounting API resource modules.
-      currencies,
-      accounts,
-      transfers
-    },
-    // enable strict mode (adds overhead!) for dev mode only
-    strict: process.env.DEV === "true",
-    plugins: [createPersistPlugin("komunitin")]
-  });
+    // Remark: The names of the resource modules must
+    // be equal to the type property of the resources they
+    // represent.
 
-  return store;
-}
+    // Social API resource modules.
+    users,
+    groups,
+    contacts,
+    members,
+    offers,
+    needs,
+    categories,
+    // Accounting API resource modules.
+    currencies,
+    accounts,
+    transfers
+  },
+  // enable strict mode (adds overhead!) for dev mode only
+  strict: process.env.DEV === "true",
+  plugins: [createPersistPlugin("komunitin")]
+});
 
 declare module '@vue/runtime-core' {
   interface State {

@@ -78,8 +78,6 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 			http.Error(w, "Missing 'user' relationship", http.StatusBadRequest)
 			return
 		}
-		// TODO authorize request.
-
 		data, err := json.Marshal(event.Data)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -95,6 +93,7 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 			"data":   data,
 		}
 
+		// TODO: delete this as transfer is not used anymore.
 		if event.Transfer != nil {
 			value["transfer"] = event.Transfer.Href
 		}
