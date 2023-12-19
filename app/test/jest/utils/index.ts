@@ -43,14 +43,24 @@ const mockGeolocation = {
 Object.defineProperty(global.navigator, 'geolocation', {value: mockGeolocation});
 
 // Mock Notification.
-const mockNotification = {
-  requestPermission: jest.fn().mockImplementation((success) => Promise.resolve(success(false))),
-  permission: "default"
+class MockNotification {
+  public static requestPermission = jest.fn().mockImplementation((success) => Promise.resolve(success(false)));
+  public static permission = "default";
+
+  constructor(public title: string, public options?: NotificationOptions) {};
+  public addEventListener = jest.fn();
 }
-Object.defineProperty(global, 'Notification', {value: mockNotification})
+
+Object.defineProperty(global, 'Notification', {value: MockNotification})
+jest.mock("../../../src/plugins/Notifications");
+jest.mock("firebase/messaging");
 
 // Set a value on scrollHeight property so QInfiniteScrolling doesn't load all resources.
 Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {configurable: true, value: 1500});
+Object.defineProperty(SVGSVGElement.prototype, "pauseAnimations", {value: jest.fn()});
+Object.defineProperty(SVGSVGElement.prototype, "unpauseAnimations", {value: jest.fn()});
+
+
 
 export async function mountComponent(component: ReturnType<typeof defineComponent>, options?: MountingOptions<any, any> & {login?: true}): Promise<VueWrapper> {
   LocalStorage.clear();

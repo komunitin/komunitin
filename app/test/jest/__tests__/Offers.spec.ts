@@ -80,6 +80,7 @@ describe("Offers", () => {
     await wrapper.vm.$wait();
     
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/offers/The-Offer/preview");
+    await wrapper.vm.$nextTicks();
     const text = wrapper.text();
     expect(text).toContain("This offer is a mirage.");
     expect(text).toContain("Updated today");

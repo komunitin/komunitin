@@ -237,7 +237,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (method == undefined) {
       method = "get";
     }
-    const request = async () => fetch(this.baseUrl + url, {
+    // Resolve URL. Usually we're given relative urls except for the case when retreiving
+    // the next page of a list, where we're given the absolute url directly from the API.
+    url = url.startsWith("http") ? url : this.baseUrl + url;
+
+    const request = async () => fetch(url, {
       method: method?.toUpperCase() ?? "GET",
       body: data ? JSON.stringify(data) : undefined,
       credentials: "include",
@@ -247,6 +251,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         Authorization: `Bearer ${context.rootGetters['accessToken']}`
       }
     })
+    
     try {
       let response = await request()
       if (!response.ok && response.status == 401) {
