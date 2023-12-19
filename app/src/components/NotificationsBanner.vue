@@ -87,6 +87,7 @@ onBeforeMount(async () => {
   onMessage(notifications.getMessaging(), async (payload) => {
     const {title, options} = await notification(payload)
     const noti = new Notification(title, options)
+    
     noti.addEventListener('click', function() {
       if (noti.data.url) {
         router.push(noti.data.url)
