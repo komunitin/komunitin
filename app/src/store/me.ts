@@ -4,7 +4,8 @@ import { KOptions } from "src/boot/koptions";
 import KError, { KErrorCode } from "src/KError";
 import { notifications } from "src/plugins/Notifications";
 import locate from "src/plugins/Location";
-import {Member, NotificationsSubscription} from "./model"
+import {Member, NotificationsSubscription, UserSettings} from "./model"
+import { setLocale } from "../boot/i18n";
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -22,7 +23,6 @@ export interface UserState {
   userInfo?: User;
   tokens?: AuthData;
   myUserId?: string;
-  lang?: string;
   /**
    * Current location, provided by device.
    */
@@ -52,7 +52,7 @@ async function loadUserData(accessToken: string,
   // but we can't use it right here because we still don't know the group code, which
   // is necessary for this process to work. So we manually do the twy calls.
   await dispatch("users/load", {
-    include: "members,members.group"
+    include: "members,members.group,settings"
   });
   const user = rootGetters["users/current"];
 
@@ -76,6 +76,8 @@ async function loadUserData(accessToken: string,
     const member = getters["myMember"] as Member
     commit("location", member.attributes.location.coordinates)
   }
+  const lang = user.settings.attributes.language
+  setLocale(lang)
 }
 
 /**
@@ -107,7 +109,6 @@ export default {
     accountId: undefined,
     location: undefined,
     subscription: undefined,
-    lang: undefined
   } as UserState),
   getters: {
     isLoggedIn: state =>
@@ -141,7 +142,6 @@ export default {
     myUserId: (state, myUserId) => (state.myUserId = myUserId),
     location: (state, location) => (state.location = location),
     subscription: (state, subscription) => (state.subscription = subscription),
-    lang: (state, lang) => (state.lang = lang)
   },
 
   actions: {
@@ -210,14 +210,19 @@ export default {
     */
     subscribe: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
-        const subscription = await notifications.subscribe(
-          context.getters.myUser, 
-          context.getters.myMember,
-          {
-            locale: context.state.lang as string
-          },
-          context.getters.accessToken);
-        context.commit("subscription", subscription);
+        const userSettings = context.getters.myUser?.settings as UserSettings
+        if (userSettings) {
+          const subscription = await notifications.subscribe(
+            context.getters.myUser, 
+            context.getters.myMember,
+            {
+              locale: userSettings.attributes.language,
+              ...userSettings.attributes.notifications
+            },
+            context.getters.accessToken);
+          context.commit("subscription", subscription);
+
+        }
       }
     },
     /**
