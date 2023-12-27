@@ -137,7 +137,23 @@ export interface User extends ResourceObject {
     updated: string,
   },
   relationships: {
+    settings: RelatedResource,
     members: RelatedLinkedCollection
+  }
+}
+
+export interface UserSettings extends ResourceObject {
+  attributes: {
+    language: string
+    notifications: {
+      myAccount: boolean
+      newNeeds: boolean
+      newOffers: boolean
+      newMembers: boolean
+    }
+  },
+  relationships: {
+    user: RelatedResource
   }
 }
 
@@ -290,6 +306,16 @@ export interface Account extends ResourceObject {
   };
   relationships: {
     currency: RelatedResource;
+    settings?: RelatedResource;
+  }
+}
+
+export interface AccountSettings extends ResourceObject {
+  attributes: {
+    acceptPaymentsAutomatically: boolean
+  }
+  relationships: {
+    account: RelatedResource
   }
 }
 
