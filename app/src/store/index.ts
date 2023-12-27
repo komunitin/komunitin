@@ -3,13 +3,15 @@ import { Resources, ResourcesState } from "./resources";
 import { KOptions } from "src/boot/koptions";
 import {
   User,
+  UserSettings,
   Group,
   Contact,
   Offer,
   Need,
   Category,
   Currency,
-  Account,  
+  Account,
+  AccountSettings,
   Member,
   Transfer
 } from "src/store/model";
@@ -17,6 +19,7 @@ import {
 import me, { UserState } from "./me";
 import ui, { UIState } from "./ui";
 import createPersistPlugin from "./persist";
+import KError, { KErrorCode } from "src/KError";
 
 // Build modules for Social API:
 const socialUrl = KOptions.url.social;
@@ -36,6 +39,11 @@ const users = new (class extends Resources<User, unknown> {
   collectionEndpoint = () => "/users";
   resourceEndpoint = () => "/users/me";
 })("users", socialUrl);
+
+const userSettings = new (class extends Resources<UserSettings, unknown> {
+  collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "User settings cannot be listed");};
+  resourceEndpoint = () => "/users/me/settings";
+})("user-settings", socialUrl);
 
 // Build modules for Accounting API:
 const accountingUrl = KOptions.url.accounting;
@@ -69,6 +77,11 @@ const accounts = new (class extends Resources<Account, unknown> {
   })
 })("accounts", accountingUrl);
 
+const accountSettings = new (class extends Resources<AccountSettings, unknown> {
+  collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "Account settings cannot be listed");};
+  resourceEndpoint = (code: string, groupCode: string) => `/${groupCode}/accounts/${code}/settings`;
+})("account-settings", accountingUrl)
+
 const transfers = new Resources<Transfer, unknown>("transfers", accountingUrl);
 
 /*
@@ -95,6 +108,7 @@ export default createStore({
 
     // Social API resource modules.
     users,
+    "user-settings": userSettings,
     groups,
     contacts,
     members,
@@ -104,6 +118,7 @@ export default createStore({
     // Accounting API resource modules.
     currencies,
     accounts,
+    "account-settings": accountSettings,
     transfers
   },
   // enable strict mode (adds overhead!) for dev mode only
