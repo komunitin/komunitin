@@ -29,6 +29,11 @@
                 :disable="true"
               />
               <menu-item
+                icon="settings"
+                :title="$t('settings')"
+                to="/settings"
+              />
+              <menu-item
                 ref="logout"
                 icon="logout"
                 :title="$t('logout')"
