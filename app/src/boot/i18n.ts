@@ -2,14 +2,14 @@ import { boot } from "quasar/wrappers";
 import { createI18n } from "vue-i18n";
 import DefaultMessages from "src/i18n/en-us/index.json";
 import langs, {LangName} from "src/i18n";
-import { QVueGlobals } from "quasar";
+import { useQuasar, Quasar, QSingletonGlobals } from "quasar";
 import LocalStorage from "../plugins/LocalStorage";
 import { formatRelative, Locale } from "date-fns";
+import { ref, watch } from "vue";
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
     $formatDate: (date: string) => string;
-    $setLocale: (locale: string) => Promise<void>;
   }
 }
 
@@ -52,10 +52,12 @@ function normalizeLocale(locale: string): LangName {
   return (locale in langs) ? locale as LangName : DEFAULT_LANG;
 }
 
+let globalLocale = DEFAULT_LANG
+
 /**
  * Return the user locale based on previous session or browser.
  */
-async function getCurrentLocale($q: QVueGlobals) {
+async function getCurrentLocale($q: QSingletonGlobals) {
   // Option 1: Locale saved in LocalStorage from previous session.
   const savedLang = await LocalStorage.getItem(LOCALE_KEY);
   if (savedLang !== null) {
@@ -66,55 +68,74 @@ async function getCurrentLocale($q: QVueGlobals) {
   return normalizeLocale(quasarLang);
 }
 
+/**
+ * This function sets the current locale for the app. Use it from outside a .vue file.
+ * Otherwise use the useLocale composable. 
+ * 
+ * Note that this function does not update the user.settings.language attribute.
+ */
+export async function setLocale(locale: string) {
+  const lang = normalizeLocale(locale);
+  await setCurrentLocale(Quasar, lang)
+}
+
+async function setCurrentLocale($q: QSingletonGlobals, locale: string) {
+  globalLocale = locale
+  // Set VueI18n lang.
+  const setI18nLocale = async (locale: LangName) => {
+    if (i18n.global.locale.value !== locale) {
+      const definition = langs[locale]
+      const messages = await definition.loadMessages();
+      i18n.global.setLocaleMessage(locale, messages);
+      i18n.global.locale.value = locale;
+    }
+  }
+
+  // Set Quasar lang.
+  const setQuasarLang = async (locale: LangName) => {
+    const messages = await langs[locale].loadQuasar()
+    $q.lang.set(messages);
+  }
+
+  // Set date-fns lang.
+  const setDateLocale = async (locale: LangName) => {
+    dateLocale = await langs[locale].loadDateFNS()
+  }
+
+  const lang = normalizeLocale(locale);
+  
+  await Promise.all([
+    setI18nLocale(lang),
+    setQuasarLang(lang),
+    setDateLocale(lang),
+    LocalStorage.set(LOCALE_KEY, locale)
+  ]);
+}
+
+/**
+ * Use this composable to implement language chooser components.
+ */
+export function useLocale() {
+  const locale = ref(globalLocale)
+  const $q = useQuasar();    
+  watch(locale, async (locale) => {
+    await setCurrentLocale($q, locale)
+  })
+  return locale;
+}
+
+
 // Default export for Quasar boot files.
-export default boot(async ({ app, store }) => {
+export default boot(async ({ app }) => {
   // Install 'vue-i18n' plugin.
   app.use(i18n);
-  
-  /**
-   * Asynchronously sets the current locale.
-   * **/  
-  app.config.globalProperties.$setLocale = async function(locale: string) {
-    // Set VueI18n lang.
-    const setI18nLocale = async (locale: LangName) => {
-      if (i18n.global.locale.value !== locale) {
-        const definition = langs[locale]
-        const messages = await definition.loadMessages();
-        i18n.global.setLocaleMessage(locale, messages);
-        i18n.global.locale.value = locale;
-      }
-    }
-
-    // Set Quasar lang.
-    const setQuasarLang = async (locale: LangName) => {
-      const messages = await langs[locale].loadQuasar()
-      this.$q.lang.set(messages);
-    }
-
-    // Set date-fns lang.
-    const setDateLocale = async (locale: LangName) => {
-      dateLocale = await langs[locale].loadDateFNS()
-    }
-
-    const lang = normalizeLocale(locale);
-    store.commit("lang", lang)
-    
-    await Promise.all([
-      setI18nLocale(lang),
-      setQuasarLang(lang),
-      setDateLocale(lang),
-      LocalStorage.set(LOCALE_KEY, locale)
-    ]);
-  };
 
   // Add date filter to Vue.
   app.config.globalProperties.$formatDate = (date: string) =>
-    formatRelative(new Date(date), new Date(), {
-      locale: dateLocale
-    })
+    formatRelative(new Date(date), new Date(), { locale: dateLocale })
 
-  // Initially set the current locale.
-  const locale = await getCurrentLocale(app.config.globalProperties.$q)
-  app.config.globalProperties.$setLocale(locale);
+  // Initially set the current locale.ç
+  const lang = await getCurrentLocale(Quasar)
+  await setCurrentLocale(Quasar, lang)
 });
 

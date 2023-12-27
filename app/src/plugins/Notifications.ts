@@ -1,15 +1,14 @@
 import { FirebaseApp, initializeApp } from "firebase/app";
 import { getMessaging, getToken, Messaging } from "firebase/messaging"
 import { KOptions } from "../boot/koptions"
+import {UserSettings} from "../store/model"
 
 import { Member, NotificationsSubscription, User } from "src/store/model";
 import KError, { KErrorCode } from "src/KError";
 
 import firebaseConfig from "./FirebaseConfig";
 
-export interface SubscriptionSettings {
-  locale: string
-}
+export type SubscriptionSettings = UserSettings['attributes']['notifications'] & { locale: string }
 
 class Notifications {
 
