@@ -8,11 +8,17 @@ import { filter } from "./ServerUtils"
 import { ContactNetworks } from "../components/SocialNetworks";
 import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
+import { inflections } from "inflected"
+
 
 const urlSocial = KOptions.url.social;
 const urlAccounting = KOptions.url.accounting;
 
 const contactTypes = Object.keys(ContactNetworks);
+
+inflections("en", function (inflect) {
+  inflect.irregular("userSettings", "userSettings")
+})
 
 function fakeMarkdown(paragraphs: number): string {
   let text = "";
@@ -177,11 +183,18 @@ export default {
           }
         }
       }
-    })
+    }),
+    userSettings: ApiSerializer.extend({
+      selfLink: () => urlSocial + "/users/me/settings"
+    }),
   },
   models: {
     user: Model.extend({
-      members: hasMany()
+      members: hasMany(),
+      settings: belongsTo("userSettings")
+    }),
+    userSettings: Model.extend({
+      user: belongsTo()
     }),
     group: Model.extend({
       members: hasMany(),
@@ -218,7 +231,16 @@ export default {
   factories: {
     user: Factory.extend({
       created: () => faker.date.past(),
-      updated: () => faker.date.past()
+      updated: () => faker.date.past(),
+    }),
+    userSettings: Factory.extend({
+      language: "en-us",
+      notifications: {
+        myAccount: true,
+        newNeeds: true,
+        newOffers: true,
+        newMembers: true
+      }
     }),
     group: Factory.extend({
       code: (i: number) => `GRP${i}`,
@@ -344,9 +366,12 @@ export default {
         }
       }
     });
-    // Create user.
+    // Create user for the first member.
     const member = (server.schema as any).members.first();
-    server.create("user", { members: [member] } as any);
+    server.create("user", {
+      members: [member],
+      settings: server.create("userSettings")
+    } as any);
   },
   routes(server: Server) {
     // All groups
@@ -466,10 +491,22 @@ export default {
       return undefined as any
     })
 
-
     // Logged-in User
     server.get(urlSocial + "/users/me", (schema: any) => {
       return schema.users.first();
+    });
+
+    // User settings
+    server.get(urlSocial + "/users/me/settings", (schema: any) => {
+      return schema.userSettings.first();
+    });
+
+    // Edit user settings
+    server.patch(urlSocial + "/users/me/settings", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const settings = schema.userSettings.first();
+      settings.update(body.data.attributes);
+      return settings;
     });
   }
 };
