@@ -30,8 +30,8 @@ describe("Transactions", () => {
     await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62/transactions");
     // Further wait to load members.
-    await wrapper.vm.$wait();
     await flushPromises();
+    await wrapper.vm.$wait();
     const transactions = wrapper.getComponent(TransactionList).findAllComponents(MemberHeader)
     expect(transactions.length).toBe(20);
     const first = transactions[0];
