@@ -118,7 +118,6 @@ export default {
           const account = server.create("account", {
             code: accountCode,
             currency: server.schema.currencies.findBy({ code }),
-            settings: server.create("accountSettings"),
           });
           member.update({ account });
         }
@@ -141,6 +140,10 @@ export default {
         currency
       });
     }
+    // Generate account settings.
+    server.schema.accounts.all().models.forEach((account: any) => {
+      server.create("accountSettings", {account});
+    })
   },
   routes(server: Server) {
     // Single currency

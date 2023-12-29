@@ -368,10 +368,11 @@ export default {
     });
     // Create user for the first member.
     const member = (server.schema as any).members.first();
-    server.create("user", {
-      members: [member],
-      settings: server.create("userSettings")
+    const user = server.create("user", {
+      members: [member]
     } as any);
+    // Create user settings.
+    server.create("userSettings", { user } as any);
   },
   routes(server: Server) {
     // All groups

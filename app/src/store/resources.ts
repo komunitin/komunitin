@@ -264,7 +264,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       if (response.status == 204) {
         return null
       } else {
-        return await response.json()
+        const json = await response.json()
+        return json
       }
     } catch (error) {
       throw KError.getKError(error);
