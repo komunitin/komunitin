@@ -26,13 +26,14 @@ const (
 
 type Event struct {
 	// The type of the event
-	Id       string                  `jsonapi:"primary,events"`
-	Name     string                  `jsonapi:"attr,name"`
-	Source   string                  `jsonapi:"attr,source"`
-	Code     string                  `jsonapi:"attr,code"`
-	Time     time.Time               `jsonapi:"attr,time,iso8601"`
-	Data     map[string]interface{}  `jsonapi:"attr,data"`
-	User     *model.ExternalUser     `jsonapi:"relation,user"`
+	Id     string                 `jsonapi:"primary,events"`
+	Name   string                 `jsonapi:"attr,name"`
+	Source string                 `jsonapi:"attr,source"`
+	Code   string                 `jsonapi:"attr,code"`
+	Time   time.Time              `jsonapi:"attr,time,iso8601"`
+	Data   map[string]interface{} `jsonapi:"attr,data"`
+	User   *model.ExternalUser    `jsonapi:"relation,user"`
+	// Deprecated
 	Transfer *model.ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
 }
 

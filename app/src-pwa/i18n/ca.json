@@ -10,5 +10,9 @@
   "paymentReceived": "Pagament rebut",
   "paymentReceivedText": "Has rebut {amount} de {name}.",
   "paymentRejected": "Pagament rebutjat",
-  "paymentRejectedText": "{name} ha rebutjat un pagament de {amount}."
+  "paymentRejectedText": "{name} ha rebutjat un pagament de {amount}.",
+  "offerExpired": "La teva oferta ha caducat",
+  "offerExpiredText": "La teva oferta '{title}' ha caducat i ja no és visible per als altres membres. Pots renovar-la per a que torni a ser visible.",
+  "needExpired": "La teva necessitat ha caducat",
+  "needExpiredText": "La teva necessitat '{content}' ha caducat i ja no és visible per als altres membres. Pots renovar-la o borrar-la si ja ha estat satisfeta."
 }

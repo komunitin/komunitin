@@ -17,13 +17,24 @@ import (
 	"github.com/komunitin/komunitin/notifications/store"
 )
 
+// Event names
 const (
 	TransferCommitted = "TransferCommitted"
 	TransferPending   = "TransferPending"
 	TransferRejected  = "TransferRejected"
 	NeedPublished     = "NeedPublished"
+	NeedExpired       = "NeedExpired"
 	OfferPublished    = "OfferPublished"
+	OfferExpired      = "OfferExpired"
 	MemberJoined      = "MemberJoined"
+)
+
+// Event types (used for notification preferences)
+const (
+	MyAccount  = "myAccount"
+	NewOffers  = "newOffers"
+	NewNeeds   = "newNeeds"
+	NewMembers = "newMembers"
 )
 
 type TransferEventDestination int
@@ -84,11 +95,15 @@ func handleEvent(ctx context.Context, value map[string]interface{}) error {
 	case TransferRejected:
 		return handleTransferEvent(ctx, value, Payee)
 	case NeedPublished:
-		return handleGroupEvent(ctx, value)
+		return handleGroupEvent(ctx, value, NewNeeds)
 	case OfferPublished:
-		return handleGroupEvent(ctx, value)
+		return handleGroupEvent(ctx, value, NewOffers)
 	case MemberJoined:
-		return handleGroupEvent(ctx, value)
+		return handleGroupEvent(ctx, value, NewMembers)
+	case NeedExpired:
+		return handleMemberEvent(ctx, value)
+	case OfferExpired:
+		return handleMemberEvent(ctx, value)
 	default:
 		log.Printf("Unkown event type %v\n", event)
 	}
@@ -114,6 +129,15 @@ func buildMessageData(value map[string]interface{}) (map[string]string, error) {
 	return data, nil
 }
 
+func handleMemberEvent(ctx context.Context, value map[string]interface{}) error {
+	data, err := buildMessageData(value)
+	if err != nil {
+		return err
+	}
+	members := []string{data["member"]}
+	return notifyMembers(ctx, members, "", data, MyAccount)
+}
+
 func handleTransferEvent(ctx context.Context, value map[string]interface{}, dest TransferEventDestination) error {
 	data, err := buildMessageData(value)
 	if err != nil {
@@ -128,11 +152,11 @@ func handleTransferEvent(ctx context.Context, value map[string]interface{}, dest
 	}
 
 	// Notify members
-	return notifyMembers(ctx, members, value["user"].(string), data)
+	return notifyMembers(ctx, members, value["user"].(string), data, MyAccount)
 
 }
 
-func handleGroupEvent(ctx context.Context, value map[string]interface{}) error {
+func handleGroupEvent(ctx context.Context, value map[string]interface{}, eventType string) error {
 
 	// Get group members
 	code := value["code"].(string)
@@ -152,10 +176,10 @@ func handleGroupEvent(ctx context.Context, value map[string]interface{}) error {
 		return err
 	}
 
-	return notifyMembers(ctx, memberIds, excludeUser, data)
+	return notifyMembers(ctx, memberIds, excludeUser, data, eventType)
 }
 
-func notifyMembers(ctx context.Context, memberIds []string, excludeUser string, data map[string]string) error {
+func notifyMembers(ctx context.Context, memberIds []string, excludeUser string, data map[string]string, eventType string) error {
 	tokens := []string{}
 
 	for _, member := range memberIds {
@@ -164,7 +188,10 @@ func notifyMembers(ctx context.Context, memberIds []string, excludeUser string, 
 			return err
 		}
 		for _, sub := range subscriptions {
-			tokens = append(tokens, sub.Token)
+			// Check if user wants to receive notifications of this type.
+			if sub.Settings[eventType] == true {
+				tokens = append(tokens, sub.Token)
+			}
 		}
 	}
 
