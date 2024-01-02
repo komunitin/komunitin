@@ -10,5 +10,9 @@
   "paymentReceived": "Pago recibido",
   "paymentReceivedText": "Has recibido {amount} de {name}.",
   "paymentRejected": "Pago rechazado",
-  "paymentRejectedText": "{name} ha rechazado un pago de {amount}."
+  "paymentRejectedText": "{name} ha rechazado un pago de {amount}.",
+  "offerExpired": "Tu oferta ha caducado",
+  "offerExpiredText": "Tu oferta '{title}' ha caducado y ya no es visible para los otros miembros. Puedes renovarla para que vuelva a ser visible.",
+  "needExpired": "Tu necesidad ha caducado",
+  "needExpiredText": "Tu necesidad '{content}' ha caducado y ya no es visible para los otros miembros. Puedes renovarla o borrarla si ya ha sido satisfecha."
 }

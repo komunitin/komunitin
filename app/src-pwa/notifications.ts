@@ -2,6 +2,10 @@ import { Store } from 'vuex'
 import { translator } from './i18n'
 import { MessagePayload } from 'firebase/messaging/sw'
 
+function truncate(text: string, length: number) {
+  return (text.length <= length) ? text : text.slice(0, length - 2) + '...'
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function notificationBuilder(store: Store<any>) {
   return async (payload: MessagePayload) => {
@@ -105,6 +109,40 @@ export function notificationBuilder(store: Store<any>) {
           options = {
             body: need.attributes.content,
             icon: need.member.attributes.image || "/icons/icon-512x512.png",
+            image: need.attributes.images && need.attributes.images.length ? need.attributes.images[0] : undefined,
+            data: {
+              url: `/groups/${group}/needs/${need.attributes.code}`
+            }
+          }
+          break;
+        }
+        case "OfferExpired": {
+          await store.dispatch("offers/load", {
+            code: payload.data.offer,
+            group
+          })
+          const offer = store.getters["offers/current"]
+          title = t('offerExpired')
+          options = {
+            body: t('offerExpiredText', {title: offer.attributes.name}),
+            icon: "/icons/icon-512x512.png",
+            image: offer.attributes.images && offer.attributes.images.length ? offer.attributes.images[0] : undefined,
+            data: {
+              url: `/groups/${group}/offers/${offer.attributes.code}`
+            }
+          }
+          break;
+        }
+        case "NeedExpired": {
+          await store.dispatch("needs/load", {
+            code: payload.data.need,
+            group
+          })
+          const need = store.getters["needs/current"]
+          title = t('needExpired')
+          options = {
+            body: t('needExpiredText', {content: truncate(need.attributes.content, 20)}),
+            icon: "/icons/icon-512x512.png",
             image: need.attributes.images && need.attributes.images.length ? need.attributes.images[0] : undefined,
             data: {
               url: `/groups/${group}/needs/${need.attributes.code}`
