@@ -7,7 +7,7 @@ const qenv = require('./.quasar.env.json');
 const environment = qenv[process.env.QENV];
 const IgnorePlugin = require("webpack").IgnorePlugin
 
-//const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
+const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
 
 console.log("Environment:")
 console.log(environment);
@@ -105,11 +105,10 @@ module.exports = configure(function(ctx) {
           .plugin('webpack-ignore-plugin')
           .use(IgnorePlugin, [{ resourceRegExp: /^leaflet$/}])
         
-        /*
         chain
           .plugin('statoscope-webpack-plugin')
           .use(StatoscopeWebpackPlugin, [{saveReportTo: "statoscope-report-[name]-[hash].html"}])
-          */
+          
         
 
       },
