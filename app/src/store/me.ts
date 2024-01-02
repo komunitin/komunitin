@@ -5,7 +5,6 @@ import KError, { KErrorCode } from "src/KError";
 import { notifications } from "src/plugins/Notifications";
 import locate from "src/plugins/Location";
 import {Member, NotificationsSubscription, UserSettings} from "./model"
-import { setLocale } from "../boot/i18n";
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -76,8 +75,6 @@ async function loadUserData(accessToken: string,
     const member = getters["myMember"] as Member
     commit("location", member.attributes.location.coordinates)
   }
-  const lang = user.settings.attributes.language
-  setLocale(lang)
 }
 
 /**

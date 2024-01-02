@@ -5,7 +5,7 @@ import { cloneDeep, merge } from "lodash-es"
 import { toRaw } from "vue"
 
 /**
- * Automatically update the state into persisten storage in every commit and restore the
+ * Automatically update the state into persistent storage in every commit and restore the
  * state when executing this function at init.
  * 
  * In order for this plugin to properly work, the commit name must be the same as the state 
