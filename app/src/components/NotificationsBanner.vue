@@ -29,6 +29,12 @@
 import { ref, computed, onBeforeMount, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStore } from "vuex";
+import { onMessage } from "firebase/messaging"
+import { notifications } from "../plugins/Notifications"
+import { notificationBuilder } from "../../src-pwa/notifications"
+import { useRouter } from "vue-router";
+
+
 const {t} = useI18n()
 
 const emit = defineEmits(["showChange"])
@@ -62,9 +68,10 @@ const dismiss = () => store.commit("notificationsBannerDismissed", true)
 const subscribe = async () => {
   permission.value = await Notification.requestPermission()
   if (permission.value == 'granted') {
-    store.dispatch("subscribe");
+    await store.dispatch("subscribe");
   }
 }
+const router = useRouter()
 
 // Initialization.
 onBeforeMount(async () => {
@@ -72,6 +79,22 @@ onBeforeMount(async () => {
     await store.dispatch("subscribe");
   }
   ready.value = true
+
+  // Set foreground message handler. We do it here instead of in the store or in the
+  // Notifications plugin file because we need to access the full UI including the 
+  // store and router.
+  const notification  = notificationBuilder(store)
+  onMessage(notifications.getMessaging(), async (payload) => {
+    const {title, options} = await notification(payload)
+    const noti = new Notification(title, options)
+    
+    noti.addEventListener('click', function() {
+      if (noti.data.url) {
+        router.push(noti.data.url)
+      }
+    })
+  })
+
 })
 
 </script>

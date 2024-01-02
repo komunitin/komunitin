@@ -2,10 +2,9 @@ import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
 import { KOptions } from "src/boot/koptions";
 import KError, { KErrorCode } from "src/KError";
-import { Notifications } from "src/plugins/Notifications";
-import {i18n} from '../boot/i18n'
+import { notifications } from "src/plugins/Notifications";
 import locate from "src/plugins/Location";
-import {Member, NotificationsSubscription} from "./model"
+import {Member, NotificationsSubscription, UserSettings} from "./model"
 
 // Exported just for testing purposes.
 export const auth = new Auth({
@@ -52,7 +51,7 @@ async function loadUserData(accessToken: string,
   // but we can't use it right here because we still don't know the group code, which
   // is necessary for this process to work. So we manually do the twy calls.
   await dispatch("users/load", {
-    include: "members,members.group"
+    include: "members,members.group,settings"
   });
   const user = rootGetters["users/current"];
 
@@ -100,7 +99,7 @@ async function loadUser(
 
 export default {
   state: () => ({
-    tokens: auth.getStoredTokens(),
+    tokens: undefined,
     // It is important to define the properties even if undefined in order to add the reactivity.
     userInfo: undefined,
     myUserId: undefined,
@@ -161,7 +160,8 @@ export default {
     authorize: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isLoggedIn) {
         try {
-          const tokens = await auth.authorize(context.state.tokens);
+          const storedTokens = await auth.getStoredTokens();
+          const tokens = await auth.authorize(storedTokens);
           context.commit("tokens", tokens);
           await loadUser(tokens.accessToken, context);
         } catch (error) {
@@ -179,7 +179,7 @@ export default {
      */
     logout: async (context: ActionContext<UserState, never>) => {
       await context.dispatch("unsubscribe");
-      auth.logout();
+      await auth.logout();
       context.commit("tokens", undefined);
       context.commit("userInfo", undefined);
       context.commit("myUserId", undefined);
@@ -207,16 +207,19 @@ export default {
     */
     subscribe: async (context: ActionContext<UserState, never>) => {
       if (!context.getters.isSubscribed && context.getters.isLoggedIn) {
-        const notifications = new Notifications();
+        const userSettings = context.getters.myUser?.settings as UserSettings
+        if (userSettings) {
+          const subscription = await notifications.subscribe(
+            context.getters.myUser, 
+            context.getters.myMember,
+            {
+              locale: userSettings.attributes.language,
+              ...userSettings.attributes.notifications
+            },
+            context.getters.accessToken);
+          context.commit("subscription", subscription);
 
-        const subscription = await notifications.subscribe(
-          context.getters.myUser, 
-          context.getters.myMember,
-          {
-            locale: i18n.global.locale.value
-          },
-          context.getters.accessToken);
-        context.commit("subscription", subscription);
+        }
       }
     },
     /**
@@ -224,7 +227,6 @@ export default {
      */
     unsubscribe: async (context: ActionContext<UserState, never>) => {
       if (context.state.subscription) {
-        const notifications = new Notifications();
         await notifications.unsubscribe(context.state.subscription, context.getters.accessToken);
         context.commit("subscription", undefined);
       }

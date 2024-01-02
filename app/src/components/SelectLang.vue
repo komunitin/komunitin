@@ -20,28 +20,18 @@
     </q-list>
   </q-btn-dropdown>
 </template>
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
 import langs from "../i18n";
+import { useLocale } from "../boot/i18n"
 
-export default defineComponent({
-  name: "SelectLang",
-  emits: ["language-change"],
-  data() {
-    return {
-      // Available languages.
-      langs
-    };
-  },
-  methods: {
-    /**
-     * Define language selected by the user and save in LocalStorage.
-     * @arg locale: Selected language key.
-     */
-    async changeLanguage(locale: string) {
-      await this.$setLocale(locale);
-      this.$emit("language-change", locale);
-    }
-  }
-});
+const emit = defineEmits<{
+  (e: "language-change", locale: string): void
+}>();
+
+const locale = useLocale();
+const changeLanguage = async (lang: string) => {
+  locale.value = lang
+  emit("language-change", lang)
+}
+
 </script>

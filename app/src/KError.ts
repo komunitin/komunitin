@@ -32,9 +32,11 @@ export enum KErrorCode {
  */
 export default class KError extends Error {
   code: string;
-  debugInfo: object | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  debugInfo: any;
 
-  constructor(code = KErrorCode.Unknown, message = "", debugInfo?: object) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(code = KErrorCode.Unknown, message = "", debugInfo?: any) {
     super(message);
     this.code = code;
     this.debugInfo = debugInfo !== undefined ? debugInfo : null;
@@ -44,5 +46,18 @@ export default class KError extends Error {
    */
   getTranslationKey(): string {
     return "Error" + this.code;
+  }
+
+  /**
+  * Get a KError from a fetch error.
+  * @param error The error.
+  */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static getKError(error: any): KError {
+    if (error instanceof KError) {
+      return error;
+    } else {
+      return new KError(KErrorCode.UnknownScript, "Unexpected error", error);
+    }
   }
 }

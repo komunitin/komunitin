@@ -28,7 +28,9 @@ func main() {
 		"https://demo.integralces.net",
 		"https://demo.komunitin.org",
 		"https://test.komunitin.org",
-		"https://komunitin.org"})
+		"https://komunitin.org",
+	})
+
 	allowedHeaders := handlers.AllowedHeaders([]string{"Authorization", "Content-Type"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"})
 	allowedCredentials := handlers.AllowCredentials()

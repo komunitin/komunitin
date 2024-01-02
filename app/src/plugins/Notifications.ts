@@ -1,28 +1,30 @@
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, MessagePayload, Messaging, onMessage } from "firebase/messaging"
+import { FirebaseApp, initializeApp } from "firebase/app";
+import { getMessaging, getToken, Messaging } from "firebase/messaging"
 import { KOptions } from "../boot/koptions"
-import axios from "axios";
+import {UserSettings} from "../store/model"
 
-import { Member, NotificationsSubscription, ResourceResponse, User } from "src/store/model";
+import { Member, NotificationsSubscription, User } from "src/store/model";
 import KError, { KErrorCode } from "src/KError";
 
 import firebaseConfig from "./FirebaseConfig";
-import { Notify } from "quasar";
-import { i18n } from "src/boot/i18n";
 
-export interface SubscriptionSettings {
-  locale: string
-}
+export type SubscriptionSettings = UserSettings['attributes']['notifications'] & { locale: string }
 
-export class Notifications {
+class Notifications {
 
+  private app: FirebaseApp | null = null
+  private messaging: Messaging | null = null
   /**
    * @returns The Firebase Messaging class, to be called from the main thread.
    */
-  private getMessaging() : Messaging {
-    const app = initializeApp(firebaseConfig);
-    const messaging = getMessaging(app);
-    return messaging;
+  public getMessaging() : Messaging {
+    if (this.app === null) {
+      this.app = initializeApp(firebaseConfig)
+    }
+    if (this.messaging === null) {
+      this.messaging = getMessaging(this.app)
+    }
+    return this.messaging;
   }
 
   /**
@@ -72,22 +74,18 @@ export class Notifications {
         }
       }
       // Send token to the server.
-      const response = await axios.post<ResourceResponse<NotificationsSubscription>>(
-        KOptions.url.notifications + '/subscriptions', 
-        message, {
-          headers: {
-            Accept: "application/vnd.api+json",
-            "Content-Type": "application/vnd.api+json",
-            Authorization: `Bearer ${accessToken}` 
-          }
-        });
+      const response = await fetch(KOptions.url.notifications + '/subscriptions', {
+        method: 'POST',
+        body: JSON.stringify(message),
+        headers: {
+          Accept: "application/vnd.api+json",
+          "Content-Type": "application/vnd.api+json",
+          Authorization: `Bearer ${accessToken}` 
+        }
+      })
+      const data = await response.json();
 
-      /**
-       * Push Message handler.
-       */
-      onMessage(messaging, this.onMessage)
-
-      return response.data.data
+      return data.data
 
     } catch (err) {
       // The user doesn't grant the app to receive notifications.
@@ -99,30 +97,13 @@ export class Notifications {
    * Unsubscribe the current device, user and member from push notifications.
    */
   public async unsubscribe(subscription: NotificationsSubscription, accessToken: string): Promise<void> {
-    await axios.delete(KOptions.url.notifications + '/subscriptions/' + subscription.id, {
+    await fetch(KOptions.url.notifications + '/subscriptions/' + subscription.id, {
+      method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`
       }
-    });
-  }
-
-
-  private onMessage(payload: MessagePayload) : void {
-    const actions = []
-    if (payload.fcmOptions?.link) {
-      actions.push({
-        label: i18n.global.t('View'),
-        color: "white",
-        handler: () => {
-          window.location.href = payload.fcmOptions?.link as string
-        },
-      })
-    }
-    Notify.create({
-      type: "info",
-      message: payload.notification?.body,
-      timeout: 0,
-      actions
-    });
+    })
   }
 }
+
+export const notifications = new Notifications()

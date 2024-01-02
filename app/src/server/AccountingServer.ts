@@ -5,9 +5,14 @@ import faker from "faker";
 import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { filter, sort, search } from "./ServerUtils";
+import { inflections } from "inflected"
+
 
 
 const urlAccounting = KOptions.url.accounting;
+inflections("en", function (inflect) {
+  inflect.irregular("accountSettings", "accountSettings")
+})
 
 export default {
   serializers: {
@@ -23,6 +28,13 @@ export default {
         "/accounts/" +
         account.code
     }),
+    accountSettings: ApiSerializer.extend({
+      selfLink: (model: any) => urlAccounting + "/" + 
+        model.account.currency.code + 
+        "/accounts/" + 
+        model.account.code + 
+        "/settings"
+    }),
     transaction: ApiSerializer.extend({
       selfLink: (transaction: any) => `${urlAccounting}/${transaction.currency.code}/transactions/${transaction.id}`,
       shouldIncludeLinkageData(relationshipKey: string, model: any) {
@@ -34,18 +46,22 @@ export default {
         );
       },
     }),
-    transfer: ApiSerializer
+    transfer: ApiSerializer,
   },
   models: {
     currency: Model,
     account: Model.extend({
       currency: belongsTo(),
+      settings: belongsTo("accountSettings"),
       transfers: hasMany(),
     }),
     transfer: Model.extend({
       payer: belongsTo("account", {inverse: null}),
       payee: belongsTo("account", {inverse: null}),
       currency: belongsTo(),
+    }),
+    accountSettings: Model.extend({
+      account: belongsTo(),
     })
   },
   factories: {
@@ -75,6 +91,9 @@ export default {
         return (this as any).state == "pending" ? faker.date.future().toJSON() : undefined;
       }
     }),
+    accountSettings: Factory.extend({
+      acceptPaymentsAutomatically: true,
+    })
   },
   /**
    * Needs to be called after SocialServer.seeds.
@@ -89,7 +108,7 @@ export default {
         const currency = server.create("currency", { code: group.code });
         group.update({ currency });
       });
-    // Create an account for each member
+    // Create an account with settings for each member
     server.schema.members
       .all()
       .models.forEach(
@@ -98,7 +117,7 @@ export default {
           const accountCode = code + `${i}`.padStart(4, "0");
           const account = server.create("account", {
             code: accountCode,
-            currency: server.schema.currencies.findBy({ code })
+            currency: server.schema.currencies.findBy({ code }),
           });
           member.update({ account });
         }
@@ -121,6 +140,10 @@ export default {
         currency
       });
     }
+    // Generate account settings.
+    server.schema.accounts.all().models.forEach((account: any) => {
+      server.create("accountSettings", {account});
+    })
   },
   routes(server: Server) {
     // Single currency
@@ -145,6 +168,13 @@ export default {
         });
       }
     );
+    // Account settings
+    server.get(`${urlAccounting}/:currency/accounts/:code/settings`, (schema: any, request) => {
+      const currency = schema.currencies.findBy({code: request.params.currency});
+      const account = schema.accounts.findBy({code: request.params.code, currencyId: currency.id});
+      return schema.accountSettings.findBy({accountId: account.id});
+    });
+      
     // Account transfers.
     server.get(`${urlAccounting}/:currency/transfers`,
       (schema: any, request: any) => {
@@ -180,5 +210,14 @@ export default {
         return new Response(201, undefined, resource)
       }
     )
+    // Edit settings
+    server.patch(`${urlAccounting}/:currency/accounts/:code/settings`, (schema: any, request: any) => {
+      const currency = schema.currencies.findBy({code: request.params.currency});
+      const account = schema.accounts.findBy({code: request.params.code, currencyId: currency.id});
+      const settings = schema.accountSettings.findBy({accountId: account.id});
+      const body = JSON.parse(request.requestBody);
+      settings.update(body.data.attributes);
+      return new Response(200, undefined, settings);
+    });
   }
 };

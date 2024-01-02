@@ -42,27 +42,14 @@
         :label="$t('expirationDate')"
         :hint="$t('needExpirationDateHint')"
       />
-      <q-item
+      <toggle-item 
         v-if="showState"
-        tag="label"
-        style="padding-left: 12px; padding-right: 12px;"
-      >
-        <q-item-section>
-          <q-item-label>
-            {{ $t('published') }}
-          </q-item-label>
-          <q-item-label caption>
-            {{ $t('needPublishedHint') }}
-          </q-item-label>
-        </q-item-section>
-        <q-item-section avatar>
-          <q-toggle
-            v-model="state"
-            true-value="published"
-            false-value="hidden"
-          />
-        </q-item-section>
-      </q-item>
+        v-model="state"
+        :label="$t('published')"
+        :hint="$t('needPublishedHint')"
+        true-value="published"
+        false-value="hidden"
+      />
       <q-btn
         :label="submitLabel ?? $t('preview')"
         type="submit"
@@ -79,6 +66,7 @@ import { ref } from "vue"
 import DateField from "../../components/DateField.vue"
 import ImageField from "../../components/ImageField.vue"
 import SelectCategory from "../../components/SelectCategory.vue"
+import ToggleItem from "../../components/ToggleItem.vue"
 import { Category, Need, NeedState } from "src/store/model"
 import useVuelidate from "@vuelidate/core"
 import { minLength, required } from "@vuelidate/validators"

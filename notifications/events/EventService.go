@@ -8,6 +8,7 @@ package events
 import (
 	"context"
 	"crypto/subtle"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -25,12 +26,14 @@ const (
 
 type Event struct {
 	// The type of the event
-	Id       string                  `jsonapi:"primary,events"`
-	Name     string                  `jsonapi:"attr,name"`
-	Source   string                  `jsonapi:"attr,source"`
-	Code     string                  `jsonapi:"attr,code"`
-	Time     time.Time               `jsonapi:"attr,time,iso8601"`
-	User     *model.ExternalUser     `jsonapi:"relation,user"`
+	Id     string                 `jsonapi:"primary,events"`
+	Name   string                 `jsonapi:"attr,name"`
+	Source string                 `jsonapi:"attr,source"`
+	Code   string                 `jsonapi:"attr,code"`
+	Time   time.Time              `jsonapi:"attr,time,iso8601"`
+	Data   map[string]interface{} `jsonapi:"attr,data"`
+	User   *model.ExternalUser    `jsonapi:"relation,user"`
+	// Deprecated
 	Transfer *model.ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
 }
 
@@ -76,16 +79,22 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 			http.Error(w, "Missing 'user' relationship", http.StatusBadRequest)
 			return
 		}
-		// TODO authorize request.
-
+		data, err := json.Marshal(event.Data)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Println(err.Error())
+			return
+		}
 		value := map[string]interface{}{
 			"name":   event.Name,
 			"source": event.Source,
 			"user":   event.User.Id,
 			"time":   event.Time.String(),
 			"code":   event.Code,
+			"data":   data,
 		}
 
+		// TODO: delete this as transfer is not used anymore.
 		if event.Transfer != nil {
 			value["transfer"] = event.Transfer.Href
 		}
