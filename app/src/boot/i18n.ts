@@ -1,7 +1,7 @@
 import { boot } from "quasar/wrappers";
 import { createI18n } from "vue-i18n";
 import DefaultMessages from "src/i18n/en-us/index.json";
-import langs, {LangName} from "src/i18n";
+import langs, {LangName, DEFAULT_LANG, normalizeLocale} from "src/i18n";
 import { useQuasar, Quasar, QSingletonGlobals } from "quasar";
 import LocalStorage from "../plugins/LocalStorage";
 import { formatRelative, Locale } from "date-fns";
@@ -13,10 +13,6 @@ declare module "@vue/runtime-core" {
   }
 }
 
-/**
- * Default to english language.
- */
-const DEFAULT_LANG = "en-us";
 /**
  * LocalStorage key for the saved locale.
  */
@@ -43,14 +39,6 @@ let dateLocale = undefined as Locale | undefined;
  * Return the date-fns Locale object for other operations than formatDate.
  */
 export const getDateLocale = () => dateLocale;
-
-/**
- * Return locale if it is a defined language for this app,
- * or the default language code (English) instead.
- * **/
-function normalizeLocale(locale: string): LangName {
-  return (locale in langs) ? locale as LangName : DEFAULT_LANG;
-}
 
 let globalLocale = DEFAULT_LANG
 
@@ -126,7 +114,7 @@ export function useLocale() {
 
 
 // Default export for Quasar boot files.
-export default boot(async ({ app }) => {
+export default boot(async ({ app, store }) => {
   // Install 'vue-i18n' plugin.
   app.use(i18n);
 
@@ -137,5 +125,16 @@ export default boot(async ({ app }) => {
   // Initially set the current locale.ç
   const lang = await getCurrentLocale(Quasar)
   await setCurrentLocale(Quasar, lang)
+
+  // Change the current locale to the user defined settings. Note that we do it that way so the
+  // store does not depend on the i18n infrastructure and therefore it can be used in the service
+  // worker.
+  store.watch((_, getters) => {
+    return getters["myUser"]?.settings?.language
+  }, (language) => {
+    if (language && language !== globalLocale) {
+      setLocale(language)
+    }
+  })
 });
 

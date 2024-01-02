@@ -66,7 +66,7 @@ import { useStore } from 'vuex';
 import PageHeader from '../../layouts/PageHeader.vue';
 import PageContainer from '../../layouts/PageContainer.vue';
 import ToggleItem from '../../components/ToggleItem.vue';
-import langs, {LangName} from "../../i18n";
+import langs, {LangName, normalizeLocale} from "../../i18n";
 import { AccountSettings, UserSettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
@@ -87,6 +87,10 @@ const langOptions = computed(() => {
 const myAccount = computed(() => store.getters["myAccount"])
 const myMember = computed(() => store.getters["myMember"])
 const userSettings = computed(() => store.getters["user-settings/current"] as UserSettings | undefined)
+const userLanguage = computed(() => {
+  const lang = userSettings.value?.attributes.language
+  return lang ? normalizeLocale(lang) : undefined
+})
 const accountSettings = computed(() => store.getters["account-settings/current"] as AccountSettings | undefined )
 
 const loadAccountSettings = async () => {
@@ -143,7 +147,7 @@ const notiOffers = ref()
 const notiMembers = ref()
 
 watchEffect(() => {
-  const lang = userSettings.value?.attributes.language as LangName
+  const lang = userLanguage.value
   language.value = lang ? {label: langs[lang].label, value: lang} : undefined
   const notifications = userSettings.value?.attributes.notifications
   notiMyAccount.value = notifications?.myAccount
@@ -155,8 +159,8 @@ watchEffect(() => {
 const locale = useLocale()
 
 watch([language, notiMyAccount, notiNeeds, notiOffers, notiMembers], () => {
-  const notis = userSettings.value?.attributes.notifications
-  if (language.value !== undefined && language.value.value !== userSettings.value?.attributes.language
+  const notis = userSettings.value?.attributes.notifications  
+  if (language.value !== undefined && language.value.value !== userLanguage.value
     || notiMyAccount.value !== undefined && notiMyAccount.value !== notis?.myAccount
     || notiNeeds.value !== undefined && notiNeeds.value !== notis?.newNeeds
     || notiNeeds.value !== undefined && notiOffers.value !== notis?.newOffers
