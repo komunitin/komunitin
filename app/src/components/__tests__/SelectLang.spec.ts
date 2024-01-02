@@ -1,6 +1,6 @@
 
 import SelectLang from "../SelectLang.vue";
-import { VueWrapper } from "@vue/test-utils"
+import { VueWrapper, flushPromises } from "@vue/test-utils"
 import { mountComponent } from "../../../test/jest/utils";
 
 /**
@@ -25,6 +25,7 @@ describe("SelectLang", () => {
     // so invocking the method directly.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (wrapper.vm as any).changeLanguage("ca");
+    await flushPromises();
     // Check language changed on i18n plugin.
     expect(wrapper.vm.$i18n.locale).toBe("ca");
     // Check language changed on quasar.

@@ -1,0 +1,19 @@
+{
+  "newOfferFrom": "New offer from {name}",
+  "newNeedFrom": "New need from {name}",
+  "newMemberInGroup": "{name} just joined {group}",
+  "newMemberLocation": "New member from {location}. Check their profile!",
+  "newPurchase": "New purchase",
+  "newPurchaseText": "Done payment of {amount} to {name}.",
+  "paymentPending": "New payment request",
+  "paymentPendingText": "{name} requests a payment of {amount}. You should accept or reject this payment as soon as possible.",
+  "paymentReceived": "Payment received",
+  "paymentReceivedText": "Payment received of {amount} from {name}.",
+  "paymentRejected": "Payment rejected",
+  "paymentRejectedText": "{name} rejected a payment of {amount}.",
+  "offerExpired": "Your offer has expired",
+  "offerExpiredText": "Your offer '{title}' has expired and is no longer visible to other members. You can renew it to make it available again.",
+  "needExpired": "Your need has expired",
+  "needExpiredText": "Your need '{content}' has expired and is no longer visible to other members. You can renew it or delete it if it has been fulfilled."
+
+}

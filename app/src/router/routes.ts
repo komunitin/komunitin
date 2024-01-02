@@ -28,6 +28,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../layouts/Layout.vue'),
     children: [
       {
+        path: '/settings',
+        name: 'Settings',
+        component: () => import('../pages/settings/EditSettings.vue')
+      },
+      {
         path: '/groups',
         name: 'GroupList',
         component: () => import('../pages/groups/GroupList.vue')

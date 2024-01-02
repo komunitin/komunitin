@@ -1,14 +1,24 @@
-import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { CacheFirst } from 'workbox-strategies';
-import { CacheableResponsePlugin } from 'workbox-cacheable-response';
-import { ExpirationPlugin } from 'workbox-expiration';
-import { onBackgroundMessage, getMessaging } from "firebase/messaging/sw";
-import { initializeApp } from 'firebase/app';
-import firebaseConfig from '../src/plugins/FirebaseConfig';
+// Workbox
+import { precacheAndRoute } from 'workbox-precaching'
+import { registerRoute } from 'workbox-routing'
+import { CacheFirst } from 'workbox-strategies'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { ExpirationPlugin } from 'workbox-expiration'
+import { clientsClaim } from 'workbox-core'
+// Firebase
+import { onBackgroundMessage, getMessaging } from "firebase/messaging/sw"
+import { initializeApp } from 'firebase/app'
+import firebaseConfig from '../src/plugins/FirebaseConfig'
+// Komunitin
+import store from "../src/store"
+import { notificationBuilder } from './notifications'
+
+(self as any).skipWaiting()
+clientsClaim()
 
 // Precache generated manifest file.
-precacheAndRoute((self as any).__WB_MANIFEST);
+precacheAndRoute((self as any).__WB_MANIFEST)
+
 
 // JS and CSS and assets should be already precached so we don't need to do any
 // runtime caching.
@@ -37,10 +47,42 @@ registerRoute(
 // Setup push notifications handler.
 
 // Initialize Firebase so we receive push notifications.
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+const app = initializeApp(firebaseConfig)
+//Note that this getMessaging is not the same as the one in src/plugins/Notifications.ts
+const messaging = getMessaging(app)
+const notification = notificationBuilder(store)
 
 // Push Message handler. 
 onBackgroundMessage(messaging, async (payload) => {
-  // Do something with the message
+  try {
+    const {title, options} = await notification(payload)
+    return (self as any).registration.showNotification(title, options)
+  } catch (error) {
+    console.error(error)
+  }
+})
+
+self.addEventListener('notificationclick', function(event: any) {
+  event.notification.close();
+  // If a window matching the app is already open, focus that;
+  // otherwise, open a new one.
+  event.waitUntil(
+    (self as any).clients.matchAll({type: 'window'}).then((clientList: any[]) => {
+      const url = event.notification.data?.url as string | undefined
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i]
+        if (client.focus && client.navigate) {
+          if (url && (client.url !== url)) {
+            return client.navigate(url).then((client: any) => client.focus())
+          } else {
+            return client.focus()
+          }
+        }
+      }
+      if (url && (self as any).clients.openWindow) {
+        return (self as any).clients.openWindow(url)
+      }
+    })
+  );
+
 })

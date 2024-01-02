@@ -16,17 +16,26 @@ function getLocalizedMessage(error: KError): string {
   return t(error.getTranslationKey()).toString();
 }
 
+
+const lastError: Record<string, number> = {}
 /**
  * Show error to the user.
  * 
  * @param error The error to be shown.
  */
 function showError(error: KError) {
-  Notify.create({
-    color: 'negative',
-    position: 'top',
-    message: getLocalizedMessage(error)
-  });
+  // Show error message only once per 5 minutes.
+  if (lastError[error.code] === undefined || Date.now() - lastError[error.code] > 1000*60*5) {
+    lastError[error.code] = Date.now()
+    Notify.create({
+      color: 'negative',
+      position: 'top',
+      message: getLocalizedMessage(error),
+      actions: [
+        { icon: 'close', color: 'white', round: true }
+      ]
+    });
+  }
 }
 
 /**
