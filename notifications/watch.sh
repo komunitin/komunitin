@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMAND="dlv debug github.com/komunitin/komunitin/notifications --listen :40000 --headless=true --log=true --api-version=2 --accept-multiclient ."
+COMMAND="dlv debug github.com/komunitin/komunitin/notifications --listen :40000 --headless=true --log=true --api-version=2 --accept-multiclient --continue ."
 # Run debugger
 echo "Starting debugger..."
 $COMMAND &
