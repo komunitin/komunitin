@@ -60,7 +60,7 @@
             @remove:file="removeImage(file.__key)"
           />
           <image-field-item
-            v-for="file in uploader?.files"
+            v-for="file in uploaderFiles"
             :key="file.__key"
             :file="file"
             @remove:file="scope.removeFile(file)"
@@ -96,6 +96,7 @@ const emit = defineEmits<{
 
 // Set files from modelValue to the QUploader component
 const uploader = ref<QUploader>()
+const uploaderFiles = computed(() => uploader.value?.files || [])
 
 const images = ref<string[]>(props.modelValue)
 
@@ -120,6 +121,7 @@ const uploaded = ({xhr}: {xhr: XMLHttpRequest}) => {
   const response = JSON.parse(xhr.responseText)
   const url = response.data.attributes.url
   images.value = [...images.value, url]
+  uploader.value?.removeUploadedFiles()
 }
 
 const removeImage = (url: string) => {
