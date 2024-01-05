@@ -80,8 +80,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import ImageFieldItem from './ImageFieldItem.vue'
-import { KOptions } from 'src/boot/koptions'
-import { useStore } from 'vuex'
+import { imageFile, useUploaderSettings } from '../composables/uploader'
 import { QUploader } from 'quasar'
 
 const props = defineProps<{
@@ -100,21 +99,6 @@ const uploaderFiles = computed(() => uploader.value?.files || [])
 
 const images = ref<string[]>(props.modelValue)
 
-const imageFile = (url: string) => {
-  const filename = (url: string) => url.split("/").pop() as string
-  return {
-    name: filename(url),
-    __key: url,
-    __sizeLabel: "",
-    __progressLabel: "",
-    __progress: 1,
-    __status: "uploaded",
-    __img: {
-      src: url
-    }
-  }
-
-}
 const imageFiles = computed(() => props.modelValue.map((url: string) => imageFile(url)))
 
 const uploaded = ({xhr}: {xhr: XMLHttpRequest}) => {
@@ -132,16 +116,7 @@ watch(images, (value) => {
   emit("update:modelValue", value)
 })
 
-// I'd prefer just "file" but Drupal backend requires it to be file[something],
-// and the aesthetics of a good name does not pay for the work today ;)
-const fieldName = "files[file]"
-const url = KOptions.url.files
-
-const store = useStore()
-const headers = () => {
-  const token = store.getters.accessToken
-  return [{name : 'Authorization', value: `Bearer ${token}`}]
-}
+const { fieldName, url, headers } = useUploaderSettings()
 
 </script>
 <style lang="scss">

@@ -1,20 +1,18 @@
 <template>
-  <div>
-    <q-avatar
-      v-if="imgSrc"
-      :size="size"
+  <q-avatar
+    :size="size"
+    text-color="white"
+    :style="`background-color: ${bgColor};`"
+  >
+    <img 
+      v-if="imgSrc" 
+      :src="imgSrc"
+      style="object-fit: cover;"
     >
-      <img :src="imgSrc">
-    </q-avatar>
-    <q-avatar
-      v-else
-      text-color="white"
-      :size="size"
-      :style="`background-color: ${bgColor};`"
-    >
+    <template v-else>
       {{ initial }}
-    </q-avatar>
-  </div>
+    </template>
+  </q-avatar>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue"
