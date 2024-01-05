@@ -33,6 +33,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/settings/EditSettings.vue')
       },
       {
+        path: '/profile',
+        name: 'EditProfile',
+        component: () => import('../pages/members/EditProfile.vue')
+      },
+      {
         path: '/groups',
         name: 'GroupList',
         component: () => import('../pages/groups/GroupList.vue')

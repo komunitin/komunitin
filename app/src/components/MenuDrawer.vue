@@ -26,7 +26,7 @@
               <menu-item
                 icon="edit"
                 :title="$t('editProfile')"
-                :disable="true"
+                to="/profile"
               />
               <menu-item
                 icon="settings"
