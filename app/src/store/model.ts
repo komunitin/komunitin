@@ -133,6 +133,7 @@ export interface ExternalResourceObject extends ResourceObject {
  */
 export interface User extends ResourceObject {
   attributes: {
+    email: string,
     created: string,
     updated: string,
   },
@@ -230,6 +231,7 @@ export interface Address {
   addressLocality: string;
   postalCode: string;
   addressRegion: string;
+  addressCountry: string;
 }
 
 /**

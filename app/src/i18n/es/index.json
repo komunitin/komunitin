@@ -166,5 +166,23 @@
   "app": "Applicación",
   "account": "Cuenta",
 
+  "enterProfileData": "Acerca de ti",
+  "editProfileHelpText": "Crea tu perfil de miembro de la red de intercambio como quieras que te vean los demás miembros.",
+  "name": "Nombre",
+  "nameHint": "Tu nombre completo o el de tu organización como quieras que aparezca.",
+  "nameRequired": "Entra un nombre",
+  "bioHint": "Una breve descripción de ti o de tu organización.",
+  "emailHint": "Tu email para entrar en la app y recibir notificaciones.",
+  "changeEmail": "Cambiar email",
+  "changePassword": "Cambiar contraseña",
+  "address": "Dirección",
+  "postalCode": "Código postal",
+  "city": "Municipio",
+  "region": "Provincia",
+  "country": "País",
+  "fieldRequired": "Este campo es necesario",
+  "phone": "Teléfono",
+  "addContact": "Añadir contacto",
+
   "ErrorAuthNoCredentials": "Error: email o password incorrectos"
 }

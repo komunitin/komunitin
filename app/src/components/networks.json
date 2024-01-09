@@ -1,13 +1,13 @@
 {
     "phone": {
         "contact": "tel:{name}",
-        "label": "Phone",
+        "label": "phone",
         "translateLabel": true
     },
     "email": {
         "contact": "mailto:{name}",
         "share": "mailto:?subject={title}&body={text}",
-        "label": "Email",
+        "label": "email",
         "translateLabel": true
     },
     "telegram": {

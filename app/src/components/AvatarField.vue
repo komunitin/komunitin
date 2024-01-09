@@ -21,7 +21,7 @@
           :img-src="src" 
           :text="text"
           size="250px"
-          class="q-mx-auto"
+          class="q-mx-auto avatar"
         />
         <div class="avatar-icon">
           <q-circular-progress
@@ -83,6 +83,9 @@ const uploaded = ({xhr}: {xhr: XMLHttpRequest}) => {
       opacity: 1;
     }
   }
+}
+.avatar:hover {
+  filter: brightness(0.8);
 }
 .avatar-icon {
   position: absolute;
