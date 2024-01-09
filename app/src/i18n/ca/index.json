@@ -169,5 +169,23 @@
   "app": "Aplicació",
   "account": "Compte",
 
-  "ErrorAuthNoCredentials": "Error: email o password incorrectes"
+  "enterProfileData": "Qui ets?",
+  "editProfileHelpText": "Crea el teu perfil de membre de la xarxa d'intercanvi com vulguis que et vegin la resta de membres.",
+  "name": "Nom",
+  "nameHint": "El teu nom complet o el de la teva organització, com vulguis que aparegui.",
+  "nameRequired": "Entra un nom",
+  "bioHint": "Breu descripció teva o de la teva organització.",
+  "emailHint": "El teu correu per entrar a l'aplicació i rebre notificacions.",
+  "changeEmail": "Canviar email",
+  "changePassword": "Canviar contrasenya",
+  "address": "Adreça",
+  "postalCode": "Codi postal",
+  "city": "Municipi",
+  "region": "Província",
+  "country": "País",
+  "fieldRequired": "Aquest camp és necessari",
+  "phone": "Telèfon",
+  "addContact": "Afegeix contacte",
+
+  "ErrorAuthNoCredentials": "Email o contrasenya incorrectes"
 }

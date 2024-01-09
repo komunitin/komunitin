@@ -27,6 +27,7 @@
     "core-js": "^3.8.3",
     "date-fns": "^2.16.1",
     "firebase": "^9.17.2",
+    "i18n-iso-countries": "^7.7.0",
     "leaflet": "^1.9.3",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",

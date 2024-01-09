@@ -68,3 +68,11 @@ export function getShareUrl(network: SocialNetwork, url: string, title: string, 
     .replace("{text}", encodeURIComponent(text));
 }
 
+/**
+ * Get the icon src for a social network.
+ */
+export function getNetworkIcon(key: string) : string {
+  // Leverage webpack assets resolution.
+  return require(`../assets/contacts/${key}.svg`)
+}
+

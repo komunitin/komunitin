@@ -12,7 +12,8 @@ export interface LocaleDefinition {
   label: string,
   loadMessages: () => Promise<never>,
   loadQuasar: () => Promise<QuasarLanguage>,
-  loadDateFNS: () => Promise<Locale>
+  loadDateFNS: () => Promise<Locale>,
+  loadCountries: () => Promise<never>
 }
 
 const langs = {
@@ -20,21 +21,25 @@ const langs = {
     label: "Català",
     loadMessages: async () => (await import("src/i18n/ca/index.json")).default,
     loadQuasar: async () => (await import("quasar/lang/ca")).default,
-    loadDateFNS: async () => (await import(`date-fns/locale/ca/index.js`)).default
-  },
+    loadDateFNS: async () => (await import("date-fns/locale/ca/index.js")).default,
+    loadCountries: async () => (await import("i18n-iso-countries/langs/ca.json")).default
+  } as LocaleDefinition,
   "en-us": {
     label: "English",
     loadMessages: async () => (await import("src/i18n/en-us/index.json")).default,
     loadQuasar: async () => (await import("quasar/lang/en-US")).default,
-    loadDateFNS: async () => (await import(`date-fns/locale/en-US/index.js`)).default
-  },
+    loadDateFNS: async () => (await import("date-fns/locale/en-US/index.js")).default,
+    loadCountries: async () => (await import("i18n-iso-countries/langs/en.json")).default
+  } as LocaleDefinition,
   "es": {
     label: "Español",
     loadMessages: async () => (await import("src/i18n/es/index.json")).default,
     loadQuasar: async () => (await import("quasar/lang/es")).default,
-    loadDateFNS: async () => (await import(`date-fns/locale/es/index.js`)).default
-  }
+    loadDateFNS: async () => (await import("date-fns/locale/es/index.js")).default,
+    loadCountries: async () => (await import("i18n-iso-countries/langs/es.json")).default
+  } as LocaleDefinition
 }
+
 export type LangName = keyof typeof langs
 export default langs as Record<LangName, LocaleDefinition>
 /**
@@ -47,6 +52,10 @@ export const DEFAULT_LANG = "en-us";
  * **/
 export function normalizeLocale(locale: string): LangName {
   return (locale in langs) ? locale as LangName : DEFAULT_LANG;
+}
+
+export function getLocaleDefinition(locale: string): LocaleDefinition {
+  return langs[normalizeLocale(locale)];
 }
 
 
