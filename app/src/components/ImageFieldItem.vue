@@ -7,7 +7,8 @@
       <q-icon
         v-if="file.__status == 'failed'"
         name="error"
-        color="negative" 
+        color="negative"
+        size="24px"
       />
       <q-circular-progress
         v-if="file.__status == 'uploading'"
@@ -15,10 +16,12 @@
         :min="0"
         :max="1"
         :indeterminate="file.__progress === 0"
+        size="24px"
+        color="white"
       />
       <div class="col" />
       <q-btn
-        v-if="file.__status == 'uploaded'"
+        v-if="file.__status == 'uploaded' || file.__status == 'failed'"
         class="self-end"
         round
         dense
@@ -31,16 +34,8 @@
   </div>
 </template>
 <script setup lang="ts">
-interface ImageFile {
-  name: string,
-  __sizeLabel: string,
-  __progressLabel: string,
-  __progress: number,
-  __status: string,
-  __img: {
-    src: string
-  }
-}
+import { ImageFile } from '../composables/uploader';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
   file: ImageFile

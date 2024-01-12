@@ -26,7 +26,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import * as SocialNetworks from "./SocialNetworks";
+import {SocialNetwork, ContactNetworks, ShareNetworks, getContactUrl, getNetworkIcon, getShareUrl} from "./SocialNetworks";
 
 import { Contact } from "../store/model";
 
@@ -35,11 +35,11 @@ type NetworkNames = Record<string, { name?: string }>;
 const CONTACT = "contact";
 const SHARE = "share";
 
-interface DataNetwork {
+/**
+ * Social network augmented with the identifier of the contact.
+ */
+interface DataNetwork extends SocialNetwork {
   name?: string;
-  pattern: string;
-  label: string;
-  translateLabel: boolean;
 }
 
 export default defineComponent({
@@ -87,7 +87,7 @@ export default defineComponent({
           {}
         );
       } else {
-        return Object.keys(SocialNetworks.ShareNetworks).reduce(
+        return Object.keys(ShareNetworks).reduce(
           (names: NetworkNames, network: string) => {
             names[network] = {}
             return names;
@@ -103,8 +103,8 @@ export default defineComponent({
 
       const baseNetworks =
         this.type == CONTACT
-          ? SocialNetworks.ContactNetworks
-          : SocialNetworks.ShareNetworks;
+          ? ContactNetworks
+          : ShareNetworks;
       // Return the array of networks with info merged from given "network" prop and static.
       return Object.keys(nets).reduce(
         (obj: { [key: string]: DataNetwork }, key: string) => {
@@ -129,15 +129,15 @@ export default defineComponent({
       const net = this.dataNetworks[network];
       const url =
         this.type == CONTACT
-          ? SocialNetworks.getContactUrl(net, net.name ?? "")
-          : SocialNetworks.getShareUrl(net, this.url, this.title, this.text);
+          ? getContactUrl(net, net.name ?? "")
+          : getShareUrl(net, this.url, this.title, this.text);
       window.open(url, "_blank");
     },
     /**
-     * Return the network icon file, leveraging webpack assets resolution.
+     * Return the network icon file, 
      */
     networkIcon(key: string) {
-      return require(`../assets/contacts/${key}.svg`)
+      return getNetworkIcon(key)
     }
   }
 });

@@ -18,24 +18,11 @@
         <q-icon name="mail" />
       </template>
     </q-input>
-    <q-input
-      v-model="pass"
-      outlined
+
+    <password-field 
+      v-model="pass" 
       dark
-      :type="isPwd ? 'password' : 'text'"
-      :label="$t('password')"
-      maxlength="30"
-      :rules="[val => !v$.pass.$invalid || $t('invalidPassword')]"
-      lazy-rules
-    >
-      <template #append>
-        <q-icon
-          :name="isPwd ? 'visibility_off' : 'visibility'"
-          class="cursor-pointer"
-          @click="isPwd = !isPwd"
-        />
-      </template>
-    </q-input>
+    />
 
     <q-btn
       outline
@@ -50,6 +37,7 @@
 </template>
 
 <script lang="ts">
+import PasswordField from "../../components/PasswordField.vue";
 import { defineComponent } from "vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required, email, minLength } from '@vuelidate/validators';
@@ -58,6 +46,9 @@ import KError, { KErrorCode } from '../../KError';
 // Login mail.
 export default defineComponent({
   name: 'LoginMail',
+  components: {
+    PasswordField
+  },
   setup () {
     return {
       v$: useVuelidate()

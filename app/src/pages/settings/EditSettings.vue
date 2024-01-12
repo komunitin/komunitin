@@ -70,7 +70,7 @@ import langs, {LangName, normalizeLocale} from "../../i18n";
 import { AccountSettings, UserSettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
-
+import { watchDebounced } from "@vueuse/shared";
 
 const store = useStore()
 
@@ -158,13 +158,13 @@ watchEffect(() => {
 
 const locale = useLocale()
 
-watch([language, notiMyAccount, notiNeeds, notiOffers, notiMembers], () => {
+watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers], () => {
   const notis = userSettings.value?.attributes.notifications  
   if (language.value !== undefined && language.value.value !== userLanguage.value
     || notiMyAccount.value !== undefined && notiMyAccount.value !== notis?.myAccount
     || notiNeeds.value !== undefined && notiNeeds.value !== notis?.newNeeds
-    || notiNeeds.value !== undefined && notiOffers.value !== notis?.newOffers
-    || notiNeeds.value !== undefined && notiMembers.value !== notis?.newMembers) {
+    || notiOffers.value !== undefined && notiOffers.value !== notis?.newOffers
+    || notiMembers.value !== undefined && notiMembers.value !== notis?.newMembers) {
     saveUserSettings({
       attributes: {
         language: language.value.value,
@@ -179,7 +179,6 @@ watch([language, notiMyAccount, notiNeeds, notiOffers, notiMembers], () => {
     // This triggers a language app update.
     locale.value = language.value.value
   }
-})
-
+}, {debounce: 1000})
 
 </script>
