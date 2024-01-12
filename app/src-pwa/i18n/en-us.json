@@ -15,5 +15,4 @@
   "offerExpiredText": "Your offer '{title}' has expired and is no longer visible to other members. You can renew it to make it available again.",
   "needExpired": "Your need has expired",
   "needExpiredText": "Your need '{content}' has expired and is no longer visible to other members. You can renew it or delete it if it has been fulfilled."
-
 }

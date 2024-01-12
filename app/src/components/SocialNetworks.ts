@@ -7,13 +7,17 @@ interface SocialNetworkEntry {
   contact?: string,
   share?: string,
   label: string,
-  translateLabel?: boolean
+  translateLabel?: boolean,
+  idLabel?: string,
+  translateIdLabel?: boolean
 }
 
-interface SocialNetwork {
+export interface SocialNetwork {
   pattern: string,
   label: string,
-  translateLabel: boolean
+  translateLabel: boolean,
+  idLabel: string,
+  translateIdLabel: boolean
 }
 
 /**
@@ -34,7 +38,9 @@ function getNetworks(type: "contact" | "share") : {[key: string] : SocialNetwork
       obj[key] = {
         pattern: network[type] as string,
         label: network.label,
-        translateLabel: network.translateLabel ?? false
+        translateLabel: network.translateLabel ?? false,
+        idLabel: network.idLabel ?? network.label,
+        translateIdLabel: (network.idLabel ? network.translateIdLabel : network.translateLabel) ?? false
       }
       return obj;
     }, {})

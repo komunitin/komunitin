@@ -165,7 +165,6 @@
   "notifications": "Notificaciones",
   "app": "Applicación",
   "account": "Cuenta",
-
   "enterProfileData": "Acerca de ti",
   "editProfileHelpText": "Crea tu perfil de miembro de la red de intercambio como quieras que te vean los demás miembros.",
   "name": "Nombre",
@@ -183,6 +182,20 @@
   "fieldRequired": "Este campo es necesario",
   "phone": "Teléfono",
   "addContact": "Añadir contacto",
+  "lnglat": "Longitud: {lng} Latitud: {lat}",
+  "type": "Tipo",
+  "username": "Nombre d'usuari",
+  "test": "Probar",
+  "changePasswordText": "Entra tu contraseña actual y la nueva que quieres usar a partir de ahora.",
+  "oldPassword": "Contraseña actual",
+  "oldPasswordHint": "Tu contraseña actual para confirmar el cambio",
+  "newPassword": "Nueva contraseña",
+  "newPasswordHint": "Tu nueva contraseña debe tener mínimo 8 caracteres",
+  "changeEmailText": "Entra tu contraseña y el nuevo correo electrónico que quieres usar a partir de ahora.",
+  "emailChangeHint": "El email debe ser válido y no estar en uso por otro usuario.",
+  "passwordChanged": "Se ha cambiado tu contraseña!",
+  "emailChanged": "Tu nuevo email es ahora {email}!",
 
-  "ErrorAuthNoCredentials": "Error: email o password incorrectos"
+  "ErrorAuthNoCredentials": "Error: email o password incorrectos",
+  "ErrorInvalidPassword": "Contraseña incorrecta"
 }

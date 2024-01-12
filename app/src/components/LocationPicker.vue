@@ -31,7 +31,7 @@
     </div>
   </l-map>
   <div class="text-onsurface-m text-body-2">
-    {{ $t('Longitude:') + ' ' + markerLatLng?.lng?.toFixed(4) + ', ' + $t('Latitude:') + ' ' + markerLatLng?.lat?.toFixed(4) }}
+    {{ $t('lnglat', {lng: markerLatLng?.lng?.toFixed(4), lat: markerLatLng?.lat?.toFixed(4)}) }}
   </div>
 </template>
 <script setup lang="ts">
@@ -39,7 +39,7 @@ import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
 import type { LeafletMouseEvent, LocationEvent, PointExpression } from 'leaflet'
 import { useLeafletSettings } from '../composables/leaflet'
 import { useStore } from 'vuex'
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import "leaflet/dist/leaflet.css";
 
 /**
@@ -108,7 +108,8 @@ const onReady = () => {
   map.value.leafletObject.on("click", onMapClick)
   map.value.leafletObject.on("locationfound", onMapClick)
 }
-onUnmounted(()=> {
+
+onBeforeUnmount(()=> {
   map.value.leafletObject.off("click", onMapClick)
   map.value.leafletObject.off("locationfound", onMapClick)
 })

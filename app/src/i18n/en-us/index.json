@@ -184,8 +184,19 @@
   "fieldRequired": "This field is required",
   "phone": "Phone",
   "addContact": "Add contact",
-
-
+  "lnglat": "Longitude: {lng} Latitude: {lat}",
+  "type": "Type",
+  "username": "Username",
+  "test": "Test",
+  "changePasswordText": "Enter your current password and the new one you want to use.",
+  "oldPassword": "Current password",
+  "oldPasswordHint": "Enter your current password to confirm the change",
+  "newPassword": "New password",
+  "newPasswordHint": "Your new password must be at least 8 characters long",
+  "changeEmailText": "Enter your current password and the new email you want to use from now on.",
+  "emailChangeHint": "Your new email must be valid and not already in use by another user",
+  "passwordChanged": "Your password has been changed.",
+  "emailChanged": "Your email has been changed to {email}.",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
@@ -204,5 +215,6 @@
   "ErrorIncorrectCredentials": "Error: Incorrect email or password",
   "ErrorAuthNoCredentials": "Error: Incorrect email or password",
   "ErrorNotImplemented": "Error: Not Implemented",
-  "ErrorInvalidTransferState": "Error: Invalid Transfer State"
+  "ErrorInvalidTransferState": "Error: Invalid Transfer State",
+  "ErrorInvalidPassword": "The password is not correct"
 }

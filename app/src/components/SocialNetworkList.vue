@@ -26,7 +26,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import {ContactNetworks, ShareNetworks, getContactUrl, getNetworkIcon, getShareUrl} from "./SocialNetworks";
+import {SocialNetwork, ContactNetworks, ShareNetworks, getContactUrl, getNetworkIcon, getShareUrl} from "./SocialNetworks";
 
 import { Contact } from "../store/model";
 
@@ -35,11 +35,11 @@ type NetworkNames = Record<string, { name?: string }>;
 const CONTACT = "contact";
 const SHARE = "share";
 
-interface DataNetwork {
+/**
+ * Social network augmented with the identifier of the contact.
+ */
+interface DataNetwork extends SocialNetwork {
   name?: string;
-  pattern: string;
-  label: string;
-  translateLabel: boolean;
 }
 
 export default defineComponent({

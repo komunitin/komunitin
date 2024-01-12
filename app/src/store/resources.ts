@@ -7,7 +7,7 @@ import {
   ResourceIdentifierObject,
   ResourceObject,
   ExternalResourceObject,
-  ErrorObject
+  ErrorResponse
 } from "src/store/model";
 
 export interface ResourcesState<T extends ResourceObject> {
@@ -65,6 +65,10 @@ export interface UpdatePayload<T extends ResourceObject> {
    * The updated fields for the resource.
    */
   resource: DeepPartial<T> & ResourceIdentifierObject
+  /**
+   * Array of resources to be updated alongside the main resource.
+   */
+  included?: (DeepPartial<ResourceObject> & ResourceIdentifierObject)[]
 }
 
 export interface DeletePayload {
@@ -354,13 +358,13 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   protected async checkResponse(response: Response) {
     if (!response.ok) {
-      const data = await response.json() as ErrorObject
+      const data = await response.json() as ErrorResponse
       // Check that the code is actually known.
-      const code =
-        data.code in KErrorCode
-          ? (data.code as KErrorCode)
-          : KErrorCode.UnknownServer;
-      throw new KError(code, data.title);
+      const serverCode = data.errors?.[0]?.code
+      const title = data.errors?.[0]?.title
+      // check if serverCode is in enum KErrorCode:
+      const code = (serverCode && serverCode in KErrorCode) ? serverCode as KErrorCode : KErrorCode.UnknownServer
+      throw new KError(code, title);
     }
   }
 
@@ -814,7 +818,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   ) {
     const url = this.resourceEndpoint(payload.code, payload.group);
     const resource = payload.resource;
-    const body = {data: resource};
+    const body = {data: resource, ...{included: payload.included}};
     try {
       const data = await this.request(context, url, "patch", body) 
       const resource = data.data

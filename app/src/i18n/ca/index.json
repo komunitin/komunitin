@@ -168,7 +168,6 @@
   "notifications": "Notificacions",
   "app": "Aplicació",
   "account": "Compte",
-
   "enterProfileData": "Qui ets?",
   "editProfileHelpText": "Crea el teu perfil de membre de la xarxa d'intercanvi com vulguis que et vegin la resta de membres.",
   "name": "Nom",
@@ -186,6 +185,20 @@
   "fieldRequired": "Aquest camp és necessari",
   "phone": "Telèfon",
   "addContact": "Afegeix contacte",
+  "lnglat": "Longitud: {lng} Latitud: {lat}",
+  "type": "Tipus",
+  "username": "Nom d'usuari",
+  "test": "Provar",
+  "changePasswordText": "Entra la teva contrasenya actual i la que vols fer servir a partir d'ara.",
+  "oldPassword": "Contrasenya actual",
+  "oldPasswordHint": "La teva contrasenya actual per a confirmar el canvi",
+  "newPassword": "Contrasenya nova",
+  "newPasswordHint": "La contrasenya ha de tenir almenys 8 caràcters",
+  "changeEmailText": "Entra la teva contrasenya i el nou correu electrònic que vols fer servir a partir d'ara.",
+  "emailChangeHint": "L'email ha de ser vàlid i no estar en ús per cap altre usuari",
+  "passwordChanged": "S'ha canviat la teva contrasenya!",
+  "emailChanged": "El teu email és ara {email}!",
 
-  "ErrorAuthNoCredentials": "Email o contrasenya incorrectes"
+  "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
+  "ErrorInvalidPassword": "Contrasenya incorrecta"
 }
