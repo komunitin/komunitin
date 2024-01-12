@@ -13,12 +13,16 @@
     "telegram": {
         "contact": "https://t.me/{name}",
         "share": "https://t.me/share/url?url={url}&text={text}",
-        "label": "Telegram"
+        "label": "Telegram",
+        "idLabel": "username",
+        "translateIdLabel": true
     },
     "whatsapp": {
         "contact": "https://api.whatsapp.com/send?phone={name}",
         "share": "https://api.whatsapp.com/send?text={text}",
-        "label": "WhatsApp"
+        "label": "WhatsApp",
+        "idLabel": "phone",
+        "translateIdLabel": true
     },
     "twitter": {
         "share": "https://twitter.com/intent/tweet?url={url}&text={title}",

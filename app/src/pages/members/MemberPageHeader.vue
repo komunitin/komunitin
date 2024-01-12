@@ -177,6 +177,7 @@ export default defineComponent({
   border-radius: 76px;
   line-height: 0;
   object-fit: cover;
+  aspect-ratio: 1/1;
 }
 .collapsible-content {
   height: 200px;

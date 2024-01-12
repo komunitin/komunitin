@@ -165,8 +165,6 @@ export interface Contact extends ResourceObject {
   attributes: {
     type: string;
     name: string;
-    created: string;
-    updated: string;
   };
 }
 
