@@ -2,7 +2,7 @@
   <div class="row text-onsurface-m">
     <!-- BIO -->
     <div class="column col-12 col-md-8">
-      <div>
+      <div v-if="member.attributes.description">
         <div class="text-overline text-uppercase text-onsurface-d">
           {{ $t('bio') }}
         </div>

@@ -6,7 +6,7 @@
     >
       <template #buttons>
         <contact-button
-          v-if="member.contacts"
+          v-if="!isMe && member.contacts"
           icon="message"
           round
           flat
@@ -23,6 +23,20 @@
             })
           "
           :title="member.attributes.name"
+        />
+        <q-btn
+          v-if="isMe"
+          icon="edit"
+          flat
+          round
+          to="/profile"
+        />
+        <q-btn
+          v-if="isMe"
+          icon="settings"
+          flat
+          round
+          to="/settings"
         />
       </template>
     </page-header>

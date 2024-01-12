@@ -15,79 +15,24 @@
   </l-map>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed } from "vue";
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 import type { PointExpression, LatLngExpression} from "leaflet";
-import { icon } from "leaflet/dist/leaflet-src.esm"
+import { useLeafletSettings } from "../composables/leaflet";
 import "leaflet/dist/leaflet.css";
 
+const props = withDefaults(defineProps<{
+  center: [number, number],
+  marker?: [number, number],
+  interactive?: boolean
+}>(), {
+  interactive: true,
+  marker: undefined
+})
 
-interface SimpleMapData {
-  url: string,
-  zoom: number,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  markerIcon?: any
-}
+const { url, zoom, markerIcon } = useLeafletSettings()
+const centerLatLng = computed(() => props.center?.slice().reverse() as PointExpression)
+const markerLatLng = computed(() => props.marker?.slice().reverse() as LatLngExpression)
 
-export default defineComponent({
-  name: "SimpleMap",
-  components: {
-    LMap,
-    LTileLayer,
-    LMarker
-  },
-  props: {
-    /**
-     * Array of [longitude, latitude]
-     */
-    center: {
-      type: Array,
-      default: undefined,
-      required: true
-    },
-    /**
-     * Array of [longitude, latitude]
-     */
-    marker: {
-      type: Array,
-      default: undefined,
-      required: false
-    },
-    interactive: {
-      type: Boolean,
-      default: true,
-      required: false
-    }
-  },
-  data() : SimpleMapData {
-    return {
-      url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      zoom: 12,
-    };
-  },
-  computed: {
-    // Leaflet expects [latitude, longitude] while GeoJSON
-    // is the opposite.
-    centerLatLng() {
-      return this.center?.slice().reverse() as PointExpression;
-    },
-    markerLatLng() {
-      return this.marker?.slice().reverse() as LatLngExpression;
-    },
-  },
-  async beforeMount() {
-    this.markerIcon = icon({
-      iconUrl: require("../assets/icons/marker.png"),
-      shadowUrl: require("../assets/icons/marker-shadow.png"),
-      iconSize: [25, 41],
-      iconAnchor: [13, 41]
-    })
-  }
-});
 </script>
-<!--style scoped>
-.leaflet-bottom.leaflet-right {
-  display: none;
-}
-</style-->

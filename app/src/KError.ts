@@ -1,10 +1,20 @@
 export enum KErrorCode {
+  // Server errors codes.
+  NotImplemented = "NotImplemented",
+  Unauthorized = "Unauthorized",
+  Forbidden = "Forbidden",
+  NotFound = "NotFound",
+  InvalidPassword = "InvalidPassword", 
+  // There are more server errors but we're not identifying them and
+  // they are all piped to UnknownServer.
+  UnknownServer = "UnknownServer",
+
+  // Client errors codes.
   Unknown = "Unknown",
   IncorrectRequest = "IncorrectRequest",
   ServerNoResponse = "ServerNoResponse",
   ServerBadResponse = "ServerBadResponse",
   ResourceNotFound = "ResourceNotFound",
-  UnknownServer = "UnknownServer",
   UnknownVueError = "UnknownVueError",
   UnknownScript = "UnknownScript",
   ErrorHandling = "ErrorHandling",
@@ -15,7 +25,6 @@ export enum KErrorCode {
   VueWarning = "VueWarning",
   IncorrectCredentials = "IncorrectCredentials",
   AuthNoCredentials = "AuthNoCredentials",
-  NotImplemented = "NotImplemented",
   RequestError = "RequestError",
   InvalidTransferState = "InvalidTransferState",
   /**
