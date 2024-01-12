@@ -8,35 +8,23 @@
     :filter="filter"
   />
 </template>
-<script lang="ts">
-import { defineComponent } from "vue"
+<script setup lang="ts">
+import { computed } from "vue"
 import ResourceCards from "../ResourceCards.vue";
 import OfferCard from "../../components/OfferCard.vue";
+import { Member } from "../../store/model";
+import { useStore } from "vuex";
 
-export default defineComponent({
-  name: "MemberOffers",
-  components: {
-    ResourceCards
-  },
-  props: {
-    groupCode: {
-      type: String,
-      required: true
-    },
-    member: {
-      type: Object,
-      required: true,
-    }
-  },
-  data() {
-    return {
-      card: OfferCard.name,
-      filter: {
-        member: this.member.id,
-        expired: 'true,false',
-        state: 'hidden,published'
-      }
-    }
-  }
-})
+const props = defineProps<{
+  groupCode: string,
+  member: Member
+}>()
+const store = useStore()
+const isMe = computed(() => props.member && props.member.id == store.getters.myMember.id)
+const card = OfferCard.name
+const filter = computed(() => ({
+  member: props.member.id,
+  expired: 'false' + (isMe.value ? ',true' : ''),
+  state: 'published' + (isMe.value ? ',hidden' : '')
+}))
 </script>
