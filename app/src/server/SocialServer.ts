@@ -411,7 +411,8 @@ export default {
 
     // Single member.
     server.get(urlSocial + "/:code/members/:member", (schema: any, request: any) => {
-      return schema.members.findBy({ code: request.params.member });
+      return schema.members.findBy({ id: request.params.member })
+        || schema.members.findBy({ code: request.params.member });
     });
 
     // Single offer.
