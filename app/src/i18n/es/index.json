@@ -195,6 +195,7 @@
   "emailChangeHint": "El email debe ser válido y no estar en uso por otro usuario.",
   "passwordChanged": "Se ha cambiado tu contraseña!",
   "emailChanged": "Tu nuevo email es ahora {email}!",
+  "website": "Web",
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta"

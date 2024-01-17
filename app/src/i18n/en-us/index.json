@@ -197,6 +197,7 @@
   "emailChangeHint": "Your new email must be valid and not already in use by another user",
   "passwordChanged": "Your password has been changed.",
   "emailChanged": "Your email has been changed to {email}.",
+  "website": "Website",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
