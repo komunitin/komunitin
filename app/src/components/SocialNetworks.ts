@@ -9,7 +9,8 @@ interface SocialNetworkEntry {
   label: string,
   translateLabel?: boolean,
   idLabel?: string,
-  translateIdLabel?: boolean
+  translateIdLabel?: boolean,
+  rawParameters?: boolean
 }
 
 export interface SocialNetwork {
@@ -18,6 +19,7 @@ export interface SocialNetwork {
   translateLabel: boolean,
   idLabel: string,
   translateIdLabel: boolean
+  rawParameters: boolean
 }
 
 /**
@@ -40,7 +42,8 @@ function getNetworks(type: "contact" | "share") : {[key: string] : SocialNetwork
         label: network.label,
         translateLabel: network.translateLabel ?? false,
         idLabel: network.idLabel ?? network.label,
-        translateIdLabel: (network.idLabel ? network.translateIdLabel : network.translateLabel) ?? false
+        translateIdLabel: (network.idLabel ? network.translateIdLabel : network.translateLabel) ?? false,
+        rawParameters: network.rawParameters ?? false
       }
       return obj;
     }, {})
@@ -61,7 +64,7 @@ export const ShareNetworks = Object.freeze(getNetworks("share"));
  */
 export function getContactUrl(network: SocialNetwork, name: string) : string {
   return network.pattern
-    .replace("{name}", encodeURIComponent(name));
+    .replace("{name}", network.rawParameters ? name : encodeURIComponent(name));
 }
 
 /**
@@ -69,9 +72,9 @@ export function getContactUrl(network: SocialNetwork, name: string) : string {
  */
 export function getShareUrl(network: SocialNetwork, url: string, title: string, text:string) : string {
   return network.pattern
-    .replace("{url}", encodeURIComponent(url))
-    .replace("{title}", encodeURIComponent(title))
-    .replace("{text}", encodeURIComponent(text));
+    .replace("{url}", network.rawParameters ? url : encodeURIComponent(url))
+    .replace("{title}", network.rawParameters ? title : encodeURIComponent(title))
+    .replace("{text}", network.rawParameters ? text : encodeURIComponent(text));
 }
 
 /**

@@ -34,6 +34,7 @@
     },
     "website": {
         "contact": "{name}",
+        "rawParameters": true,
         "label": "website",
         "translateLabel": true,
         "idLabel": "URL"

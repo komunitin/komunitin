@@ -45,7 +45,9 @@ function fakeContactName(type: string) {
     case "phone":
       return faker.phone.phoneNumberFormat();
     case "telegram":
-      return "@" + faker.internet.userName();
+      return faker.internet.userName();
+    case "website":
+      return faker.internet.url();
     default:
       return faker.internet.email();
   }
