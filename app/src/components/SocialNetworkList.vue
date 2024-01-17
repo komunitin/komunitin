@@ -114,6 +114,9 @@ export default defineComponent({
             if (nets[key].name !== undefined) {
               obj[key].name = nets[key].name;
             }
+            if (obj[key].label && baseNetworks[key].translateLabel) {
+              obj[key].label = this.$t(obj[key].label);
+            }
           }
           return obj;
         },
