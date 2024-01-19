@@ -57,6 +57,10 @@
           />
         </q-list>
       </div>
+      <save-changes
+        ref="changes"
+        class="q-mt-lg"
+      />
     </q-page>
   </page-container>
 </template>
@@ -66,6 +70,8 @@ import { useStore } from 'vuex';
 import PageHeader from '../../layouts/PageHeader.vue';
 import PageContainer from '../../layouts/PageContainer.vue';
 import ToggleItem from '../../components/ToggleItem.vue';
+import SaveChanges from '../../components/SaveChanges.vue';
+
 import langs, {LangName, normalizeLocale} from "../../i18n";
 import { AccountSettings, UserSettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
@@ -109,20 +115,24 @@ const loadUserSettings = async () => {
 
 onMounted(async () => Promise.all([loadAccountSettings(), loadUserSettings()]))
 
+const changes = ref<typeof SaveChanges>()
+
 const saveAccountSettings = async (resource: DeepPartial<AccountSettings>) => {
-  await store.dispatch("account-settings/update", {
+  const fn = () => store.dispatch("account-settings/update", {
     code: myAccount.value.attributes.code,
     group: myAccount.value.currency.attributes.code,
     resource
   })
+  changes.value?.save(fn)
 }
 
 const saveUserSettings = async (resource: DeepPartial<UserSettings>) => {
-  await store.dispatch("user-settings/update", {
+  const fn = () => store.dispatch("user-settings/update", {
     code: myMember.value.attributes.code,
     group: myMember.value.group.attributes.code,
     resource
   })
+  changes.value?.save(fn)
 }
 
 // Account settings
