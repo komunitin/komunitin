@@ -66,7 +66,8 @@ function fakeAddress() {
     streetAddress: faker.address.streetAddress(),
     addressLocality: faker.address.city(),
     postalCode: faker.address.zipCode(),
-    addressRegion: faker.address.county()
+    addressRegion: faker.address.county(),
+    addressCountry: faker.address.countryCode()
   };
 }
 
@@ -232,6 +233,7 @@ export default {
   },
   factories: {
     user: Factory.extend({
+      email: () => faker.internet.email(),
       created: () => faker.date.past(),
       updated: () => faker.date.past(),
     }),
@@ -417,6 +419,14 @@ export default {
         || schema.members.findBy({ code: request.params.member });
     });
 
+    // Edit member profile
+    server.patch(urlSocial + "/:code/members/:member", (schema: any, request: any) => {
+      const member = schema.members.findBy({ id: request.params.member })
+      const body = JSON.parse(request.requestBody);
+      member.update(body.data.attributes);
+      return member;
+    });
+
     // Single offer.
     server.get(urlSocial + "/:code/offers/:offer", (schema: any, request: any) => {
       return schema.offers.findBy({ code: request.params.offer });
@@ -512,5 +522,7 @@ export default {
       settings.update(body.data.attributes);
       return settings;
     });
+
+
   }
 };
