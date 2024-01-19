@@ -17,6 +17,10 @@
         @update:member="saveMember"
         @update:contacts="saveContacts"
       />
+      <save-changes
+        ref="changes"
+        class="q-mt-lg"
+      />
     </q-page>
   </page-container>
 </template>
@@ -24,6 +28,7 @@
 import PageHeader from "../../layouts/PageHeader.vue"
 import PageContainer from "../../layouts/PageContainer.vue"
 import ProfileForm from "./ProfileForm.vue"
+import SaveChanges from "../../components/SaveChanges.vue"
 
 import { useStore } from "vuex"
 import { computed, ref } from "vue"
@@ -50,18 +55,21 @@ const loadMember = async () => {
   member.value = myMember.value
 }
 
+const changes = ref<typeof SaveChanges>()
+
 const saveMember = async (resource: DeepPartial<Member>) => {
-  await store.dispatch("members/update", {
+  const fn = () => store.dispatch("members/update", {
     code: myMember.value.id,
     group: code.value,
     resource : {
       attributes: resource.attributes
     }
   })
+  changes.value?.save(fn)
 }
 
 const saveContacts = async (resources: DeepPartial<Contact>[]) => {
-  await store.dispatch("members/update", {
+  const fn = () => store.dispatch("members/update", {
     code: myMember.value.id,
     group: code.value,
     resource: {
@@ -73,9 +81,9 @@ const saveContacts = async (resources: DeepPartial<Contact>[]) => {
     },
     included: resources
   })
+  changes.value?.save(fn)
 }
 
 loadMember()
-// TODO: Update email and password.
 
 </script>
