@@ -31,5 +31,12 @@
     "facebook": {
         "share": "https://www.facebook.com/sharer/sharer.php?u={url}&title={title}&description={text}",
         "label": "Facebook"
+    },
+    "website": {
+        "contact": "{name}",
+        "rawParameters": true,
+        "label": "website",
+        "translateLabel": true,
+        "idLabel": "URL"
     }
 }

@@ -1,7 +1,7 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Model, belongsTo, hasMany, Server, Factory } from "miragejs";
+import { Model, belongsTo, hasMany, Server, Factory, Response } from "miragejs";
 import faker from "faker";
 import { filter } from "./ServerUtils"
 
@@ -45,7 +45,9 @@ function fakeContactName(type: string) {
     case "phone":
       return faker.phone.phoneNumberFormat();
     case "telegram":
-      return "@" + faker.internet.userName();
+      return faker.internet.userName();
+    case "website":
+      return faker.internet.url();
     default:
       return faker.internet.email();
   }
@@ -64,7 +66,8 @@ function fakeAddress() {
     streetAddress: faker.address.streetAddress(),
     addressLocality: faker.address.city(),
     postalCode: faker.address.zipCode(),
-    addressRegion: faker.address.county()
+    addressRegion: faker.address.county(),
+    addressCountry: faker.address.countryCode()
   };
 }
 
@@ -230,6 +233,7 @@ export default {
   },
   factories: {
     user: Factory.extend({
+      email: () => faker.internet.email(),
       created: () => faker.date.past(),
       updated: () => faker.date.past(),
     }),
@@ -411,7 +415,17 @@ export default {
 
     // Single member.
     server.get(urlSocial + "/:code/members/:member", (schema: any, request: any) => {
-      return schema.members.findBy({ code: request.params.member });
+      return schema.members.findBy({ id: request.params.member })
+      || schema.members.findBy({ code: request.params.member })
+      || new Response(404);
+    });
+
+    // Edit member profile
+    server.patch(urlSocial + "/:code/members/:member", (schema: any, request: any) => {
+      const member = schema.members.findBy({ id: request.params.member })
+      const body = JSON.parse(request.requestBody);
+      member.update(body.data.attributes);
+      return member;
     });
 
     // Single offer.
@@ -509,5 +523,7 @@ export default {
       settings.update(body.data.attributes);
       return settings;
     });
+
+
   }
 };

@@ -21,11 +21,10 @@ describe("logged in", () => {
     await flushPromises()
     await wrapper.vm.$wait()
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
-  });
-  it("renders Group, member and account data", async() => {
+    
     const text = wrapper.text();
     // Member name
-    expect(text).toContain("Tomasa Nikolaus");
+    expect(text).toContain("Emiliano Lemke");
     // Acount number
     expect(text).toContain("GRP00000");
     // Group name

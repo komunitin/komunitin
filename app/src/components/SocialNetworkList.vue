@@ -109,10 +109,14 @@ export default defineComponent({
       return Object.keys(nets).reduce(
         (obj: { [key: string]: DataNetwork }, key: string) => {
           if (key in baseNetworks) {
-            obj[key] = baseNetworks[key];
+            // Dont change the baseNetworks object.
+            obj[key] = {...baseNetworks[key]};
             // Contacts have "name", ShareNetworks no.
             if (nets[key].name !== undefined) {
               obj[key].name = nets[key].name;
+            }
+            if (obj[key].label && baseNetworks[key].translateLabel) {
+              obj[key].label = this.$t(obj[key].label);
             }
           }
           return obj;

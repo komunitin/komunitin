@@ -37,7 +37,7 @@ import PasswordField from '../../components/PasswordField.vue';
 import KError, { KErrorCode } from '../../KError';
 
 const props = defineProps<{
-  modelValue: string
+  modelValue?: string
   user: User
   group: Group
 }>();

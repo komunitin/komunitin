@@ -28,7 +28,7 @@ describe("Transactions", () => {
     // Click transactions link
     await wrapper.get("#menu-transactions").trigger("click");
     await flushPromises();
-    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62/transactions");
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/EmilianoLemke57/transactions");
     // Further wait to load members.
     await flushPromises();
     await wrapper.vm.$wait();
@@ -36,13 +36,13 @@ describe("Transactions", () => {
     expect(transactions.length).toBe(20);
     const first = transactions[0];
     expect(first.text()).toContain("Pending");
-    expect(first.text()).toContain("Magali");
+    expect(first.text()).toContain("Arnoldo");
     expect(first.text()).toContain("$-8.00");
     expect(first.text()).toContain("Persevering");
 
     const second = transactions[1];
     expect(second.text()).toContain("today");
-    expect(second.text()).toContain("Isobel");
+    expect(second.text()).toContain("Lamar");
     expect(second.text()).toContain("$70.72");
     expect(second.text()).toContain("Inverse");
     // Search
@@ -55,9 +55,9 @@ describe("Transactions", () => {
     await wrapper.vm.$router.push("/groups/GRP0/transactions/8e8bf9df-3f8c-4682-9660-515da55fc265");
     await wrapper.vm.$wait();
     const text = wrapper.text();
-    expect(text).toContain("Tomasa");
+    expect(text).toContain("Emiliano");
     expect(text).toContain("GRP00000");
-    expect(text).toContain("Isobel");
+    expect(text).toContain("Lamar");
     expect(text).toContain("GRP00005");
     expect(text).toContain("$70.72");
     expect(text).toContain("today at");
@@ -77,7 +77,7 @@ describe("Transactions", () => {
     await flushPromises()
     await wrapper.vm.$wait()
     const list = wrapper.getComponent(QDialog).getComponent(QList)
-    expect(list.text()).toContain("Cameron")
+    expect(list.text()).toContain("Carol")
     const payer = list.findAllComponents(MemberHeader)[2]
     await payer.trigger("click")
     await flushPromises();
@@ -86,8 +86,8 @@ describe("Transactions", () => {
     await wrapper.get("button[type='submit']").trigger("click")
     await flushPromises();
     const text = wrapper.text();
-    expect(text).toContain("Cameron");
-    expect(text).toContain("Tomasa");
+    expect(text).toContain("Carol");
+    expect(text).toContain("Emiliano");
     expect(text).toContain("123");
     expect(text).toContain("Test transaction description.");
     expect(text).toContain("today")

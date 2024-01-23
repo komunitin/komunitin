@@ -2,14 +2,14 @@
   <div>
     <q-header
       id="header"
-      class="bg-primary"
-      :class="showBalance ? '' : 'row'"
+      class="bg-primary items-center no-wrap"
+      :class="showBalance ? '' : 'flex'"
       :style="`height: ${computedHeight}px;`"
     >
-      <q-toolbar
-        class="text-onprimary"
-        :class="(showBalance ? '' : 'col-shrink ') + (noButton ? 'q-px-none' : 'q-pr-none')"
-        :style="`min-height: ${toolbarHeight}px`"
+      <div
+        class="flex q-py-xs"
+        :class="[noButton ? '' : 'q-pl-sm q-pr-xs']"
+        style="height: 50px;"
       >
         <!-- render back button, menu button or none -->
         <q-btn
@@ -30,7 +30,7 @@
           :aria-label="$t('menu')"
           @click="$store.dispatch('toogleDrawer')"
         />
-      </q-toolbar>
+      </div>
       <div
         v-if="showBalance"
         class="col self-center column items-center"
@@ -53,12 +53,14 @@
           }}
         </div>
       </div>
-      <q-toolbar :class="((noButton || showBalance) ? 'no-button ' : '') + (showBalance ? '' : 'col-grow q-pl-none')">
+      <q-toolbar
+        class="no-wrap"
+        :class="((noButton || showBalance) ? 'no-button ' : '') + (showBalance ? '' : 'col-grow q-pl-none')"
+        style="max-width: none; flex: 1 1 0%"
+      >
         <q-toolbar-title v-if="!searchActive">
           {{ title }}
         </q-toolbar-title>
-      
-
         <q-input
           v-if="searchActive"
           v-model="searchText"
@@ -66,7 +68,6 @@
           dense
           standout
           class="q-mr-xs search-box"
-          :class="noButton ? '' : 'q-ml-md'"
           type="search"
           debounce="250"
           autofocus
@@ -96,7 +97,6 @@
           icon="search"
           @click="searchActive = true"
         />
-
         <!-- slot for right buttons -->
         <slot name="buttons" />
         <q-scroll-observer
