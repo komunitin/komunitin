@@ -41,6 +41,11 @@ describe("SocialNetworkList", () => {
     }));
 
     contact = mount(SocialNetworkList, {
+      global: {
+        mocks: {
+          $t: (x: never) => x,
+        }
+      },
       props: {
         contacts,
         type: "contact"
@@ -48,6 +53,11 @@ describe("SocialNetworkList", () => {
     });
 
     share = mount(SocialNetworkList, {
+      global: {
+        mocks: {
+          $t: (x: never) => x,
+        }
+      },
       props: {
         type: "share",
         title: "Title",

@@ -47,7 +47,7 @@ describe("Needs", () => {
     await wrapper.vm.$router.push("/groups/GRP0/needs/Et-quae-po");
     await wrapper.vm.$wait();
     const text = wrapper.text();
-    expect(text).toContain("Esteban");
+    expect(text).toContain("Brigitte");
     expect(text).toContain("Baby");
     expect(text).toContain("Et quae");
     expect(text).toContain("GRP00009");
@@ -86,18 +86,18 @@ describe("Needs", () => {
   });
 
   it ("Updates a need", async () => {
-    await wrapper.vm.$router.push("/groups/GRP0/needs/Tempore/edit");
+    await wrapper.vm.$router.push("/groups/GRP0/needs/Dolorum-b/edit");
     await wrapper.vm.$wait();
     await wrapper.get("[name='description']").setValue("This is an updated description.")
     await wrapper.get("[type='submit']").trigger("click");
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs/Tempore");
+    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs/Dolorum-b");
     const text = wrapper.text();
     expect(text).toContain("This is an updated description.");
   })
 
   it ("Deletes a need", async () => {
-    await wrapper.vm.$router.push("/groups/GRP0/needs/Tempore");
+    await wrapper.vm.$router.push("/groups/GRP0/needs/Dolorum-b");
     await wrapper.vm.$wait();
     await wrapper.getComponent(DeleteNeedBtn).trigger("click");
     await wrapper.vm.$wait();

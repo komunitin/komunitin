@@ -39,7 +39,7 @@ describe("Members", () => {
     // Check GRP00002 result
     const members = wrapper.getComponent(MemberList).findAllComponents(MemberHeader);
     const second = members[2];
-    expect(second.text()).toContain("Cameron");
+    expect(second.text()).toContain("Carol");
     expect(second.text()).toContain("GRP00002");
     expect(second.text()).toContain("$583.11");
     expect(second.text()).toContain("Min $-500");
@@ -48,21 +48,21 @@ describe("Members", () => {
 
     // Default avatar
     const avatar = members[0].findComponent(QAvatar); 
-    expect(avatar.text()).toEqual("T");
+    expect(avatar.text()).toEqual("E");
 
     // Check GRP00025 result
     const other = members[25];
-    expect(other.text()).toContain("Roberto");
+    expect(other.text()).toContain("Tanya");
     expect(other.text()).toContain("GRP00025");
     expect(other.text()).toContain("$386.64");
     expect(other.text()).toContain("Min $-500");
     // Search
-    wrapper.getComponent(PageHeader).vm.$emit("search", "isobe");
+    wrapper.getComponent(PageHeader).vm.$emit("search", "schr");
     await wrapper.vm.$wait();
     // Check result!
     expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(1);
     const result = wrapper.getComponent(MemberList).getComponent(MemberHeader);
-    expect(result.text()).toContain("Isobel Upton");
+    expect(result.text()).toContain("Lamar Schroeder");
     expect(result.text()).toContain("GRP00005");
     expect(result.text()).toContain("$598.71");
   }, 20000);

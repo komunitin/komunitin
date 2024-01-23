@@ -25,7 +25,7 @@ describe("Member", () => {
     // Click members link
     await wrapper.get("#my-member").trigger("click");
     await flushPromises();
-    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/TomasaNikolausV_Ledner62");
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/EmilianoLemke57");
     // Wait for content.
     await wrapper.vm.$wait();
     const text = wrapper.text();
@@ -39,12 +39,12 @@ describe("Member", () => {
     expect(text).toContain("3 Offers");
     expect(wrapper.findAllComponents(QTab).length).toBe(3);
     // Bio
-    expect(text).toContain("Consequuntur aut est fuga");
+    expect(text).toContain("Est placeat ex ut voluptas enim ex");
     // Contact
-    expect(text).toContain("363-958-4365");
-    expect(text).toContain("@Sharon.Turner");
+    expect(text).toContain("210-860-5469");
+    expect(text).toContain("Kaley_Cummerata");
     // Location
-    expect(text).toContain("Avon");
+    expect(text).toContain("Borders");
     
     // Needs
 
@@ -74,12 +74,12 @@ describe("Member", () => {
     const member = wrapper.getComponent(MemberList).findAllComponents(MemberHeader)[1];
     member.trigger("click");
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/MagaliLeffler45");
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/ArnoldoErdman69");
     const text = wrapper.text();
-    expect(text).toContain("Magali");
+    expect(text).toContain("Arnoldo");
     expect(text).toContain("GRP00001");
     expect(text).toContain("$-199.78");
-    expect(text).toContain("Nisi");
+    expect(text).toContain("Voluptates totam quaerat eius aut odio adipisci");
     expect(text).toContain("@yahoo.com");
     expect(text).toContain("No Needs");
     expect(text).toContain("3 Offers");
@@ -102,7 +102,7 @@ describe("Member", () => {
     const offers = wrapper.findAllComponents(OfferCard);
     expect(offers.length).toBe(3);
     const offer = offers[0];
-    expect(offer.text()).toContain("Magali");
+    expect(offer.text()).toContain("Arnoldo");
 
     // Transactions
     tabs[3].trigger("click");

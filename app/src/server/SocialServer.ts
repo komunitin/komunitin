@@ -1,7 +1,7 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Model, belongsTo, hasMany, Server, Factory } from "miragejs";
+import { Model, belongsTo, hasMany, Server, Factory, Response } from "miragejs";
 import faker from "faker";
 import { filter } from "./ServerUtils"
 
@@ -416,7 +416,8 @@ export default {
     // Single member.
     server.get(urlSocial + "/:code/members/:member", (schema: any, request: any) => {
       return schema.members.findBy({ id: request.params.member })
-        || schema.members.findBy({ code: request.params.member });
+      || schema.members.findBy({ code: request.params.member })
+      || new Response(404);
     });
 
     // Edit member profile

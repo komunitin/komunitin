@@ -45,8 +45,8 @@ describe("Offers", () => {
     expect(wrapper.findAllComponents(OfferCard).length).toBe(0);
     expect(wrapper.findComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
-    // found 10 results!
-    expect(wrapper.findAllComponents(OfferCard).length).toBe(3);
+    // found 2 results!
+    expect(wrapper.findAllComponents(OfferCard).length).toBe(2);
   })
 
   it ("renders single offer", async() => {
@@ -54,7 +54,7 @@ describe("Offers", () => {
     await wrapper.vm.$wait();
     const text = wrapper.text();
     expect(text).toContain("Tuna");
-    expect(text).toContain("Magali");
+    expect(text).toContain("Arnoldo");
     expect(text).toContain("GRP00001");
     expect(text).toContain("$0.88");
     expect(text).toContain("Updated yesterday");
