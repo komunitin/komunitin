@@ -60,7 +60,7 @@ describe("Groups", () => {
     // Contact
     expect(text).toContain("363-958-4365");
     expect(text).toContain("Kaci.Donnelly31@yahoo.com");
-    expect(text).toContain("@Amir_Mann");
+    expect(text).toContain("Amir_Mann");
     expect(text).toContain("186-667-337");
   })
 });

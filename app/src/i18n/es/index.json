@@ -195,6 +195,13 @@
   "emailChangeHint": "El email debe ser válido y no estar en uso por otro usuario.",
   "passwordChanged": "Se ha cambiado tu contraseña!",
   "emailChanged": "Tu nuevo email es ahora {email}!",
+  "website": "Web",
+  "retryIn": "Reintento en {seconds} segundos",
+  "retryNow": "Reintentar ahora",
+  "noChanges": "No hay cambios para guardar.",
+  "savingChanges": "Guardando cambios...",
+  "changesSaved": "Se han guardado todos los cambios!",
+  "errorSavingChanges": "Error al guardar los cambios.",
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta"

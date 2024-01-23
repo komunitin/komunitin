@@ -14,37 +14,29 @@
     </template>
   </q-avatar>
 </template>
-<script lang="ts">
-import { defineComponent } from "vue"
-import {colors} from "quasar";
+<script setup lang="ts">
+import { colors } from "quasar";
+import { computed } from "vue";
 
-export default defineComponent({
-  props: {
-    imgSrc: {
-      type: String,
-      required: false,
-      default: null
-    },
-    text: {
-      type: String,
-      required: true,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: "40px"
-    }
-  },
-  computed: {
-    initial(): string {
-      return this.text.substring(0,1).toUpperCase();
-    },
-    bgColor(): string {
-      const seed = Math.abs(this.text.split("").reduce(
-        (hash: number, b: string) => (((hash << 5) - hash) + b.charCodeAt(0)*997), 0)); 
-      const rgb = colors.hsvToRgb({h: seed % 360, s: 80, v:80});
-      return colors.rgbToHex(rgb);
-    }
-  }
+const props = withDefaults(defineProps<{
+  imgSrc?: string | null,
+  text: string,
+  size?: string
+}>(), {
+  imgSrc: null,
+  size: "40px"
 });
+
+const initial = computed(() => props.text.substring(0,1).toUpperCase());
+const bgColor = computed(() => {
+  if (props.imgSrc) {
+    return "#FFF";
+  }
+  const seed = Math.abs(props.text.split("").reduce(
+    (hash: number, b: string) => (((hash << 5) - hash) + b.charCodeAt(0)*997), 0)); 
+  const rgb = colors.hsvToRgb({h: seed % 360, s: 80, v:80});
+  return colors.rgbToHex(rgb);
+})
+
+
 </script>
