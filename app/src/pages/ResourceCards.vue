@@ -206,7 +206,9 @@ export default defineComponent({
         });
         this.$emit("page-loaded", this.storeState.currentPage);
       }
-      done(!this.$store.getters[this.moduleName + "/hasNext"]);
+      // Stop loading if there is no next page. Note that we're not
+      // stopping the infinite scrolling if hasNext returns undefined.
+      done(this.$store.getters[this.moduleName + "/hasNext"] === false);
     }
   }
 });
