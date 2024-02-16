@@ -18,7 +18,7 @@
         />
       </q-toolbar>
     </q-header>
-    <q-page-container>
+    <q-page-container class="narrow">
       <div
         id="title"
         class="text-onoutside q-mt-md q-mb-xl"
@@ -37,7 +37,7 @@
           <fit-text>{{ $t('openSystemForExchangeCommunities') }}</fit-text>
         </p>
       </div>
-      <router-view />
+      <router-view/>
     </q-page-container>
 
     <q-footer class="bg-transparent q-py-md text-center text-onoutside-m">
@@ -102,12 +102,13 @@ export default defineComponent({
 }
 
 #title {
-  // Set the width of title div so text can fit in it using the 'vue-resize-text' module.
-  width: 328px;
   .logo {
     // Center the logo and exactly fit to the central div.
     width: 352px;
     margin-left: -12px;
   }
+}
+.narrow {
+  width: 328px;
 }
 </style>
