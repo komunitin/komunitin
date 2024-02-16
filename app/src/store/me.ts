@@ -1,6 +1,5 @@
 import { Module, ActionContext } from "vuex";
 import { Auth, User, AuthData } from "../plugins/Auth";
-import { KOptions } from "src/boot/koptions";
 import KError, { KErrorCode } from "src/KError";
 import { notifications } from "src/plugins/Notifications";
 import locate from "src/plugins/Location";

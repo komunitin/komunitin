@@ -22,7 +22,7 @@
           v-model="newPassword"
           :label="$t('newPassword')"
           :hint="$t('newPasswordHint')"
-          :minLength="8"
+          :min-length="8"
         />
         <q-btn
           class="q-mt-lg"
@@ -46,7 +46,7 @@ import { useStore } from "vuex"
 import { computed, ref } from "vue"
 import { Notify } from "quasar"
 import { useI18n } from "vue-i18n"
-import { useRoute, useRouter } from "vue-router"
+import { useRouter } from "vue-router"
 
 
 const store = useStore()
