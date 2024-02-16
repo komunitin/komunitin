@@ -205,6 +205,14 @@
   "savingChanges": "Desant canvis...",
   "changesSaved": "S'han desat tots els canvis!",
   "errorSavingChanges": "Error desant els canvis.",
+  "forgotPassword": "Has oblidat la contrasenya?",
+  "resetPassword": "Restableix contrasenya",
+  "resetPasswordText": "Entra el teu correu electrònic i t'enviarem un enllaç per a restablir la teva contrasenya.",
+  "sendResetLink": "Envia enllaç",
+  "resetLinkSent": "Enllaç enviat!",
+  "resetLinkSentText": "T'hem enviat un email amb un enllaç per a restablir la teva contrasenya. Comprova la teva safata d'entrada i segueix les instruccions.",
+  "setPassword": "Estableix contrasenya",
+  "setPasswordText": "Entra la teva nova contrasenya.",
 
   "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
   "ErrorInvalidPassword": "Contrasenya incorrecta"

@@ -7,11 +7,7 @@ import locate from "src/plugins/Location";
 import {Member, NotificationsSubscription, UserSettings} from "./model"
 
 // Exported just for testing purposes.
-export const auth = new Auth({
-  clientId: KOptions.oauth.clientid,
-  tokenEndpoint: KOptions.url.auth + "/token",
-  userInfoEndpoint: KOptions.url.auth + "/UserInfo"
-});
+export const auth = new Auth()
 
 export interface LoginPayload {
   email: string;
@@ -173,6 +169,15 @@ export default {
           throw error;
         }
       }
+    },
+    /**
+     * 
+     * @param context 
+     */
+    authorizeWithCode: async (context: ActionContext<UserState, never>, payload: {code: string}) => {
+      const tokens = await auth.authorizeWithCode(payload.code);
+      context.commit("tokens", tokens);
+      await loadUser(tokens.accessToken, context);
     },
     /**
      * Logout current user.

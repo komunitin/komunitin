@@ -10,16 +10,19 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/home/Login.vue')
       },
       {
-        path: '/login-select/',
-        props: false,
+        path: '/login-select',
         name: 'LoginSelect',
         component: () => import('../pages/home/LoginSelect.vue')
       },
       {
-        path: '/login-mail/',
-        props: false,
+        path: '/login-mail',
         name: 'LoginMail',
         component: () => import('../pages/home/LoginMail.vue')
+      },
+      {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: () => import('../pages/home/ForgotPassword.vue')
       }
     ]
   },
@@ -36,6 +39,11 @@ const routes: RouteRecordRaw[] = [
         path: '/profile',
         name: 'EditProfile',
         component: () => import('../pages/members/EditProfile.vue')
+      },
+      {
+        path: '/set-password',
+        name: 'SetPassword',
+        component: () => import('../pages/members/SetPassword.vue')
       },
       {
         path: '/groups',
