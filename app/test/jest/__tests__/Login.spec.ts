@@ -35,7 +35,7 @@ describe("Front page and login", () => {
     // Click Login with email button.
     //wrapper.get("#login_mail").trigger("click");
     //await wrapper.vm.$nextTicks();
-    expect(wrapper.vm.$route.path).toBe("/login-mail/");
+    expect(wrapper.vm.$route.path).toBe("/login-mail");
     // Click back
     expect(wrapper.get("#back").isVisible()).toBe(true);
     // *** LoginSelect's been disabled.
