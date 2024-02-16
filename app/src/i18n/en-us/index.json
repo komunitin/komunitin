@@ -204,7 +204,14 @@
   "savingChanges": "Saving changes...",
   "changesSaved": "All changes have been saved!",
   "errorSavingChanges": "Error saving changes.",
-
+  "forgotPassword": "Forgot password?",
+  "resetPassword": "Reset your password",
+  "resetPasswordText": "Enter your email and we will send you a link to reset your password.",
+  "sendResetLink": "Send link",
+  "resetLinkSent": "Email sent!",
+  "resetLinkSentText": "We have sent you an email with a link to reset your password. Check your inbox and follow the instructions.",
+  "setPassword": "Set password",
+  "setPasswordText": "Enter your new password.",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
