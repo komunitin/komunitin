@@ -25,8 +25,8 @@
     <div class="row justify-end q-mt-xs">
       <router-link
         to="/forgot-password" 
-        @click.prevent="forgotPassword = true"
         class="text-onoutside-m link"
+        @click.prevent="forgotPassword = true"
       >
         {{ $t('forgotPassword') }}
       </router-link>

@@ -37,7 +37,7 @@
           <fit-text>{{ $t('openSystemForExchangeCommunities') }}</fit-text>
         </p>
       </div>
-      <router-view/>
+      <router-view />
     </q-page-container>
 
     <q-footer class="bg-transparent q-py-md text-center text-onoutside-m">
