@@ -5,7 +5,7 @@
     :type="isPwd ? 'password' : 'text'"
     :label="$t('password')"
     maxlength="30"
-    :rules="[v => (!!v && (v.length >= 4)) || $t('invalidPassword')]"
+    :rules="[v => (!!v && (v.length >= minLength)) || $t('invalidPassword')]"
     lazy-rules
   >
     <template #append>
@@ -20,9 +20,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 
-const props = defineProps<{
-  modelValue: string
-}>()
+const props = withDefaults(defineProps<{
+  modelValue: string,
+  minLength?: number
+}>(), {
+  minLength: 4
+})
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void

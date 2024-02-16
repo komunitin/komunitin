@@ -202,6 +202,14 @@
   "savingChanges": "Guardando cambios...",
   "changesSaved": "Se han guardado todos los cambios!",
   "errorSavingChanges": "Error al guardar los cambios.",
+  "forgotPassword": "Olvidaste tu contraseña?",
+  "resetPassword": "Restablecer contraseña",
+  "resetPasswordText": "Entra tu email y te enviaremos un enlace para restablecer tu contraseña.",
+  "sendResetLink": "Enviar enlace",
+  "resetLinkSent": "Enlace enviado!",
+  "resetLinkSentText": "Te hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y sigue las instrucciones.",
+  "setPassword": "Establecer contraseña",
+  "setPasswordText": "Entra tu nueva contraseña.",
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta"

@@ -17,21 +17,6 @@ export interface User {
   zoneinfo: string;
 }
 
-export interface AuthOptions {
-  /**
-   * Absolute URL of the OAuth2 token endpoint.
-   */
-  tokenEndpoint: string;
-  /**
-   * Absolute URL of OIDC userinfo endpoint
-   */
-  userInfoEndpoint: string;
-  /**
-   * OAuth2 Client ID.
-   */
-  clientId: string;
-}
-
 export interface TokenResponse {
   access_token: string;
   refresh_token: string;
@@ -46,6 +31,7 @@ interface TokenRequestData {
   password?: string;
   scope?: string;
   refresh_token?: string;
+  code?: string;
 }
 
 export interface AuthData {
@@ -64,13 +50,18 @@ export interface AuthData {
 export class Auth {
   public static readonly STORAGE_KEY: string = "auth-session";
   public static readonly SCOPES = "komunitin_social komunitin_accounting email offline_access openid profile";
+  public static readonly AUTH_SCOPE = "komunitin_auth";
 
   private readonly tokenEndpoint: string;
   private readonly userInfoEndpoint: string;
+  private readonly resetPasswordEndpoint: string;
+  private readonly clientId: string;
 
-  constructor(options: AuthOptions) {
-    this.tokenEndpoint = options.tokenEndpoint;
-    this.userInfoEndpoint = options.userInfoEndpoint;
+  constructor() {
+    this.tokenEndpoint = KOptions.url.auth + "/token";
+    this.userInfoEndpoint = KOptions.url.auth + "/UserInfo"
+    this.resetPasswordEndpoint = KOptions.url.auth + "/reset-password"
+    this.clientId = KOptions.oauth.clientid
   }
 
   /**
@@ -146,6 +137,34 @@ export class Auth {
     });
 
     return tokens;
+  }
+
+  /**
+   * 
+   * @param 
+   */
+  public async authorizeWithCode(code: string): Promise<AuthData> {
+    const tokens = await this.tokenRequest({
+      grant_type: "authorization_code",
+      code,
+      scope: Auth.SCOPES + " " + Auth.AUTH_SCOPE
+    });
+
+    return tokens;
+  }
+
+  public async resetPassword(email: string): Promise<void> {
+    const params = new URLSearchParams(); 
+    params.append("email", email);
+    params.append("client_id", this.clientId);
+
+    const response = await fetch(this.resetPasswordEndpoint, {
+      method: "POST",
+      body: params,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    });
+
+    this.checkResponse(response)
   }
 
   /**
@@ -230,7 +249,7 @@ export class Auth {
    * @param data The data to be sent. client_id is set automatically.
    */
   private async tokenRequest(data: TokenRequestData): Promise<AuthData> {
-    data.client_id = KOptions.oauth.clientid;
+    data.client_id = this.clientId;
     // Use URLSearchParams in order to send the request with x-www-urlencoded.
     const params = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => params.append(key, value));

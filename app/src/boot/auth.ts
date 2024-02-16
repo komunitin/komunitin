@@ -5,7 +5,13 @@ export default boot(({ router, store }) => {
   // Prevent access to paths that need authorization.
   router.beforeEach(async (to) => {
     try {
-      await store.dispatch("authorize");
+      if (to.query.token) {
+        // Login with url token.
+        await store.dispatch("authorizeWithCode", {code: to.query.token});
+      } else {
+        // Login with stored credentials
+        await store.dispatch("authorize");
+      }
       // User is logged in.
       if (to.path == "/" || to.path.startsWith("/login")) {
         // Redirect to dashboard. But since dashboard is still not developed, redirect to needs page.
@@ -19,9 +25,10 @@ export default boot(({ router, store }) => {
       //Private nodes are all but:
       //  - /
       //  - /login*
+      //  - /forgot-password
       //  - /groups
       //  - /groups/XXXX
-      if (to.path != "/" && !to.path.startsWith("/login") && to.path != "/groups" && !(/^\/groups\/\w+$/.test(to.path))) {
+      if (to.path != "/" && !to.path.startsWith("/login") && to.path != "/forgot-password" && to.path != "/groups" && !(/^\/groups\/\w+$/.test(to.path))) {
         return {
           path: "/login-mail",
           query: {
