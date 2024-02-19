@@ -23,6 +23,7 @@ module.exports = configure(function(ctx) {
       "i18n",
       "mirage",
       "auth",
+      "gtm"
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
