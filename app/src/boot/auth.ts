@@ -22,13 +22,8 @@ export default boot(({ router, store }) => {
       // User is not logged in. If user is trying to access a private node, bring them to login page
       // so they are redirected to the desired path after login.
       
-      //Private nodes are all but:
-      //  - /
-      //  - /login*
-      //  - /forgot-password
-      //  - /groups
-      //  - /groups/XXXX
-      if (to.path != "/" && !to.path.startsWith("/login") && to.path != "/forgot-password" && to.path != "/groups" && !(/^\/groups\/\w+$/.test(to.path))) {
+      // Public pages have a special flag.
+      if (!to.meta.public) {
         return {
           path: "/login-mail",
           query: {
