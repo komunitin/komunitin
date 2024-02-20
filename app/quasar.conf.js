@@ -18,7 +18,6 @@ module.exports = configure(function(ctx) {
     // --> boot files are part of "main.js"
     // https://quasar.dev/quasar-cli/cli-documentation/boot-files
     boot: [
-      "koptions",
       "errors",
       "i18n",
       "mirage",
