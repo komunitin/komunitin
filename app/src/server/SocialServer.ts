@@ -9,6 +9,7 @@ import { ContactNetworks } from "../components/SocialNetworks";
 import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { inflections } from "inflected"
+import Schema from "miragejs/orm/schema";
 
 
 const urlSocial = KOptions.url.social;
@@ -18,6 +19,7 @@ const contactTypes = Object.keys(ContactNetworks);
 
 inflections("en", function (inflect) {
   inflect.irregular("userSettings", "userSettings")
+  inflect.irregular("signupSettings", "signupSettings")
 })
 
 function fakeMarkdown(paragraphs: number): string {
@@ -190,6 +192,9 @@ export default {
     userSettings: ApiSerializer.extend({
       selfLink: () => urlSocial + "/users/me/settings"
     }),
+    signupSettings: ApiSerializer.extend({
+      selfLink: (signupSettings: any) => urlSocial + "/" + signupSettings.group.code + "/signup-settings"
+    }),
   },
   models: {
     user: Model.extend({
@@ -206,6 +211,10 @@ export default {
       offers: hasMany(),
       needs: hasMany(),
       currency: belongsTo(),
+      signupSettings: belongsTo()
+    }),
+    signupSettings: Model.extend({
+      group: belongsTo()
     }),
     member: Model.extend({
       group: belongsTo(),
@@ -323,12 +332,22 @@ export default {
       expires: () => faker.date.future().toJSON(),
       created: () => faker.date.past().toJSON(),
       updated: () => faker.date.recent().toJSON()
+    }),
+    signupSettings: Factory.extend({
+      requireAdminApproval: true,
+      requireAcceptTerms: true,
+      terms: fakeMarkdown(2),
+      minOffers: 1,
+      minNeeds: 0
     })
   },
   seeds(server: Server) {
     faker.seed(1);
     // Create groups.
     server.createList("group", 7).forEach((group, i) => {
+      // Create signup settings.
+      const signupSettings = server.create("signupSettings", { group } as any);
+      group.update({ signupSettings });
       // Create group contacts.
       faker.seed(1);
       const contacts = server.createList("contact", 4);
@@ -411,6 +430,12 @@ export default {
     server.get(urlSocial + "/:code/members", (schema: any, request: any) => {
       const group = schema.groups.findBy({ code: request.params.code });
       return filter(schema.members.where({ groupId: group.id }), request);
+    });
+
+    // Get group signup settings
+    server.get(urlSocial + "/:code/signup-settings", (schema: any, request: any) => {
+      const group = schema.groups.findBy({ code: request.params.code });
+      return group.signupSettings;
     });
 
     // Single member.
@@ -523,7 +548,6 @@ export default {
       settings.update(body.data.attributes);
       return settings;
     });
-
 
   }
 };

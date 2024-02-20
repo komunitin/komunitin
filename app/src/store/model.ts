@@ -193,7 +193,21 @@ export interface Group extends ResourceObject {
     needs: RelatedCollection;
     posts: RelatedCollection;
     currency: RelatedResource;
+    signupSettings: RelatedResource;
   };
+}
+
+export interface GroupSignupSettings extends ResourceObject {
+  attributes: {
+    requireAdminApproval: boolean;
+    requireAcceptTerms: boolean;
+    terms: string;
+    minOffers: number;
+    minNeeds: number;
+  },
+  relationships: {
+    group: RelatedResource;
+  }
 }
 
 /**
@@ -403,3 +417,4 @@ export interface NotificationsSubscription extends ResourceObject {
     member: RelatedResource;
   }
 }
+

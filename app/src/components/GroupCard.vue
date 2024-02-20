@@ -47,6 +47,7 @@
       <q-btn
         flat
         color="primary"
+        :to="`groups/${group.attributes.code}/signup`"
       >
         {{ $t("signUp") }}
       </q-btn>

@@ -4,6 +4,9 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('../layouts/Front.vue'),
+    meta: {
+      public: true
+    },
     children: [
       {
         path: '',
@@ -48,13 +51,28 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/groups',
         name: 'GroupList',
-        component: () => import('../pages/groups/GroupList.vue')
+        component: () => import('../pages/groups/GroupList.vue'),
+        meta: {
+          public: true
+        }
       },
       {
         path: '/groups/:code',
         props: true,
         name: 'Group',
-        component: () => import('../pages/groups/Group.vue')
+        component: () => import('../pages/groups/Group.vue'),
+        meta: {
+          public: true
+        }
+      },
+      {
+        path: '/groups/:code/signup',
+        props: true,
+        name: 'Signup',
+        component: () => import('../pages/members/Signup.vue'),
+        meta: {
+          public: true
+        }
       },
       {
         path: '/groups/:code/offers',
