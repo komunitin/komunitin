@@ -14,6 +14,7 @@
         :member="member"
         :contacts="member.contacts"
         :user="user"
+        :change-credentials="true"
         @update:member="saveMember"
         @update:contacts="saveContacts"
       />

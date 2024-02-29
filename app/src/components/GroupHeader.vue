@@ -28,7 +28,7 @@
 import { Group } from 'src/store/model';
 import Avatar from './Avatar.vue'
 
-const props = defineProps<{
+defineProps<{
   group: Group
 }>()
 </script>

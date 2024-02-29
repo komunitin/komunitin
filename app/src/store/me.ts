@@ -68,7 +68,7 @@ async function loadUserData(accessToken: string,
   // If we don't have the user location yet, initialize to the member configured location.
   if (state.location == undefined) {
     const member = getters["myMember"] as Member
-    commit("location", member.attributes.location.coordinates)
+    commit("location", member.attributes.location?.coordinates)
   }
 }
 

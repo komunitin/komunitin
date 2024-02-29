@@ -1,7 +1,15 @@
 <template>
-  <q-form class="q-gutter-y-lg" @submit="emit('submit')">
+  <q-form
+    class="q-gutter-y-lg column"
+    @submit="emit('submit')"
+  >
     <div>
-      {{ $t('signupCredentialsText') }}
+      <div class="text-subtitle1">
+        {{ $t('signupCredentialsHeader') }}
+      </div>
+      <div class="text-onsurface-m">
+        {{ $t('signupCredentialsText') }}
+      </div>
     </div>
     <q-input
       v-model="name"
@@ -14,26 +22,38 @@
       :rules="[(v) => !!v || $t('nameRequired')]"
     />
     <q-input
-      name="email"
       v-model="email"
+      name="email"
       :label="$t('email')"
       :hint="$t('emailChangeHint')"
       outlined
       :rules="[() => !v$.email.$invalid || $t('invalidEmail')]"
     />
     <password-field
-      name="password"
       v-model="password"
+      name="password"
       :label="$t('newPassword')"
       :hint="$t('newPasswordHint')"
     />
-    <q-btn
-      :label="$t('submit')"
-      type="submit"
-      color="primary"
-      unelevated
-      :disable="v$.$invalid"
-    />
+    <div class="row">
+      <q-btn
+        v-if="hasBack"
+        class="col q-mr-md"
+        :label="$t('back')"
+        color="primary"
+        flat
+        @click="emit('back')"
+      />
+      <q-btn
+        class="col"
+        :label="$t('submit')"
+        type="submit"
+        color="primary"
+        unelevated
+        :disable="v$.$invalid"
+        :loading="props.loading"
+      />
+    </div>
   </q-form>
 </template>
 <script setup lang="ts">
@@ -47,12 +67,15 @@ const props = defineProps<{
     name: string
     email: string
     password: string
-  }
+  },
+  hasBack: boolean
+  loading: boolean
 }>()
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: {name: string, email: string, password: string}): void,
   (e: "submit"): void
+  (e: "back"): void
 }>()
 
 const name = ref(props.modelValue.name)
@@ -68,7 +91,5 @@ const v$ = useVuelidate({
 watchEffect(() => {
   emit('update:modelValue', {name: name.value, email: email.value, password: password.value})
 })
-
-
 
 </script>

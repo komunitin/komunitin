@@ -9,7 +9,6 @@ import { ContactNetworks } from "../components/SocialNetworks";
 import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { inflections } from "inflected"
-import Schema from "miragejs/orm/schema";
 
 
 const urlSocial = KOptions.url.social;
@@ -389,13 +388,29 @@ export default {
         }
       }
     });
-    // Create user for the first member.
+    // Create test user for the first member.
     const member = (server.schema as any).members.first();
     const user = server.create("user", {
       members: [member]
     } as any);
-    // Create user settings.
     server.create("userSettings", { user } as any);
+    // Create empty user (for signup testing).
+    server.create("user", {
+      email: "empty@example.com",
+      members: [
+        server.create("member", { 
+          name: "Empty User",
+          code: "empty_user",
+          type: undefined,
+          description: undefined,
+          image: undefined,
+          address: undefined,
+          location: undefined,
+          group: (server.schema as any).groups.first()
+        } as any)
+      ],
+      settings: server.create("userSettings")
+    } as any)
   },
   routes(server: Server) {
     // All groups
@@ -532,8 +547,12 @@ export default {
     })
 
     // Logged-in User
-    server.get(urlSocial + "/users/me", (schema: any) => {
-      return schema.users.first();
+    server.get(urlSocial + "/users/me", (schema: any, request: any) => {
+      if (request.requestHeaders.Authorization.split(" ")[1] == "empty_user_access_token") {
+        return schema.users.findBy({ email: "empty@example.com" });
+      } else {
+        return schema.users.first();
+      }
     });
 
     // User settings
@@ -547,6 +566,21 @@ export default {
       const settings = schema.userSettings.first();
       settings.update(body.data.attributes);
       return settings;
+    });
+
+    // Create user.
+    server.post(urlSocial + "/users", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const memberData = body.data.relationships.members.data[0];
+      
+      const group = schema.groups.find(memberData.relationships.group.data.id);
+      const member = schema.members.create({...memberData.attributes, group});
+      const user = schema.users.create({...body.data.attributes, members: [member], settings: schema.userSettings.create()});
+      
+      console.info("New user created! Follow this URL to contine the signup process:")
+      console.info(`https://localhost:2030/groups/${group.code}/signup-member?token=empty_user`);
+
+      return user;
     });
 
   }

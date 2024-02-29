@@ -13,6 +13,7 @@
         :code="code"
         :show-state="false"
         :model-value="offer"
+        :loading="loading"
         @submit="onSubmit"
       />
     </q-page>
@@ -36,6 +37,7 @@ const props = defineProps<{
 const store = useStore()
 const router = useRouter()
 
+
 const offer = ref<Offer & {category: Category} | undefined>(undefined)
 
 // Load initial values from current resource only if we are comming 
@@ -45,23 +47,29 @@ if (typeof forwardUrl === "string" && forwardUrl.endsWith("/preview")) {
   offer.value = store.getters["offers/current"] 
 }
 
+const loading = ref(false)
+
 const onSubmit = async (resource: DeepPartial<Offer>) => {
-  if (resource.id === undefined) {
-    await store.dispatch("offers/create", {
-      group: props.code,
-      resource
-    })
-  } else {
-    await store.dispatch("offers/update", {
-      group: props.code,
-      code: resource.attributes?.code,
-      resource
-    })
+  try {
+    loading.value = true
+    if (resource.id === undefined) {
+      await store.dispatch("offers/create", {
+        group: props.code,
+        resource
+      })
+    } else {
+      await store.dispatch("offers/update", {
+        group: props.code,
+        code: resource.attributes?.code,
+        resource
+      })
+    }
+  } finally {
+    loading.value = false
   }
-
-  const offer = store.getters["offers/current"]
-
+  
   // Go to preview page.
+  const offer = store.getters["offers/current"]
   router.push({
     name: "PreviewOffer",
     params: {
