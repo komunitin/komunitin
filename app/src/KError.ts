@@ -5,6 +5,7 @@ export enum KErrorCode {
   Forbidden = "Forbidden",
   NotFound = "NotFound",
   InvalidPassword = "InvalidPassword", 
+  DuplicatedEmail = "DuplicatedEmail",
   // There are more server errors but we're not identifying them and
   // they are all piped to UnknownServer.
   UnknownServer = "UnknownServer",

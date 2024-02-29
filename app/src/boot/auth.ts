@@ -14,8 +14,12 @@ export default boot(({ router, store }) => {
       }
       // User is logged in.
       if (to.path == "/" || to.path.startsWith("/login")) {
-        // Redirect to dashboard. But since dashboard is still not developed, redirect to needs page.
-        return `/groups/${store.getters.myMember.group.attributes.code}/needs`;
+        if (to.query.redirect) {
+          return to.query.redirect as string;
+        } else {
+          // Redirect to dashboard. But since dashboard is still not developed, redirect to needs page.
+          return `/groups/${store.getters.myMember.group.attributes.code}/needs`;
+        }
       }
       return true
     } catch (error) {

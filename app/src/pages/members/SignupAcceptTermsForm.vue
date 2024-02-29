@@ -1,9 +1,20 @@
 <template>
-  <q-form >
-    <group-header :group="group" class="q-pl-none"/>
-    <div class="text-h6 q-my-md">
-      {{ $t('membershipTerms') }}
+  <q-form
+    class="q-gutter-y-lg column"
+    @submit="emit('accept')"
+  >
+    <div>
+      <div class="text-subtitle1">
+        {{ $t('membershipTerms') }}
+      </div>
+      <div class="text-onsurface-m">
+        {{ $t('membershipTermsText') }}
+      </div>
     </div>
+    <group-header
+      :group="group"
+      class="q-pl-none"
+    />
     <!-- eslint-disable vue/no-v-html -->
     <div
       class="col text-body1 text-onsurface"
@@ -16,7 +27,6 @@
       color="primary"
       padding="xs lg"
       unelevated
-      @click="emit('accept')"
     />
   </q-form>
 </template>
@@ -25,7 +35,7 @@ import { Group } from 'src/store/model';
 import md2html from 'src/plugins/Md2html';
 import GroupHeader from 'src/components/GroupHeader.vue'
 
-const props = defineProps<{
+defineProps<{
   group: Group
   terms: string
 }>()

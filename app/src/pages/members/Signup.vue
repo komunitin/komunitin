@@ -5,23 +5,50 @@
   />
   <page-container class="row justify-center">
     <q-page 
-      padding 
+      v-if="settings && group" 
+      id="page-signup"
+      padding
       class="q-py-lg col-12 col-sm-8 col-md-6 q-mb-xl"
-      v-if="settings && group"
     >
       <signup-accept-terms-form
-        v-if="settings.requireAcceptTerms && !acceptTerms"  
+        v-if="page == 'terms'"  
         :group="group"
         :terms="settings.terms"
-        @accept="acceptTerms = true"
+        @accept="toPage('credentials')"
       />
       <signup-credentials-form
-        v-else-if="acceptTerms"
+        v-else-if="page == 'credentials'"
         v-model="credentials"
-        @sumbit="createUser"
+        :loading="loading"
+        @submit="createUser"
+        :has-back="needsTerms"        
+        @back="toPage('terms')"
       />
-      <div v-else>
-        {{ $t('signupVerifyEmail') }}
+      <div v-else-if="page == 'verify'">
+        <div class="text-h6">
+          {{ $t('signupVerifyEmail') }}
+        </div>
+        <div>
+          <div class="float-left q-pr-md">
+            <q-icon 
+              name="forward_to_inbox" 
+              size="100px" 
+              color="icon-dark"
+            />
+          </div>
+          <div class="text-body1 text-onsurface-m q-pt-md">
+            {{ $t('signupVerifyEmailText') }}
+          </div>
+        </div>
+        <div>
+          <q-btn
+            class="q-mt-md"
+            color="primary"
+            :label="$t('Resend email')"
+            @click="resendEmail"
+            :loading="loading"
+          />
+        </div>
       </div>
     </q-page>
   </page-container>
@@ -32,11 +59,16 @@ import PageContainer from "../../layouts/PageContainer.vue"
 import SignupAcceptTermsForm from "./SignupAcceptTermsForm.vue"
 import SignupCredentialsForm from "./SignupCredentialsForm.vue"
 
-import { KOptions } from "src/boot/koptions";
-import { useFetch } from "@vueuse/core";
-import { GroupSignupSettings } from "src/store/model";
 import { useStore } from "vuex";
-import { computed, ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
+import { scroll } from "quasar";
+import { useLocale } from "src/boot/i18n";
+import { Auth } from "../../plugins/Auth"
+import KError, { KErrorCode } from "src/KError";
+import { Notify } from "quasar";
+import { useI18n } from "vue-i18n";
+
+const { getScrollTarget } = scroll
 
 const props = defineProps<{
   code: string
@@ -45,14 +77,20 @@ const props = defineProps<{
 const store = useStore()
 
 store.dispatch("groups/load", {
-  code: props.code
+  code: props.code,
+  include: "signup-settings"
 })
 const group = computed(() => store.getters["groups/current"])
+const settings = computed(() => group.value?.['signup-settings']?.attributes)
 
-const { data } = useFetch<{data: GroupSignupSettings}>(KOptions.url.social + "/" + props.code + "/signup-settings").json()
-const settings = computed(() => data.value?.data.attributes)
+const page = ref("terms")
+const needsTerms = computed(() => settings.value?.requireAcceptTerms)
 
-const acceptTerms = ref(false)
+watchEffect(() => {
+  if (needsTerms.value === false && page.value == "terms") {
+    toPage("credentials")
+  }
+})
 
 const credentials = ref({
   name: "",
@@ -60,8 +98,83 @@ const credentials = ref({
   password: "",
 })
 
-const createUser = () => {
-  console.log("create user")
+const toPage = (name: string) => {
+  page.value = name
+  const el = document.getElementById("page-signup") as Element
+  getScrollTarget(el).scrollTo(0, 0)
+}
+
+const loading = ref(false)
+const locale = useLocale()
+const { t } = useI18n()
+
+const createUser = async () => {
+  loading.value = true
+  try {
+    // Create a user associated with a member.
+    await store.dispatch("users/create", {
+      group: props.code,
+      resource: {
+        type: "users",
+        attributes: {
+          email: credentials.value.email,
+          password: credentials.value.password
+        },
+        relationships: {
+          members: {
+            data: [{
+              type: "members",
+              attributes: {
+                name: credentials.value.name
+              },
+              relationships: {
+                group: {
+                  data: {
+                    type: "groups",
+                    id: group.value.id
+                  }
+                }
+              }
+            }]
+          },
+          settings: {
+            data: {
+              type: "user-settings",
+              attributes: {
+                language: locale.value
+              }
+            }
+          }
+        }
+      }
+    })
+    page.value = 'verify'
+  } catch (error) {
+    // Catch the case where the email is already in use.
+    if (error instanceof KError && error.code === KErrorCode.DuplicatedEmail) {
+      Notify.create({
+        message: t('emailInUse'),
+        color: "negative",
+        closeBtn: true,
+        timeout: 0
+      })
+    } else {
+      throw error
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const auth = new Auth()
+
+const resendEmail = async () => {
+  loading.value = true
+  try {
+    await auth.resendValidationEmail(credentials.value.email)
+  } finally {
+    loading.value = false
+  }
 }
 
 </script>

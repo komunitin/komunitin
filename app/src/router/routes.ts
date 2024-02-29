@@ -75,6 +75,15 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
+        path: '/groups/:code/signup-member',
+        props: true,
+        name: 'SignupMember',
+        component: () => import('../pages/members/SignupMember.vue'),
+        meta: {
+          navigation: false
+        }
+      },
+      {
         path: '/groups/:code/offers',
         props: true,
         name: 'OfferList',

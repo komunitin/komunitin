@@ -84,6 +84,7 @@
         unelevated
         class="full-width"
         :disabled="v$.$invalid"
+        :loading="loading"
       />
     </div>
   </q-form>
@@ -105,6 +106,7 @@ const props = defineProps<{
   modelValue?: DeepPartial<Offer> & {category: Category}
   showState?: boolean
   submitLabel?: string
+  loading?: boolean
 }>()
 const emit = defineEmits<{
   (e: "submit", value: DeepPartial<Offer>): void
