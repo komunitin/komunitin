@@ -579,7 +579,9 @@ export default {
       const member = schema.members.create({...memberData.attributes, group});
       const user = schema.users.create({...body.data.attributes, members: [member], settings: schema.userSettings.create()});
       
+      // eslint-disable-next-line no-console
       console.info("New user created! Follow this URL to contine the signup process:")
+      // eslint-disable-next-line no-console
       console.info(`https://localhost:2030/groups/${group.code}/signup-member?token=empty_user`);
 
       return user;
