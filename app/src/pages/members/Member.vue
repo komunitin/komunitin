@@ -129,7 +129,6 @@ import ShareButton from "../../components/ShareButton.vue";
 import CreateTransactionBtn from "../../components/CreateTransactionBtn.vue";
 import TransactionItems from "../transactions/TransactionItems.vue";
 import FloatingBtn from "src/components/FloatingBtn.vue";
-import PageContainer from "src/layouts/PageContainer.vue";
 
 
 const props = defineProps<{
