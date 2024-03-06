@@ -336,7 +336,7 @@ export default {
     signupSettings: Factory.extend({
       requireAdminApproval: true,
       requireAcceptTerms: true,
-      terms: fakeMarkdown(2),
+      terms: () => fakeMarkdown(2),
       minOffers: 1,
       minNeeds: 0
     })
