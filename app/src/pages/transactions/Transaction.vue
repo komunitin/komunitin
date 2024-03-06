@@ -5,7 +5,7 @@
       :back="`/groups/${code}/members/${myMember?.attributes.code}/transactions`"
       balance
     />
-    <page-container 
+    <q-page-container 
       class="row justify-center bg-light"
     >
       <q-page
@@ -36,14 +36,13 @@
           </div>
         </transaction-card>
       </q-page>
-    </page-container>
+    </q-page-container>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { mapGetters } from "vuex";
 import PageHeader from "../../layouts/PageHeader.vue";
-import PageContainer from "../../layouts/PageContainer.vue";
 import {ExtendedTransfer, Transfer, TransferState} from "../../store/model";
 import FormatCurrency from "../../plugins/FormatCurrency"
 import TransactionCard from "../../components/TransactionCard.vue"
@@ -54,7 +53,6 @@ export default defineComponent({
   components: {
     PageHeader,
     TransactionCard,
-    PageContainer
   },
   props: {
     code: {

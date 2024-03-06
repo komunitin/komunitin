@@ -47,7 +47,7 @@
         />
       </template>
     </page-header>
-    <page-container>
+    <q-page-container>
       <q-page>
         <member-page-header
           :member="member"
@@ -110,7 +110,7 @@
         </q-tab-panels>
         <create-transaction-btn v-if="!isMe" />
       </q-page>
-    </page-container>
+    </q-page-container>
   </div>
 </template>
 <script setup lang="ts">
