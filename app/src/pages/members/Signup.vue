@@ -20,8 +20,8 @@
         v-else-if="page == 'credentials'"
         v-model="credentials"
         :loading="loading"
-        @submit="createUser"
-        :has-back="needsTerms"        
+        :has-back="needsTerms"
+        @submit="createUser"        
         @back="toPage('terms')"
       />
       <div v-else-if="page == 'verify'">
@@ -42,11 +42,12 @@
         </div>
         <div>
           <q-btn
-            class="q-mt-md"
+            class="q-my-lg full-width"
             color="primary"
+            flat
             :label="$t('Resend email')"
-            @click="resendEmail"
             :loading="loading"
+            @click="resendEmail"
           />
         </div>
       </div>

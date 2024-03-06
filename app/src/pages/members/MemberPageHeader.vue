@@ -61,7 +61,7 @@
     </div>
     <template #fixed>
       <q-tabs
-        v-model="currentTab"
+        :model-value="tab"
         active-bg-color="active"
         active-color="primary"
         class="bg-surface text-onsurface-m full-width"
@@ -137,11 +137,6 @@ export default defineComponent({
     return {
       FormatCurrency
     }
-  },
-  data() {
-    return {
-      currentTab: this.tab
-    };
   },
   computed: {
     memberTypeLabel(): string {

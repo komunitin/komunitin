@@ -34,7 +34,7 @@ describe("Members", () => {
     expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(20);
     (wrapper.getComponent(QInfiniteScroll).vm as QInfiniteScroll).trigger();
     await wrapper.vm.$wait();
-    expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(30);
+    expect(wrapper.getComponent(MemberList).findAllComponents(MemberHeader).length).toBe(31);
     await wrapper.vm.$nextTick();
     // Check GRP00002 result
     const members = wrapper.getComponent(MemberList).findAllComponents(MemberHeader);

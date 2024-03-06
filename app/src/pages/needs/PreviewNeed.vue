@@ -22,6 +22,7 @@ import NeedPage from './Need.vue'
 import { Need } from '../../store/model'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
@@ -33,6 +34,8 @@ const $q = useQuasar()
 const { t } = useI18n()
 const store = useStore()
 const router = useRouter()
+
+const myMember = computed(() => store.getters.myMember)
 
 const publish = async (need: Need) => {
   need.attributes.state = 'published'
@@ -48,7 +51,10 @@ const publish = async (need: Need) => {
     type: 'positive'
   })
 
-  router.push(`/groups/${props.code}/needs`)
+  router.push({
+    path:`/groups/${props.code}/members/${myMember.value.attributes.code}`, 
+    hash: '#needs'
+  })
 }
 
 </script>

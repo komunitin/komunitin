@@ -5,7 +5,6 @@ import { createStore, Store } from "vuex";
 
 import {
   QBtn,
-  QHeader,
   QInput,
   QLayout,
   Quasar
@@ -21,6 +20,15 @@ const i18n = createI18n({
   legacy: false
 })
 config.global.plugins.unshift([i18n])
+
+jest.mock("../../plugins/Notifications")
+jest.mock("@firebase/messaging");
+jest.mock('vue-router', () => ({
+  useRoute: jest.fn(),
+  useRouter: jest.fn(() => ({
+    push: jest.fn()
+  }))
+}))
 
 describe("PageHeader", () => {
   let wrapper: VueWrapper;
@@ -52,7 +60,6 @@ describe("PageHeader", () => {
       },
       actions: { toogleDrawer }
     });
-    
 
     const TestComponent = defineComponent({
       template: `
@@ -175,8 +182,8 @@ describe("PageHeader", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("balance");
     expect(wrapper.text()).toContain("$1.00");
-    const header = wrapper.getComponent(QHeader).element as HTMLElement;
-    expect(header.style.height).toBe("170px");
+    const header = wrapper.get<HTMLDivElement>('#header');
+    expect(header.element.style.height).toBe("170px");
     const pageHeader = wrapper.getComponent(PageHeader);
     // I could not emulate the scroll event and as a weaker substitute I
     // just irectly call the event handler hoping that the even conection
@@ -200,17 +207,17 @@ describe("PageHeader", () => {
     scrollDetails.position.top = 10;
     pageHeader.vm.scrollHandler(scrollDetails);
     await wrapper.vm.$nextTick();
-    expect(header.style.height).toBe("160px");
+    expect(header.element.style.height).toBe("160px");
     expect(wrapper.text()).toContain("$");
     scrollDetails.position.top = 101;
     pageHeader.vm.scrollHandler(scrollDetails);
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).not.toContain("$");
-    expect(header.style.height).toBe("69px");
+    expect(header.element.style.height).toBe("69px");
     scrollDetails.position.top = 200;
     pageHeader.vm.scrollHandler(scrollDetails);
     await wrapper.vm.$nextTick();
-    expect(header.style.height).toBe("64px");
+    expect(header.element.style.height).toBe("64px");
     
   });
 });

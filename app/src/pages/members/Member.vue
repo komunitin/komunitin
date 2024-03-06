@@ -2,7 +2,7 @@
   <div v-if="!isLoading">
     <page-header 
       :title="member.attributes.name"
-      :back="`/groups/${code}/members`"
+      :back="isActive ? `/groups/${code}/members` : ''"
     >
       <template #buttons>
         <contact-button
@@ -38,17 +38,27 @@
           round
           to="/settings"
         />
+        <q-btn
+          v-if="isMe && !isActive"
+          icon="logout"
+          flat
+          round
+          @click="logout"
+        />
       </template>
     </page-header>
-    <q-page-container>
+    <page-container>
       <q-page>
         <member-page-header
           :member="member"
-          :tab="tab"
+          :tab="hashTab"
           :transactions="!isMe"
           @tab-change="onTabChange"
         />
-        <q-tab-panels v-model="tab">
+        <q-tab-panels
+          :model-value="hashTab"  
+          @update:model-value="onTabChange"
+        >
           <q-tab-panel
             name="profile"
             keep-alive
@@ -100,12 +110,13 @@
         </q-tab-panels>
         <create-transaction-btn v-if="!isMe" />
       </q-page>
-    </q-page-container>
+    </page-container>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from "vue"
-import {mapGetters} from "vuex";
+<script setup lang="ts">
+import { ref, computed, watch } from "vue"
+import { useStore } from "vuex";
+import { useRoute, useRouter } from "vue-router";
 
 import PageHeader from "../../layouts/PageHeader.vue";
 
@@ -118,67 +129,53 @@ import ShareButton from "../../components/ShareButton.vue";
 import CreateTransactionBtn from "../../components/CreateTransactionBtn.vue";
 import TransactionItems from "../transactions/TransactionItems.vue";
 import FloatingBtn from "src/components/FloatingBtn.vue";
+import PageContainer from "src/layouts/PageContainer.vue";
 
-import { Member, Currency, Account, Contact, Offer, Need } from '../../store/model';
 
-export default defineComponent({
-  name: "Member",
-  components: {
-    PageHeader,
-    ContactButton,
-    ShareButton,
-    MemberPageHeader,
-    MemberProfile,
-    MemberNeeds,
-    MemberOffers,
-    TransactionItems,
-    CreateTransactionBtn,
-    FloatingBtn
-  },
-  props: {
-    code: {
-      type: String,
-      required: true,
-    },
-    memberCode: {
-      type: String,
-      required: true
-    }
-  },
-  data: () => ({
-    tab: "profile",
-    fetched: false
-  }),
-  computed: {
-    ...mapGetters(["myMember"]),
-    member() : Member & {account: Account & {currency: Currency}, contacts?: Contact[], offers?: Offer[], needs?: Need[]} {
-      return this.$store.getters['members/current'];
-    },
-    isMe() : boolean {
-      return this.member && this.myMember && this.member.id == this.myMember.id;
-    },
-    isLoading() : boolean {
-      // We need the explicit fetched boolean to force trigger update that may not
-      // trigger due to the structure of relatinship links of resource objects.
-      return !(this.fetched || this.member && this.member.account !== null && this.member.contacts !== null);
-    }
-  },
-  created() {
-    // See Group.vue for a comment on the following line.
-    this.$watch("memberCode", this.fetchData, { immediate: true });
-  },
-  methods: {
-    async fetchData(memberCode: string) {
-      await this.$store.dispatch("members/load", {
-        code: memberCode,
-        group: this.code,
-        include: "contacts,offers,needs,account"
-      });
-      this.fetched = true;
-    },
-    onTabChange(tab: string) {
-      this.tab = tab;
-    }
-  }
-})
+const props = defineProps<{
+  code: string,
+  memberCode: string
+}>()
+
+const store = useStore()
+
+const myMember = computed(() => store.getters.myMember)
+const isActive = computed(() => store.getters.isActive)
+
+const fetched = ref(false)
+const isLoading = computed(() => !(fetched.value || member.value && member.value.account !== null && member.value.contacts !== null))
+
+const fetchData = async (memberCode: string) => {
+  await store.dispatch("members/load", {
+    code: memberCode,
+    group: props.code,
+    include: "contacts,offers,needs,account"
+  });
+  fetched.value = true;
+}
+watch(() => props.memberCode, (code) => fetchData(code), {immediate: true})
+
+const member = computed(() => fetched.value ? store.getters['members/current'] : undefined)
+const isMe = computed(() => member.value && myMember.value && member.value.id == myMember.value.id)
+
+// Tab and hash navigation.
+const route = useRoute()
+const router = useRouter()
+
+const tabs = ['profile', 'needs', 'offers', 'transactions']
+
+const hashTab = computed(() => route.hash.slice(1))
+
+if (!tabs.includes(hashTab.value)) {
+  router.replace({hash: '#profile'})
+}
+
+const onTabChange = (tab: string | number) => {  
+  router.push({hash: `#${tab}`})
+}
+
+const logout = async () => {
+  await store.dispatch("logout")
+  await router.push("/")
+}
 </script>

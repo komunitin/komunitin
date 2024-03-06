@@ -27,10 +27,8 @@
 </template>
 <script setup lang="ts">
 import KError, { KErrorCode } from "src/KError";
-import { ref, computed, onBeforeMount, watch } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import { useStore } from "vuex";
-
-const emit = defineEmits(["showChange"])
 
 const ready = ref(false)
 
@@ -46,12 +44,6 @@ const isDenied = computed(() => permission.value == 'denied')
 // browser don't support permission api) but we at least have a saved location.
 const show = computed(() => ready.value && !dismissed.value && !isAuthorized.value && !(permission.value === undefined && store.state.location !== undefined))
 
-
-watch(show, (oldShow, newShow) => {
-  if (oldShow != newShow) {
-    emit("showChange", show.value)
-  }
-})
 
 const dismiss = () => store.commit("locationBannerDismissed", true)
 
@@ -82,6 +74,8 @@ onBeforeMount(async () => {
   }
   ready.value = true
 })
+
+defineExpose({show})
 
 </script>
 <style lang="scss" scoped>
