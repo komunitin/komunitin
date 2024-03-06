@@ -107,6 +107,8 @@ export default {
       state.userInfo !== undefined &&
       state.myUserId !== undefined &&
       auth.isAuthorized(state.tokens),
+    isActive: (state, getters) =>
+      getters.myMember?.attributes.state === "active",
     isSubscribed: state =>
       state.subscription !== undefined,
     myUser: (state, getters, rootState, rootGetters) => {

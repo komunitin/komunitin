@@ -45,6 +45,7 @@
         }}
       </q-btn>
       <q-btn
+        v-if="!isLoggedIn"
         flat
         color="primary"
         :to="`groups/${group.attributes.code}/signup`"
@@ -56,7 +57,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue"
+import { useStore } from "vuex"
 
 import cardClickTo from "../plugins/CardClickTo";
 import clamp from "../plugins/Clamp";
@@ -84,8 +86,12 @@ export default defineComponent({
     }
   },
   setup() {
+    const store = useStore()
+    const isLoggedIn = computed(() => store.getters.isLoggedIn)
+
     return {
-      md2txt
+      md2txt,
+      isLoggedIn
     }
   },
   computed: {

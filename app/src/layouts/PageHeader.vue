@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <q-header
+  <q-header>
+    <div
       id="header"
       class="bg-primary items-center no-wrap"
       :class="showBalance ? '' : 'flex'"
@@ -89,7 +89,6 @@
             />
           </template>
         </q-input>
-
         <q-btn
           v-if="search && !searchActive"
           flat
@@ -104,21 +103,16 @@
           @scroll="scrollHandler"
         />
       </q-toolbar>
-    </q-header>
-    <!-- We add a dummy transparent div here to add the height we substract from the collapsible part.
-  I've not been able to do it in a more elegant fashion :(
-  
-  The point is that QPageContainer dynamically sets a padding-top equal to the QHeader height. Since we 
-  reduce this height on scroll, then the page goes up as twice as fast, because of the scrolling and 
-  because of the shrinking. With this dummy div we compensate one of those to achieve normal behavior.
-   -->
-    <div :style="`height: ${offsetHeight}px`" />
-  </div>
+    </div>
+    <banner />
+  </q-header>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 import FormatCurrency from "../plugins/FormatCurrency";
+import Banner from "./Banner.vue";
+
 
 /**
  * Header component with some features for the Komunitin app
@@ -132,6 +126,9 @@ import FormatCurrency from "../plugins/FormatCurrency";
  */
 export default defineComponent({
   name: "PageHeader",
+  components: {
+    Banner
+  },
   props: {
     /**
      * Page title

@@ -9,7 +9,10 @@
       class="q-py-lg col-12 col-sm-8 col-md-6 q-mb-xl"
     >
       <div v-if="page=='profile'">
-        <q-form @submit="saveMember">
+        <q-form 
+          v-if="myMember && myMember.contacts && myUser"
+          @submit="saveMember"
+        >
           <profile-form 
             :change-credentials="false"
             :member="myMember"
@@ -51,7 +54,9 @@
             />
           </div>
           <div class="text-body1 text-onsurface-m q-my-md">
-            {{ $t('signupCompleteText') }}
+            {{ $t('signupCompleteText', {
+              group: group.attributes.name
+            }) }}
           </div>
           <div class="text-body1 text-onsurface-m q-my-md">
             {{ $t('signupCompleteText2') }}
@@ -87,25 +92,34 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
+// Loaded member & user objects
+const myMember = computed(() => store.getters.myMember)
+const myUser = computed(() => store.getters.myUser)
+
 // Fetch group
 store.dispatch("groups/load", {
   code: props.code,
   include: "signup-settings"
 })
+// Load member
+const member = ref(myMember.value)
+store.dispatch("members/load", {
+  code: myMember.value.id,
+  group: props.code,
+  include: "contacts"
+}).then(() => {
+  member.value = myMember.value
+})
+
 const group = computed(() => store.getters["groups/current"])
 const settings = computed(() => group.value?.['signup-settings']?.attributes)
-// Loaded member & user objects
-const myMember = computed(() => store.getters.myMember)
-const myUser = computed(() => store.getters.myUser)
+
 
 const verifyEmail = async () => {
   // ...
   
 }
 onMounted(verifyEmail)
-
-// Editable member
-const member = ref()
 
 const loadingSaveMember = ref(false)
 
@@ -116,7 +130,15 @@ const updateMember = (resource: DeepPartial<Member>) => {
   }
 }
 const updateContacts = (contacts: DeepPartial<Contact>[]) => {
-  member.value.contacts = contacts
+  member.value = {
+    ...(myMember.value),
+    contacts,
+    relationships: {
+      contacts: {
+        data: contacts.map(c => ({ type: "contacts", id: c.id }))
+      }
+    }
+  }
 }
 const saveMember = async () => {
   loadingSaveMember.value = true
@@ -124,7 +146,8 @@ const saveMember = async () => {
     await store.dispatch("members/update", {
       code: member.value.id,
       group: props.code,
-      resource: member.value
+      resource: member.value,
+      included: member.value.contacts
     })
     nextPage()
   } finally {

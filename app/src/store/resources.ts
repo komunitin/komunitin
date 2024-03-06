@@ -221,7 +221,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    *
    * If a resource of type A has a one-to-one relationship to this resource but
    * this resource doesn't directly have the inverse relationship, by declaring
-   * the inverse relatinship the resource object will behave as if teh inverse 
+   * the inverse relatinship the resource object will behave as if the inverse 
    * relationship was also present in the API. The loading of the related object,
    * however, can't be done using the `include` parameter of load actions, but
    * has to be done through a separate load action. It also works with external 
@@ -462,7 +462,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       _rootState: unknown,
       rootGetters: Record<string, Getter>
     ) => (conditions: Record<string, string>) => {
-      const target = Object.values(state.resources).find((resource: ResourceObject) =>
+      const targets = Object.values(state.resources).filter((resource: ResourceObject) =>
         Object.entries(conditions).every(
           ([field, value]) => {
             if (resource.attributes?.[field]) {
@@ -476,7 +476,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           }
         )
       );
-      return target ? this.relatedGetters(rootGetters, target) : null;
+      // In the improbable case we have more than one resource meeting the criteria, 
+      // we return the last one. This may help in cases where this function is used
+      // to find inverse one-to-one relationships that just changed, because the Object.values()
+      // order is the insertion order so we'll get the most updated object.
+      return targets.length > 0 ? this.relatedGetters(rootGetters, targets.pop() as T) : null;
     },
 
     /**

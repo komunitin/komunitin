@@ -225,6 +225,7 @@
   "signupCompleteText2": "Meanwhile you can complete your profile and improve your offers.",
   "goToMyAccount": "Go to my account",
   "emailInUse": "This email is already in use. If you want to register a new account, choose another email. If you want to recover the password for the existing account, go to the login page and click on 'Forgot password?'.",
+  "inactiveAccountBannerText": "Your account is inactive. You can't make transactions or see other members offers and needs until your account is activated by the group administrators.",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

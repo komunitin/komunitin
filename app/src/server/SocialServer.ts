@@ -277,6 +277,7 @@ export default {
         return faker.internet.userName((this as any).name);
       },
       access: "public",
+      state: "active",
       type: () => faker.random.arrayElement(["personal", "business", "public"]),
       name: () => faker.name.findName(),
       description: () => fakeMarkdown(2),
@@ -401,6 +402,7 @@ export default {
         server.create("member", { 
           name: "Empty User",
           code: "empty_user",
+          state: "pending",
           type: undefined,
           description: undefined,
           image: undefined,

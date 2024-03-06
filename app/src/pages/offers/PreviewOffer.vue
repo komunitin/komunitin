@@ -22,6 +22,7 @@ import OfferPage from './Offer.vue'
 import { Offer } from '../../store/model'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
@@ -33,6 +34,8 @@ const $q = useQuasar()
 const { t } = useI18n()
 const store = useStore()
 const router = useRouter()
+
+const myMember = computed(() => store.getters.myMember)
 
 const publish = async (offer: Offer) => {
   offer.attributes.state = 'published'
@@ -48,7 +51,10 @@ const publish = async (offer: Offer) => {
     type: 'positive'
   })
 
-  router.push(`/groups/${props.code}/offers`)
+  router.push({
+    path: `/groups/${props.code}/members/${myMember.value.attributes.code}`,
+    hash: '#offers'
+  })
 }
 
 </script>
