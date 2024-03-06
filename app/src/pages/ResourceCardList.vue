@@ -6,7 +6,7 @@
       balance
       @search="fetchResources"
     />
-    <page-container>
+    <q-page-container>
       <q-page>
         <resource-cards
           ref="resourceCards"
@@ -14,16 +14,14 @@
         />
         <slot name="after" />
       </q-page>
-    </page-container>
+    </q-page-container>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import PageContainer from "../layouts/PageContainer.vue"
 import PageHeader from "../layouts/PageHeader.vue";
-
 import ResourceCards from "./ResourceCards.vue"
 
 /**
@@ -33,7 +31,6 @@ export default defineComponent({
   name: "ResourceCardList",
   components: {
     PageHeader,
-    PageContainer,
     ResourceCards
   },
   props: {

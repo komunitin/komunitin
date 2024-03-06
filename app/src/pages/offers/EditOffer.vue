@@ -4,7 +4,7 @@
     balance 
     :back="`/groups/${code}/offers/${offerCode}`"
   />
-  <page-container class="row justify-center">
+  <q-page-container class="row justify-center">
     <q-page 
       padding 
       class="q-py-lg col-12 col-sm-8 col-md-6"
@@ -18,12 +18,11 @@
         @submit="onSubmit"
       />
     </q-page>
-  </page-container>
+  </q-page-container>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
 import PageHeader from "../../layouts/PageHeader.vue"
-import PageContainer from "../../layouts/PageContainer.vue"
 import OfferForm from "./OfferForm.vue"
 import { useStore } from 'vuex';
 import { Offer, Category } from '../../store/model';

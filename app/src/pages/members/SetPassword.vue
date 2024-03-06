@@ -4,7 +4,7 @@
     balance 
     :back="`/groups/${code}/members/${memberCode}`"
   />
-  <page-container class="row justify-center">
+  <q-page-container class="row justify-center">
     <q-page 
       padding 
       class="q-py-lg col-12 col-sm-8 col-md-6 q-mb-xl"
@@ -35,11 +35,10 @@
         />
       </form>
     </q-page>
-  </page-container>
+  </q-page-container>
 </template>
 <script setup lang="ts">
 import PageHeader from "../../layouts/PageHeader.vue"
-import PageContainer from "../../layouts/PageContainer.vue"
 import PasswordField from "../../components/PasswordField.vue"
 
 import { useStore } from "vuex"

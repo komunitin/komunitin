@@ -3,7 +3,7 @@
     :title="$t('signup')"
     back="/groups"
   />
-  <page-container class="row justify-center">
+  <q-page-container class="row justify-center">
     <q-page 
       v-if="settings && group" 
       id="page-signup"
@@ -52,11 +52,10 @@
         </div>
       </div>
     </q-page>
-  </page-container>
+  </q-page-container>
 </template>
 <script setup lang="ts">
 import PageHeader from "../../layouts/PageHeader.vue"
-import PageContainer from "../../layouts/PageContainer.vue"
 import SignupAcceptTermsForm from "./SignupAcceptTermsForm.vue"
 import SignupCredentialsForm from "./SignupCredentialsForm.vue"
 

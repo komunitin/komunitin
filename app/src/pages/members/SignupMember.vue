@@ -2,7 +2,7 @@
   <page-header
     :title="$t('signup')"
   />
-  <page-container class="row justify-center">
+  <q-page-container class="row justify-center">
     <q-page 
       id="page-signup"
       padding 
@@ -73,11 +73,10 @@
         </div>
       </div>
     </q-page>
-  </page-container>
+  </q-page-container>
 </template>
 <script setup lang="ts">
 import PageHeader from "../../layouts/PageHeader.vue"
-import PageContainer from "../../layouts/PageContainer.vue"
 import ProfileForm from "./ProfileForm.vue"
 import OfferForm from "../offers/OfferForm.vue"
 import { computed, onMounted, ref } from "vue"
