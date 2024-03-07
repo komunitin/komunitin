@@ -45,7 +45,7 @@
             class="q-my-lg full-width"
             color="primary"
             flat
-            :label="$t('Resend email')"
+            :label="$t('resendEmail')"
             :loading="loading"
             @click="resendEmail"
           />

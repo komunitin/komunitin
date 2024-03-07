@@ -66,7 +66,7 @@ describe("Needs", () => {
     await wrapper.vm.$wait();
     
     const menu = select.findAllComponents(QItem);
-    menu[1].trigger("click");
+    await menu[1].trigger("click");
     await flushPromises();
 
     await wrapper.get("[type='submit']").trigger("click");

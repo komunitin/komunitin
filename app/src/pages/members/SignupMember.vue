@@ -25,7 +25,7 @@
             class="full-width q-my-lg"
             color="primary"
             type="submit"
-            :label="$t('Save profile')"
+            :label="$t('saveProfile')"
             unelevated
             :loading="loadingSaveMember"     
           />
