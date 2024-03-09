@@ -132,6 +132,13 @@
               :contacts="group.contacts"
             />
           </div>
+          <floating-btn
+            v-if="!isLoggedIn"
+            :label="$t('signUp')"
+            icon="add"
+            color="primary"
+            :to="`/groups/${group.attributes.code}/signup`"
+          />
         </div>
       </q-page>
     </q-page-container>
@@ -150,6 +157,7 @@ import GroupStats from "../../components/GroupStats.vue";
 import ShareButton from "../../components/ShareButton.vue";
 import SimpleMap from "../../components/SimpleMap.vue";
 import SocialNetworkList from "../../components/SocialNetworkList.vue";
+import FloatingBtn from "../../components/FloatingBtn.vue";
 
 import { Group, Contact, Category, Currency } from "../../store/model";
 
@@ -164,7 +172,8 @@ export default defineComponent({
     ContactButton,
     GroupStats,
     SocialNetworkList,
-    PageHeader
+    PageHeader,
+    FloatingBtn
   },
   props: {
     code: {
@@ -188,6 +197,9 @@ export default defineComponent({
     };
   },
   computed: {
+    isLoggedIn(): boolean {
+      return this.$store.getters.isLoggedIn
+    },
     group(): Group & { contacts: Contact[]; categories: Category[] } {
       return this.$store.getters["groups/current"];
     },
