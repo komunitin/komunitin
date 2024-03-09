@@ -18,6 +18,7 @@ const contactTypes = Object.keys(ContactNetworks);
 
 inflections("en", function (inflect) {
   inflect.irregular("userSettings", "userSettings")
+  inflect.irregular("signupSettings", "signupSettings")
 })
 
 function fakeMarkdown(paragraphs: number): string {
@@ -190,6 +191,9 @@ export default {
     userSettings: ApiSerializer.extend({
       selfLink: () => urlSocial + "/users/me/settings"
     }),
+    signupSettings: ApiSerializer.extend({
+      selfLink: (signupSettings: any) => urlSocial + "/" + signupSettings.group.code + "/signup-settings"
+    }),
   },
   models: {
     user: Model.extend({
@@ -206,6 +210,10 @@ export default {
       offers: hasMany(),
       needs: hasMany(),
       currency: belongsTo(),
+      signupSettings: belongsTo()
+    }),
+    signupSettings: Model.extend({
+      group: belongsTo()
     }),
     member: Model.extend({
       group: belongsTo(),
@@ -269,6 +277,7 @@ export default {
         return faker.internet.userName((this as any).name);
       },
       access: "public",
+      state: "active",
       type: () => faker.random.arrayElement(["personal", "business", "public"]),
       name: () => faker.name.findName(),
       description: () => fakeMarkdown(2),
@@ -323,12 +332,22 @@ export default {
       expires: () => faker.date.future().toJSON(),
       created: () => faker.date.past().toJSON(),
       updated: () => faker.date.recent().toJSON()
+    }),
+    signupSettings: Factory.extend({
+      requireAdminApproval: true,
+      requireAcceptTerms: true,
+      terms: () => fakeMarkdown(2),
+      minOffers: 1,
+      minNeeds: 0
     })
   },
   seeds(server: Server) {
     faker.seed(1);
     // Create groups.
     server.createList("group", 7).forEach((group, i) => {
+      // Create signup settings.
+      const signupSettings = server.create("signupSettings", { group } as any);
+      group.update({ signupSettings });
       // Create group contacts.
       faker.seed(1);
       const contacts = server.createList("contact", 4);
@@ -370,13 +389,30 @@ export default {
         }
       }
     });
-    // Create user for the first member.
+    // Create test user for the first member.
     const member = (server.schema as any).members.first();
     const user = server.create("user", {
       members: [member]
     } as any);
-    // Create user settings.
     server.create("userSettings", { user } as any);
+    // Create empty user (for signup testing).
+    server.create("user", {
+      email: "empty@example.com",
+      members: [
+        server.create("member", { 
+          name: "Empty User",
+          code: "empty_user",
+          state: "pending",
+          type: undefined,
+          description: undefined,
+          image: undefined,
+          address: undefined,
+          location: undefined,
+          group: (server.schema as any).groups.first()
+        } as any)
+      ],
+      settings: server.create("userSettings")
+    } as any)
   },
   routes(server: Server) {
     // All groups
@@ -411,6 +447,12 @@ export default {
     server.get(urlSocial + "/:code/members", (schema: any, request: any) => {
       const group = schema.groups.findBy({ code: request.params.code });
       return filter(schema.members.where({ groupId: group.id }), request);
+    });
+
+    // Get group signup settings
+    server.get(urlSocial + "/:code/signup-settings", (schema: any, request: any) => {
+      const group = schema.groups.findBy({ code: request.params.code });
+      return group.signupSettings;
     });
 
     // Single member.
@@ -507,8 +549,12 @@ export default {
     })
 
     // Logged-in User
-    server.get(urlSocial + "/users/me", (schema: any) => {
-      return schema.users.first();
+    server.get(urlSocial + "/users/me", (schema: any, request: any) => {
+      if (request.requestHeaders.Authorization.split(" ")[1] == "empty_user_access_token") {
+        return schema.users.findBy({ email: "empty@example.com" });
+      } else {
+        return schema.users.first();
+      }
     });
 
     // User settings
@@ -524,6 +570,22 @@ export default {
       return settings;
     });
 
+    // Create user.
+    server.post(urlSocial + "/users", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const memberData = body.data.relationships.members.data[0];
+      
+      const group = schema.groups.find(memberData.relationships.group.data.id);
+      const member = schema.members.create({...memberData.attributes, group});
+      const user = schema.users.create({...body.data.attributes, members: [member], settings: schema.userSettings.create()});
+      
+      // eslint-disable-next-line no-console
+      console.info("New user created! Follow this URL to contine the signup process:")
+      // eslint-disable-next-line no-console
+      console.info(`https://localhost:2030/groups/${group.code}/signup-member?token=empty_user`);
+
+      return user;
+    });
 
   }
 };

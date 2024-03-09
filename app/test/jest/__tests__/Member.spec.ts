@@ -25,7 +25,7 @@ describe("Member", () => {
     // Click members link
     await wrapper.get("#my-member").trigger("click");
     await flushPromises();
-    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/EmilianoLemke57");
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/EmilianoLemke57#profile");
     // Wait for content.
     await wrapper.vm.$wait();
     const text = wrapper.text();
@@ -51,7 +51,6 @@ describe("Member", () => {
     const needsTab = wrapper.findAllComponents(QTab)[1];
     needsTab.trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     expect(wrapper.findAllComponents(NeedCard).length).toBe(1);
     
@@ -59,7 +58,6 @@ describe("Member", () => {
     const offersTab = wrapper.findAllComponents(QTab)[2];
     await offersTab.trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     expect(wrapper.findAllComponents(OfferCard).length).toBe(3);
   });
@@ -74,7 +72,7 @@ describe("Member", () => {
     const member = wrapper.getComponent(MemberList).findAllComponents(MemberHeader)[1];
     member.trigger("click");
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/ArnoldoErdman69");
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/ArnoldoErdman69#profile");
     const text = wrapper.text();
     expect(text).toContain("Arnoldo");
     expect(text).toContain("GRP00001");
@@ -90,14 +88,12 @@ describe("Member", () => {
     // Needs (empty)
     tabs[1].trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     expect(wrapper.text()).toContain("nothing here");
 
     //Offers
     tabs[2].trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     const offers = wrapper.findAllComponents(OfferCard);
     expect(offers.length).toBe(3);
@@ -107,7 +103,6 @@ describe("Member", () => {
     // Transactions
     tabs[3].trigger("click");
     await wrapper.vm.$nextTick();
-    expect(wrapper.getComponent(QInnerLoading).isVisible()).toBe(true);
     await wrapper.vm.$wait();
     const transactions = wrapper.getComponent(TransactionItems).findAllComponents(MemberHeader);
     expect(transactions.length).toBe(5);

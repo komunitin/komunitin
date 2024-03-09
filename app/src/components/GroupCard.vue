@@ -6,33 +6,19 @@
     bordered
   >
     <!-- Header with group avatar, name and short code -->
-    <q-item>
-      <q-item-section avatar>
-        <avatar
-          :img-src="group.attributes.image"
-          :text="group.attributes.code"
+    <group-header :group="group">
+      <template #side>
+        <share-button
+          icon="share"
+          flat
+          round
+          color="icon-dark"
+          :text="$t('checkTheExchangeCommunityGroup', { group: group.attributes.name })"
+          :title="group.attributes.name"
+          :url="url"
         />
-      </q-item-section>
-      <q-item-section>
-        <q-item-label>
-          {{ group.attributes.name }}
-        </q-item-label>
-        <q-item-label>
-          {{ group.attributes.code }}
-        </q-item-label>
-      </q-item-section>
-      <share-button
-        icon="share"
-        flat
-        round
-        color="icon-dark"
-        :text="
-          $t('checkTheExchangeCommunityGroup', { group: group.attributes.name })
-        "
-        :title="group.attributes.name"
-        :url="url"
-      />
-    </q-item>
+      </template>
+    </group-header> 
     <!-- Group position map -->
     <q-card-section class="simple-map">
       <simple-map
@@ -59,8 +45,10 @@
         }}
       </q-btn>
       <q-btn
+        v-if="!isLoggedIn"
         flat
         color="primary"
+        :to="`groups/${group.attributes.code}/signup`"
       >
         {{ $t("signUp") }}
       </q-btn>
@@ -69,23 +57,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue"
+import { useStore } from "vuex"
 
 import cardClickTo from "../plugins/CardClickTo";
 import clamp from "../plugins/Clamp";
 import md2txt from "../plugins/Md2txt";
 
-
-import Avatar from "./Avatar.vue";
 import ShareButton from "./ShareButton.vue";
 import SimpleMap from "./SimpleMap.vue";
+import GroupHeader from "./GroupHeader.vue";
 
 export default defineComponent({
   name: "GroupCard",
   components: {
     ShareButton,
     SimpleMap,
-    Avatar
+    GroupHeader
   },
   directives: {
     clamp,
@@ -98,8 +86,12 @@ export default defineComponent({
     }
   },
   setup() {
+    const store = useStore()
+    const isLoggedIn = computed(() => store.getters.isLoggedIn)
+
     return {
-      md2txt
+      md2txt,
+      isLoggedIn
     }
   },
   computed: {

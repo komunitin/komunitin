@@ -4,7 +4,7 @@
     balance 
     :back="`/groups/${code}/members/${memberCode}`"
   />
-  <page-container class="row justify-center">
+  <q-page-container class="row justify-center">
     <q-page 
       padding 
       class="q-py-lg col-12 col-sm-8 col-md-6"
@@ -62,13 +62,12 @@
         class="q-mt-lg"
       />
     </q-page>
-  </page-container>
+  </q-page-container>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 import { useStore } from 'vuex';
 import PageHeader from '../../layouts/PageHeader.vue';
-import PageContainer from '../../layouts/PageContainer.vue';
 import ToggleItem from '../../components/ToggleItem.vue';
 import SaveChanges from '../../components/SaveChanges.vue';
 

@@ -4,7 +4,7 @@
     balance 
     :back="`/groups/${code}/offers`"
   />
-  <page-container class="row justify-center">
+  <q-page-container class="row justify-center">
     <q-page 
       padding 
       class="q-py-lg col-12 col-sm-8 col-md-6"
@@ -13,14 +13,14 @@
         :code="code"
         :show-state="false"
         :model-value="offer"
+        :loading="loading"
         @submit="onSubmit"
       />
     </q-page>
-  </page-container>
+  </q-page-container>
 </template>
 <script setup lang="ts">
 import PageHeader from "../../layouts/PageHeader.vue"
-import PageContainer from "../../layouts/PageContainer.vue"
 import OfferForm from "./OfferForm.vue"
 import { Category, Offer } from "src/store/model"
 import { useStore } from "vuex"
@@ -36,6 +36,7 @@ const props = defineProps<{
 const store = useStore()
 const router = useRouter()
 
+
 const offer = ref<Offer & {category: Category} | undefined>(undefined)
 
 // Load initial values from current resource only if we are comming 
@@ -45,23 +46,29 @@ if (typeof forwardUrl === "string" && forwardUrl.endsWith("/preview")) {
   offer.value = store.getters["offers/current"] 
 }
 
+const loading = ref(false)
+
 const onSubmit = async (resource: DeepPartial<Offer>) => {
-  if (resource.id === undefined) {
-    await store.dispatch("offers/create", {
-      group: props.code,
-      resource
-    })
-  } else {
-    await store.dispatch("offers/update", {
-      group: props.code,
-      code: resource.attributes?.code,
-      resource
-    })
+  try {
+    loading.value = true
+    if (resource.id === undefined) {
+      await store.dispatch("offers/create", {
+        group: props.code,
+        resource
+      })
+    } else {
+      await store.dispatch("offers/update", {
+        group: props.code,
+        code: resource.attributes?.code,
+        resource
+      })
+    }
+  } finally {
+    loading.value = false
   }
-
-  const offer = store.getters["offers/current"]
-
+  
   // Go to preview page.
+  const offer = store.getters["offers/current"]
   router.push({
     name: "PreviewOffer",
     params: {

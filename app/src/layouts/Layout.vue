@@ -43,7 +43,7 @@ export default defineComponent({
   },
   computed: {
     drawerExists(): boolean {
-      return this.$store.getters.drawerExists;
+      return this.$store.getters.drawerExists
     },
     drawerState: {
       get () {

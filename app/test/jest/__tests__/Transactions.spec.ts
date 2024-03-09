@@ -34,34 +34,34 @@ describe("Transactions", () => {
     await wrapper.vm.$wait();
     const transactions = wrapper.getComponent(TransactionList).findAllComponents(MemberHeader)
     expect(transactions.length).toBe(20);
-    const first = transactions[0];
+    const first = transactions[4];
     expect(first.text()).toContain("Pending");
     expect(first.text()).toContain("Arnoldo");
-    expect(first.text()).toContain("$-8.00");
-    expect(first.text()).toContain("Persevering");
+    expect(first.text()).toContain("$-0.42");
+    expect(first.text()).toContain("Synchronised");
 
     const second = transactions[1];
     expect(second.text()).toContain("today");
-    expect(second.text()).toContain("Lamar");
-    expect(second.text()).toContain("$70.72");
-    expect(second.text()).toContain("Inverse");
+    expect(second.text()).toContain("Oleta");
+    expect(second.text()).toContain("$-83.13");
+    expect(second.text()).toContain("Progressive");
     // Search
-    wrapper.getComponent(PageHeader).vm.$emit("search", "desk");
+    wrapper.getComponent(PageHeader).vm.$emit("search", "net");
     await wrapper.vm.$wait();
     // Check result!
-    expect(wrapper.getComponent(TransactionList).findAllComponents(MemberHeader).length).toBe(2);
+    expect(wrapper.getComponent(TransactionList).findAllComponents(MemberHeader).length).toBe(3);
   });
   it("renders single transaction", async () => {
-    await wrapper.vm.$router.push("/groups/GRP0/transactions/8e8bf9df-3f8c-4682-9660-515da55fc265");
+    await wrapper.vm.$router.push("/groups/GRP0/transactions/2d1985aa-d963-4c7d-bffd-89d7f9342b3c");
     await wrapper.vm.$wait();
     const text = wrapper.text();
     expect(text).toContain("Emiliano");
     expect(text).toContain("GRP00000");
-    expect(text).toContain("Lamar");
-    expect(text).toContain("GRP00005");
-    expect(text).toContain("$70.72");
+    expect(text).toContain("Oleta");
+    expect(text).toContain("GRP00003");
+    expect(text).toContain("$-49.37");
     expect(text).toContain("today at");
-    expect(text).toContain("Inverse");
+    expect(text).toContain("Polarised");
     expect(text).toContain("Committed");
     expect(text).toContain("Group 0");
   })

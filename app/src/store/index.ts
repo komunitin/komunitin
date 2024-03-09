@@ -13,7 +13,8 @@ import {
   Account,
   AccountSettings,
   Member,
-  Transfer
+  Transfer,
+  GroupSignupSettings
 } from "src/store/model";
 // Import logged-in user module
 import me, { UserState } from "./me";
@@ -28,6 +29,7 @@ const groups = new (class extends Resources<Group, unknown> {
   collectionEndpoint = () => "/groups";
   resourceEndpoint = (code: string) => `/${code}`;
 })("groups", socialUrl);
+const signupSettings = new Resources<GroupSignupSettings, unknown>("signup-settings", socialUrl);
 
 const contacts = new Resources<Contact, unknown>("contacts", socialUrl);
 const members = new Resources<Member, unknown>("members", socialUrl);
@@ -119,7 +121,8 @@ export default createStore({
     currencies,
     accounts,
     "account-settings": accountSettings,
-    transfers
+    transfers,
+    "signup-settings": signupSettings
   },
   // enable strict mode (adds overhead!) for dev mode only
   strict: process.env.DEV === "true",

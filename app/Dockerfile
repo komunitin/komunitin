@@ -5,7 +5,7 @@
 # Develop stage
 
 # Use the latest official node image.
-FROM node:14 as komunitin-app-develop
+FROM node:18 as komunitin-app-develop
 WORKDIR /app
 
 # Install mkcert

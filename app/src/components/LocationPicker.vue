@@ -110,8 +110,8 @@ const onReady = () => {
 }
 
 onBeforeUnmount(()=> {
-  map.value.leafletObject.off("click", onMapClick)
-  map.value.leafletObject.off("locationfound", onMapClick)
+  map.value.leafletObject?.off("click", onMapClick)
+  map.value.leafletObject?.off("locationfound", onMapClick)
 })
 
 const locate = () => {

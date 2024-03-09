@@ -4,6 +4,7 @@ export interface UIState {
   drawerState: boolean;
   notificationsBannerDismissed: boolean;
   locationBannerDismissed: boolean;
+  inactiveBannerDismissed: boolean;
   previousRoute: string | undefined;
 }
 
@@ -13,12 +14,14 @@ export default {
     drawerState: true,
     notificationsBannerDismissed: false,
     locationBannerDismissed: false,
+    inactiveBannerDismissed: false,
     previousRoute: undefined,
     loggingOut: false
   }),
   getters: {
     drawerExists: (state, getters, rootState, rootGetters) =>
-      rootGetters["isLoggedIn"]
+      // Show menu only for logged in and active users.
+      rootGetters["isActive"]
   },
   mutations: {
     drawerPersistent: (state, value: boolean) =>
@@ -26,6 +29,7 @@ export default {
     drawerState: (state, value: boolean) => (state.drawerState = value),
     notificationsBannerDismissed: (state, value: boolean) => (state.notificationsBannerDismissed = value),
     locationBannerDismissed: (state, value: boolean) => (state.locationBannerDismissed = value),
+    inactiveBannerDismissed: (state, value: boolean) => (state.inactiveBannerDismissed = value),
     previousRoute: (state, previousRoute: string) => (state.previousRoute = previousRoute),
   },
   actions: {
@@ -33,3 +37,4 @@ export default {
       commit("drawerState", !state.drawerState)
   }
 } as Module<UIState, never>;
+
