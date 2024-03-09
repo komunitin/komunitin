@@ -87,7 +87,8 @@ describe("Offers", () => {
     expect(text).toContain("Computers");
     await wrapper.get(".q-btn--fab").trigger("click");
     await wrapper.vm.$wait();
-    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/offers");
+    expect(wrapper.vm.$route.path).toBe("/groups/GRP0/members/EmilianoLemke57");
+    expect(wrapper.vm.$route.hash).toBe("#offers");
     await wrapper.vm.$router.push("/groups/GRP0/offers/The-Offer")
     expect(wrapper.text()).toContain("The Offer");
     expect(wrapper.text()).toContain("$10.00");

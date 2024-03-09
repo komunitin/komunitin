@@ -14,21 +14,25 @@ export default boot(({ router, store }) => {
       }
       // User is logged in.
       if (to.path == "/" || to.path.startsWith("/login")) {
-        // Redirect to dashboard. But since dashboard is still not developed, redirect to needs page.
-        return `/groups/${store.getters.myMember.group.attributes.code}/needs`;
+        if (to.query.redirect) {
+          return to.query.redirect as string;
+        } else if (store.getters.isActive) {
+          // Redirect to member's dashboard. But since dashboard is still not developed, redirect to needs page.
+          return `/groups/${store.getters.myMember.group.attributes.code}/needs`;
+        } else {
+          // Redirect inactive users to their own profile page.
+          const myMember = store.getters.myMember;
+          return `/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}`
+        }
       }
+      // Block inactive users to all but settings and profile pages.
       return true
     } catch (error) {
       // User is not logged in. If user is trying to access a private node, bring them to login page
       // so they are redirected to the desired path after login.
       
-      //Private nodes are all but:
-      //  - /
-      //  - /login*
-      //  - /forgot-password
-      //  - /groups
-      //  - /groups/XXXX
-      if (to.path != "/" && !to.path.startsWith("/login") && to.path != "/forgot-password" && to.path != "/groups" && !(/^\/groups\/\w+$/.test(to.path))) {
+      // Public pages have a special flag.
+      if (!to.meta.public) {
         return {
           path: "/login-mail",
           query: {

@@ -175,9 +175,8 @@ export default defineComponent({
     this.fetchResources(this.query)
     // Set the current page to 0 etc in fetchResources before enabling scroll load.
     this.ready = true
-    // Refresh results if search query or current location change.
+    // Refresh results if search query change.
     this.$watch(() => this.query, (newQuery: string) => this.fetchResources(newQuery))
-    this.$watch(() => this.location, () => this.fetchResources(this.query))
   },
   methods: {
     /**

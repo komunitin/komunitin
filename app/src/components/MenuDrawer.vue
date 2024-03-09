@@ -58,31 +58,14 @@
     <q-separator />
 
     <!-- Group -->
-    <q-item
+    <group-header 
       id="my-group"
       :clickable="!groupActive"
       :active="groupActive"
-      class="text-onsurface-m"
       active-class="bg-active text-primary"
+      :group="myMember.group" 
       @click="$router.push(`/groups/${myMember.group.attributes.code}`)"
-    >
-      <q-item-section avatar>
-        <avatar
-          :img-src="myMember.group.attributes.image"
-          :text="myMember.group.attributes.code"
-        />
-      </q-item-section>
-      <q-item-section>
-        <div class="text-subtitle2">
-          {{ myMember.group.attributes.name }}
-        </div>
-        <q-item-label caption>
-          {{
-            myMember.group.attributes.code
-          }}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
+    />
 
     <q-separator />
     
@@ -123,9 +106,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
-import Avatar from "./Avatar.vue";
 import MemberHeader from "./MemberHeader.vue";
 import MenuItem from "./MenuItem.vue";
+import GroupHeader from "./GroupHeader.vue";
 
 
 export default defineComponent({
@@ -133,7 +116,7 @@ export default defineComponent({
   components: {
     MenuItem,
     MemberHeader,
-    Avatar
+    GroupHeader
   },
   computed: {
     ...mapGetters(["myMember", "myAccount"]),

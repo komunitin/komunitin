@@ -167,6 +167,20 @@ export class Auth {
     this.checkResponse(response)
   }
 
+  public async resendValidationEmail(email: string): Promise<void> {
+    const params = new URLSearchParams(); 
+    params.append("email", email);
+    params.append("client_id", this.clientId);
+
+    const response = await fetch(KOptions.url.auth + "/resend-validation", {
+      method: "POST",
+      body: params,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    });
+
+    this.checkResponse(response)
+  }
+
   /**
    * Authenticate using external OpenID Connect provider.
    */

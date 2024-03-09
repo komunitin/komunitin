@@ -54,7 +54,10 @@
         <q-icon name="email" />
       </template>
     </q-input>
-    <div class="row q-pb-md q-col-gutter-md">
+    <div 
+      v-if="changeCredentials"
+      class="row q-col-gutter-md"
+    >
       <div class="col-12 col-sm-6">
         <change-email-btn 
           v-model="email"
@@ -72,7 +75,7 @@
       </div>
     </div>
   </div>
-  <div>
+  <div class="q-pt-lg">
     <div class="text-overline text-uppercase text-onsurface-m text-bold q-my-sm">
       {{ $t('location') }}
     </div>
@@ -146,6 +149,7 @@ const props = defineProps<{
   member: Member & {group: Group}
   contacts: PartialContact[]
   user: User
+  changeCredentials: boolean
 }>()
 
 const emit = defineEmits<{
@@ -156,15 +160,15 @@ const emit = defineEmits<{
 
 // Member attributes.
 const m = computed(() => props.member.attributes)
-const image = ref(m.value.image)
-const name = ref(m.value.name)
-const description = ref(m.value.description)
-const location = ref(m.value.location.coordinates)
-const address = ref(m.value.address.streetAddress)
-const postalCode = ref(m.value.address.postalCode)
-const city = ref(m.value.address.addressLocality)
-const region = ref(m.value.address.addressRegion)
-const country = ref(m.value.address.addressCountry)
+const image = ref(m.value.image ?? null)
+const name = ref(m.value.name ?? "")
+const description = ref(m.value.description ?? "")
+const location = ref(m.value.location?.coordinates ?? null)
+const address = ref(m.value.address?.streetAddress ?? "")
+const postalCode = ref(m.value.address?.postalCode ?? "")
+const city = ref(m.value.address?.addressLocality ?? "")
+const region = ref(m.value.address?.addressRegion ?? "")
+const country = ref(m.value.address?.addressCountry ?? "")
 
 // Member contacts
 const contacts = ref(props.contacts)

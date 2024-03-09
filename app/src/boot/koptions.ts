@@ -1,5 +1,3 @@
-import { boot } from "quasar/wrappers";
-
 /**
  * Load environment variables from process.env and organize them in a typed
  * object so they are more comfortable to use across the app.
@@ -32,19 +30,14 @@ const KOptions = {
      * OAuth 2 ClientId constant.
      */
     clientid: process.env.OAUTH_CLIENTID ??  "komunitin-app"
+  },
+  gtag: {
+    /**
+     * Google Measurement Id.
+     */
+    id: process.env.GTAG_ID ?? ""
   }
 }
 
 // For use outside Vue components.
 export { KOptions };
-
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $KOptions: typeof KOptions;
-  }
-}
-
-export default boot(({ app }) => {
-  // Augment Vue interface with $KOptions member.
-  app.config.globalProperties.$KOptions = KOptions;
-});

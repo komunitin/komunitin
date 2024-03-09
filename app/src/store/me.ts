@@ -68,7 +68,7 @@ async function loadUserData(accessToken: string,
   // If we don't have the user location yet, initialize to the member configured location.
   if (state.location == undefined) {
     const member = getters["myMember"] as Member
-    commit("location", member.attributes.location.coordinates)
+    commit("location", member.attributes.location?.coordinates)
   }
 }
 
@@ -107,6 +107,8 @@ export default {
       state.userInfo !== undefined &&
       state.myUserId !== undefined &&
       auth.isAuthorized(state.tokens),
+    isActive: (state, getters) =>
+      getters.myMember?.attributes.state === "active",
     isSubscribed: state =>
       state.subscription !== undefined,
     myUser: (state, getters, rootState, rootGetters) => {

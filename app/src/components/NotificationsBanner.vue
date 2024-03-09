@@ -26,7 +26,7 @@
   </q-banner>
 </template>
 <script setup lang="ts">
-import { ref, computed, onBeforeMount, watch } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStore } from "vuex";
 import { onMessage } from "firebase/messaging"
@@ -36,8 +36,6 @@ import { useRouter } from "vue-router";
 
 
 const {t} = useI18n()
-
-const emit = defineEmits(["showChange"])
 
 const ready = ref(false);
 
@@ -57,12 +55,6 @@ const text = computed(() => {
 })
 
 const show = computed(() => ready.value && isLoggedIn.value && !isAuthorized.value && !dismissed.value)
-
-watch(show, (oldShow, newShow) => {
-  if (oldShow != newShow) {
-    emit("showChange", show.value)
-  }
-})
 
 const dismiss = () => store.commit("notificationsBannerDismissed", true)
 const subscribe = async () => {
@@ -96,6 +88,8 @@ onBeforeMount(async () => {
   })
 
 })
+
+defineExpose({show})
 
 </script>
 <style lang="scss" scoped>
