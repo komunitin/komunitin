@@ -19,7 +19,7 @@ type Store struct {
 // Create a new store.
 func NewStore() (*Store, error) {
 	store := &Store{
-		// Store and Stream ara using the same Redis instance. That's fine but incidental.
+		// Store and Stream are using the same Redis instance. That's fine but incidental.
 		// They could perfectly use different instances if needed for scalability.
 		client: *redis.NewClient(&redis.Options{
 			Addr:     "redis:6379",
