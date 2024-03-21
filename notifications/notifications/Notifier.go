@@ -66,6 +66,12 @@ func Notifier(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	// Create a single connection to the DB.
+	store, err := store.NewStore()
+	if err != nil {
+		return err
+	}
+
 	// Infinite loop
 	for {
 		// Blocking call to get next event in stream
@@ -74,7 +80,7 @@ func Notifier(ctx context.Context) error {
 			// Unexpected error, terminating.
 			return err
 		}
-		err = handleEvent(ctx, value)
+		err = handleEvent(ctx, value, store)
 		if err != nil {
 			// Error handling event. Just print and ignore event.
 			log.Printf("Error handling event: %v\n", err)
@@ -84,26 +90,26 @@ func Notifier(ctx context.Context) error {
 	}
 }
 
-func handleEvent(ctx context.Context, value map[string]interface{}) error {
+func handleEvent(ctx context.Context, value map[string]interface{}, store *store.Store) error {
 	event := value["name"]
 
 	switch event {
 	case TransferCommitted:
-		return handleTransferEvent(ctx, value, Both)
+		return handleTransferEvent(ctx, value, store, Both)
 	case TransferPending:
-		return handleTransferEvent(ctx, value, Payer)
+		return handleTransferEvent(ctx, value, store, Payer)
 	case TransferRejected:
-		return handleTransferEvent(ctx, value, Payee)
+		return handleTransferEvent(ctx, value, store, Payee)
 	case NeedPublished:
-		return handleGroupEvent(ctx, value, NewNeeds)
+		return handleGroupEvent(ctx, value, store, NewNeeds)
 	case OfferPublished:
-		return handleGroupEvent(ctx, value, NewOffers)
+		return handleGroupEvent(ctx, value, store, NewOffers)
 	case MemberJoined:
-		return handleGroupEvent(ctx, value, NewMembers)
+		return handleGroupEvent(ctx, value, store, NewMembers)
 	case NeedExpired:
-		return handleMemberEvent(ctx, value)
+		return handleMemberEvent(ctx, value, store)
 	case OfferExpired:
-		return handleMemberEvent(ctx, value)
+		return handleMemberEvent(ctx, value, store)
 	default:
 		log.Printf("Unkown event type %v\n", event)
 	}
@@ -129,16 +135,16 @@ func buildMessageData(value map[string]interface{}) (map[string]string, error) {
 	return data, nil
 }
 
-func handleMemberEvent(ctx context.Context, value map[string]interface{}) error {
+func handleMemberEvent(ctx context.Context, value map[string]interface{}, store *store.Store) error {
 	data, err := buildMessageData(value)
 	if err != nil {
 		return err
 	}
 	members := []string{data["member"]}
-	return notifyMembers(ctx, members, "", data, MyAccount)
+	return notifyMembers(ctx, store, members, "", data, MyAccount)
 }
 
-func handleTransferEvent(ctx context.Context, value map[string]interface{}, dest TransferEventDestination) error {
+func handleTransferEvent(ctx context.Context, value map[string]interface{}, store *store.Store, dest TransferEventDestination) error {
 	data, err := buildMessageData(value)
 	if err != nil {
 		return err
@@ -152,11 +158,11 @@ func handleTransferEvent(ctx context.Context, value map[string]interface{}, dest
 	}
 
 	// Notify members
-	return notifyMembers(ctx, members, value["user"].(string), data, MyAccount)
+	return notifyMembers(ctx, store, members, value["user"].(string), data, MyAccount)
 
 }
 
-func handleGroupEvent(ctx context.Context, value map[string]interface{}, eventType string) error {
+func handleGroupEvent(ctx context.Context, value map[string]interface{}, store *store.Store, eventType string) error {
 
 	// Get group members
 	code := value["code"].(string)
@@ -176,14 +182,17 @@ func handleGroupEvent(ctx context.Context, value map[string]interface{}, eventTy
 		return err
 	}
 
-	return notifyMembers(ctx, memberIds, excludeUser, data, eventType)
+	return notifyMembers(ctx, store, memberIds, excludeUser, data, eventType)
 }
 
-func notifyMembers(ctx context.Context, memberIds []string, excludeUser string, data map[string]string, eventType string) error {
+func notifyMembers(ctx context.Context, store *store.Store, memberIds []string, excludeUser string, data map[string]string, eventType string) error {
+	// The array of tokens to send the message to.
 	tokens := []string{}
+	// A map to reverse from tokens to subscriptions in order to easily handle responses.
+	tokenMap := make(map[string]*Subscription)
 
 	for _, member := range memberIds {
-		subscriptions, err := getMemberSubscriptions(ctx, member, excludeUser)
+		subscriptions, err := getMemberSubscriptions(ctx, store, member, excludeUser)
 		if err != nil {
 			return err
 		}
@@ -191,6 +200,7 @@ func notifyMembers(ctx context.Context, memberIds []string, excludeUser string, 
 			// Check if user wants to receive notifications of this type.
 			if sub.Settings[eventType] == true {
 				tokens = append(tokens, sub.Token)
+				tokenMap[sub.Token] = &sub
 			}
 		}
 	}
@@ -212,23 +222,38 @@ func notifyMembers(ctx context.Context, memberIds []string, excludeUser string, 
 			Data:   data,
 		}
 
-		err := sendMessage(ctx, message)
-
+		br, err := sendMessage(ctx, store, message)
 		if err != nil {
 			return err
 		}
+		// Handle responses
+		log.Printf("Sent %d notifications with %d successes and %d failures.\n", (end - i), br.SuccessCount, br.FailureCount)
+		handleResponses(ctx, store, br.Responses, tokens, tokenMap)
 	}
 	return nil
 }
 
-// Return the subscriptions of given member, excluding the ones related to the given user id.
-func getMemberSubscriptions(ctx context.Context, memberId string, excludeUser string) ([]Subscription, error) {
-	// Get connection to DB.
-	store, err := store.NewStore()
-	if err != nil {
-		return nil, err
+func handleResponses(ctx context.Context, store *store.Store, responses []*messaging.SendResponse, tokens []string, tokenMap map[string]*Subscription) {
+	// Responses order is the same as tokens order, as per Firebase documentation.
+	for i, r := range responses {
+		token := tokens[i]
+		sub := tokenMap[token]
+		if r.Success {
+			// Log success
+			log.Printf("Notification sent to member %s.\n", sub.Member.Id)
+		} else {
+			// Log error
+			log.Printf("Error sending notification to member %s: %v\n", sub.Member.Id, r.Error)
+			if messaging.IsRegistrationTokenNotRegistered(r.Error) {
+				store.Delete(ctx, "subscriptions", sub.Id)
+				log.Printf("Subscription deleted for member %s.\n", sub.Member.Id)
+			}
+		}
 	}
+}
 
+// Return the subscriptions of given member, excluding the ones related to the given user id.
+func getMemberSubscriptions(ctx context.Context, store *store.Store, memberId string, excludeUser string) ([]Subscription, error) {
 	// Get subscriptions for this member.
 	res, err := store.GetByIndex(ctx, "subscriptions", reflect.TypeOf((*Subscription)(nil)), "member", memberId)
 	if err != nil {
@@ -247,26 +272,24 @@ func getMemberSubscriptions(ctx context.Context, memberId string, excludeUser st
 	return subscriptions, nil
 }
 
-func sendMessage(ctx context.Context, message *messaging.MulticastMessage) error {
+func sendMessage(ctx context.Context, store *store.Store, message *messaging.MulticastMessage) (*messaging.BatchResponse, error) {
 	// Credentials are implicitly loaded from a JSON file identifyed by the environment
 	// variable GOOGLE_APPLICATION_CREDENTIALS.
 	app, err := firebase.NewApp(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("error initializing firebase: %v", err)
+		return nil, fmt.Errorf("error initializing firebase: %v", err)
 	}
 	client, err := app.Messaging(ctx)
 	if err != nil {
-		return fmt.Errorf("error getting firebase messaging client: %v", err)
+		return nil, fmt.Errorf("error getting firebase messaging client: %v", err)
 	}
 
 	// Send the message!
-	br, err := client.SendMulticast(ctx, message)
-	if err != nil {
-		return err
-	}
-	// TODO: Handle errors by deleting invalid tokens.
+	return client.SendMulticast(ctx, message)
 
-	log.Printf("%d messages sent.\n", br.SuccessCount)
+}
 
-	return nil
+func successfulMessage(r *messaging.SendResponse, token string) {
+	// Find member by token.
+
 }
