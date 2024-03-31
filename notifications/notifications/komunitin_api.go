@@ -55,21 +55,30 @@ func getUserByToken(ctx context.Context, token string) (*model.User, error) {
 
 func getGroupMembers(ctx context.Context, code string) ([]*model.Member, error) {
 	url := socialUrl + "/" + code + "/members"
-	res, err := getResource(ctx, url)
-	if err != nil {
-		return nil, err
-	}
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("error fetching members: %s", res.Status)
-	}
-	members, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*model.Member)(nil)))
-	if err != nil {
-		return nil, err
-	}
-	// Fix members type.
-	result := make([]*model.Member, len(members))
-	for i, member := range members {
-		result[i] = member.(*model.Member)
+	result := make([]*model.Member, 0)
+	for url != "" {
+		res, err := getResource(ctx, url)
+		if err != nil {
+			return nil, err
+		}
+		if res.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("error fetching members: %s", res.Status)
+		}
+		members, extras, err := jsonapi.UnmarshalManyPayload(res.Body, reflect.TypeOf((*model.Member)(nil)))
+		if err != nil {
+			return nil, err
+		}
+		// Fix members type and add to result array.
+		for _, member := range members {
+			result = append(result, member.(*model.Member))
+		}
+		// Prepare next page.
+		next, ok := (*extras.Links)["next"]
+		if ok && next != nil {
+			url = next.(string)
+		} else {
+			url = ""
+		}
 	}
 	return result, nil
 }
