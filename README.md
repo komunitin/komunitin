@@ -15,7 +15,9 @@ Check the installed version of the current `master` branch at [test.komunitin.or
 
 ## Structure
 The Komunitin system is made of several units:
- - Komunitin app: The client application with user interface. See the [app](app/) folder.
- - Notifications service: The backend for the messaging system including push notifications. See the [notifications](notifications/) folder.
+ - Komunitin app: [ALPHA] The client application with user interface. See the [app](app/) folder.
+ - Notifications service: [ALPHA] The backend for the messaging system including push notifications. See the [notifications](notifications/) folder.
  - IntegralCES: The backend for the social and accounting APIs. These will be moved to two separate microservices but the APIs are provided by the classic 
- IntegralCES by now. See the [ices Drupal project](https://drupal.org/project/ices)
+ IntegralCES by now. See the [ices Drupal project](https://drupal.org/project/ices).
+ - Accounting service: [TODO]: The new decentralized backend for the accounting API.
+ - Social service: [TODO] The new decentralized backend for the social API.
