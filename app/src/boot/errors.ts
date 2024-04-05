@@ -24,8 +24,14 @@ const lastError: Record<string, number> = {}
  * @param error The error to be shown.
  */
 function showError(error: KError) {
-  // Show error message only once per 5 minutes.
-  if (lastError[error.code] === undefined || Date.now() - lastError[error.code] > 1000*60*5) {
+  // Sometimes, specially during development, we dont want the UI to continually
+  // show the same error message. We show these errors ony once every 5 min. 
+  const showOnceErrors = [KErrorCode.VueWarning, KErrorCode.UnknownServer, 
+    KErrorCode.Unknown, KErrorCode.UnknownVueError, KErrorCode.UnknownScript, 
+    KErrorCode.ErrorHandling, KErrorCode.NotificationsPermissionDenied, 
+    KErrorCode.ScriptError, KErrorCode.UserLoggingOut
+  ]
+  if (!showOnceErrors.includes(error.code as KErrorCode) || lastError[error.code] === undefined || Date.now() - lastError[error.code] > 1000*60*5) {
     lastError[error.code] = Date.now()
     Notify.create({
       color: 'negative',
