@@ -107,13 +107,7 @@
     <banner />
   </q-header>
 </template>
-<script lang="ts">
-import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
-import FormatCurrency from "../plugins/FormatCurrency";
-import Banner from "./Banner.vue";
-
-
+<script setup lang="ts">
 /**
  * Header component with some features for the Komunitin app
  *  - In small screens, shows a menu button or a back button depending on wether 
@@ -124,131 +118,104 @@ import Banner from "./Banner.vue";
  *  - Provides a slot #buttons to be able to customize the right toolbar buttons 
  * depending on the page content.
  */
-export default defineComponent({
-  name: "PageHeader",
-  components: {
-    Banner
-  },
-  props: {
-    /**
-     * Page title
-     */
-    title: {
-      type: String,
-      default: ""
-    },
-    /**
-     * Enable search feature
-     */
-    search: {
-      type: Boolean,
-      default: false
-    },
-    /**
-     * Make the toolbar prominent and show the current balance.
-     */
-    balance: {
-      type: Boolean,
-      default: false
-    },
-    /**
-     * Whether to show the back button instead of the menu button.
-     */
-    back: {
-      type: String,
-      default: ""
-    }
-  },
-  emits: ['search-input', 'search'],
-  setup() {
-    return {
-      FormatCurrency
-    }
-  },
-  data() {
-    return {
-      searchActive: false,
-      searchText: "",
-      scrollOffset: 0,
-      offset: 0,
-    }
-  },
-  computed: {
-    ...mapGetters(["myAccount"]),
-    /**
-     * Show the back button.
-     */
-    showBack(): boolean {
-      return this.back != "" || !this.$store.getters.drawerExists;
-    },
-    /**
-     * Show the menu button.
-     */
-    showMenu(): boolean {
-      return !this.showBack && !this.$store.state.ui.drawerPersistent;
-    },
-    /**
-     * Show no button
-     */
-    noButton(): boolean {
-      return !this.showBack && !this.showMenu;
-    },
-    /**
-     * Constant value for the thin header height.
-     */
-    headerHeight(): number { return 64 },
-    /**
-     * Constant value for the toolbar height.
-     */
-    toolbarHeight(): number { return 50 },
-    /**
-     * Constant value for the height of the balance section.
-     */
-    balanceHeight(): number { return 70 },
 
-    prominentHeight(): number {
-      return 2 * this.toolbarHeight + this.balanceHeight;
-    },
-    originalHeight(): number {
-      return this.balance && this.myAccount ? this.prominentHeight : this.headerHeight;
-    },
-    computedHeight(): number {
-      return this.originalHeight - this.offset;
-    },
-    balanceScaleFactor():number {
-      return Math.max(0, 1 - this.offset / this.balanceHeight);
-    },
-    showBalance() : boolean {
-      return this.balance && this.myAccount && this.offset < this.balanceHeight;
-    },
-    offsetHeight() : number {
-      return this.originalHeight - this.computedHeight;
-    }
-  },
-  methods: {
-    clearSearchText() {
-      this.searchText = "";
-      this.$emit("search-input", "");
-    },
-    scrollHandler(details: { position: { top: number; }; }) {      
-      this.offset = Math.min(details.position.top, this.originalHeight - this.headerHeight)
-      this.scrollOffset = details.position.top;
-    },
-    onUpdateSearchText() {
-      this.$emit('search-input', this.searchText)
-    },
-    onSearch() {
-      this.$emit('search', this.searchText);
-    },
-    goUp() {
-      if (this.$store.state.ui.previousRoute !== undefined) {
-        this.$router.back()
-      } else {
-        this.$router.push(this.back)
-      }
+import { ref, computed } from "vue";
+import { useStore } from "vuex"
+import { useRouter } from "vue-router"
+import FormatCurrency from "../plugins/FormatCurrency";
+import Banner from "./Banner.vue";
+
+const props = withDefaults(defineProps<{
+  title: string;
+  search: boolean;
+  balance: boolean;
+  /**
+   * If a string is provided, back button will go to router.back() or to the
+   * provided route if there is no previous page. If a function is provided, it
+   * will be called to get the route (independently of previous page).
+   */
+  back: string | (() => string);
+}>(), {
+  title: "",
+  search: false,
+  balance: false,
+  back: ""
+})
+
+const emit = defineEmits<{
+  (e: 'search-input', value: string): void,
+  (e: 'search', value: string): void
+}>()
+
+const store = useStore()
+
+const searchActive = ref(false)
+const searchText = ref("")
+const scrollOffset = ref(0)
+const offset = ref(0)
+
+const myAccount = computed(() => store.getters.myAccount)
+/**
+ * Show the back button.
+ */
+const showBack = computed(() => props.back != "" || !store.getters.drawerExists)
+/**
+ * Show the menu button.
+ */
+const showMenu = computed(() => !showBack.value && !store.state.ui.drawerPersistent)
+/**
+ * Show no button
+ */
+const noButton = computed(() => !showBack.value && !showMenu.value)
+/**
+ * Constant value for the thin header height.
+ */
+const headerHeight = 64
+/**
+ * Constant value for the toolbar height.
+ */
+const toolbarHeight = 50
+/**
+ * Constant value for the height of the balance section.
+ */
+const balanceHeight = 70
+const prominentHeight = 2 * toolbarHeight + balanceHeight
+const originalHeight = computed(() => props.balance && myAccount.value ? prominentHeight : headerHeight)
+const computedHeight = computed(() => originalHeight.value - offset.value)
+const balanceScaleFactor = computed(() => Math.max(0, 1 - offset.value / balanceHeight))
+const showBalance = computed(() => props.balance && myAccount.value && offset.value < balanceHeight)
+
+const clearSearchText = () => {
+  searchText.value = ""
+  emit('search-input', "")
+}
+
+const scrollHandler = (details: { position: { top: number; }; }) => {
+  offset.value = Math.min(details.position.top, originalHeight.value - headerHeight)
+  scrollOffset.value = details.position.top
+}
+
+const onUpdateSearchText = () => {
+  emit('search-input', searchText.value)
+}
+
+const onSearch = () => {
+  emit('search', searchText.value)
+}
+
+const router = useRouter()
+
+const goUp = () => {
+  if (props.back instanceof Function) {
+    router.push(props.back())
+  } else {
+    if (store.state.ui.previousRoute !== undefined) {
+      router.back()
+    } else {
+      router.push(props.back)
     }
   }
-});
+}
 </script>
 <style lang="scss" scoped>
 // Toolbar has a default padding of 12px. That's ok when there's a button,

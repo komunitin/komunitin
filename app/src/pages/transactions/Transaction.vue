@@ -2,7 +2,7 @@
   <div>
     <page-header 
       :title="$t('transaction')"
-      :back="`/groups/${code}/members/${myMember?.attributes.code}/transactions`"
+      :back="() => `/groups/${code}/members/${myMember?.attributes.code}/transactions`"
       balance
     />
     <q-page-container 
