@@ -126,15 +126,10 @@ import FormatCurrency from "../plugins/FormatCurrency";
 import Banner from "./Banner.vue";
 
 const props = withDefaults(defineProps<{
-  title: string;
-  search: boolean;
-  balance: boolean;
-  /**
-   * If a string is provided, back button will go to router.back() or to the
-   * provided route if there is no previous page. If a function is provided, it
-   * will be called to get the route (independently of previous page).
-   */
-  back: string | (() => string);
+  title?: string;
+  search?: boolean;
+  balance?: boolean;
+  back?: string;
 }>(), {
   title: "",
   search: false,
@@ -206,14 +201,10 @@ const onSearch = () => {
 const router = useRouter()
 
 const goUp = () => {
-  if (props.back instanceof Function) {
-    router.push(props.back())
+  if (store.state.ui.previousRoute !== undefined) {
+    router.back()
   } else {
-    if (store.state.ui.previousRoute !== undefined) {
-      router.back()
-    } else {
-      router.push(props.back)
-    }
+    router.push(props.back)
   }
 }
 </script>

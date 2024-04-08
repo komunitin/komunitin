@@ -27,17 +27,16 @@ export default function( { store } : {store: Store<State>} ): Router {
   });
 
   store.commit("previousRoute", undefined)
-  
   let first = true;
   
   router.afterEach((to, from, failure) => {
     if (!failure) {
+      // there is a first call to this guard at the first page that we want to ignore.
       if(!first) {
-        // there is a first call to this guard at the first page that we want to ignore.
-        store.commit("previousRoute", from.fullPath)
+        store.commit("previousRoute", from.meta.back === false ? undefined : from.fullPath)
       } else {
         first = false
-      } 
+      }
     }
   })
 
