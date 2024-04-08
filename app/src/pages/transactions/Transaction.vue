@@ -5,7 +5,7 @@
       :back="`/groups/${code}/members/${myMember?.attributes.code}/transactions`"
       balance
     />
-    <q-page-container 
+    <q-page-container
       class="row justify-center bg-light"
     >
       <q-page

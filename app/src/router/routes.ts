@@ -120,7 +120,11 @@ const routes: RouteRecordRaw[] = [
         path: '/groups/:code/members/:memberCode/transactions/confirm',
         props: true,
         name: 'ConfirmCreateTransaction',
-        component: () => import('../pages/transactions/ConfirmCreateTransaction.vue')
+        component: () => import('../pages/transactions/ConfirmCreateTransaction.vue'),
+        meta: {
+          // do not allow to go back to this page
+          back: false
+        }
       },
       {
         path: '/groups/:code/offers/new',
@@ -138,7 +142,11 @@ const routes: RouteRecordRaw[] = [
         path: '/groups/:code/offers/:offerCode/preview',
         props: true,
         name: 'PreviewOffer',
-        component: () => import("../pages/offers/PreviewOffer.vue")
+        component: () => import("../pages/offers/PreviewOffer.vue"),
+        meta: {
+          // do not allow to go back to this page
+          back: false
+        }
       },
       {
         path: '/groups/:code/offers/:offerCode/edit',
@@ -162,7 +170,11 @@ const routes: RouteRecordRaw[] = [
         path: '/groups/:code/needs/:needCode/preview',
         props: true,
         name: 'PreviewNeed',
-        component: () => import("../pages/needs/PreviewNeed.vue")
+        component: () => import("../pages/needs/PreviewNeed.vue"),
+        meta: {
+          // do not allow to go back to this page
+          back: false
+        }
       },
       {
         path: '/groups/:code/needs/:needCode/edit',
