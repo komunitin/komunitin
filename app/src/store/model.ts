@@ -143,6 +143,8 @@ export interface User extends ResourceObject {
   }
 }
 
+export type MailingFrequency = "never" | "daily" | "weekly" | "monthly";
+
 export interface UserSettings extends ResourceObject {
   attributes: {
     language: string
@@ -151,6 +153,10 @@ export interface UserSettings extends ResourceObject {
       newNeeds: boolean
       newOffers: boolean
       newMembers: boolean
+    },
+    emails: {
+      myAccount: boolean
+      group: MailingFrequency
     }
   },
   relationships: {

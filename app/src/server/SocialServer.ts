@@ -252,6 +252,10 @@ export default {
         newNeeds: true,
         newOffers: true,
         newMembers: true
+      },
+      emails: {
+        myAccount: true,
+        group: "weekly"
       }
     }),
     group: Factory.extend({
