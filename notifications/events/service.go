@@ -8,23 +8,18 @@ package events
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/komunitin/jsonapi"
-	"github.com/komunitin/komunitin/notifications/model"
+	"github.com/komunitin/komunitin/notifications/api"
+	"github.com/komunitin/komunitin/notifications/config"
 	"github.com/komunitin/komunitin/notifications/service"
-	"github.com/komunitin/komunitin/notifications/store"
 )
 
-const (
-	EventStream = "events"
-)
-
-type Event struct {
+// EventData object as reveived from JSON:API request.
+type EventData struct {
 	// The type of the event
 	Id     string                 `jsonapi:"primary,events"`
 	Name   string                 `jsonapi:"attr,name"`
@@ -32,23 +27,16 @@ type Event struct {
 	Code   string                 `jsonapi:"attr,code"`
 	Time   time.Time              `jsonapi:"attr,time,iso8601"`
 	Data   map[string]interface{} `jsonapi:"attr,data"`
-	User   *model.ExternalUser    `jsonapi:"relation,user"`
-	// Deprecated
-	Transfer *model.ExternalTransfer `jsonapi:"relation,transfer,omitempty"`
+	User   *api.ExternalUser      `jsonapi:"relation,user"`
 }
-
-var (
-	expectedUser = os.Getenv("NOTIFICATIONS_EVENTS_USERNAME")
-	expectedPass = os.Getenv("NOTIFICATIONS_EVENTS_PASSWORD")
-)
 
 func checkBasicAuth(w http.ResponseWriter, r *http.Request) bool {
 	user, pass, ok := r.BasicAuth()
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 	}
-	usermatch := subtle.ConstantTimeCompare([]byte(user), []byte(expectedUser)) == 1
-	passmatch := subtle.ConstantTimeCompare([]byte(pass), []byte(expectedPass)) == 1
+	usermatch := subtle.ConstantTimeCompare([]byte(user), []byte(config.NotificationsEventsUsername)) == 1
+	passmatch := subtle.ConstantTimeCompare([]byte(pass), []byte(config.NotificationsEventsPassword)) == 1
 	if usermatch && passmatch {
 		return true
 	} else {
@@ -58,7 +46,7 @@ func checkBasicAuth(w http.ResponseWriter, r *http.Request) bool {
 }
 
 // Return the handler for requests to /events
-func eventsHandler(stream store.Stream) http.HandlerFunc {
+func eventsHandler(stream *EventStream) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Check authentication by asking the caller to use notification client_id/client_secret pair as basic auth.
 		if !checkBasicAuth(w, r) {
@@ -69,51 +57,55 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		event := new(Event)
-		err = service.ValidateJson(w, r, event)
+		eventData := new(EventData)
+		err = service.ValidateJson(w, r, eventData)
 		if err != nil {
 			return
 		}
 		// Validate provided data.
-		if event.User == nil {
+		if eventData.User == nil {
 			http.Error(w, "Missing 'user' relationship", http.StatusBadRequest)
 			return
 		}
-		data, err := json.Marshal(event.Data)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			log.Println(err.Error())
-			return
-		}
-		value := map[string]interface{}{
-			"name":   event.Name,
-			"source": event.Source,
-			"user":   event.User.Id,
-			"time":   event.Time.String(),
-			"code":   event.Code,
-			"data":   data,
+
+		// convert Data from map[string]interface{} to map[string]string
+		data := make(map[string]string, len(eventData.Data))
+		for k, v := range eventData.Data {
+			if s, ok := v.(string); ok {
+				data[k] = s
+			} else {
+				http.Error(w, "Data field must be a map of strings", http.StatusBadRequest)
+				return
+			}
 		}
 
-		// TODO: delete this as transfer is not used anymore.
-		if event.Transfer != nil {
-			value["transfer"] = event.Transfer.Href
+		// Create internal Event object.
+		event := &Event{
+			Name:   eventData.Name,
+			Source: eventData.Source,
+			Code:   eventData.Code,
+			Time:   eventData.Time,
+			Data:   data,
+			User:   eventData.User.Id,
 		}
 
 		// Enqueue event to the stream.
-		id, err := stream.Add(r.Context(), value)
+		id, err := stream.Add(r.Context(), event)
 		if err != nil {
 			// Unexpected error
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Println(err.Error())
 			return
 		}
+
 		// Return success following JSON:API spec https://jsonapi.org/format/#crud-creating-responses.
 		w.Header().Set(service.ContentType, jsonapi.MediaType)
 		w.WriteHeader(http.StatusCreated)
+
 		// Not adding Location header since events are not accessible (by the moment).
 		// Send response, which is the same as the request but with the id.
-		event.Id = id
-		err = jsonapi.MarshalPayload(w, event)
+		eventData.Id = id
+		err = jsonapi.MarshalPayload(w, eventData)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Println(err.Error())
@@ -125,9 +117,9 @@ func eventsHandler(stream store.Stream) http.HandlerFunc {
 // Starts the events server.
 func InitService() {
 	// Create store connection.
-	stream, err := store.NewStream(context.Background(), EventStream)
+	stream, err := NewEventsStream(context.Background(), "service")
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.HandleFunc("/events", eventsHandler(*stream))
+	http.HandleFunc("/events", eventsHandler(stream))
 }

@@ -1,4 +1,4 @@
-package model
+package api
 
 // Komunitin API object models.
 
@@ -9,16 +9,28 @@ import (
 )
 
 type User struct {
-	Id      string    `jsonapi:"primary,users"`
-	Members []*Member `jsonapi:"relation,members"`
-	// Ommitted other fields.
+	Id       string        `jsonapi:"primary,users"`
+	Email    string        `jsonapi:"attr,email"`
+	Members  []*Member     `jsonapi:"relation,members"`
+	Settings *UserSettings `jsonapi:"relation,settings"`
 }
+
 type Member struct {
-	Id      string           `jsonapi:"primary,members"`
-	Code    string           `jsonapi:"attr,code"`
-	Name    string           `jsonapi:"attr,name"`
-	Account *ExternalAccount `jsonapi:"relation,account"`
+	Id    string `jsonapi:"primary,members"`
+	Code  string `jsonapi:"attr,code"`
+	Name  string `jsonapi:"attr,name"`
+	Image string `jsonapi:"attr,image"`
 	// Ommitted other fields.
+	Account *ExternalAccount `jsonapi:"relation,account"`
+	// Ommitted other relations.
+}
+
+type UserSettings struct {
+	Id            string                 `jsonapi:"primary,user-settings"`
+	Language      string                 `jsonapi:"attr,language"`
+	Komunitin     bool                   `jsonapi:"attr,komunitin"`
+	Notifications map[string]interface{} `jsonapi:"attr,notifications"`
+	Emails        map[string]interface{} `jsonapi:"attr,emails"`
 }
 
 type Transfer struct {

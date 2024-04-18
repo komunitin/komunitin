@@ -1,4 +1,4 @@
-package notifications
+package api
 
 // Requests access token to komunitin auth API using the client credentials Oauth2 flow.
 // This flow grants access to this app to the whole API.
@@ -12,15 +12,15 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"strconv"
 	"time"
+
+	"golang.org/x/net/context/ctxhttp"
+
+	"github.com/komunitin/komunitin/notifications/config"
 )
 
 var (
-	clientId          = os.Getenv("NOTIFICATIONS_CLIENT_ID")
-	clientSecret      = os.Getenv("NOTIFICATIONS_CLIENT_SECRET")
-	authUrl           = os.Getenv("KOMUNITIN_AUTH_URL")
 	accessToken       string
 	accessTokenExpiry time.Time
 )
@@ -59,8 +59,12 @@ func getAuthorizationToken(ctx context.Context) (string, error) {
 	if accessTokenExpiry.After(time.Now().Add(time.Minute)) {
 		return accessToken, nil
 	}
+	authUrl := config.KomunitinAuthUrl
+	clientId := config.NotificationsClientId
+	clientSecret := config.NotificationsClientSecret
+
 	// Otherwise get a new one using client credentials from environment variables.
-	res, err := http.PostForm(authUrl+"/token", url.Values{
+	res, err := ctxhttp.PostForm(ctx, http.DefaultClient, authUrl+"/token", url.Values{
 		"grant_type":    []string{"client_credentials"},
 		"client_id":     []string{clientId},
 		"client_secret": []string{clientSecret},

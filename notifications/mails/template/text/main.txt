@@ -1,0 +1,32 @@
+{{define "main"}}
+{{.Greeting}}
+
+{{template "content" .}}
+
+{{.Footer}}
+{{end}}
+
+{{define "content"}}
+{{.Text}}
+
+{{"transactionDetails" | t}}:
+
+{{template "transfer" .}}
+
+{{template "action" .}}
+{{end}}
+
+{{define "transfer"}}
+  {{"payer" | t}}: {{.PayerName}} | {{.PayerAccount}}
+  {{"payee" | t}}: {{.PayeeName}} | {{.PayeeAccount}}
+  {{.Amount}}
+  {{.Time}}
+  {{.Description}}
+  {{"state" | t}}: {{.State}}
+  {{"group" | t}}: {{.Group}}
+{{end}}
+
+{{define "action"}}
+  {{.ActionText}}:
+  {{.ActionUrl}}
+{{end}}

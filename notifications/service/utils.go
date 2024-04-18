@@ -53,6 +53,7 @@ func ValidateJson(w http.ResponseWriter, r *http.Request, res interface{}) error
 	// Decode() returning a "http: request body too large" error.
 	body := http.MaxBytesReader(w, r.Body, 16*1024)
 	err := jsonapi.UnmarshalPayload(body, res)
+
 	// Error validation code from https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body.
 	if err != nil {
 		var syntaxError *json.SyntaxError

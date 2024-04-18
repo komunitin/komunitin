@@ -5,14 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug notifications",
+      "name": "Debug notifications main",
       "type": "go",
       "request": "attach",
       "mode": "remote",
-      "remotePath": "/opt/notifications",
       "port": 40000,
       "host": "localhost",
-      "cwd": "${workspaceRoot}/notifications",
-    }
+      "substitutePath": [
+        {
+          "from": "${workspaceRoot}/notifications",
+          "to": "/opt/notifications"
+        }
+      ]
+    },
   ]
 }

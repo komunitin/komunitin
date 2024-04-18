@@ -71,6 +71,7 @@
             :hint="$t('myAccountEmailsHint')"
           />
           <q-select
+            v-show="false"  
             v-model="emailGroup"
             outlined
             emit-value
@@ -104,10 +105,11 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n()
 const frequencies = [
-  {label: t('never'), value: 'never'},
   {label: t('daily'), value: 'daily'},
   {label: t('weekly'), value: 'weekly'},
-  {label: t('monthly'), value: 'monthly'}
+  {label: t('monthly'), value: 'monthly'},
+  {label: t('quarterly'), value: 'quarterly'},
+  {label: t('never'), value: 'never'}
 ] as const
 
 const store = useStore()

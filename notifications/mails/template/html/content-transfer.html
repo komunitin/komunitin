@@ -1,0 +1,5 @@
+{{define "content"}}
+<p style="font-weight: bold;">{{.Text}}</p>
+<p style="padding-top: 32px; color: #6e6e6e;">{{"transactionDetails" | t}}</p>
+{{template "transfer" .}}
+{{end}}

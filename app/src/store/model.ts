@@ -143,11 +143,12 @@ export interface User extends ResourceObject {
   }
 }
 
-export type MailingFrequency = "never" | "daily" | "weekly" | "monthly";
+export type MailingFrequency = "never" | "daily" | "weekly" | "monthly" | "quarterly";
 
 export interface UserSettings extends ResourceObject {
   attributes: {
     language: string
+    komunitin: boolean
     notifications: {
       myAccount: boolean
       newNeeds: boolean

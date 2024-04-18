@@ -239,6 +239,7 @@
   "daily": "Daily",
   "weekly": "Weekly",
   "monthly": "Monthly",
+  "quarterly": "Quarterly",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

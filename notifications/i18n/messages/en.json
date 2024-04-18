@@ -1,0 +1,20 @@
+{
+  "hello": "Hello {{.Name}},",
+  "payer": "Payer",
+  "payee": "Payee",
+  "state": "State",
+  "group": "Group",
+  "transactionDetails": "Transaction details",
+  "incomeSubject": "Payment received",
+  "incomeText": "You received {{.Amount}} from {{.PayerName}}.",
+  "paymentSubject": "Payment sent",
+  "paymentText": "You have paid {{.Amount}} to {{.PayeeName}}.",
+  "footer": "The Komunitin team",
+  "viewTransaction": "View transaction",
+  "new": "New",
+  "pending": "Pending",
+  "accepted": "Accepted",
+  "committed": "Committed",
+  "rejected": "Rejected",
+  "deleted": "Deleted"
+}
