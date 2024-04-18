@@ -247,6 +247,7 @@ export default {
     }),
     userSettings: Factory.extend({
       language: "en-us",
+      komunitin: true,
       notifications: {
         myAccount: true,
         newNeeds: true,
