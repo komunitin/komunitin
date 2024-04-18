@@ -2,6 +2,7 @@ package i18n
 
 import (
 	"testing"
+	"time"
 
 	"golang.org/x/text/number"
 )
@@ -23,6 +24,10 @@ func TestEnglish(t *testing.T) {
 	if c := en.C(1.23456, "€", number.Scale(2)); c != "€1.23" {
 		t.Errorf("currency format failed: %s", c)
 	}
+	tt, _ := time.Parse(time.RFC3339, "2024-04-16T23:05:00Z")
+	if en.Dt(tt) != "4/16/24 11:05 PM" {
+		t.Errorf("date format failed, got %s", en.Dt(tt))
+	}
 }
 
 func TestSpanish(t *testing.T) {
@@ -42,6 +47,10 @@ func TestSpanish(t *testing.T) {
 	if c := es.C(1.23456, "€", number.Scale(2)); c != "1,23€" {
 		t.Errorf("currency format failed: %s", c)
 	}
+	tt, _ := time.Parse(time.RFC3339, "2024-04-16T23:05:00Z")
+	if es.Dt(tt) != "16/04/24 23:05" {
+		t.Errorf("date format failed, got %s", es.Dt(tt))
+	}
 }
 
 func TestCatalan(t *testing.T) {
@@ -60,5 +69,9 @@ func TestCatalan(t *testing.T) {
 	}
 	if c := cat.C(1.23456, "€", number.Scale(2)); c != "1,23€" {
 		t.Errorf("currency format failed: %s", c)
+	}
+	tt, _ := time.Parse(time.RFC3339, "2024-04-16T23:05:00Z")
+	if cat.Dt(tt) != "16/04/24 23:05" {
+		t.Errorf("date format failed, got %s", cat.Dt(tt))
 	}
 }

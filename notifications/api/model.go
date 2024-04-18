@@ -38,9 +38,8 @@ type Transfer struct {
 	Amount   int       `jsonapi:"attr,amount"`
 	Meta     string    `jsonapi:"attr,meta"`
 	State    string    `jsonapi:"attr,state"`
-	Expires  time.Time `jsonapi:"attr,expires,iso8601"`
-	Created  time.Time `jsonapi:"attr,expires,iso8601"`
-	Updated  time.Time `jsonapi:"attr,expires,iso8601"`
+	Created  time.Time `jsonapi:"attr,created,iso8601"`
+	Updated  time.Time `jsonapi:"attr,updated,iso8601"`
 	Payer    *Account  `jsonapi:"relation,payer"`
 	Payee    *Account  `jsonapi:"relation,payee"`
 	Currency *Currency `jsonapi:"relation,currency"`
