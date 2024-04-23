@@ -57,6 +57,31 @@
           />
         </q-list>
       </div>
+      <div class="q-mt-lg">
+        <div class="text-overline text-uppercase text-onsurface-m text-bold">
+          {{ $t('emails') }}
+        </div>
+        <div class="text-body2 text-onsurface-m q-mb-sm">
+          {{ $t('emailsSettingsText') }}
+        </div>
+        <q-list>
+          <toggle-item 
+            v-model="emailMyAccount"
+            :label="$t('myAccountEmails')"
+            :hint="$t('myAccountEmailsHint')"
+          />
+          <q-select
+            v-show="false"  
+            v-model="emailGroup"
+            outlined
+            emit-value
+            map-options
+            :options="frequencies"
+            :label="$t('groupEmails')"
+            :hint="$t('groupEmailsHint')"
+          />
+        </q-list>  
+      </div>
       <save-changes
         ref="changes"
         class="q-mt-lg"
@@ -72,10 +97,20 @@ import ToggleItem from '../../components/ToggleItem.vue';
 import SaveChanges from '../../components/SaveChanges.vue';
 
 import langs, {LangName, normalizeLocale} from "../../i18n";
-import { AccountSettings, UserSettings } from '../../store/model';
+import { AccountSettings, MailingFrequency, UserSettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
 import { watchDebounced } from "@vueuse/shared";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n()
+const frequencies = [
+  {label: t('daily'), value: 'daily'},
+  {label: t('weekly'), value: 'weekly'},
+  {label: t('monthly'), value: 'monthly'},
+  {label: t('quarterly'), value: 'quarterly'},
+  {label: t('never'), value: 'never'}
+] as const
 
 const store = useStore()
 
@@ -148,32 +183,46 @@ watch([acceptPayments], () => {
   }
 })
 
+
 // User settings
+
 const language = ref()
-const notiMyAccount = ref()
-const notiNeeds = ref()
-const notiOffers = ref()
-const notiMembers = ref()
+
+const notiMyAccount = ref<boolean>()
+const notiNeeds = ref<boolean>()
+const notiOffers = ref<boolean>()
+const notiMembers = ref<boolean>()
+
+const emailMyAccount = ref<boolean>()
+const emailGroup = ref<MailingFrequency>()
 
 watchEffect(() => {
   const lang = userLanguage.value
   language.value = lang ? {label: langs[lang].label, value: lang} : undefined
+  
   const notifications = userSettings.value?.attributes.notifications
   notiMyAccount.value = notifications?.myAccount
   notiNeeds.value = notifications?.newNeeds
   notiOffers.value = notifications?.newOffers
   notiMembers.value = notifications?.newMembers
+
+  const emails = userSettings.value?.attributes.emails
+  emailMyAccount.value = emails?.myAccount
+  emailGroup.value = emails?.group
 })
 
 const locale = useLocale()
 
-watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers], () => {
+watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers, emailMyAccount, emailGroup], () => {
   const notis = userSettings.value?.attributes.notifications  
+  const emails = userSettings.value?.attributes.emails
   if (language.value !== undefined && language.value.value !== userLanguage.value
     || notiMyAccount.value !== undefined && notiMyAccount.value !== notis?.myAccount
     || notiNeeds.value !== undefined && notiNeeds.value !== notis?.newNeeds
     || notiOffers.value !== undefined && notiOffers.value !== notis?.newOffers
-    || notiMembers.value !== undefined && notiMembers.value !== notis?.newMembers) {
+    || notiMembers.value !== undefined && notiMembers.value !== notis?.newMembers
+    || emailMyAccount.value !== undefined && emailMyAccount.value !== emails?.myAccount
+    || emailGroup.value !== undefined && emailGroup.value !== emails?.group) {
     saveUserSettings({
       attributes: {
         language: language.value.value,
@@ -182,7 +231,11 @@ watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers], ()
           newNeeds: notiNeeds.value,
           newOffers: notiOffers.value,
           newMembers: notiMembers.value
-        }      
+        },
+        emails: {
+          myAccount: emailMyAccount.value,
+          group: emailGroup.value
+        }
       }
     })
     // This triggers a language app update.

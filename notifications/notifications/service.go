@@ -12,7 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/komunitin/jsonapi"
-	"github.com/komunitin/komunitin/notifications/model"
+	"github.com/komunitin/komunitin/notifications/api"
 	"github.com/komunitin/komunitin/notifications/service"
 	"github.com/komunitin/komunitin/notifications/store"
 	"github.com/rs/xid"
@@ -24,14 +24,14 @@ type Subscription struct {
 	Token string `jsonapi:"attr,token" json:"token"`
 	// jsonapi lib doesn't support typed embedded structs.
 	Settings map[string]interface{} `jsonapi:"attr,settings" json:"settings"`
-	User     *model.ExternalUser    `jsonapi:"relation,user" json:"user"`
-	Member   *model.ExternalMember  `jsonapi:"relation,member" json:"member"`
+	User     *api.ExternalUser      `jsonapi:"relation,user" json:"user"`
+	Member   *api.ExternalMember    `jsonapi:"relation,member" json:"member"`
 }
 
 // Checks that the token present in Authorization header is valid and
 // matches the given user. Also checks that the member belongs to the
 // given user. Calls the social api to perform these checks.
-func validateAuthorization(w http.ResponseWriter, r *http.Request, user *model.ExternalUser, member *model.ExternalMember) error {
+func validateAuthorization(w http.ResponseWriter, r *http.Request, user *api.ExternalUser, member *api.ExternalMember) error {
 	token := strings.Trim(r.Header.Get("Authorization"), " ")
 	prefix := "Bearer "
 	if !strings.HasPrefix(token, prefix) {
@@ -40,7 +40,7 @@ func validateAuthorization(w http.ResponseWriter, r *http.Request, user *model.E
 		return errors.New(msg)
 	}
 	token = strings.Trim(token[len(prefix):], " ")
-	fetchedUser, err := getUserByToken(r.Context(), token)
+	fetchedUser, err := api.GetUserByToken(r.Context(), token)
 	if err != nil {
 		http.Error(w, "Error fetching the user resource with given token.", http.StatusUnauthorized)
 		return err

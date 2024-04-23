@@ -4,6 +4,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/go-redis/redis/v8"
@@ -11,7 +12,7 @@ import (
 )
 
 type Stream struct {
-	client     redis.Client
+	client     *redis.Client
 	name       string
 	groupId    string
 	consumerId string
@@ -19,20 +20,20 @@ type Stream struct {
 
 // Create a new stream. Note that the name of the stream is what actually identifies the stream,
 // so if you create two streams with the same name, they will be the same stream.
-func NewStream(ctx context.Context, name string) (*Stream, error) {
+func NewStream(ctx context.Context, name string, consumer string) (*Stream, error) {
 	// Create Stream data and Redis client.
 	stream := &Stream{
 		name: name,
-		client: *redis.NewClient(&redis.Options{
+		client: redis.NewClient(&redis.Options{
 			Addr:     "redis:6379",
 			Password: "", // no password set
 			DB:       0,  // use default database
 		}),
 		consumerId: xid.New().String(),
-		groupId:    name + "-consumer-group",
+		groupId:    consumer,
 	}
 	// Create read group if not exists.
-	err := stream.client.XGroupCreateMkStream(ctx, name, stream.groupId, "0").Err()
+	err := stream.client.XGroupCreateMkStream(ctx, stream.name, stream.groupId, "$").Err()
 	if err != nil && strings.Contains(err.Error(), "BUSYGROUP") {
 		// Ignore "Consumer Group name already exists" error.
 		err = nil
@@ -61,6 +62,12 @@ func (stream *Stream) Get(ctx context.Context) (string, map[string]interface{}, 
 	}).Result()
 	if err != nil {
 		return "", nil, err
+	}
+	if len(entries) != 1 {
+		return "", nil, fmt.Errorf("expected 1 entry in stream read operation, got %d", len(entries))
+	}
+	if len(entries[0].Messages) != 1 {
+		return "", nil, fmt.Errorf("expected 1 message in stream read operation, got %d", len(entries[0].Messages))
 	}
 	message := entries[0].Messages[0]
 	return message.ID, message.Values, nil

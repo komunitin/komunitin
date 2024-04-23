@@ -247,11 +247,16 @@ export default {
     }),
     userSettings: Factory.extend({
       language: "en-us",
+      komunitin: true,
       notifications: {
         myAccount: true,
         newNeeds: true,
         newOffers: true,
         newMembers: true
+      },
+      emails: {
+        myAccount: true,
+        group: "weekly"
       }
     }),
     group: Factory.extend({

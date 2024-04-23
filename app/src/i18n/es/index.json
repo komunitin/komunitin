@@ -227,6 +227,17 @@
   "saveProfile": "Guardar perfil",
   "submit": "Enviar",
   "resendEmail": "Reenviar email",
+  "emails": "Emails",
+  "emailsSettingsText": "Configura los emails que quieres recibir en tu bandeja de entrada.",
+  "myAccountEmails": "Mi cuenta",
+  "myAccountEmailsHint": "Emails de movimientos de tu cuenta: pagos, transferencias pendientes, ofertas o necesidades caducadas...",
+  "groupEmails": "Novedades del grupo",
+  "groupEmailsHint": "Recopilación de novedades de tu grupo: nuevos miembros, nuevas ofertas y necesidades...",
+  "never": "Nunca",
+  "daily": "Diario",
+  "weekly": "Semanal",
+  "monthly": "Mensual",
+  "quarterly": "Trimestral",
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta"

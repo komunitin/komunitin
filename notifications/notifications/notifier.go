@@ -4,29 +4,17 @@ package notifications
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
-	"os"
+	"maps"
 	"reflect"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 
+	"github.com/komunitin/komunitin/notifications/api"
 	"github.com/komunitin/komunitin/notifications/events"
 	"github.com/komunitin/komunitin/notifications/store"
-)
-
-// Event names
-const (
-	TransferCommitted = "TransferCommitted"
-	TransferPending   = "TransferPending"
-	TransferRejected  = "TransferRejected"
-	NeedPublished     = "NeedPublished"
-	NeedExpired       = "NeedExpired"
-	OfferPublished    = "OfferPublished"
-	OfferExpired      = "OfferExpired"
-	MemberJoined      = "MemberJoined"
 )
 
 // Event types (used for notification preferences)
@@ -45,13 +33,6 @@ const (
 	Both
 )
 
-// These configuration parameters are set docker-compose.xml file.
-var (
-	/*accountingUrl = os.Getenv("KOMUNITIN_ACCOUNTING_URL")*/
-	socialUrl = os.Getenv("KOMUNITIN_SOCIAL_URL")
-	/*appUrl    = os.Getenv("KOMUNITIN_APP_URL")*/
-)
-
 // Wait for data in events stream and perform notifications as needed.
 func Notifier(ctx context.Context) error {
 	// TODO: Better error handling. Need to be studied carefully, but:
@@ -62,7 +43,7 @@ func Notifier(ctx context.Context) error {
 	// sending notifications by reading events into a channel and then having
 	// different goroutines consuming the channel and performing the notifications.
 
-	stream, err := store.NewStream(ctx, events.EventStream)
+	stream, err := events.NewEventsStream(ctx, "notifier")
 	if err != nil {
 		return err
 	}
@@ -75,98 +56,71 @@ func Notifier(ctx context.Context) error {
 	// Infinite loop
 	for {
 		// Blocking call to get next event in stream
-		id, value, err := stream.Get(ctx)
+		event, err := stream.Get(ctx)
 		if err != nil {
 			// Unexpected error, terminating.
 			return err
 		}
-		err = handleEvent(ctx, value, store)
+		err = handleEvent(ctx, event, store)
 		if err != nil {
 			// Error handling event. Just print and ignore event.
 			log.Printf("Error handling event: %v\n", err)
 		}
 		// Acknowledge event handled
-		stream.Ack(ctx, id)
+		stream.Ack(ctx, event.Id)
 	}
 }
 
-func handleEvent(ctx context.Context, value map[string]interface{}, store *store.Store) error {
-	event := value["name"]
+func handleEvent(ctx context.Context, event *events.Event, store *store.Store) error {
 
-	switch event {
-	case TransferCommitted:
-		return handleTransferEvent(ctx, value, store, Both)
-	case TransferPending:
-		return handleTransferEvent(ctx, value, store, Payer)
-	case TransferRejected:
-		return handleTransferEvent(ctx, value, store, Payee)
-	case NeedPublished:
-		return handleGroupEvent(ctx, value, store, NewNeeds)
-	case OfferPublished:
-		return handleGroupEvent(ctx, value, store, NewOffers)
-	case MemberJoined:
-		return handleGroupEvent(ctx, value, store, NewMembers)
-	case NeedExpired:
-		return handleMemberEvent(ctx, value, store)
-	case OfferExpired:
-		return handleMemberEvent(ctx, value, store)
+	switch event.Name {
+	case events.TransferCommitted:
+		return handleTransferEvent(ctx, event, store, Both)
+	case events.TransferPending:
+		return handleTransferEvent(ctx, event, store, Payer)
+	case events.TransferRejected:
+		return handleTransferEvent(ctx, event, store, Payee)
+	case events.NeedPublished:
+		return handleGroupEvent(ctx, event, store, NewNeeds)
+	case events.OfferPublished:
+		return handleGroupEvent(ctx, event, store, NewOffers)
+	case events.MemberJoined:
+		return handleGroupEvent(ctx, event, store, NewMembers)
+	case events.NeedExpired:
+		return handleMemberEvent(ctx, event, store)
+	case events.OfferExpired:
+		return handleMemberEvent(ctx, event, store)
 	default:
-		log.Printf("Unkown event type %v\n", event)
+		return fmt.Errorf("unkown event type %v", event.Name)
 	}
-	return nil
 }
 
-func buildMessageData(value map[string]interface{}) (map[string]string, error) {
-	data := make(map[string]string)
-	data["event"] = value["name"].(string)
-	data["code"] = value["code"].(string)
-	data["user"] = value["user"].(string)
-
-	decoded := make(map[string]string)
-	err := json.Unmarshal([]byte(value["data"].(string)), &decoded)
-	if err != nil {
-		return nil, err
-	}
-
-	for key, value := range decoded {
-		data[key] = value
-	}
-
-	return data, nil
+func handleMemberEvent(ctx context.Context, event *events.Event, store *store.Store) error {
+	members := []string{event.Data["member"]}
+	// Note that OfferExpired and NeedExpired are usually sent by the system cron,
+	// so the user is always the system user and in particular the affected user
+	// is not ignored and gets notified.
+	return notifyMembers(ctx, store, members, event, MyAccount)
 }
 
-func handleMemberEvent(ctx context.Context, value map[string]interface{}, store *store.Store) error {
-	data, err := buildMessageData(value)
-	if err != nil {
-		return err
-	}
-	members := []string{data["member"]}
-	return notifyMembers(ctx, store, members, "", data, MyAccount)
-}
-
-func handleTransferEvent(ctx context.Context, value map[string]interface{}, store *store.Store, dest TransferEventDestination) error {
-	data, err := buildMessageData(value)
-	if err != nil {
-		return err
-	}
+func handleTransferEvent(ctx context.Context, event *events.Event, store *store.Store, dest TransferEventDestination) error {
 	members := make([]string, 0, 2)
 	if dest == Both || dest == Payer {
-		members = append(members, data["payer"])
+		members = append(members, event.Data["payer"])
 	}
 	if dest == Both || dest == Payee {
-		members = append(members, data["payee"])
+		members = append(members, event.Data["payee"])
 	}
 
 	// Notify members
-	return notifyMembers(ctx, store, members, value["user"].(string), data, MyAccount)
+	return notifyMembers(ctx, store, members, event, MyAccount)
 
 }
 
-func handleGroupEvent(ctx context.Context, value map[string]interface{}, store *store.Store, eventType string) error {
+func handleGroupEvent(ctx context.Context, event *events.Event, store *store.Store, eventType string) error {
 
 	// Get group members
-	code := value["code"].(string)
-	members, err := getGroupMembers(ctx, code)
+	members, err := api.GetGroupMembers(ctx, event.Code)
 	if err != nil {
 		return err
 	}
@@ -176,23 +130,17 @@ func handleGroupEvent(ctx context.Context, value map[string]interface{}, store *
 		memberIds[i] = member.Id
 	}
 
-	excludeUser := value["user"].(string)
-	data, err := buildMessageData(value)
-	if err != nil {
-		return err
-	}
-
-	return notifyMembers(ctx, store, memberIds, excludeUser, data, eventType)
+	return notifyMembers(ctx, store, memberIds, event, eventType)
 }
 
-func notifyMembers(ctx context.Context, store *store.Store, memberIds []string, excludeUser string, data map[string]string, eventType string) error {
+func notifyMembers(ctx context.Context, store *store.Store, memberIds []string, event *events.Event, eventType string) error {
 	// The array of tokens to send the message to.
 	tokens := []string{}
 	// A map to reverse from tokens to subscriptions in order to easily handle responses.
 	tokenMap := make(map[string]*Subscription)
 
 	for _, member := range memberIds {
-		subscriptions, err := getMemberSubscriptions(ctx, store, member, excludeUser)
+		subscriptions, err := getMemberSubscriptions(ctx, store, member, event.User)
 		if err != nil {
 			return err
 		}
@@ -209,6 +157,12 @@ func notifyMembers(ctx context.Context, store *store.Store, memberIds []string, 
 		return nil
 	}
 
+	// We send push messages with flat data.
+	messageData := maps.Clone(event.Data)
+	messageData["event"] = event.Name
+	messageData["code"] = event.Code
+	messageData["user"] = event.User
+
 	// Break tokens in groups of 500 and send the message because of firebase limitations.
 	for i := 0; i < len(tokens); i += 500 {
 		end := i + 500
@@ -219,10 +173,9 @@ func notifyMembers(ctx context.Context, store *store.Store, memberIds []string, 
 		// Send notification
 		message := &messaging.MulticastMessage{
 			Tokens: tokens[i:end],
-			Data:   data,
+			Data:   messageData,
 		}
-
-		br, err := sendMessage(ctx, store, message)
+		br, err := sendMessage(ctx, message)
 		if err != nil {
 			return err
 		}
@@ -272,7 +225,7 @@ func getMemberSubscriptions(ctx context.Context, store *store.Store, memberId st
 	return subscriptions, nil
 }
 
-func sendMessage(ctx context.Context, store *store.Store, message *messaging.MulticastMessage) (*messaging.BatchResponse, error) {
+func sendMessage(ctx context.Context, message *messaging.MulticastMessage) (*messaging.BatchResponse, error) {
 	// Credentials are implicitly loaded from a JSON file identifyed by the environment
 	// variable GOOGLE_APPLICATION_CREDENTIALS.
 	app, err := firebase.NewApp(ctx, nil)
@@ -286,10 +239,5 @@ func sendMessage(ctx context.Context, store *store.Store, message *messaging.Mul
 
 	// Send the message!
 	return client.SendMulticast(ctx, message)
-
-}
-
-func successfulMessage(r *messaging.SendResponse, token string) {
-	// Find member by token.
 
 }

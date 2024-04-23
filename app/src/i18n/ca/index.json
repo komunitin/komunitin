@@ -230,6 +230,17 @@
   "saveProfile": "Desa perfil",
   "submit": "Envia",
   "resendEmail": "Reenvia email",
+  "emails": "Emails",
+  "emailsSettingsText": "Configura els emails que vols rebre al teu correu electrònic.",
+  "myAccountEmails": "El meu compte",
+  "myAccountEmailsHint": "Rebre emails sobre els moviments del teu compte: pagaments, transferències pendents, ofertes o necessitats caducades...",
+  "groupEmails": "Novetats del grup",
+  "groupEmailsHint": "Recopilació de les novetats del grup: nous membres, ofertes i necessitats...",
+  "never": "Mai",
+  "daily": "Diari",
+  "weekly": "Setmanal",
+  "monthly": "Mensual",
+  "quarterly": "Trimestral",
 
   "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
   "ErrorInvalidPassword": "Contrasenya incorrecta"
