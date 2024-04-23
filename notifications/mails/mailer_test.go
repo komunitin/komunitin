@@ -1,6 +1,7 @@
 package mails
 
 import (
+	"context"
 	"strings"
 	"testing"
 	"time"
@@ -9,6 +10,8 @@ import (
 )
 
 func TestTransferMessage(t *testing.T) {
+	mailSender = NewMockMailSender()
+
 	user := &api.User{
 		Id:    "1",
 		Email: "user@example.com",
@@ -47,10 +50,12 @@ func TestTransferMessage(t *testing.T) {
 		Image: "https://example.com/payee.jpg",
 	}
 
-	msg, err := buildPayerMessage(user, payer, payee, transfer)
+	err := sendTransferEmail(context.Background(), user, payer, payee, transfer, paymentSent)
 	if err != nil {
 		t.Error(err)
 	}
+	msg := (mailSender.(*MailSenderMock)).SentEmails[0]
+
 	if msg.Subject != "Payment sent" {
 		t.Errorf("Expected 'Payment sent', got '%s'", msg.Subject)
 	}
@@ -82,10 +87,12 @@ func TestTransferMessage(t *testing.T) {
 
 	// Test other lang
 	user.Settings.Language = "es"
-	msg, err = buildPayerMessage(user, payer, payee, transfer)
+	err = sendTransferEmail(context.Background(), user, payer, payee, transfer, paymentSent)
 	if err != nil {
 		t.Error(err)
 	}
+	msg = (mailSender.(*MailSenderMock)).SentEmails[1]
+
 	if msg.Subject != "Pago enviado" {
 		t.Errorf("Expected 'Pago enviado', got '%s'", msg.Subject)
 	}

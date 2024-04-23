@@ -20,14 +20,10 @@ const (
 	Income  = "Income"
 )
 
-type Message struct {
-	Subject  string
-	BodyHtml string
-	BodyText string
-}
-
 // Data for the template
 type TemplateMainData struct {
+	Subject  string
+	Name     string
 	LogoUrl  string
 	SiteName string
 	Footer   string
@@ -55,7 +51,8 @@ type TemplateActionData struct {
 }
 
 type TemplateContentTransferData struct {
-	Text string
+	Text    string
+	Subtext string
 }
 
 // All data required for payments/incomes emails.
@@ -66,7 +63,7 @@ type EmailTransferData struct {
 	TemplateContentTransferData
 }
 
-func buildTransferMessage(subject string, templateData EmailTransferData, t *i18n.Translator) (*Message, error) {
+func buildTransferMessage(t *i18n.Translator, templateData EmailTransferData) (*Email, error) {
 	// Functions available in the template
 	funcMap := htmlTemplate.FuncMap{
 		"t":         t.T,
@@ -96,8 +93,8 @@ func buildTransferMessage(subject string, templateData EmailTransferData, t *i18
 	}
 	textBody := w.String()
 
-	return &Message{
-		Subject:  subject,
+	return &Email{		
+		Subject:  templateData.Subject,
 		BodyHtml: htmlBody,
 		BodyText: textBody,
 	}, nil

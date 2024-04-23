@@ -1,14 +1,13 @@
 {{define "main"}}
 {{.Greeting}}
-
 {{template "content" .}}
-
 {{.Footer}}
 {{end}}
 
 {{define "content"}}
 {{.Text}}
-
+{{if .Subtext}}{{.Subtext}}
+{{end}}
 {{"transactionDetails" | t}}:
 
 {{template "transfer" .}}

@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"maps"
 	"reflect"
 
 	firebase "firebase.google.com/go"
@@ -156,6 +157,12 @@ func notifyMembers(ctx context.Context, store *store.Store, memberIds []string, 
 		return nil
 	}
 
+	// We send push messages with flat data.
+	messageData := maps.Clone(event.Data)
+	messageData["event"] = event.Name
+	messageData["code"] = event.Code
+	messageData["user"] = event.User
+
 	// Break tokens in groups of 500 and send the message because of firebase limitations.
 	for i := 0; i < len(tokens); i += 500 {
 		end := i + 500
@@ -166,9 +173,8 @@ func notifyMembers(ctx context.Context, store *store.Store, memberIds []string, 
 		// Send notification
 		message := &messaging.MulticastMessage{
 			Tokens: tokens[i:end],
-			Data:   event.Data,
+			Data:   messageData,
 		}
-
 		br, err := sendMessage(ctx, message)
 		if err != nil {
 			return err
