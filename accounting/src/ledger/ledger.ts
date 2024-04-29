@@ -19,6 +19,8 @@ export type KeyPair = StellarKeyPair
 
 /**
  * Configurable parameters for a Currency.
+ * 
+ * Note that currencies have always a fixed precision of 7 decimal places.
  */
 export type LedgerCurrencyConfig = {
   /** 
@@ -26,8 +28,8 @@ export type LedgerCurrencyConfig = {
    * */ 
   code: string,
   /**
-   * The rate of the currency in muHOURs (micro HOURs), as a fraction with numerator and denominator.
-   * If the rate is 1/1000, it means that 1 muHOUR is worth 1000 of the currency.
+   * The rate of the currency in HOURs, as a fraction with numerator and denominator.
+   * If the rate is 1/10, it means that 1 HOUR is worth 10 units of the currency.
    */
   rate: Rate
   /**
@@ -89,6 +91,7 @@ export interface LedgerCurrency {
  * An account in a ledger.
  */
 export interface LedgerAccount {
+  
   /**
    * 
    * @param payee 
@@ -107,6 +110,14 @@ export interface LedgerAccount {
    * Get the balance of the account in the community currency.
    */
   balance(): string
+
+  /**
+   * Update the account data from the ledger.
+   * 
+   * Call this method after performing a transaction to get the updated balance.
+   */
+  update(): Promise<this>
+
 }
 
 /**

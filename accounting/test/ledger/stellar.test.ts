@@ -42,35 +42,41 @@ describe('Creates stellar elements', async () => {
     assert.match(currencyKeys.issuer.publicKey(),pubKeyRegex)
     assert.match(currencyKeys.credit.publicKey(),pubKeyRegex)
     assert.match(currencyKeys.admin.publicKey(), pubKeyRegex)
-
   })
 
   let accountKey: Keypair
-  await it('should be able to create a new account', async() => {
+  await it('should be able to create a new account', async () => {
     const result = await currency.createAccount({
       sponsor: sponsor,
-      issuer: currencyKeys.issuer
+      issuer: currencyKeys.issuer,
+      credit: currencyKeys.credit
     })
     accountKey = result.key
     assert.notEqual(accountKey, undefined)
     assert.match(accountKey.publicKey(), pubKeyRegex)
     const account = await currency.getAccount(accountKey.publicKey())
-    assert.equal(account.balance(),"1000")
+    assert.equal(account.balance(),"1000.0000000")
   })
 
   let account2Key: Keypair
   await it('should be able to pay from one account to another', async() => {
-    account2Key = (await currency.createAccount({sponsor, issuer: currencyKeys.issuer})).key
+    account2Key = (await currency.createAccount({sponsor, issuer: currencyKeys.issuer, credit: currencyKeys.credit})).key
     const account = await currency.getAccount(accountKey.publicKey())
-    account.pay({payeePublicKey: account2Key.publicKey(), amount: "100"}, {account: accountKey, sponsor})
-    assert.equal(account.balance(),"900") // Should I reload the account?
+    await account.pay({payeePublicKey: account2Key.publicKey(), amount: "100"}, {account: accountKey, sponsor})
+    await account.update()
+    assert.equal(account.balance(),"900.0000000")
     const account2 = await currency.getAccount(account2Key.publicKey())
-    assert.equal(account2.balance(),"1100")
+    assert.equal(account2.balance(),"1100.0000000")
   })
 
   await it('should be able to delete an account', async() => {
     const account2 = await currency.getAccount(account2Key.publicKey())
     await account2.delete({admin: currencyKeys.admin, sponsor})
-    assert.equal(account2.balance(),"0") 
+    try {
+      account2.balance()
+      assert.fail("Account should have been deleted")
+    } catch (error) {
+      assert.equal((error as Error).message, "Account not found")
+    }
   })
 })

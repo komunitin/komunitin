@@ -2,6 +2,7 @@ import { Asset, Operation, AuthRequiredFlag, AuthRevocableFlag, AuthClawbackEnab
 import { LedgerAccount, LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarLedger } from "./ledger"
+import Big from "big.js"
 
 export class StellarCurrency implements LedgerCurrency {
   ledger: StellarLedger
@@ -117,10 +118,10 @@ export class StellarCurrency implements LedgerCurrency {
     issuer: Keypair,
   }): Promise<void> {
     const creditAccount = await this.creditAccount()
-    const balance = BigInt(creditAccount.balance())
-    const starting = BigInt(this.creditAccountStartingBalance())
-    if (balance < starting) {
-      const diff = starting - balance
+    const balance = Big(creditAccount.balance())
+    const starting = Big(this.creditAccountStartingBalance())
+    if (balance.lt(starting)) {
+      const diff = starting.minus(balance)
       const issuerAccount = await this.issuerAccount()
       const builder = this.ledger.transactionBuilder(issuerAccount)
         .addOperation(Operation.payment({
@@ -137,10 +138,10 @@ export class StellarCurrency implements LedgerCurrency {
   // At this time this is computed as the quantity to fund 100 new accounts plus the equivalent
   // in local currency of 100 HOURs.
   private creditAccountStartingBalance(): string {
-    const nAccounts = 100n
-    const defaultCredits = BigInt(this.config.defaultInitialBalance ?? 0) * nAccounts
-    const baseHours = 100n
-    const base = BigInt(this.config.rate.d) * baseHours / BigInt(this.config.rate.n)
+    const nAccounts = 100
+    const defaultCredits = Big(this.config.defaultInitialBalance ?? 0).times(nAccounts) 
+    const baseHours = 100
+    const base = Big(this.config.rate.d).times(baseHours).div(this.config.rate.n).toFixed(7)
     return (defaultCredits + base).toString()
   }
 
@@ -174,9 +175,9 @@ export class StellarCurrency implements LedgerCurrency {
       }))
       // Aprove trust line
       .addOperation(Operation.setTrustLineFlags({
-        source: config.publicKey,
+        source: this.data.issuerPublicKey,
         asset,
-        trustor: this.data.issuerPublicKey,
+        trustor: config.publicKey,
         flags: {
           authorized: true,
         }
@@ -206,7 +207,7 @@ export class StellarCurrency implements LedgerCurrency {
     }))
 
     // Add initial funding.
-    if (BigInt(config.initialBalance) > 0n) {
+    if (Big(config.initialBalance).gt(0)) {
       t.addOperation(Operation.payment({
         source: this.data.creditPublicKey,
         destination: config.publicKey,
@@ -224,10 +225,10 @@ export class StellarCurrency implements LedgerCurrency {
     issuer: Keypair,
     credit?: Keypair, // Only if defaultInitialBalance > 0
   }): Promise<{key: Keypair}> {
-    if (keys.credit && BigInt(this.config.defaultInitialBalance) === 0n) {
+    if (keys.credit && Big(this.config.defaultInitialBalance).eq(0)) {
       throw new Error("Credit key not allowed if defaultInitialBalance is 0.")
     }
-    if (!keys.credit && BigInt(this.config.defaultInitialBalance) > 0n) {
+    if (!keys.credit && Big(this.config.defaultInitialBalance).gt(0)) {
       throw new Error("Credit key required if defaultInitialBalance is positive.")
     }
     // Create keypair.
@@ -242,13 +243,13 @@ export class StellarCurrency implements LedgerCurrency {
       adminSigner: this.data.adminPublicKey
     })
 
-    await this.ledger.submitTransaction(builder, Object.values(keys), keys.sponsor)
+    await this.ledger.submitTransaction(builder, [...Object.values(keys), account], keys.sponsor)
 
     return {key: account}
   }
 
   async getAccount(publicKey: string): Promise<StellarAccount> {
-    if (!this.accounts.hasOwnProperty(publicKey)) {
+    if (!this.accounts[publicKey]) {
       this.accounts[publicKey] = this.ledger.server.loadAccount(publicKey).then((account) => {
         return new StellarAccount(account, this)
       })      

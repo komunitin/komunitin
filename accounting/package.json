@@ -10,10 +10,12 @@
 		"test": "tsx --test test/**/*.ts"
 	},
 	"dependencies": {
-		"@stellar/stellar-sdk": "^11.3.0"
+		"@stellar/stellar-sdk": "^11.3.0",
+		"big.js": "^6.2.1"
 	},
 	"devDependencies": {
 		"@tsconfig/node20": "^20.1.4",
+		"@types/big.js": "^6.2.2",
 		"esbuild": "^0.20.2",
 		"tsx": "^4.7.3",
 		"typescript": "^5.4.5"

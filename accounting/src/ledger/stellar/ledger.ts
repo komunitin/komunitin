@@ -114,7 +114,7 @@ export class StellarLedger implements Ledger {
 
   private isNonRetryError(error: any): boolean {
     // Bas request, not found, too many requests.
-    if (error.status == 400 || error.status == 404 || error.status == 429) {
+    if (error.response && error.response.status == 400 || error.response.status == 404 || error.response.status == 429) {
       return true
     }
     return false
@@ -141,7 +141,7 @@ export class StellarLedger implements Ledger {
       const inner = transaction instanceof FeeBumpTransaction ? transaction.innerTransaction : transaction
       const expiration = parseInt(inner.timeBounds?.maxTime ?? "0")
 
-      if (Date.now() >= expiration) {
+      if (Date.now() >= expiration * 1000) {
         throw new Error("Transaction expired. Create a new one and submit it again.", {cause: error})
       }
 

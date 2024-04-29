@@ -1,14 +1,23 @@
 import { Horizon, Keypair, Operation } from "@stellar/stellar-sdk"
 import { KeyPair, LedgerAccount } from "../ledger"
 import { StellarCurrency } from "./currency"
+import {Big} from "big.js"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
-  public account: Horizon.AccountResponse
+  public account: Horizon.AccountResponse | undefined
 
   constructor(account: Horizon.AccountResponse, currency: StellarCurrency) {
     this.currency = currency
     this.account = account
+  }
+
+  async update() {
+    if (this.account === undefined) {
+      throw new Error("Account not found")
+    }
+    this.account = await this.currency.ledger.server.loadAccount(this.account.accountId())
+    return this
   }
 
   /**
@@ -16,6 +25,9 @@ export class StellarAccount implements LedgerAccount {
    * @returns The balance of the account in the local currency.
    */
   balance() {
+    if (this.account === undefined) {
+      throw new Error("Account not found")
+    }
     const balance = this.account.balances.find((b) => {
       if (b.asset_type == "credit_alphanum4" || b.asset_type == "credit_alphanum12") {
         const balance = b as Horizon.HorizonApi.BalanceLineAsset
@@ -42,7 +54,7 @@ export class StellarAccount implements LedgerAccount {
   }) {
     const builder = this.currency.ledger.transactionBuilder(this)
     // Send all the balance to the credit account.
-    if (BigInt(this.balance()) > 0n) {
+    if (Big(this.balance()).gt(0)) {
       builder.addOperation(Operation.payment({
         destination: this.currency.data.creditPublicKey,
         asset: this.currency.asset(),
@@ -59,6 +71,7 @@ export class StellarAccount implements LedgerAccount {
       destination: this.currency.ledger.sponsorPublicKey.publicKey()
     }))
     await this.currency.ledger.submitTransaction(builder, [keys.admin], keys.sponsor)
+    this.account = undefined
   }
 
   /**
@@ -67,7 +80,7 @@ export class StellarAccount implements LedgerAccount {
    * @param keys The signer keys. The account entry can be either the master key or the admin key for administered accounts.
    */
   async pay(payment: { payeePublicKey: string; amount: string }, keys: { account: Keypair; sponsor: Keypair }) {
-    if (BigInt(this.balance()) < BigInt(payment.amount)) {
+    if (Big(this.balance()).lt(payment.amount)) {
       throw new Error("Insufficient balance")
     }
     const builder = this.currency.ledger.transactionBuilder(this)
