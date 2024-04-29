@@ -1,8 +1,9 @@
 {
+  "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "sourceMap": true,
     "baseUrl": ".",
   },
+  "include": ["src", "test"]
 }
