@@ -5,7 +5,7 @@ import { StellarLedger } from "./ledger"
 
 export class StellarCurrency implements LedgerCurrency {
   ledger: StellarLedger
-  config: LedgerCurrencyConfig & {defaultCreditLimit: string}
+  config: LedgerCurrencyConfig & {defaultInitialBalance: string}
   data: LedgerCurrencyData
 
   // Registry of currency accounts. This way we are sure we are not instantiating
@@ -15,8 +15,8 @@ export class StellarCurrency implements LedgerCurrency {
   constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData) {
     this.ledger = ledger
     const defaultConfig = {
-      defaultCreditLimit: "0",
-      defaultDebitLimit: undefined
+      defaultInitialBalance: "0",
+      defaultMaximumBalance: undefined
     }
     this.config = {...defaultConfig, ...config}
     this.data = data
@@ -91,15 +91,15 @@ export class StellarCurrency implements LedgerCurrency {
     // 2. Credit account.
     this.createAccountTransaction(builder, {
       publicKey: this.data.creditPublicKey,
-      creditLimit: "0",
-      debitLimit: undefined
+      initialBalance: "0",
+      maximumBalance: undefined
     })
 
     // 3. Admin account
     this.createAccountTransaction(builder, {
       publicKey: this.data.adminPublicKey,
-      creditLimit: "0",
-      debitLimit: undefined
+      initialBalance: "0",
+      maximumBalance: undefined
     })
 
     await this.ledger.submitTransaction(builder, [keys.sponsor, keys.issuer, keys.credit, keys.admin], keys.sponsor)
@@ -138,22 +138,22 @@ export class StellarCurrency implements LedgerCurrency {
   // in local currency of 100 HOURs.
   private creditAccountStartingBalance(): string {
     const nAccounts = 100n
-    const defaultCredits = BigInt(this.config.defaultCreditLimit ?? 0) * nAccounts
+    const defaultCredits = BigInt(this.config.defaultInitialBalance ?? 0) * nAccounts
     const baseHours = 100n
     const base = BigInt(this.config.rate.d) * baseHours / BigInt(this.config.rate.n)
     return (defaultCredits + base).toString()
   }
 
   /**
-   * Adds the necessary operations to t to create a new account with a trustline to this local currency with limit 
-   * config.debitLimit and optionally an initial payment of config.creditLimit from the credit account. Note that
-   * this transaction will need to be signed by the sponsor, the new account, the issuer and optionally the credit 
-   * account if config.creditLimit > 0.
+   * Adds the necessary operations to t to create a new account with a trustline to this local currency 
+   * with limit config.maximumBalance and optionally an initial payment of config.initialBalance from 
+   * the credit account. Note that this transaction will need to be signed by the sponsor, the new account,
+   * the issuer and optionally the credit account if config.initialBalance > 0.
    * 
    * @param t The transaction builder.
    * @param config Account parameters.
    */
-  private createAccountTransaction(t: TransactionBuilder, config: {publicKey: string, creditLimit: string, debitLimit?: string, adminSigner?: string}) {
+  private createAccountTransaction(t: TransactionBuilder, config: {publicKey: string, initialBalance: string, maximumBalance?: string, adminSigner?: string}) {
     const sponsorPublicKey = this.ledger.sponsorPublicKey.publicKey()
     const asset = this.asset()
 
@@ -170,7 +170,7 @@ export class StellarCurrency implements LedgerCurrency {
       .addOperation(Operation.changeTrust({
         source: config.publicKey,
         asset,
-        limit: config.debitLimit
+        limit: config.maximumBalance
       }))
       // Aprove trust line
       .addOperation(Operation.setTrustLineFlags({
@@ -206,12 +206,12 @@ export class StellarCurrency implements LedgerCurrency {
     }))
 
     // Add initial funding.
-    if (BigInt(config.creditLimit) > 0n) {
+    if (BigInt(config.initialBalance) > 0n) {
       t.addOperation(Operation.payment({
         source: this.data.creditPublicKey,
         destination: config.publicKey,
         asset,
-        amount: config.creditLimit
+        amount: config.initialBalance
       }))
     }
     
@@ -222,13 +222,13 @@ export class StellarCurrency implements LedgerCurrency {
   async createAccount(keys: {
     sponsor: Keypair
     issuer: Keypair,
-    credit?: Keypair, // Only if defaultCreditLimit > 0
+    credit?: Keypair, // Only if defaultInitialBalance > 0
   }): Promise<{key: Keypair}> {
-    if (keys.credit && BigInt(this.config.defaultCreditLimit) === 0n) {
-      throw new Error("Credit key not allowed if currenct defaultCreditLimit is 0.")
+    if (keys.credit && BigInt(this.config.defaultInitialBalance) === 0n) {
+      throw new Error("Credit key not allowed if defaultInitialBalance is 0.")
     }
-    if (!keys.credit && BigInt(this.config.defaultCreditLimit) > 0n) {
-      throw new Error("Credit key required if currenct defaultCreditLimit is positive.")
+    if (!keys.credit && BigInt(this.config.defaultInitialBalance) > 0n) {
+      throw new Error("Credit key required if defaultInitialBalance is positive.")
     }
     // Create keypair.
     const account = Keypair.random()
@@ -237,8 +237,8 @@ export class StellarCurrency implements LedgerCurrency {
 
     this.createAccountTransaction(builder, {
       publicKey: account.publicKey(),
-      creditLimit: this.config.defaultCreditLimit,
-      debitLimit: this.config.defaultDebitLimit,
+      initialBalance: this.config.defaultInitialBalance,
+      maximumBalance: this.config.defaultMaximumBalance,
       adminSigner: this.data.adminPublicKey
     })
 

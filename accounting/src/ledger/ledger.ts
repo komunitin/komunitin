@@ -26,20 +26,20 @@ export type LedgerCurrencyConfig = {
    * */ 
   code: string,
   /**
-   * The rate of the currency in HOURs, as a fraction with numerator and denominator.
-   * If the rate is 1/1000, it means that 1 HOUR is worth 1000 of the currency.
+   * The rate of the currency in muHOURs (micro HOURs), as a fraction with numerator and denominator.
+   * If the rate is 1/1000, it means that 1 muHOUR is worth 1000 of the currency.
    */
   rate: Rate
   /**
-   * The default maximum positive balance an account can have in this currency.
+   * The maximum positive balance an account can have in this currency by default.
    * Defaults to infinity (accounts can have unlimited positive balance).
    */
-  defaultDebitLimit?: string
+  defaultMaximumBalance?: string
   /**
-   * The default minimum negative balance an account can have in this currency.
-   * Defaults to 0 (so accounts can't have a negative balance).
+   * The initial funding an account will receive when created.
+   * Defaults to 0 (so accounts are not funded on creation).
    */
-  defaultCreditLimit?: string
+  defaultInitialBalance?: string
 }
 
 /**
@@ -78,7 +78,7 @@ export interface LedgerCurrency {
   createAccount(keys: {
     sponsor: Keypair
     issuer: Keypair,
-    credit?: Keypair, // Only if defaultCreditLimit > 0
+    credit?: Keypair, // Only if defaultInitialBalance > 0
   }): Promise<{key: KeyPair}>
 
   getAccount(publicKey: string): Promise<LedgerAccount>

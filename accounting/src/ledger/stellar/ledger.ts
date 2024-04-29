@@ -1,5 +1,5 @@
 import { Networks, Horizon, Keypair, TransactionBuilder, BASE_FEE, Transaction, Memo, MemoType, Operation, NetworkError, FeeBumpTransaction } from "@stellar/stellar-sdk"
-import { sleep } from "src/utils/sleep"
+import { sleep } from "../../utils/sleep"
 import { Ledger, LedgerCurrencyConfig, LedgerCurrency, LedgerCurrencyKeys, LedgerCurrencyData } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarCurrency } from "./currency"
@@ -22,10 +22,9 @@ export class StellarLedger implements Ledger {
 
   public static STELLAR_TIMEOUT_SECONDS = 30
 
-  private static instance: StellarLedger
-
   /**
-   * Get the singleton instance of the StellarLedger class.
+   * Create a new instance of the StellarLedger class. Note that a single instance should be used for a sponsor account
+   * and set of currencies. So in practice, this class must be used as a singleton.
    * 
    * @param server The URL of the Horizon server to connect to. For example, "https://horizon-testnet.stellar.org"
    * @param network The Stellar Network Passphase to use. For example Networks.TESTNET
@@ -33,26 +32,14 @@ export class StellarLedger implements Ledger {
    * class (in the same or different processes) should use the same sponsor account. Otherwise, there will be conflicts
    * with the sequence numbers.
    */
-  static getInstance(config: StellarLedgerConfig): StellarLedger {
-    if (!StellarLedger.instance) {
-      StellarLedger.instance = new StellarLedger(
-        new Horizon.Server(config.server),
-        config.network,
-        Keypair.fromPublicKey(config.sponsorPublicKey),
-        config.domain
-      )
-    }
-    return StellarLedger.instance
+  constructor(config: StellarLedgerConfig) {
+    this.server = new Horizon.Server(config.server)
+    this.network = config.network
+    this.sponsorPublicKey = Keypair.fromPublicKey(config.sponsorPublicKey)
+    this.domain = config.domain
   }
 
-  private constructor(server: Horizon.Server, network: Networks, sponsor: Keypair, domain: string) {
-    this.server = server
-    this.network = network
-    this.sponsorPublicKey = sponsor
-    this.domain = domain
-  }
-
-  private sponsorAccountPromise: Promise<Horizon.AccountResponse>
+  private sponsorAccountPromise: Promise<Horizon.AccountResponse> | undefined
   async sponsorAccount(): Promise<Horizon.AccountResponse> {
     if (!this.sponsorAccountPromise) {
       this.sponsorAccountPromise = this.server.loadAccount(this.sponsorPublicKey.publicKey())
@@ -125,11 +112,12 @@ export class StellarLedger implements Ledger {
       error.response.data.extras.result_codes.transaction == Horizon.HorizonApi.TransactionFailedResultCodes.TX_INSUFFICIENT_FEE)
   }
 
-  private isNonRetryError(error): boolean {
+  private isNonRetryError(error: any): boolean {
     // Bas request, not found, too many requests.
     if (error.status == 400 || error.status == 404 || error.status == 429) {
       return true
     }
+    return false
   }
 
   /**
