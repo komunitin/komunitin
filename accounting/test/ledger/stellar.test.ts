@@ -6,6 +6,12 @@ import { StellarLedger } from "../../src/ledger/stellar"
 import { Keypair, Networks } from "@stellar/stellar-sdk"
 import { friendbot } from "./utils"
 
+/**
+ * Test the Stellar ledger implementation using the real Stellar testnet.
+ * Note that this test is not 100% deterministic because it depends on the 
+ * 
+ * Stellar testnet and in any case it may take up to 1 minute to run.
+ */
 describe('Creates stellar elements', async () => {
   let ledger: Ledger
   let sponsor: Keypair
