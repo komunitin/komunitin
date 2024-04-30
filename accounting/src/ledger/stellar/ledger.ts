@@ -3,6 +3,7 @@ import { sleep } from "../../utils/sleep"
 import { Ledger, LedgerCurrencyConfig, LedgerCurrency, LedgerCurrencyKeys, LedgerCurrencyData } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarCurrency } from "./currency"
+import Big from "big.js"
 
 export type StellarLedgerConfig = {
   server: string,
@@ -149,31 +150,48 @@ export class StellarLedger implements Ledger {
     }
   }
   /**
-   * 
-   * @param code 4 character string representing the currency code. Allowed characters are A-Z and 0-9.
+   * Implements {@link Ledger.createCurrency}
    */
   async createCurrency(config: LedgerCurrencyConfig, sponsor: Keypair): Promise<{currency: LedgerCurrency, keys: LedgerCurrencyKeys}> {
     // Generate the keys.
     const keys = {
       issuer: Keypair.random(),
       credit: Keypair.random(),
-      admin: Keypair.random()
+      admin: Keypair.random(),
+      externalIssuer: Keypair.random(),
+      externalTrader: Keypair.random()
     }
 
     const data = {
       issuerPublicKey: keys.issuer.publicKey(),
       creditPublicKey: keys.credit.publicKey(),
-      adminPublicKey: keys.admin.publicKey()
+      adminPublicKey: keys.admin.publicKey(),
+      externalIssuerPublicKey: keys.externalIssuer.publicKey(),
+      externalTraderPublicKey: keys.externalTrader.publicKey()
     }
 
     const currency = this.getCurrency(config, data)
     
-    await currency.install({...keys, sponsor})
-    await currency.fundCreditAccount({sponsor, issuer: keys.issuer})
+    await currency.install({
+      sponsor,
+      admin: keys.admin,
+      credit: keys.credit,
+      issuer: keys.issuer
+    })
+
+    await currency.installGateway({
+      sponsor,
+      issuer: keys.issuer,
+      externalIssuer: keys.externalIssuer,
+      externalTrader: keys.externalTrader,
+      credit: Big(config.externalTraderInitialBalance ?? 0).gt(0) ? keys.credit : undefined,
+    })
 
     return {currency, keys}
   }
-
+  /**
+   * Implements {@link Ledger.getCurrency}
+   */
   getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): StellarCurrency {
     // TODO: if we end up using the accounts, this will need to be a singleton for each different currency.
     return new StellarCurrency(this, config, data)

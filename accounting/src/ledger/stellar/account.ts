@@ -1,11 +1,11 @@
-import { Horizon, Keypair, Operation } from "@stellar/stellar-sdk"
-import { KeyPair, LedgerAccount } from "../ledger"
+import { Asset, Horizon, Keypair, Operation } from "@stellar/stellar-sdk"
+import { KeyPair, LedgerAccount, PathQuote } from "../ledger"
 import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
-  
+
   // Use getStellarAccount() instead.
   private account: Horizon.AccountResponse | undefined
 
@@ -44,11 +44,7 @@ export class StellarAccount implements LedgerAccount {
   }
 
   /**
-   * Delete this account from the Stellar network. That means:
-   *   - Send all its balance to the credit account
-   *   - Remove its trustline
-   *   - Should we merge it to the sponsor account?
-   * The admin key is required because this is a high threshold operation.
+   * Implements {@link LedgerAccount.delete }
    */
   async delete(keys: {
     admin: KeyPair,
@@ -77,9 +73,7 @@ export class StellarAccount implements LedgerAccount {
   }
 
   /**
-   * Perform a community currency transfer.
-   * @param payment The payment details: destination and amount
-   * @param keys The signer keys. The account entry can be either the master key or the admin key for administered accounts.
+   * Implements {@link LedgerAccount.pay}
    */
   async pay(payment: { payeePublicKey: string; amount: string }, keys: { account: Keypair; sponsor: Keypair }) {
     if (Big(this.balance()).lt(payment.amount)) {
@@ -104,5 +98,32 @@ export class StellarAccount implements LedgerAccount {
     }
     return this.account
   }
+
+  /**
+   * Implements {@link LedgerAccount.externalPay}
+   */
+  async externalPay(payment: { payeePublicKey: string, amount: string, path: PathQuote }, keys: { account: Keypair; sponsor: Keypair }) {
+
+    if (Big(this.balance()).lt(payment.path.sourceAmount)) {
+      throw new Error("Insufficient balance")
+    }
+
+    const builder = this.currency.ledger.transactionBuilder(this)
+
+    builder.addOperation(Operation.pathPaymentStrictReceive({
+      sendAsset: payment.path.sourceAsset as Asset,
+      sendMax: payment.path.sourceAmount,
+      destination: payment.payeePublicKey,
+      destAsset: payment.path.destAsset as Asset,
+      destAmount: payment.amount,
+      path: payment.path.path as Asset[]
+    }))
+
+    return await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
+
+  }
+    
+
+
 
 }

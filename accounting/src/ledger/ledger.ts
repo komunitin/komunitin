@@ -33,15 +33,38 @@ export type LedgerCurrencyConfig = {
    */
   rate: Rate
   /**
-   * The maximum positive balance an account can have in this currency by default.
-   * Defaults to infinity (accounts can have unlimited positive balance).
-   */
-  defaultMaximumBalance?: string
-  /**
    * The initial funding an account will receive when created.
    * Defaults to 0 (so accounts are not funded on creation).
    */
   defaultInitialBalance?: string
+  /**
+   * The maximum balance an account can have in this currency by default.
+   * Defaults to infinity (accounts can have unlimited balance). This value,
+   * if set, needs to be greater than {@link defaultInitialBalance}.
+   */
+  defaultMaximumBalance?: string
+  /**
+   * The initial balance in local currency for the external trader account.
+   * 
+   * This is the global trade balance limit for incomming transactions. Or 
+   * in other words, it is the total amount of the local currency that can
+   * be created by external payments.
+   * 
+   * Defaults to 0, meaning that we need outgoing payments (to other currencies) 
+   * before we can have incoming transfers (from other currencies).
+   */
+  externalTraderInitialBalance?: string
+  /**
+   * The maximum balance in local currency for the external trader account.
+   * 
+   * This value minus the {@link externalTraderInitialBalance} is the global
+   * trade balance limit for outgoing payments. Or in other words, it is the
+   * total amount of the local currency that can be destroyed by external
+   * payments.
+   * 
+   * Defaults to infinity, meaning that there is no limit to outgoing payments.
+   */
+  externalTraderMaximumBalance?: string
 }
 
 /**
@@ -50,7 +73,9 @@ export type LedgerCurrencyConfig = {
 export type LedgerCurrencyKeys = {
   issuer: KeyPair, 
   credit: KeyPair, 
-  admin: KeyPair
+  admin: KeyPair,
+  externalIssuer: KeyPair,
+  externalTrader: KeyPair
 }
 
 /**
@@ -60,13 +85,21 @@ export type LedgerCurrencyData = {
   issuerPublicKey: string,
   creditPublicKey: string,
   adminPublicKey: string
+  externalIssuerPublicKey: string
+  externalTraderPublicKey: string
 }
 
 /**
  * The starting interface for the ledger.
  */
 export interface Ledger {
+  /**
+   * Create a new currency.
+   */
   createCurrency(config: LedgerCurrencyConfig, sponsor: KeyPair): Promise<{currency: LedgerCurrency, keys: LedgerCurrencyKeys}>
+  /**
+   * Get a currency object from the configuration and data.
+   */
   getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): LedgerCurrency
 }
 
@@ -83,8 +116,46 @@ export interface LedgerCurrency {
     credit?: Keypair, // Only if defaultInitialBalance > 0
   }): Promise<{key: KeyPair}>
 
+  /**
+   * Get a loaded account object.
+   * @param publicKey 
+   */
   getAccount(publicKey: string): Promise<LedgerAccount>
+
+  /**
+   * Create a trust line from this currency to the specified other currency.
+   * 
+   * A trust line allows the external account to hold this external currency and 
+   * hence the users from the external currency can pay to the users of this currency.
+   * 
+   * @param line
+   *   - issuerPublicKey: The public key of the external issuer from the other currency.
+   *   - limit: The maixmum amount of this foreign currency we're willing to hold, in local 
+   *            currency units. Set to "0" to remove the trust line.
+   * @param keys 
+   */
+  trustCurrency(line: { externalIssuerPublicKey: string; limit: string }, keys: { sponsor: Keypair; externalTrader: Keypair }): Promise<void>
+
+  /**
+   * Checks whether there is a path linking two local currencies.
+   * 
+   * @param data
+   *   destCode: The code of the destination local currency
+   *   destIssuer: The public key of the destination local currency issuer
+   *   amount: The amount to be received in the destination currency
+   * 
+   * @returns false if there is no path, or a quote with the source and destination amounts.
+   */
+  quotePath(data: {destCode: string, destIssuer: string, amount: string}): Promise<false | PathQuote>
   
+}
+
+export interface PathQuote {
+  sourceAmount: string,
+  sourceAsset: LedgerAsset,
+  destAsset: LedgerAsset,
+  destAmount: string,
+  path: LedgerAsset[]
 }
 
 /**
@@ -93,16 +164,26 @@ export interface LedgerCurrency {
 export interface LedgerAccount {
   
   /**
-   * 
-   * @param payee 
-   * @param amount 
-   * @param meta 
+   * Perform a community currency transfer.
+   * @param payment The payment details: destination and amount
+   * @param keys The account entry can be either the master key or the admin key for administered accounts.
    */
-  pay(payment: {payeePublicKey: string,amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
+  pay(payment: {payeePublicKey: string, amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
 
   /**
-   * Permanently delete the account from the Stellar ledger.
-   * @param keys 
+   * Perform a payment to an account on a different currency.
+   * @param payment
+   *   amount: The amount to pay in the payee currency. The payee will receive exactly this amount.
+   *   payeePublicKey: The public key of the payee account.
+   *   externalIssuerPublicKey: The public key of the issuer of the payee currency.
+   */
+  externalPay(payment: {payeePublicKey: string, amount: string, path: PathQuote}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
+
+  /**
+   * Permanently delete the account from the ledger.
+   * 
+   * This function returns existing balance to the credit account.
+   * @param keys The admin key is required because this is a high threshold operation.
    */
   delete(keys: {admin: KeyPair, sponsor: KeyPair}): Promise<void>
 
@@ -132,4 +213,9 @@ export interface LedgerTransfer {
 export type Rate = {
   n: number
   d: number
+}
+
+export type LedgerAsset = {
+  issuer: string,
+  code: string
 }
