@@ -52,7 +52,7 @@ export class StellarLedger implements Ledger {
    * @returns 
    */
   transactionBuilder(account: StellarAccount) {
-    return this.stellarTransactionBuilder(account.account)
+    return this.stellarTransactionBuilder(account.getStellarAccount())
   }
   async sponsorTransactionBuilder() {
     const sponsorAccount = await this.sponsorAccount()

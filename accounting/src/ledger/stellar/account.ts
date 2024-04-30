@@ -5,7 +5,9 @@ import {Big} from "big.js"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
-  public account: Horizon.AccountResponse | undefined
+  
+  // Use getStellarAccount() instead.
+  private account: Horizon.AccountResponse | undefined
 
   constructor(account: Horizon.AccountResponse, currency: StellarCurrency) {
     this.currency = currency
@@ -90,6 +92,17 @@ export class StellarAccount implements LedgerAccount {
       amount: payment.amount
     }))
     return await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
+  }
+
+  /**
+   * Get the Stellar account object.
+   * @returns The Stellar account object.
+   */
+  getStellarAccount() {
+    if (this.account === undefined) {
+      throw new Error("Account not found")
+    }
+    return this.account
   }
 
 }
