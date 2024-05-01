@@ -3,6 +3,7 @@ import { LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData, PathQuote } f
 import { StellarAccount } from "./account"
 import { StellarLedger } from "./ledger"
 import Big from "big.js"
+import { logger } from "src/utils/logger"
 
 export class StellarCurrency implements LedgerCurrency {
   static GLOBAL_ASSET_CODE = "HOUR"
@@ -417,6 +418,8 @@ export class StellarCurrency implements LedgerCurrency {
 
     await this.ledger.submitTransaction(builder, [...Object.values(keys), account], keys.sponsor)
 
+    logger.info({publicKey: account.publicKey()}, `Created new account for currency ${this.config.code}`)
+
     return {key: account}
   }
   /**
@@ -452,8 +455,8 @@ export class StellarCurrency implements LedgerCurrency {
   /**
    * Implements {@link LedgerCurrency.trustCurrency()}.
    */
-  async trustCurrency(line: { externalIssuerPublicKey: string, limit: string }, keys: { sponsor: Keypair; externalTrader: Keypair }) {
-    const asset = new Asset(StellarCurrency.GLOBAL_ASSET_CODE, line.externalIssuerPublicKey)
+  async trustCurrency(line: { trustedPublicKey: string, limit: string }, keys: { sponsor: Keypair, externalTrader: Keypair, externalIssuer: Keypair }) {
+    const asset = new Asset(StellarCurrency.GLOBAL_ASSET_CODE, line.trustedPublicKey)
     const limit = this.fromLocalToHour(line.limit)
     
     const externalTrader = await this.externalTraderAccount()
@@ -462,19 +465,28 @@ export class StellarCurrency implements LedgerCurrency {
       source: keys.sponsor.publicKey(),
       sponsoredId: this.data.externalTraderPublicKey
     }))
+    // We need to fund the trading account to satisfy the selling liabilities.
+    .addOperation(Operation.payment({
+      source: this.data.externalIssuerPublicKey,
+      destination: this.data.externalTraderPublicKey,
+      asset: this.hour(),
+      amount: limit
+    }))
     .addOperation(Operation.changeTrust({asset,limit}))
     // Sell own HOUR's by external HOUR's at 1:1 rate for path payments
     .addOperation(Operation.createPassiveSellOffer({
       selling: this.hour(),
       buying: asset,
-      amount: line.limit,
+      amount: limit,
       price: "1"
     }))
     .addOperation(Operation.endSponsoringFutureReserves({
       source: this.data.externalTraderPublicKey
     }))
 
-    await this.ledger.submitTransaction(builder, [keys.sponsor, keys.externalTrader], keys.sponsor)
+    await this.ledger.submitTransaction(builder, [keys.sponsor, keys.externalTrader, keys.externalIssuer], keys.sponsor)
+
+    logger.info({line}, `Currency ${this.config.code} trusted external issuer`)
   }
 
   /**

@@ -10,7 +10,7 @@ import { friendbot } from "./utils"
  * Test the Stellar ledger implementation using the real Stellar testnet.
  * Note that this test is not 100% deterministic because it depends on the 
  * 
- * Stellar testnet and in any case it may take up to 1 minute to run.
+ * Stellar testnet and in any case it may take up to 2 minutes to run.
  */
 describe('Creates stellar elements', async () => {
   let ledger: Ledger
@@ -28,7 +28,6 @@ describe('Creates stellar elements', async () => {
       sponsorPublicKey: sponsor.publicKey(),
       domain: "example.com"
     })
-
   })
 
   let currency: LedgerCurrency
@@ -53,7 +52,7 @@ describe('Creates stellar elements', async () => {
   })
 
   let accountKey: Keypair
-  await it.skip('should be able to create a new account', async () => {
+  await it('should be able to create a new account', async () => {
     const result = await currency.createAccount({
       sponsor: sponsor,
       issuer: currencyKeys.issuer,
@@ -67,7 +66,7 @@ describe('Creates stellar elements', async () => {
   })
 
   let account2Key: Keypair
-  await it.skip('should be able to pay from one account to another', async() => {
+  await it('should be able to pay from one account to another', async() => {
     account2Key = (await currency.createAccount({sponsor, issuer: currencyKeys.issuer, credit: currencyKeys.credit})).key
     const account = await currency.getAccount(accountKey.publicKey())
     await account.pay({payeePublicKey: account2Key.publicKey(), amount: "100"}, {account: accountKey, sponsor})
@@ -77,7 +76,7 @@ describe('Creates stellar elements', async () => {
     assert.equal(account2.balance(),"1100.0000000")
   })
 
-  await it.skip('should be able to delete an account', async() => {
+  await it('should be able to delete an account', async() => {
     const account2 = await currency.getAccount(account2Key.publicKey())
     await account2.delete({admin: currencyKeys.admin, sponsor})
     try {
@@ -95,27 +94,35 @@ describe('Creates stellar elements', async () => {
     const result = await ledger.createCurrency({
       code: "TES2",
       rate: {n: 1, d: 2},
-      defaultInitialBalance: "1000"
+      defaultInitialBalance: "1000",
+      externalTraderInitialBalance: "10000"
     }, sponsor)
     currency2 = result.currency
     currency2Keys = result.keys
-    // Create an account
+    await assert.doesNotReject(currency2.trustCurrency({
+      trustedPublicKey: currencyKeys.externalIssuer.publicKey(),
+      limit: "10" // 5 hours
+    }, {
+      sponsor,
+      externalTrader: currency2Keys.externalTrader,
+      externalIssuer: currency2Keys.externalIssuer
+    }))
+    // Create account from currency 2
     const {key: key2} = await currency2.createAccount({
       sponsor,
       issuer: currency2Keys.issuer,
       credit: currency2Keys.credit
     })
-    await assert.doesNotReject(currency2.trustCurrency({
-      externalIssuerPublicKey: currencyKeys.externalIssuer.publicKey(),
-      limit: "10" // 5 hours
-    }, {
+    // Create account from currency 1
+    const {key: key1} = await currency.createAccount({
       sponsor,
-      externalTrader: currency2Keys.externalTrader
-    })) 
+      issuer: currencyKeys.issuer,
+      credit: currencyKeys.credit
+    })
     // Create a path payment from currency 1 to currency 2.
     const path = await currency.quotePath({
       destCode: "TES2",
-      destIssuer: currencyKeys.issuer.publicKey(),
+      destIssuer: currency2Keys.issuer.publicKey(),
       amount: "5" // 2.5 hours.
     })
     assert.notEqual(path, false)
@@ -129,21 +136,14 @@ describe('Creates stellar elements', async () => {
       assert.equal(path.path[0].issuer, currencyKeys.externalIssuer.publicKey())
       assert.equal(path.path[1].code, "HOUR")
       assert.equal(path.path[1].issuer, currency2Keys.externalIssuer.publicKey())
-      
-      // Create account from currency1
-      const {key: key1} = await currency.createAccount({
-        sponsor,
-        issuer: currencyKeys.issuer,
-        credit: currencyKeys.credit
-      })
 
       const account1 = await currency.getAccount(key1.publicKey())
       await assert.doesNotReject(account1.externalPay({
         payeePublicKey: key2.publicKey(),
-        amount: "5",
+        amount: "5", // in external currency
         path
       }, {
-        account: accountKey,
+        account: key1,
         sponsor
       }))
 

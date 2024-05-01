@@ -129,12 +129,13 @@ export interface LedgerCurrency {
    * hence the users from the external currency can pay to the users of this currency.
    * 
    * @param line
-   *   - issuerPublicKey: The public key of the external issuer from the other currency.
+   *   - trustedPublicKey: The public key of the external issuer from the other currency.
    *   - limit: The maixmum amount of this foreign currency we're willing to hold, in local 
    *            currency units. Set to "0" to remove the trust line.
    * @param keys 
+   *   - externalIssuer: Needed to additionally fund the trader account to satisfy the new selling liabilities.
    */
-  trustCurrency(line: { externalIssuerPublicKey: string; limit: string }, keys: { sponsor: Keypair; externalTrader: Keypair }): Promise<void>
+  trustCurrency(line: { trustedPublicKey: string; limit: string }, keys: { sponsor: Keypair, externalTrader: Keypair, externalIssuer: Keypair }): Promise<void>
 
   /**
    * Checks whether there is a path linking two local currencies.

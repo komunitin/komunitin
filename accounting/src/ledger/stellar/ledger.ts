@@ -4,6 +4,7 @@ import { Ledger, LedgerCurrencyConfig, LedgerCurrency, LedgerCurrencyKeys, Ledge
 import { StellarAccount } from "./account"
 import { StellarCurrency } from "./currency"
 import Big from "big.js"
+import { logger } from "../../utils/logger"
 
 export type StellarLedgerConfig = {
   server: string,
@@ -133,6 +134,7 @@ export class StellarLedger implements Ledger {
       return await this.server.submitTransaction(transaction)
     } catch (error) {
       if (this.isNonRetryError(error)) {
+        this.logTransactionError(transaction, error)
         throw error
       }
       
@@ -187,6 +189,8 @@ export class StellarLedger implements Ledger {
       credit: Big(config.externalTraderInitialBalance ?? 0).gt(0) ? keys.credit : undefined,
     })
 
+    logger.info({publicKeys: data}, `Created new currency ${config.code}`)
+
     return {currency, keys}
   }
   /**
@@ -195,5 +199,27 @@ export class StellarLedger implements Ledger {
   getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): StellarCurrency {
     // TODO: if we end up using the accounts, this will need to be a singleton for each different currency.
     return new StellarCurrency(this, config, data)
+  }
+
+  private logTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: unknown) {
+    const inner = transaction instanceof FeeBumpTransaction ? transaction.innerTransaction : transaction
+    const operations = inner.operations.map(op => op.type)
+    if (error && (error as any).response?.data?.title) {
+      const nerror = error as NetworkError
+      const msg = `Horizon Error: ${nerror.response.data?.title}`
+      const data = nerror.response.data as Horizon.HorizonApi.ErrorResponseData.TransactionFailed
+      if (data.extras) {
+        // Transaction failed
+        const result = data.extras.result_codes
+        logger.error({operations, results: result.operations, result: result.transaction}, msg)
+      } else {
+        // Other Horizon error
+        logger.error({operations, data}, msg)
+      }
+    } else if (error instanceof Error) {
+      logger.error({operations, error}, `Error submitting transaction: ${error.message}`)
+    } else {
+      logger.error({operations, error}, `Error submitting transaction: ${error}`)
+    }
   }
 }
