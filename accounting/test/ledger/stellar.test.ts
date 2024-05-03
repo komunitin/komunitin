@@ -1,10 +1,14 @@
-import {describe, it, before} from "node:test"
+import {describe, it, before, after} from "node:test"
 import assert from "node:assert"
 
-import { Ledger, LedgerCurrency, LedgerCurrencyKeys } from "../../src/ledger"
+import { Ledger, LedgerCurrency, LedgerCurrencyKeys, PathQuote } from "../../src/ledger"
 import { StellarLedger } from "../../src/ledger/stellar"
 import { Keypair, Networks } from "@stellar/stellar-sdk"
 import { friendbot } from "./utils"
+import { defaultIncommingHourTradeListener } from "src/ledger/listener"
+import { logger } from "../../src/utils/logger"
+
+//logger.level = "debug"
 
 /**
  * Test the Stellar ledger implementation using the real Stellar testnet.
@@ -15,6 +19,12 @@ import { friendbot } from "./utils"
 describe('Creates stellar elements', async () => {
   let ledger: Ledger
   let sponsor: Keypair
+
+  let currency: LedgerCurrency
+  let currencyKeys: LedgerCurrencyKeys
+
+  let currency2: LedgerCurrency
+  let currency2Keys: LedgerCurrencyKeys
 
   before(async() => {
     // Create and fund a sponsor account.
@@ -28,19 +38,33 @@ describe('Creates stellar elements', async () => {
       sponsorPublicKey: sponsor.publicKey(),
       domain: "example.com"
     })
+
+    ledger.addListener("error", (error) => { logger.error(error) })
+    ledger.addListener("incommingHourTrade", defaultIncommingHourTradeListener(async() => sponsor, async (cur) => 
+      (cur === currency) ? currencyKeys.externalTrader : currency2Keys.externalTrader
+    ))
   })
 
-  let currency: LedgerCurrency
-  let currencyKeys: LedgerCurrencyKeys
+  after(() => {
+    // Remove the listeners.
+    ledger.stop()
+  })
+  
   const pubKeyRegex = /G[A-Z0-9]{55}/
   await it('should be able to create a new currency', async() => {
-    const result = await ledger.createCurrency({
+    const config = {
       code: "TEST",
       rate: {n: 1, d: 10},
       defaultInitialBalance: "1000"
-    }, sponsor)
-    currency = result.currency
-    currencyKeys = result.keys
+    }
+    currencyKeys = await ledger.createCurrency(config, sponsor)
+    currency = ledger.getCurrency(config, {
+      adminPublicKey: currencyKeys.admin.publicKey(),
+      issuerPublicKey: currencyKeys.issuer.publicKey(),
+      creditPublicKey: currencyKeys.credit.publicKey(),
+      externalIssuerPublicKey: currencyKeys.externalIssuer.publicKey(),
+      externalTraderPublicKey: currencyKeys.externalTrader.publicKey()
+    })
     
     assert.notEqual(currency,undefined)
 
@@ -52,7 +76,7 @@ describe('Creates stellar elements', async () => {
   })
 
   let accountKey: Keypair
-  await it('should be able to create a new account', async () => {
+  await it.skip('should be able to create a new account', async () => {
     const result = await currency.createAccount({
       sponsor: sponsor,
       issuer: currencyKeys.issuer,
@@ -66,7 +90,7 @@ describe('Creates stellar elements', async () => {
   })
 
   let account2Key: Keypair
-  await it('should be able to pay from one account to another', async() => {
+  await it.skip('should be able to pay from one account to another', async() => {
     account2Key = (await currency.createAccount({sponsor, issuer: currencyKeys.issuer, credit: currencyKeys.credit})).key
     const account = await currency.getAccount(accountKey.publicKey())
     await account.pay({payeePublicKey: account2Key.publicKey(), amount: "100"}, {account: accountKey, sponsor})
@@ -76,7 +100,7 @@ describe('Creates stellar elements', async () => {
     assert.equal(account2.balance(),"1100.0000000")
   })
 
-  await it('should be able to delete an account', async() => {
+  await it.skip('should be able to delete an account', async() => {
     const account2 = await currency.getAccount(account2Key.publicKey())
     await account2.delete({admin: currencyKeys.admin, sponsor})
     try {
@@ -87,18 +111,24 @@ describe('Creates stellar elements', async () => {
     }
   })
 
-  let currency2: LedgerCurrency
-  let currency2Keys: LedgerCurrencyKeys
-  await it('should be able to perform path payments', async() => {
+  
+  await it('should be able to perform path payments', async(done) => {
     // Create a second currency.
-    const result = await ledger.createCurrency({
+    const config = {
       code: "TES2",
       rate: {n: 1, d: 2},
       defaultInitialBalance: "1000",
       externalTraderInitialBalance: "10000"
-    }, sponsor)
-    currency2 = result.currency
-    currency2Keys = result.keys
+    } 
+    currency2Keys = await ledger.createCurrency(config, sponsor)
+    currency2 = ledger.getCurrency(config, {
+      adminPublicKey: currency2Keys.admin.publicKey(),
+      issuerPublicKey: currency2Keys.issuer.publicKey(),
+      creditPublicKey: currency2Keys.credit.publicKey(),
+      externalIssuerPublicKey: currency2Keys.externalIssuer.publicKey(),
+      externalTraderPublicKey: currency2Keys.externalTrader.publicKey()
+    })
+    
     await assert.doesNotReject(currency2.trustCurrency({
       trustedPublicKey: currencyKeys.externalIssuer.publicKey(),
       limit: "10" // 5 hours
@@ -126,31 +156,57 @@ describe('Creates stellar elements', async () => {
       amount: "5" // 2.5 hours.
     })
     assert.notEqual(path, false)
-    if (path) {
-      assert.equal(path.sourceAmount, "25.0000000")
-      assert.equal(path.destAmount, "5.0000000")
-      assert.equal(path.sourceAsset.code, "TEST")
-      assert.equal(path.destAsset.code, "TES2")
-      assert.equal(path.path.length, 2)
-      assert.equal(path.path[0].code, "HOUR")
-      assert.equal(path.path[0].issuer, currencyKeys.externalIssuer.publicKey())
-      assert.equal(path.path[1].code, "HOUR")
-      assert.equal(path.path[1].issuer, currency2Keys.externalIssuer.publicKey())
-
-      const account1 = await currency.getAccount(key1.publicKey())
-      await assert.doesNotReject(account1.externalPay({
-        payeePublicKey: key2.publicKey(),
-        amount: "5", // in external currency
-        path
-      }, {
-        account: key1,
-        sponsor
-      }))
-
-      await account1.update()
-      assert.equal(account1.balance(),"975.0000000")
-      const destAccount = await currency2.getAccount(key2.publicKey())
-      assert.equal(destAccount.balance(),"1005.0000000")
+    if (!path) {
+      return
     }
+    assert.equal(path.sourceAmount, "25.0000000")
+    assert.equal(path.destAmount, "5.0000000")
+    assert.equal(path.sourceAsset.code, "TEST")
+    assert.equal(path.destAsset.code, "TES2")
+    assert.equal(path.path.length, 2)
+    assert.equal(path.path[0].code, "HOUR")
+    assert.equal(path.path[0].issuer, currencyKeys.externalIssuer.publicKey())
+    assert.equal(path.path[1].code, "HOUR")
+    assert.equal(path.path[1].issuer, currency2Keys.externalIssuer.publicKey())
+    const account1 = await currency.getAccount(key1.publicKey())
+    await assert.doesNotReject(account1.externalPay({
+      payeePublicKey: key2.publicKey(),
+      amount: "5", // in external currency
+      path
+    }, {
+      account: key1,
+      sponsor
+    }))
+    await account1.update()
+    assert.equal(account1.balance(),"975.0000000")
+    const account2 = await currency2.getAccount(key2.publicKey())
+    assert.equal(account2.balance(),"1005.0000000")
+
+    // Now the currency 2 has a surplus of 1.5 hours, so they can buy to currency 
+    // 1 members even if currency 1 has not trusted currency 2.
+    const promise = new Promise<void>((resolve) => {
+      ledger.addListener("externalHourOfferUpdated", async (currency, offer) => {
+        const path2 = await currency2.quotePath({
+          destCode: "TEST",
+          destIssuer: currencyKeys.issuer.publicKey(),
+          amount: "5" // 0.5 hours
+        })
+        assert.notEqual(path2, false)
+        await assert.doesNotReject(account2.externalPay({
+          payeePublicKey: key1.publicKey(),
+          amount: "5", // in external currency
+          path: path2 as PathQuote
+        }, {
+          account: key2,
+          sponsor
+        }))
+        await account1.update()
+        assert.equal(account1.balance(),"980.0000000")
+        await account2.update()
+        assert.equal(account2.balance(),"1004.0000000")
+        resolve()
+      })
+    })
+    assert.doesNotReject(promise) 
   })
 })

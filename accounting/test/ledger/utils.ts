@@ -1,8 +1,5 @@
-import pino from "pino"
+import { logger } from "../../src/utils/logger"
 
-export const logger = pino({
-  name: "tester"
-})
 
 export const friendbot = async (publicKey: string) => {
   try {

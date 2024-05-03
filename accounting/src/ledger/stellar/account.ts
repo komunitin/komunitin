@@ -23,17 +23,19 @@ export class StellarAccount implements LedgerAccount {
   }
 
   /**
-   * Get the balance of the account in the local currency.
-   * @returns The balance of the account in the local currency.
+   * Implemenets {@link LedgerAccount.balance }
    */
-  balance() {
+  balance(asset?: Asset) {
     if (this.account === undefined) {
       throw new Error("Account not found")
     }
+    if (asset === undefined) {
+      asset = this.currency.asset()
+    }
     const balance = this.account.balances.find((b) => {
-      if (b.asset_type == "credit_alphanum4" || b.asset_type == "credit_alphanum12") {
+      if (b.asset_type == asset.getAssetType()) {
         const balance = b as Horizon.HorizonApi.BalanceLineAsset
-        return (balance.asset_issuer == this.currency.data.issuerPublicKey && balance.asset_code == this.currency.config.code) 
+        return (balance.asset_issuer == asset.issuer && balance.asset_code == asset.code) 
       }
       return false
     })

@@ -1,10 +1,12 @@
 import { Networks, Horizon, Keypair, TransactionBuilder, BASE_FEE, Transaction, Memo, MemoType, Operation, NetworkError, FeeBumpTransaction } from "@stellar/stellar-sdk"
 import { sleep } from "../../utils/sleep"
-import { Ledger, LedgerCurrencyConfig, LedgerCurrency, LedgerCurrencyKeys, LedgerCurrencyData } from "../ledger"
+import { Ledger, LedgerCurrencyConfig, LedgerCurrency, LedgerCurrencyKeys, LedgerCurrencyData, LedgerEvents } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarCurrency } from "./currency"
 import Big from "big.js"
 import { logger } from "../../utils/logger"
+import TypedEmitter from "typed-emitter"
+import {EventEmitter} from "node:events"
 
 export type StellarLedgerConfig = {
   server: string,
@@ -24,6 +26,11 @@ export class StellarLedger implements Ledger {
 
   public static STELLAR_TIMEOUT_SECONDS = 30
 
+  public emitter: TypedEmitter<LedgerEvents>
+
+  // issuer public key => currency
+  private currencies: Record<string, StellarCurrency> = {}
+
   /**
    * Create a new instance of the StellarLedger class. Note that a single instance should be used for a sponsor account
    * and set of currencies. So in practice, this class must be used as a singleton.
@@ -39,6 +46,32 @@ export class StellarLedger implements Ledger {
     this.network = config.network
     this.sponsorPublicKey = Keypair.fromPublicKey(config.sponsorPublicKey)
     this.domain = config.domain
+    this.emitter = new EventEmitter() as TypedEmitter<LedgerEvents>
+  }
+
+  /**
+   * Implements {@link Ledger.addListener}
+   */
+  public addListener(event: any, handler: any) {
+    return this.emitter.addListener(event, handler)
+  }
+
+  /**
+   * Implements {@link Ledger.removeListener}
+   */
+  public removeListener(event: any, listener: any) {
+    return this.emitter.removeListener(event, listener)
+  }
+
+  /**
+   * Implements {@link Ledger.stop}
+   */
+  public stop() {
+    this.emitter.removeAllListeners()
+    for (const currency of Object.values(this.currencies)) {
+      currency.stop()
+    }
+    this.currencies = {}
   }
 
   private sponsorAccountPromise: Promise<Horizon.AccountResponse> | undefined
@@ -116,7 +149,7 @@ export class StellarLedger implements Ledger {
 
   private isNonRetryError(error: any): boolean {
     // Bas request, not found, too many requests.
-    if (error.response && error.response.status == 400 || error.response.status == 404 || error.response.status == 429) {
+    if (error.response && (error.response.status == 400 || error.response.status == 404 || error.response.status == 429)) {
       return true
     }
     return false
@@ -154,7 +187,7 @@ export class StellarLedger implements Ledger {
   /**
    * Implements {@link Ledger.createCurrency}
    */
-  async createCurrency(config: LedgerCurrencyConfig, sponsor: Keypair): Promise<{currency: LedgerCurrency, keys: LedgerCurrencyKeys}> {
+  async createCurrency(config: LedgerCurrencyConfig, sponsor: Keypair): Promise<LedgerCurrencyKeys> {
     // Generate the keys.
     const keys = {
       issuer: Keypair.random(),
@@ -172,7 +205,7 @@ export class StellarLedger implements Ledger {
       externalTraderPublicKey: keys.externalTrader.publicKey()
     }
 
-    const currency = this.getCurrency(config, data)
+    const currency = new StellarCurrency(this, config, data)
     
     await currency.install({
       sponsor,
@@ -191,14 +224,17 @@ export class StellarLedger implements Ledger {
 
     logger.info({publicKeys: data}, `Created new currency ${config.code}`)
 
-    return {currency, keys}
+    return keys
   }
   /**
    * Implements {@link Ledger.getCurrency}
    */
   getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): StellarCurrency {
-    // TODO: if we end up using the accounts, this will need to be a singleton for each different currency.
-    return new StellarCurrency(this, config, data)
+    if (!this.currencies[data.issuerPublicKey]) {
+      this.currencies[data.issuerPublicKey] = new StellarCurrency(this, config, data)
+      this.currencies[data.issuerPublicKey].start()
+    }
+    return this.currencies[data.issuerPublicKey]
   }
 
   private logTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: unknown) {

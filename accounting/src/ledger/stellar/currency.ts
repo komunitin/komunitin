@@ -21,6 +21,9 @@ export class StellarCurrency implements LedgerCurrency {
   // the same account twice and hence we won't have seq number issues.
   private accounts: Record<string, Promise<StellarAccount>>
 
+  // Registry of Horizon stream connection closers.
+  private streams: (() => void)[]
+
   constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData) {
     this.ledger = ledger
     const defaultConfig = {
@@ -30,11 +33,155 @@ export class StellarCurrency implements LedgerCurrency {
     this.config = {...defaultConfig, ...config}
     this.data = data
     this.accounts = {}
+    this.streams = []
 
     // Input checking.
     if (this.config.code.match(/^[A-Z0-9]{4}$/) === null) {
       throw new Error("Invalid currency code")
     }
+  }
+  
+  public start() {
+    const stream = this.ledger.server.trades()
+      .forAccount(this.data.externalTraderPublicKey)
+      .cursor('now')
+      .stream({
+      // The arrow notation is used to preserve the context of the class.
+      onmessage: (page) => {
+        logger.debug({page}, `Received horizon external trade event for currency ${this.config.code}`)
+        // Looks like the typings are not correct and message is a TradeRecord intstead of a CollectionPage<TradeRecord>
+        const record = page as unknown as Horizon.ServerApi.TradeRecord
+        if (record.trade_type) {
+          this.handleExternalTradeEvent(record)
+          .catch((error) => {
+            this.ledger.emitter.emit("error", error)
+          })
+        } else {
+          throw new Error("Unexpected trade message", {cause: page})
+        }
+      },
+      onerror: (error) => {
+        this.ledger.emitter.emit("error", error)
+      }
+    })
+    this.streams.push(stream)
+  }
+
+  public stop() {
+    // Close all horizon stream connections.
+    for (const close of this.streams) {
+      close()
+    }
+  }
+
+  private async handleExternalTradeEvent(trade: Horizon.ServerApi.TradeRecord) {
+    // We want to monitor incomming payments using this external trader.
+    // An incoming payment is Hx => Ht => Lt, where:
+    // - Hx is the external Hour
+    // - Ht is the local Hour
+    // - Lt is the local currency
+    
+    // We want to catch the Hx => Ht (selling local hours by external hours)
+    // trade if it is done by this external trader.
+    if (trade.base_asset_type == "native" || trade.counter_asset_type == "native") {
+      throw new Error("Unexpected trade with native token", {
+        cause: trade
+      })
+    }
+    const base = new Asset(trade.base_asset_code as string, trade.base_asset_issuer)
+    const counter = new Asset(trade.counter_asset_code as string, trade.counter_asset_issuer)
+    const hour = this.hour()
+    const asset = this.asset()
+
+    if (trade.base_is_seller // Selling
+      && base.equals(hour) // this HOUR
+      && counter.code == StellarCurrency.GLOBAL_ASSET_CODE // by external HOUR
+    ) {
+      // Create a market order that will either immediately execute to compensate 
+      // the trade balance or will be appended to the order book to be executed in
+      // a later outgoing external payment.
+      this.ledger.emitter.emit("incommingHourTrade", this, {
+        externalHour: counter
+      })
+    } else if (!trade.base_is_seller // Buying
+      && base.code == StellarCurrency.GLOBAL_ASSET_CODE // external HOUR
+      && counter.equals(hour)) { // by this HOUR
+      this.ledger.emitter.emit("incommingHourTrade", this, {
+        externalHour: base
+      })
+    } else if (base.equals(asset) && counter.equals(hour) || base.equals(hour) && counter.equals(asset)) {
+      // Do nothing. This is a trade between the local currency and the local Hour.
+    } else {
+      throw new Error("Unexpected trade", {
+        cause: trade
+      })
+    }
+  }
+
+  private async fetchExternalHourOffer(externalHour: Asset) {
+    const offers = await this.ledger.server.offers()
+    .seller(this.data.externalTraderPublicKey)
+    .selling(externalHour)
+    .buying(this.hour())
+    .limit(1).call()
+
+    if (offers.records.length > 0) {
+      return offers.records[0]
+    } else {
+      return false
+    }
+  }
+
+  /**
+   * Sets/updates the sell offer selling the positive balance of external hours by the
+   * local hours.
+   * 
+   * @param asset The asset representing the external hours.
+   */
+  async updateExternalHourOffer(asset: Asset, keys: {sponsor: Keypair, externalTrader: Keypair}) {
+    if (asset.code != StellarCurrency.GLOBAL_ASSET_CODE) {
+      throw new Error(`Unexpected asset ${asset.code}:${asset.issuer}`)
+    }
+    const offer = await this.fetchExternalHourOffer(asset)
+
+    const trader = await this.externalTraderAccount()
+    const balance = trader.balance(asset)
+    const builder = this.ledger.transactionBuilder(trader)
+    const sellOfferOptions = {
+      selling: asset,
+      buying: this.hour(),
+      amount: balance.toString(),
+      price: "1"
+    }
+    
+    // TODO: We need to find a way to clear trade balances.
+    // Note that we're creating/increasing the value of a passive offer Hext => Hloc but
+    // it would be possible that we can burn own Hloc in exchange of these new Hext and 
+    // hence lowering the total debt.
+    
+    if (offer) {
+      // Offer already exists, just update it.
+      builder.addOperation(Operation.manageSellOffer({
+        ...sellOfferOptions,
+        offerId: offer.id
+      }))
+      await this.ledger.submitTransaction(builder, [keys.externalTrader], keys.sponsor)
+      logger.info({asset}, `Updated external hour offer for currency ${this.config.code}`)
+    } else {
+      // Create new offer.
+      builder.addOperation(Operation.beginSponsoringFutureReserves({
+        source: keys.sponsor.publicKey(),
+        sponsoredId: this.data.externalTraderPublicKey
+      }))
+      .addOperation(Operation.createPassiveSellOffer(sellOfferOptions))
+      .addOperation(Operation.endSponsoringFutureReserves({
+        source: this.data.externalTraderPublicKey
+      }))
+
+      await this.ledger.submitTransaction(builder, [keys.sponsor, keys.externalTrader], keys.sponsor)
+      logger.info({asset}, `Created external hour offer for currency ${this.config.code}`)
+    }
+    this.ledger.emitter.emit("externalHourOfferUpdated", this, {externalHour: asset, created: !offer})
   }
 
   /**
@@ -425,13 +572,19 @@ export class StellarCurrency implements LedgerCurrency {
   /**
    * Implements {@link LedgerCurrency.getAccount()}
    */
-  async getAccount(publicKey: string): Promise<StellarAccount> {
+  async getAccount(publicKey: string, update = true): Promise<StellarAccount> {
     if (!this.accounts[publicKey]) {
       this.accounts[publicKey] = this.ledger.server.loadAccount(publicKey).then((account) => {
         return new StellarAccount(account, this)
-      })      
+      })
+      return await this.accounts[publicKey]
+    } else {
+      const account = await this.accounts[publicKey]
+      if (update) {
+        await account.update()
+      }
+      return account
     }
-    return await this.accounts[publicKey]
   }
 
   /**

@@ -1,4 +1,5 @@
 import { Keypair, Keypair as StellarKeyPair } from "@stellar/stellar-sdk"
+import TypedEmitter from "typed-emitter"
 /*
  * Architecture:
  *  - Objects never have private keys as properties. Private keys are passed as
@@ -82,11 +83,25 @@ export type LedgerCurrencyKeys = {
  * The public data generated when a currency is created.
  */
 export type LedgerCurrencyData = {
-  issuerPublicKey: string,
-  creditPublicKey: string,
+  issuerPublicKey: string
+  creditPublicKey: string
   adminPublicKey: string
   externalIssuerPublicKey: string
   externalTraderPublicKey: string
+}
+
+/**
+ * Event types.
+ */
+export type LedgerEvents = {
+  error: (error: Error) => void
+  incommingHourTrade: (currency: LedgerCurrency, trade: {
+    externalHour: LedgerAsset
+  }) => Promise<void>
+  externalHourOfferUpdated: (currency: LedgerCurrency, offer: {
+    externalHour: LedgerAsset
+    created: boolean
+  }) => Promise<void>
 }
 
 /**
@@ -96,11 +111,32 @@ export interface Ledger {
   /**
    * Create a new currency.
    */
-  createCurrency(config: LedgerCurrencyConfig, sponsor: KeyPair): Promise<{currency: LedgerCurrency, keys: LedgerCurrencyKeys}>
+  createCurrency(config: LedgerCurrencyConfig, sponsor: KeyPair): Promise<LedgerCurrencyKeys>
   /**
    * Get a currency object from the configuration and data.
    */
   getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): LedgerCurrency
+  /**
+   * Registers a listener for the specified event.
+   * 
+   * The ledger needs to have a listener for the "incommingHourTrade" event to handle the updating of external offers. 
+   * You may use the {@link defaultIncommingHourTradeListener} implementation for this.
+   * 
+   * The "error" event is called when there is an error or unhandled rejection in
+   * the event handlers.
+   * 
+   * @param event The event name
+   * @param handler The event handler
+   */
+  addListener: TypedEmitter<LedgerEvents>['addListener']
+  /**
+   * Removes a listener.
+   */
+  removeListener: TypedEmitter<LedgerEvents>['removeListener']
+  /**
+   * Remove all listeners and stop listening from events in the ledger.
+   */
+  stop(): void
 }
 
 /**
@@ -117,7 +153,7 @@ export interface LedgerCurrency {
   }): Promise<{key: KeyPair}>
 
   /**
-   * Get a loaded account object.
+   * Get a loaded and updated account object.
    * @param publicKey 
    */
   getAccount(publicKey: string): Promise<LedgerAccount>
@@ -148,7 +184,15 @@ export interface LedgerCurrency {
    * @returns false if there is no path, or a quote with the source and destination amounts.
    */
   quotePath(data: {destCode: string, destIssuer: string, amount: string}): Promise<false | PathQuote>
-  
+
+  /**
+   * Updates the trade offer selling external hours by this currency defined hours. This method needs to
+   * be called when the balance of external hours increases. See {@link LedgerCurrencyListener.onIncommingHourTrade}
+   * 
+   * @param externalHour 
+   * @param keys 
+   */
+  updateExternalHourOffer(externalHour: LedgerAsset, keys: { sponsor: Keypair; externalTrader: Keypair }): Promise<void>
 }
 
 export interface PathQuote {
@@ -190,6 +234,8 @@ export interface LedgerAccount {
 
   /**
    * Get the balance of the account in the community currency.
+   * 
+   * @returns The balance of the account in the community currency.
    */
   balance(): string
 
