@@ -44,6 +44,13 @@ export class StellarAccount implements LedgerAccount {
     }
     return balance.balance
   }
+  balances() {
+    if (this.account === undefined) {
+      throw new Error("Account not found")
+    }
+    return (this.account.balances as Horizon.HorizonApi.BalanceLineAsset[])
+      .map(b => ({asset: new Asset(b.asset_code, b.asset_issuer), balance: b.balance, limit: b.limit}))
+  }
 
   /**
    * Implements {@link LedgerAccount.delete }

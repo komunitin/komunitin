@@ -4,6 +4,7 @@ import { StellarAccount } from "./account"
 import { StellarLedger } from "./ledger"
 import Big from "big.js"
 import { logger } from "src/utils/logger"
+import { retry } from "src/utils/sleep"
 
 export class StellarCurrency implements LedgerCurrency {
   static GLOBAL_ASSET_CODE = "HOUR"
@@ -109,8 +110,20 @@ export class StellarCurrency implements LedgerCurrency {
       this.ledger.emitter.emit("incommingHourTrade", this, {
         externalHour: base
       })
-    } else if (base.equals(asset) && counter.equals(hour) || base.equals(hour) && counter.equals(asset)) {
-      // Do nothing. This is a trade between the local currency and the local Hour.
+    } else if (base.equals(asset) && counter.equals(hour)) {
+      if (trade.base_is_seller) {
+        // selling local by hours, so this is an incomming payment.
+        this.ledger.emitter.emit("incommingTrade", this)
+      } else {
+        this.ledger.emitter.emit("outgoingTrade", this)
+      }
+    } else if (base.equals(hour) && counter.equals(asset)) {
+      if (trade.base_is_seller) {
+        // selling hours by local, so this is an outgoing payment.
+        this.ledger.emitter.emit("outgoingTrade", this)
+      } else {
+        this.ledger.emitter.emit("incommingTrade", this)
+      }
     } else {
       throw new Error("Unexpected trade", {
         cause: trade
@@ -118,10 +131,13 @@ export class StellarCurrency implements LedgerCurrency {
     }
   }
 
-  private async fetchExternalHourOffer(externalHour: Asset) {
+  /**
+   * Get an offer from the trader account selling the given asset and buying hours.
+   */
+  private async fetchExternalSellingOffer(asset: Asset) {
     const offers = await this.ledger.server.offers()
     .seller(this.data.externalTraderPublicKey)
-    .selling(externalHour)
+    .selling(asset)
     .buying(this.hour())
     .limit(1).call()
 
@@ -131,21 +147,38 @@ export class StellarCurrency implements LedgerCurrency {
       return false
     }
   }
+/*
+  async updateExternalTraderOffers(keys: {sponsor: Keypair, externalTrader: Keypair}) {
+    const trader = await this.externalTraderAccount()
+    // All balances for trader account
+    const balances = trader.balances()
+    // All sell offers for trader account
+    const offers = await this.ledger.server.offers().forAccount(this.data.externalTraderPublicKey).call()
+    const findOfferSelling = (asset: Asset) => offers.records.find((o) => o.selling.asset_issuer == asset.issuer && o.selling.asset_code == asset.code)
+    for (const balance of balances) {
+      if (balance.asset.equals(this.asset()) && Big(balance.balance).gt(0)) {
+        // Update outgoingTradeOffer.
+        const offer = findOfferSelling(this.asset())
+        if (offer?.amount != balance.balance) {
+
+        }
+      } else if (balance.asset.code == StellarCurrency.GLOBAL_ASSET_CODE && Big(balance.balance).gt(0)) {
+        // Update incomingTradeOffer.
+
+      }
+    }
+  }
+*/
 
   /**
-   * Sets/updates the sell offer selling the positive balance of external hours by the
-   * local hours.
-   * 
-   * @param asset The asset representing the external hours.
+   * This function checks the offer from the external trader account that is selling the given asset
+   * and updates this offer so the total offered equals the current balance.
    */
-  async updateExternalHourOffer(asset: Asset, keys: {sponsor: Keypair, externalTrader: Keypair}) {
-    if (asset.code != StellarCurrency.GLOBAL_ASSET_CODE) {
-      throw new Error(`Unexpected asset ${asset.code}:${asset.issuer}`)
-    }
-    const offer = await this.fetchExternalHourOffer(asset)
-
+  async updateExternalOffer(asset: Asset, keys: {sponsor: Keypair, externalTrader: Keypair})  {
+    const offer = await this.fetchExternalSellingOffer(asset)
     const trader = await this.externalTraderAccount()
     const balance = trader.balance(asset)
+
     const builder = this.ledger.transactionBuilder(trader)
     const sellOfferOptions = {
       selling: asset,
@@ -153,12 +186,7 @@ export class StellarCurrency implements LedgerCurrency {
       amount: balance.toString(),
       price: "1"
     }
-    
-    // TODO: We need to find a way to clear trade balances.
-    // Note that we're creating/increasing the value of a passive offer Hext => Hloc but
-    // it would be possible that we can burn own Hloc in exchange of these new Hext and 
-    // hence lowering the total debt.
-    
+
     if (offer) {
       // Offer already exists, just update it.
       builder.addOperation(Operation.manageSellOffer({
@@ -166,7 +194,7 @@ export class StellarCurrency implements LedgerCurrency {
         offerId: offer.id
       }))
       await this.ledger.submitTransaction(builder, [keys.externalTrader], keys.sponsor)
-      logger.info({asset}, `Updated external hour offer for currency ${this.config.code}`)
+      logger.info({asset}, `Updated external ${asset.code} offer for currency ${this.config.code}`)
     } else {
       // Create new offer.
       builder.addOperation(Operation.beginSponsoringFutureReserves({
@@ -179,9 +207,9 @@ export class StellarCurrency implements LedgerCurrency {
       }))
 
       await this.ledger.submitTransaction(builder, [keys.sponsor, keys.externalTrader], keys.sponsor)
-      logger.info({asset}, `Created external hour offer for currency ${this.config.code}`)
+      logger.info({asset}, `Created external ${asset.code} offer for currency ${this.config.code}`)
     }
-    this.ledger.emitter.emit("externalHourOfferUpdated", this, {externalHour: asset, created: !offer})
+    this.ledger.emitter.emit("externalOfferUpdated", this, {...sellOfferOptions, created: !offer})
   }
 
   /**
@@ -645,30 +673,46 @@ export class StellarCurrency implements LedgerCurrency {
   /**
    * Implements {@link LedgerCurrency.quotePath}, adding additional asset properties to the result.
    */
-  async quotePath(data: {destCode: string, destIssuer: string, amount: string}): Promise<false | PathQuote>{
+  async quotePath(data: {destCode: string, destIssuer: string, amount: string, retry?: boolean}): Promise<false | PathQuote>{
     const destAsset = new Asset(data.destCode, data.destIssuer)
-    
-    const paths = await this.ledger.server.strictReceivePaths(
-      [this.asset()],
-      destAsset,
-      data.amount
-    ).call()
-
-    // Filter out paths that are not sneding the required amount.
-    const viable = paths.records.filter((p) => Big(p.destination_amount).gte(data.amount))
-
-    if (viable.length > 0) {
-      // Get the path with minimum source amount.
-      const path = viable.reduce((acc, p) => (Big(p.source_amount).lt(acc.source_amount)) ? p : acc)
-      return {
-        sourceAmount: path.source_amount,
-        sourceAsset: this.asset(),
-        destAmount: path.destination_amount,
+    const noPathFound = new Error("No viable path found")
+    const fn = async () => {
+      const paths = await this.ledger.server.strictReceivePaths(
+        [this.asset()],
         destAsset,
-        path: path.path.map((a) => new Asset(a.asset_code, a.asset_issuer))
+        data.amount
+      ).call()
+
+      // Filter out paths that are not sneding the required amount.
+      const viable = paths.records.filter((p) => Big(p.destination_amount).gte(data.amount))
+
+      if (viable.length > 0) {
+        // Get the path with minimum source amount.
+        const path = viable.reduce((acc, p) => (Big(p.source_amount).lt(acc.source_amount)) ? p : acc)
+        return {
+          sourceAmount: path.source_amount,
+          sourceAsset: this.asset(),
+          destAmount: path.destination_amount,
+          destAsset,
+          path: path.path.map((a) => new Asset(a.asset_code, a.asset_issuer))
+        }
+      } else {
+        throw noPathFound
       }
-    } else {
-      return false
+    }
+
+    try {
+      if (data.retry) {
+        return await retry(fn, 30000, 1000)
+      } else {
+        return await fn()
+      }
+    } catch (error) {
+      if (error === noPathFound) {
+        return false
+      } else {
+        throw error
+      }
     }
   }
 

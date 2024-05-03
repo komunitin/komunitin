@@ -94,14 +94,36 @@ export type LedgerCurrencyData = {
  * Event types.
  */
 export type LedgerEvents = {
-  error: (error: Error) => void
+  /**
+   * Called when a new external payment is received.
+   */
+  incommingTrade: (currency: LedgerCurrency) => Promise<void>
+  /**
+   * Called when a new external payment is sent.
+   */
+  outgoingTrade: (currency: LedgerCurrency) => Promise<void>
+  /**
+   * Called when a new external payment is received and it used
+   * this trader external hour by local hour offer.
+   */
   incommingHourTrade: (currency: LedgerCurrency, trade: {
     externalHour: LedgerAsset
   }) => Promise<void>
-  externalHourOfferUpdated: (currency: LedgerCurrency, offer: {
-    externalHour: LedgerAsset
-    created: boolean
-  }) => Promise<void>
+  /**
+   * Called after uptating an offer from the external trader account.
+   */
+  externalOfferUpdated: (currency: LedgerCurrency, offer: {
+      selling: LedgerAsset
+      buying: LedgerAsset
+      amount: string
+      created: boolean
+    }) => Promise<void>
+
+  /**
+   * Called if there is an error in the event handlers.
+   * @param error 
+   */
+  error: (error: Error) => void
 }
 
 /**
@@ -144,6 +166,10 @@ export interface Ledger {
  */
 export interface LedgerCurrency {
   /**
+   * Get the local currency asset.
+   */
+  asset(): LedgerAsset
+  /**
    * Create and approve a new account in this currency.
    */
   createAccount(keys: {
@@ -183,16 +209,18 @@ export interface LedgerCurrency {
    * 
    * @returns false if there is no path, or a quote with the source and destination amounts.
    */
-  quotePath(data: {destCode: string, destIssuer: string, amount: string}): Promise<false | PathQuote>
+  quotePath(data: {destCode: string, destIssuer: string, amount: string, retry?: boolean}): Promise<false | PathQuote>
 
   /**
-   * Updates the trade offer selling external hours by this currency defined hours. This method needs to
-   * be called when the balance of external hours increases. See {@link LedgerCurrencyListener.onIncommingHourTrade}
+   * Updates the trade offer selling an asset by this currency defined hours. This method needs to
+   * be called when the balance of external hours (after incomming payments using hour offers) or 
+   * local currency (after outgoing external payments) increases for the trader account. 
+   * See {@link LedgerCurrencyListener.onIncommingHourTrade}
    * 
    * @param externalHour 
    * @param keys 
    */
-  updateExternalHourOffer(externalHour: LedgerAsset, keys: { sponsor: Keypair; externalTrader: Keypair }): Promise<void>
+  updateExternalOffer(sellingAsset: LedgerAsset, keys: { sponsor: Keypair; externalTrader: Keypair }): Promise<void>
 }
 
 export interface PathQuote {

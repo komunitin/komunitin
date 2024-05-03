@@ -5,7 +5,7 @@ import { Ledger, LedgerCurrency, LedgerCurrencyKeys, PathQuote } from "../../src
 import { StellarLedger } from "../../src/ledger/stellar"
 import { Keypair, Networks } from "@stellar/stellar-sdk"
 import { friendbot } from "./utils"
-import { defaultIncommingHourTradeListener } from "src/ledger/listener"
+import { defaultIncommingHourTradeListener, installDefaultListeners } from "src/ledger/listener"
 import { logger } from "../../src/utils/logger"
 
 //logger.level = "debug"
@@ -39,10 +39,10 @@ describe('Creates stellar elements', async () => {
       domain: "example.com"
     })
 
-    ledger.addListener("error", (error) => { logger.error(error) })
-    ledger.addListener("incommingHourTrade", defaultIncommingHourTradeListener(async() => sponsor, async (cur) => 
-      (cur === currency) ? currencyKeys.externalTrader : currency2Keys.externalTrader
-    ))
+    // Add the listeners.
+    installDefaultListeners(ledger, async() => sponsor, async(currency) => {
+      return currency.asset().code == "TEST" ? currencyKeys.externalTrader : currency2Keys.externalTrader
+    })
   })
 
   after(() => {
@@ -76,7 +76,7 @@ describe('Creates stellar elements', async () => {
   })
 
   let accountKey: Keypair
-  await it.skip('should be able to create a new account', async () => {
+  await it('should be able to create a new account', async () => {
     const result = await currency.createAccount({
       sponsor: sponsor,
       issuer: currencyKeys.issuer,
@@ -90,7 +90,7 @@ describe('Creates stellar elements', async () => {
   })
 
   let account2Key: Keypair
-  await it.skip('should be able to pay from one account to another', async() => {
+  await it('should be able to pay from one account to another', async() => {
     account2Key = (await currency.createAccount({sponsor, issuer: currencyKeys.issuer, credit: currencyKeys.credit})).key
     const account = await currency.getAccount(accountKey.publicKey())
     await account.pay({payeePublicKey: account2Key.publicKey(), amount: "100"}, {account: accountKey, sponsor})
@@ -100,7 +100,7 @@ describe('Creates stellar elements', async () => {
     assert.equal(account2.balance(),"1100.0000000")
   })
 
-  await it.skip('should be able to delete an account', async() => {
+  await it('should be able to delete an account', async() => {
     const account2 = await currency.getAccount(account2Key.publicKey())
     await account2.delete({admin: currencyKeys.admin, sponsor})
     try {
@@ -184,12 +184,14 @@ describe('Creates stellar elements', async () => {
 
     // Now the currency 2 has a surplus of 1.5 hours, so they can buy to currency 
     // 1 members even if currency 1 has not trusted currency 2.
+    
     const promise = new Promise<void>((resolve) => {
-      ledger.addListener("externalHourOfferUpdated", async (currency, offer) => {
+      const fn = async () => {
         const path2 = await currency2.quotePath({
           destCode: "TEST",
           destIssuer: currencyKeys.issuer.publicKey(),
-          amount: "5" // 0.5 hours
+          amount: "5", // 0.5 hours
+          retry: true
         })
         assert.notEqual(path2, false)
         await assert.doesNotReject(account2.externalPay({
@@ -204,9 +206,11 @@ describe('Creates stellar elements', async () => {
         assert.equal(account1.balance(),"980.0000000")
         await account2.update()
         assert.equal(account2.balance(),"1004.0000000")
+        ledger.removeListener("externalOfferUpdated", fn)
         resolve()
-      })
+      }
+      ledger.addListener("externalOfferUpdated", fn)
     })
-    assert.doesNotReject(promise) 
+    await assert.doesNotReject(promise) 
   })
 })

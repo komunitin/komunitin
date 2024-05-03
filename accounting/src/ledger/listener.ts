@@ -1,9 +1,15 @@
 
 import { logger } from "../utils/logger"
-import { LedgerAsset, KeyPair, LedgerCurrency } from "./ledger"
+import { LedgerAsset, KeyPair, LedgerCurrency, Ledger } from "./ledger"
 
 type KeyGetter = () => Promise<KeyPair>
 type CurrencyKeyGetter = (currency: LedgerCurrency) => Promise<KeyPair>
+
+export function installDefaultListeners(ledger: Ledger, sponsorKeyGetter: KeyGetter, traderKeyGetter: CurrencyKeyGetter) {
+  ledger.addListener("error", defaultErrorListener())
+  ledger.addListener("incommingHourTrade", defaultIncommingHourTradeListener(sponsorKeyGetter, traderKeyGetter))
+  ledger.addListener("outgoingTrade", defaultOutgoingTradeListener(sponsorKeyGetter, traderKeyGetter))
+}
 
 /**
  * Default implementation of the "incommingHourTrade" event listener.
@@ -17,7 +23,20 @@ export function defaultIncommingHourTradeListener (sponsorKeyGetter: KeyGetter, 
   }) => {
     const sponsorKey = await sponsorKeyGetter()
     const traderKey = await traderKeyGetter(currency)
-    await currency.updateExternalHourOffer(trade.externalHour, {sponsor: sponsorKey, externalTrader: traderKey})
+    await currency.updateExternalOffer(trade.externalHour, {sponsor: sponsorKey, externalTrader: traderKey})
+  }
+}
+/**
+ * Default implementation of the "outgoingTrade" event listener.
+ * 
+ * Uses the provided getters to get the keys needed and then calls the
+ * {LedgerCurrency.updateExternalOffer} method with the local asset.
+ */
+export function defaultOutgoingTradeListener(sponsorKeyGetter: KeyGetter, traderKeyGetter: CurrencyKeyGetter) {
+  return async (currency: LedgerCurrency) => {
+    const sponsorKey = await sponsorKeyGetter()
+    const traderKey = await traderKeyGetter(currency)
+    await currency.updateExternalOffer(currency.asset(), {sponsor: sponsorKey, externalTrader: traderKey})
   }
 }
 
