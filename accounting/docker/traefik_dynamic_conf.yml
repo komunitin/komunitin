@@ -1,0 +1,17 @@
+tls:
+  certificates:
+    - certFile: /certs/localhost.pem
+      keyFile: /certs/localhost-key.pem
+http:
+  routers:
+    stellar:
+      rule: Host(`localhost`)
+      service: stellar
+      entrypoints:
+        - websecure
+      tls: true
+  services:
+    stellar:
+      loadBalancer:
+        servers:
+          - url: http://stellar:8000

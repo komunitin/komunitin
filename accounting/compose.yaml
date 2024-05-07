@@ -1,0 +1,22 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--entrypoints.websecure.address=:2025"
+      - "--providers.file.filename=/traefik_dynamic_conf.yml"
+    ports:
+      - "2025:2025"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./tmp/certs:/certs"
+      - "./docker/traefik_dynamic_conf.yml:/traefik_dynamic_conf.yml"
+    
+  stellar:
+    image: stellar/quickstart
+    container_name: stellar
+    environment:
+      NETWORK: "local"
+      
