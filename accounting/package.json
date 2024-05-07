@@ -1,0 +1,26 @@
+{
+	"name": "komunitin-accounting",
+	"version": "0.0.1",
+	"author": "Esteve Badia",
+	"license": "AGPL-3.0-only",
+	"scripts": {
+		"compile": "tsc",
+		"bundle": "esbuild src/index.ts --bundle --sourcemap --platform=node --outdir=bundle",
+		"start": "node --enable-source-maps bundle/index.js",
+		"test": "tsx --test test/**/*.ts"
+	},
+	"dependencies": {
+		"@stellar/stellar-sdk": "^11.3.0",
+		"big.js": "^6.2.1",
+		"pino": "^9.0.0"
+	},
+	"devDependencies": {
+		"@tsconfig/node20": "^20.1.4",
+		"@types/big.js": "^6.2.2",
+		"esbuild": "^0.20.2",
+		"pino-pretty": "^11.0.0",
+		"tsx": "^4.7.3",
+		"typed-emitter": "^2.1.0",
+		"typescript": "^5.4.5"
+	}
+}

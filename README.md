@@ -19,5 +19,5 @@ The Komunitin system is made of several units:
  - Notifications service: [ALPHA] The backend for the messaging system including push notifications. See the [notifications](notifications/) folder.
  - IntegralCES: The backend for the social and accounting APIs. These will be moved to two separate microservices but the APIs are provided by the classic 
  IntegralCES by now. See the [ices Drupal project](https://drupal.org/project/ices).
- - Accounting service: [TODO]: The new decentralized backend for the accounting API.
+ - Accounting service: [IN PROGRESS]: The new decentralized backend for the accounting API. See the [accounting](accounting) folder.
  - Social service: [TODO] The new decentralized backend for the social API.
