@@ -18,13 +18,12 @@ This service uses the [Stellar](https://stellar.org) blockchain to define the cu
 
 ### External model
 In order to feature trade between communities, the following model is proposed:
-  - Each community has a global imaginary asset called HOUR, with the following properties:
-    - The asset code is "HOUR".
-    - ? Authorization required
-    - ? Revocable and clawbackable
-  
+  - Each currency has two additional distinguished Stellar accounts:
+    - The external issuer account. Mints an asset with code HOUR (for all currencies). This asset is permissionless.
+    - The external trader account. This account defines sell offers between the local asset and the HOUR asset, and also between the HOUR asset from this currency and the HOUR asset from other currencies.
+  - Initially, the trader account is funded with sufficient HOUR balance and sets an offer to convert the local asset to HOUR.
+  - If the trader is configured to hold and initial balance of local asset, then it also sets an offer to convert HOUR to the local asset.
+  - The currency andministration may choose to trust another currency up to a limit. This means that the currency will accept the HOUR asset from the other currency as payment. This is reflected by creating a trustline to the external HOUR asset and a sell offer to convert the currency HOUR asset to the external HOUR asset.
+  - Whenever an incoming external payment is received, the trader account creates or updates the sell offer to convert the current balance of external HOUR assets to local HOUR assets.
 
 
- - Each community sets the value of its currency in terms of a global imaginary value (the HOUR).
- - Community currencies can set trade agreements with other trusted communities, limiting the trade balance.
- - Users from one community can trade with users from another community, all using only their respective local assets, through a path of previous trade agreements between currencies.
