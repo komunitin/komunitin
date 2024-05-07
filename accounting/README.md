@@ -1,5 +1,11 @@
 # Komunitin accounting service
 
+## Test
+Execute the tests:
+```bash
+$ pnpm test
+```
+
 ## Ledger
 This service uses the [Stellar](https://stellar.org) blockchain to define the currencies, accounts, and transactions of the community.
 
