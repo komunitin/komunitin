@@ -1,13 +1,20 @@
 # Komunitin accounting service
 
+This service uses the [Stellar](https://stellar.org) blockchain to define the currencies, accounts, and transactions of the community.
+
+## Build
+```bash
+$ pnpm install
+```
+
 ## Test
 Execute the tests:
 ```bash
 $ pnpm test
 ```
 
-## Ledger
-This service uses the [Stellar](https://stellar.org) blockchain to define the currencies, accounts, and transactions of the community.
+## Stellar
+
 
 ### Local model
  - Each community currency has its own asset. Assets have the following properties:
