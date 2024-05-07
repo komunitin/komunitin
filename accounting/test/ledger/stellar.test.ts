@@ -190,6 +190,7 @@ describe('Creates stellar elements', async () => {
     const promise = new Promise<void>((resolve, reject) => {
       const fn = async () => {
         try {
+          ledger.removeListener("externalOfferUpdated", fn)
           const path2 = await currency2.quotePath({
             destCode: "TEST",
             destIssuer: currencyKeys.issuer.publicKey(),
@@ -212,8 +213,6 @@ describe('Creates stellar elements', async () => {
           resolve()
         } catch (error) {
           reject(error)
-        } finally {
-          ledger.removeListener("externalOfferUpdated", fn)
         }
       }
       ledger.addListener("externalOfferUpdated", fn)
