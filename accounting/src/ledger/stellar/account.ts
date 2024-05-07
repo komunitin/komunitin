@@ -2,6 +2,7 @@ import { Asset, Horizon, Keypair, Operation } from "@stellar/stellar-sdk"
 import { KeyPair, LedgerAccount, PathQuote } from "../ledger"
 import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
+import { logger } from "../../utils/logger"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
@@ -78,6 +79,9 @@ export class StellarAccount implements LedgerAccount {
       destination: this.currency.ledger.sponsorPublicKey.publicKey()
     }))
     await this.currency.ledger.submitTransaction(builder, [keys.admin], keys.sponsor)
+    
+    logger.info(`Account ${this.account?.accountId()} deleted`)
+
     this.account = undefined
   }
 
@@ -94,7 +98,11 @@ export class StellarAccount implements LedgerAccount {
       asset: this.currency.asset(),
       amount: payment.amount
     }))
-    return await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
+    const transaction = await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
+    
+    logger.info({hash: transaction.hash}, `Account ${this.account?.accountId()} paid ${payment.amount} to ${payment.payeePublicKey}`)
+    
+    return transaction
   }
 
   /**
@@ -128,8 +136,10 @@ export class StellarAccount implements LedgerAccount {
       path: payment.path.path as Asset[]
     }))
 
-    return await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
-
+    const transaction = await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
+    logger.info({hash: transaction.hash}, `Account ${this.account?.accountId()} paid ${payment.amount} ${payment.path.destAsset.code} to ${payment.payeePublicKey} through path`)
+    
+    return transaction
   }
     
 

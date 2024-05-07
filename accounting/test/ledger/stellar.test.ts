@@ -3,10 +3,11 @@ import assert from "node:assert"
 
 import { Ledger, LedgerCurrency, LedgerCurrencyKeys, PathQuote } from "../../src/ledger"
 import { StellarLedger } from "../../src/ledger/stellar"
-import { Keypair, Networks } from "@stellar/stellar-sdk"
+import { Keypair } from "@stellar/stellar-sdk"
 import { friendbot } from "./utils"
-import { defaultIncommingHourTradeListener, installDefaultListeners } from "src/ledger/listener"
-import { logger } from "../../src/utils/logger"
+import { installDefaultListeners } from "src/ledger/listener"
+import { TestConfig } from "test/config"
+
 
 //logger.level = "debug"
 
@@ -33,14 +34,15 @@ describe('Creates stellar elements', async () => {
 
     // Instantiate the ledger.
     ledger = new StellarLedger({
-      server: 'https://horizon-testnet.stellar.org',
-      network: Networks.TESTNET,
+      server: TestConfig.STELLAR_HORIZON_URL,
+      network: TestConfig.STELLAR_NETWORK,
       sponsorPublicKey: sponsor.publicKey(),
       domain: "example.com"
     })
 
     // Add the listeners.
     installDefaultListeners(ledger, async() => sponsor, async(currency) => {
+      // Get the privatey keys for the external trader accounts.
       return currency.asset().code == "TEST" ? currencyKeys.externalTrader : currency2Keys.externalTrader
     })
   })
@@ -54,7 +56,7 @@ describe('Creates stellar elements', async () => {
   await it('should be able to create a new currency', async() => {
     const config = {
       code: "TEST",
-      rate: {n: 1, d: 10},
+      rate: {n: 1, d: 10}, //1 TEST = 0.1 HOUR
       defaultInitialBalance: "1000"
     }
     currencyKeys = await ledger.createCurrency(config, sponsor)
@@ -116,7 +118,7 @@ describe('Creates stellar elements', async () => {
     // Create a second currency.
     const config = {
       code: "TES2",
-      rate: {n: 1, d: 2},
+      rate: {n: 1, d: 2}, // 1TES2 ? 0.5 HOUR
       defaultInitialBalance: "1000",
       externalTraderInitialBalance: "10000"
     } 
@@ -171,7 +173,7 @@ describe('Creates stellar elements', async () => {
     const account1 = await currency.getAccount(key1.publicKey())
     await assert.doesNotReject(account1.externalPay({
       payeePublicKey: key2.publicKey(),
-      amount: "5", // in external currency
+      amount: "5", // in TES2 currency. This is 2.5 hours.
       path
     }, {
       account: key1,
@@ -185,29 +187,34 @@ describe('Creates stellar elements', async () => {
     // Now the currency 2 has a surplus of 1.5 hours, so they can buy to currency 
     // 1 members even if currency 1 has not trusted currency 2.
     
-    const promise = new Promise<void>((resolve) => {
+    const promise = new Promise<void>((resolve, reject) => {
       const fn = async () => {
-        const path2 = await currency2.quotePath({
-          destCode: "TEST",
-          destIssuer: currencyKeys.issuer.publicKey(),
-          amount: "5", // 0.5 hours
-          retry: true
-        })
-        assert.notEqual(path2, false)
-        await assert.doesNotReject(account2.externalPay({
-          payeePublicKey: key1.publicKey(),
-          amount: "5", // in external currency
-          path: path2 as PathQuote
-        }, {
-          account: key2,
-          sponsor
-        }))
-        await account1.update()
-        assert.equal(account1.balance(),"980.0000000")
-        await account2.update()
-        assert.equal(account2.balance(),"1004.0000000")
-        ledger.removeListener("externalOfferUpdated", fn)
-        resolve()
+        try {
+          const path2 = await currency2.quotePath({
+            destCode: "TEST",
+            destIssuer: currencyKeys.issuer.publicKey(),
+            amount: "5",
+            retry: true
+          })
+          assert.notEqual(path2, false)
+          await assert.doesNotReject(account2.externalPay({
+            payeePublicKey: key1.publicKey(),
+            amount: "5", // in external currency
+            path: path2 as PathQuote
+          }, {
+            account: key2,
+            sponsor
+          }))
+          await account1.update()
+          assert.equal(account1.balance(),"980.0000000")
+          await account2.update()
+          assert.equal(account2.balance(),"1004.0000000")
+          resolve()
+        } catch (error) {
+          reject(error)
+        } finally {
+          ledger.removeListener("externalOfferUpdated", fn)
+        }
       }
       ledger.addListener("externalOfferUpdated", fn)
     })

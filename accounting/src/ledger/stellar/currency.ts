@@ -184,7 +184,7 @@ export class StellarCurrency implements LedgerCurrency {
       selling: asset,
       buying: this.hour(),
       amount: balance.toString(),
-      price: "1"
+      price: asset.equals(this.asset()) ? this.config.rate : "1"
     }
 
     if (offer) {
