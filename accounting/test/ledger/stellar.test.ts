@@ -4,9 +4,9 @@ import assert from "node:assert"
 import { Ledger, LedgerCurrency, LedgerCurrencyKeys, PathQuote } from "../../src/ledger"
 import { StellarLedger } from "../../src/ledger/stellar"
 import { Keypair } from "@stellar/stellar-sdk"
-import { friendbot } from "./utils"
 import { installDefaultListeners } from "src/ledger/listener"
 import { TestConfig } from "test/config"
+import { friendbot } from "src/ledger/stellar/friendbot"
 
 
 //logger.level = "debug"
@@ -30,7 +30,7 @@ describe('Creates stellar elements', async () => {
   before(async() => {
     // Create and fund a sponsor account.
     sponsor = Keypair.random()
-    await friendbot(sponsor.publicKey())
+    await friendbot(TestConfig.STELLAR_FRIENDBOT_URL, sponsor.publicKey())
 
     // Instantiate the ledger.
     ledger = new StellarLedger({

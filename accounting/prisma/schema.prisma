@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Currency {
+  tenantId              String
+  id                    String   @id @default(uuid())
+
+  status                String   @default("new")
+
+  code                  String   @unique @db.VarChar(255)
+  name                  String   @db.VarChar(255)
+  namePlural            String   @db.VarChar(255)
+  symbol                String   @db.VarChar(255)
+
+  decimals              Int
+  scale                 Int
+
+  rateN                 Int
+  rateD                 Int
+
+  defaultCreditLimit    Int
+  defaultMaximumBalance Int?
+
+  created               DateTime @default(now())
+  updated               DateTime @updatedAt
+
+  // Currency keys
+  issuerKeyId         String? @unique
+  creditKeyId         String? @unique
+  adminKeyId          String? @unique
+  externalIssuerKeyId String? @unique
+  externalTraderKeyId String? @unique
+
+  issuerKey         EncryptedSecret? @relation("issuer", fields: [issuerKeyId], references: [id])
+  creditKey         EncryptedSecret? @relation("credit", fields: [creditKeyId], references: [id])
+  adminKey          EncryptedSecret? @relation("admin", fields: [adminKeyId], references: [id])
+  externalIssuerKey EncryptedSecret? @relation("externalIssuer", fields: [externalIssuerKeyId], references: [id])
+  externalTraderKey EncryptedSecret? @relation("externalTrader", fields: [externalTraderKeyId], references: [id])
+
+  accounts Account[]
+}
+
+model Account {
+  tenantId   String
+  id         String @id @default(uuid())
+  code       String @unique @db.VarChar(255)
+  keyId      String @unique @db.VarChar(255)
+  currencyId String
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  key      EncryptedSecret @relation(fields: [keyId], references: [id])
+  currency Currency        @relation(fields: [currencyId], references: [id])
+}
+
+model EncryptedSecret {
+  tenantId        String
+  id              String @id @default(uuid())
+  salt            String @db.VarChar(255)
+  encryptedSecret String @db.VarChar(255)
+
+  created   DateTime @default(now())
+  updated   DateTime @updatedAt
+  encrypted DateTime @default(now())
+  accessed  DateTime @default(now())
+
+  // These are required by prisma, but we don't use them
+  account                Account?
+  issuerCurrency         Currency? @relation("issuer")
+  creditCurrency         Currency? @relation("credit")
+  adminCurrency          Currency? @relation("admin")
+  externalIssuerCurrency Currency? @relation("externalIssuer")
+  externalTraderCurrency Currency? @relation("externalTrader")
+}

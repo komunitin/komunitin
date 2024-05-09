@@ -4,6 +4,9 @@
     "outDir": "dist",
     "sourceMap": true,
     "baseUrl": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true
   },
   "include": ["src", "test"]
 }

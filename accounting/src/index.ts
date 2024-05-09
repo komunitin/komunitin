@@ -1,3 +1,10 @@
-import { StellarLedger } from "./ledger/stellar";
+import { startServer } from "./server/server";
 
-console.log("TODO: Implement the server!")
+startServer()
+  .then(() => {
+    console.log("Server started successfully.");
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })

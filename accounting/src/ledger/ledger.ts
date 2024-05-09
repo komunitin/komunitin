@@ -1,4 +1,5 @@
 import { Keypair, Keypair as StellarKeyPair } from "@stellar/stellar-sdk"
+import { Rate } from "../utils/types"
 import TypedEmitter from "typed-emitter"
 /*
  * Architecture:
@@ -281,13 +282,6 @@ export interface LedgerAccount {
  */
 export interface LedgerTransfer {
   hash: string
-}
-/**
- * A fraction with numerator and denominator.
- */
-export type Rate = {
-  n: number
-  d: number
 }
 
 export type LedgerAsset = {

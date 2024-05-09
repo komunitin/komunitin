@@ -1,6 +1,6 @@
 import { Networks, Horizon, Keypair, TransactionBuilder, BASE_FEE, Transaction, Memo, MemoType, Operation, NetworkError, FeeBumpTransaction } from "@stellar/stellar-sdk"
 import { sleep } from "../../utils/sleep"
-import { Ledger, LedgerCurrencyConfig, LedgerCurrency, LedgerCurrencyKeys, LedgerCurrencyData, LedgerEvents } from "../ledger"
+import { Ledger, LedgerCurrencyConfig, LedgerCurrencyKeys, LedgerCurrencyData, LedgerEvents } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarCurrency } from "./currency"
 import Big from "big.js"
@@ -10,10 +10,15 @@ import {EventEmitter} from "node:events"
 
 export type StellarLedgerConfig = {
   server: string,
-  network: Networks,
+  network: "testnet" | "local" | "public",
   sponsorPublicKey: string,
   domain: string
 }
+
+export const createStellarLedger = (config: StellarLedgerConfig): Ledger => {
+  return new StellarLedger(config)
+}
+
 /**
  * This is a singleton class. It is used to manage the connection to the Stellar network.
  */
@@ -42,8 +47,13 @@ export class StellarLedger implements Ledger {
    * with the sequence numbers.
    */
   constructor(config: StellarLedgerConfig) {
+    const networks = {
+      testnet: Networks.TESTNET,
+      local: Networks.TESTNET,
+      public: Networks.PUBLIC
+    }
     this.server = new Horizon.Server(config.server)
-    this.network = config.network
+    this.network = networks[config.network]
     this.sponsorPublicKey = Keypair.fromPublicKey(config.sponsorPublicKey)
     this.domain = config.domain
     this.emitter = new EventEmitter() as TypedEmitter<LedgerEvents>
