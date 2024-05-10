@@ -29,6 +29,9 @@ importers:
       pino:
         specifier: ^9.0.0
         version: 9.0.0
+      ts-japi:
+        specifier: ^1.11.3
+        version: 1.11.3
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.4
@@ -858,6 +861,10 @@ packages:
   toml@3.0.0:
     resolution: {integrity: sha512-y/mWCZinnvxjTKYhJ+pYxwD0mRLVvOtdS2Awbgxln6iEnt4rk0yBxeSBHkGJcPucRiG0e55mwWp+g/05rsrd6w==}
 
+  ts-japi@1.11.3:
+    resolution: {integrity: sha512-L4T2/iU0Ca/Axo+36DrdeKDh4nPOc1Dj6ascawBPuoYT/DTqEzGzUolEtt41mBUQObf0VOimpv8SpIMnlWEZhg==}
+    engines: {node: '>=10'}
+
   tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
@@ -1668,6 +1675,8 @@ snapshots:
   toidentifier@1.0.1: {}
 
   toml@3.0.0: {}
+
+  ts-japi@1.11.3: {}
 
   tslib@2.6.2:
     optional: true

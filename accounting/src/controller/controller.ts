@@ -7,7 +7,8 @@ import { friendbot } from "../ledger/stellar/friendbot"
 import { logger } from "../utils/logger"
 import { loadConfig } from "./config"
 import { KeyObject } from "node:crypto"
-import { InputCurrency, Currency, currencyFromRecord } from "../model/currency"
+import { InputCurrency, Currency, currencyFromRecord, recordFromInputCurrency } from "../model/currency"
+import { badConfig, badRequest, notFound } from "src/utils/error"
 
 export async function createController(): Promise<SharedController> {
   const config = loadConfig()
@@ -17,10 +18,10 @@ export async function createController(): Promise<SharedController> {
   const isProduction = config.STELLAR_NETWORK === "public"
   if (masterPassword) {
     if (isProduction && (masterPassword.length < 16)) {
-      throw new Error("MASTER_PASSWORD must be at least 16 characters long.")
+      throw badConfig("MASTER_PASSWORD must be at least 16 characters long.")
     }
     if (isProduction && (!config.MASTER_PASSWORD_SALT || config.MASTER_PASSWORD_SALT.length < 16)) {
-      throw new Error("MASTER_PASSWORD_SALT must be provided and at least 16 characters long.")
+      throw badConfig("MASTER_PASSWORD_SALT must be provided and at least 16 characters long.")
     }
     const salt = config.MASTER_PASSWORD_SALT || "komunitin.org"
     masterKeyObject = await deriveKey(masterPassword, salt)
@@ -41,7 +42,7 @@ export async function createController(): Promise<SharedController> {
     sponsor = Keypair.random()
     await friendbot(config.STELLAR_FRIENDBOT_URL, sponsor.publicKey())
   } else {
-    throw new Error("Either SPONSOR_PRIVATE_KEY or STELLAR_FRIENDBOT_URL must be provided.")
+    throw badConfig("Either SPONSOR_PRIVATE_KEY or STELLAR_FRIENDBOT_URL must be provided.")
   }
   const sponsorKey = async () => sponsor
 
@@ -72,16 +73,16 @@ class LedgerController implements SharedController {
   async createCurrency(currency: InputCurrency): Promise<Currency> {
     // Validate input beyond syntactic validation.
     if (await this.currencyExists(currency.code)) {
-      throw new Error(`Currency with code ${currency.code} already exists.`)
+      throw badRequest(`Currency with code ${currency.code} already exists.`)
     }
     // Add the currency to the DB
+    const inputRecord = recordFromInputCurrency(currency)
+    
     let record = await this.db.currency.create({
       data: {
-        ...currency,
+        ...inputRecord,
         tenantId: currency.code,
-        status: "new",
-        rateN: currency.rate.n,
-        rateD: currency.rate.d,
+        status: "new"
       }
     })
 
@@ -130,9 +131,12 @@ class LedgerController implements SharedController {
    * Implements {@link SharedController.getCurrency}
    */
   async getCurrency(code: string): Promise<Currency> {
-    const record = await this.db.currency.findUniqueOrThrow({
+    const record = await this.db.currency.findUnique({
       where: { code }
     })
+    if (!record) {
+      throw notFound(`Currency with code ${code} not found.`)
+    }
     return currencyFromRecord(record)
   }
 

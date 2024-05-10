@@ -14,27 +14,27 @@ datasource db {
 }
 
 model Currency {
-  tenantId              String
-  id                    String   @id @default(uuid())
+  tenantId String @db.VarChar(32)
+  id       String @id @default(uuid())
 
-  status                String   @default("new")
+  status String @default("new")
 
-  code                  String   @unique @db.VarChar(255)
-  name                  String   @db.VarChar(255)
-  namePlural            String   @db.VarChar(255)
-  symbol                String   @db.VarChar(255)
+  code       String @unique @db.VarChar(255)
+  name       String @db.VarChar(255)
+  namePlural String @db.VarChar(255)
+  symbol     String @db.VarChar(255)
 
-  decimals              Int
-  scale                 Int
+  decimals Int
+  scale    Int
 
-  rateN                 Int
-  rateD                 Int
+  rateN Int
+  rateD Int
 
   defaultCreditLimit    Int
   defaultMaximumBalance Int?
 
-  created               DateTime @default(now())
-  updated               DateTime @updatedAt
+  created DateTime @default(now())
+  updated DateTime @updatedAt
 
   // Currency keys
   issuerKeyId         String? @unique
@@ -53,7 +53,7 @@ model Currency {
 }
 
 model Account {
-  tenantId   String
+  tenantId   String @db.VarChar(32)
   id         String @id @default(uuid())
   code       String @unique @db.VarChar(255)
   keyId      String @unique @db.VarChar(255)
@@ -67,9 +67,8 @@ model Account {
 }
 
 model EncryptedSecret {
-  tenantId        String
+  tenantId        String @db.VarChar(32)
   id              String @id @default(uuid())
-  salt            String @db.VarChar(255)
   encryptedSecret String @db.VarChar(255)
 
   created   DateTime @default(now())

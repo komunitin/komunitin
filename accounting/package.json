@@ -17,7 +17,8 @@
 		"dotenv": "^16.4.5",
 		"express": "^4.19.2",
 		"express-validator": "^7.0.1",
-		"pino": "^9.0.0"
+		"pino": "^9.0.0",
+		"ts-japi": "^1.11.3"
 	},
 	"devDependencies": {
 		"@tsconfig/node20": "^20.1.4",

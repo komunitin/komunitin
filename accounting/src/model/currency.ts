@@ -24,7 +24,28 @@ export interface Currency {
 }
 
 export type InputCurrency = Omit<Currency, "id" | "status" | "created" | "updated">
-
+export const inputCurrencyFromApi = (body: Record<string,any>): InputCurrency => {
+  const data = body.data
+  const attributes = data.attributes
+  return {
+    ...attributes
+  }
+}
+export const recordFromInputCurrency = (currency: InputCurrency) => {
+  return {
+    code: currency.code,
+    name: currency.name,
+    namePlural: currency.namePlural,
+    symbol: currency.symbol,
+    decimals: currency.decimals,
+    scale: currency.scale,
+    rateN: currency.rate.n,
+    rateD: currency.rate.d,
+    defaultCreditLimit: currency.defaultCreditLimit,
+    defaultMaximumBalance: currency.defaultMaximumBalance ?? undefined
+  }
+  
+}
 export const currencyFromRecord = (record: CurrencyRecord) => {
   return {
     id: record.id,

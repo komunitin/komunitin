@@ -7,6 +7,7 @@ import Big from "big.js"
 import { logger } from "../../utils/logger"
 import TypedEmitter from "typed-emitter"
 import {EventEmitter} from "node:events"
+import { KError, badTransaction, internalError, notImplemented } from "../../utils/error"
 
 export type StellarLedgerConfig = {
   server: string,
@@ -144,7 +145,7 @@ export class StellarLedger implements Ledger {
         // TODO: Handle the insufficient fee error by waiting a reasonable amount of
         // time before increasing the fee up to a maximum value.
         // https://developers.stellar.org/docs/learn/encyclopedia/error-handling
-        throw new Error("TODO: Implement fee strategy!", {cause: error})
+        throw notImplemented("Implement fee strategy", error)
       }
       throw error
     }
@@ -177,8 +178,7 @@ export class StellarLedger implements Ledger {
       return await this.server.submitTransaction(transaction)
     } catch (error) {
       if (this.isNonRetryError(error)) {
-        this.logTransactionError(transaction, error)
-        throw error
+        throw this.getTransactionError(transaction, error)
       }
       
       await sleep(timeout)
@@ -188,7 +188,7 @@ export class StellarLedger implements Ledger {
       const expiration = parseInt(inner.timeBounds?.maxTime ?? "0")
 
       if (Date.now() >= expiration * 1000) {
-        throw new Error("Transaction expired. Create a new one and submit it again.", {cause: error})
+        throw badTransaction("Transaction expired. Create a new one and submit it again.", error)
       }
 
       return await this.submitTransactionWithRetry(transaction, 2 * timeout)
@@ -247,7 +247,7 @@ export class StellarLedger implements Ledger {
     return this.currencies[data.issuerPublicKey]
   }
 
-  private logTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: unknown) {
+  private getTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: unknown): KError {
     const inner = transaction instanceof FeeBumpTransaction ? transaction.innerTransaction : transaction
     const operations = inner.operations.map(op => op.type)
     if (error && (error as any).response?.data?.title) {
@@ -257,15 +257,15 @@ export class StellarLedger implements Ledger {
       if (data.extras) {
         // Transaction failed
         const result = data.extras.result_codes
-        logger.error({operations, results: result.operations, result: result.transaction}, msg)
+        return badTransaction(msg, {operations, results: result.operations, result: result.transaction})
       } else {
         // Other Horizon error
-        logger.error({operations, data}, msg)
+        return badTransaction(msg, {operations, data})
       }
     } else if (error instanceof Error) {
-      logger.error({operations, error}, `Error submitting transaction: ${error.message}`)
+      return internalError(`Error submitting transaction: ${error.message}`, {operations, error})
     } else {
-      logger.error({operations, error}, `Error submitting transaction: ${error}`)
+      return internalError(`Error submitting transaction: ${error}`, {operations, error})
     }
   }
 }

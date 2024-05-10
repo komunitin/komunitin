@@ -3,6 +3,7 @@ import { KeyPair, LedgerAccount, PathQuote } from "../ledger"
 import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
 import { logger } from "../../utils/logger"
+import { badTransaction, internalError } from "../../utils/error"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
@@ -17,7 +18,7 @@ export class StellarAccount implements LedgerAccount {
 
   async update() {
     if (this.account === undefined) {
-      throw new Error("Account not found")
+      throw internalError("Account not found")
     }
     this.account = await this.currency.ledger.server.loadAccount(this.account.accountId())
     return this
@@ -28,7 +29,7 @@ export class StellarAccount implements LedgerAccount {
    */
   balance(asset?: Asset) {
     if (this.account === undefined) {
-      throw new Error("Account not found")
+      throw internalError("Account not found")
     }
     if (asset === undefined) {
       asset = this.currency.asset()
@@ -41,13 +42,13 @@ export class StellarAccount implements LedgerAccount {
       return false
     })
     if (!balance) {
-      throw new Error("Unexpected account without local currency balance!")
+      throw internalError(`Unexpected account without ${asset.code} currency balance`)
     }
     return balance.balance
   }
   balances() {
     if (this.account === undefined) {
-      throw new Error("Account not found")
+      throw internalError("Account not found")
     }
     return (this.account.balances as Horizon.HorizonApi.BalanceLineAsset[])
       .map(b => ({asset: new Asset(b.asset_code, b.asset_issuer), balance: b.balance, limit: b.limit}))
@@ -90,7 +91,7 @@ export class StellarAccount implements LedgerAccount {
    */
   async pay(payment: { payeePublicKey: string; amount: string }, keys: { account: Keypair; sponsor: Keypair }) {
     if (Big(this.balance()).lt(payment.amount)) {
-      throw new Error("Insufficient balance")
+      throw badTransaction("Insufficient balance")
     }
     const builder = this.currency.ledger.transactionBuilder(this)
     builder.addOperation(Operation.payment({
@@ -111,7 +112,7 @@ export class StellarAccount implements LedgerAccount {
    */
   getStellarAccount() {
     if (this.account === undefined) {
-      throw new Error("Account not found")
+      throw internalError("Account not found")
     }
     return this.account
   }
@@ -122,7 +123,7 @@ export class StellarAccount implements LedgerAccount {
   async externalPay(payment: { payeePublicKey: string, amount: string, path: PathQuote }, keys: { account: Keypair; sponsor: Keypair }) {
 
     if (Big(this.balance()).lt(payment.path.sourceAmount)) {
-      throw new Error("Insufficient balance")
+      throw badTransaction("Insufficient balance")
     }
 
     const builder = this.currency.ledger.transactionBuilder(this)

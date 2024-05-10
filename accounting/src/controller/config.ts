@@ -1,4 +1,5 @@
 import dotenv from "dotenv"
+import { badConfig } from "../utils/error"
 
 export const loadConfig = () => {
   dotenv.config()
@@ -24,7 +25,7 @@ export const loadConfig = () => {
 
   // Validate some config
   if (!["testnet", "local", "public"].includes(config.STELLAR_NETWORK)) {
-    throw new Error("Invalid STELLAR_NETWORK config")
+    throw badConfig("Invalid STELLAR_NETWORK config")
   }
 
   return config

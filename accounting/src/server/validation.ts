@@ -12,15 +12,15 @@ export namespace Validators {
   ]
 
   const isCurrencyAttributes = (path: string) => [
-    body(`${path}.code`).isString().trim().isLength({max: 4, min: 4}),
+    body(`${path}.code`).isString().trim().matches(/^[A-Z0-9]{4}$/),
     body(`${path}.name`).isString().trim().notEmpty(),
     body(`${path}.namePlural`).isString().trim().notEmpty(),
     body(`${path}.symbol`).isString().trim().isLength({max: 3, min: 1}),
     body(`${path}.decimals`).isInt({max: 8, min: 0}),
     body(`${path}.scale`).isInt({max: 12, min: 0}),
-    body(`${path}.value`).isObject(),
-    body(`${path}.value.n`).isInt({min: 1}),
-    body(`${path}.value.d`).isInt({min: 1}),
+    body(`${path}.rate`).isObject(),
+    body(`${path}.rate.n`).isInt({min: 1}),
+    body(`${path}.rate.d`).isInt({min: 1}),
     body(`${path}.defaultCreditLimit`).optional().isInt({min: 0}).default(0),
     body(`${path}.defaultDebitLimit`).optional().isInt(),
   ]

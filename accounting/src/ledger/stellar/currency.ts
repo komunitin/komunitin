@@ -5,6 +5,7 @@ import { StellarLedger } from "./ledger"
 import Big from "big.js"
 import { logger } from "src/utils/logger"
 import { retry } from "src/utils/sleep"
+import { badRequest, internalError } from "src/utils/error"
 
 export class StellarCurrency implements LedgerCurrency {
   static GLOBAL_ASSET_CODE = "HOUR"
@@ -38,7 +39,7 @@ export class StellarCurrency implements LedgerCurrency {
 
     // Input checking.
     if (this.config.code.match(/^[A-Z0-9]{4}$/) === null) {
-      throw new Error("Invalid currency code")
+      throw badRequest("Invalid currency code")
     }
   }
   
@@ -58,7 +59,7 @@ export class StellarCurrency implements LedgerCurrency {
             this.ledger.emitter.emit("error", error)
           })
         } else {
-          throw new Error("Unexpected trade message", {cause: page})
+          throw internalError("Unexpected trade message", page)
         }
       },
       onerror: (error) => {
@@ -85,9 +86,7 @@ export class StellarCurrency implements LedgerCurrency {
     // We want to catch the Hx => Ht (selling local hours by external hours)
     // trade if it is done by this external trader.
     if (trade.base_asset_type == "native" || trade.counter_asset_type == "native") {
-      throw new Error("Unexpected trade with native token", {
-        cause: trade
-      })
+      throw internalError("Unexpected trade with native token", trade)
     }
     const base = new Asset(trade.base_asset_code as string, trade.base_asset_issuer)
     const counter = new Asset(trade.counter_asset_code as string, trade.counter_asset_issuer)
@@ -125,9 +124,7 @@ export class StellarCurrency implements LedgerCurrency {
         this.ledger.emitter.emit("incommingTrade", this)
       }
     } else {
-      throw new Error("Unexpected trade", {
-        cause: trade
-      })
+      throw internalError("Unexpected trade", trade)
     }
   }
 
@@ -574,10 +571,10 @@ export class StellarCurrency implements LedgerCurrency {
     credit?: Keypair, // Only if defaultInitialBalance > 0
   }): Promise<{key: Keypair}> {
     if (keys.credit && Big(this.config.defaultInitialBalance).eq(0)) {
-      throw new Error("Credit key not allowed if defaultInitialBalance is 0.")
+      throw internalError("Credit key not allowed if defaultInitialBalance is 0.")
     }
     if (!keys.credit && Big(this.config.defaultInitialBalance).gt(0)) {
-      throw new Error("Credit key required if defaultInitialBalance is positive.")
+      throw internalError("Credit key required if defaultInitialBalance is positive.")
     }
     // Create keypair.
     const account = Keypair.random()
