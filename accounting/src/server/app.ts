@@ -2,6 +2,7 @@ import express from "express"
 import { getRoutes } from "./routes"
 import { createController } from "../controller"
 import { errorHandler } from "./errors"
+import { httpLogger } from "../utils/logger"
 
 export async function createApp() {
   const app = express()
@@ -10,6 +11,8 @@ export async function createApp() {
   app.use(express.json({
     type: ['application/vnd.api+json', 'application/json']
   }))
+  //logger
+  app.use(httpLogger)
 
   // Routes
   const controller = await createController()

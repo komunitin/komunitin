@@ -18,6 +18,7 @@
 		"express": "^4.19.2",
 		"express-validator": "^7.0.1",
 		"pino": "^9.0.0",
+		"pino-http": "^10.1.0",
 		"ts-japi": "^1.11.3"
 	},
 	"devDependencies": {
