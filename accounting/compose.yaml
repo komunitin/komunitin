@@ -1,10 +1,13 @@
 services:
   db:
-    image: postgres:16
+    build:
+      context: ./docker/db
     restart: always
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_APP_USER: user
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-password}
       POSTGRES_DB: komunitin_accounting

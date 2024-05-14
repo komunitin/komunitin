@@ -1,8 +1,7 @@
 import { Rate } from "../utils/types";
 import { Currency as CurrencyRecord } from "@prisma/client"
 
-// API Models.
-
+// Currency model
 export interface Currency {
   id: string
   code: string
@@ -18,6 +17,14 @@ export interface Currency {
 
   defaultCreditLimit: number
   defaultMaximumBalance?: number
+
+  keys?: {
+    issuer: string,
+    credit: string,
+    admin: string,
+    externalTrader: string,
+    externalIssuer: string
+  }
 
   created: Date
   updated: Date
@@ -59,7 +66,14 @@ export const currencyFromRecord = (record: CurrencyRecord) => {
     rate: { n: record.rateN, d: record.rateD },
     defaultCreditLimit: record.defaultCreditLimit,
     defaultMaximumBalance: record.defaultMaximumBalance ?? undefined,
+    keys: record.issuerKeyId ? {
+      issuer: record.issuerKeyId as string,
+      credit: record.creditKeyId as string,
+      admin: record.adminKeyId as string,
+      externalTrader: record.externalTraderKeyId as string,
+      externalIssuer: record.externalIssuerKeyId as string
+    } : undefined,
     created: record.created,
-    updated: record.updated
+    updated: record.updated,
   }
 }

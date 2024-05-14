@@ -14,12 +14,12 @@ datasource db {
 }
 
 model Currency {
-  tenantId String @db.VarChar(32)
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   id       String @id @default(uuid())
 
-  status String @default("new")
+  status   String @default("new") @db.VarChar(31)
 
-  code       String @unique @db.VarChar(255)
+  code       String @unique @db.VarChar(31)
   name       String @db.VarChar(255)
   namePlural String @db.VarChar(255)
   symbol     String @db.VarChar(255)
@@ -36,13 +36,17 @@ model Currency {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
-  // Currency keys
-  issuerKeyId         String? @unique
-  creditKeyId         String? @unique
-  adminKeyId          String? @unique
-  externalIssuerKeyId String? @unique
-  externalTraderKeyId String? @unique
+  // EncryptionKey
+  encryptionKeyId     String @unique @db.VarChar(255)
 
+  // Currency keys
+  issuerKeyId         String? @unique @db.VarChar(255)
+  creditKeyId         String? @unique @db.VarChar(255)
+  adminKeyId          String? @unique @db.VarChar(255)
+  externalIssuerKeyId String? @unique @db.VarChar(255)
+  externalTraderKeyId String? @unique @db.VarChar(255)
+
+  encryptionKey     EncryptedSecret? @relation("encryption", fields: [encryptionKeyId], references: [id])
   issuerKey         EncryptedSecret? @relation("issuer", fields: [issuerKeyId], references: [id])
   creditKey         EncryptedSecret? @relation("credit", fields: [creditKeyId], references: [id])
   adminKey          EncryptedSecret? @relation("admin", fields: [adminKeyId], references: [id])
@@ -53,11 +57,17 @@ model Currency {
 }
 
 model Account {
-  tenantId   String @db.VarChar(32)
+  tenantId   String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   id         String @id @default(uuid())
   code       String @unique @db.VarChar(255)
+
   keyId      String @unique @db.VarChar(255)
   currencyId String
+
+  // These three fields are just a cache from the Stellar network.
+  balance        Int
+  creditLimit    Int
+  maximumBalance Int?
 
   created DateTime @default(now())
   updated DateTime @updatedAt
@@ -67,7 +77,7 @@ model Account {
 }
 
 model EncryptedSecret {
-  tenantId        String @db.VarChar(32)
+  tenantId        String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   id              String @id @default(uuid())
   encryptedSecret String @db.VarChar(255)
 
@@ -78,6 +88,7 @@ model EncryptedSecret {
 
   // These are required by prisma, but we don't use them
   account                Account?
+  encryptionCurrency     Currency? @relation("encryption")
   issuerCurrency         Currency? @relation("issuer")
   creditCurrency         Currency? @relation("credit")
   adminCurrency          Currency? @relation("admin")

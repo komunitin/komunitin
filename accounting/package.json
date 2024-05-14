@@ -13,12 +13,14 @@
 	"dependencies": {
 		"@prisma/client": "5.13.0",
 		"@stellar/stellar-sdk": "^11.3.0",
+		"@types/qs": "^6.9.15",
 		"big.js": "^6.2.1",
 		"dotenv": "^16.4.5",
 		"express": "^4.19.2",
 		"express-validator": "^7.0.1",
 		"pino": "^9.0.0",
 		"pino-http": "^10.1.0",
+		"qs": "^6.12.1",
 		"ts-japi": "^1.11.3"
 	},
 	"devDependencies": {

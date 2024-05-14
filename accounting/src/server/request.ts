@@ -1,0 +1,111 @@
+import { parseRawSimulation } from "@stellar/stellar-sdk/lib/soroban"
+import {Request} from "express"
+import { internalError } from "src/utils/error"
+
+// Pagination. We use the https://jsonapi.org/profiles/ethanresnick/cursor-pagination/ spec for pagination.
+// However, we actually use the offset as a cursor. For performance reasons we may change
+// the cursor definition to something that allows us random access since the client uses it
+// as an opaque string.
+
+const DEFAULT_PAGE_SIZE = 20
+const MAX_PAGE_SIZE = 200
+
+export const pagination = (req: Request) => {
+  let size = DEFAULT_PAGE_SIZE
+  let cursor = 0
+
+  const page = req.query.page as any
+  if (page) {
+    // Parse size
+    if (page.size) {
+      const inputSize = parseInt(page.size)
+      if (inputSize > 0 && inputSize <= MAX_PAGE_SIZE) {
+        size = inputSize
+      }
+    }
+    if (page.after) {
+      const inputAfter = parseInt(page.after)
+      if (inputAfter >= 0) {
+        cursor = inputAfter
+      }
+    }
+  }
+  return {cursor, size}
+}
+
+export const filters = (req: Request, fields: string[]) => {
+  const filter = {} as Record<string, string | string[]>
+  for (const field of fields) {
+    const value = req.query[field]
+    // Remove unexpected field types.
+    if (typeof value === "string" || (Array.isArray(value) && value.every(v => typeof v === "string"))) {
+      filter[field] = value as string | string[]
+    }
+  }
+  return filter
+}
+
+export type Sort = {
+  field: string
+  order: "asc" | "desc"
+}
+
+export const sort = (req: Request, fields: string[], defaultDesc = false): SortOptions => {
+  if (fields.length === 0) {
+    throw internalError("Provide at least one sort field")
+  }
+
+  const sort = req.query.sort
+  if (typeof sort === "string") {
+    const desc = sort.startsWith("-")
+    const field = desc ? sort.slice(1) : sort
+    if (fields.includes(field)) {
+      return {
+        field,
+        order: desc ? "desc" : "asc"
+      }
+    }
+  }
+  return {
+    field: fields[0],
+    order: defaultDesc ? "desc" : "asc"
+  }
+}
+export type PaginationOptions = {
+  cursor: number
+  size: number
+}
+export type FilterOptions = Record<string, string | string[]>
+export type SortOptions = Sort
+
+export type CollectionOptions = {
+  pagination: PaginationOptions
+  filters: FilterOptions
+  sort: SortOptions
+}
+/**
+ * Return the request pagination, filtering and sort parameters. 
+ * 
+ * The first field in sort will be the default sort if none is provided.
+ * 
+ * Example:
+ * ```typescript
+ * const options = params(req, {
+ *  filter: ["code", "id"],
+ *  sort: ["code", "created", "updated"]
+ * })
+ * 
+ * @param req express Request
+ * @param options the filter and sort fields to allow
+ * @returns 
+ */
+export const params = (req: Request, options: {
+  filter: string[],
+  sort: string[]
+}): CollectionOptions => {
+  return {
+    pagination: pagination(req),
+    filters: filters(req, options.filter),
+    sort: sort(req, options.sort)
+  }
+}

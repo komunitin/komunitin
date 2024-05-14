@@ -14,6 +14,9 @@ importers:
       '@stellar/stellar-sdk':
         specifier: ^11.3.0
         version: 11.3.0
+      '@types/qs':
+        specifier: ^6.9.15
+        version: 6.9.15
       big.js:
         specifier: ^6.2.1
         version: 6.2.1
@@ -32,6 +35,9 @@ importers:
       pino-http:
         specifier: ^10.1.0
         version: 10.1.0
+      qs:
+        specifier: ^6.12.1
+        version: 6.12.1
       ts-japi:
         specifier: ^1.11.3
         version: 1.11.3
@@ -777,6 +783,10 @@ packages:
 
   qs@6.11.0:
     resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
+    engines: {node: '>=0.6'}
+
+  qs@6.12.1:
+    resolution: {integrity: sha512-zWmv4RSuB9r2mYQw3zxQuHWeU+42aKi1wWig/j4ele4ygELZ7PEO6MM7rim9oAQH2A5MWfsAVf/jPvTPgCbvUQ==}
     engines: {node: '>=0.6'}
 
   quick-format-unescaped@4.0.4:
@@ -1580,6 +1590,10 @@ snapshots:
       once: 1.4.0
 
   qs@6.11.0:
+    dependencies:
+      side-channel: 1.0.6
+
+  qs@6.12.1:
     dependencies:
       side-channel: 1.0.6
 

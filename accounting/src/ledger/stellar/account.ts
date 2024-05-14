@@ -1,9 +1,10 @@
 import { Asset, Horizon, Keypair, Operation } from "@stellar/stellar-sdk"
-import { KeyPair, LedgerAccount, PathQuote } from "../ledger"
+import { KeyPair, LedgerAccount, LedgerTransfer, PathQuote } from "../ledger"
 import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
 import { logger } from "../../utils/logger"
 import { badTransaction, internalError } from "../../utils/error"
+import { StellarTransaction } from "./transaction"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
@@ -16,24 +17,65 @@ export class StellarAccount implements LedgerAccount {
     this.account = account
   }
 
-  async update() {
+  private stellarAccount() {
     if (this.account === undefined) {
       throw internalError("Account not found")
     }
-    this.account = await this.currency.ledger.server.loadAccount(this.account.accountId())
+    return this.account
+  }
+
+  async update() {
+    this.account = await this.currency.ledger.server.loadAccount(this.stellarAccount().accountId())
     return this
+  }
+  
+  /**
+   * Implements LedgerAccount.transfers()
+   */
+  async transfers(): Promise<LedgerTransfer[]> {
+    const transfers = [] as LedgerTransfer[]
+    let result = await this.stellarAccount().payments({
+      limit: 20
+    })
+    do {
+      transfers.push(...result.records.map((r) => ({
+        amount: r.amount,
+        asset: new Asset(r.asset_code as string, r.asset_issuer),
+        payer: r.from,
+        payee: r.to
+      })))
+      result = await result.next()
+    } while(result.records.length > 0);
+
+    return transfers;
   }
 
   /**
-   * Implemenets {@link LedgerAccount.balance }
+   * Implements LedgerAccount.credit()
+   * 
+   * Note that this call requires fetching and parsing all payments to this account.
    */
-  balance(asset?: Asset) {
+  async credit(): Promise<string> {
+    const transfers = await this.transfers()
+    return transfers.filter(t => t.payer == this.currency.data.creditPublicKey)
+      .reduce((amount, transfer) => Big(transfer.amount).add(amount), Big(0))
+      .toString()
+  }
+
+  maximumBalance() : string {
+    const asset = this.currency.asset()
+    const balance = this.stellarBalance(asset)
+    if (!balance) {
+      throw internalError(`Unexpected account without ${asset.code} currency balance`)
+    }
+    return balance.limit
+  }
+
+  private stellarBalance(asset: Asset) {
     if (this.account === undefined) {
       throw internalError("Account not found")
     }
-    if (asset === undefined) {
-      asset = this.currency.asset()
-    }
+    
     const balance = this.account.balances.find((b) => {
       if (b.asset_type == asset.getAssetType()) {
         const balance = b as Horizon.HorizonApi.BalanceLineAsset
@@ -41,11 +83,22 @@ export class StellarAccount implements LedgerAccount {
       }
       return false
     })
+    return balance as Horizon.HorizonApi.BalanceLineAsset | undefined
+  }
+  /**
+   * Implements { @link LedgerAccount.balance }
+   */
+  balance(asset?: Asset) {
+    if (asset === undefined) {
+      asset = this.currency.asset()
+    }
+    const balance = this.stellarBalance(asset)
     if (!balance) {
       throw internalError(`Unexpected account without ${asset.code} currency balance`)
     }
     return balance.balance
   }
+
   balances() {
     if (this.account === undefined) {
       throw internalError("Account not found")
@@ -102,8 +155,9 @@ export class StellarAccount implements LedgerAccount {
     const transaction = await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
     
     logger.info({hash: transaction.hash}, `Account ${this.account?.accountId()} paid ${payment.amount} to ${payment.payeePublicKey}`)
-    
+
     return transaction
+    
   }
 
   /**

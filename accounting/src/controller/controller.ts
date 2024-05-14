@@ -1,14 +1,16 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, Currency as CurrencyRecord } from "@prisma/client"
 import { Keypair } from "@stellar/stellar-sdk"
-import { Ledger, createStellarLedger } from "../ledger"
-import { deriveKey, encrypt, randomKey } from "../utils/crypto"
+import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, createStellarLedger } from "../ledger"
+import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
 import { SharedController } from "."
 import { friendbot } from "../ledger/stellar/friendbot"
 import { logger } from "../utils/logger"
 import { loadConfig } from "./config"
-import { KeyObject } from "node:crypto"
+import { KeyObject, createSecretKey } from "node:crypto"
 import { InputCurrency, Currency, currencyFromRecord, recordFromInputCurrency } from "../model/currency"
-import { badConfig, badRequest, notFound } from "src/utils/error"
+import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
+import { LedgerCurrencyController, storeCurrencyKey } from "./currency"
+import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
 
 export async function createController(): Promise<SharedController> {
   const config = loadConfig()
@@ -57,17 +59,52 @@ export async function createController(): Promise<SharedController> {
   return new LedgerController(ledger, db, masterKey, sponsorKey)
 }
 
-class LedgerController implements SharedController {
-  db: PrismaClient
+const currencyConfig = (currency: InputCurrency): LedgerCurrencyConfig => {
+  const defaultMaximumBalance = currency.defaultMaximumBalance 
+    ? (currency.defaultCreditLimit + currency.defaultMaximumBalance).toString()
+    : undefined
+  return {
+    code: currency.code,
+    rate: currency.rate,
+    defaultInitialBalance: currency.defaultCreditLimit.toString(),
+    defaultMaximumBalance
+  }
+}
+
+const currencyData = (currency: Currency): LedgerCurrencyData => {
+  const keys = currency.keys
+  if (!keys) {
+    throw internalError("Missing keys in currency record")
+  }
+  return {
+    issuerPublicKey: keys.issuer,
+    creditPublicKey: keys.credit,
+    adminPublicKey: keys.admin,
+    externalIssuerPublicKey: keys.externalIssuer,
+    externalTraderPublicKey: keys.externalTrader
+  }
+}
+
+export class LedgerController implements SharedController {
+  
   ledger: Ledger
+  private _db: PrismaClient
   private sponsorKey: () => Promise<Keypair>
   private masterKey: () => Promise<KeyObject>
 
   constructor(ledger: Ledger, db: PrismaClient, masterKey: () => Promise<KeyObject>, sponsorKey: () => Promise<Keypair>) {
     this.ledger = ledger
+    this._db = db
     this.sponsorKey = sponsorKey
-    this.db = db
     this.masterKey = masterKey
+  }
+
+  privilegedDb(): PrivilegedPrismaClient {
+    return privilegedDb(this._db)
+  }
+
+  tenantDb(tenantId: string) : TenantPrismaClient {
+    return tenantDb(this._db, tenantId)
   }
 
   async createCurrency(currency: InputCurrency): Promise<Currency> {
@@ -75,40 +112,40 @@ class LedgerController implements SharedController {
     if (await this.currencyExists(currency.code)) {
       throw badRequest(`Currency with code ${currency.code} already exists.`)
     }
+    // Create and save a symmetric encryption key for this currency:
+    const currencyKey = await this.storeKey(currency.code, await randomKey())
+    
     // Add the currency to the DB
     const inputRecord = recordFromInputCurrency(currency)
-    
-    let record = await this.db.currency.create({
+    const db = this.tenantDb(currency.code)
+
+    let record = await db.currency.create({
       data: {
         ...inputRecord,
-        tenantId: currency.code,
-        status: "new"
+        status: "new",
+        encryptionKeyId: currencyKey.id
       }
     })
 
     // Create the currency on the ledger.
-    const defaultMaximumBalance = record.defaultMaximumBalance 
-      ? (record.defaultMaximumBalance + record.defaultMaximumBalance).toString()
-      : undefined
-    
-    const keys = await this.ledger.createCurrency({
-      code: record.code,
-      rate: { n: record.rateN, d: record.rateD },
-      defaultInitialBalance: record.defaultCreditLimit.toString(),
-      defaultMaximumBalance,
-    }, await this.sponsorKey())
+    const keys = await this.ledger.createCurrency(
+      currencyConfig(currency), 
+      await this.sponsorKey()
+    )
+
+    const storeKey = (key: Keypair) => storeCurrencyKey(key, db, this.masterKey)
 
     // Store the keys into the DB.
     const currencyKeyIds = {
-      issuerKeyId: (await this.storeKey(record.code, keys.issuer)).id,
-      creditKeyId: (await this.storeKey(record.code, keys.credit)).id,
-      adminKeyId: (await this.storeKey(record.code, keys.admin)).id,
-      externalIssuerKeyId: (await this.storeKey(record.code, keys.externalIssuer)).id,
-      externalTraderKeyId: (await this.storeKey(record.code, keys.externalTrader)).id
+      issuerKeyId: await storeKey(keys.issuer),
+      creditKeyId: await storeKey(keys.credit),
+      adminKeyId: await storeKey(keys.admin),
+      externalIssuerKeyId: await storeKey(keys.externalIssuer),
+      externalTraderKeyId: await storeKey(keys.externalTrader)
     }
     
     // Update the currency record in DB
-    record = await this.db.currency.update({
+    record = await db.currency.update({
       where: { id: record.id },
       data: {
         status: "active",
@@ -123,39 +160,63 @@ class LedgerController implements SharedController {
    * Implements {@link SharedController.getCurrencies}
    */
   async getCurrencies(): Promise<Currency[]> {
-    const records = await this.db.currency.findMany()
+    const records = await this.privilegedDb().currency.findMany()
     const currencies = records.map(r => currencyFromRecord(r))
     return currencies
   }
-  /**
-   * Implements {@link SharedController.getCurrency}
-   */
-  async getCurrency(code: string): Promise<Currency> {
-    const record = await this.db.currency.findUnique({
+  private async currencyRecord(code: string) {
+    const record = await this.tenantDb(code).currency.findUnique({
       where: { code }
     })
     if (!record) {
       throw notFound(`Currency with code ${code} not found.`)
     }
+    return record
+  }
+  /**
+   * Implements {@link SharedController.getCurrency}
+   */
+  async getCurrency(code: string): Promise<Currency> {
+    const record = await this.currencyRecord(code)
     return currencyFromRecord(record)
   }
 
   async currencyExists(code: string): Promise<boolean> {
-    const result = await this.db.currency.findUnique({
+    const result = await this.tenantDb(code).currency.findUnique({
       select: { code: true },
       where: { code }
     })
     return result !== null
   }
-  
-  async storeKey(code: string, key: Keypair) {
-    const encryptedSecret = await encrypt(key.secret(), await this.masterKey())
-    return await this.db.encryptedSecret.create({
+
+  /**
+   * Stores a key into the DB, encrypted with the master key. Used to store currency master
+   * encryption key.
+   */
+  async storeKey(code: string, key: KeyObject) {
+    const encryptedSecret = await encrypt(exportKey(key), await this.masterKey())
+    return await this.tenantDb(code).encryptedSecret.create({
       data: {
-        tenantId: code,
-        id: key.publicKey(),
         encryptedSecret
       }
     })
   }
+
+  async retrieveKey(code: string, id: string) {
+    const result = await this.tenantDb(code).encryptedSecret.findUniqueOrThrow({
+      where: { id }
+    })
+    const secret = await decrypt(result.encryptedSecret, await this.masterKey())
+    return importKey(secret)
+  }
+
+  async getCurrencyController(code: string): Promise<LedgerCurrencyController> {
+    const record = await this.currencyRecord(code)
+    const currency = currencyFromRecord(record)
+    const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency))
+    const db = this.tenantDb(code)
+    const encryptionKey = () => this.retrieveKey(code, record.encryptionKeyId)
+    return new LedgerCurrencyController(this, record, ledgerCurrency, db, encryptionKey, this.sponsorKey)
+  }
 }
+

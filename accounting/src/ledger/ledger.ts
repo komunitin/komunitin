@@ -172,11 +172,13 @@ export interface LedgerCurrency {
   asset(): LedgerAsset
   /**
    * Create and approve a new account in this currency.
+   * 
+   * Provide credit key only if defaultInitialBalance > 0
    */
   createAccount(keys: {
     sponsor: Keypair
     issuer: Keypair,
-    credit?: Keypair, // Only if defaultInitialBalance > 0
+    credit?: Keypair,
   }): Promise<{key: KeyPair}>
 
   /**
@@ -242,7 +244,7 @@ export interface LedgerAccount {
    * @param payment The payment details: destination and amount
    * @param keys The account entry can be either the master key or the admin key for administered accounts.
    */
-  pay(payment: {payeePublicKey: string, amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
+  pay(payment: {payeePublicKey: string, amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransaction>
 
   /**
    * Perform a payment to an account on a different currency.
@@ -251,7 +253,7 @@ export interface LedgerAccount {
    *   payeePublicKey: The public key of the payee account.
    *   externalIssuerPublicKey: The public key of the issuer of the payee currency.
    */
-  externalPay(payment: {payeePublicKey: string, amount: string, path: PathQuote}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
+  externalPay(payment: {payeePublicKey: string, amount: string, path: PathQuote}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransaction>
 
   /**
    * Permanently delete the account from the ledger.
@@ -280,10 +282,21 @@ export interface LedgerAccount {
 /**
  * A transfer committed in the ledger.
  */
-export interface LedgerTransfer {
+export interface LedgerTransaction {
   hash: string
 }
-
+/**
+ * A payment in the ledger
+ */
+export interface LedgerTransfer {
+  payer: string,
+  payee: string,
+  amount: string,
+  asset: LedgerAsset
+}
+/**
+ * An asset in the ledger.
+ */
 export type LedgerAsset = {
   issuer: string,
   code: string
