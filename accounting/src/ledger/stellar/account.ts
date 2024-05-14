@@ -4,7 +4,6 @@ import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
 import { logger } from "../../utils/logger"
 import { badTransaction, internalError } from "../../utils/error"
-import { StellarTransaction } from "./transaction"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
