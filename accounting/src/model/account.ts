@@ -1,5 +1,8 @@
-import { Currency } from "./currency"
-import { Account as AccountRecord } from "@prisma/client"
+import { Currency } from './currency'
+import { Account as AccountRecord } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+
+type CreateAccount = Prisma.AccountCreateInput
 
 export interface Account {
   id: string,

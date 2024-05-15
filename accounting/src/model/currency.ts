@@ -1,5 +1,9 @@
+
 import { Rate } from "../utils/types";
-import { Currency as CurrencyRecord } from "@prisma/client"
+import { Currency as CurrencyRecord, Prisma } from "@prisma/client"
+
+
+export { CurrencyRecord }
 
 // Currency model
 export interface Currency {
@@ -26,34 +30,34 @@ export interface Currency {
     externalIssuer: string
   }
 
+  encryptionKey: string
+
   created: Date
   updated: Date
 }
 
-export type InputCurrency = Omit<Currency, "id" | "status" | "created" | "updated">
-export const inputCurrencyFromApi = (body: Record<string,any>): InputCurrency => {
-  const data = body.data
-  const attributes = data.attributes
+export type CreateCurrency = Omit<Currency, "id" | "status" | "created" | "updated" | "encryptionKey" | "keys">
+export type UpdateCurrency = Partial<CreateCurrency & {id: string}>
+
+export function currencyToRecord(currency: CreateCurrency): Prisma.CurrencyCreateInput
+export function currencyToRecord(currency: UpdateCurrency): Prisma.CurrencyUpdateInput
+export function currencyToRecord(currency: CreateCurrency | UpdateCurrency): Prisma.CurrencyCreateInput | Prisma.CurrencyUpdateInput {
   return {
-    ...attributes
-  }
-}
-export const recordFromInputCurrency = (currency: InputCurrency) => {
-  return {
+    id: (currency as UpdateCurrency).id,
     code: currency.code,
     name: currency.name,
     namePlural: currency.namePlural,
     symbol: currency.symbol,
     decimals: currency.decimals,
     scale: currency.scale,
-    rateN: currency.rate.n,
-    rateD: currency.rate.d,
+    rateN: currency.rate?.n,
+    rateD: currency.rate?.d,
     defaultCreditLimit: currency.defaultCreditLimit,
-    defaultMaximumBalance: currency.defaultMaximumBalance ?? undefined
+    defaultMaximumBalance: currency.defaultMaximumBalance ?? null
   }
-  
 }
-export const currencyFromRecord = (record: CurrencyRecord) => {
+
+export const recordToCurrency = (record: CurrencyRecord): Currency => {
   return {
     id: record.id,
     code: record.code,
@@ -73,6 +77,7 @@ export const currencyFromRecord = (record: CurrencyRecord) => {
       externalTrader: record.externalTraderKeyId as string,
       externalIssuer: record.externalIssuerKeyId as string
     } : undefined,
+    encryptionKey: record.encryptionKeyId,
     created: record.created,
     updated: record.updated,
   }

@@ -7,7 +7,7 @@ import { friendbot } from "../ledger/stellar/friendbot"
 import { logger } from "../utils/logger"
 import { loadConfig } from "./config"
 import { KeyObject, createSecretKey } from "node:crypto"
-import { InputCurrency, Currency, currencyFromRecord, recordFromInputCurrency } from "../model/currency"
+import { CreateCurrency, Currency, recordToCurrency, currencyToRecord } from "../model/currency"
 import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
 import { LedgerCurrencyController, storeCurrencyKey } from "./currency"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
@@ -59,7 +59,7 @@ export async function createController(): Promise<SharedController> {
   return new LedgerController(ledger, db, masterKey, sponsorKey)
 }
 
-const currencyConfig = (currency: InputCurrency): LedgerCurrencyConfig => {
+const currencyConfig = (currency: CreateCurrency): LedgerCurrencyConfig => {
   const defaultMaximumBalance = currency.defaultMaximumBalance 
     ? (currency.defaultCreditLimit + currency.defaultMaximumBalance).toString()
     : undefined
@@ -107,7 +107,7 @@ export class LedgerController implements SharedController {
     return tenantDb(this._db, tenantId)
   }
 
-  async createCurrency(currency: InputCurrency): Promise<Currency> {
+  async createCurrency(currency: CreateCurrency): Promise<Currency> {
     // Validate input beyond syntactic validation.
     if (await this.currencyExists(currency.code)) {
       throw badRequest(`Currency with code ${currency.code} already exists.`)
@@ -116,7 +116,7 @@ export class LedgerController implements SharedController {
     const currencyKey = await this.storeKey(currency.code, await randomKey())
     
     // Add the currency to the DB
-    const inputRecord = recordFromInputCurrency(currency)
+    const inputRecord = currencyToRecord(currency)
     const db = this.tenantDb(currency.code)
 
     let record = await db.currency.create({
@@ -153,7 +153,7 @@ export class LedgerController implements SharedController {
       }
     })
 
-    return currencyFromRecord(record)
+    return recordToCurrency(record)
 
   }
   /**
@@ -161,24 +161,19 @@ export class LedgerController implements SharedController {
    */
   async getCurrencies(): Promise<Currency[]> {
     const records = await this.privilegedDb().currency.findMany()
-    const currencies = records.map(r => currencyFromRecord(r))
+    const currencies = records.map(r => recordToCurrency(r))
     return currencies
   }
-  private async currencyRecord(code: string) {
-    const record = await this.tenantDb(code).currency.findUnique({
-      where: { code }
-    })
-    if (!record) {
-      throw notFound(`Currency with code ${code} not found.`)
-    }
-    return record
-  }
+
   /**
    * Implements {@link SharedController.getCurrency}
    */
   async getCurrency(code: string): Promise<Currency> {
-    const record = await this.currencyRecord(code)
-    return currencyFromRecord(record)
+    const record = await this.tenantDb(code).currency.findUnique({where: { code }})
+    if (!record) {
+      throw notFound(`Currency with code ${code} not found.`)
+    }
+    return recordToCurrency(record)
   }
 
   async currencyExists(code: string): Promise<boolean> {
@@ -211,12 +206,11 @@ export class LedgerController implements SharedController {
   }
 
   async getCurrencyController(code: string): Promise<LedgerCurrencyController> {
-    const record = await this.currencyRecord(code)
-    const currency = currencyFromRecord(record)
+    const currency = await this.getCurrency(code)
     const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency))
     const db = this.tenantDb(code)
-    const encryptionKey = () => this.retrieveKey(code, record.encryptionKeyId)
-    return new LedgerCurrencyController(this, record, ledgerCurrency, db, encryptionKey, this.sponsorKey)
+    const encryptionKey = () => this.retrieveKey(code, currency.encryptionKey)
+    return new LedgerCurrencyController(currency, ledgerCurrency, db, encryptionKey, this.sponsorKey)
   }
 }
 

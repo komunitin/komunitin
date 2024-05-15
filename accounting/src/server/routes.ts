@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import { Validators } from './validation';
-import { checkExact, matchedData, validationResult } from 'express-validator';
-import { Currency, inputCurrencyFromApi } from '../model/currency';
+import { check, checkExact, matchedData, validationResult } from 'express-validator';
+import { Currency } from '../model/currency';
 import { Account } from "../model/account"
 import { SharedController } from '../controller';
 import { Serializer } from 'ts-japi';
@@ -36,11 +36,10 @@ export function getRoutes(controller: SharedController) {
   })
 
   // Create currency
-  router.post('/currencies', checkExact(Validators.isCurrency('data')), asyncHandler(async (req, res) => {
+  router.post('/currencies', checkExact(Validators.isCreateCurrency('data')), asyncHandler(async (req, res) => {
     validationResult(req).throw()
     const data = matchedData(req)
-    const inputCurrency = inputCurrencyFromApi(data)
-    const currency = await controller.createCurrency(inputCurrency)
+    const currency = await controller.createCurrency(data.attributes)
     // Serialize currency to JSON:API
     const result = await currencySerializer.serialize(currency)
     res.status(200).json(result)
@@ -56,6 +55,16 @@ export function getRoutes(controller: SharedController) {
   // Get currency
   router.get('/:code/currency', asyncHandler(async (req,res) => {
     const currency = await controller.getCurrency(req.params.code)
+    const result = await currencySerializer.serialize(currency)
+    res.status(200).json(result)
+  }))
+
+  // Update currency
+  router.patch('/:code/currency', (req) => checkExact(Validators.isUpdateCurrency('data')), asyncHandler(async (req, res) => {
+    validationResult(req).throw()
+    const data = matchedData(req)
+    const currencyController = await controller.getCurrencyController(req.params.code)
+    const currency = await currencyController.update(data.attributes)
     const result = await currencySerializer.serialize(currency)
     res.status(200).json(result)
   }))
@@ -86,6 +95,8 @@ export function getRoutes(controller: SharedController) {
     const result = await accountSerializer.serialize(accounts)
     res.status(200).json(result)
   }))
+
+
 
   return router
 
