@@ -1,5 +1,5 @@
 import { Asset, Horizon, Keypair, Operation } from "@stellar/stellar-sdk"
-import { KeyPair, LedgerAccount, LedgerTransfer, PathQuote } from "../ledger"
+import { LedgerAccount, LedgerTransfer, PathQuote } from "../ledger"
 import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
 import { logger } from "../../utils/logger"
@@ -61,6 +61,45 @@ export class StellarAccount implements LedgerAccount {
       .toString()
   }
 
+  /**
+   *  Implements LedgerAccount.updateCredit()
+   */
+  async updateCredit(amount: string, keys: {
+    account?: Keypair,
+    credit?: Keypair,
+    sponsor: Keypair
+  }) {
+    const currentCredit = await this.credit()
+    if (!Big(amount).eq(currentCredit)) {
+      const diff = Big(amount).sub(currentCredit)
+      if (diff.lt(0)) {
+        if (!keys.account) {
+          throw internalError("Required account key when reducing the credit")
+        }
+        await this.pay({
+          payeePublicKey: this.currency.data.creditPublicKey,
+          amount: diff.abs().toString()
+        }, {
+          account: keys.account,
+          sponsor: keys.sponsor
+        })
+      } else {
+        if (!keys.credit) {
+          throw internalError("Required credit key when increasing the credit")
+        }
+        const credit = await this.currency.creditAccount()
+        await credit.pay({
+          payeePublicKey: this.stellarAccount().accountId(),
+          amount: diff.toString()
+        }, {
+          sponsor: keys.sponsor,
+          account: keys.credit
+        })
+      }
+    }
+    return amount
+  }
+
   maximumBalance() : string {
     const asset = this.currency.asset()
     const balance = this.stellarBalance(asset)
@@ -110,8 +149,8 @@ export class StellarAccount implements LedgerAccount {
    * Implements {@link LedgerAccount.delete }
    */
   async delete(keys: {
-    admin: KeyPair,
-    sponsor: KeyPair
+    admin: Keypair,
+    sponsor: Keypair
   }) {
     const builder = this.currency.ledger.transactionBuilder(this)
     // Send all the balance to the credit account.

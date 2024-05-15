@@ -17,7 +17,7 @@ model Currency {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   id       String @id @default(uuid())
 
-  status   String @default("new") @db.VarChar(31)
+  status String @default("new") @db.VarChar(31)
 
   code       String @unique @db.VarChar(31)
   name       String @db.VarChar(255)
@@ -37,7 +37,7 @@ model Currency {
   updated DateTime @updatedAt
 
   // EncryptionKey
-  encryptionKeyId     String @unique @db.VarChar(255)
+  encryptionKeyId String @unique @db.VarChar(255)
 
   // Currency keys
   issuerKeyId         String? @unique @db.VarChar(255)
@@ -53,13 +53,13 @@ model Currency {
   externalIssuerKey EncryptedSecret? @relation("externalIssuer", fields: [externalIssuerKeyId], references: [id])
   externalTraderKey EncryptedSecret? @relation("externalTrader", fields: [externalTraderKeyId], references: [id])
 
-  accounts Account[]
+  accounts Account[] @relation()
 }
 
 model Account {
-  tenantId   String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
-  id         String @id @default(uuid())
-  code       String @unique @db.VarChar(255)
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+  id       String @id @default(uuid())
+  code     String @unique @db.VarChar(255)
 
   keyId      String @unique @db.VarChar(255)
   currencyId String
@@ -74,6 +74,26 @@ model Account {
 
   key      EncryptedSecret @relation(fields: [keyId], references: [id])
   currency Currency        @relation(fields: [currencyId], references: [id])
+
+  payerTransfers Transfer[] @relation("payer")
+  payeeTransfers Transfer[] @relation("payee")
+}
+
+model Transfer {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+  id       String @id @default(uuid())
+
+  state  String @default("new") @db.VarChar(31)
+  meta   String @db.Text
+  amount Int
+
+  hash String? @db.VarChar(255)
+
+  payerId String
+  payer   Account @relation("payer", fields: [payerId], references: [id])
+
+  payeeId String
+  payee   Account @relation("payee", fields: [payeeId], references: [id])
 }
 
 model EncryptedSecret {
@@ -87,7 +107,7 @@ model EncryptedSecret {
   accessed  DateTime @default(now())
 
   // These are required by prisma, but we don't use them
-  account                Account?
+  account                Account?  @relation
   encryptionCurrency     Currency? @relation("encryption")
   issuerCurrency         Currency? @relation("issuer")
   creditCurrency         Currency? @relation("credit")

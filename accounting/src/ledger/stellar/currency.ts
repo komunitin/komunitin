@@ -13,10 +13,10 @@ export class StellarCurrency implements LedgerCurrency {
    * In case there is no defined maximum balance for the external trader account,
    * this is the default for the initial balance in hours for this account.
    */
-  static DEFAULT_EXTERNAL_TRADER_INITIAL_BALANCE = "1000"
+  static DEFAULT_EXTERNAL_TRADER_INITIAL_CREDIT = "1000"
 
   ledger: StellarLedger
-  config: LedgerCurrencyConfig & {defaultInitialBalance: string}
+  config: LedgerCurrencyConfig & {defaultInitialCredit: string}
   data: LedgerCurrencyData
 
   // Registry of currency accounts. This way we are sure we are not instantiating
@@ -29,7 +29,7 @@ export class StellarCurrency implements LedgerCurrency {
   constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData) {
     this.ledger = ledger
     const defaultConfig = {
-      defaultInitialBalance: "0",
+      defaultInitialCredit: "0",
       defaultMaximumBalance: undefined
     }
     this.config = {...defaultConfig, ...config}
@@ -289,7 +289,7 @@ export class StellarCurrency implements LedgerCurrency {
     // 2. Credit account.
     this.createAccountTransaction(builder, {
       publicKey: this.data.creditPublicKey,
-      initialBalance: "0",
+      initialCredit: "0",
       maximumBalance: undefined
     })
     // 2.1 Initially fund credit account
@@ -303,7 +303,7 @@ export class StellarCurrency implements LedgerCurrency {
     // 3. Admin account
     this.createAccountTransaction(builder, {
       publicKey: this.data.adminPublicKey,
-      initialBalance: "0",
+      initialCredit: "0",
       maximumBalance: undefined
     })
 
@@ -315,7 +315,7 @@ export class StellarCurrency implements LedgerCurrency {
    * Creates the necessary accounts and trustlines for the currency to be able to exchange with 
    * other komunitin currencies in the Stellar network.
    * 
-   * Give the credit key only if this.config.externalTraderInitialBalance is not zero.
+   * Give the credit key only if this.config.externalTraderInitialCredit is not zero.
    * @param keys 
    */
   async installGateway(keys: {
@@ -349,7 +349,7 @@ export class StellarCurrency implements LedgerCurrency {
     // 2.0 Create external trader with local currency balance.
     this.createAccountTransaction(builder, {
       publicKey: this.data.externalTraderPublicKey,
-      initialBalance: this.config.externalTraderInitialBalance ?? "0",
+      initialCredit: this.config.externalTraderInitialCredit ?? "0",
       maximumBalance: this.config.externalTraderMaximumBalance
     })
     // Add additional properties to external trader.
@@ -373,12 +373,12 @@ export class StellarCurrency implements LedgerCurrency {
       }))
     }
     // 2.3 Add passive sell offer for incomming payments (hour => asset).
-    if (this.config.externalTraderInitialBalance && Big(this.config.externalTraderInitialBalance).gt(0)) {
+    if (this.config.externalTraderInitialCredit && Big(this.config.externalTraderInitialCredit).gt(0)) {
       builder.addOperation(Operation.createPassiveSellOffer({
         source: this.data.externalTraderPublicKey,
         selling: this.asset(),
         buying: this.hour(),
-        amount: this.config.externalTraderInitialBalance,
+        amount: this.config.externalTraderInitialCredit,
         price: this.config.rate
       }))
     }
@@ -410,10 +410,10 @@ export class StellarCurrency implements LedgerCurrency {
    * This function assures that the current balance of the external trader is not less than
    * the starting balance. This starting balance is computed as follows:
    *  - If externalTraderMaximumBalance is defined, it is the difference between this value and
-   *   the externalTraderInitialBalance expressed in hours. Since hours are needed in exchange
+   *   the externalTraderInitialCredit expressed in hours. Since hours are needed in exchange
    *   for local currency.
    * - If externalTraderMaximumBalance is not defined, the starting balance is just the 
-   *   constant {@link StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_BALANCE}.
+   *   constant {@link StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_CREDIT}.
    */
   public async fundExternalTrader(keys: {
     sponsor: Keypair,
@@ -444,10 +444,10 @@ export class StellarCurrency implements LedgerCurrency {
     if (this.config.externalTraderMaximumBalance) {
       return this.fromLocalToHour(
         Big(this.config.externalTraderMaximumBalance)
-        .minus(this.config.externalTraderInitialBalance ?? 0)
+        .minus(this.config.externalTraderInitialCredit ?? 0)
         .toString())
     } else {
-      return StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_BALANCE
+      return StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_CREDIT
     }
   }
 
@@ -484,7 +484,7 @@ export class StellarCurrency implements LedgerCurrency {
   // in local currency of 100 HOURs.
   private creditAccountStartingBalance(): string {
     const nAccounts = 100
-    const defaultCredits = Big(this.config.defaultInitialBalance ?? 0).times(nAccounts) 
+    const defaultCredits = Big(this.config.defaultInitialCredit ?? 0).times(nAccounts) 
     const baseHours = 100
     const base = this.fromHourToLocal(baseHours.toString())
     return (defaultCredits + base).toString()
@@ -492,14 +492,14 @@ export class StellarCurrency implements LedgerCurrency {
 
   /**
    * Adds the necessary operations to t to create a new account with a trustline to this local currency 
-   * with limit config.maximumBalance and optionally an initial payment of config.initialBalance from 
+   * with limit config.maximumBalance and optionally an initial payment of config.initialCredit from 
    * the credit account. Note that this transaction will need to be signed by the sponsor, the new account,
-   * the issuer and optionally the credit account if config.initialBalance > 0.
+   * the issuer and optionally the credit account if config.initialCredit > 0.
    * 
    * @param t The transaction builder.
    * @param config Account parameters.
    */
-  private createAccountTransaction(t: TransactionBuilder, config: {publicKey: string, initialBalance: string, maximumBalance?: string, adminSigner?: string}) {
+  private createAccountTransaction(t: TransactionBuilder, config: {publicKey: string, initialCredit: string, maximumBalance?: string, adminSigner?: string}) {
     const sponsorPublicKey = this.ledger.sponsorPublicKey.publicKey()
     const asset = this.asset()
 
@@ -552,12 +552,12 @@ export class StellarCurrency implements LedgerCurrency {
     }))
 
     // Add initial funding.
-    if (Big(config.initialBalance).gt(0)) {
+    if (Big(config.initialCredit).gt(0)) {
       t.addOperation(Operation.payment({
         source: this.data.creditPublicKey,
         destination: config.publicKey,
         asset,
-        amount: config.initialBalance
+        amount: config.initialCredit
       }))
     }
     
@@ -568,13 +568,13 @@ export class StellarCurrency implements LedgerCurrency {
   async createAccount(keys: {
     sponsor: Keypair
     issuer: Keypair,
-    credit?: Keypair, // Only if defaultInitialBalance > 0
+    credit?: Keypair, // Only if defaultInitialCredit > 0
   }): Promise<{key: Keypair}> {
-    if (keys.credit && Big(this.config.defaultInitialBalance).eq(0)) {
-      throw internalError("Credit key not allowed if defaultInitialBalance is 0.")
+    if (keys.credit && Big(this.config.defaultInitialCredit).eq(0)) {
+      throw internalError("Credit key not allowed if defaultInitialCredit is 0")
     }
-    if (!keys.credit && Big(this.config.defaultInitialBalance).gt(0)) {
-      throw internalError("Credit key required if defaultInitialBalance is positive.")
+    if (!keys.credit && Big(this.config.defaultInitialCredit).gt(0)) {
+      throw internalError("Credit key required if defaultInitialCredit is positive")
     }
     // Create keypair.
     const account = Keypair.random()
@@ -583,7 +583,7 @@ export class StellarCurrency implements LedgerCurrency {
 
     this.createAccountTransaction(builder, {
       publicKey: account.publicKey(),
-      initialBalance: this.config.defaultInitialBalance,
+      initialCredit: this.config.defaultInitialCredit,
       maximumBalance: this.config.defaultMaximumBalance,
       adminSigner: this.data.adminPublicKey
     })

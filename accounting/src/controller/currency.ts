@@ -1,6 +1,6 @@
 import { LedgerCurrency } from "../ledger";
 import { CurrencyController } from ".";
-import { Account, InputAccount, accountFromRecord } from "../model/account";
+import { Account, InputAccount, UpdateAccount, recordToAccount } from "../model/account";
 import { TenantPrismaClient } from "./multitenant";
 import { Keypair } from "@stellar/stellar-sdk";
 import { decrypt, encrypt } from "src/utils/crypto";
@@ -9,6 +9,7 @@ import { CreateCurrency, Currency, UpdateCurrency, currencyToRecord, recordToCur
 import { badRequest, notFound, notImplemented } from "src/utils/error";
 import { CollectionOptions } from "src/server/request";
 import { whereFilter } from "./filter";
+import { InputTransfer, Transfer } from "src/model";
 
 /**
  * Return the Key id (= the public key).
@@ -38,6 +39,13 @@ export class LedgerCurrencyController implements CurrencyController {
     this.ledger = ledger
     this.encryptionKey = encryptionKey
     this.sponsorKey = sponsorKey
+  }
+
+  creditKey() {
+    return this.retrieveKey(this.model.keys?.credit as string)
+  }
+  adminKey() {
+    return this.retrieveKey(this.model.keys?.admin as string)
   }
 
   async update(currency: UpdateCurrency) {
@@ -73,7 +81,7 @@ export class LedgerCurrencyController implements CurrencyController {
     // get required keys from DB.
     const keys = {
       issuer: await this.retrieveKey(this.model.keys?.issuer as string),
-      credit: this.model.defaultCreditLimit > 0 ? await this.retrieveKey(this.model.keys?.credit as string) : undefined,
+      credit: this.model.defaultCreditLimit > 0 ? await this.creditKey() : undefined,
       sponsor: await this.sponsorKey()
     }
     // Create account in ledger
@@ -84,14 +92,49 @@ export class LedgerCurrencyController implements CurrencyController {
     const record = await this.db.account.create({
       data: {
         code,
-        keyId,
         creditLimit: this.model.defaultCreditLimit,
         maximumBalance: this.model.defaultMaximumBalance,
         balance: 0,
-        currencyId: this.model.id
+
+        currency: { connect: { id: this.model.id } },
+        key: { connect: { id: keyId } }
       }
     })
-    return accountFromRecord(record, this.model)
+    return recordToAccount(record, this.model)
+  }
+
+  async updateAccount(data: UpdateAccount): Promise<Account> {
+    const account = await this.getAccount(data.id)
+    // code, creditLimit and maximumBalance can be updated
+    if (data.code && data.code !== account.code) {
+      const existing = await this.getAccountByCode(data.code)
+      if (existing) {
+        throw badRequest(`Code ${data.code} is already in use`)
+      }
+      if (!data.code.startsWith(this.model.code)) {
+        throw badRequest(`Code must start with ${this.model.code}`)
+      }
+    }
+    // Update credit limit
+    if (data.creditLimit && data.creditLimit !== account.creditLimit) {
+      const ledgerAccount = await this.ledger.getAccount(account.key)
+      await ledgerAccount.updateCredit(String(data.creditLimit), {
+        sponsor: await this.sponsorKey(),
+        credit: data.creditLimit > account.creditLimit ? await this.creditKey() : undefined,
+        account: data.creditLimit < account.creditLimit ? await this.adminKey() : undefined
+      })
+    }
+    // Update maximum balance
+    if (data.maximumBalance && data.maximumBalance !== account.maximumBalance) {
+      throw notImplemented("Updating maximum balance not implemented")
+    }
+    // Update db.
+    const updated = await this.db.account.update({
+      data,
+      where: {id: account.id}
+    })
+
+    return recordToAccount(updated, this.model)
   }
 
   /**
@@ -102,22 +145,22 @@ export class LedgerCurrencyController implements CurrencyController {
       where: { id }
     })
     if (!record) {
-      throw notFound(`Account id ${id} not found in currency ${this.model.code}.`)
+      throw notFound(`Account id ${id} not found in currency ${this.model.code}`)
     }
-    return accountFromRecord(record, this.model)
+    return recordToAccount(record, this.model)
   }
 
   /**
    * Implements {@link CurrencyController.getAccountByCode}
    */
-  async getAccountByCode(code: string): Promise<Account> {
+  async getAccountByCode(code: string): Promise<Account|undefined> {
     const record = await this.db.account.findUnique({
       where: { code }
     })
     if (!record) {
-      throw notFound(`Account code ${code} not found in currency ${this.model.code}.`)
+      return undefined
     }
-    return accountFromRecord(record, this.model)
+    return recordToAccount(record, this.model)
   }
 
   async getAccounts(params: CollectionOptions): Promise<Account[]> {
@@ -136,7 +179,60 @@ export class LedgerCurrencyController implements CurrencyController {
       take: params.pagination.size,
     })
 
-    return records.map(r => accountFromRecord(r, this.model))
+    return records.map(r => recordToAccount(r, this.model))
+  }
+
+  /**
+   * Implements CurrencyController.createTransfer()
+   */
+  async createTransfer(data: InputTransfer): Promise<Transfer> {
+    // Check id. Allow for user-defined ids, but check for duplicates.
+    if (data.id) {
+      const existing = await this.db.transfer.findUnique({where: {id: data.id}})
+      if (existing) {
+        throw badRequest(`Transfer with id ${data.id} already exists`)
+      }
+    }
+    if (!["new", "committed"].includes(data.state)) {
+      throw badRequest(`Invalid transfer state ${data.state}`)
+    }
+    if (data.amount <= 0) {
+      throw badRequest("Transfer amount must be positive")
+    }
+    if (!data.payerId) {
+      throw badRequest("Payer account id is required")
+    }
+    if (!data.payeeId) {
+      throw badRequest("Payee account id is required")
+    }
+    if (data.payerId == data.payeeId) {
+      throw badRequest("Payer and payee must be different")
+    }
+    // Already throw if not found.
+    const payer = await this.getAccount(data.payerId)
+    const payee = await this.getAccount(data.payeeId)
+    // Check that both accounts are in the same currency (although that should be the case due to DB RLS).
+    if (payer.currency.id !== payee.currency.id) {
+      throw badRequest("Payer and payee must be in the same currency")
+    }
+    // Create the transaction in the DB
+    const record = await this.db.transfer.create({
+      data: {
+        id: data.id,
+        state: "new",
+        amount: data.amount,
+        meta: data.meta,
+        payer: { connect: { id: payer.id } },
+        payee: { connect: { id: payee.id } }
+      }
+    })
+    let transfer = recordToTransfer(record)
+    
+    if (data.state === "committed") {
+      transfer = await this.submitTransfer(data)
+    }
+
+    return transfer
   }
 
   private async getFreeCode() {

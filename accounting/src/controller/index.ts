@@ -1,7 +1,6 @@
 
 import { CollectionOptions } from "../server/request";
-import { Account, InputAccount } from "../model/account";
-import { CreateCurrency, Currency, UpdateCurrency } from "../model/currency";
+import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount } from "../model";
 export { createController } from "./controller";
 /**
  * Controller for operations not related to a particular currency.
@@ -17,8 +16,14 @@ export interface SharedController {
  */
 export interface CurrencyController {
   update(currency: UpdateCurrency): Promise<Currency>
+  
+  // Accounts
   createAccount(account: InputAccount): Promise<Account>
-  getAccount(id: string): Promise<Account>
-  getAccountByCode(code: string): Promise<Account>
   getAccounts(params: CollectionOptions): Promise<Account[]>
+  getAccount(id: string): Promise<Account>
+  getAccountByCode(code: string): Promise<Account|undefined>
+  updateAccount(data: UpdateAccount): Promise<Account>;
+  
+  // Transfers
+  createTransfer(transfer: InputTransfer): Promise<Transfer>
 }

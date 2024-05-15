@@ -77,6 +77,7 @@ export const decrypt = async (encrypted: string, key: KeyObject) => {
 export const exportKey = (key: KeyObject) => {
   return key.export().toString("hex")
 }
+
 export const importKey = (key: String) => {
   return createSecretKey(Buffer.from(key, "hex"))
 }

@@ -229,7 +229,7 @@ export class StellarLedger implements Ledger {
       issuer: keys.issuer,
       externalIssuer: keys.externalIssuer,
       externalTrader: keys.externalTrader,
-      credit: Big(config.externalTraderInitialBalance ?? 0).gt(0) ? keys.credit : undefined,
+      credit: Big(config.externalTraderInitialCredit ?? 0).gt(0) ? keys.credit : undefined,
     })
 
     logger.info({publicKeys: data}, `Created new currency ${config.code}`)
