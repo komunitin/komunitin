@@ -21,7 +21,7 @@ export const deriveKey = async (password: string, salt: string) => {
  */
 export const randomKey = async () => {
   return new Promise<KeyObject>((resolve, reject) => {
-    generateKey('aes', {length: 64}, (err, key) => {
+    generateKey('aes', {length: 256}, (err, key) => {
       if (err) {
         reject(err)
       } else {
