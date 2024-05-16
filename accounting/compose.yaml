@@ -8,6 +8,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_APP_USER: user
+      POSTGRES_DB: postgres
+      POSTGRES_APP_USER: accounting
       POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-password}
-      POSTGRES_DB: komunitin_accounting
+      

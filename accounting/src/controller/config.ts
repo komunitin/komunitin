@@ -2,9 +2,10 @@ import dotenv from "dotenv"
 import { badConfig } from "../utils/error"
 
 export const loadConfig = () => {
+  // Read .env file
   dotenv.config()
 
-  // build configuration object
+  // Build configuration object
   const config = {
     STELLAR_NETWORK: (process.env.STELLAR_NETWORK || "testnet") as "testnet" | "local" | "public",
     STELLAR_HORIZON_URL: process.env.STELLAR_HORIZON_URL ||  "https://horizon-testnet.stellar.org",
