@@ -9,7 +9,7 @@ import { CreateCurrency, Currency, UpdateCurrency, currencyToRecord, recordToCur
 import { badRequest, notFound, notImplemented } from "src/utils/error";
 import { CollectionOptions } from "src/server/request";
 import { whereFilter } from "./filter";
-import { InputTransfer, Transfer } from "src/model";
+import { InputTransfer, Transfer, TransferState, recordToTransfer } from "src/model";
 
 /**
  * Return the Key id (= the public key).
@@ -226,14 +226,59 @@ export class LedgerCurrencyController implements CurrencyController {
         payee: { connect: { id: payee.id } }
       }
     })
-    let transfer = recordToTransfer(record)
+    let transfer = recordToTransfer(record, {payer,payee})
     
     if (data.state === "committed") {
-      transfer = await this.submitTransfer(data)
+      transfer = await this.setTransferState(transfer, "committed")
     }
 
     return transfer
   }
+
+  /**
+   * Moves the transfer to the specified state. This function does not check authorisation.
+   * @returns 
+   */
+  private async setTransferState(transfer: Transfer, state: TransferState) {
+    // "new" | "accepted" => "committed" | "failed"
+    if (state == "committed" && ["new", "accepted"].includes(transfer.state)) {
+      transfer.state = "submitted"
+      try {
+        const transaction = await this.submitTransfer(transfer)
+        transfer.hash = transaction.hash
+        transfer.state = "committed"
+      } catch (e) {
+        transfer.state = "failed"
+        throw e
+      } finally {
+        await this.db.transfer.update({
+          data: {
+            state: transfer.state,
+            hash: transfer.hash
+          },
+          where: {id: transfer.id}
+        })
+      }
+    }
+    else {
+      throw notImplemented(`Transition from "${transfer.state}" to "${state}" not implemented`)
+    }
+    
+    return transfer
+  }
+
+  private async submitTransfer(transfer: Transfer) {
+    const ledgerPayer = await this.ledger.getAccount(transfer.payer.key)
+    const transaction = await ledgerPayer.pay({
+      payeePublicKey: transfer.payee.key,
+      amount: String(transfer.amount),
+    }, {
+      sponsor: await this.sponsorKey(),
+      account: await this.retrieveKey(transfer.payer.key)
+    })
+    return transaction
+  }
+
 
   private async getFreeCode() {
     // We look for the maximum code of type "CODE1234", so we can have other codes ("CODESpecial").

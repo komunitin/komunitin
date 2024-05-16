@@ -84,8 +84,8 @@ model Transfer {
   id       String @id @default(uuid())
 
   state  String @default("new") @db.VarChar(31)
-  meta   String @db.Text
   amount Int
+  meta   String @db.Text
 
   hash String? @db.VarChar(255)
 
@@ -94,6 +94,9 @@ model Transfer {
 
   payeeId String
   payee   Account @relation("payee", fields: [payeeId], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
 }
 
 model EncryptedSecret {

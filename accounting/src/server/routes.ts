@@ -135,7 +135,6 @@ export function getRoutes(controller: SharedController) {
   // Get account settings
   // Update account settings
 
-
   // Create transfer
   router.post(':code/transfers', checkExact(Validators.isCreateTransfer()), asyncHandler(async (req, res) => {
     validationResult(req).throw()
