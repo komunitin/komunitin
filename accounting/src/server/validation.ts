@@ -26,8 +26,6 @@ export namespace Validators {
   ]
 
   const isCurrencyCreateAttributesExist = (path: string) => [
-    body(`${path}.type`).equals("currencies"),
-    body(`${path}.id`).not().exists(),
     // Mandatory attributes.
     body(`${path}.code`).exists(),
     body(`${path}.name`).exists(),

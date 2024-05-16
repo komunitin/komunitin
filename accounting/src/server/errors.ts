@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger";
 import { KError, badRequest, fieldValidationError, internalError } from "../utils/error"
 import type { ErrorRequestHandler } from "express";
 
@@ -45,6 +46,7 @@ const getKError = (error: any): KError => {
 }
 
 export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  logger.error(err)
   const kerror = getKError(err)
   const errorObj = errorObject(kerror)
   res.status(kerror.getStatus()).json(errorObj)

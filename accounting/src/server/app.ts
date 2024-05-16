@@ -17,6 +17,13 @@ export async function createApp() {
   app.use(express.json({
     type: ['application/vnd.api+json', 'application/json']
   }))
+
+  app.use((req, res, next) => {
+    // The res.json function will add a "charset=utf-8" to this content type
+    // header. This is annoying because it's not needed, but lets keep it.
+    res.type('application/vnd.api+json')
+    next()
+  })
   //logger
   app.use(httpLogger)
 
