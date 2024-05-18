@@ -8,9 +8,9 @@
 		"bundle": "esbuild src/index.ts --bundle --sourcemap --platform=node --outdir=bundle",
 		"start": "node --enable-source-maps bundle/index.js",
 		"dev": "tsx --watch src/index.ts",
-		"test": "tsx --test test/**/*.ts",
 		"test-ledger": "tsx --test test/ledger/*.ts",
-		"test-server": "prisma migrate reset --force && tsx --test test/server/*.ts"
+		"test-server": "prisma migrate reset --force && tsx --test test/server/*.ts",
+		"test": "prisma migrate reset --force && tsx --test test/**/*.ts"
 	},
 	"dependencies": {
 		"@prisma/client": "5.13.0",
