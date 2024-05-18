@@ -2,7 +2,8 @@ services:
   db:
     build:
       context: ./docker/db
-    restart: always
+    container_name: db
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
@@ -11,4 +12,11 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_APP_USER: accounting
       POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-password}
-      
+  stellar:
+    image: stellar/quickstart
+    container_name: stellar
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      NETWORK: local

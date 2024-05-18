@@ -1,5 +1,5 @@
 import { Asset, Operation, AuthRequiredFlag, AuthRevocableFlag, AuthClawbackEnabledFlag, AuthFlag, TransactionBuilder, Keypair, Horizon } from "@stellar/stellar-sdk"
-import { LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData, PathQuote } from "../ledger"
+import { LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData, LedgerCurrencyState, PathQuote } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarLedger } from "./ledger"
 import Big from "big.js"
@@ -18,15 +18,16 @@ export class StellarCurrency implements LedgerCurrency {
   ledger: StellarLedger
   config: LedgerCurrencyConfig & {defaultInitialCredit: string}
   data: LedgerCurrencyData
+  state: LedgerCurrencyState
 
   // Registry of currency accounts. This way we are sure we are not instantiating
   // the same account twice and hence we won't have seq number issues.
   private accounts: Record<string, Promise<StellarAccount>>
 
-  // Registry of Horizon stream connection closers.
-  private streams: (() => void)[]
+  // Stream connection close function for external trades listener.
+  private externalTradesStream?: () => void
 
-  constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData) {
+  constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState) {
     this.ledger = ledger
     const defaultConfig = {
       defaultInitialCredit: "0",
@@ -34,45 +35,55 @@ export class StellarCurrency implements LedgerCurrency {
     }
     this.config = {...defaultConfig, ...config}
     this.data = data
+    this.state = state
     this.accounts = {}
-    this.streams = []
 
     // Input checking.
     if (this.config.code.match(/^[A-Z0-9]{4}$/) === null) {
       throw badRequest("Invalid currency code")
     }
   }
-  
+
   public start() {
-    const stream = this.ledger.server.trades()
+    this.externalTradesStream = this.ledger.server.trades()
       .forAccount(this.data.externalTraderPublicKey)
-      .cursor('now')
+      .cursor(this.state.externalTradesStreamCursor)
       .stream({
       // The arrow notation is used to preserve the context of the class.
       onmessage: (page) => {
         logger.debug({page}, `Received horizon external trade event for currency ${this.config.code}`)
         // Looks like the typings are not correct and message is a TradeRecord intstead of a CollectionPage<TradeRecord>
         const record = page as unknown as Horizon.ServerApi.TradeRecord
-        if (record.trade_type) {
-          this.handleExternalTradeEvent(record)
+        this.handleExternalTradeEvent(record)
           .catch((error) => {
             this.ledger.emitter.emit("error", error)
           })
-        } else {
-          throw internalError("Unexpected trade message", page)
-        }
+          .finally(() => {
+            this.state.externalTradesStreamCursor = record.paging_token
+            this.ledger.emitter.emit("stateUpdated", this, this.state)
+          })
       },
       onerror: (error) => {
+        // "throw" error
         this.ledger.emitter.emit("error", error)
-      }
+        // Close stream & reconnect.
+        this.closeExternalTradesStream()
+        this.start()
+      },
+      reconnectTimeout: 5*60*1000 // 5 min
     })
-    this.streams.push(stream)
+    logger.info(`Listening external trades for currency ${this.config.code}`)
   }
 
   public stop() {
     // Close all horizon stream connections.
-    for (const close of this.streams) {
-      close()
+    this.closeExternalTradesStream()
+  }
+
+  private closeExternalTradesStream() {
+    if (this.externalTradesStream) {
+      this.externalTradesStream()
+      this.externalTradesStream = undefined
     }
   }
 

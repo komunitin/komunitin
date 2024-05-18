@@ -1,5 +1,6 @@
 import dotenv from "dotenv"
 import { badConfig } from "../utils/error"
+import { Config } from "@stellar/stellar-sdk"
 
 export const loadConfig = () => {
   // Read .env file
@@ -28,6 +29,9 @@ export const loadConfig = () => {
   if (!["testnet", "local", "public"].includes(config.STELLAR_NETWORK)) {
     throw badConfig("Invalid STELLAR_NETWORK config")
   }
-
+  // Allow plain http connections to Stellar Horizon server in local network.
+  if (config.STELLAR_NETWORK === "local") {
+    Config.setAllowHttp(config.STELLAR_HORIZON_URL.startsWith("http://"))
+  }
   return config
 }

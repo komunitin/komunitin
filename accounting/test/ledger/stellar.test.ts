@@ -5,11 +5,12 @@ import { Ledger, LedgerCurrency, LedgerCurrencyKeys, PathQuote } from "../../src
 import { StellarLedger } from "../../src/ledger/stellar"
 import { Keypair } from "@stellar/stellar-sdk"
 import { installDefaultListeners } from "src/ledger/listener"
-import { TestConfig } from "test/config"
 import { friendbot } from "src/ledger/stellar/friendbot"
+import { loadConfig } from "src/controller/config"
+import { logger } from "src/utils/logger"
 
 
-//logger.level = "debug"
+logger.level = "debug"
 
 /**
  * Test the Stellar ledger implementation using the real Stellar testnet.
@@ -29,13 +30,14 @@ describe('Creates stellar elements', async () => {
 
   before(async() => {
     // Create and fund a sponsor account.
+    const config = loadConfig()
     sponsor = Keypair.random()
-    await friendbot(TestConfig.STELLAR_FRIENDBOT_URL, sponsor.publicKey())
+    await friendbot(config.STELLAR_FRIENDBOT_URL, sponsor.publicKey())
 
     // Instantiate the ledger.
     ledger = new StellarLedger({
-      server: TestConfig.STELLAR_HORIZON_URL,
-      network: TestConfig.STELLAR_NETWORK,
+      server: config.STELLAR_HORIZON_URL,
+      network: config.STELLAR_NETWORK,
       sponsorPublicKey: sponsor.publicKey(),
       domain: "example.com"
     })
@@ -66,7 +68,7 @@ describe('Creates stellar elements', async () => {
       creditPublicKey: currencyKeys.credit.publicKey(),
       externalIssuerPublicKey: currencyKeys.externalIssuer.publicKey(),
       externalTraderPublicKey: currencyKeys.externalTrader.publicKey()
-    })
+    }, {externalTradesStreamCursor: "0"})
     
     assert.notEqual(currency,undefined)
 
@@ -118,7 +120,7 @@ describe('Creates stellar elements', async () => {
     // Create a second currency.
     const config = {
       code: "TES2",
-      rate: {n: 1, d: 2}, // 1TES2 ? 0.5 HOUR
+      rate: {n: 1, d: 2}, // 1TES2 = 0.5 HOUR
       defaultInitialCredit: "1000",
       externalTraderInitialCredit: "10000"
     } 
@@ -129,6 +131,8 @@ describe('Creates stellar elements', async () => {
       creditPublicKey: currency2Keys.credit.publicKey(),
       externalIssuerPublicKey: currency2Keys.externalIssuer.publicKey(),
       externalTraderPublicKey: currency2Keys.externalTrader.publicKey()
+    }, {
+      externalTradesStreamCursor: "0"
     })
     
     await assert.doesNotReject(currency2.trustCurrency({
@@ -185,8 +189,10 @@ describe('Creates stellar elements', async () => {
     assert.equal(account2.balance(),"1005.0000000")
 
     // Now the currency 2 has a surplus of 1.5 hours, so they can buy to currency 
-    // 1 members even if currency 1 has not trusted currency 2.
-    
+    // 1 members even if currency 1 has not trusted currency 2. We need to wait,
+    // however, for the trade offers to be set.
+    // For some unknown reason, the standalone stellar server may take up to 1
+    // minute to stream the trade offers, so we wait for them.
     const promise = new Promise<void>((resolve, reject) => {
       const fn = async () => {
         try {

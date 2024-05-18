@@ -1,6 +1,6 @@
 import { Networks, Horizon, Keypair, TransactionBuilder, BASE_FEE, Transaction, Memo, MemoType, Operation, NetworkError, FeeBumpTransaction } from "@stellar/stellar-sdk"
 import { sleep } from "../../utils/sleep"
-import { Ledger, LedgerCurrencyConfig, LedgerCurrencyKeys, LedgerCurrencyData, LedgerEvents } from "../ledger"
+import { Ledger, LedgerCurrencyConfig, LedgerCurrencyKeys, LedgerCurrencyData, LedgerEvents, LedgerCurrencyState } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarCurrency } from "./currency"
 import Big from "big.js"
@@ -50,7 +50,7 @@ export class StellarLedger implements Ledger {
   constructor(config: StellarLedgerConfig) {
     const networks = {
       testnet: Networks.TESTNET,
-      local: Networks.TESTNET,
+      local: Networks.STANDALONE,
       public: Networks.PUBLIC
     }
     this.server = new Horizon.Server(config.server)
@@ -215,7 +215,7 @@ export class StellarLedger implements Ledger {
       externalTraderPublicKey: keys.externalTrader.publicKey()
     }
 
-    const currency = new StellarCurrency(this, config, data)
+    const currency = new StellarCurrency(this, config, data, {externalTradesStreamCursor: "0"})
     
     await currency.install({
       sponsor,
@@ -239,9 +239,9 @@ export class StellarLedger implements Ledger {
   /**
    * Implements {@link Ledger.getCurrency}
    */
-  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): StellarCurrency {
+  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState): StellarCurrency {
     if (!this.currencies[data.issuerPublicKey]) {
-      this.currencies[data.issuerPublicKey] = new StellarCurrency(this, config, data)
+      this.currencies[data.issuerPublicKey] = new StellarCurrency(this, config, data, state)
       this.currencies[data.issuerPublicKey].start()
     }
     return this.currencies[data.issuerPublicKey]

@@ -92,6 +92,14 @@ export type LedgerCurrencyData = {
 }
 
 /**
+ * Some data to be updated when running the currency and to 
+ * be persisted between runs.
+ */
+export type LedgerCurrencyState = {
+  externalTradesStreamCursor: string
+}
+
+/**
  * Event types.
  */
 export type LedgerEvents = {
@@ -119,7 +127,8 @@ export type LedgerEvents = {
       amount: string
       created: boolean
     }) => Promise<void>
-
+  
+  stateUpdated: (currency: LedgerCurrency, state: LedgerCurrencyState) => Promise<void>
   /**
    * Called if there is an error in the event handlers.
    * @param error 
@@ -138,7 +147,7 @@ export interface Ledger {
   /**
    * Get a currency object from the configuration and data.
    */
-  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): LedgerCurrency
+  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState): LedgerCurrency
   /**
    * Registers a listener for the specified event.
    * 
