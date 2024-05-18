@@ -1,4 +1,5 @@
 
+import { LedgerCurrencyState } from "../ledger";
 import { Rate } from "../utils/types";
 import { Currency as CurrencyRecord, Prisma } from "@prisma/client"
 
@@ -32,6 +33,8 @@ export interface Currency {
 
   encryptionKey: string
 
+  state: LedgerCurrencyState
+
   created: Date
   updated: Date
 }
@@ -53,7 +56,9 @@ export function currencyToRecord(currency: CreateCurrency | UpdateCurrency): Pri
     rateN: currency.rate?.n,
     rateD: currency.rate?.d,
     defaultCreditLimit: currency.defaultCreditLimit,
-    defaultMaximumBalance: currency.defaultMaximumBalance ?? null
+    defaultMaximumBalance: currency.defaultMaximumBalance ?? null,
+    
+    externalTradesStreamCursor: currency.state?.externalTradesStreamCursor,
   }
 }
 
@@ -78,6 +83,9 @@ export const recordToCurrency = (record: CurrencyRecord): Currency => {
       externalIssuer: record.externalIssuerKeyId as string
     } : undefined,
     encryptionKey: record.encryptionKeyId,
+    state: {
+      externalTradesStreamCursor: record.externalTradesStreamCursor
+    },
     created: record.created,
     updated: record.updated,
   }

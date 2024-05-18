@@ -1,4 +1,4 @@
-import { LedgerCurrency } from "../ledger";
+import { LedgerCurrency, LedgerCurrencyState } from "../ledger";
 import { CurrencyController } from ".";
 import { Account, InputAccount, UpdateAccount, recordToAccount } from "../model/account";
 import { TenantPrismaClient } from "./multitenant";
@@ -44,15 +44,18 @@ export class LedgerCurrencyController implements CurrencyController {
   creditKey() {
     return this.retrieveKey(this.model.keys?.credit as string)
   }
+  externalTraderKey() {
+    return this.retrieveKey(this.model.keys?.externalTrader as string)
+  }
   adminKey() {
     return this.retrieveKey(this.model.keys?.admin as string)
   }
 
   async update(currency: UpdateCurrency) {
-    if (currency.code !== this.model.code) {
+    if (currency.code && currency.code !== this.model.code) {
       throw badRequest("Can't change currency code")
     }
-    if (currency.id !== this.model.id) {
+    if (currency.id && currency.id !== this.model.id) {
       throw badRequest("Can't change currency id")
     }
     if (currency.rate && (currency.rate.n !== this.model.rate.n || currency.rate.d !== this.model.rate.d)) {
@@ -70,6 +73,14 @@ export class LedgerCurrencyController implements CurrencyController {
     })
     this.model = recordToCurrency(record)
     return this.model
+  }
+
+  async updateState(state: LedgerCurrencyState) {
+    await this.db.currency.update({
+      data: { ...state },
+      where: { id: this.model.id }
+    })
+    this.model.state = state
   }
 
   /**

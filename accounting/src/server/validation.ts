@@ -3,7 +3,7 @@ import { body } from "express-validator"
 export namespace Validators {
   const jsonApiResource = (path: string, type: string) => [
     body(`${path}`).isObject(),
-    body(`${path}.type`).isString().equals(type),
+    body(`${path}.type`).optional().isString().equals(type),
     body(`${path}.id`).optional().isString().notEmpty(),
     body(`${path}.attributes`).optional().isObject(),
     body(`${path}.attributes.id`).not().exists(),
@@ -35,7 +35,8 @@ export namespace Validators {
     body(`${path}.scale`).exists(),
     body(`${path}.rate`).exists(),
     body(`${path}.rate.n`).exists(),
-    body(`${path}.rate.d`).exists()
+    body(`${path}.rate.d`).exists(),
+    body(`${path}.defaultCreditLimit`).default(0)
   ]
 
   export const isCreateCurrency = () => [

@@ -46,6 +46,9 @@ model Currency {
   externalIssuerKeyId String? @unique @db.VarChar(255)
   externalTraderKeyId String? @unique @db.VarChar(255)
 
+  // Currency state vars
+  externalTradesStreamCursor String  @db.VarChar(255) @default("0")
+
   encryptionKey     EncryptedSecret? @relation("encryption", fields: [encryptionKeyId], references: [id])
   issuerKey         EncryptedSecret? @relation("issuer", fields: [issuerKeyId], references: [id])
   creditKey         EncryptedSecret? @relation("credit", fields: [creditKeyId], references: [id])

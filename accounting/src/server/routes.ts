@@ -91,7 +91,7 @@ export function getRoutes(controller: SharedController) {
     validationResult(req).throw()
     const data = inputData(req)
     const currencyController = await controller.getCurrencyController(req.params.code)
-    const currency = await currencyController.update(data.data.attributes)
+    const currency = await currencyController.update(data)
     const result = await currencySerializer.serialize(currency)
     res.status(200).json(result)
   }))

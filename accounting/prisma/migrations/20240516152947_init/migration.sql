@@ -21,6 +21,7 @@ CREATE TABLE "Currency" (
     "adminKeyId" VARCHAR(255),
     "externalIssuerKeyId" VARCHAR(255),
     "externalTraderKeyId" VARCHAR(255),
+    "externalTradesStreamCursor" VARCHAR(255) NOT NULL DEFAULT '0',
 
     CONSTRAINT "Currency_pkey" PRIMARY KEY ("id")
 );

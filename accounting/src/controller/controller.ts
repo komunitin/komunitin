@@ -1,6 +1,6 @@
 import { PrismaClient, Currency as CurrencyRecord } from "@prisma/client"
 import { Keypair } from "@stellar/stellar-sdk"
-import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, createStellarLedger } from "../ledger"
+import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, LedgerCurrencyState, createStellarLedger } from "../ledger"
 import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
 import { SharedController } from "."
 import { friendbot } from "../ledger/stellar/friendbot"
@@ -11,6 +11,7 @@ import { CreateCurrency, Currency, recordToCurrency, currencyToRecord } from "..
 import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
 import { LedgerCurrencyController, storeCurrencyKey } from "./currency"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
+import { installDefaultListeners } from "src/ledger/listener"
 
 export async function createController(): Promise<SharedController> {
   const config = loadConfig()
@@ -54,8 +55,9 @@ export async function createController(): Promise<SharedController> {
     sponsorPublicKey: sponsor.publicKey(),
     domain: config.DOMAIN
   })
-
+  
   const db = new PrismaClient()
+
   return new LedgerController(ledger, db, masterKey, sponsorKey)
 }
 
@@ -85,6 +87,10 @@ const currencyData = (currency: Currency): LedgerCurrencyData => {
   }
 }
 
+const currencyState = (currency: Currency): LedgerCurrencyState => {
+  return currency.state
+}
+
 export class LedgerController implements SharedController {
   
   ledger: Ledger
@@ -97,6 +103,17 @@ export class LedgerController implements SharedController {
     this._db = db
     this.sponsorKey = sponsorKey
     this.masterKey = masterKey
+    installDefaultListeners(ledger, async (currency, state) => {
+        const code = currency.asset().code
+        const controller = await this.getCurrencyController(code)
+        await controller.updateState(state)
+      },
+      sponsorKey,
+      async (currency) => {
+        const code = currency.asset().code
+        const controller = await this.getCurrencyController(code)
+        return controller.externalTraderKey()
+      })
   }
 
   privilegedDb(): PrivilegedPrismaClient {
@@ -210,9 +227,14 @@ export class LedgerController implements SharedController {
     return importKey(secret)
   }
 
+  async stop() {
+    await this.ledger.stop()
+    await this._db.$disconnect()
+  }
+
   async getCurrencyController(code: string): Promise<LedgerCurrencyController> {
     const currency = await this.getCurrency(code)
-    const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency))
+    const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency), currencyState(currency))
     const db = this.tenantDb(code)
     const encryptionKey = () => this.retrieveKey(code, currency.encryptionKey)
     return new LedgerCurrencyController(currency, ledgerCurrency, db, encryptionKey, this.sponsorKey)

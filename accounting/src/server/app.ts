@@ -1,12 +1,13 @@
 import express from "express"
 import { getRoutes } from "./routes"
-import { createController } from "../controller"
+import { SharedController, createController } from "../controller"
 import { errorHandler } from "./errors"
 import { httpLogger } from "../utils/logger"
 import qs from "qs"
 
-export async function createApp() {
-  const app = express()
+export type ExpressExtended = express.Express & { komunitin: { controller: SharedController } }
+export async function createApp() : Promise<ExpressExtended> {
+  const app = express() as ExpressExtended
   app.set('query parser', (query: string) => {
     return qs.parse(query, {
       // parse comma-separated values into arrays.
@@ -29,12 +30,18 @@ export async function createApp() {
 
   // Routes
   const controller = await createController()
+  app.komunitin = { controller }
   app.use("/", getRoutes(controller))
+  
 
   // Error handlers
   app.use(errorHandler)
 
   return app
+}
+
+export const closeApp = async (app: ExpressExtended) => {
+  await app.komunitin.controller.stop()
 }
 
 

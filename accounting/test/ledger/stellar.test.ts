@@ -43,7 +43,7 @@ describe('Creates stellar elements', async () => {
     })
 
     // Add the listeners.
-    installDefaultListeners(ledger, async() => sponsor, async(currency) => {
+    installDefaultListeners(ledger, async () => {}, async() => sponsor, async(currency) => {
       // Get the privatey keys for the external trader accounts.
       return currency.asset().code == "TEST" ? currencyKeys.externalTrader : currency2Keys.externalTrader
     })
