@@ -6,7 +6,7 @@ import { Keypair } from "@stellar/stellar-sdk";
 import { decrypt, encrypt } from "src/utils/crypto";
 import type {KeyObject} from "node:crypto"
 import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency } from "src/model/currency";
-import { badRequest, forbidden, notFound, notImplemented } from "src/utils/error";
+import { badRequest, forbidden, internalError, notFound, notImplemented } from "src/utils/error";
 import { CollectionOptions } from "src/server/request";
 import { whereFilter } from "./filter";
 import { InputTransfer, Transfer, TransferState, recordToTransfer } from "src/model";
@@ -97,7 +97,10 @@ export class LedgerCurrencyController implements CurrencyController {
   /**
    * Implements {@link CurrencyController.createAccount}
    */
-  async createAccount(account: InputAccount): Promise<Account> {
+  async createAccount(ctx: Context, account: InputAccount): Promise<Account> {
+    if (ctx.userId === undefined) {
+      throw internalError("User id is required")
+    }
     // Find next free account code.
     const code = await this.getFreeCode()
     // get required keys from DB.
@@ -119,8 +122,14 @@ export class LedgerCurrencyController implements CurrencyController {
         balance: 0,
 
         currency: { connect: { id: this.model.id } },
-        key: { connect: { id: keyId } }
-      }
+        key: { connect: { id: keyId } },
+        users: {
+          connectOrCreate: {
+            where: { id: ctx.userId },
+            create: { id: ctx.userId }
+          }
+        }
+      },
     })
     return recordToAccount(record, this.model)
   }

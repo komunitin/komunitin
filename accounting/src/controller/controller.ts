@@ -191,7 +191,7 @@ export class LedgerController implements SharedController {
   /**
    * Implements {@link SharedController.getCurrencies}
    */
-  async getCurrencies(): Promise<Currency[]> {
+  async getCurrencies(ctx: Context): Promise<Currency[]> {
     const records = await this.privilegedDb().currency.findMany()
     const currencies = records.map(r => recordToCurrency(r))
     return currencies
@@ -204,7 +204,7 @@ export class LedgerController implements SharedController {
     return this.loadCurrency(code)
   }
 
-  async loadCurrency(code: string): Promise<Currency> {
+  private async loadCurrency(code: string): Promise<Currency> {
     const record = await this.tenantDb(code).currency.findUnique({where: { code }})
     if (!record) {
       throw notFound(`Currency with code ${code} not found`)
