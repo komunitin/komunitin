@@ -5,11 +5,12 @@ import { TenantPrismaClient } from "./multitenant";
 import { Keypair } from "@stellar/stellar-sdk";
 import { decrypt, encrypt } from "src/utils/crypto";
 import type {KeyObject} from "node:crypto"
-import { CreateCurrency, Currency, UpdateCurrency, currencyToRecord, recordToCurrency } from "src/model/currency";
-import { badRequest, notFound, notImplemented } from "src/utils/error";
+import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency } from "src/model/currency";
+import { badRequest, forbidden, notFound, notImplemented } from "src/utils/error";
 import { CollectionOptions } from "src/server/request";
 import { whereFilter } from "./filter";
 import { InputTransfer, Transfer, TransferState, recordToTransfer } from "src/model";
+import { Context } from "src/utils/context";
 
 /**
  * Return the Key id (= the public key).
@@ -51,7 +52,17 @@ export class LedgerCurrencyController implements CurrencyController {
     return this.retrieveKey(this.model.keys?.admin as string)
   }
 
-  async update(currency: UpdateCurrency) {
+  private async user(ctx: Context) {
+    return await this.db.user.findUniqueOrThrow({where: {id: ctx.userId}})
+  }
+
+  async update(ctx: Context, currency: UpdateCurrency) {
+    // Only currency owner can update it.
+    const user = await this.user(ctx)
+    if (user.id != this.model.userId) {
+      throw forbidden("Only the currency owner can update it")
+    }
+
     if (currency.code && currency.code !== this.model.code) {
       throw badRequest("Can't change currency code")
     }
@@ -114,11 +125,11 @@ export class LedgerCurrencyController implements CurrencyController {
     return recordToAccount(record, this.model)
   }
 
-  async updateAccount(data: UpdateAccount): Promise<Account> {
-    const account = await this.getAccount(data.id)
+  async updateAccount(ctx: Context, data: UpdateAccount): Promise<Account> {
+    const account = await this.getAccount(ctx, data.id)
     // code, creditLimit and maximumBalance can be updated
     if (data.code && data.code !== account.code) {
-      const existing = await this.getAccountByCode(data.code)
+      const existing = await this.getAccountByCode(ctx, data.code)
       if (existing) {
         throw badRequest(`Code ${data.code} is already in use`)
       }
@@ -151,7 +162,7 @@ export class LedgerCurrencyController implements CurrencyController {
   /**
    * Implements {@link CurrencyController.getAccount}
    */
-  async getAccount(id: string): Promise<Account> {
+  async getAccount(ctx: Context, id: string): Promise<Account> {
     const record = await this.db.account.findUnique({
       where: { id }
     })
@@ -164,7 +175,7 @@ export class LedgerCurrencyController implements CurrencyController {
   /**
    * Implements {@link CurrencyController.getAccountByCode}
    */
-  async getAccountByCode(code: string): Promise<Account|undefined> {
+  async getAccountByCode(ctx: Context, code: string): Promise<Account|undefined> {
     const record = await this.db.account.findUnique({
       where: { code }
     })
@@ -174,7 +185,7 @@ export class LedgerCurrencyController implements CurrencyController {
     return recordToAccount(record, this.model)
   }
 
-  async getAccounts(params: CollectionOptions): Promise<Account[]> {
+  async getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]> {
     // Allow filtering by code and by id.
     const filter = whereFilter(params.filters)
     
@@ -196,7 +207,7 @@ export class LedgerCurrencyController implements CurrencyController {
   /**
    * Implements CurrencyController.createTransfer()
    */
-  async createTransfer(data: InputTransfer): Promise<Transfer> {
+  async createTransfer(ctx: Context, data: InputTransfer): Promise<Transfer> {
     // Check id. Allow for user-defined ids, but check for duplicates.
     if (data.id) {
       const existing = await this.db.transfer.findUnique({where: {id: data.id}})
@@ -220,8 +231,8 @@ export class LedgerCurrencyController implements CurrencyController {
       throw badRequest("Payer and payee must be different")
     }
     // Already throw if not found.
-    const payer = await this.getAccount(data.payerId)
-    const payee = await this.getAccount(data.payeeId)
+    const payer = await this.getAccount(ctx, data.payerId)
+    const payee = await this.getAccount(ctx, data.payeeId)
     // Check that both accounts are in the same currency (although that should be the case due to DB RLS).
     if (payer.currency.id !== payee.currency.id) {
       throw badRequest("Payer and payee must be in the same currency")

@@ -1,6 +1,7 @@
 import { logger } from "../utils/logger";
-import { KError, badRequest, fieldValidationError, internalError } from "../utils/error"
+import { KError, badRequest, fieldValidationError, forbidden, internalError, unauthorized } from "../utils/error"
 import type { ErrorRequestHandler } from "express";
+import { UnauthorizedError } from "express-oauth2-jwt-bearer"
 
 // JSON Api error object.
 interface ErrorObject {
@@ -36,6 +37,17 @@ const getKError = (error: any): KError => {
       return fieldValidationError(`Field ${first.path} is invalid in request ${first.location}.`, error.errors)
     } else {
       return badRequest(error.msg, error.errors)
+    }
+  // authorization errors
+  } else if (error instanceof UnauthorizedError) {
+    if (error.status === 400) {
+      return badRequest(error.message, error)
+    } else if (error.status === 401) {
+      return unauthorized(error.message)
+    } else if (error.status === 403) {
+      return forbidden(error.message)
+    } else {
+      return internalError(error.message, error)
     }
   // general unexpected errors
   } else if (error instanceof Error) {

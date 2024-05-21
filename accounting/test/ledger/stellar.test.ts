@@ -6,7 +6,7 @@ import { StellarLedger } from "../../src/ledger/stellar"
 import { Keypair } from "@stellar/stellar-sdk"
 import { installDefaultListeners } from "src/ledger/listener"
 import { friendbot } from "src/ledger/stellar/friendbot"
-import { loadConfig } from "src/controller/config"
+import { config } from "src/config"
 import { logger } from "src/utils/logger"
 
 
@@ -30,7 +30,6 @@ describe('Creates stellar elements', async () => {
 
   before(async() => {
     // Create and fund a sponsor account.
-    const config = loadConfig()
     sponsor = Keypair.random()
     await friendbot(config.STELLAR_FRIENDBOT_URL, sponsor.publicKey())
 

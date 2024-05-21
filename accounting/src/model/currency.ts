@@ -37,6 +37,8 @@ export interface Currency {
 
   created: Date
   updated: Date
+
+  userId: string
 }
 
 export type CreateCurrency = Omit<Currency, "id" | "status" | "created" | "updated" | "encryptionKey" | "keys">
@@ -86,6 +88,7 @@ export const recordToCurrency = (record: CurrencyRecord): Currency => {
     state: {
       externalTradesStreamCursor: record.externalTradesStreamCursor
     },
+    userId: record.userId,
     created: record.created,
     updated: record.updated,
   }

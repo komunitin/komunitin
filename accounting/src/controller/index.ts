@@ -2,13 +2,15 @@
 import { CollectionOptions } from "../server/request";
 import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer } from "../model";
 export { createController } from "./controller";
+import { Context } from "../utils/context";
 /**
  * Controller for operations not related to a particular currency.
  */
 export interface SharedController {
-  createCurrency(currency: CreateCurrency): Promise<Currency>
-  getCurrencies(): Promise<Currency[]>
-  getCurrency(code: string): Promise<Currency | undefined>
+  createCurrency(ctx: Context, currency: CreateCurrency): Promise<Currency>
+  getCurrencies(ctx: Context): Promise<Currency[]>
+  getCurrency(ctx: Context, code: string): Promise<Currency>
+
   getCurrencyController(code: string): Promise<CurrencyController>
   stop(): Promise<void>
 }
@@ -16,15 +18,16 @@ export interface SharedController {
  * Controller for operations related to a particular currency.
  */
 export interface CurrencyController {
-  update(currency: UpdateCurrency): Promise<Currency>
+  // Currency
+  update(ctx: Context, currency: UpdateCurrency): Promise<Currency>
   
   // Accounts
-  createAccount(account: InputAccount): Promise<Account>
-  getAccounts(params: CollectionOptions): Promise<Account[]>
-  getAccount(id: string): Promise<Account>
-  getAccountByCode(code: string): Promise<Account|undefined>
-  updateAccount(data: UpdateAccount): Promise<Account>;
+  createAccount(ctx: Context, account: InputAccount): Promise<Account>
+  getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]>
+  getAccount(ctx: Context, id: string): Promise<Account>
+  getAccountByCode(ctx: Context, code: string): Promise<Account|undefined>
+  updateAccount(ctx: Context, data: UpdateAccount): Promise<Account>;
   
   // Transfers
-  createTransfer(transfer: InputTransfer): Promise<Transfer>
+  createTransfer(ctx: Context, transfer: InputTransfer): Promise<Transfer>
 }

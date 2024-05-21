@@ -5,15 +5,18 @@ import { errorHandler } from "./errors"
 import { httpLogger } from "../utils/logger"
 import qs from "qs"
 
+
 export type ExpressExtended = express.Express & { komunitin: { controller: SharedController } }
 export async function createApp() : Promise<ExpressExtended> {
   const app = express() as ExpressExtended
+  app.disable('x-powered-by')
   app.set('query parser', (query: string) => {
     return qs.parse(query, {
       // parse comma-separated values into arrays.
       comma: true
     })
   })
+
   // Express middlewares
   app.use(express.json({
     type: ['application/vnd.api+json', 'application/json']

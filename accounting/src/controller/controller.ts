@@ -5,16 +5,16 @@ import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "..
 import { SharedController } from "."
 import { friendbot } from "../ledger/stellar/friendbot"
 import { logger } from "../utils/logger"
-import { loadConfig } from "./config"
+import { config } from "../config"
 import { KeyObject } from "node:crypto"
 import { CreateCurrency, Currency, recordToCurrency, currencyToRecord } from "../model/currency"
-import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
+import { badConfig, badRequest, internalError, notFound, unauthorized } from "src/utils/error"
 import { LedgerCurrencyController, storeCurrencyKey } from "./currency"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
 import { installDefaultListeners } from "src/ledger/listener"
+import { Context } from "src/utils/context"
 
 export async function createController(): Promise<SharedController> {
-  const config = loadConfig()
   // Master symmetric key for encrypting secrets.
   const masterPassword = config.MASTER_PASSWORD
   let masterKeyObject: KeyObject
@@ -124,10 +124,14 @@ export class LedgerController implements SharedController {
     return tenantDb(this._db, tenantId)
   }
 
-  async createCurrency(currency: CreateCurrency): Promise<Currency> {
+  async createCurrency(ctx: Context, currency: CreateCurrency): Promise<Currency> {
     // Validate input beyond syntactic validation.
     if (await this.currencyExists(currency.code)) {
       throw badRequest(`Currency with code ${currency.code} already exists`)
+    }
+    if (ctx.userId === undefined) {
+      // This should not happen as the middleware checks it.
+      throw internalError("User ID not provided in context")
     }
     // Create and save a symmetric encryption key for this currency:
     const currencyKey = await this.storeKey(currency.code, await randomKey())
@@ -143,6 +147,12 @@ export class LedgerController implements SharedController {
         encryptionKey: {
           connect: {
             id: currencyKey.id
+          }
+        },
+        user: {
+          connectOrCreate: {
+            where: { id: ctx.userId },
+            create: { id: ctx.userId }
           }
         }
       },
@@ -190,7 +200,11 @@ export class LedgerController implements SharedController {
   /**
    * Implements {@link SharedController.getCurrency}
    */
-  async getCurrency(code: string): Promise<Currency> {
+  async getCurrency(ctx: Context, code: string): Promise<Currency> {
+    return this.loadCurrency(code)
+  }
+
+  async loadCurrency(code: string): Promise<Currency> {
     const record = await this.tenantDb(code).currency.findUnique({where: { code }})
     if (!record) {
       throw notFound(`Currency with code ${code} not found`)
@@ -233,7 +247,7 @@ export class LedgerController implements SharedController {
   }
 
   async getCurrencyController(code: string): Promise<LedgerCurrencyController> {
-    const currency = await this.getCurrency(code)
+    const currency = await this.loadCurrency(code)
     const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency), currencyState(currency))
     const db = this.tenantDb(code)
     const encryptionKey = () => this.retrieveKey(code, currency.encryptionKey)

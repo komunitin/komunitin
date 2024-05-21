@@ -1,7 +1,18 @@
 -- CreateTable
+CREATE TABLE "User" (
+    "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
+    "id" TEXT NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Currency" (
     "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
     "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "status" VARCHAR(31) NOT NULL DEFAULT 'new',
     "code" VARCHAR(31) NOT NULL,
     "name" VARCHAR(255) NOT NULL,
@@ -71,6 +82,12 @@ CREATE TABLE "EncryptedSecret" (
     CONSTRAINT "EncryptedSecret_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "_AccountToUser" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Currency_code_key" ON "Currency"("code");
 
@@ -97,6 +114,15 @@ CREATE UNIQUE INDEX "Account_code_key" ON "Account"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_keyId_key" ON "Account"("keyId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_AccountToUser_AB_unique" ON "_AccountToUser"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_AccountToUser_B_index" ON "_AccountToUser"("B");
+
+-- AddForeignKey
+ALTER TABLE "Currency" ADD CONSTRAINT "Currency_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Currency" ADD CONSTRAINT "Currency_encryptionKeyId_fkey" FOREIGN KEY ("encryptionKeyId") REFERENCES "EncryptedSecret"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -127,3 +153,9 @@ ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_payerId_fkey" FOREIGN KEY ("paye
 
 -- AddForeignKey
 ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_payeeId_fkey" FOREIGN KEY ("payeeId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_AccountToUser" ADD CONSTRAINT "_AccountToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_AccountToUser" ADD CONSTRAINT "_AccountToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

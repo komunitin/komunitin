@@ -6,7 +6,9 @@ export enum KErrorCode {
   InternalError = "InternalError",
   BadTransaction = "BadTransaction",
   NotImplemented = "NotImplemented",
-  FieldValidationError = "FieldValidationError"
+  FieldValidationError = "FieldValidationError",
+  Unauthorized = "Unauthorized",
+  Forbidden = "Forbidden"
 }
 
 const errorDefinitions: Record<KErrorCode, [number, string]> = {
@@ -16,7 +18,9 @@ const errorDefinitions: Record<KErrorCode, [number, string]> = {
   [KErrorCode.BadConfig]: [500, "Bad Configuration"],
   [KErrorCode.NotImplemented]: [500, "Not Implemented"],
   [KErrorCode.InternalError]: [500, "Internal Error"],
-  [KErrorCode.FieldValidationError]: [400, "Field validation Error"]
+  [KErrorCode.FieldValidationError]: [400, "Field validation Error"],
+  [KErrorCode.Unauthorized]: [401, "Unauthorized"],
+  [KErrorCode.Forbidden]: [403, "Forbidden"]
 } as const
 
 const status = (code: KErrorCode) => errorDefinitions[code][0]
@@ -48,3 +52,5 @@ export const notFound = (message: string) => new KError(KErrorCode.NotFound, mes
 export const notImplemented = (message: string, cause?: unknown) => new KError(KErrorCode.NotImplemented, message, { cause })
 export const badTransaction = (message: string, cause?: unknown) => new KError(KErrorCode.BadTransaction, message, { cause })
 export const fieldValidationError = (message: string, cause?: unknown) => new KError(KErrorCode.FieldValidationError, message, { cause })
+export const unauthorized = (message: string) => new KError(KErrorCode.Unauthorized, message)
+export const forbidden = (message: string) => new KError(KErrorCode.Forbidden, message)

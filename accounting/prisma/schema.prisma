@@ -13,9 +13,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+  id       String @id
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  // User accounts
+  accounts Account[] @relation()
+  // Only for currency admins
+  currency Currency[] @relation()
+}
+
 model Currency {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   id       String @id @default(uuid())
+
+  userId   String
+  user     User @relation(fields: [userId], references: [id])
 
   status String @default("new") @db.VarChar(31)
 
@@ -66,6 +82,8 @@ model Account {
 
   keyId      String @unique @db.VarChar(255)
   currencyId String
+
+  users     User[] @relation()
 
   // These three fields are just a cache from the Stellar network.
   balance        Int
