@@ -4,7 +4,8 @@ import { SharedController, createController } from "../controller"
 import { errorHandler } from "./errors"
 import { httpLogger } from "../utils/logger"
 import qs from "qs"
-
+import helmet from "helmet"
+import cors from "cors"
 
 export type ExpressExtended = express.Express & { komunitin: { controller: SharedController } }
 export async function createApp() : Promise<ExpressExtended> {
@@ -16,6 +17,11 @@ export async function createApp() : Promise<ExpressExtended> {
       comma: true
     })
   })
+  
+  // Add some security headers.
+  app.use(helmet())
+  // Add CORS so this API can be called from any domain.
+  app.use(cors())
 
   // Express middlewares
   app.use(express.json({
