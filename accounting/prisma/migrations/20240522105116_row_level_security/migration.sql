@@ -24,4 +24,4 @@ CREATE POLICY bypass_rls_policy ON "Currency" USING (current_setting('app.bypass
 CREATE POLICY bypass_rls_policy ON "EncryptedSecret" USING (current_setting('app.bypass_rls', TRUE)::text = 'on');
 CREATE POLICY bypass_rls_policy ON "Account" USING (current_setting('app.bypass_rls', TRUE)::text = 'on');
 CREATE POLICY bypass_rls_policy ON "Transfer" USING (current_setting('app.bypass_rls', TRUE)::text = 'on');
-CREATE POLICY bypass_rls_policy ON "User" USING ("tenantId" = current_setting('app.current_tenant_id', TRUE)::text);
+CREATE POLICY bypass_rls_policy ON "User" USING (current_setting('app.bypass_rls', TRUE)::text = 'on');

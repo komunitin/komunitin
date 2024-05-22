@@ -6,3 +6,4 @@
 export * from "./currency"
 export * from "./account"
 export * from "./transfer"
+export * from "./user"

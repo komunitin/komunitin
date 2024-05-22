@@ -12,7 +12,6 @@ CREATE TABLE "User" (
 CREATE TABLE "Currency" (
     "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
     "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
     "status" VARCHAR(31) NOT NULL DEFAULT 'new',
     "code" VARCHAR(31) NOT NULL,
     "name" VARCHAR(255) NOT NULL,
@@ -33,6 +32,7 @@ CREATE TABLE "Currency" (
     "externalIssuerKeyId" VARCHAR(255),
     "externalTraderKeyId" VARCHAR(255),
     "externalTradesStreamCursor" VARCHAR(255) NOT NULL DEFAULT '0',
+    "adminId" TEXT NOT NULL,
 
     CONSTRAINT "Currency_pkey" PRIMARY KEY ("id")
 );
@@ -122,7 +122,7 @@ CREATE UNIQUE INDEX "_AccountToUser_AB_unique" ON "_AccountToUser"("A", "B");
 CREATE INDEX "_AccountToUser_B_index" ON "_AccountToUser"("B");
 
 -- AddForeignKey
-ALTER TABLE "Currency" ADD CONSTRAINT "Currency_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Currency" ADD CONSTRAINT "Currency_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Currency" ADD CONSTRAINT "Currency_encryptionKeyId_fkey" FOREIGN KEY ("encryptionKeyId") REFERENCES "EncryptedSecret"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

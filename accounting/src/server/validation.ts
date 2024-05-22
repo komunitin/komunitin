@@ -1,14 +1,24 @@
 import { body } from "express-validator"
 
 export namespace Validators {
-  const jsonApiResource = (path: string, type: string) => [
+  
+  const jsonApiAnyResource = (path: string) => [
     body(`${path}`).isObject(),
-    body(`${path}.type`).optional().isString().equals(type),
     body(`${path}.id`).optional().isString().notEmpty(),
     body(`${path}.attributes`).optional().isObject(),
     body(`${path}.attributes.id`).not().exists(),
     body(`${path}.attributes.type`).not().exists(),
     body(`${path}.relationships`).optional().isObject(),
+  ]
+  const jsonApiResource = (path: string, type: string) => [
+    ...jsonApiAnyResource(path),
+    body(`${path}.type`).optional().isString().equals(type),
+  ]
+
+  const jsonApiDoc = (type: string) => [
+    ...jsonApiResource("data", type),
+    body("included").optional().isArray(),
+    ...jsonApiAnyResource("included.*"),
   ]
 
   const isCurrencyUpdateAttributes = (path: string) => [
@@ -40,13 +50,13 @@ export namespace Validators {
   ]
 
   export const isCreateCurrency = () => [
-    ...jsonApiResource("data", "currencies"),
+    ...jsonApiDoc("currencies"),
     ...isCurrencyCreateAttributesExist("data.attributes"),
     ...isCurrencyUpdateAttributes("data.attributes"),
   ]
 
   export const isUpdateCurrency = () => [
-    ...jsonApiResource("data", "currencies"),
+    ...jsonApiDoc("currencies"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
     ...isCurrencyUpdateAttributes(`data.attributes`),
   ]
@@ -57,7 +67,7 @@ export namespace Validators {
   ]
 
   export const isUpdateAccount = () => [
-    ...jsonApiResource("data", "accounts"),
+    ...jsonApiDoc("accounts"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
     ...isAccountUpdateAttibutes("data.attributes")
   ]
@@ -69,7 +79,7 @@ export namespace Validators {
   ]
 
   export const isCreateTransfer = () => [
-    ...jsonApiResource("data", "transfers"),
+    ...jsonApiDoc("transfers"),
     body("data.id").optional().isUUID(), // Support client-defined UUID.
     ...isTransferCreateAttributes("data.attributes"),
     ...isTransferCreateRelationships("data.relationships")

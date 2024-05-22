@@ -57,9 +57,8 @@ export class LedgerCurrencyController implements CurrencyController {
   }
 
   async update(ctx: Context, currency: UpdateCurrency) {
-    // Only currency owner can update it.
     const user = await this.user(ctx)
-    if (user.id != this.model.userId) {
+    if (user.id != this.model.admin?.id) {
       throw forbidden("Only the currency owner can update it")
     }
 

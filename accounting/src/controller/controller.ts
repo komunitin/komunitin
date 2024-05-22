@@ -140,6 +140,14 @@ export class LedgerController implements SharedController {
     const inputRecord = currencyToRecord(currency)
     const db = this.tenantDb(currency.code)
 
+    // Use logged in user as admin if not provided.
+    const admin = currency.admin?.id ?? ctx.userId
+    // Check that the user is not already being used in other tenant.
+    const user = await this.privilegedDb().user.findUnique({where: { id: admin }})
+    if (user) {
+      throw badRequest(`User ${admin} is already being used in another tenant`)
+    }
+    
     let record = await db.currency.create({
       data: {
         ...inputRecord,
@@ -149,14 +157,13 @@ export class LedgerController implements SharedController {
             id: currencyKey.id
           }
         },
-        user: {
+        admin: {
           connectOrCreate: {
-            where: { id: ctx.userId },
-            create: { id: ctx.userId }
+            where: { id: admin },
+            create: { id: admin }
           }
         }
       },
-      
     })
 
     // Create the currency on the ledger.
