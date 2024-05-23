@@ -10,7 +10,7 @@
 		"dev": "tsx --watch src/index.ts",
 		"test-ledger": "tsx --test test/ledger/*.ts",
 		"test-server": "prisma migrate reset --force && tsx --test --test-concurrency=1 test/server/*test.ts",
-		"test": "prisma migrate reset --force && tsx --test test/**/*test.ts"
+		"test": "prisma migrate reset --force && tsx --test --test-concurrency=1 test/**/*test.ts"
 	},
 	"dependencies": {
 		"@prisma/client": "5.13.0",
