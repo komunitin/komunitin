@@ -1,5 +1,6 @@
 import { parseRawSimulation } from "@stellar/stellar-sdk/lib/soroban"
 import {Request} from "express"
+import { claimIncludes } from "express-oauth2-jwt-bearer"
 import { internalError } from "src/utils/error"
 
 // Pagination. We use the https://jsonapi.org/profiles/ethanresnick/cursor-pagination/ spec for pagination.
@@ -35,13 +36,17 @@ export const pagination = (req: Request) => {
 
 export const filters = (req: Request, fields: string[]) => {
   const filter = {} as Record<string, string | string[]>
-  for (const field of fields) {
-    const value = req.query[field]
-    // Remove unexpected field types.
-    if (typeof value === "string" || (Array.isArray(value) && value.every(v => typeof v === "string"))) {
-      filter[field] = value as string | string[]
+  if (req.query.filter) {
+    const queryFilters = req.query.filter as Record<string, string | string[]>
+    for (const field of fields) {
+      const value = queryFilters[field]
+      // Remove unexpected field types.
+      if (typeof value === "string" || (Array.isArray(value) && value.every(v => typeof v === "string"))) {
+        filter[field] = value as string | string[]
+      }
     }
   }
+  
   return filter
 }
 
@@ -71,6 +76,16 @@ export const sort = (req: Request, fields: string[], defaultDesc = false): SortO
     order: defaultDesc ? "desc" : "asc"
   }
 }
+
+export const include = (req: Request, relationships: string[]) => {
+  const include: string[] = []
+  if (typeof req.query.include == 'string') {
+    include.push(req.query.include)
+  } else if (Array.isArray(req.query.include)) {
+    include.push(...(req.query.include as string[]))
+  }
+  return relationships.filter(r => include.includes(r))
+}
 export type PaginationOptions = {
   cursor: number
   size: number
@@ -78,10 +93,14 @@ export type PaginationOptions = {
 export type FilterOptions = Record<string, string | string[]>
 export type SortOptions = Sort
 
+export type ResourceOptions = {
+  include: string[]
+}
 export type CollectionOptions = {
   pagination: PaginationOptions
   filters: FilterOptions
   sort: SortOptions
+  include: string[]
 }
 /**
  * Return the request pagination, filtering and sort parameters. 
@@ -92,20 +111,31 @@ export type CollectionOptions = {
  * ```typescript
  * const options = params(req, {
  *  filter: ["code", "id"],
- *  sort: ["code", "created", "updated"]
+ *  sort: ["code", "created", "updated"],
+ *  include: ["accounts"]
  * })
  * 
  * @param req express Request
  * @param options the filter and sort fields to allow
  * @returns 
  */
-export const params = (req: Request, options: {
-  filter: string[],
-  sort: string[]
+export const collectionParams = (req: Request, options: {
+  filter?: string[],
+  sort: string[],
+  include?: string[]
 }): CollectionOptions => {
   return {
     pagination: pagination(req),
-    filters: filters(req, options.filter),
-    sort: sort(req, options.sort)
+    filters: filters(req, options?.filter ?? []),
+    sort: sort(req, options.sort),
+    include: include(req, options?.include ?? [])
+  }
+}
+
+export const resourceParams = (req: Request, options: {
+  include?: string[]
+}): ResourceOptions => {
+  return {
+    include: include(req, options?.include ?? [])
   }
 }

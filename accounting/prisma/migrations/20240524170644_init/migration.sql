@@ -42,6 +42,7 @@ CREATE TABLE "Account" (
     "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
     "id" TEXT NOT NULL,
     "code" VARCHAR(255) NOT NULL,
+    "status" VARCHAR(31) NOT NULL DEFAULT 'active',
     "keyId" VARCHAR(255) NOT NULL,
     "currencyId" TEXT NOT NULL,
     "balance" INTEGER NOT NULL,

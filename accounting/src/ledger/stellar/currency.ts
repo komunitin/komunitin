@@ -4,7 +4,7 @@ import { StellarAccount } from "./account"
 import { StellarLedger } from "./ledger"
 import Big from "big.js"
 import { logger } from "src/utils/logger"
-import { retry } from "src/utils/sleep"
+import { retry, sleep } from "src/utils/sleep"
 import { badRequest, internalError } from "src/utils/error"
 
 export class StellarCurrency implements LedgerCurrency {
@@ -45,34 +45,47 @@ export class StellarCurrency implements LedgerCurrency {
   }
 
   public start() {
-    this.externalTradesStream = this.ledger.server.trades()
+    const onmessage = (page: unknown) => {
+      logger.debug({page}, `Received horizon external trade event for currency ${this.config.code}`)
+      // Looks like the typings are not correct and message is a TradeRecord intstead of a CollectionPage<TradeRecord>
+      const record = page as Horizon.ServerApi.TradeRecord
+      this.handleExternalTradeEvent(record)
+        .catch((error) => {
+          this.ledger.emitter.emit("error", error)
+        })
+        .finally(() => {
+          this.state.externalTradesStreamCursor = record.paging_token
+          this.ledger.emitter.emit("stateUpdated", this, this.state)
+        })
+    }
+    // pause at least 5 sec between connection attempts.
+    const separationAttempt = 5000
+    let lastAttempt = 0
+
+    const listen = () => {
+      lastAttempt = Date.now()
+      this.externalTradesStream = this.ledger.server.trades()
       .forAccount(this.data.externalTraderPublicKey)
       .cursor(this.state.externalTradesStreamCursor)
       .stream({
-      // The arrow notation is used to preserve the context of the class.
-      onmessage: (page) => {
-        logger.debug({page}, `Received horizon external trade event for currency ${this.config.code}`)
-        // Looks like the typings are not correct and message is a TradeRecord intstead of a CollectionPage<TradeRecord>
-        const record = page as unknown as Horizon.ServerApi.TradeRecord
-        this.handleExternalTradeEvent(record)
-          .catch((error) => {
-            this.ledger.emitter.emit("error", error)
-          })
-          .finally(() => {
-            this.state.externalTradesStreamCursor = record.paging_token
-            this.ledger.emitter.emit("stateUpdated", this, this.state)
-          })
-      },
-      onerror: (error) => {
-        // "throw" error
-        this.ledger.emitter.emit("error", error)
-        // Close stream & reconnect.
-        this.closeExternalTradesStream()
-        this.start()
-      },
-      reconnectTimeout: 5*60*1000 // 5 min
-    })
-    logger.info(`Listening external trades for currency ${this.config.code}`)
+        // The arrow notation is used to preserve the context of the class.
+        onmessage,
+        onerror: (error) => {
+          // "throw" error
+          this.ledger.emitter.emit("error", error)
+          // Close stream
+          this.closeExternalTradesStream()
+          // If last attempt was made less than 5s ago, wait until 5s have passed
+          // and try to reconnect.
+          const fromLastAttempt = Date.now() - lastAttempt
+          if (fromLastAttempt < separationAttempt) {
+            setTimeout(listen, separationAttempt - fromLastAttempt)
+          }
+        },
+        reconnectTimeout: 5*60*1000 // 5 min
+      })
+      logger.info(`Listening external trades for currency ${this.config.code}`)
+    }
   }
 
   public stop() {

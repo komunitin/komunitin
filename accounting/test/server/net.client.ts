@@ -23,7 +23,7 @@ export function client(app: Express) {
   return {
     get: async (path: string, auth?: {user: string, scopes: Scope[]}, status: number = 200) => {
       return await completeRequest(
-        request(app).get(path),
+        request(app).get(path), 
         auth, status)
     },
     post: async (path: string, data: any, auth?: {user: string, scopes: Scope[]}, status: number = 200) => {

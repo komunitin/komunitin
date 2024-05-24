@@ -80,6 +80,8 @@ model Account {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   id       String @id @default(uuid())
   code     String @unique @db.VarChar(255)
+  
+  status   String @default("active") @db.VarChar(31)
 
   keyId      String @unique @db.VarChar(255)
   currencyId String

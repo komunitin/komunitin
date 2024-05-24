@@ -34,10 +34,13 @@ export class StellarAccount implements LedgerAccount {
   async transfers(): Promise<LedgerTransfer[]> {
     const transfers = [] as LedgerTransfer[]
     let result = await this.stellarAccount().payments({
-      limit: 20
+      limit: 20,
     })
     do {
-      transfers.push(...result.records.map((r) => ({
+      transfers
+      .push(...result.records
+      .filter((r) => r.type == "payment")
+      .map((r) => ({
         amount: r.amount,
         asset: new Asset(r.asset_code as string, r.asset_issuer),
         payer: r.from,

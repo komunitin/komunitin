@@ -17,13 +17,21 @@ export const CurrencySerializer = new Serializer<Currency>("currencies", {
   relators: {
     admins: new Relator<Currency,User>(async (currency) => {
       return currency.admin ? [currency.admin] : undefined
-    }, UserSerializer)
+    }, UserSerializer, { relatedName: "admins" })
   }
 })
 export const AccountSerializer = new Serializer<Account>("accounts", {
   version: null,
   projection: projection<Account>(['code', 'balance', 'creditLimit', 
   'maximumBalance', 'created', 'updated']),
+  relators: {
+    currency: new Relator<Account,Currency>(async (account) => {
+      return account.currency
+    }, CurrencySerializer, { relatedName: "currency" }),
+    users: new Relator<Account,User>(async (account) => {
+      return account.users
+    }, UserSerializer)
+  }
 })
 export const TransferSerializer = new Serializer<Transfer>("transfers", {
   version: null,

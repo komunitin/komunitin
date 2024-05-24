@@ -1,11 +1,18 @@
 import { AtLeast } from 'src/utils/types'
 import { Currency } from './currency'
-import { Account as AccountRecord, Prisma } from '@prisma/client'
+import { Account as AccountRecord, User as UserRecord, Prisma } from '@prisma/client'
+import { User } from './user'
+
+export enum AccountStatus {
+  Active = "active",
+  Deleted = "deleted",
+}
 
 export interface Account {
   id: string,
   code: string,
   key: string
+  status: AccountStatus
 
   created: Date
   updated: Date
@@ -15,13 +22,14 @@ export interface Account {
   creditLimit: number,
   maximumBalance?: number,
 
+  users?: User[]
   currency: Currency
   // TODO UserSettings.
   settings: undefined
 }
 
 // No input needed for creating an account (beyond implicit currency)!
-export type InputAccount = {}
+export type InputAccount = Partial<Pick<Account, "users">>
 export type UpdateAccount = AtLeast<Pick<Account, "id" | "code" | "creditLimit" | "maximumBalance">, "id">
 
 export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInput {
@@ -33,7 +41,8 @@ export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInp
   }
 }
 
-export const recordToAccount = (record: AccountRecord, currency: Currency): Account => {
+export const recordToAccount = (record: AccountRecord & {users?: UserRecord[]}, currency: Currency): Account => {
+  const users = record.users ? record.users.map(user => ({id: user.id})) : undefined;
   return {
     id: record.id,
     code: record.code,
@@ -44,6 +53,7 @@ export const recordToAccount = (record: AccountRecord, currency: Currency): Acco
     created: record.created,
     updated: record.updated,
     // Relationships
+    users,
     currency,
     settings: undefined
   }

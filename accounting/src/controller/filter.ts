@@ -2,7 +2,8 @@
 
 export const whereFilter = (filter: Record<string, string | string[]>) => {
   const where: Record<string, any> = {}
-  for (const key in Object.keys(filter)) {
+  const fields = Object.keys(filter)
+  for (const key of fields) {
     if (filter[key]) {
       if (Array.isArray(filter[key])) {
         where[key] = {

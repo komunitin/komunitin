@@ -27,6 +27,7 @@ export interface CurrencyController {
   getAccount(ctx: Context, id: string): Promise<Account>
   getAccountByCode(ctx: Context, code: string): Promise<Account|undefined>
   updateAccount(ctx: Context, data: UpdateAccount): Promise<Account>;
+  deleteAccount(ctx: Context, id: string): Promise<void>;
   
   // Transfers
   createTransfer(ctx: Context, transfer: InputTransfer): Promise<Transfer>

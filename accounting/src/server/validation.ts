@@ -3,12 +3,9 @@ import { body } from "express-validator"
 export namespace Validators {
   
   const jsonApiAnyResource = (path: string) => [
-    body(`${path}`).isObject(),
     body(`${path}.id`).optional().isString().notEmpty(),
-    body(`${path}.attributes`).optional().isObject(),
     body(`${path}.attributes.id`).not().exists(),
     body(`${path}.attributes.type`).not().exists(),
-    body(`${path}.relationships`).optional().isObject(),
   ]
   const jsonApiResource = (path: string, type: string) => [
     ...jsonApiAnyResource(path),
@@ -17,7 +14,6 @@ export namespace Validators {
 
   const jsonApiDoc = (type: string) => [
     ...jsonApiResource("data", type),
-    body("included").optional().isArray(),
     ...jsonApiAnyResource("included.*"),
   ]
 
@@ -28,7 +24,6 @@ export namespace Validators {
     body(`${path}.symbol`).optional().isString().trim().isLength({max: 3, min: 1}),
     body(`${path}.decimals`).optional().isInt({max: 8, min: 0}),
     body(`${path}.scale`).optional().isInt({max: 12, min: 0}),
-    body(`${path}.rate`).optional().isObject(),
     body(`${path}.rate.n`).optional().isInt({min: 1}).default(1),
     body(`${path}.rate.d`).optional().isInt({min: 1}).default(1),
     body(`${path}.defaultCreditLimit`).optional().isInt({min: 0}).default(0),
@@ -49,10 +44,23 @@ export namespace Validators {
     body(`${path}.defaultCreditLimit`).default(0)
   ]
 
+  const isCollectionRelationship = (path: string, name: string, type: string) => [
+    body(`${path}.relationships.${name}`).optional(),
+    body(`${path}.relationships.${name}.data.*.id`).isString().notEmpty(),
+    body(`${path}.relationships.${name}.data.*.type`).equals(type),
+  ]
+
+  const isIncludedTypes = (types: string[]) => [
+    body("included.*.type").isIn(types),
+    body("included.*.id").isString().notEmpty(),
+  ]
+
   export const isCreateCurrency = () => [
     ...jsonApiDoc("currencies"),
     ...isCurrencyCreateAttributesExist("data.attributes"),
     ...isCurrencyUpdateAttributes("data.attributes"),
+    ...isCollectionRelationship("data", "admins", "users"),
+    ...isIncludedTypes(["users"]),
   ]
 
   export const isUpdateCurrency = () => [
@@ -62,14 +70,21 @@ export namespace Validators {
   ]
 
   const isAccountUpdateAttibutes = (path: string) => [
+    body(`${path}.code`).optional(),
     body(`${path}.maximumBalance`).optional().isInt({min: 0}),
-    body(`${path}.creditLimit`).optional().isInt({min: 0})
+    body(`${path}.creditLimit`).optional().isInt({min: 0}),
   ]
 
   export const isUpdateAccount = () => [
     ...jsonApiDoc("accounts"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
     ...isAccountUpdateAttibutes("data.attributes")
+  ]
+
+  export const isCreateAccount = () => [
+    ...jsonApiDoc("accounts"),
+    ...isCollectionRelationship("data", "users", "users"),
+    ...isIncludedTypes(["users"]),
   ]
 
   const isTransferCreateAttributes = (path: string) => [

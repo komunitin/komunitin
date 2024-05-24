@@ -26,10 +26,11 @@ const mount = (data: Record<string, any>, included: Record<string, any>[] | unde
   }
 
   const resource = {
+    ...data.attributes,
+    ...relationships,
+    // overwrite undefined id and type in attributes from validation
     id: data.id,
     type: data.type,
-    ...data.attributes,
-    ...relationships
   }
 
   return resource

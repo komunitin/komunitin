@@ -9,8 +9,10 @@ import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency } from "sr
 import { badRequest, forbidden, internalError, notFound, notImplemented } from "src/utils/error";
 import { CollectionOptions } from "src/server/request";
 import { whereFilter } from "./filter";
-import { InputTransfer, Transfer, TransferState, recordToTransfer } from "src/model";
+import { InputTransfer, Transfer, TransferState, User, recordToTransfer } from "src/model";
 import { Context } from "src/utils/context";
+import { WithRequired } from "src/utils/types";
+import Big from "big.js";
 
 /**
  * Return the Key id (= the public key).
@@ -52,15 +54,35 @@ export class LedgerCurrencyController implements CurrencyController {
     return this.retrieveKey(this.model.keys?.admin as string)
   }
 
-  private async user(ctx: Context) {
-    return await this.db.user.findUniqueOrThrow({where: {id: ctx.userId}})
+  /**
+   * Check that the current user has an account in this currency.
+   * @param ctx 
+   * @returns the user object
+   */
+  private async checkUser(ctx: Context): Promise<User> {
+    // TODO: cache user object
+    const record = await this.db.user.findUnique({where: {id: ctx.userId}})
+    if (!record) {
+      throw forbidden(`User not found in currency ${this.model.code}`)
+    }
+    return {id: record.id}
+  }
+
+  /**
+   * Check that the current user is the currency owner.
+   * @param ctx 
+   * @returns the user object
+   */
+  private async checkAdmin(ctx: Context): Promise<User> {
+    const user = await this.checkUser(ctx)
+    if (user.id !== this.model.admin?.id) {
+      throw forbidden("Only the currency owner can perform this operation")
+    }
+    return user
   }
 
   async update(ctx: Context, currency: UpdateCurrency) {
-    const user = await this.user(ctx)
-    if (user.id != this.model.admin?.id) {
-      throw forbidden("Only the currency owner can update it")
-    }
+    await this.checkAdmin(ctx)
 
     if (currency.code && currency.code !== this.model.code) {
       throw badRequest("Can't change currency code")
@@ -97,9 +119,11 @@ export class LedgerCurrencyController implements CurrencyController {
    * Implements {@link CurrencyController.createAccount}
    */
   async createAccount(ctx: Context, account: InputAccount): Promise<Account> {
-    if (ctx.userId === undefined) {
-      throw internalError("User id is required")
-    }
+    // Only the currency owner can create accounts (by now).
+    const admin = await this.checkAdmin(ctx)
+    // Account owner: provided in input or current user.
+    const userIds = account.users?.map(u => u.id) ?? [admin.id]
+
     // Find next free account code.
     const code = await this.getFreeCode()
     // get required keys from DB.
@@ -123,10 +147,7 @@ export class LedgerCurrencyController implements CurrencyController {
         currency: { connect: { id: this.model.id } },
         key: { connect: { id: keyId } },
         users: {
-          connectOrCreate: {
-            where: { id: ctx.userId },
-            create: { id: ctx.userId }
-          }
+          connectOrCreate: userIds.map(id => ({where: {id}, create: {id}}))
         }
       },
     })
@@ -134,6 +155,9 @@ export class LedgerCurrencyController implements CurrencyController {
   }
 
   async updateAccount(ctx: Context, data: UpdateAccount): Promise<Account> {
+    // Only the currency owner can update accounts.
+    await this.checkAdmin(ctx)
+
     const account = await this.getAccount(ctx, data.id)
     // code, creditLimit and maximumBalance can be updated
     if (data.code && data.code !== account.code) {
@@ -170,22 +194,33 @@ export class LedgerCurrencyController implements CurrencyController {
   /**
    * Implements {@link CurrencyController.getAccount}
    */
-  async getAccount(ctx: Context, id: string): Promise<Account> {
+  async getAccount(ctx: Context, id: string): Promise<WithRequired<Account, "users">> {
+    await this.checkUser(ctx)
+
     const record = await this.db.account.findUnique({
-      where: { id }
+      where: { 
+        id,
+        status: "active",
+      },
+      include: { users: true }
     })
     if (!record) {
       throw notFound(`Account id ${id} not found in currency ${this.model.code}`)
     }
-    return recordToAccount(record, this.model)
+    return recordToAccount(record, this.model) as WithRequired<Account, "users">
   }
 
   /**
    * Implements {@link CurrencyController.getAccountByCode}
    */
   async getAccountByCode(ctx: Context, code: string): Promise<Account|undefined> {
+    await this.checkUser(ctx)
     const record = await this.db.account.findUnique({
-      where: { code }
+      where: { 
+        code,
+        status: "active",
+      },
+      include: { users: true }
     })
     if (!record) {
       return undefined
@@ -194,6 +229,7 @@ export class LedgerCurrencyController implements CurrencyController {
   }
 
   async getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]> {
+    await this.checkUser(ctx)
     // Allow filtering by code and by id.
     const filter = whereFilter(params.filters)
     
@@ -201,6 +237,7 @@ export class LedgerCurrencyController implements CurrencyController {
       where: {
         currencyId: this.model.id,
         ...filter,
+        status: "active"
       },
       orderBy: {
         [params.sort.field]: params.sort.order
@@ -212,10 +249,33 @@ export class LedgerCurrencyController implements CurrencyController {
     return records.map(r => recordToAccount(r, this.model))
   }
 
+  async deleteAccount(ctx: Context, id: string): Promise<void> {
+    const user = await this.checkUser(ctx)
+    const account = await this.getAccount(ctx, id)
+    if (!(this.model.admin?.id === user.id || account.users.some(u => u.id === user.id))) {
+      throw forbidden("User is not allowed to delete this account")
+    }
+    const ledgerAccount = await this.ledger.getAccount(account.key)
+    if (account.balance != 0) {
+      throw badRequest("Account balance must be zero to delete account")
+    }
+    // Delete account in ledger
+    await ledgerAccount.delete({
+      sponsor: await this.sponsorKey(),
+      admin: await this.adminKey()
+    })
+    // Soft delete account in DB
+    await this.db.account.update({
+      data: { status: "deleted" },
+      where: { id }
+    })
+  }
+
   /**
    * Implements CurrencyController.createTransfer()
    */
   async createTransfer(ctx: Context, data: InputTransfer): Promise<Transfer> {
+    const user = await this.checkUser(ctx)
     // Check id. Allow for user-defined ids, but check for duplicates.
     if (data.id) {
       const existing = await this.db.transfer.findUnique({where: {id: data.id}})
@@ -241,6 +301,12 @@ export class LedgerCurrencyController implements CurrencyController {
     // Already throw if not found.
     const payer = await this.getAccount(ctx, data.payerId)
     const payee = await this.getAccount(ctx, data.payeeId)
+
+    // Check that the user is allowed to transfer from the payer account.
+    if (!payer.users.some(u => u.id === user.id)) {
+      throw forbidden("User is not allowed to transfer from this account")
+    }
+
     // Check that both accounts are in the same currency (although that should be the case due to DB RLS).
     if (payer.currency.id !== payee.currency.id) {
       throw badRequest("Payer and payee must be in the same currency")
@@ -309,12 +375,12 @@ export class LedgerCurrencyController implements CurrencyController {
     return transaction
   }
 
-
   private async getFreeCode() {
     // We look for the maximum code of type "CODE1234", so we can have other codes ("CODESpecial").
-    // Code numbers can have any length but are zero-padded if they are less than 10K.
-    const result = await this.db.$queryRaw`SELECT MAX(substring(code from 4)::int) FROM Account WHERE code ~ '${this.model.code}[0-9]+'` as {code: string}
-    const codeNum = result ? parseInt(result.code) + 1 : 0
+    // Code numbers can have any length but are zero-padded until 4 digits.
+    const pattern = `${this.model.code}[0-9]+`
+    const [{max}] = await this.db.$queryRaw`SELECT MAX(substring(code from 5)::int) as max FROM "Account" WHERE code ~ ${pattern}` as [{max: number|null}]
+    const codeNum = (max !== null) ? max + 1 : 0
     const code = this.model.code + String(codeNum).padStart(4, "0")
     return code
   }

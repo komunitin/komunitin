@@ -44,6 +44,7 @@ export async function createController(): Promise<SharedController> {
     // Create a new random sponsor account with friendbot.
     sponsor = Keypair.random()
     await friendbot(config.STELLAR_FRIENDBOT_URL, sponsor.publicKey())
+    logger.info(`Sponsor account created. Private Key: ${sponsor.secret()}`)
   } else {
     throw badConfig("Either SPONSOR_PRIVATE_KEY or STELLAR_FRIENDBOT_URL must be provided")
   }
@@ -133,8 +134,10 @@ export class LedgerController implements SharedController {
       // This should not happen as the middleware checks it.
       throw internalError("User ID not provided in context")
     }
-    // Create and save a symmetric encryption key for this currency:
-    const currencyKey = await this.storeKey(currency.code, await randomKey())
+    // Create and save a currency key that will be used to encrypt all other keys
+    // related to this currency. This key itself is encrypted using the master key.
+    const currencyKey = await randomKey()
+    const encryptedCurrencyKey = await this.storeKey(currency.code, currencyKey)
     
     // Add the currency to the DB
     const inputRecord = currencyToRecord(currency)
@@ -154,7 +157,7 @@ export class LedgerController implements SharedController {
         status: "new",
         encryptionKey: {
           connect: {
-            id: currencyKey.id
+            id: encryptedCurrencyKey.id
           }
         },
         admin: {
@@ -171,10 +174,9 @@ export class LedgerController implements SharedController {
       currencyConfig(currency), 
       await this.sponsorKey()
     )
-
-    const storeKey = (key: Keypair) => storeCurrencyKey(key, db, this.masterKey)
-
-    // Store the keys into the DB.
+    
+    // Store the keys into the DB, encrypted using the currency key.
+    const storeKey = (key: Keypair) => storeCurrencyKey(key, db, async () => currencyKey)
     const currencyKeyIds = {
       issuerKeyId: await storeKey(keys.issuer),
       creditKeyId: await storeKey(keys.credit),

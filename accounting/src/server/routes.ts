@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { Validators } from './validation';
 import { checkExact } from 'express-validator';
 import { SharedController } from '../controller';
-import { params } from './request';
+import { collectionParams, resourceParams } from './request';
 import { Scope, auth, noAuth } from './auth';
 import { context } from 'src/utils/context';
 import { input } from './parse';
@@ -60,9 +60,9 @@ export function getRoutes(controller: SharedController) {
   }))
 
   // Create account
-  router.post('/:code/accounts', auth(Scope.Accounting), asyncHandler(async (req, res) => {
+  router.post('/:code/accounts', auth(Scope.Accounting), checkExact(Validators.isCreateAccount()), asyncHandler(async (req, res) => {
     const currencyController = await controller.getCurrencyController(req.params.code)
-    const inputAccount = {}
+    const inputAccount = input(req)
     const account = await currencyController.createAccount(context(req), inputAccount)
     const result = await AccountSerializer.serialize(account)
     res.status(200).json(result)
@@ -71,11 +71,15 @@ export function getRoutes(controller: SharedController) {
   // List accounts
   router.get('/:code/accounts', auth(Scope.Accounting), asyncHandler(async (req, res) => {
     const currencyController = await controller.getCurrencyController(req.params.code)
-    const accounts = await currencyController.getAccounts(context(req), params(req, {
+    const options = collectionParams(req, {
       filter: ["id", "code"],
-      sort: ["code", "balance", "creditLimit", "maximumBalance", "created", "updated"]
-    }))
-    const result = await AccountSerializer.serialize(accounts)
+      sort: ["code", "balance", "creditLimit", "maximumBalance", "created", "updated"],
+      include: ["currency"]
+    })
+    const accounts = await currencyController.getAccounts(context(req), options)
+    const result = await AccountSerializer.serialize(accounts, {
+      include: options.include
+    })
     res.status(200).json(result)
   }))
 
@@ -83,7 +87,12 @@ export function getRoutes(controller: SharedController) {
   router.get('/:code/accounts/:id', auth(Scope.Accounting), asyncHandler(async (req, res) => {
     const currencyController = await controller.getCurrencyController(req.params.code)
     const account = await currencyController.getAccount(context(req), req.params.id)
-    const result = await AccountSerializer.serialize(account)
+    const options = resourceParams(req, {
+      include: ["currency"]
+    })
+    const result = await AccountSerializer.serialize(account, {
+      include: options.include
+    })
     res.status(200).json(result)
   }))
 
@@ -98,6 +107,13 @@ export function getRoutes(controller: SharedController) {
 
   // Get account settings
   // Update account settings
+
+  // Delete account.
+  router.delete('/:code/accounts/:id', auth(Scope.Accounting), asyncHandler(async (req, res) => {
+    const currencyController = await controller.getCurrencyController(req.params.code)
+    await currencyController.deleteAccount(context(req), req.params.id)
+    res.status(204).end()
+  }))
 
   // Create transfer
   router.post(':code/transfers', auth(Scope.Accounting), checkExact(Validators.isCreateTransfer()), asyncHandler(async (req, res) => {
