@@ -115,7 +115,7 @@ describe('Creates stellar elements', async () => {
   })
 
   
-  await it('should be able to perform path payments', async(done) => {
+  await it('should be able to perform path payments', async () => {
     // Create a second currency.
     const config = {
       code: "TES2",

@@ -171,7 +171,4 @@ describe('Accounts endpoints', async () => {
     await api.delete(`/TEST/accounts/${account1.id}`, user2, 204)
   })
 
-
-
-
 })
