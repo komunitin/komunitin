@@ -27,6 +27,9 @@ export class StellarCurrency implements LedgerCurrency {
   // Stream connection close function for external trades listener.
   private externalTradesStream?: () => void
 
+  // Flag to indicate if the listener should be running.
+  private started = false
+
   constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState) {
     this.ledger = ledger
     const defaultConfig = {
@@ -48,8 +51,11 @@ export class StellarCurrency implements LedgerCurrency {
     // pause at least 5 sec between connection attempts.
     const separationAttempt = 5000
     let lastAttempt = 0
+    this.started = true
 
     const listen = () => {
+      if (!this.started) { return }
+
       lastAttempt = Date.now()
       this.externalTradesStream = this.ledger.server.trades()
       .forAccount(this.data.externalTraderPublicKey)
@@ -93,6 +99,7 @@ export class StellarCurrency implements LedgerCurrency {
 
   public stop() {
     // Close all horizon stream connections.
+    this.started = false
     this.closeExternalTradesStream()
   }
 
