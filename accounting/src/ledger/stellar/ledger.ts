@@ -1,19 +1,25 @@
 import { Networks, Horizon, Keypair, TransactionBuilder, BASE_FEE, Transaction, Memo, MemoType, Operation, NetworkError, FeeBumpTransaction } from "@stellar/stellar-sdk"
 import { sleep } from "../../utils/sleep"
-import { Ledger, LedgerCurrencyConfig, LedgerCurrency, LedgerCurrencyKeys, LedgerCurrencyData, LedgerEvents } from "../ledger"
+import { Ledger, LedgerCurrencyConfig, LedgerCurrencyKeys, LedgerCurrencyData, LedgerEvents, LedgerCurrencyState } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarCurrency } from "./currency"
 import Big from "big.js"
 import { logger } from "../../utils/logger"
 import TypedEmitter from "typed-emitter"
 import {EventEmitter} from "node:events"
+import { KError, badTransaction, internalError, notImplemented } from "../../utils/error"
 
 export type StellarLedgerConfig = {
   server: string,
-  network: Networks,
+  network: "testnet" | "local" | "public",
   sponsorPublicKey: string,
   domain: string
 }
+
+export const createStellarLedger = (config: StellarLedgerConfig): Ledger => {
+  return new StellarLedger(config)
+}
+
 /**
  * This is a singleton class. It is used to manage the connection to the Stellar network.
  */
@@ -42,8 +48,13 @@ export class StellarLedger implements Ledger {
    * with the sequence numbers.
    */
   constructor(config: StellarLedgerConfig) {
+    const networks = {
+      testnet: Networks.TESTNET,
+      local: Networks.STANDALONE,
+      public: Networks.PUBLIC
+    }
     this.server = new Horizon.Server(config.server)
-    this.network = config.network
+    this.network = networks[config.network]
     this.sponsorPublicKey = Keypair.fromPublicKey(config.sponsorPublicKey)
     this.domain = config.domain
     this.emitter = new EventEmitter() as TypedEmitter<LedgerEvents>
@@ -134,7 +145,7 @@ export class StellarLedger implements Ledger {
         // TODO: Handle the insufficient fee error by waiting a reasonable amount of
         // time before increasing the fee up to a maximum value.
         // https://developers.stellar.org/docs/learn/encyclopedia/error-handling
-        throw new Error("TODO: Implement fee strategy!", {cause: error})
+        throw notImplemented("Implement fee strategy", error)
       }
       throw error
     }
@@ -167,8 +178,7 @@ export class StellarLedger implements Ledger {
       return await this.server.submitTransaction(transaction)
     } catch (error) {
       if (this.isNonRetryError(error)) {
-        this.logTransactionError(transaction, error)
-        throw error
+        throw this.getTransactionError(transaction, error)
       }
       
       await sleep(timeout)
@@ -178,7 +188,7 @@ export class StellarLedger implements Ledger {
       const expiration = parseInt(inner.timeBounds?.maxTime ?? "0")
 
       if (Date.now() >= expiration * 1000) {
-        throw new Error("Transaction expired. Create a new one and submit it again.", {cause: error})
+        throw badTransaction("Transaction expired. Create a new one and submit it again.", error)
       }
 
       return await this.submitTransactionWithRetry(transaction, 2 * timeout)
@@ -205,7 +215,7 @@ export class StellarLedger implements Ledger {
       externalTraderPublicKey: keys.externalTrader.publicKey()
     }
 
-    const currency = new StellarCurrency(this, config, data)
+    const currency = new StellarCurrency(this, config, data, {externalTradesStreamCursor: "0"})
     
     await currency.install({
       sponsor,
@@ -219,7 +229,7 @@ export class StellarLedger implements Ledger {
       issuer: keys.issuer,
       externalIssuer: keys.externalIssuer,
       externalTrader: keys.externalTrader,
-      credit: Big(config.externalTraderInitialBalance ?? 0).gt(0) ? keys.credit : undefined,
+      credit: Big(config.externalTraderInitialCredit ?? 0).gt(0) ? keys.credit : undefined,
     })
 
     logger.info({publicKeys: data}, `Created new currency ${config.code}`)
@@ -229,15 +239,15 @@ export class StellarLedger implements Ledger {
   /**
    * Implements {@link Ledger.getCurrency}
    */
-  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): StellarCurrency {
+  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState): StellarCurrency {
     if (!this.currencies[data.issuerPublicKey]) {
-      this.currencies[data.issuerPublicKey] = new StellarCurrency(this, config, data)
+      this.currencies[data.issuerPublicKey] = new StellarCurrency(this, config, data, state)
       this.currencies[data.issuerPublicKey].start()
     }
     return this.currencies[data.issuerPublicKey]
   }
 
-  private logTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: unknown) {
+  private getTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: unknown): KError {
     const inner = transaction instanceof FeeBumpTransaction ? transaction.innerTransaction : transaction
     const operations = inner.operations.map(op => op.type)
     if (error && (error as any).response?.data?.title) {
@@ -247,15 +257,15 @@ export class StellarLedger implements Ledger {
       if (data.extras) {
         // Transaction failed
         const result = data.extras.result_codes
-        logger.error({operations, results: result.operations, result: result.transaction}, msg)
+        return badTransaction(msg, {operations, results: result.operations, result: result.transaction})
       } else {
         // Other Horizon error
-        logger.error({operations, data}, msg)
+        return badTransaction(msg, {operations, data})
       }
     } else if (error instanceof Error) {
-      logger.error({operations, error}, `Error submitting transaction: ${error.message}`)
+      return internalError(`Error submitting transaction: ${error.message}`, {operations, error})
     } else {
-      logger.error({operations, error}, `Error submitting transaction: ${error}`)
+      return internalError(`Error submitting transaction: ${error}`, {operations, error})
     }
   }
 }

@@ -1,14 +1,15 @@
 
 import { logger } from "../utils/logger"
-import { LedgerAsset, KeyPair, LedgerCurrency, Ledger } from "./ledger"
+import { LedgerAsset, KeyPair, LedgerCurrency, Ledger, LedgerCurrencyState } from "./ledger"
 
 type KeyGetter = () => Promise<KeyPair>
 type CurrencyKeyGetter = (currency: LedgerCurrency) => Promise<KeyPair>
 
-export function installDefaultListeners(ledger: Ledger, sponsorKeyGetter: KeyGetter, traderKeyGetter: CurrencyKeyGetter) {
+export function installDefaultListeners(ledger: Ledger, updateState: (currency: LedgerCurrency, state: LedgerCurrencyState) => Promise<void>, sponsorKeyGetter: KeyGetter, traderKeyGetter: CurrencyKeyGetter) {
   ledger.addListener("error", defaultErrorListener())
   ledger.addListener("incommingHourTrade", defaultIncommingHourTradeListener(sponsorKeyGetter, traderKeyGetter))
   ledger.addListener("outgoingTrade", defaultOutgoingTradeListener(sponsorKeyGetter, traderKeyGetter))
+  ledger.addListener("stateUpdated", updateState)
 }
 
 /**

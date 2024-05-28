@@ -1,4 +1,5 @@
-import { Keypair, Keypair as StellarKeyPair } from "@stellar/stellar-sdk"
+import { Keypair as StellarKeyPair } from "@stellar/stellar-sdk"
+import { Rate } from "../utils/types"
 import TypedEmitter from "typed-emitter"
 /*
  * Architecture:
@@ -37,11 +38,11 @@ export type LedgerCurrencyConfig = {
    * The initial funding an account will receive when created.
    * Defaults to 0 (so accounts are not funded on creation).
    */
-  defaultInitialBalance?: string
+  defaultInitialCredit?: string
   /**
    * The maximum balance an account can have in this currency by default.
    * Defaults to infinity (accounts can have unlimited balance). This value,
-   * if set, needs to be greater than {@link defaultInitialBalance}.
+   * if set, needs to be greater than {@link defaultInitialCredit}.
    */
   defaultMaximumBalance?: string
   /**
@@ -54,11 +55,11 @@ export type LedgerCurrencyConfig = {
    * Defaults to 0, meaning that we need outgoing payments (to other currencies) 
    * before we can have incoming transfers (from other currencies).
    */
-  externalTraderInitialBalance?: string
+  externalTraderInitialCredit?: string
   /**
    * The maximum balance in local currency for the external trader account.
    * 
-   * This value minus the {@link externalTraderInitialBalance} is the global
+   * This value minus the {@link externalTraderInitialCredit} is the global
    * trade balance limit for outgoing payments. Or in other words, it is the
    * total amount of the local currency that can be destroyed by external
    * payments.
@@ -91,6 +92,14 @@ export type LedgerCurrencyData = {
 }
 
 /**
+ * Some data to be updated when running the currency and to 
+ * be persisted between runs.
+ */
+export type LedgerCurrencyState = {
+  externalTradesStreamCursor: string
+}
+
+/**
  * Event types.
  */
 export type LedgerEvents = {
@@ -118,7 +127,8 @@ export type LedgerEvents = {
       amount: string
       created: boolean
     }) => Promise<void>
-
+  
+  stateUpdated: (currency: LedgerCurrency, state: LedgerCurrencyState) => Promise<void>
   /**
    * Called if there is an error in the event handlers.
    * @param error 
@@ -137,7 +147,7 @@ export interface Ledger {
   /**
    * Get a currency object from the configuration and data.
    */
-  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData): LedgerCurrency
+  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState): LedgerCurrency
   /**
    * Registers a listener for the specified event.
    * 
@@ -171,11 +181,13 @@ export interface LedgerCurrency {
   asset(): LedgerAsset
   /**
    * Create and approve a new account in this currency.
+   * 
+   * Provide credit key only if defaultInitialCredit > 0
    */
   createAccount(keys: {
-    sponsor: Keypair
-    issuer: Keypair,
-    credit?: Keypair, // Only if defaultInitialBalance > 0
+    sponsor: KeyPair
+    issuer: KeyPair,
+    credit?: KeyPair,
   }): Promise<{key: KeyPair}>
 
   /**
@@ -197,7 +209,7 @@ export interface LedgerCurrency {
    * @param keys 
    *   - externalIssuer: Needed to additionally fund the trader account to satisfy the new selling liabilities.
    */
-  trustCurrency(line: { trustedPublicKey: string; limit: string }, keys: { sponsor: Keypair, externalTrader: Keypair, externalIssuer: Keypair }): Promise<void>
+  trustCurrency(line: { trustedPublicKey: string; limit: string }, keys: { sponsor: KeyPair, externalTrader: KeyPair, externalIssuer: KeyPair }): Promise<void>
 
   /**
    * Checks whether there is a path linking two local currencies.
@@ -220,7 +232,7 @@ export interface LedgerCurrency {
    * @param externalHour 
    * @param keys 
    */
-  updateExternalOffer(sellingAsset: LedgerAsset, keys: { sponsor: Keypair; externalTrader: Keypair }): Promise<void>
+  updateExternalOffer(sellingAsset: LedgerAsset, keys: { sponsor: KeyPair; externalTrader: KeyPair }): Promise<void>
 }
 
 export interface PathQuote {
@@ -241,7 +253,7 @@ export interface LedgerAccount {
    * @param payment The payment details: destination and amount
    * @param keys The account entry can be either the master key or the admin key for administered accounts.
    */
-  pay(payment: {payeePublicKey: string, amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
+  pay(payment: {payeePublicKey: string, amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransaction>
 
   /**
    * Perform a payment to an account on a different currency.
@@ -250,7 +262,7 @@ export interface LedgerAccount {
    *   payeePublicKey: The public key of the payee account.
    *   externalIssuerPublicKey: The public key of the issuer of the payee currency.
    */
-  externalPay(payment: {payeePublicKey: string, amount: string, path: PathQuote}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
+  externalPay(payment: {payeePublicKey: string, amount: string, path: PathQuote}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransaction>
 
   /**
    * Permanently delete the account from the ledger.
@@ -274,22 +286,43 @@ export interface LedgerAccount {
    */
   update(): Promise<this>
 
+  /**
+   * Return the current amount of credit.
+   */
+  credit(): Promise<string>
+
+  /**
+   * Update the balance in this account from the credit account.
+   * 
+   * The credit key is required when increasing the credit, while the account (or admin)
+   * key is required when reducing the credit.
+   */
+  updateCredit(amount: string, keys: {
+    sponsor: KeyPair,
+    credit?: KeyPair,
+    account?: KeyPair
+  }): Promise<string>
+
 }
 
 /**
  * A transfer committed in the ledger.
  */
-export interface LedgerTransfer {
+export interface LedgerTransaction {
   hash: string
 }
 /**
- * A fraction with numerator and denominator.
+ * A payment in the ledger
  */
-export type Rate = {
-  n: number
-  d: number
+export interface LedgerTransfer {
+  payer: string,
+  payee: string,
+  amount: string,
+  asset: LedgerAsset
 }
-
+/**
+ * An asset in the ledger.
+ */
 export type LedgerAsset = {
   issuer: string,
   code: string

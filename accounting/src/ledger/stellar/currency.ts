@@ -1,10 +1,20 @@
 import { Asset, Operation, AuthRequiredFlag, AuthRevocableFlag, AuthClawbackEnabledFlag, AuthFlag, TransactionBuilder, Keypair, Horizon } from "@stellar/stellar-sdk"
-import { LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData, PathQuote } from "../ledger"
+import { LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData, LedgerCurrencyState, PathQuote } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarLedger } from "./ledger"
 import Big from "big.js"
 import { logger } from "src/utils/logger"
-import { retry } from "src/utils/sleep"
+import { retry, sleep } from "src/utils/sleep"
+import { badRequest, internalError } from "src/utils/error"
+import { CallBuilder } from "@stellar/stellar-sdk/lib/horizon/call_builder"
+
+interface StreamData {
+  started: boolean
+  listen?: () => void
+  close?: () => void
+}
+const STREAM_NAMES = [ "externalTrades" ] as const
+type StreamName = typeof STREAM_NAMES[number]
 
 export class StellarCurrency implements LedgerCurrency {
   static GLOBAL_ASSET_CODE = "HOUR"
@@ -12,66 +22,107 @@ export class StellarCurrency implements LedgerCurrency {
    * In case there is no defined maximum balance for the external trader account,
    * this is the default for the initial balance in hours for this account.
    */
-  static DEFAULT_EXTERNAL_TRADER_INITIAL_BALANCE = "1000"
+  static DEFAULT_EXTERNAL_TRADER_INITIAL_CREDIT = "1000"
 
   ledger: StellarLedger
-  config: LedgerCurrencyConfig & {defaultInitialBalance: string}
+  config: LedgerCurrencyConfig & {defaultInitialCredit: string}
   data: LedgerCurrencyData
+  state: LedgerCurrencyState
 
   // Registry of currency accounts. This way we are sure we are not instantiating
   // the same account twice and hence we won't have seq number issues.
   private accounts: Record<string, Promise<StellarAccount>>
 
-  // Registry of Horizon stream connection closers.
-  private streams: (() => void)[]
+  // Stream handlers. It has been architectured so it allows for a set of different
+  // streams but currently only the externalTrades stream is implemented. This is
+  // because we expected to be able to stream all payments associated with a single
+  // asset but it looks like that's not the case.
+  private streams: Record<StreamName, StreamData>
 
-  constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData) {
+  constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState) {
     this.ledger = ledger
     const defaultConfig = {
-      defaultInitialBalance: "0",
+      defaultInitialCredit: "0",
       defaultMaximumBalance: undefined
     }
     this.config = {...defaultConfig, ...config}
     this.data = data
+    this.state = state
     this.accounts = {}
-    this.streams = []
+    
+    this.streams = Object.fromEntries(STREAM_NAMES.map((name) => [name, {started: false}])) as Record<StreamName, StreamData>
 
     // Input checking.
     if (this.config.code.match(/^[A-Z0-9]{4}$/) === null) {
-      throw new Error("Invalid currency code")
+      throw badRequest("Invalid currency code")
     }
   }
   
-  public start() {
-    const stream = this.ledger.server.trades()
-      .forAccount(this.data.externalTraderPublicKey)
-      .cursor('now')
-      .stream({
-      // The arrow notation is used to preserve the context of the class.
-      onmessage: (page) => {
-        logger.debug({page}, `Received horizon external trade event for currency ${this.config.code}`)
-        // Looks like the typings are not correct and message is a TradeRecord intstead of a CollectionPage<TradeRecord>
-        const record = page as unknown as Horizon.ServerApi.TradeRecord
-        if (record.trade_type) {
-          this.handleExternalTradeEvent(record)
+  private listenStream<T extends Horizon.HorizonApi.BaseResponse & {paging_token: string}>(name: StreamName , cursor: keyof LedgerCurrencyState, endpoint: CallBuilder<Horizon.ServerApi.CollectionPage<T>>, onMessage: (record: T) => Promise<void>) {
+    const separationAttempt = 5000
+    
+    const stream = this.streams[name]
+    stream.started = true
+
+    stream.listen = () => {
+      if (!stream.started) { return }
+
+      const lastAttempt = Date.now()
+      stream.close = endpoint.cursor(this.state[cursor]).stream({
+        onmessage: (page: Horizon.ServerApi.CollectionPage<T>) => {
+          // Looks like there is a bug in typings, as the records received when steraming are not
+          // of type collection but single resources.
+          const record = page as unknown as T
+          logger.debug({page}, `Received Horizon stream event.`)
+          onMessage(record)
           .catch((error) => {
             this.ledger.emitter.emit("error", error)
           })
-        } else {
-          throw new Error("Unexpected trade message", {cause: page})
-        }
-      },
-      onerror: (error) => {
-        this.ledger.emitter.emit("error", error)
-      }
-    })
-    this.streams.push(stream)
+          .finally(() => {
+            // Update cursor in db.
+            this.state[cursor] = record.paging_token
+            this.ledger.emitter.emit("stateUpdated", this, this.state)
+          })
+        },
+        onerror: (error: any) => {
+          // "throw" error
+          this.ledger.emitter.emit("error", error)
+          // Close stream
+          if (stream.close) {
+            stream.close()
+          }
+          const fromLastAttempt = Date.now() - lastAttempt
+          const wait = Math.max(0, separationAttempt - fromLastAttempt)
+          sleep(wait).then(stream.listen).catch((error) => {
+            this.ledger.emitter.emit("error", error)
+          })
+        },
+        reconnectTimeout: 5*60*1000 // 5 min
+      })
+    }
+
+    stream.listen()
+  }
+  start() {  
+    this.listenStream("externalTrades", "externalTradesStreamCursor", 
+      this.ledger.server.trades().forAccount(this.data.externalTraderPublicKey),
+      (trade) => this.handleExternalTradeEvent(trade)
+    )
+    // TODO: Listen for local payments too.
   }
 
   public stop() {
-    // Close all horizon stream connections.
-    for (const close of this.streams) {
-      close()
+    for (const name of STREAM_NAMES) {
+      this.closeStream(name)
+    }
+  }
+
+  private closeStream(name: StreamName) {
+    const stream = this.streams[name]
+    if (stream.close) {
+      stream.close()
+      stream.close = undefined
+      stream.started = false
     }
   }
 
@@ -85,9 +136,7 @@ export class StellarCurrency implements LedgerCurrency {
     // We want to catch the Hx => Ht (selling local hours by external hours)
     // trade if it is done by this external trader.
     if (trade.base_asset_type == "native" || trade.counter_asset_type == "native") {
-      throw new Error("Unexpected trade with native token", {
-        cause: trade
-      })
+      throw internalError("Unexpected trade with native token", trade)
     }
     const base = new Asset(trade.base_asset_code as string, trade.base_asset_issuer)
     const counter = new Asset(trade.counter_asset_code as string, trade.counter_asset_issuer)
@@ -125,9 +174,7 @@ export class StellarCurrency implements LedgerCurrency {
         this.ledger.emitter.emit("incommingTrade", this)
       }
     } else {
-      throw new Error("Unexpected trade", {
-        cause: trade
-      })
+      throw internalError("Unexpected trade", trade)
     }
   }
 
@@ -147,28 +194,6 @@ export class StellarCurrency implements LedgerCurrency {
       return false
     }
   }
-/*
-  async updateExternalTraderOffers(keys: {sponsor: Keypair, externalTrader: Keypair}) {
-    const trader = await this.externalTraderAccount()
-    // All balances for trader account
-    const balances = trader.balances()
-    // All sell offers for trader account
-    const offers = await this.ledger.server.offers().forAccount(this.data.externalTraderPublicKey).call()
-    const findOfferSelling = (asset: Asset) => offers.records.find((o) => o.selling.asset_issuer == asset.issuer && o.selling.asset_code == asset.code)
-    for (const balance of balances) {
-      if (balance.asset.equals(this.asset()) && Big(balance.balance).gt(0)) {
-        // Update outgoingTradeOffer.
-        const offer = findOfferSelling(this.asset())
-        if (offer?.amount != balance.balance) {
-
-        }
-      } else if (balance.asset.code == StellarCurrency.GLOBAL_ASSET_CODE && Big(balance.balance).gt(0)) {
-        // Update incomingTradeOffer.
-
-      }
-    }
-  }
-*/
 
   /**
    * This function checks the offer from the external trader account that is selling the given asset
@@ -292,7 +317,7 @@ export class StellarCurrency implements LedgerCurrency {
     // 2. Credit account.
     this.createAccountTransaction(builder, {
       publicKey: this.data.creditPublicKey,
-      initialBalance: "0",
+      initialCredit: "0",
       maximumBalance: undefined
     })
     // 2.1 Initially fund credit account
@@ -306,7 +331,7 @@ export class StellarCurrency implements LedgerCurrency {
     // 3. Admin account
     this.createAccountTransaction(builder, {
       publicKey: this.data.adminPublicKey,
-      initialBalance: "0",
+      initialCredit: "0",
       maximumBalance: undefined
     })
 
@@ -318,7 +343,7 @@ export class StellarCurrency implements LedgerCurrency {
    * Creates the necessary accounts and trustlines for the currency to be able to exchange with 
    * other komunitin currencies in the Stellar network.
    * 
-   * Give the credit key only if this.config.externalTraderInitialBalance is not zero.
+   * Give the credit key only if this.config.externalTraderInitialCredit is not zero.
    * @param keys 
    */
   async installGateway(keys: {
@@ -352,7 +377,7 @@ export class StellarCurrency implements LedgerCurrency {
     // 2.0 Create external trader with local currency balance.
     this.createAccountTransaction(builder, {
       publicKey: this.data.externalTraderPublicKey,
-      initialBalance: this.config.externalTraderInitialBalance ?? "0",
+      initialCredit: this.config.externalTraderInitialCredit ?? "0",
       maximumBalance: this.config.externalTraderMaximumBalance
     })
     // Add additional properties to external trader.
@@ -376,12 +401,12 @@ export class StellarCurrency implements LedgerCurrency {
       }))
     }
     // 2.3 Add passive sell offer for incomming payments (hour => asset).
-    if (this.config.externalTraderInitialBalance && Big(this.config.externalTraderInitialBalance).gt(0)) {
+    if (this.config.externalTraderInitialCredit && Big(this.config.externalTraderInitialCredit).gt(0)) {
       builder.addOperation(Operation.createPassiveSellOffer({
         source: this.data.externalTraderPublicKey,
         selling: this.asset(),
         buying: this.hour(),
-        amount: this.config.externalTraderInitialBalance,
+        amount: this.config.externalTraderInitialCredit,
         price: this.config.rate
       }))
     }
@@ -413,10 +438,10 @@ export class StellarCurrency implements LedgerCurrency {
    * This function assures that the current balance of the external trader is not less than
    * the starting balance. This starting balance is computed as follows:
    *  - If externalTraderMaximumBalance is defined, it is the difference between this value and
-   *   the externalTraderInitialBalance expressed in hours. Since hours are needed in exchange
+   *   the externalTraderInitialCredit expressed in hours. Since hours are needed in exchange
    *   for local currency.
    * - If externalTraderMaximumBalance is not defined, the starting balance is just the 
-   *   constant {@link StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_BALANCE}.
+   *   constant {@link StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_CREDIT}.
    */
   public async fundExternalTrader(keys: {
     sponsor: Keypair,
@@ -447,10 +472,10 @@ export class StellarCurrency implements LedgerCurrency {
     if (this.config.externalTraderMaximumBalance) {
       return this.fromLocalToHour(
         Big(this.config.externalTraderMaximumBalance)
-        .minus(this.config.externalTraderInitialBalance ?? 0)
+        .minus(this.config.externalTraderInitialCredit ?? 0)
         .toString())
     } else {
-      return StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_BALANCE
+      return StellarCurrency.DEFAULT_EXTERNAL_TRADER_INITIAL_CREDIT
     }
   }
 
@@ -487,7 +512,7 @@ export class StellarCurrency implements LedgerCurrency {
   // in local currency of 100 HOURs.
   private creditAccountStartingBalance(): string {
     const nAccounts = 100
-    const defaultCredits = Big(this.config.defaultInitialBalance ?? 0).times(nAccounts) 
+    const defaultCredits = Big(this.config.defaultInitialCredit ?? 0).times(nAccounts) 
     const baseHours = 100
     const base = this.fromHourToLocal(baseHours.toString())
     return (defaultCredits + base).toString()
@@ -495,14 +520,14 @@ export class StellarCurrency implements LedgerCurrency {
 
   /**
    * Adds the necessary operations to t to create a new account with a trustline to this local currency 
-   * with limit config.maximumBalance and optionally an initial payment of config.initialBalance from 
+   * with limit config.maximumBalance and optionally an initial payment of config.initialCredit from 
    * the credit account. Note that this transaction will need to be signed by the sponsor, the new account,
-   * the issuer and optionally the credit account if config.initialBalance > 0.
+   * the issuer and optionally the credit account if config.initialCredit > 0.
    * 
    * @param t The transaction builder.
    * @param config Account parameters.
    */
-  private createAccountTransaction(t: TransactionBuilder, config: {publicKey: string, initialBalance: string, maximumBalance?: string, adminSigner?: string}) {
+  private createAccountTransaction(t: TransactionBuilder, config: {publicKey: string, initialCredit: string, maximumBalance?: string, adminSigner?: string}) {
     const sponsorPublicKey = this.ledger.sponsorPublicKey.publicKey()
     const asset = this.asset()
 
@@ -555,12 +580,12 @@ export class StellarCurrency implements LedgerCurrency {
     }))
 
     // Add initial funding.
-    if (Big(config.initialBalance).gt(0)) {
+    if (Big(config.initialCredit).gt(0)) {
       t.addOperation(Operation.payment({
         source: this.data.creditPublicKey,
         destination: config.publicKey,
         asset,
-        amount: config.initialBalance
+        amount: config.initialCredit
       }))
     }
     
@@ -571,13 +596,13 @@ export class StellarCurrency implements LedgerCurrency {
   async createAccount(keys: {
     sponsor: Keypair
     issuer: Keypair,
-    credit?: Keypair, // Only if defaultInitialBalance > 0
+    credit?: Keypair, // Only if defaultInitialCredit > 0
   }): Promise<{key: Keypair}> {
-    if (keys.credit && Big(this.config.defaultInitialBalance).eq(0)) {
-      throw new Error("Credit key not allowed if defaultInitialBalance is 0.")
+    if (keys.credit && Big(this.config.defaultInitialCredit).eq(0)) {
+      throw internalError("Credit key not allowed if defaultInitialCredit is 0")
     }
-    if (!keys.credit && Big(this.config.defaultInitialBalance).gt(0)) {
-      throw new Error("Credit key required if defaultInitialBalance is positive.")
+    if (!keys.credit && Big(this.config.defaultInitialCredit).gt(0)) {
+      throw internalError("Credit key required if defaultInitialCredit is positive")
     }
     // Create keypair.
     const account = Keypair.random()
@@ -586,7 +611,7 @@ export class StellarCurrency implements LedgerCurrency {
 
     this.createAccountTransaction(builder, {
       publicKey: account.publicKey(),
-      initialBalance: this.config.defaultInitialBalance,
+      initialCredit: this.config.defaultInitialCredit,
       maximumBalance: this.config.defaultMaximumBalance,
       adminSigner: this.data.adminPublicKey
     })

@@ -15,7 +15,7 @@ jobs:
       run:
         working-directory: ./app
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Build app
       run: docker build --build-arg QENV=mirage --target komunitin-app-build --tag komunitin-app-build:mirage .
@@ -53,7 +53,7 @@ jobs:
         working-directory: ./notifications
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Build notifications image
       run: docker build --tag komunitin/komunitin-notifications .
@@ -63,7 +63,48 @@ jobs:
       run: |
         docker login -u komunitin -p ${{ secrets.DOCKER_PASS }}
         docker push komunitin/komunitin-notifications
-  
+
+  build-accounting:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./accounting
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Test accounting
+      shell: bash
+      run: cp .env.test .env && docker compose up -d
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        version: latest
+    
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - uses: actions/cache@v4
+      name: Setup pnpm cache
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Run tests
+      run: pnpm test
+
   update-test:
     runs-on: ubuntu-latest
     needs: [build-app, build-notifications]

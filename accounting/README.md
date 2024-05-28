@@ -7,6 +7,13 @@ This service uses the [Stellar](https://stellar.org) blockchain to define the cu
 $ pnpm install
 ```
 
+## Run dev server
+Start the dependecy services (database by now) and the Accounting service at http://localhost:3000.
+```bash
+$ docker compose up -d
+$ pnpm dev
+```
+
 ## Test
 Execute the tests:
 ```bash
