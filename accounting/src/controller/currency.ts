@@ -476,8 +476,8 @@ export class LedgerCurrencyController implements CurrencyController {
       }
       const record = await this.db.transfer.update({
         data: {
-          amount: transfer.amount,
-          meta: transfer.meta,
+          amount: data.amount,
+          meta: data.meta,
           payer: { connect: { id: transfer.payer.id } },
           payee: { connect: { id: transfer.payee.id } }
         },

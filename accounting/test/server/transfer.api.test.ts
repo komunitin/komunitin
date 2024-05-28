@@ -176,6 +176,56 @@ describe('Transfer endpoints', async () => {
     assert.equal(account2.attributes.balance, 1070)
   })
 
+  await it('update transfer', async () => {
+    const transfer = await payment(account1.id, account2.id, 100, "Initial transfer", "new", user2)
+    assert.equal(transfer.attributes.amount, 100)
+    assert.equal(transfer.attributes.state, "new")
+    const response = await api.patch(`/TEST/transfers/${transfer.id}`, {
+      data: { 
+        attributes: { 
+          amount: 200,
+          meta: "Updated transfer",
+        },
+        relationships: {
+          payee: { data: { type: "accounts", id: account0.id } }
+        }
+      }
+    }, user2)
+    const updatedTransfer = response.body.data
+    assert.equal(updatedTransfer.attributes.amount, 200)
+    assert.equal(updatedTransfer.attributes.meta, "Updated transfer")
+    assert.equal(updatedTransfer.attributes.state, "new")
+    assert.equal(updatedTransfer.relationships.payee.data.id, account0.id)
+  })
+
+  await it('invalid updates', async () => {
+    const transfer = await payment(account1.id, account2.id, 100, "Initial transfer", "new", user2)
+    // invalid amount
+    await api.patch(`/TEST/transfers/${transfer.id}`, {
+      data: { attributes: { amount: -100 } }
+    }, user2, 400)
+    // invalid state
+    await api.patch(`/TEST/transfers/${transfer.id}`, {
+      data: { attributes: { state: "invalid" } }
+    }, user2, 400)
+    // invalid payee
+    await api.patch(`/TEST/transfers/${transfer.id}`, {
+      data: { relationships: { payee: { data: { type: "accounts", id: "12345678-1234-1234-1234-123456789012" } } } }
+    }, user2, 404)
+    // forbidden payer change
+    await api.patch(`/TEST/transfers/${transfer.id}`, {
+      data: { relationships: { payer: { data: { type: "accounts", id: account0.id } } } }
+    }, user2, 403)
+    // forbidden update
+    await api.patch(`/TEST/transfers/${transfer.id}`, {
+      data: { attributes: { amount: 200 } }
+    }, user3, 403)
+    // unauthorized update
+    await api.patch(`/TEST/transfers/${transfer.id}`, {
+      data: { attributes: { amount: 200 } }
+    }, undefined, 401)
+  })
+
   after(async () => {
     server.close()
     await closeApp(app)
