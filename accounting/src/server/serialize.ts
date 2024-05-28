@@ -36,4 +36,12 @@ export const AccountSerializer = new Serializer<Account>("accounts", {
 export const TransferSerializer = new Serializer<Transfer>("transfers", {
   version: null,
   projection: projection<Transfer>(['state', 'amount', 'meta', 'created', 'updated']),
+  relators: {
+    payer: new Relator<Transfer,Account>(async (transfer) => {
+      return transfer.payer
+    }, AccountSerializer, { relatedName: "payer" }),
+    payee: new Relator<Transfer,Account>(async (transfer) => {
+      return transfer.payee
+    }, AccountSerializer, { relatedName: "payee" })
+  }
 })

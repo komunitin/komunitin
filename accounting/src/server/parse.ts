@@ -16,7 +16,7 @@ const mount = (data: Record<string, any>, included: Record<string, any>[] | unde
       }
       const includedResource = (resourceId: {id: string, type: string}) => {
         const resource = included?.find(resource => resource.id === resourceId.id && resource.type === resourceId.type)
-        return resource ? mount(resource, included, depth + 1) : resourceId
+        return resource ? mount(resource, included, depth + 1) : resourceId.id
       }
       const includedResources = (resourceIds: {id: string, type: string}[]) => {
         return resourceIds.map(resourceId => includedResource(resourceId))
@@ -39,7 +39,7 @@ const mount = (data: Record<string, any>, included: Record<string, any>[] | unde
 /**
  * Returns an object from a validated json:api input resource object.
  * Sets the id from the route, sets the attributes as top-level keys and
- * sets the relationships as loaded objects or resource identifiers using
+ * sets the relationships as loaded objects or just identifiers using
  * the relationship name as key.
  * 
  * @return The data object with 

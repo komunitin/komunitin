@@ -116,10 +116,18 @@ export function getRoutes(controller: SharedController) {
   }))
 
   // Create transfer
-  router.post(':code/transfers', auth(Scope.Accounting), checkExact(Validators.isCreateTransfer()), asyncHandler(async (req, res) => {
+  router.post('/:code/transfers', auth(Scope.Accounting), checkExact(Validators.isCreateTransfer()), asyncHandler(async (req, res) => {
     const data = input(req)
     const currencyController = await controller.getCurrencyController(req.params.code)
     const transfer = await currencyController.createTransfer(context(req), data)
+    const result = await TransferSerializer.serialize(transfer)
+    res.status(200).json(result)
+  }))
+
+  router.patch('/:code/transfers/:id', auth(Scope.Accounting), checkExact(Validators.isUpdateTransfer()), asyncHandler(async (req, res) => {
+    const data = input(req)
+    const currencyController = await controller.getCurrencyController(req.params.code)
+    const transfer = await currencyController.updateTransfer(context(req), data)
     const result = await TransferSerializer.serialize(transfer)
     res.status(200).json(result)
   }))

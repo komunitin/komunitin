@@ -30,7 +30,7 @@ export namespace Validators {
     body(`${path}.defaultMaximumBalance`).optional().isInt({min: 0}),
   ]
 
-  const isCurrencyCreateAttributesExist = (path: string) => [
+  const isCreateCurrencyAttributesExist = (path: string) => [
     // Mandatory attributes.
     body(`${path}.code`).exists(),
     body(`${path}.name`).exists(),
@@ -57,7 +57,7 @@ export namespace Validators {
 
   export const isCreateCurrency = () => [
     ...jsonApiDoc("currencies"),
-    ...isCurrencyCreateAttributesExist("data.attributes"),
+    ...isCreateCurrencyAttributesExist("data.attributes"),
     ...isCurrencyUpdateAttributes("data.attributes"),
     ...isCollectionRelationship("data", "admins", "users"),
     ...isIncludedTypes(["users"]),
@@ -69,7 +69,7 @@ export namespace Validators {
     ...isCurrencyUpdateAttributes(`data.attributes`),
   ]
 
-  const isAccountUpdateAttibutes = (path: string) => [
+  const isUpdateAccountAttibutes = (path: string) => [
     body(`${path}.code`).optional(),
     body(`${path}.maximumBalance`).optional().isInt({min: 0}),
     body(`${path}.creditLimit`).optional().isInt({min: 0}),
@@ -78,7 +78,7 @@ export namespace Validators {
   export const isUpdateAccount = () => [
     ...jsonApiDoc("accounts"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
-    ...isAccountUpdateAttibutes("data.attributes")
+    ...isUpdateAccountAttibutes("data.attributes")
   ]
 
   export const isCreateAccount = () => [
@@ -87,25 +87,54 @@ export namespace Validators {
     ...isIncludedTypes(["users"]),
   ]
 
-  const isTransferCreateAttributes = (path: string) => [
+  const isCreateTransferAttributes = (path: string) => [
     body(`${path}.meta`).isString(),
     body(`${path}.amount`).isInt({gt: 0}),
     body(`${path}.state`).isIn(["new", "committed"]),
   ]
 
+  const isResourceId = (path: string, type: string) => [
+    body(`${path}.data.id`).isUUID(),
+    body(`${path}.data.type`).equals(type),
+  ]
+
+  const isCreateTransferRelationships = (path: string) => [
+    ...isResourceId(`${path}.payer`, "accounts"),
+    ...isResourceId(`${path}.payee`, "accounts"),
+  ]
+
   export const isCreateTransfer = () => [
     ...jsonApiDoc("transfers"),
     body("data.id").optional().isUUID(), // Support client-defined UUID.
-    ...isTransferCreateAttributes("data.attributes"),
-    ...isTransferCreateRelationships("data.relationships")
+    ...isCreateTransferAttributes("data.attributes"),
+    ...isCreateTransferRelationships("data.relationships")
   ]
 
-  export const isTransferCreateRelationships = (path: string) => [
-    body(`${path}.payer.data.id`).isUUID(),
-    body(`${path}.payer.data.type`).equals("accounts"),
-    body(`${path}.payee.data.id`).isUUID(),
-    body(`${path}.payee.data.type`).equals("accounts"),
+  const isUpdateTransferAttributes = (path: string) => [
+    body(`${path}.meta`).optional().isString(),
+    body(`${path}.amount`).optional().isInt({gt: 0}),
+    body(`${path}.state`).optional().isIn(["new", "committed"]),
   ]
+
+  const isOptionalResourceId = (path: string, type: string) => [
+    body(`${path}`).optional(),
+    body(`${path}.data.id`).if(body(`${path}`).exists()).isUUID(),
+    body(`${path}.data.type`).if(body(`${path}`).exists()).equals(type),
+  ]
+
+  const isUpdateTransferRelationships = (path: string) => [
+    body(path).optional(),
+    ...isOptionalResourceId(`${path}.payer`, "accounts"),
+    ...isOptionalResourceId(`${path}.payee`, "accounts"),
+  ]
+
+  export const isUpdateTransfer = () => [
+    ...jsonApiDoc("transfers"),
+    body("data.id").optional().isUUID(), // id optional as currency is identified by route.
+    ...isUpdateTransferAttributes("data.attributes"),
+    ...isUpdateTransferRelationships("data.relationships")
+  ]
+
 }
 
 

@@ -9,7 +9,7 @@ import { config } from "../config"
 import { KeyObject } from "node:crypto"
 import { CreateCurrency, Currency, recordToCurrency, currencyToRecord } from "../model/currency"
 import { badConfig, badRequest, internalError, notFound, unauthorized } from "src/utils/error"
-import { LedgerCurrencyController, storeCurrencyKey } from "./currency"
+import { LedgerCurrencyController, amountToLedger, storeCurrencyKey } from "./currency"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
 import { installDefaultListeners } from "src/ledger/listener"
 import { Context } from "src/utils/context"
@@ -63,13 +63,13 @@ export async function createController(): Promise<SharedController> {
 }
 
 const currencyConfig = (currency: CreateCurrency): LedgerCurrencyConfig => {
-  const defaultMaximumBalance = currency.defaultMaximumBalance 
-    ? (currency.defaultCreditLimit + currency.defaultMaximumBalance).toString()
+  const defaultMaximumBalance = currency.defaultMaximumBalance !== undefined
+    ? amountToLedger(currency, currency.defaultCreditLimit + currency.defaultMaximumBalance)
     : undefined
   return {
     code: currency.code,
     rate: currency.rate,
-    defaultInitialCredit: currency.defaultCreditLimit.toString(),
+    defaultInitialCredit: amountToLedger(currency, currency.defaultCreditLimit),
     defaultMaximumBalance
   }
 }

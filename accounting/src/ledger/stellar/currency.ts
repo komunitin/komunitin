@@ -6,6 +6,15 @@ import Big from "big.js"
 import { logger } from "src/utils/logger"
 import { retry, sleep } from "src/utils/sleep"
 import { badRequest, internalError } from "src/utils/error"
+import { CallBuilder } from "@stellar/stellar-sdk/lib/horizon/call_builder"
+
+interface StreamData {
+  started: boolean
+  listen?: () => void
+  close?: () => void
+}
+const STREAM_NAMES = [ "externalTrades" ] as const
+type StreamName = typeof STREAM_NAMES[number]
 
 export class StellarCurrency implements LedgerCurrency {
   static GLOBAL_ASSET_CODE = "HOUR"
@@ -24,11 +33,11 @@ export class StellarCurrency implements LedgerCurrency {
   // the same account twice and hence we won't have seq number issues.
   private accounts: Record<string, Promise<StellarAccount>>
 
-  // Stream connection close function for external trades listener.
-  private externalTradesStream?: () => void
-
-  // Flag to indicate if the listener should be running.
-  private started = false
+  // Stream handlers. It has been architectured so it allows for a set of different
+  // streams but currently only the externalTrades stream is implemented. This is
+  // because we expected to be able to stream all payments associated with a single
+  // asset but it looks like that's not the case.
+  private streams: Record<StreamName, StreamData>
 
   constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState) {
     this.ledger = ledger
@@ -40,73 +49,80 @@ export class StellarCurrency implements LedgerCurrency {
     this.data = data
     this.state = state
     this.accounts = {}
+    
+    this.streams = Object.fromEntries(STREAM_NAMES.map((name) => [name, {started: false}])) as Record<StreamName, StreamData>
 
     // Input checking.
     if (this.config.code.match(/^[A-Z0-9]{4}$/) === null) {
       throw badRequest("Invalid currency code")
     }
   }
-
-  public start() {
-    // pause at least 5 sec between connection attempts.
+  
+  private listenStream<T extends Horizon.HorizonApi.BaseResponse & {paging_token: string}>(name: StreamName , cursor: keyof LedgerCurrencyState, endpoint: CallBuilder<Horizon.ServerApi.CollectionPage<T>>, onMessage: (record: T) => Promise<void>) {
     const separationAttempt = 5000
-    let lastAttempt = 0
-    this.started = true
+    
+    const stream = this.streams[name]
+    stream.started = true
 
-    const listen = () => {
-      if (!this.started) { return }
+    stream.listen = () => {
+      if (!stream.started) { return }
 
-      lastAttempt = Date.now()
-      this.externalTradesStream = this.ledger.server.trades()
-      .forAccount(this.data.externalTraderPublicKey)
-      .cursor(this.state.externalTradesStreamCursor)
-      .stream({
-        // The arrow notation preserves the context of the class.
-        onmessage: (page: unknown) => {
-          logger.debug({page}, `Received horizon external trade event for currency ${this.config.code}`)
-          // Looks like the typings are not correct and message is a TradeRecord intstead of a CollectionPage<TradeRecord>
-          const record = page as Horizon.ServerApi.TradeRecord
-          this.handleExternalTradeEvent(record)
-            .catch((error) => {
-              this.ledger.emitter.emit("error", error)
-            })
-            .finally(() => {
-              // Update cursor in db.
-              this.state.externalTradesStreamCursor = record.paging_token
-              this.ledger.emitter.emit("stateUpdated", this, this.state)
-            })
+      const lastAttempt = Date.now()
+      stream.close = endpoint.cursor(this.state[cursor]).stream({
+        onmessage: (page: Horizon.ServerApi.CollectionPage<T>) => {
+          // Looks like there is a bug in typings, as the records received when steraming are not
+          // of type collection but single resources.
+          const record = page as unknown as T
+          logger.debug({page}, `Received Horizon stream event.`)
+          onMessage(record)
+          .catch((error) => {
+            this.ledger.emitter.emit("error", error)
+          })
+          .finally(() => {
+            // Update cursor in db.
+            this.state[cursor] = record.paging_token
+            this.ledger.emitter.emit("stateUpdated", this, this.state)
+          })
         },
-        onerror: (error) => {
+        onerror: (error: any) => {
           // "throw" error
           this.ledger.emitter.emit("error", error)
           // Close stream
-          this.closeExternalTradesStream()
-          // If last connection was made less than 5s ago, wait until 5s have passed
-          // and try to reconnect so we don't flood the server with requests.
+          if (stream.close) {
+            stream.close()
+          }
           const fromLastAttempt = Date.now() - lastAttempt
           const wait = Math.max(0, separationAttempt - fromLastAttempt)
-          sleep(wait).then(listen).catch((error) => {
+          sleep(wait).then(stream.listen).catch((error) => {
             this.ledger.emitter.emit("error", error)
           })
         },
         reconnectTimeout: 5*60*1000 // 5 min
       })
-      logger.info(`Listening external trades for currency ${this.config.code}`)
     }
 
-    listen()
+    stream.listen()
+  }
+  start() {  
+    this.listenStream("externalTrades", "externalTradesStreamCursor", 
+      this.ledger.server.trades().forAccount(this.data.externalTraderPublicKey),
+      (trade) => this.handleExternalTradeEvent(trade)
+    )
+    // TODO: Listen for local payments too.
   }
 
   public stop() {
-    // Close all horizon stream connections.
-    this.started = false
-    this.closeExternalTradesStream()
+    for (const name of STREAM_NAMES) {
+      this.closeStream(name)
+    }
   }
 
-  private closeExternalTradesStream() {
-    if (this.externalTradesStream) {
-      this.externalTradesStream()
-      this.externalTradesStream = undefined
+  private closeStream(name: StreamName) {
+    const stream = this.streams[name]
+    if (stream.close) {
+      stream.close()
+      stream.close = undefined
+      stream.started = false
     }
   }
 
@@ -178,28 +194,6 @@ export class StellarCurrency implements LedgerCurrency {
       return false
     }
   }
-/*
-  async updateExternalTraderOffers(keys: {sponsor: Keypair, externalTrader: Keypair}) {
-    const trader = await this.externalTraderAccount()
-    // All balances for trader account
-    const balances = trader.balances()
-    // All sell offers for trader account
-    const offers = await this.ledger.server.offers().forAccount(this.data.externalTraderPublicKey).call()
-    const findOfferSelling = (asset: Asset) => offers.records.find((o) => o.selling.asset_issuer == asset.issuer && o.selling.asset_code == asset.code)
-    for (const balance of balances) {
-      if (balance.asset.equals(this.asset()) && Big(balance.balance).gt(0)) {
-        // Update outgoingTradeOffer.
-        const offer = findOfferSelling(this.asset())
-        if (offer?.amount != balance.balance) {
-
-        }
-      } else if (balance.asset.code == StellarCurrency.GLOBAL_ASSET_CODE && Big(balance.balance).gt(0)) {
-        // Update incomingTradeOffer.
-
-      }
-    }
-  }
-*/
 
   /**
    * This function checks the offer from the external trader account that is selling the given asset

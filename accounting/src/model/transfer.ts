@@ -1,7 +1,7 @@
 import { AtLeast } from "src/utils/types"
 import { Account } from "./account"
 import { Transfer as TransferRecord } from "@prisma/client"
-import { hash } from "@stellar/stellar-sdk"
+import { User } from "."
 
 /**
  * Possible state transitions for a transfer.
@@ -31,9 +31,12 @@ export interface Transfer {
   
   payer: Account
   payee: Account
+
+  user: User
 }
 
-export type InputTransfer = AtLeast<Omit<Transfer, "created" | "updated" | "payer" | "payee">, "amount" | "meta" | "state"> & {payerId: string, payeeId: string}
+export type InputTransfer = AtLeast<Omit<Transfer, "created" | "updated" | "payer" | "payee">, "amount" | "meta" | "state"> & {payer: string, payee: string}
+export type UpdateTransfer = AtLeast<Omit<Transfer, "created" | "updated" | "payer" | "payee"> & {payer: string, payee: string}, "id">
 
 export const recordToTransfer = (record: TransferRecord, accounts: {payer: Account, payee: Account}): Transfer => ({
   id: record.id,
@@ -44,5 +47,6 @@ export const recordToTransfer = (record: TransferRecord, accounts: {payer: Accou
   created: record.created,
   updated: record.updated,
   payer: accounts.payer,
-  payee: accounts.payee
+  payee: accounts.payee,
+  user: {id: record.userId}
 })

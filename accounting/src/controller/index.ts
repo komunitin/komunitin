@@ -1,6 +1,6 @@
 
 import { CollectionOptions } from "../server/request";
-import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer } from "../model";
+import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer } from "../model";
 export { createController } from "./controller";
 import { Context } from "../utils/context";
 /**
@@ -31,4 +31,6 @@ export interface CurrencyController {
   
   // Transfers
   createTransfer(ctx: Context, transfer: InputTransfer): Promise<Transfer>
+  getTransfer(ctx: Context, id: string): Promise<Transfer>
+  updateTransfer(ctx: Context, transfer: UpdateTransfer): Promise<Transfer>
 }
