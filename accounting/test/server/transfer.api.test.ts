@@ -1,11 +1,12 @@
 import { describe, before, after, it } from "node:test"
 import assert from "node:assert"
-import { client } from "./net.client"
+import { client, norl } from "./net.client"
 import { ExpressExtended, closeApp, createApp } from "src/server/app"
 import { clearDb } from "./db"
 import { server } from "./net.mock"
 import { Scope } from "src/server/auth"
 import { validate as isUuid } from "uuid"
+import { config } from "src/config"
 
 
 describe('Transfer endpoints', async () => {
@@ -224,6 +225,52 @@ describe('Transfer endpoints', async () => {
     await api.patch(`/TEST/transfers/${transfer.id}`, {
       data: { attributes: { amount: 200 } }
     }, undefined, 401)
+  })
+
+  await it('get transfer', async () => {
+    const transfer = await payment(account1.id, account2.id, 100, "Get transfer", "new", user2)
+    const response = await api.get(`/TEST/transfers/${transfer.id}`, user2)
+    const fetchedTransfer = response.body.data
+    assert.equal(fetchedTransfer.id, transfer.id)
+    assert.equal(fetchedTransfer.attributes.amount, 100)
+    assert.equal(fetchedTransfer.attributes.meta, "Get transfer")
+    assert.equal(fetchedTransfer.attributes.state, "new")
+    assert.equal(fetchedTransfer.relationships.payer.data.id, account1.id)
+    assert.equal(fetchedTransfer.relationships.payee.data.id, account2.id)
+
+    // unauthorized get
+    await api.get(`/TEST/transfers/${transfer.id}`, undefined, 401)
+    // allowed get by other party
+    await api.get(`/TEST/transfers/${transfer.id}`, user3)
+    // forbidden get by unrelated user
+    await createAccount("4")
+    await api.get(`/TEST/transfers/${transfer.id}`, { user: "4", scopes: [Scope.Accounting] }, 403)
+  })
+
+  await it('list transfers', async () => {
+    const response = await api.get('/TEST/transfers?page[size]=3&sort=-created', user2)    
+    assert.equal(response.body.data.length, 3)
+    assert.equal(response.body.links.prev, null)
+    assert.equal(norl(response.body.links.next), norl("/TEST/transfers?page[size]=3&sort=-created&page[after]=3"))
+    const transfers = response.body.data
+    // Last transfer
+    assert.equal(transfers[0].attributes.meta, "Get transfer")
+    assert.equal(transfers[0].attributes.amount, 100)
+    assert.equal(transfers[0].attributes.state, "new")
+    assert.equal(transfers[0].relationships.payer.data.id, account1.id)
+    assert.equal(transfers[0].relationships.payee.data.id, account2.id)
+
+    const response2 = await api.get(norl(response.body.links.next), user2)
+    assert.equal(response2.body.data.length, 3)
+    assert.notEqual(response2.body.data[0].id, transfers[0].id)
+    assert.equal(norl(response2.body.links.prev), norl("/TEST/transfers?page[size]=3&sort=-created&page[after]=0"))
+    assert.equal(norl(response2.body.links.next), norl("/TEST/transfers?page[size]=3&sort=-created&page[after]=6"))
+
+    const response3 = await api.get(norl(response2.body.links.next), user2)
+    assert.equal(response3.body.data.length, 2)
+    assert.equal(norl(response3.body.links.prev), norl("/TEST/transfers?page[size]=3&sort=-created&page[after]=3"))
+    assert.equal(response3.body.links.next, null)
+
   })
 
   after(async () => {

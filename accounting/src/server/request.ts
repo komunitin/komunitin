@@ -102,6 +102,11 @@ export type CollectionOptions = {
   sort: SortOptions
   include: string[]
 }
+export type CollectionParamsOptions = {
+  filter?: string[],
+  sort: string[],
+  include?: string[]
+}
 /**
  * Return the request pagination, filtering and sort parameters. 
  * 
@@ -119,11 +124,7 @@ export type CollectionOptions = {
  * @param options the filter and sort fields to allow
  * @returns 
  */
-export const collectionParams = (req: Request, options: {
-  filter?: string[],
-  sort: string[],
-  include?: string[]
-}): CollectionOptions => {
+export const collectionParams = (req: Request, options: CollectionParamsOptions): CollectionOptions => {
   return {
     pagination: pagination(req),
     filters: filters(req, options?.filter ?? []),
@@ -131,10 +132,8 @@ export const collectionParams = (req: Request, options: {
     include: include(req, options?.include ?? [])
   }
 }
-
-export const resourceParams = (req: Request, options: {
-  include?: string[]
-}): ResourceOptions => {
+export type ResourceParamsOptions = { include?: string[] }
+export const resourceParams = (req: Request, options: ResourceParamsOptions): ResourceOptions => {
   return {
     include: include(req, options?.include ?? [])
   }

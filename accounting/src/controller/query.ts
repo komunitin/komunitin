@@ -16,3 +16,10 @@ export const whereFilter = (filter: Record<string, string | string[]>) => {
   }
   return where
 }
+
+export const includeRelations = (include: string[] | undefined) => {
+  if (!include) {
+    return undefined
+  }
+  return Object.fromEntries(include.map((relation) => [relation, true]))
+}

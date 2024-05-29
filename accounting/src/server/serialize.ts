@@ -1,5 +1,5 @@
 import { Currency, User, Account, Transfer } from '../model';
-import { Relator, Serializer } from 'ts-japi';
+import { Paginator, Relator, Serializer, SingleOrArray } from 'ts-japi';
 
 const projection = <T>(fields: (keyof T)[]) => {
   return Object.fromEntries(fields.map(field => [field, 1]))

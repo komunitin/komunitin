@@ -23,14 +23,15 @@ export interface CurrencyController {
   
   // Accounts
   createAccount(ctx: Context, account: InputAccount): Promise<Account>
-  getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]>
   getAccount(ctx: Context, id: string): Promise<Account>
   getAccountByCode(ctx: Context, code: string): Promise<Account|undefined>
+  getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]>
   updateAccount(ctx: Context, data: UpdateAccount): Promise<Account>;
   deleteAccount(ctx: Context, id: string): Promise<void>;
   
   // Transfers
   createTransfer(ctx: Context, transfer: InputTransfer): Promise<Transfer>
   getTransfer(ctx: Context, id: string): Promise<Transfer>
+  getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]>
   updateTransfer(ctx: Context, transfer: UpdateTransfer): Promise<Transfer>
 }

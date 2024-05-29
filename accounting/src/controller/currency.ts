@@ -1,17 +1,17 @@
 import { LedgerCurrency, LedgerCurrencyState } from "../ledger";
 import { CurrencyController } from ".";
-import { Account, InputAccount, UpdateAccount, recordToAccount } from "../model/account";
 import { TenantPrismaClient } from "./multitenant";
 import { Keypair } from "@stellar/stellar-sdk";
-import { decrypt, encrypt } from "src/utils/crypto";
-import type {KeyObject} from "node:crypto"
-import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency } from "src/model/currency";
-import { badRequest, forbidden, internalError, notFound, notImplemented } from "src/utils/error";
-import { CollectionOptions } from "src/server/request";
-import { whereFilter } from "./filter";
-import { InputTransfer, Transfer, TransferState, UpdateTransfer, User, recordToTransfer } from "src/model";
-import { Context } from "src/utils/context";
-import { AtLeast, WithRequired } from "src/utils/types";
+import { decrypt, encrypt } from "../utils/crypto";
+import type { KeyObject } from "node:crypto"
+import { badRequest, forbidden, notFound, notImplemented } from "../utils/error";
+import { CollectionOptions } from "../server/request";
+import { includeRelations, whereFilter } from "./query";
+import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency, Account, 
+  InputAccount, UpdateAccount, recordToAccount, InputTransfer, Transfer, 
+  TransferState, UpdateTransfer, User, recordToTransfer } from "../model";
+import { Context } from "../utils/context";
+import { AtLeast, WithRequired } from "../utils/types";
 import Big from "big.js";
 
 /**
@@ -72,6 +72,10 @@ export class LedgerCurrencyController implements CurrencyController {
     return {id: record.id}
   }
 
+  private isAdmin(user:User) {
+    return user.id === this.model.admin?.id
+  }
+
   /**
    * Check that the current user is the currency owner.
    * @param ctx 
@@ -79,7 +83,7 @@ export class LedgerCurrencyController implements CurrencyController {
    */
   private async checkAdmin(ctx: Context): Promise<User> {
     const user = await this.checkUser(ctx)
-    if (user.id !== this.model.admin?.id) {
+    if (!this.isAdmin(user)) {
       throw forbidden("Only the currency owner can perform this operation")
     }
     return user
@@ -240,8 +244,8 @@ export class LedgerCurrencyController implements CurrencyController {
     const records = await this.db.account.findMany({
       where: {
         currencyId: this.model.id,
+        status: "active",
         ...filter,
-        status: "active"
       },
       orderBy: {
         [params.sort.field]: params.sort.order
@@ -256,7 +260,7 @@ export class LedgerCurrencyController implements CurrencyController {
   async deleteAccount(ctx: Context, id: string): Promise<void> {
     const user = await this.checkUser(ctx)
     const account = await this.getAccount(ctx, id)
-    if (!(this.model.admin?.id === user.id || account.users.some(u => u.id === user.id))) {
+    if (!(this.isAdmin(user) || account.users.some(u => u.id === user.id))) {
       throw forbidden("User is not allowed to delete this account")
     }
     const ledgerAccount = await this.ledger.getAccount(account.key)
@@ -307,7 +311,7 @@ export class LedgerCurrencyController implements CurrencyController {
     const payee = await this.getAccount(ctx, data.payee)
 
     // Check that the user is allowed to transfer from the payer account.
-    if (!(user.id == this.model.admin?.id || payer.users.some(u => u.id === user.id))) {
+    if (!(this.isAdmin(user) || payer.users.some(u => u.id === user.id))) {
       throw forbidden("User is not allowed to transfer from this account")
     }
 
@@ -345,7 +349,7 @@ export class LedgerCurrencyController implements CurrencyController {
     if (state == "committed" && ["new", "accepted"].includes(transfer.state)) {
       transfer.state = "submitted"
       try {
-        const transaction = await this.submitTransfer(transfer, user.id === this.model.admin?.id)
+        const transaction = await this.submitTransfer(transfer, this.isAdmin(user))
         transfer.hash = transaction.hash
         transfer.state = "committed"
       } catch (e) {
@@ -436,7 +440,7 @@ export class LedgerCurrencyController implements CurrencyController {
       throw notFound(`Transfer with id ${id} not found`)
     }
     // Transfers can be accessed by admin and by involved parties.
-    if (user.id !== this.model.admin?.id && ![transfer.payer, transfer.payee].some(a => a.users.some(u => u.id === user.id))) {
+    if (!this.isAdmin(user) && ![transfer.payer, transfer.payee].some(a => a.users.some(u => u.id === user.id))) {
       throw forbidden("User is not allowed to access this transfer")
     }
     
@@ -444,8 +448,44 @@ export class LedgerCurrencyController implements CurrencyController {
       payer: recordToAccount(transfer.payer, this.model),
       payee: recordToAccount(transfer.payee, this.model)
     })
-
   }
+
+  public async getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]> {
+    const user = await this.checkUser(ctx)
+    
+    const where = whereFilter(params.filters)
+    
+    // Regular users can only transfers where they are involved.
+    if (!this.isAdmin(user)) {
+      where.OR = [
+        {payer: {users: {some: {id: user.id}}}},
+        {payee: {users: {some: {id: user.id}}}}
+      ]
+    }
+
+    const include = includeRelations(params.include)
+
+    const records = await this.db.transfer.findMany({
+      where,
+      orderBy: {
+        [params.sort.field]: params.sort.order
+      },
+      include: {
+        ...include,
+        // always include accounts.
+        payer: true,
+        payee: true
+      },
+      skip: params.pagination.cursor,
+      take: params.pagination.size,
+    }) 
+
+    return records.map(r => recordToTransfer(r, {
+      payer: recordToAccount(r.payer, this.model),
+      payee: recordToAccount(r.payee, this.model)
+    }))
+  }
+    
 
   /**
    * Implements {@link CurrencyController.updateTransfer}

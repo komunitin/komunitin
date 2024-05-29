@@ -3,6 +3,19 @@ import { Express } from "express"
 import request, { Response, Request } from "supertest"
 import assert from "node:assert"
 import { token } from "./auth.mock"
+import { config } from "src/config"
+
+/**
+ * Normalize URL for test comparison
+ */
+export function norl(url: string) {
+  // Absolute URL.
+  const urlObj = new URL(url, config.API_BASE_URL)
+  // Sort query string args & normalize the encoding of the URL
+  urlObj.searchParams.sort()
+  const norm = urlObj.href.replace(config.API_BASE_URL, "")
+  return norm
+}
 
 export function client(app: Express) {
   const completeRequest = async (req: Request, auth?: {user: string, scopes: Scope[]}, status: number = 200) => {
