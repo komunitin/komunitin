@@ -115,6 +115,12 @@ export function getRoutes(controller: SharedController) {
     }, TransferSerializer)
   )
 
+  router.delete('/:code/transfers/:id', auth(Scope.Accounting), asyncHandler(async (req, res) => {
+    const currencyController = await controller.getCurrencyController(req.params.code)
+    await currencyController.deleteTransfer(context(req), req.params.id)
+    res.status(204).end()
+  }))
+
   router.get('/:code/transfers/:id', auth(Scope.Accounting), 
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getTransfer(ctx, id)

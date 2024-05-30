@@ -69,11 +69,13 @@ describe('Payment requests', async () => {
       undefined, 401
     )
   })
+  
 
   it('immediate payment request', async () => {
     const response = await api.post('/TEST/transfers', testTransfer(account1.id, account2.id, 100, "Immediate request", "committed"), user2)
     assert.equal(response.body.data.type, 'transfers')
     assert.equal(response.body.data.attributes.state, "committed")
+    
     // check balances
     const response1 = await api.get(`/TEST/accounts/${account1.id}`, admin)
     assert.equal(response1.body.data.attributes.balance, -100)
@@ -81,7 +83,8 @@ describe('Payment requests', async () => {
     assert.equal(response2.body.data.attributes.balance, 100)
   })
 
-  it ('pending payment request', async() => {
+  let committed: {id: string}
+  it ('accept payment', async() => {
     const response = await api.post('/TEST/transfers', testTransfer(account2.id, account1.id, 100, "Pending request", "committed"), user1)
     assert.equal(response.body.data.attributes.state, "pending")
     // check balances not changed
@@ -92,11 +95,27 @@ describe('Payment requests', async () => {
     // approve transfer by payer
     const response3 = await api.patch(`/TEST/transfers/${response.body.data.id}`, { data: { attributes: { state: "committed" } } }, user2)
     assert.equal(response3.body.data.attributes.state, "committed")
+    committed = response3.body.data
     // check balances
     const response4 = await api.get(`/TEST/accounts/${account1.id}`, admin)
     assert.equal(response4.body.data.attributes.balance, 0)
     const response5 = await api.get(`/TEST/accounts/${account2.id}`, admin)
     assert.equal(response5.body.data.attributes.balance, 0)
+  })
+
+  let rejected: {id: string}
+  it('reject payment', async () => {
+    const response = await api.post('/TEST/transfers', testTransfer(account2.id, account1.id, 100, "Pending request", "committed"), user1)
+    assert.equal(response.body.data.attributes.state, "pending")
+    // reject transfer
+    const response2 = await api.patch(`/TEST/transfers/${response.body.data.id}`, { data: { attributes: { state: "rejected" } } }, user2)
+    assert.equal(response2.body.data.attributes.state, "rejected")
+    rejected = response2.body.data
+    // check balances
+    const response3 = await api.get(`/TEST/accounts/${account1.id}`, admin)
+    assert.equal(response3.body.data.attributes.balance, 0)
+    const response4 = await api.get(`/TEST/accounts/${account2.id}`, admin)
+    assert.equal(response4.body.data.attributes.balance, 0)
   })
 
   it ('invalid state updates', async() => {
@@ -107,19 +126,30 @@ describe('Payment requests', async () => {
     await api.patch(`/TEST/transfers/${transferId}`, { data: { attributes: { state: "pending" } } }, user1, 400)
     await api.patch(`/TEST/transfers/${transferId}`, { data: { attributes: { state: "submitted" } } }, user1, 400)
     await api.patch(`/TEST/transfers/${transferId}`, { data: { attributes: { state: "rejected" } } }, user1, 400)
+    await api.patch(`/TEST/transfers/${committed.id}`, { data: { attributes: { state: "rejected" } } }, user2, 400)
+    await api.patch(`/TEST/transfers/${rejected.id}`, { data: { attributes: { state: "committed" } } }, user2, 400)
   })
 
-  it('reject transfer', async () => {
-    const response = await api.post('/TEST/transfers', testTransfer(account2.id, account1.id, 100, "Pending request", "committed"), user1)
-    assert.equal(response.body.data.attributes.state, "pending")
-    // reject transfer
-    const response2 = await api.patch(`/TEST/transfers/${response.body.data.id}`, { data: { attributes: { state: "rejected" } } }, user2)
-    assert.equal(response2.body.data.attributes.state, "rejected")
-    // check balances
-    const response3 = await api.get(`/TEST/accounts/${account1.id}`, admin)
-    assert.equal(response3.body.data.attributes.balance, 0)
-    const response4 = await api.get(`/TEST/accounts/${account2.id}`, admin)
-    assert.equal(response4.body.data.attributes.balance, 0)
+  it('delete transfer', async () => {
+    // can't delete other's transfer
+    await api.delete(`/TEST/transfers/${rejected.id}`, user2, 403)
+    // can't delete committed transfer
+    await api.delete(`/TEST/transfers/${committed.id}`, user1, 400)
+
+    // delete rejected.
+    await api.delete(`/TEST/transfers/${rejected.id}`, user1, 204)
+    // delete new
+    const response = await api.post("/test/transfers", testTransfer(account2.id, account1.id, 100, "Draft", "new"), user1)
+    await api.delete(`/TEST/transfers/${response.body.data.id}`, user1, 204)
+    // delete pending
+    const response2 = await api.post("/test/transfers", testTransfer(account2.id, account1.id, 100, "Pending", "new"), user1)
+    await api.delete(`/TEST/transfers/${response2.body.data.id}`, user1, 204)
+
+    const result = await api.get(`/TEST/transfers`, user1)
+    // Committed transfer still there
+    assert(result.body.data.some((t: {id: string}) => t.id === committed.id))
+    // But rejected one not there anymore.
+    assert(!result.body.data.some((t: {id: string}) => t.id === rejected.id))
   })
 
   after(async () => {

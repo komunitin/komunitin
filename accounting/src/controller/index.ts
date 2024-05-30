@@ -37,4 +37,5 @@ export interface CurrencyController {
   getTransfer(ctx: Context, id: string): Promise<Transfer>
   getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]>
   updateTransfer(ctx: Context, transfer: UpdateTransfer): Promise<Transfer>
+  deleteTransfer(ctx: Context, id: string): Promise<void>
 }

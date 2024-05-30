@@ -366,7 +366,7 @@ export class LedgerCurrencyController implements CurrencyController {
     // Transitions available to users:
     const transitions = {
       new: ["committed", "deleted"],
-      pending: ["rejected", "committed"],
+      pending: ["rejected", "committed", "deleted"],
       rejected: ["deleted"],
       failed: ["deleted"],
     }
@@ -560,6 +560,8 @@ export class LedgerCurrencyController implements CurrencyController {
       ]
     }
 
+    where.state = {not: "deleted"}
+
     const include = includeRelations(params.include)
 
     const records = await this.db.transfer.findMany({
@@ -629,6 +631,12 @@ export class LedgerCurrencyController implements CurrencyController {
     }
 
     return transfer
+  }
+
+  public async deleteTransfer(ctx: Context, id: string): Promise<void> {
+    const user = await this.checkUser(ctx)
+    const transfer = await this.getTransfer(ctx, id)
+    await this.updateTransferState(transfer, "deleted", user)
   }
 
   private async storeKey(key: Keypair) {
