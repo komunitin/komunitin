@@ -67,3 +67,7 @@ export const recordToAccount = (record: AccountRecord & {users?: UserRecord[]}, 
     }
   }
 }
+
+export const userHasAccount = (user: User, account: Account): boolean | undefined => {
+  return account.users?.some(u => u.id === user.id)
+}

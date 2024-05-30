@@ -90,7 +90,7 @@ export namespace Validators {
   const isCreateTransferAttributes = (path: string) => [
     body(`${path}.meta`).isString(),
     body(`${path}.amount`).isInt({gt: 0}),
-    body(`${path}.state`).isIn(["new", "committed"]),
+    body(`${path}.state`).isIn(["new", "committed", "rejected", "deleted"]),
   ]
 
   const isResourceId = (path: string, type: string) => [

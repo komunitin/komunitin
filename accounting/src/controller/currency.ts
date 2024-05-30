@@ -4,13 +4,14 @@ import { TenantPrismaClient } from "./multitenant";
 import { Keypair } from "@stellar/stellar-sdk";
 import { decrypt, encrypt } from "../utils/crypto";
 import type { KeyObject } from "node:crypto"
-import { badRequest, forbidden, notFound, notImplemented } from "../utils/error";
+import { badRequest, forbidden, internalError, notFound, notImplemented } from "../utils/error";
 import { CollectionOptions } from "../server/request";
 import { includeRelations, whereFilter } from "./query";
 import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency, Account, 
   InputAccount, UpdateAccount, recordToAccount, InputTransfer, Transfer, 
   TransferState, UpdateTransfer, User, recordToTransfer, 
-  AccountSettings} from "../model";
+  AccountSettings,
+  userHasAccount} from "../model";
 import { Context } from "../utils/context";
 import { AtLeast, WithRequired } from "../utils/types";
 import Big from "big.js";
@@ -261,7 +262,7 @@ export class LedgerCurrencyController implements CurrencyController {
   async deleteAccount(ctx: Context, id: string): Promise<void> {
     const user = await this.checkUser(ctx)
     const account = await this.getAccount(ctx, id)
-    if (!(this.isAdmin(user) || account.users.some(u => u.id === user.id))) {
+    if (!(this.isAdmin(user) || userHasAccount(user, account))) {
       throw forbidden("User is not allowed to delete this account")
     }
     const ledgerAccount = await this.ledger.getAccount(account.key)
@@ -312,7 +313,7 @@ export class LedgerCurrencyController implements CurrencyController {
     const payee = await this.getAccount(ctx, data.payee)
 
     // Check that the user is allowed to transfer from the payer account.
-    if (!(this.isAdmin(user) || payer.users.some(u => u.id === user.id))) {
+    if (!(this.isAdmin(user) || userHasAccount(user, payer) || userHasAccount(user, payee))) {
       throw forbidden("User is not allowed to transfer from this account")
     }
 
@@ -320,7 +321,8 @@ export class LedgerCurrencyController implements CurrencyController {
     if (payer.currency.id !== payee.currency.id) {
       throw badRequest("Payer and payee must be in the same currency")
     }
-    // Create the transaction in the DB
+
+    // Create the transaction in the DB with state "new".
     const record = await this.db.transfer.create({
       data: {
         id: data.id,
@@ -332,45 +334,107 @@ export class LedgerCurrencyController implements CurrencyController {
         user: { connect: { id: user.id } }
       }
     })
-    let transfer = recordToTransfer(record, {payer,payee})
+    const transfer = recordToTransfer(record, {payer,payee})
     
-    if (data.state === "committed") {
-      transfer = await this.setTransferState(transfer, "committed", user)
-    }
+    await this.updateTransferState(transfer, data.state, user)
 
     return transfer
   }
 
   /**
-   * Moves the transfer to the specified state. This function does not check authorisation.
+   * Try move the transfer to the desired state. The outcome can be the desired state,
+   * a different intermediate state or a failed state. If the user is not authorized to
+   * perform the transition or in other error cases, an error is thrown.
+   * 
+   * new ?-> pending | submitted
+   * pending ?-> submitted | rejected
+   * rejected ?-> deleted
+   * submitted -> committed | failed
+   * failed ?-> deleted
    * @returns 
    */
-  private async setTransferState(transfer: Transfer, state: TransferState, user: User) {
-    // "new" | "accepted" => "committed" | "failed"
-    if (state == "committed" && ["new", "accepted"].includes(transfer.state)) {
-      transfer.state = "submitted"
-      try {
-        const transaction = await this.submitTransfer(transfer, this.isAdmin(user))
-        transfer.hash = transaction.hash
-        transfer.state = "committed"
-      } catch (e) {
-        transfer.state = "failed"
-        throw e
-      } finally {
-        await this.db.transfer.update({
-          data: {
-            state: transfer.state,
-            hash: transfer.hash
-          },
-          where: {id: transfer.id}
-        })
-      }
-    }
-    else {
-      throw notImplemented(`Transition from "${transfer.state}" to "${state}" not implemented`)
+  private async updateTransferState(transfer: Transfer, state: TransferState, user: User) {
+    // Allow identity transitions.
+    if (transfer.state == state) {
+      return
     }
     
-    return transfer
+    if (["submitted", "pending", "failed"].includes(state)) {
+      throw badRequest(`State "${state}" is only set by the system`)
+    }
+
+    // Transitions available to users:
+    const transitions = {
+      new: ["committed"],
+      pending: ["rejected", "committed"],
+      rejected: ["deleted"],
+      failed: ["deleted"],
+    }
+    
+    if (!(transfer.state in transitions) || !transitions[transfer.state as keyof typeof transitions].includes(state)) {
+      throw badRequest(`Invalid state transition from ${transfer.state} to ${state}`)
+    }
+
+    // note that state can only be "committed", "rejected" or "deleted" at this point.
+
+    const saveState = async () => {
+      await this.db.transfer.update({
+        data: {
+          state: transfer.state,
+          hash: transfer.hash
+        },
+        where: {id: transfer.id}
+      })
+    }
+
+    // Trying to commit the transfer
+    if (state == "committed") {
+      // Cases for direct submission
+      // 1 - Admin user
+      // 2 - Payer user
+      // 3 - Payee user with automaticallyAcceptPayments flag
+      if (this.isAdmin(user) 
+        || userHasAccount(user, transfer.payer) 
+        || (userHasAccount(user, transfer.payee) && transfer.payer.settings.acceptPaymentsAutomatically)) {
+        transfer.state = "submitted"
+        try {
+          const transaction = await this.submitTransfer(transfer, this.isAdmin(user))
+          transfer.hash = transaction.hash
+          transfer.state = "committed"
+        } catch (e) {
+          transfer.state = "failed"
+          throw e
+        } finally {
+          await saveState()
+        }
+      // Payment request with payer user without automaticallyAcceptPayments flag
+      } else if (userHasAccount(user, transfer.payee)) {
+        transfer.state = "pending"
+        await saveState()
+      } else {
+        throw forbidden("User is not allowed to commit this transfer")
+      }
+    }
+
+    if (state == "rejected") { 
+      if (userHasAccount(user, transfer.payer)) {
+        transfer.state = "rejected"
+        await saveState()
+      } else {
+        throw forbidden("User is not allowed to reject this transfer")
+      }
+    }
+
+    if (state == "deleted") {
+      // Only transfer creator can delete it.
+      if (this.isAdmin(user) || transfer.user.id == user.id) {
+        transfer.state = "deleted"
+        await saveState()
+      } else {
+        throw forbidden("User is not allowed to delete this transfer")
+      }
+    }
+
   }
 
   private async submitTransfer(transfer: Transfer, admin = false) {
@@ -413,7 +477,7 @@ export class LedgerCurrencyController implements CurrencyController {
   public async getAccountSettings(ctx: Context, id: string): Promise<AccountSettings> {
     const user = await this.checkUser(ctx)
     const account = await this.getAccount(ctx, id)
-    if (!this.isAdmin(user) && !account.users.some(u => u.id === user.id)) {
+    if (!this.isAdmin(user) && !userHasAccount(user, account)) {
       throw forbidden("User is not allowed to access this account settings")
     }
     return {
@@ -425,7 +489,7 @@ export class LedgerCurrencyController implements CurrencyController {
   public async updateAccountSettings(ctx: Context, settings: AccountSettings ): Promise<AccountSettings> {
     const user = await this.checkUser(ctx)
     const account = await this.getAccount(ctx, settings.id as string)
-    if (!this.isAdmin(user) && !account.users.some(u => u.id === user.id)) {
+    if (!this.isAdmin(user) && !userHasAccount(user, account)) {
       throw forbidden("User is not allowed to update this account settings")
     }
     const record = await this.db.account.update({
@@ -472,15 +536,15 @@ export class LedgerCurrencyController implements CurrencyController {
     if (!transfer) {
       throw notFound(`Transfer with id ${id} not found`)
     }
+    const payer = recordToAccount(transfer.payer, this.model)
+    const payee = recordToAccount(transfer.payee, this.model)
+
     // Transfers can be accessed by admin and by involved parties.
-    if (!this.isAdmin(user) && ![transfer.payer, transfer.payee].some(a => a.users.some(u => u.id === user.id))) {
+    if (!(this.isAdmin(user) || userHasAccount(user, payer) || userHasAccount(user, payee))) {
       throw forbidden("User is not allowed to access this transfer")
     }
     
-    return recordToTransfer(transfer, {
-      payer: recordToAccount(transfer.payer, this.model),
-      payee: recordToAccount(transfer.payee, this.model)
-    })
+    return recordToTransfer(transfer, { payer, payee })
   }
 
   public async getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]> {
@@ -560,16 +624,8 @@ export class LedgerCurrencyController implements CurrencyController {
     }
 
     // Update state
-    if (data.state !== undefined && data.state !== transfer.state) {
-      // Transfer commit.
-      if (transfer.state == "new" && data.state == "committed") {
-        if (user.id !== transfer.user.id) {
-          throw forbidden("User is not allowed to commit this transfer")
-        }
-        transfer = await this.setTransferState(transfer, data.state, user)
-      } else {
-        throw badRequest(`Invalid state transition from ${transfer.state} to ${data.state}`)
-      }
+    if (data.state !== undefined ) {
+      await this.updateTransferState(transfer, data.state, user)
     }
 
     return transfer
