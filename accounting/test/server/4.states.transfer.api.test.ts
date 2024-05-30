@@ -139,10 +139,10 @@ describe('Payment requests', async () => {
     // delete rejected.
     await api.delete(`/TEST/transfers/${rejected.id}`, user1, 204)
     // delete new
-    const response = await api.post("/test/transfers", testTransfer(account2.id, account1.id, 100, "Draft", "new"), user1)
+    const response = await api.post("/TEST/transfers", testTransfer(account2.id, account1.id, 100, "Draft", "new"), user1)
     await api.delete(`/TEST/transfers/${response.body.data.id}`, user1, 204)
     // delete pending
-    const response2 = await api.post("/test/transfers", testTransfer(account2.id, account1.id, 100, "Pending", "new"), user1)
+    const response2 = await api.post("/TEST/transfers", testTransfer(account2.id, account1.id, 100, "Pending", "new"), user1)
     await api.delete(`/TEST/transfers/${response2.body.data.id}`, user1, 204)
 
     const result = await api.get(`/TEST/transfers`, user1)
