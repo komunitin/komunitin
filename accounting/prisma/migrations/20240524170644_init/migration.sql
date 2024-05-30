@@ -45,6 +45,7 @@ CREATE TABLE "Account" (
     "status" VARCHAR(31) NOT NULL DEFAULT 'active',
     "keyId" VARCHAR(255) NOT NULL,
     "currencyId" TEXT NOT NULL,
+    "acceptPaymentsAutomatically" BOOLEAN NOT NULL DEFAULT false,
     "balance" INTEGER NOT NULL,
     "creditLimit" INTEGER NOT NULL,
     "maximumBalance" INTEGER,

@@ -1,6 +1,6 @@
 
 import { CollectionOptions } from "../server/request";
-import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer } from "../model";
+import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings } from "../model";
 export { createController } from "./controller";
 import { Context } from "../utils/context";
 /**
@@ -28,6 +28,9 @@ export interface CurrencyController {
   getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]>
   updateAccount(ctx: Context, data: UpdateAccount): Promise<Account>;
   deleteAccount(ctx: Context, id: string): Promise<void>;
+
+  getAccountSettings(ctx: Context, id: string): Promise<AccountSettings>
+  updateAccountSettings(ctx: Context, settings: AccountSettings): Promise<AccountSettings>
   
   // Transfers
   createTransfer(ctx: Context, transfer: InputTransfer): Promise<Transfer>

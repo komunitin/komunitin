@@ -6,55 +6,24 @@ import { clearDb } from "./db"
 import { server } from "./net.mock"
 import { Scope } from "src/server/auth"
 import { validate as isUuid } from "uuid"
-import { config } from "src/config"
+import { testAccount, testCurrency, testTransfer, userAuth } from "./api.data"
 
 
 describe('Transfer endpoints', async () => {
   let app: ExpressExtended
   let api: ReturnType<typeof client>
 
-  const testCurrency = {
-    type: "currencies",
-    attributes: {
-      code: "TEST",
-      name: "Testy",
-      namePlural: "Testies",
-      symbol: "T$",
-      decimals: 2,
-      scale: 4,
-      rate: {n: 1, d: 10},
-      defaultCreditLimit: 1000
-    }
-  }
-  const admin = { user: "1", scopes: [Scope.Accounting] }
-  const user2 = { user: "2", scopes: [Scope.Accounting] }
-  const user3 = { user: "3", scopes: [Scope.Accounting] }
+  const admin = userAuth("1")
+  const user2 = userAuth("2")
+  const user3 = userAuth("3")
 
   const createAccount = async (user: string) => {
-    const response = await api.post('/TEST/accounts', {
-      data: {
-        relationships: {
-          users: { data: [{ type: "users", id: user }] }
-        }
-      },
-      included: [{ type: "users", id: user }]
-    }, admin)
+    const response = await api.post('/TEST/accounts', testAccount(user), admin)
     return response.body.data
   }
+
   const payment = async (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus = 200) => {
-    const response = await api.post('/TEST/transfers', {
-      data: {
-        attributes: {
-          amount,
-          meta,
-          state
-        },
-        relationships: {
-          payer: { data: { type: "accounts", id: payer }},
-          payee: { data: { type: "accounts", id: payee }}
-        }
-      }
-    }, auth, httpStatus)
+    const response = await api.post('/TEST/transfers', testTransfer(payer, payee, amount, meta, state), auth, httpStatus)
     return response.body.data
   }
 
@@ -66,7 +35,7 @@ describe('Transfer endpoints', async () => {
     api = client(app)
     server.listen({ onUnhandledRequest: "bypass" })
     // Create currency TEST
-    await api.post('/currencies', { data: testCurrency }, admin)
+    await api.post('/currencies', testCurrency(), admin)
     // Create 3 accounts
     account0 = await createAccount(admin.user)
     account1 = await createAccount(user2.user)

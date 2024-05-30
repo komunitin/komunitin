@@ -24,8 +24,14 @@ export interface Account {
 
   users?: User[]
   currency: Currency
-  // TODO UserSettings.
-  settings: undefined
+  
+  settings: AccountSettings
+}
+
+export interface AccountSettings {
+  // Same id as the account
+  id?: string
+  acceptPaymentsAutomatically: boolean 
 }
 
 // No input needed for creating an account (beyond implicit currency)!
@@ -45,6 +51,7 @@ export const recordToAccount = (record: AccountRecord & {users?: UserRecord[]}, 
   const users = record.users ? record.users.map(user => ({id: user.id})) : undefined;
   return {
     id: record.id,
+    status: record.status as AccountStatus,
     code: record.code,
     key: record.keyId,
     balance: record.balance,
@@ -55,6 +62,8 @@ export const recordToAccount = (record: AccountRecord & {users?: UserRecord[]}, 
     // Relationships
     users,
     currency,
-    settings: undefined
+    settings: {
+      acceptPaymentsAutomatically: record.acceptPaymentsAutomatically
+    }
   }
 }

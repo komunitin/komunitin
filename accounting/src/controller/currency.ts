@@ -9,7 +9,8 @@ import { CollectionOptions } from "../server/request";
 import { includeRelations, whereFilter } from "./query";
 import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency, Account, 
   InputAccount, UpdateAccount, recordToAccount, InputTransfer, Transfer, 
-  TransferState, UpdateTransfer, User, recordToTransfer } from "../model";
+  TransferState, UpdateTransfer, User, recordToTransfer, 
+  AccountSettings} from "../model";
 import { Context } from "../utils/context";
 import { AtLeast, WithRequired } from "../utils/types";
 import Big from "big.js";
@@ -406,6 +407,38 @@ export class LedgerCurrencyController implements CurrencyController {
     return Big(amount).times(Big(10).pow(this.model.scale)).toNumber()
   }
 
+  /**
+   * Implements {@link CurrencyController.getAccountSettings}
+   */
+  public async getAccountSettings(ctx: Context, id: string): Promise<AccountSettings> {
+    const user = await this.checkUser(ctx)
+    const account = await this.getAccount(ctx, id)
+    if (!this.isAdmin(user) && !account.users.some(u => u.id === user.id)) {
+      throw forbidden("User is not allowed to access this account settings")
+    }
+    return {
+      id: account.id,
+      ...account.settings
+    }
+  }
+
+  public async updateAccountSettings(ctx: Context, settings: AccountSettings ): Promise<AccountSettings> {
+    const user = await this.checkUser(ctx)
+    const account = await this.getAccount(ctx, settings.id as string)
+    if (!this.isAdmin(user) && !account.users.some(u => u.id === user.id)) {
+      throw forbidden("User is not allowed to update this account settings")
+    }
+    const record = await this.db.account.update({
+      data: { ...settings },
+      where: { id: account.id }
+    })
+    const updated = recordToAccount(record, this.model)
+    return {
+      id: updated.id,
+      ...updated.settings
+    }
+  }
+
   private async getFreeCode() {
     // We look for the maximum code of type "CODE1234", so we can have other codes ("CODESpecial").
     // Code numbers can have any length but are zero-padded until 4 digits.
@@ -452,7 +485,7 @@ export class LedgerCurrencyController implements CurrencyController {
 
   public async getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]> {
     const user = await this.checkUser(ctx)
-    
+
     const where = whereFilter(params.filters)
     
     // Regular users can only transfers where they are involved.

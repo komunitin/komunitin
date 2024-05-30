@@ -1,4 +1,4 @@
-import { Currency, User, Account, Transfer } from '../model';
+import { Currency, User, Account, Transfer, AccountSettings } from '../model';
 import { Paginator, Relator, Serializer, SingleOrArray } from 'ts-japi';
 
 const projection = <T>(fields: (keyof T)[]) => {
@@ -44,4 +44,9 @@ export const TransferSerializer = new Serializer<Transfer>("transfers", {
       return transfer.payee
     }, AccountSerializer, { relatedName: "payee" })
   }
+})
+
+export const AccountSettingsSerializer = new Serializer<AccountSettings>("account-settings", {
+  version: null,
+  projection: projection<AccountSettings>(['acceptPaymentsAutomatically'])
 })

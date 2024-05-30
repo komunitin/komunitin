@@ -135,6 +135,12 @@ export namespace Validators {
     ...isUpdateTransferRelationships("data.relationships")
   ]
 
+  export const isUpdateAccountSettings = () => [
+    ...jsonApiDoc("account-settings"),
+    body("data.id").optional().isUUID(), // id optional as currency is identified by route.
+    body("data.attributes.acceptPaymentsAutomatically").isBoolean(),
+  ]
+
 }
 
 

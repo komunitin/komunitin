@@ -6,9 +6,9 @@ import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourcePa
 import { Scope, auth, noAuth } from './auth';
 import { Context, context } from 'src/utils/context';
 import { input } from './parse';
-import { AccountSerializer, CurrencySerializer, TransferSerializer } from './serialize';
+import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, TransferSerializer } from './serialize';
 import { Dictionary, Serializer } from 'ts-japi';
-import { InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
+import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
 import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
 
 export function getRoutes(controller: SharedController) {
@@ -83,8 +83,18 @@ export function getRoutes(controller: SharedController) {
   )
 
   // Get account settings
-  // Update account settings
+  router.get('/:code/accounts/:id/settings', auth(Scope.Accounting),
+    currencyResourceHandler(controller, async (currencyController, ctx, id) => {
+      return await currencyController.getAccountSettings(ctx, id)
+    }, AccountSettingsSerializer, {})
+  )
 
+  // Update account settings
+  router.patch('/:code/accounts/:id/settings', auth(Scope.Accounting), checkExact(Validators.isUpdateAccountSettings()),
+    currencyInputHandler(controller, async (currencyController, ctx, data: AccountSettings) => {
+      return await currencyController.updateAccountSettings(ctx, data)
+    }, AccountSettingsSerializer)
+  )
   // Delete account.
   router.delete('/:code/accounts/:id', auth(Scope.Accounting), asyncHandler(async (req, res) => {
     const currencyController = await controller.getCurrencyController(req.params.code)

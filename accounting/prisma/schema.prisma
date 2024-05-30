@@ -89,6 +89,9 @@ model Account {
   currencyId String
 
   users     User[] @relation()
+  
+  // Settings defined by user.
+  acceptPaymentsAutomatically Boolean @default(false)
 
   // These three fields are just a cache from the Stellar network.
   balance        Int
