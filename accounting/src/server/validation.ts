@@ -90,7 +90,7 @@ export namespace Validators {
   const isCreateTransferAttributes = (path: string) => [
     body(`${path}.meta`).isString(),
     body(`${path}.amount`).isInt({gt: 0}),
-    body(`${path}.state`).isIn(["new", "committed", "rejected", "deleted"]),
+    body(`${path}.state`).isIn(["new", "committed"]),
   ]
 
   const isResourceId = (path: string, type: string) => [
@@ -113,7 +113,7 @@ export namespace Validators {
   const isUpdateTransferAttributes = (path: string) => [
     body(`${path}.meta`).optional().isString(),
     body(`${path}.amount`).optional().isInt({gt: 0}),
-    body(`${path}.state`).optional().isIn(["new", "committed"]),
+    body(`${path}.state`).optional().isIn(["new", "committed", "rejected", "deleted"]),
   ]
 
   const isOptionalResourceId = (path: string, type: string) => [

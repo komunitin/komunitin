@@ -365,7 +365,7 @@ export class LedgerCurrencyController implements CurrencyController {
 
     // Transitions available to users:
     const transitions = {
-      new: ["committed"],
+      new: ["committed", "deleted"],
       pending: ["rejected", "committed"],
       rejected: ["deleted"],
       failed: ["deleted"],

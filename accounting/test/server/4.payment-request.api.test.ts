@@ -99,6 +99,29 @@ describe('Payment requests', async () => {
     assert.equal(response5.body.data.attributes.balance, 0)
   })
 
+  it ('invalid state updates', async() => {
+    const response = await api.post('/TEST/transfers', testTransfer(account2.id, account1.id, 100, "Pending request", "new"), user1)
+    assert.equal(response.body.data.attributes.state, "new")
+    const transferId = response.body.data.id
+    // Invalid state updates
+    await api.patch(`/TEST/transfers/${transferId}`, { data: { attributes: { state: "pending" } } }, user1, 400)
+    await api.patch(`/TEST/transfers/${transferId}`, { data: { attributes: { state: "submitted" } } }, user1, 400)
+    await api.patch(`/TEST/transfers/${transferId}`, { data: { attributes: { state: "rejected" } } }, user1, 400)
+  })
+
+  it('reject transfer', async () => {
+    const response = await api.post('/TEST/transfers', testTransfer(account2.id, account1.id, 100, "Pending request", "committed"), user1)
+    assert.equal(response.body.data.attributes.state, "pending")
+    // reject transfer
+    const response2 = await api.patch(`/TEST/transfers/${response.body.data.id}`, { data: { attributes: { state: "rejected" } } }, user2)
+    assert.equal(response2.body.data.attributes.state, "rejected")
+    // check balances
+    const response3 = await api.get(`/TEST/accounts/${account1.id}`, admin)
+    assert.equal(response3.body.data.attributes.balance, 0)
+    const response4 = await api.get(`/TEST/accounts/${account2.id}`, admin)
+    assert.equal(response4.body.data.attributes.balance, 0)
+  })
+
   after(async () => {
     server.close()
     await closeApp(app)

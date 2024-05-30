@@ -106,8 +106,6 @@ describe('Transfer endpoints', async () => {
   await it('forbidden payment', async () => {
     // user not involved
     await payment(account0.id, account1.id, 10, "Unauthorized transfer", "committed", user3, 403)
-    // user is the payee
-    await payment(account1.id, account2.id, 10, "Unauthorized transfer", "committed", user3, 403)
   })
 
   await it('invalid payments', async () => {
