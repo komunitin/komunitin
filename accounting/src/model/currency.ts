@@ -7,11 +7,24 @@ import { User } from "./user";
 
 export { CurrencyRecord }
 
-// Currency model
+export type CurrencySettings = {
+  defaultInitialCreditLimit: number
+  defaultInitialMaximumBalance?: number
+  defaultAcceptPaymentsAutomatically?: boolean
+  defaultAcceptPaymentsWhitelist?: string[]
+  defaultAcceptPaymentsAfter?: number
+  defaultOnPaymentCreditLimit?: number
+}
+
+export type CurrencyStatus = "new" | "active"
+
+/**
+ * Currency model
+ */
 export interface Currency {
   id: string
   code: string
-  status: "new" | "active"
+  status: CurrencyStatus
     
   name: string
   namePlural: string
@@ -21,8 +34,7 @@ export interface Currency {
   scale: number
   rate: Rate
 
-  defaultCreditLimit: number
-  defaultMaximumBalance?: number
+  encryptionKey: string
 
   keys?: {
     issuer: string,
@@ -32,8 +44,7 @@ export interface Currency {
     externalIssuer: string
   }
 
-  encryptionKey: string
-
+  settings: CurrencySettings
   state: LedgerCurrencyState
 
   created: Date
@@ -51,6 +62,7 @@ export function currencyToRecord(currency: CreateCurrency | UpdateCurrency): Pri
   return {
     id: (currency as UpdateCurrency).id,
     code: currency.code,
+
     name: currency.name,
     namePlural: currency.namePlural,
     symbol: currency.symbol,
@@ -58,9 +70,9 @@ export function currencyToRecord(currency: CreateCurrency | UpdateCurrency): Pri
     scale: currency.scale,
     rateN: currency.rate?.n,
     rateD: currency.rate?.d,
-    defaultCreditLimit: currency.defaultCreditLimit,
-    defaultMaximumBalance: currency.defaultMaximumBalance ?? null,
-    externalTradesStreamCursor: currency.state?.externalTradesStreamCursor,
+
+    settings: currency.settings,
+    state: currency.state,
   }
 }
 
@@ -69,14 +81,15 @@ export const recordToCurrency = (record: CurrencyRecord): Currency => {
     id: record.id,
     code: record.code,
     status: record.status as Currency["status"],
+
     name: record.name,
     namePlural: record.namePlural,
     symbol: record.symbol,
     decimals: record.decimals,
     scale: record.scale,
     rate: { n: record.rateN, d: record.rateD },
-    defaultCreditLimit: record.defaultCreditLimit,
-    defaultMaximumBalance: record.defaultMaximumBalance ?? undefined,
+    
+    encryptionKey: record.encryptionKeyId,
     keys: record.issuerKeyId ? {
       issuer: record.issuerKeyId as string,
       credit: record.creditKeyId as string,
@@ -84,12 +97,13 @@ export const recordToCurrency = (record: CurrencyRecord): Currency => {
       externalTrader: record.externalTraderKeyId as string,
       externalIssuer: record.externalIssuerKeyId as string
     } : undefined,
-    encryptionKey: record.encryptionKeyId,
-    state: {
-      externalTradesStreamCursor: record.externalTradesStreamCursor
-    },
+    
+    settings: record.settings as CurrencySettings,
+    state: record.state as LedgerCurrencyState,
+    
     created: record.created,
     updated: record.updated,
+
     admin: {
       id: record.adminId
     }

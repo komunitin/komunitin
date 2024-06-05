@@ -36,8 +36,11 @@ describe('Currencies endpoints', async () => {
         decimals: 2,
         scale: 4,
         rate: {n: 1, d: 10},
-        defaultCreditLimit: 1000,
-        ...attributes
+        ...attributes,
+        settings: {
+          defaultInitialCreditLimit: 1000,
+          ...attributes.settings
+        },
       },
       relationships: {
         admins: {
@@ -61,7 +64,7 @@ describe('Currencies endpoints', async () => {
     assert.equal(response.body.data.attributes.name, 'Testy')
     assert.equal(response.body.data.attributes.rate.n, 1)
     assert.equal(response.body.data.attributes.rate.d, 10)
-    assert.equal(response.body.data.attributes.defaultCreditLimit, 1000)    
+    assert.equal(response.body.data.attributes.settings.defaultInitialCreditLimit, 1000)    
   })
 
   // Helper doing an authenticated post to /currencies, expecting a 400 error.
@@ -74,11 +77,11 @@ describe('Currencies endpoints', async () => {
 
   await it('create currency with maxBalance', async () => {
     // User 2 creates currency TES2 with maximum balance defined.
-    const currency = currencyPostBody({code:"TES2", defaultMaximumBalance: 5000, defaultCreditLimit: undefined}, "2")
+    const currency = currencyPostBody({code:"TES2", settings: { defaultMaximumBalance: 5000, defaultInitialCreditLimit: undefined }}, "2")
     const response = await api.post('/currencies', currency, admin2)
 
-    assert.equal(response.body.data.attributes.defaultMaximumBalance, 5000)
-    assert.equal(response.body.data.attributes.defaultCreditLimit, 0)
+    assert.equal(response.body.data.attributes.settings.defaultMaximumBalance, 5000)
+    assert.equal(response.body.data.attributes.settings.defaultInitialCreditLimit, 0)
   })
 
   it('repeated code', async () => badPost({code: "TES1"}))
@@ -87,7 +90,7 @@ describe('Currencies endpoints', async () => {
   it('incorrect div by zero rate', async () => badPost({code: "ERRO", rate: {n: 1, d: 0}}))
   it('incorrect zero rate', async () => badPost({code: "ERRO", rate: {n: 0, d: 1}}))
   it('incorrect negative rate', async () => badPost({code: "ERRO", rate: {n: -1, d: 1}}))
-  it('incorrect limit', async () => badPost({code: "ERRO", defaultCreditLimit: -1}))
+  it('incorrect limit', async () => badPost({code: "ERRO", settings: {defaultInitialCreditLimit: -1}}))
   
   // Only logged in users with komunitin_accounting scope can create currencies.
   it('unauthorized create', async () => {
@@ -121,12 +124,14 @@ describe('Currencies endpoints', async () => {
       attributes: {
         name: "Testy2",
         namePlural: "Testies2",
-        defaultCreditLimit: 1000
+        settings: {
+          defaultInitialCreditLimit: 1000
+        }
       }
     }}, admin2)
     assert.equal(response.body.data.attributes.name, 'Testy2')
     assert.equal(response.body.data.attributes.namePlural, 'Testies2')
-    assert.equal(response.body.data.attributes.defaultCreditLimit, 1000)
+    assert.equal(response.body.data.attributes.settings.defaultInitialCreditLimit, 1000)
   })
   it('currency code cant be updated', async () => {
     await api.patch('/TES2/currency', {data: { attributes: { code: "ERRO" } }}, admin2, 400)

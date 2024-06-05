@@ -3,10 +3,13 @@ import { CollectionOptions } from "../server/request";
 import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings } from "../model";
 export { createController } from "./controller";
 import { Context } from "../utils/context";
+import { Ledger } from "src/ledger";
 /**
  * Controller for operations not related to a particular currency.
  */
 export interface SharedController {
+  getLedger(): Ledger
+  
   createCurrency(ctx: Context, currency: CreateCurrency): Promise<Currency>
   getCurrencies(ctx: Context): Promise<Currency[]>
   getCurrency(ctx: Context, code: string): Promise<Currency>
@@ -25,6 +28,7 @@ export interface CurrencyController {
   createAccount(ctx: Context, account: InputAccount): Promise<Account>
   getAccount(ctx: Context, id: string): Promise<Account>
   getAccountByCode(ctx: Context, code: string): Promise<Account|undefined>
+  getAccountByKey(ctx: Context, key: string): Promise<Account|undefined>
   getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]>
   updateAccount(ctx: Context, data: UpdateAccount): Promise<Account>;
   deleteAccount(ctx: Context, id: string): Promise<void>;

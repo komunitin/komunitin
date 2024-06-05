@@ -10,7 +10,7 @@
 		"dev": "tsx --watch src/index.ts",
 		"test-ledger": "tsx --test test/ledger/*.ts",
 		"test-server": "prisma migrate reset --force && tsx --test --test-concurrency=1 test/server/*.test.ts",
-		"test-current": "tsx --test --test-concurrency=1 test/server/4.states.transfer.api.test.ts",
+		"test-current": "tsx --test --test-concurrency=1 test/server/4.*.test.ts",
 		"test": "pnpm test-ledger && pnpm test-server"
 	},
 	"dependencies": {

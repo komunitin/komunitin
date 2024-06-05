@@ -28,15 +28,30 @@ export interface Account {
   settings: AccountSettings
 }
 
-export interface AccountSettings {
+export type AccountSettings = {
   // Same id as the account
   id?: string
-  acceptPaymentsAutomatically: boolean 
+
+  // Payments from all accounts are automatically accepted
+  acceptPaymentsAutomatically?: boolean
+
+  // If acceptPaymentsAutomatically is false, this is a list of account id's
+  // for which payments are automatically accepted.
+  acceptPaymentsWhitelist?: string[]
+
+  // If acceptPaymentsAutomatically is false, accept payments after this
+  // period of time in seconds if no manual action is taken.
+  acceptPaymentsAfter?: number
+
+  // If present, the credit limit for this account is increased every
+  // time this account receives a payment by the same amount until the
+  // limit is reached.
+  onPaymentCreditLimit?: number
 }
 
 // No input needed for creating an account (beyond implicit currency)!
 export type InputAccount = Partial<Pick<Account, "users">>
-export type UpdateAccount = AtLeast<Pick<Account, "id" | "code" | "creditLimit" | "maximumBalance">, "id">
+export type UpdateAccount = AtLeast<Pick<Account, "id" | "code" | "creditLimit" | "maximumBalance" | "settings">, "id">
 
 export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInput {
   return {
@@ -44,6 +59,7 @@ export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInp
     code: account.code,
     creditLimit: account.creditLimit,
     maximumBalance: account.maximumBalance ?? null,
+    settings: account.settings,
   }
 }
 
@@ -54,17 +70,17 @@ export const recordToAccount = (record: AccountRecord & {users?: UserRecord[]}, 
     status: record.status as AccountStatus,
     code: record.code,
     key: record.keyId,
+    // Ledger cache
     balance: record.balance,
     creditLimit: record.creditLimit,
     maximumBalance: record.maximumBalance ?? undefined,
+    // Created and updated
     created: record.created,
     updated: record.updated,
     // Relationships
     users,
     currency,
-    settings: {
-      acceptPaymentsAutomatically: record.acceptPaymentsAutomatically
-    }
+    settings: record.settings as AccountSettings,
   }
 }
 

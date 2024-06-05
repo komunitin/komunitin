@@ -34,6 +34,10 @@ export function amountToLedger(currency: AtLeast<Currency, "scale">, amount: num
   return Big(amount).div(Big(10).pow(currency.scale)).toString()
 }
 
+export function amountFromLedger(currency: AtLeast<Currency, "scale">, amount: string) {
+  return Big(amount).times(Big(10).pow(currency.scale)).toNumber()
+}
+
 export class LedgerCurrencyController implements CurrencyController {
   model: Currency
   ledger: LedgerCurrency
@@ -103,7 +107,7 @@ export class LedgerCurrencyController implements CurrencyController {
     if (currency.rate && (currency.rate.n !== this.model.rate.n || currency.rate.d !== this.model.rate.d)) {
       throw notImplemented("Change the currency rate not implemented yet")
     }
-    // Note that changing defaultMaximumBalance or defaultCreditLimit does not affect existing accounts so
+    // Note that changing defaultMaximumBalance or defaultInitialCreditLimit does not affect existing accounts so
     // no heavy lifting to do.
 
     const data = currencyToRecord(currency)
@@ -119,7 +123,7 @@ export class LedgerCurrencyController implements CurrencyController {
 
   async updateState(state: LedgerCurrencyState) {
     await this.db.currency.update({
-      data: { ...state },
+      data: { state },
       where: { id: this.model.id }
     })
     this.model.state = state
@@ -139,7 +143,7 @@ export class LedgerCurrencyController implements CurrencyController {
     // get required keys from DB.
     const keys = {
       issuer: await this.retrieveKey(this.model.keys?.issuer as string),
-      credit: this.model.defaultCreditLimit > 0 ? await this.creditKey() : undefined,
+      credit: this.model.settings.defaultInitialCreditLimit > 0 ? await this.creditKey() : undefined,
       sponsor: await this.sponsorKey()
     }
     // Create account in ledger with default credit limit & max balance.
@@ -150,9 +154,19 @@ export class LedgerCurrencyController implements CurrencyController {
     const record = await this.db.account.create({
       data: {
         code,
-        creditLimit: this.model.defaultCreditLimit,
-        maximumBalance: this.model.defaultMaximumBalance,
+
+        // Initialize ledger values with what we have just created.
+        creditLimit: this.model.settings.defaultInitialCreditLimit,
+        maximumBalance: this.model.settings.defaultInitialMaximumBalance,
         balance: 0,
+
+        // Initialize account settings with currency defaults.
+        settings: {
+          acceptPaymentsAutomatically: this.model.settings.defaultAcceptPaymentsAutomatically,
+          acceptPaymentsWhitelist: this.model.settings.defaultAcceptPaymentsWhitelist,
+          acceptPaymentsAfter: this.model.settings.defaultAcceptPaymentsAfter,
+          onPaymentCreditLimit: this.model.settings.defaultOnPaymentCreditLimit
+        },
 
         currency: { connect: { id: this.model.id } },
         key: { connect: { id: keyId } },
@@ -229,6 +243,24 @@ export class LedgerCurrencyController implements CurrencyController {
       where: { 
         code,
         status: "active",
+      },
+      include: { users: true }
+    })
+    if (!record) {
+      return undefined
+    }
+    return recordToAccount(record, this.model)
+  }
+
+  /**
+   * Implements {@link CurrencyController.getAccountByKey}
+   */
+  async getAccountByKey(ctx: Context, key: string): Promise<Account | undefined> {
+    await this.checkUser(ctx)
+    const record = await this.db.account.findUnique({
+      where: { 
+        status: "active",
+        keyId: key,
       },
       include: { users: true }
     })
@@ -468,7 +500,7 @@ export class LedgerCurrencyController implements CurrencyController {
   }
 
   private amountFromLedger(amount: string) {
-    return Big(amount).times(Big(10).pow(this.model.scale)).toNumber()
+    return amountFromLedger(this.model, amount)
   }
 
   /**
@@ -492,8 +524,17 @@ export class LedgerCurrencyController implements CurrencyController {
     if (!this.isAdmin(user) && !userHasAccount(user, account)) {
       throw forbidden("User is not allowed to update this account settings")
     }
+
+    // Check that the user is only updating allowed settings.
+
+    // We can make this list configurable in the future.
+    const userSettings = ["acceptPaymentsAutomatically"]
+    if (!this.isAdmin(user) && Object.keys(settings).some(k => !["id", "type"].includes(k) && !userSettings.includes(k))) {
+      throw forbidden("User is not allowed to update this account setting")
+    }
+
     const record = await this.db.account.update({
-      data: { ...settings },
+      data: { settings },
       where: { id: account.id }
     })
     const updated = recordToAccount(record, this.model)

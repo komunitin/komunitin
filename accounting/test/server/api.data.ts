@@ -11,7 +11,9 @@ export const testCurrency = () => ({
       decimals: 2,
       scale: 4,
       rate: {n: 1, d: 10},
-      defaultCreditLimit: 1000
+      settings: {
+        defaultInitialCreditLimit: 1000
+      }
     }
   }
 })

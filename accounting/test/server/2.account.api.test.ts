@@ -6,24 +6,11 @@ import { client } from "./net.client"
 import { server } from "./net.mock"
 import { Scope } from "src/server/auth"
 import { clearDb } from "./db"
+import { testCurrency } from "./api.data"
 
 describe('Accounts endpoints', async () => {
   let app: ExpressExtended
   let api: ReturnType<typeof client>
-
-  const testCurrency = {
-    type: "currencies",
-    attributes: {
-      code: "TEST",
-      name: "Testy",
-      namePlural: "Testies",
-      symbol: "T$",
-      decimals: 2,
-      scale: 4,
-      rate: {n: 1, d: 10},
-      defaultCreditLimit: 1000
-    }
-  }
 
   const admin = { user: "1", scopes: [Scope.Accounting] }
   const user2 = { user: "2", scopes: [Scope.Accounting] }
@@ -35,7 +22,7 @@ describe('Accounts endpoints', async () => {
     api = client(app)
     server.listen({ onUnhandledRequest: "bypass" })
     // Create currency TEST
-    await api.post('/currencies', { data: testCurrency }, admin)
+    await api.post('/currencies', testCurrency(), admin)
   })
   
   after(async () => {

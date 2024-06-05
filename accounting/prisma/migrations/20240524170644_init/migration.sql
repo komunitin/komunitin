@@ -21,8 +21,8 @@ CREATE TABLE "Currency" (
     "scale" INTEGER NOT NULL,
     "rateN" INTEGER NOT NULL,
     "rateD" INTEGER NOT NULL,
-    "defaultCreditLimit" INTEGER NOT NULL,
-    "defaultMaximumBalance" INTEGER,
+    "settings" JSONB,
+    "state" JSONB,
     "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated" TIMESTAMP(3) NOT NULL,
     "encryptionKeyId" VARCHAR(255) NOT NULL,
@@ -31,7 +31,6 @@ CREATE TABLE "Currency" (
     "adminKeyId" VARCHAR(255),
     "externalIssuerKeyId" VARCHAR(255),
     "externalTraderKeyId" VARCHAR(255),
-    "externalTradesStreamCursor" VARCHAR(255) NOT NULL DEFAULT '0',
     "adminId" TEXT NOT NULL,
 
     CONSTRAINT "Currency_pkey" PRIMARY KEY ("id")
@@ -45,7 +44,7 @@ CREATE TABLE "Account" (
     "status" VARCHAR(31) NOT NULL DEFAULT 'active',
     "keyId" VARCHAR(255) NOT NULL,
     "currencyId" TEXT NOT NULL,
-    "acceptPaymentsAutomatically" BOOLEAN NOT NULL DEFAULT false,
+    "settings" JSONB,
     "balance" INTEGER NOT NULL,
     "creditLimit" INTEGER NOT NULL,
     "maximumBalance" INTEGER,

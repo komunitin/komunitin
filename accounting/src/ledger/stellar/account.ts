@@ -44,7 +44,8 @@ export class StellarAccount implements LedgerAccount {
         amount: r.amount,
         asset: new Asset(r.asset_code as string, r.asset_issuer),
         payer: r.from,
-        payee: r.to
+        payee: r.to,
+        hash: r.transaction_hash
       })))
       result = await result.next()
     } while(result.records.length > 0);
@@ -195,10 +196,19 @@ export class StellarAccount implements LedgerAccount {
     }))
     const transaction = await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
     
+    const transfer = {
+      amount: payment.amount,
+      asset: this.currency.asset(),
+      payer: this.account?.accountId() as string,
+      payee: payment.payeePublicKey,
+      hash: transaction.hash
+    }
+    
+    this.currency.ledger.emitter.emit("transfer", this.currency, transfer)
+    
     logger.info({hash: transaction.hash}, `Account ${this.account?.accountId()} paid ${payment.amount} to ${payment.payeePublicKey}`)
 
-    return transaction
-    
+    return transfer
   }
 
   /**
@@ -233,9 +243,22 @@ export class StellarAccount implements LedgerAccount {
     }))
 
     const transaction = await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
+
+    const transfer = {
+      amount: payment.amount,
+      asset: payment.path.destAsset as Asset,
+      payer: this.account?.accountId() as string,
+      payee: payment.payeePublicKey,
+      hash: transaction.hash,
+      sourceAsset: payment.path.sourceAsset as Asset,
+      // We may need to get the source amount from the result instead of directly
+      // take this amount, but in our case of 1:1 exchange rate, it must be the same.
+      sourceAmount: payment.path.sourceAmount
+    }
+
     logger.info({hash: transaction.hash}, `Account ${this.account?.accountId()} paid ${payment.amount} ${payment.path.destAsset.code} to ${payment.payeePublicKey} through path`)
     
-    return transaction
+    return transfer
   }
     
 

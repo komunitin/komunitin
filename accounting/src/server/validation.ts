@@ -17,7 +17,17 @@ export namespace Validators {
     ...jsonApiAnyResource("included.*"),
   ]
 
-  const isCurrencyUpdateAttributes = (path: string) => [
+  const isUpdateCurrencySettings = (path: string) => [
+    body(`${path}`).optional(),
+    body(`${path}.defaultInitialCreditLimit`).optional().isInt({min: 0}).default(0),
+    body(`${path}.defaultInitialMaximumBalance`).optional().isInt({min: 0}),
+    body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.defaultAcceptPaymentsWhitelist`).optional().isArray(),
+    body(`${path}.defaultAcceptPaymentsAfter`).optional().isInt({min: 0}),
+    body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
+  ]
+
+  const isUpdateCurrencyAttributes = (path: string) => [
     body(`${path}.code`).optional().isString().trim().matches(/^[A-Z0-9]{4}$/), // code optional as provided in path.
     body(`${path}.name`).optional().isString().trim().notEmpty(),
     body(`${path}.namePlural`).optional().isString().trim().notEmpty(),
@@ -26,8 +36,7 @@ export namespace Validators {
     body(`${path}.scale`).optional().isInt({max: 12, min: 0}),
     body(`${path}.rate.n`).optional().isInt({min: 1}).default(1),
     body(`${path}.rate.d`).optional().isInt({min: 1}).default(1),
-    body(`${path}.defaultCreditLimit`).optional().isInt({min: 0}).default(0),
-    body(`${path}.defaultMaximumBalance`).optional().isInt({min: 0}),
+    ...isUpdateCurrencySettings(`${path}.settings`),
   ]
 
   const isCreateCurrencyAttributesExist = (path: string) => [
@@ -41,7 +50,7 @@ export namespace Validators {
     body(`${path}.rate`).exists(),
     body(`${path}.rate.n`).exists(),
     body(`${path}.rate.d`).exists(),
-    body(`${path}.defaultCreditLimit`).default(0)
+    body(`${path}.settings.defaultInitialCreditLimit`).default(0)
   ]
 
   const isCollectionRelationship = (path: string, name: string, type: string) => [
@@ -58,7 +67,7 @@ export namespace Validators {
   export const isCreateCurrency = () => [
     ...jsonApiDoc("currencies"),
     ...isCreateCurrencyAttributesExist("data.attributes"),
-    ...isCurrencyUpdateAttributes("data.attributes"),
+    ...isUpdateCurrencyAttributes("data.attributes"),
     ...isCollectionRelationship("data", "admins", "users"),
     ...isIncludedTypes(["users"]),
   ]
@@ -66,7 +75,7 @@ export namespace Validators {
   export const isUpdateCurrency = () => [
     ...jsonApiDoc("currencies"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
-    ...isCurrencyUpdateAttributes(`data.attributes`),
+    ...isUpdateCurrencyAttributes(`data.attributes`),
   ]
 
   const isUpdateAccountAttibutes = (path: string) => [
@@ -135,10 +144,17 @@ export namespace Validators {
     ...isUpdateTransferRelationships("data.relationships")
   ]
 
+  const isUpdateAccountSettingsAttributes = (path: string) => [
+    body(`${path}.acceptPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.acceptPaymentsWhitelist`).optional().isArray(),
+    body(`${path}.acceptPaymentsAfter`).optional().isInt({min: 0}),
+    body(`${path}.onPaymentCreditLimit`).optional().isInt({min: 0}),
+  ]
+
   export const isUpdateAccountSettings = () => [
     ...jsonApiDoc("account-settings"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
-    body("data.attributes.acceptPaymentsAutomatically").isBoolean(),
+    ...isUpdateAccountSettingsAttributes("data.attributes"),
   ]
 
 }

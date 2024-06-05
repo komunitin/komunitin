@@ -45,8 +45,15 @@ model Currency {
   rateN Int
   rateD Int
 
-  defaultCreditLimit    Int
-  defaultMaximumBalance Int?
+  // Currency settings defined by currency admin.
+  settings Json?
+
+  // Currency state to be persisted between runs. 
+  
+  // This object contains cursors for keeping track of the point
+  // until this currency has been updated from the ledger.
+  state Json?
+  //externalTradesStreamCursor String  @db.VarChar(255) @default("0")
 
   created DateTime @default(now())
   updated DateTime @updatedAt
@@ -60,9 +67,6 @@ model Currency {
   adminKeyId          String? @unique @db.VarChar(255)
   externalIssuerKeyId String? @unique @db.VarChar(255)
   externalTraderKeyId String? @unique @db.VarChar(255)
-
-  // Currency state vars
-  externalTradesStreamCursor String  @db.VarChar(255) @default("0")
 
   // Currency admin user.
   adminId   String
@@ -90,8 +94,8 @@ model Account {
 
   users     User[] @relation()
   
-  // Settings defined by user.
-  acceptPaymentsAutomatically Boolean @default(false)
+  // Account settings defined by currency admin and the user.
+  settings Json? 
 
   // These three fields are just a cache from the Stellar network.
   balance        Int

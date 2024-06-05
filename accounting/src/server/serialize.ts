@@ -12,8 +12,7 @@ export const UserSerializer = new Serializer<User>("users", {
 export const CurrencySerializer = new Serializer<Currency>("currencies", {
   version: null,
   projection: projection<Currency>(['code', 'status', 'name', 'namePlural', 
-    'symbol', 'decimals', 'scale', 'rate', 'defaultCreditLimit', 
-    'defaultMaximumBalance', 'created', 'updated']),
+    'symbol', 'decimals', 'scale', 'rate', 'settings', 'created', 'updated']),
   relators: {
     admins: new Relator<Currency,User>(async (currency) => {
       return currency.admin ? [currency.admin] : undefined
@@ -48,5 +47,5 @@ export const TransferSerializer = new Serializer<Transfer>("transfers", {
 
 export const AccountSettingsSerializer = new Serializer<AccountSettings>("account-settings", {
   version: null,
-  projection: projection<AccountSettings>(['acceptPaymentsAutomatically'])
+  projection: projection<AccountSettings>(['acceptPaymentsAutomatically', 'acceptPaymentsWhitelist', 'acceptPaymentsAfter', 'onPaymentCreditLimit'])
 })
