@@ -6,10 +6,14 @@ import { amountFromLedger } from "../currency";
 export const initUpdateCreditOnPayment = (controller: SharedController) => {
   const onTransfer = async (_ledgerCurrency: LedgerCurrency, transfer: LedgerTransfer) => {
     const code = transfer.asset.code // dest asset in case of external transfer.
-    const ctx = systemContext("updateCreditOnPayment")
+    const ctx = systemContext()
     const currency = await controller.getCurrency(ctx, code)
     // Check if the currency supports this feature.
-    if (currency.settings.defaultOnPaymentCreditLimit !== undefined) {
+    if (currency.settings.defaultOnPaymentCreditLimit !== undefined ) {
+      // Don't handle payments from the credit account as it would be an infinite recursion.
+      if (transfer.payer == currency.keys?.credit) {
+        return
+      }
       // Load account settings
       const currencyController = await controller.getCurrencyController(code)
       const account = await currencyController.getAccountByKey(ctx, transfer.payee)

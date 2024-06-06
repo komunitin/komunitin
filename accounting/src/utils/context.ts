@@ -9,10 +9,6 @@ export interface Context {
    * The user ID of the authenticated user.
    */
   userId?: string
-  /**
-   * The label of the system context.
-   */
-  label?: string
 }
 
 export const context = (req: Request): Context => {
@@ -22,9 +18,8 @@ export const context = (req: Request): Context => {
   }
 }
 
-export const systemContext = (label: string): Context => {
+export const systemContext = (): Context => {
   return {
     type: "system",
-    label
   }
 }

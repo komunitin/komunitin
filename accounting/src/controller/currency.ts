@@ -70,7 +70,9 @@ export class LedgerCurrencyController implements CurrencyController {
    * @returns the user object
    */
   private async checkUser(ctx: Context): Promise<User> {
-    // TODO: cache user object
+    if (ctx.type === "system") {
+      return this.model.admin as User
+    }
     const record = await this.db.user.findUnique({where: {id: ctx.userId}})
     if (!record) {
       throw forbidden(`User not found in currency ${this.model.code}`)
@@ -107,9 +109,14 @@ export class LedgerCurrencyController implements CurrencyController {
     if (currency.rate && (currency.rate.n !== this.model.rate.n || currency.rate.d !== this.model.rate.d)) {
       throw notImplemented("Change the currency rate not implemented yet")
     }
-    // Note that changing defaultMaximumBalance or defaultInitialCreditLimit does not affect existing accounts so
-    // no heavy lifting to do.
-
+    
+    // Merge settings with existing settings as otherwise the DB will overwrite the whole settings object.
+    if (currency.settings !== undefined) {
+      currency.settings = {
+        ...this.model.settings,
+        ...(currency.settings)
+      }
+    }
     const data = currencyToRecord(currency)
     const record = await this.db.currency.update({
       data,
@@ -118,6 +125,10 @@ export class LedgerCurrencyController implements CurrencyController {
       }
     })
     this.model = recordToCurrency(record)
+
+    // Note that changing default currency options don't affect existing account options
+    // (eg credit limit), so no heavy lifting is required.
+
     return this.model
   }
 
