@@ -107,10 +107,12 @@ export type LedgerEvents = {
    * Called when a new external payment is received.
    */
   incommingTrade: (currency: LedgerCurrency) => Promise<void>
+
   /**
    * Called when a new external payment is sent.
    */
   outgoingTrade: (currency: LedgerCurrency) => Promise<void>
+
   /**
    * Called when a new external payment is received and it used
    * this trader external hour by local hour offer.
@@ -118,6 +120,7 @@ export type LedgerEvents = {
   incommingHourTrade: (currency: LedgerCurrency, trade: {
     externalHour: LedgerAsset
   }) => Promise<void>
+
   /**
    * Called after uptating an offer from the external trader account.
    */
@@ -127,8 +130,22 @@ export type LedgerEvents = {
       amount: string
       created: boolean
     }) => Promise<void>
-  
+
+  /**
+   * Called after a payment is made.
+   * */
+  transfer: (currency: LedgerCurrency, transfer: LedgerTransfer) => Promise<void>
+
+  /**
+   * Called when the currency state is updated and the state should be 
+   * persisted to the database.
+   * 
+   * Specifically, this is called when we get events from the Horizon
+   * server and the state contains the cursor, so if the app crashes 
+   * and restarts we can continue from where we left.
+   */
   stateUpdated: (currency: LedgerCurrency, state: LedgerCurrencyState) => Promise<void>
+  
   /**
    * Called if there is an error in the event handlers.
    * @param error 
@@ -147,7 +164,7 @@ export interface Ledger {
   /**
    * Get a currency object from the configuration and data.
    */
-  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState): LedgerCurrency
+  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state?: LedgerCurrencyState): LedgerCurrency
   /**
    * Registers a listener for the specified event.
    * 
@@ -253,7 +270,7 @@ export interface LedgerAccount {
    * @param payment The payment details: destination and amount
    * @param keys The account entry can be either the master key or the admin key for administered accounts.
    */
-  pay(payment: {payeePublicKey: string, amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransaction>
+  pay(payment: {payeePublicKey: string, amount: string}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransfer>
 
   /**
    * Perform a payment to an account on a different currency.
@@ -262,7 +279,7 @@ export interface LedgerAccount {
    *   payeePublicKey: The public key of the payee account.
    *   externalIssuerPublicKey: The public key of the issuer of the payee currency.
    */
-  externalPay(payment: {payeePublicKey: string, amount: string, path: PathQuote}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerTransaction>
+  externalPay(payment: {payeePublicKey: string, amount: string, path: PathQuote}, keys: {account: KeyPair, sponsor: KeyPair}): Promise<LedgerExternalTransfer>
 
   /**
    * Permanently delete the account from the ledger.
@@ -306,19 +323,20 @@ export interface LedgerAccount {
 }
 
 /**
- * A transfer committed in the ledger.
- */
-export interface LedgerTransaction {
-  hash: string
-}
-/**
  * A payment in the ledger
  */
 export interface LedgerTransfer {
   payer: string,
   payee: string,
   amount: string,
-  asset: LedgerAsset
+  asset: LedgerAsset,
+  // ledger transaction id.
+  hash: string,
+}
+
+export interface LedgerExternalTransfer extends LedgerTransfer {
+  sourceAsset: LedgerAsset,
+  sourceAmount: string,
 }
 /**
  * An asset in the ledger.

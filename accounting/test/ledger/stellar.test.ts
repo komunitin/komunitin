@@ -4,7 +4,7 @@ import assert from "node:assert"
 import { Ledger, LedgerCurrency, LedgerCurrencyKeys, PathQuote } from "../../src/ledger"
 import { StellarLedger } from "../../src/ledger/stellar"
 import { Keypair } from "@stellar/stellar-sdk"
-import { installDefaultListeners } from "src/ledger/listener"
+import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 import { friendbot } from "src/ledger/stellar/friendbot"
 import { config } from "src/config"
 import { logger } from "src/utils/logger"
@@ -41,8 +41,8 @@ describe('Creates stellar elements', async () => {
       domain: "example.com"
     })
 
-    // Add the listeners.
-    installDefaultListeners(ledger, async () => {}, async() => sponsor, async(currency) => {
+    // Needed for external trade.
+    initUpdateExternalOffers(ledger, async() => sponsor, async(currency) => {
       // Get the privatey keys for the external trader accounts.
       return currency.asset().code == "TEST" ? currencyKeys.externalTrader : currency2Keys.externalTrader
     })
@@ -67,7 +67,7 @@ describe('Creates stellar elements', async () => {
       creditPublicKey: currencyKeys.credit.publicKey(),
       externalIssuerPublicKey: currencyKeys.externalIssuer.publicKey(),
       externalTraderPublicKey: currencyKeys.externalTrader.publicKey()
-    }, {externalTradesStreamCursor: "0"})
+    })
     
     assert.notEqual(currency,undefined)
 
@@ -130,8 +130,6 @@ describe('Creates stellar elements', async () => {
       creditPublicKey: currency2Keys.credit.publicKey(),
       externalIssuerPublicKey: currency2Keys.externalIssuer.publicKey(),
       externalTraderPublicKey: currency2Keys.externalTrader.publicKey()
-    }, {
-      externalTradesStreamCursor: "0"
     })
     
     await assert.doesNotReject(currency2.trustCurrency({

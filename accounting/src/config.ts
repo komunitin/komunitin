@@ -16,6 +16,7 @@ const loadConfig = () => {
     AUTH_JWKS_URL: process.env.JWKS_URL || "https://komunitin.org/.well-known/jwks.json",
     AUTH_JWT_ISSUER: process.env.JWT_ISSUER || "https://komunitin.org",
     AUTH_JWT_AUDIENCE: process.env.JWT_AUDIENCE || "https://komunitin.org",
+    API_BASE_URL: process.env.API_BASE_URL || "https://komunitin.org/accounting",
     // SECRETS
     // TODO: Using environment variables for secrets is a reasonable practice but not a 
     // best practice. Consider other mechanisms for providing secrets to the application.

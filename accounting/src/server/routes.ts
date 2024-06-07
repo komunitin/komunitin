@@ -1,24 +1,15 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import { Validators } from './validation';
-import { checkExact } from 'express-validator';
-import { SharedController } from '../controller';
-import { collectionParams, resourceParams } from './request';
+import { checkExact, param } from 'express-validator';
+import { CurrencyController, SharedController } from '../controller';
+import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, collectionParams, resourceParams } from './request';
 import { Scope, auth, noAuth } from './auth';
-import { context } from 'src/utils/context';
+import { Context, context } from 'src/utils/context';
 import { input } from './parse';
-import { AccountSerializer, CurrencySerializer, TransferSerializer } from './serialize';
-
-
-// Let promise rejections be handled by error handler middleware.
-const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await fn(req,res)
-    } catch (err) {
-      next(err)
-    }
-  }
-}
+import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, TransferSerializer } from './serialize';
+import { Dictionary, Serializer } from 'ts-japi';
+import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
+import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
 
 export function getRoutes(controller: SharedController) {
   const router = Router()
@@ -51,63 +42,59 @@ export function getRoutes(controller: SharedController) {
   }))
 
   // Update currency
-  router.patch('/:code/currency', auth(Scope.Accounting), checkExact(Validators.isUpdateCurrency()), asyncHandler(async (req, res) => {
-    const data = input(req)
-    const currencyController = await controller.getCurrencyController(req.params.code)
-    const currency = await currencyController.update(context(req), data)
-    const result = await CurrencySerializer.serialize(currency)
-    res.status(200).json(result)
-  }))
+  router.patch('/:code/currency', auth(Scope.Accounting), checkExact(Validators.isUpdateCurrency()), 
+    currencyInputHandler(controller, async (currencyController, ctx, data: UpdateCurrency) => {
+      return await currencyController.update(ctx, data)
+    }, CurrencySerializer)
+  )
 
   // Create account
-  router.post('/:code/accounts', auth(Scope.Accounting), checkExact(Validators.isCreateAccount()), asyncHandler(async (req, res) => {
-    const currencyController = await controller.getCurrencyController(req.params.code)
-    const inputAccount = input(req)
-    const account = await currencyController.createAccount(context(req), inputAccount)
-    const result = await AccountSerializer.serialize(account)
-    res.status(200).json(result)
-  }))
+  router.post('/:code/accounts', auth(Scope.Accounting), checkExact(Validators.isCreateAccount()), 
+    currencyInputHandler(controller, async (currencyController, ctx, data: InputAccount) => {
+      return await currencyController.createAccount(ctx, data)
+    }, AccountSerializer)
+  )
 
   // List accounts
-  router.get('/:code/accounts', auth(Scope.Accounting), asyncHandler(async (req, res) => {
-    const currencyController = await controller.getCurrencyController(req.params.code)
-    const options = collectionParams(req, {
+  router.get('/:code/accounts', auth(Scope.Accounting), 
+    currencyCollectionHandler(controller, async (currencyController, ctx, params) => {
+      return await currencyController.getAccounts(ctx, params)
+    }, AccountSerializer, {
       filter: ["id", "code"],
       sort: ["code", "balance", "creditLimit", "maximumBalance", "created", "updated"],
       include: ["currency"]
     })
-    const accounts = await currencyController.getAccounts(context(req), options)
-    const result = await AccountSerializer.serialize(accounts, {
-      include: options.include
-    })
-    res.status(200).json(result)
-  }))
+  )
 
   // Get account
-  router.get('/:code/accounts/:id', auth(Scope.Accounting), asyncHandler(async (req, res) => {
-    const currencyController = await controller.getCurrencyController(req.params.code)
-    const account = await currencyController.getAccount(context(req), req.params.id)
-    const options = resourceParams(req, {
+  router.get('/:code/accounts/:id', auth(Scope.Accounting), 
+    currencyResourceHandler(controller, async (currencyController, ctx, id) => {
+      return await currencyController.getAccount(ctx, id)
+    }, AccountSerializer, {
       include: ["currency"]
     })
-    const result = await AccountSerializer.serialize(account, {
-      include: options.include
-    })
-    res.status(200).json(result)
-  }))
+  )
 
   // Update account
-  router.patch('/:code/accounts/:id', auth(Scope.Accounting), checkExact(Validators.isUpdateAccount()), asyncHandler(async (req, res) => {
-    const data = input(req)
-    const currencyController = await controller.getCurrencyController(req.params.code)
-    const account = await currencyController.updateAccount(context(req), data)
-    const result = await AccountSerializer.serialize(account)
-    res.status(200).json(result)
-  }))
+  router.patch('/:code/accounts/:id', auth(Scope.Accounting), checkExact(Validators.isUpdateAccount()), 
+    currencyInputHandler(controller, async (currencyController, ctx, data: UpdateAccount) => {
+      return await currencyController.updateAccount(ctx, data)
+    }, AccountSerializer)
+  )
 
   // Get account settings
-  // Update account settings
+  router.get('/:code/accounts/:id/settings', auth(Scope.Accounting),
+    currencyResourceHandler(controller, async (currencyController, ctx, id) => {
+      return await currencyController.getAccountSettings(ctx, id)
+    }, AccountSettingsSerializer, {})
+  )
 
+  // Update account settings
+  router.patch('/:code/accounts/:id/settings', auth(Scope.Accounting), checkExact(Validators.isUpdateAccountSettings()),
+    currencyInputHandler(controller, async (currencyController, ctx, data: AccountSettings) => {
+      return await currencyController.updateAccountSettings(ctx, data)
+    }, AccountSettingsSerializer)
+  )
   // Delete account.
   router.delete('/:code/accounts/:id', auth(Scope.Accounting), asyncHandler(async (req, res) => {
     const currencyController = await controller.getCurrencyController(req.params.code)
@@ -116,21 +103,41 @@ export function getRoutes(controller: SharedController) {
   }))
 
   // Create transfer
-  router.post('/:code/transfers', auth(Scope.Accounting), checkExact(Validators.isCreateTransfer()), asyncHandler(async (req, res) => {
-    const data = input(req)
+  router.post('/:code/transfers', auth(Scope.Accounting), checkExact(Validators.isCreateTransfer()), 
+    currencyInputHandler(controller, async (currencyController, ctx, data: InputTransfer) => {
+      return await currencyController.createTransfer(ctx, data)
+    }, TransferSerializer)
+  )
+
+  router.patch('/:code/transfers/:id', auth(Scope.Accounting), checkExact(Validators.isUpdateTransfer()),
+    currencyInputHandler(controller, async (currencyController, ctx, data: UpdateTransfer) => {
+      return await currencyController.updateTransfer(ctx, data)
+    }, TransferSerializer)
+  )
+
+  router.delete('/:code/transfers/:id', auth(Scope.Accounting), asyncHandler(async (req, res) => {
     const currencyController = await controller.getCurrencyController(req.params.code)
-    const transfer = await currencyController.createTransfer(context(req), data)
-    const result = await TransferSerializer.serialize(transfer)
-    res.status(200).json(result)
+    await currencyController.deleteTransfer(context(req), req.params.id)
+    res.status(204).end()
   }))
 
-  router.patch('/:code/transfers/:id', auth(Scope.Accounting), checkExact(Validators.isUpdateTransfer()), asyncHandler(async (req, res) => {
-    const data = input(req)
-    const currencyController = await controller.getCurrencyController(req.params.code)
-    const transfer = await currencyController.updateTransfer(context(req), data)
-    const result = await TransferSerializer.serialize(transfer)
-    res.status(200).json(result)
-  }))
+  router.get('/:code/transfers/:id', auth(Scope.Accounting), 
+    currencyResourceHandler(controller, async (currencyController, ctx, id) => {
+      return await currencyController.getTransfer(ctx, id)
+    }, TransferSerializer, {
+      include: ["currency", "payer", "payee"]
+    })
+  )
+
+  router.get('/:code/transfers', auth(Scope.Accounting),
+    currencyCollectionHandler(controller, async (currencyController, ctx, params) => {
+      return await currencyController.getTransfers(ctx, params)
+    }, TransferSerializer, {
+      filter: ["payer", "payee"],
+      sort: ["created", "updated"],
+      include: ["payer", "payee"]
+    })
+  )
 
   return router
 

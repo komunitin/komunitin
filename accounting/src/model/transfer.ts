@@ -6,14 +6,13 @@ import { User } from "."
 /**
  * Possible state transitions for a transfer.
  * 
- * new ?-> pending | sent
+ * new ?-> pending | submitted
  * pending ?-> accepted | rejected
- * accepted -> submitted
  * rejected ?-> deleted
  * submitted -> committed | failed
  * failed ?-> deleted
  */
-export const TransferStates = ["new", "pending", "accepted", "rejected", "submitted", "failed", "committed", "deleted"] as const
+export const TransferStates = ["new", "pending", "rejected", "submitted", "failed", "committed", "deleted"] as const
 
 export type TransferState = typeof TransferStates[number]
 

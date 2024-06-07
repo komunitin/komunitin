@@ -58,19 +58,24 @@ export class StellarLedger implements Ledger {
     this.sponsorPublicKey = Keypair.fromPublicKey(config.sponsorPublicKey)
     this.domain = config.domain
     this.emitter = new EventEmitter() as TypedEmitter<LedgerEvents>
+    
+    // Always log errors in event handlers.
+    this.addListener("error", (error: any) => {
+      logger.error(error)
+    })
   }
 
   /**
    * Implements {@link Ledger.addListener}
    */
-  public addListener(event: any, handler: any) {
+  public addListener(event: keyof LedgerEvents, handler: any) {
     return this.emitter.addListener(event, handler)
   }
 
   /**
    * Implements {@link Ledger.removeListener}
    */
-  public removeListener(event: any, listener: any) {
+  public removeListener(event: keyof LedgerEvents, listener: any) {
     return this.emitter.removeListener(event, listener)
   }
 
@@ -215,7 +220,7 @@ export class StellarLedger implements Ledger {
       externalTraderPublicKey: keys.externalTrader.publicKey()
     }
 
-    const currency = new StellarCurrency(this, config, data, {externalTradesStreamCursor: "0"})
+    const currency = new StellarCurrency(this, config, data)
     
     await currency.install({
       sponsor,
@@ -239,7 +244,7 @@ export class StellarLedger implements Ledger {
   /**
    * Implements {@link Ledger.getCurrency}
    */
-  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState): StellarCurrency {
+  getCurrency(config: LedgerCurrencyConfig, data: LedgerCurrencyData, state?: LedgerCurrencyState): StellarCurrency {
     if (!this.currencies[data.issuerPublicKey]) {
       this.currencies[data.issuerPublicKey] = new StellarCurrency(this, config, data, state)
       this.currencies[data.issuerPublicKey].start()

@@ -11,8 +11,11 @@ import { CreateCurrency, Currency, recordToCurrency, currencyToRecord } from "..
 import { badConfig, badRequest, internalError, notFound, unauthorized } from "src/utils/error"
 import { LedgerCurrencyController, amountToLedger, storeCurrencyKey } from "./currency"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
-import { installDefaultListeners } from "src/ledger/listener"
-import { Context } from "src/utils/context"
+import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
+import { Context, systemContext } from "src/utils/context"
+import { initUpdateCreditOnPayment } from "./features/update-credit-on-payment"
+import cron from "node-cron"
+
 
 export async function createController(): Promise<SharedController> {
   // Master symmetric key for encrypting secrets.
@@ -63,13 +66,13 @@ export async function createController(): Promise<SharedController> {
 }
 
 const currencyConfig = (currency: CreateCurrency): LedgerCurrencyConfig => {
-  const defaultMaximumBalance = currency.defaultMaximumBalance !== undefined
-    ? amountToLedger(currency, currency.defaultCreditLimit + currency.defaultMaximumBalance)
+  const defaultMaximumBalance = currency.settings.defaultInitialMaximumBalance !== undefined
+    ? amountToLedger(currency, currency.settings.defaultInitialCreditLimit + currency.settings.defaultInitialMaximumBalance)
     : undefined
   return {
     code: currency.code,
     rate: currency.rate,
-    defaultInitialCredit: amountToLedger(currency, currency.defaultCreditLimit),
+    defaultInitialCredit: amountToLedger(currency, currency.settings.defaultInitialCreditLimit),
     defaultMaximumBalance
   }
 }
@@ -88,14 +91,13 @@ const currencyData = (currency: Currency): LedgerCurrencyData => {
   }
 }
 
-const currencyState = (currency: Currency): LedgerCurrencyState => {
-  return currency.state
-}
 
 export class LedgerController implements SharedController {
   
   ledger: Ledger
   private _db: PrismaClient
+  private cronTask: cron.ScheduledTask
+
   private sponsorKey: () => Promise<Keypair>
   private masterKey: () => Promise<KeyObject>
 
@@ -104,17 +106,30 @@ export class LedgerController implements SharedController {
     this._db = db
     this.sponsorKey = sponsorKey
     this.masterKey = masterKey
-    installDefaultListeners(ledger, async (currency, state) => {
-        const code = currency.asset().code
-        const controller = await this.getCurrencyController(code)
-        await controller.updateState(state)
-      },
+
+    // External trade sync
+    initUpdateExternalOffers(ledger,
       sponsorKey,
       async (currency) => {
         const code = currency.asset().code
         const controller = await this.getCurrencyController(code)
         return controller.externalTraderKey()
       })
+
+    // Save the state of the currency in the DB when it changes.
+    this.ledger.addListener("stateUpdated", async (currency, state) => {
+      const code = currency.asset().code
+      const controller = await this.getCurrencyController(code)
+      await controller.updateState(state)
+    })
+
+    // Feature: update credit limit on received payments (for enabled currencies and accounts)
+    initUpdateCreditOnPayment(this)
+
+    // run cron every 5 minutes.
+    this.cronTask = cron.schedule("* * * * */5", () => {
+      this.cron()
+    })
   }
 
   privilegedDb(): PrivilegedPrismaClient {
@@ -139,6 +154,17 @@ export class LedgerController implements SharedController {
     const currencyKey = await randomKey()
     const encryptedCurrencyKey = await this.storeKey(currency.code, currencyKey)
     
+    // Add default settings:
+    currency.settings = {
+      // defaultInitialCreditLimit: 0,
+      defaultInitialMaximumBalance: undefined,
+      defaultAcceptPaymentsAutomatically: false,
+      defaultAcceptPaymentsAfter: 15*24*60*60, // 15 days,
+      defaultAcceptPaymentsWhitelist: [],
+      defaultOnPaymentCreditLimit: undefined,
+      ...currency.settings
+    }
+
     // Add the currency to the DB
     const inputRecord = currencyToRecord(currency)
     const db = this.tenantDb(currency.code)
@@ -251,16 +277,35 @@ export class LedgerController implements SharedController {
   }
 
   async stop() {
-    await this.ledger.stop()
+    this.cronTask.stop()
+    this.ledger.stop()
     await this._db.$disconnect()
   }
 
   async getCurrencyController(code: string): Promise<LedgerCurrencyController> {
     const currency = await this.loadCurrency(code)
-    const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency), currencyState(currency))
+    const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency), currency.state)
     const db = this.tenantDb(code)
     const encryptionKey = () => this.retrieveKey(code, currency.encryptionKey)
     return new LedgerCurrencyController(currency, ledgerCurrency, db, encryptionKey, this.sponsorKey)
+  }
+  async cron() {
+    logger.info("Running cron")
+    // Run cron for each currency.
+    try {
+      const ctx = systemContext()
+      const currencies = await this.getCurrencies(ctx)
+      for (const currency of currencies) {
+        const currencyController = await this.getCurrencyController(currency.code)
+        await currencyController.cron(ctx)
+      }
+    } catch (e) {
+      logger.error(e, "Error running cron")
+    }
+  }
+
+  getLedger(): Ledger {
+    return this.ledger
   }
 }
 

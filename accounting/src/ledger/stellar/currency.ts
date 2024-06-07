@@ -39,7 +39,7 @@ export class StellarCurrency implements LedgerCurrency {
   // asset but it looks like that's not the case.
   private streams: Record<StreamName, StreamData>
 
-  constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData, state: LedgerCurrencyState) {
+  constructor(ledger: StellarLedger, config: LedgerCurrencyConfig, data: LedgerCurrencyData, state?: LedgerCurrencyState) {
     this.ledger = ledger
     const defaultConfig = {
       defaultInitialCredit: "0",
@@ -47,7 +47,7 @@ export class StellarCurrency implements LedgerCurrency {
     }
     this.config = {...defaultConfig, ...config}
     this.data = data
-    this.state = state
+    this.state = state ?? {externalTradesStreamCursor: "0"}
     this.accounts = {}
     
     this.streams = Object.fromEntries(STREAM_NAMES.map((name) => [name, {started: false}])) as Record<StreamName, StreamData>

@@ -10,7 +10,7 @@
 		"dev": "tsx --watch src/index.ts",
 		"test-ledger": "tsx --test test/ledger/*.ts",
 		"test-server": "prisma migrate reset --force && tsx --test --test-concurrency=1 test/server/*.test.ts",
-		"test-current": "tsx --test --test-concurrency=1 test/server/transfer.api.test.ts",
+		"test-current": "tsx --test --test-concurrency=1 test/server/5.*.test.ts",
 		"test": "pnpm test-ledger && pnpm test-server"
 	},
 	"dependencies": {
@@ -23,6 +23,7 @@
 		"express-oauth2-jwt-bearer": "^1.6.0",
 		"express-validator": "^7.0.1",
 		"helmet": "^7.1.0",
+		"node-cron": "^3.0.3",
 		"pino": "^9.0.0",
 		"pino-http": "^10.1.0",
 		"qs": "^6.12.1",
@@ -33,6 +34,7 @@
 		"@types/big.js": "^6.2.2",
 		"@types/cors": "^2.8.17",
 		"@types/express": "^4.17.21",
+		"@types/node-cron": "^3.0.11",
 		"@types/qs": "^6.9.15",
 		"@types/supertest": "^6.0.2",
 		"@types/uuid": "^9.0.8",

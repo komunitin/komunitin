@@ -1,5 +1,5 @@
-import { Currency, User, Account, Transfer } from '../model';
-import { Relator, Serializer } from 'ts-japi';
+import { Currency, User, Account, Transfer, AccountSettings } from '../model';
+import { Paginator, Relator, Serializer, SingleOrArray } from 'ts-japi';
 
 const projection = <T>(fields: (keyof T)[]) => {
   return Object.fromEntries(fields.map(field => [field, 1]))
@@ -12,8 +12,7 @@ export const UserSerializer = new Serializer<User>("users", {
 export const CurrencySerializer = new Serializer<Currency>("currencies", {
   version: null,
   projection: projection<Currency>(['code', 'status', 'name', 'namePlural', 
-    'symbol', 'decimals', 'scale', 'rate', 'defaultCreditLimit', 
-    'defaultMaximumBalance', 'created', 'updated']),
+    'symbol', 'decimals', 'scale', 'rate', 'settings', 'created', 'updated']),
   relators: {
     admins: new Relator<Currency,User>(async (currency) => {
       return currency.admin ? [currency.admin] : undefined
@@ -44,4 +43,9 @@ export const TransferSerializer = new Serializer<Transfer>("transfers", {
       return transfer.payee
     }, AccountSerializer, { relatedName: "payee" })
   }
+})
+
+export const AccountSettingsSerializer = new Serializer<AccountSettings>("account-settings", {
+  version: null,
+  projection: projection<AccountSettings>(['acceptPaymentsAutomatically', 'acceptPaymentsWhitelist', 'acceptPaymentsAfter', 'onPaymentCreditLimit'])
 })
