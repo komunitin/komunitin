@@ -77,10 +77,10 @@ describe('Currencies endpoints', async () => {
 
   await it('create currency with maxBalance', async () => {
     // User 2 creates currency TES2 with maximum balance defined.
-    const currency = currencyPostBody({code:"TES2", settings: { defaultMaximumBalance: 5000, defaultInitialCreditLimit: undefined }}, "2")
+    const currency = currencyPostBody({code:"TES2", settings: { defaultInitialMaximumBalance: 5000, defaultInitialCreditLimit: undefined }}, "2")
     const response = await api.post('/currencies', currency, admin2)
 
-    assert.equal(response.body.data.attributes.settings.defaultMaximumBalance, 5000)
+    assert.equal(response.body.data.attributes.settings.defaultInitialMaximumBalance, 5000)
     assert.equal(response.body.data.attributes.settings.defaultInitialCreditLimit, 0)
   })
 
