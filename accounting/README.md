@@ -8,7 +8,7 @@ $ pnpm install
 ```
 
 ## Run dev server
-Start the dependecy services (database by now) and the Accounting service at http://localhost:3000.
+Start the dependecy services (database by now) and the Accounting service at http://localhost:2025.
 ```bash
 $ docker compose up -d
 $ pnpm dev
