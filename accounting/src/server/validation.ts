@@ -18,7 +18,6 @@ export namespace Validators {
   ]
 
   const isUpdateCurrencySettings = (path: string) => [
-    body(`${path}`).optional(),
     body(`${path}.defaultInitialCreditLimit`).optional().isInt({min: 0}).default(0),
     body(`${path}.defaultInitialMaximumBalance`).optional().isInt({min: 0}),
     body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),

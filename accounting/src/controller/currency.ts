@@ -15,6 +15,7 @@ import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency, Account,
 import { Context } from "../utils/context";
 import { AtLeast, WithRequired } from "../utils/types";
 import Big from "big.js";
+import { PaymentCallBuilder } from "@stellar/stellar-sdk/lib/horizon/payment_call_builder";
 
 /**
  * Return the Key id (= the public key).
@@ -171,12 +172,10 @@ export class LedgerCurrencyController implements CurrencyController {
         maximumBalance: this.model.settings.defaultInitialMaximumBalance,
         balance: 0,
 
-        // Initialize account settings with currency defaults.
+        // Initialize some account settings (others will be taken from currency settings if not set)
         settings: {
           acceptPaymentsAutomatically: this.model.settings.defaultAcceptPaymentsAutomatically,
           acceptPaymentsWhitelist: this.model.settings.defaultAcceptPaymentsWhitelist,
-          acceptPaymentsAfter: this.model.settings.defaultAcceptPaymentsAfter,
-          onPaymentCreditLimit: this.model.settings.defaultOnPaymentCreditLimit
         },
 
         currency: { connect: { id: this.model.id } },
@@ -438,7 +437,7 @@ export class LedgerCurrencyController implements CurrencyController {
       // 3 - Payee user with automaticallyAcceptPayments flag
       if (this.isAdmin(user) 
         || userHasAccount(user, transfer.payer) 
-        || (userHasAccount(user, transfer.payee) && transfer.payer.settings.acceptPaymentsAutomatically)) {
+        || (userHasAccount(user, transfer.payee) && this.submitPaymentRequestImmediately(transfer))) {
         transfer.state = "submitted"
         try {
           const transaction = await this.submitTransfer(transfer, this.isAdmin(user))
@@ -477,7 +476,12 @@ export class LedgerCurrencyController implements CurrencyController {
         throw forbidden("User is not allowed to delete this transfer")
       }
     }
+  }
 
+  private submitPaymentRequestImmediately(transfer: Transfer) {
+    const whitelist = transfer.payer.settings.acceptPaymentsWhitelist
+    return transfer.payer.settings.acceptPaymentsAutomatically || 
+     whitelist && whitelist.includes(transfer.payee.id)
   }
 
   private async submitTransfer(transfer: Transfer, admin = false) {
@@ -612,7 +616,10 @@ export class LedgerCurrencyController implements CurrencyController {
       ]
     }
 
-    where.state = {not: "deleted"}
+    // default state filter.
+    if (!where.state) {
+      where.state = {not: "deleted"}
+    }
 
     const include = includeRelations(params.include)
 
@@ -702,5 +709,39 @@ export class LedgerCurrencyController implements CurrencyController {
     const secret = await decrypt(result.encryptedSecret, await this.encryptionKey())
     return Keypair.fromSecret(secret)
   }
-  
+
+  async cron(ctx: Context) {
+    if (this.model.settings.defaultAcceptPaymentsAfter !== undefined) {
+      await this.acceptPendingTransfers(ctx)
+    }
+  }
+
+  private async acceptPendingTransfers(ctx: Context) {
+    const N_PENDING_TRANSFERS = 100
+    // Find the oldest N pending transfers (at most), if more than these are expired,
+    // do them the next cron run.
+    const transfers = await this.getTransfers(ctx, {
+      filters: {
+        state: "pending",
+      },
+      include: ["payer", "payee"],
+      sort: {field: "updated", order: "asc"},
+      pagination: {cursor: 0, size: N_PENDING_TRANSFERS}
+    })
+    const defaultAcceptPaymentsAfter = this.model.settings.defaultAcceptPaymentsAfter
+    for (const transfer of transfers) {
+      const payerSettings = transfer.payer.settings
+      // Check if the transfer is in "pending" state for more than the configured time.
+      // Note that if the configured lapse is false or undefined, we don't count them.
+      const lapse = payerSettings.acceptPaymentsAfter ?? defaultAcceptPaymentsAfter
+      const expired = lapse && transfer.updated.getTime() + lapse*1000 < Date.now()
+      // Also do it if the account just changed their config to "acceptPaymentsAutomatically"
+      // or updated their whitelist.
+      const immediate = this.submitPaymentRequestImmediately(transfer)
+      if (expired || immediate) {
+        // Submit this transfer as admin.
+        await this.updateTransferState(transfer, "committed", this.model.admin as User)
+      }
+    }
+  }
 }

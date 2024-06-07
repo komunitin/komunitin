@@ -12,9 +12,10 @@ import { badConfig, badRequest, internalError, notFound, unauthorized } from "sr
 import { LedgerCurrencyController, amountToLedger, storeCurrencyKey } from "./currency"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
 import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
-import { Context } from "src/utils/context"
+import { Context, systemContext } from "src/utils/context"
 import { initUpdateCreditOnPayment } from "./features/update-credit-on-payment"
-import { currencyInputHandler } from "src/server/handlers"
+import cron from "node-cron"
+
 
 export async function createController(): Promise<SharedController> {
   // Master symmetric key for encrypting secrets.
@@ -95,6 +96,8 @@ export class LedgerController implements SharedController {
   
   ledger: Ledger
   private _db: PrismaClient
+  private cronTask: cron.ScheduledTask
+
   private sponsorKey: () => Promise<Keypair>
   private masterKey: () => Promise<KeyObject>
 
@@ -122,6 +125,11 @@ export class LedgerController implements SharedController {
 
     // Feature: update credit limit on received payments (for enabled currencies and accounts)
     initUpdateCreditOnPayment(this)
+
+    // run cron every 5 minutes.
+    this.cronTask = cron.schedule("* * * * */5", () => {
+      this.cron()
+    })
   }
 
   privilegedDb(): PrivilegedPrismaClient {
@@ -269,7 +277,8 @@ export class LedgerController implements SharedController {
   }
 
   async stop() {
-    await this.ledger.stop()
+    this.cronTask.stop()
+    this.ledger.stop()
     await this._db.$disconnect()
   }
 
@@ -279,6 +288,20 @@ export class LedgerController implements SharedController {
     const db = this.tenantDb(code)
     const encryptionKey = () => this.retrieveKey(code, currency.encryptionKey)
     return new LedgerCurrencyController(currency, ledgerCurrency, db, encryptionKey, this.sponsorKey)
+  }
+  async cron() {
+    logger.info("Running cron")
+    // Run cron for each currency.
+    try {
+      const ctx = systemContext()
+      const currencies = await this.getCurrencies(ctx)
+      for (const currency of currencies) {
+        const currencyController = await this.getCurrencyController(currency.code)
+        await currencyController.cron(ctx)
+      }
+    } catch (e) {
+      logger.error(e, "Error running cron")
+    }
   }
 
   getLedger(): Ledger {

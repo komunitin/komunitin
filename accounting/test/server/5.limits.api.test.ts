@@ -2,10 +2,24 @@ import { describe, it } from "node:test"
 import assert from "node:assert"
 import { setupServerTest } from "./setup"
 import { waitFor } from "./utils"
+import { LedgerController } from "src/controller/controller"
+import { sleep } from "src/utils/sleep"
 
 describe("OnPayment credit limit", async () => {
   const t = setupServerTest()
-  
+
+  await it('cant set arbitrary currency options', async () => {
+    await t.api.patch(`/TEST/currency`, {
+      data: {
+        attributes: {
+          settings: {
+            invalid: 123
+          }
+        }
+      }
+    }, t.admin, 400)
+  })
+
   await it('admin enable on-payment credit limit', async () => {
     const response = await t.api.patch('/TEST/currency', {
       data: {
@@ -35,7 +49,7 @@ describe("OnPayment credit limit", async () => {
     assert.equal(a1.attributes.creditLimit, 1000)
   })
 
-  await it ('user can indeed use credit limit', async () => {
+  await it('user can indeed use credit limit', async () => {
     await t.payment(t.account2.id, t.account1.id, 1400, "Use credit", "committed", t.user2)
 
     await waitFor(async () => {
@@ -50,6 +64,58 @@ describe("OnPayment credit limit", async () => {
     assert.equal(a2.attributes.balance, -1200)
     assert.equal(a2.attributes.creditLimit, 1200)
 
+  })
+
+  await it('accept payment request from whitelisted accounts', async () => {
+    // Account 0 accept payments from account 1.
+    const response = await t.api.patch(`/TEST/accounts/${t.account0.id}/settings`, {
+      data: {
+        attributes: {
+          acceptPaymentsWhitelist: [t.account1.id]
+        }
+      }
+    }, t.admin)
+    assert.deepEqual(response.body.data.attributes.acceptPaymentsWhitelist, [t.account1.id])
+
+    const transfer = await t.payment(t.account0.id, t.account1.id, 300, "Whitelisted", "committed", t.user1)
+    assert.equal(transfer.attributes.amount, 300)
+    assert.equal(transfer.attributes.state, "committed")
+
+  })
+
+
+  await it('set tranfers to be updated after a tiny while', async () => {
+    const res = await t.api.patch(`/TEST/currency`, {	
+      data: {	
+        attributes: {	
+          settings: {	
+            defaultAcceptPaymentsAfter: 1	 // second
+          }	
+        }	
+      }	
+    }, t.admin)
+    assert.equal(res.body.data.attributes.settings.defaultAcceptPaymentsAfter, 1)
+    // payment request
+    const transfer = await t.payment(t.account1.id, t.account2.id, 100, "Use credit", "committed", t.user2)
+    assert.equal(transfer.attributes.state, "pending")
+    // wait 1 second and run cron
+    await sleep(1000)
+    await (t.app.komunitin.controller as LedgerController).cron()
+    // check transfer has been committed.
+    const updated = await t.api.get(`/TEST/transfers/${transfer.id}`, t.user2)
+    assert.equal(updated.body.data.attributes.state, "committed")
+  })
+
+  await it('cant set arbitrary currency options', async () => {
+    await t.api.patch(`/TEST/currency`, {
+      data: {
+        attributes: {
+          settings: {
+            invalid: 123
+          }
+        }
+      }
+    }, t.admin, 400)
   })
 
 })
