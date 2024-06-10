@@ -4,6 +4,7 @@ import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccou
 export { createController } from "./controller";
 import { Context } from "../utils/context";
 import { Ledger } from "src/ledger";
+import { CreateMigration, Migration } from "./migration/migration";
 /**
  * Controller for operations not related to a particular currency.
  */
@@ -15,6 +16,9 @@ export interface SharedController {
   getCurrency(ctx: Context, code: string): Promise<Currency>
 
   getCurrencyController(code: string): Promise<CurrencyController>
+
+  createMigration(ctx: Context, migration: CreateMigration): Promise<Migration>
+   
   stop(): Promise<void>
 }
 /**

@@ -50,8 +50,8 @@ export type AccountSettings = {
 }
 
 // No input needed for creating an account (beyond implicit currency)!
-export type InputAccount = Partial<Pick<Account, "users">>
-export type UpdateAccount = AtLeast<Pick<Account, "id" | "code" | "creditLimit" | "maximumBalance" | "settings">, "id">
+export type InputAccount = Pick<Account, "id" | "code" | "creditLimit" | "maximumBalance" | "settings" | "users">
+export type UpdateAccount = AtLeast<InputAccount, "id">
 
 export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInput {
   return {

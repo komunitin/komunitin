@@ -1,15 +1,13 @@
-import { Request, Response, NextFunction, Router } from 'express';
-import { Validators } from './validation';
-import { checkExact, param } from 'express-validator';
-import { CurrencyController, SharedController } from '../controller';
-import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, collectionParams, resourceParams } from './request';
+import { Router } from 'express';
+import { checkExact } from 'express-validator';
+import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
+import { context } from 'src/utils/context';
+import { SharedController } from '../controller';
 import { Scope, auth, noAuth } from './auth';
-import { Context, context } from 'src/utils/context';
+import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
 import { input } from './parse';
 import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, TransferSerializer } from './serialize';
-import { Dictionary, Serializer } from 'ts-japi';
-import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
-import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
+import { Validators } from './validation';
 
 export function getRoutes(controller: SharedController) {
   const router = Router()
@@ -138,6 +136,12 @@ export function getRoutes(controller: SharedController) {
       include: ["payer", "payee"]
     })
   )
+
+  router.post('/migrations', auth(Scope.Accounting), checkExact(Validators.isCreateMigration()), asyncHandler(async (req, res) => {
+    const data = input(req)
+    const result = await controller.createMigration(context(req), data)
+    res.status(200).json(result)
+  }))
 
   return router
 

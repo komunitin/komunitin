@@ -8,7 +8,14 @@ import { User } from "./user";
 export { CurrencyRecord }
 
 export type CurrencySettings = {
+  /**
+   * The credit limit that will have new qccounts by default.
+   */
   defaultInitialCreditLimit: number
+  /**
+   * The maximum balance that will have new accounts by default. Set
+   * to undefined for no limit.
+   */
   defaultInitialMaximumBalance?: number
   defaultAcceptPaymentsAutomatically?: boolean
   defaultAcceptPaymentsWhitelist?: string[]

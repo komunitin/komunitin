@@ -156,6 +156,17 @@ export namespace Validators {
     ...isUpdateAccountSettingsAttributes("data.attributes"),
   ]
 
+  const isCreateMigrationAttributes = (path: string) => [
+    body(`${path}.code`).isString().notEmpty(),
+    body(`${path}.source.url`).isString().notEmpty(),
+    body(`${path}.source.platform`).isString().notEmpty(),
+    body(`${path}.source.access_token`).isString().notEmpty(),
+  ]
+  export const isCreateMigration = () => [
+    ...jsonApiDoc("migrations"),
+    ...isCreateMigrationAttributes("data.attributes"),
+  ]
+
 }
 
 

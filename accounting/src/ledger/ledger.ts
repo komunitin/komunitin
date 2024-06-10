@@ -35,17 +35,6 @@ export type LedgerCurrencyConfig = {
    */
   rate: Rate
   /**
-   * The initial funding an account will receive when created.
-   * Defaults to 0 (so accounts are not funded on creation).
-   */
-  defaultInitialCredit?: string
-  /**
-   * The maximum balance an account can have in this currency by default.
-   * Defaults to infinity (accounts can have unlimited balance). This value,
-   * if set, needs to be greater than {@link defaultInitialCredit}.
-   */
-  defaultMaximumBalance?: string
-  /**
    * The initial balance in local currency for the external trader account.
    * 
    * This is the global trade balance limit for incomming transactions. Or 
@@ -199,9 +188,12 @@ export interface LedgerCurrency {
   /**
    * Create and approve a new account in this currency.
    * 
-   * Provide credit key only if defaultInitialCredit > 0
+   * Provide credit key only if initialCredit > 0
    */
-  createAccount(keys: {
+  createAccount(options: {
+    initialCredit: string
+    maximumBalance?: string
+  }, keys: {
     sponsor: KeyPair
     issuer: KeyPair,
     credit?: KeyPair,

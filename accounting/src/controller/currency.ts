@@ -12,10 +12,9 @@ import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency, Account,
   TransferState, UpdateTransfer, User, recordToTransfer, 
   AccountSettings,
   userHasAccount} from "../model";
-import { Context } from "../utils/context";
+import { Context, systemContext } from "../utils/context";
 import { AtLeast, WithRequired } from "../utils/types";
 import Big from "big.js";
-import { PaymentCallBuilder } from "@stellar/stellar-sdk/lib/horizon/payment_call_builder";
 
 /**
  * Return the Key id (= the public key).
@@ -146,12 +145,17 @@ export class LedgerCurrencyController implements CurrencyController {
    */
   async createAccount(ctx: Context, account: InputAccount): Promise<Account> {
     // Only the currency owner can create accounts (by now).
-    const admin = await this.checkAdmin(ctx)
+    await this.checkAdmin(ctx)
     // Account owner: provided in input or current user.
-    const userIds = account.users?.map(u => u.id) ?? [admin.id]
+    const userIds = account.users?.map(u => u.id) ?? [ctx.userId]
 
     // Find next free account code.
-    const code = await this.getFreeCode()
+    let code = account.code
+    if (code) {
+      this.checkFreeCode(account.code)
+    } else {
+      code = await this.getFreeCode()
+    }
     // get required keys from DB.
     const keys = {
       issuer: await this.retrieveKey(this.model.keys?.issuer as string),
@@ -159,14 +163,19 @@ export class LedgerCurrencyController implements CurrencyController {
       sponsor: await this.sponsorKey()
     }
     // Create account in ledger with default credit limit & max balance.
-    const {key} = await this.ledger.createAccount(keys)
+    const maximumBalance = account.maximumBalance ?? this.model.settings.defaultInitialMaximumBalance
+    const options = {
+      initialCredit: this.amountToLedger(account.creditLimit ?? this.model.settings.defaultInitialCreditLimit),
+      maximumBalance: maximumBalance ? this.amountToLedger(maximumBalance) : undefined
+    }
+    const {key} = await this.ledger.createAccount(options, keys)
     // Store key
     const keyId = await this.storeKey(key)
     // Store account in DB
     const record = await this.db.account.create({
       data: {
+        id: account.id,
         code,
-
         // Initialize ledger values with what we have just created.
         creditLimit: this.model.settings.defaultInitialCreditLimit,
         maximumBalance: this.model.settings.defaultInitialMaximumBalance,
@@ -195,13 +204,7 @@ export class LedgerCurrencyController implements CurrencyController {
     const account = await this.getAccount(ctx, data.id)
     // code, creditLimit and maximumBalance can be updated
     if (data.code && data.code !== account.code) {
-      const existing = await this.getAccountByCode(ctx, data.code)
-      if (existing) {
-        throw badRequest(`Code ${data.code} is already in use`)
-      }
-      if (!data.code.startsWith(this.model.code)) {
-        throw badRequest(`Code must start with ${this.model.code}`)
-      }
+      this.checkFreeCode(data.code)
     }
     // Update credit limit
     if (data.creditLimit && data.creditLimit !== account.creditLimit) {
@@ -567,6 +570,17 @@ export class LedgerCurrencyController implements CurrencyController {
     const codeNum = (max !== null) ? max + 1 : 0
     const code = this.model.code + String(codeNum).padStart(4, "0")
     return code
+  }
+
+  private async checkFreeCode(code: string) {
+    if (!code.startsWith(this.model.code)) {
+      throw badRequest(`Code must start with ${this.model.code}`)
+    }
+    const existing = await this.getAccountByCode(systemContext(), code)
+    if (existing) {
+      throw badRequest(`Code ${code} is already in use`)
+    }
+    
   }
 
   /**

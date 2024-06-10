@@ -15,6 +15,8 @@ import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 import { Context, systemContext } from "src/utils/context"
 import { initUpdateCreditOnPayment } from "./features/update-credit-on-payment"
 import cron from "node-cron"
+import { CreateMigration, Migration } from "./migration/migration"
+import { migrateFromIntegralces } from "./migration/integralces"
 
 
 export async function createController(): Promise<SharedController> {
@@ -66,14 +68,9 @@ export async function createController(): Promise<SharedController> {
 }
 
 const currencyConfig = (currency: CreateCurrency): LedgerCurrencyConfig => {
-  const defaultMaximumBalance = currency.settings.defaultInitialMaximumBalance !== undefined
-    ? amountToLedger(currency, currency.settings.defaultInitialCreditLimit + currency.settings.defaultInitialMaximumBalance)
-    : undefined
   return {
     code: currency.code,
     rate: currency.rate,
-    defaultInitialCredit: amountToLedger(currency, currency.settings.defaultInitialCreditLimit),
-    defaultMaximumBalance
   }
 }
 
@@ -306,6 +303,15 @@ export class LedgerController implements SharedController {
 
   getLedger(): Ledger {
     return this.ledger
+  }
+
+  async createMigration(ctx: Context, migration: CreateMigration): Promise<Migration> {
+    // TODO: store migrations in DB.
+    if (migration.source.platform === "integralces") {
+      return await migrateFromIntegralces(ctx, this, migration)
+    } else {
+      throw badRequest(`Unsupported platform ${migration.source.platform}`) 
+    }
   }
 }
 
