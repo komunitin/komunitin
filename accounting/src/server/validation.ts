@@ -99,6 +99,8 @@ export namespace Validators {
     body(`${path}.meta`).isString(),
     body(`${path}.amount`).isInt({gt: 0}),
     body(`${path}.state`).isIn(["new", "committed"]),
+    body(`${path}.created`).optional(),
+    body(`${path}.updated`).optional(),
   ]
 
   const isResourceId = (path: string, type: string) => [
@@ -109,6 +111,7 @@ export namespace Validators {
   const isCreateTransferRelationships = (path: string) => [
     ...isResourceId(`${path}.payer`, "accounts"),
     ...isResourceId(`${path}.payee`, "accounts"),
+    ...isResourceId(`${path}.currency`, "currencies"),
   ]
 
   export const isCreateTransfer = () => [
@@ -134,6 +137,7 @@ export namespace Validators {
     body(path).optional(),
     ...isOptionalResourceId(`${path}.payer`, "accounts"),
     ...isOptionalResourceId(`${path}.payee`, "accounts"),
+    ...isOptionalResourceId(`${path}.currency`, "currencies"),
   ]
 
   export const isUpdateTransfer = () => [

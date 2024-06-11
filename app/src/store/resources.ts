@@ -101,7 +101,7 @@ export interface LoadListPayload {
   /**
    * Filter by fields. For example `{"member": "some-uuid"}`
    */
-  filter?: { [field: string]: string };
+  filter?: { [field: string]: string | string[] };
   /**
    * Sort the results using this field.
    */
@@ -308,7 +308,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     });
     // Fetch external resources.
     const promises = Object.keys(external).map(name => {
-      const ids = external[name].map(resource => resource.id).join(",");
+      const ids = external[name].map(resource => resource.id);
       return dispatch(
         `${name}/loadList`,
         {
@@ -626,7 +626,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       params.set("filter[search]", payload.search);
     }
     if (payload.filter) {
-      Object.entries(payload.filter).map(([field, value]) => {
+      Object.entries(payload.filter).forEach(([field, value]) => {
+        if (Array.isArray(value)) {
+          value = value.join(",");
+        }
         params.set(`filter[${field}]`, value);
       });
     }
@@ -659,6 +662,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     if (payload.filter) {
       Object.entries(payload.filter).map(([field, value]) => {
+        if (Array.isArray(value)) {
+          value = value.join(",");
+        }
         params.set(`filter[${field}]`, value);
       });
     }

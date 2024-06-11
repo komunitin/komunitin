@@ -15,6 +15,7 @@ import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency, Account,
 import { Context, systemContext } from "../utils/context";
 import { AtLeast, WithRequired } from "../utils/types";
 import Big from "big.js";
+import {validate as isUuid} from "uuid"
 
 /**
  * Return the Key id (= the public key).
@@ -73,7 +74,31 @@ export class LedgerCurrencyController implements CurrencyController {
     if (ctx.type === "system") {
       return this.model.admin as User
     }
-    const record = await this.db.user.findUnique({where: {id: ctx.userId}})
+    if (!ctx.userId) {
+      throw forbidden("User not set")
+    }
+    let where
+    // The id provided in the token is a UUID, so it is the same as our 
+    // database id field.
+    if (isUuid(ctx.userId)) {
+      where = {id: ctx.userId}
+    // The id is a number. This is a legacy case provided by IntegralCES
+    // auth provider, where the id in the token is the Drupal user id, while
+    // the user id's from the api are derived UUID-like id's.
+    // We have a mapping from the id to the UUID-like id in the database:
+    // 75736572-2020-[4 random digits]-[4 random digits]-[zero padded user id]
+    } else if (/^\d+$/.test(ctx.userId)) {
+      where = {
+        id: {
+          startsWith: "75736572-2020",
+          endsWith: ctx.userId.padStart(12, "0")
+        }
+      }
+    } else {
+      throw forbidden("Invalid user id")
+    }
+    
+    const record = await this.db.user.findFirst({ where })
     if (!record) {
       throw forbidden(`User not found in currency ${this.model.code}`)
     }
@@ -620,22 +645,37 @@ export class LedgerCurrencyController implements CurrencyController {
   public async getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]> {
     const user = await this.checkUser(ctx)
 
-    const where = whereFilter(params.filters)
+    const {account, ...filters} = params.filters
+    const where = whereFilter(filters)
+    // Special account filter.
+    if (account !== undefined) {
+      where.OR = [
+        {payer: {id: account}},
+        {payee: {id: account}}
+      ]
+    }
     
     // Regular users can only transfers where they are involved.
     if (!this.isAdmin(user)) {
-      where.OR = [
-        {payer: {users: {some: {id: user.id}}}},
-        {payee: {users: {some: {id: user.id}}}}
-      ]
+      where.AND = {
+        OR: [
+          {payer: {users: {some: {id: user.id}}}},
+          {payee: {users: {some: {id: user.id}}}}
+        ]
+      }
     }
-
     // default state filter.
     if (!where.state) {
       where.state = {not: "deleted"}
     }
 
     const include = includeRelations(params.include)
+
+    // Currency is defined as a transfer relationship in API model
+    // but not in DB.
+    if (include?.currency) {
+      delete include.currency
+    }
 
     const records = await this.db.transfer.findMany({
       where,

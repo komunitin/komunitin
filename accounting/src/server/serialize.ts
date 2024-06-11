@@ -41,7 +41,10 @@ export const TransferSerializer = new Serializer<Transfer>("transfers", {
     }, AccountSerializer, { relatedName: "payer" }),
     payee: new Relator<Transfer,Account>(async (transfer) => {
       return transfer.payee
-    }, AccountSerializer, { relatedName: "payee" })
+    }, AccountSerializer, { relatedName: "payee" }),
+    currency: new Relator<Transfer,Currency>(async (transfer) => {
+      return transfer.payee.currency
+    }, CurrencySerializer, { relatedName: "currency" })
   }
 })
 

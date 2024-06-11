@@ -5,12 +5,13 @@ export const whereFilter = (filter: Record<string, string | string[]>) => {
   const fields = Object.keys(filter)
   for (const key of fields) {
     if (filter[key]) {
-      if (Array.isArray(filter[key])) {
+      const values = Array.isArray(filter[key]) ? filter[key] : (filter[key] as string).split(',')
+      if (values.length > 1) {
         where[key] = {
-          in: filter[key]
+          in: values
         }
       } else {
-        where[key] = filter[key]
+        where[key] = values[0]
       }
     }
   }

@@ -13,9 +13,9 @@ const loadConfig = () => {
     STELLAR_FRIENDBOT_URL: process.env.STELLAR_FRIENDBOT_URL || "https://friendbot.stellar.org",
     DOMAIN: process.env.DOMAIN || "komunitin.org",
     MASTER_PASSWORD_SALT: process.env.MASTER_PASSWORD_SALT || undefined,
-    AUTH_JWKS_URL: process.env.JWKS_URL || "https://komunitin.org/.well-known/jwks.json",
-    AUTH_JWT_ISSUER: process.env.JWT_ISSUER || "https://komunitin.org",
-    AUTH_JWT_AUDIENCE: process.env.JWT_AUDIENCE || "https://komunitin.org",
+    AUTH_JWKS_URL: process.env.AUTH_JWKS_URL || "https://komunitin.org/.well-known/jwks.json",
+    AUTH_JWT_ISSUER: process.env.AUTH_JWT_ISSUER || "https://komunitin.org",
+    AUTH_JWT_AUDIENCE: process.env.AUTH_JWT_AUDIENCE || "https://komunitin.org",
     API_BASE_URL: process.env.API_BASE_URL || "https://komunitin.org/accounting",
     // SECRETS
     // TODO: Using environment variables for secrets is a reasonable practice but not a 

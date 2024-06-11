@@ -80,7 +80,7 @@ export const sort = (req: Request, fields: string[], defaultDesc = false): SortO
 export const include = (req: Request, relationships: string[]) => {
   const include: string[] = []
   if (typeof req.query.include == 'string') {
-    include.push(req.query.include)
+    include.push(...(req.query.include.split(",")))
   } else if (Array.isArray(req.query.include)) {
     include.push(...(req.query.include as string[]))
   }

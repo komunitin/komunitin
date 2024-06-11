@@ -30,7 +30,7 @@
                 color="primary"
                 padding="xs lg"
                 unelevated
-                @click="updateTransactionState('accepted')"
+                @click="updateTransactionState('committed')"
               />
             </q-card-actions>  
           </div>

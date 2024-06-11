@@ -1,5 +1,5 @@
 import { Module, ActionContext } from "vuex";
-import { Auth, User, AuthData } from "../plugins/Auth";
+import { Auth, AuthData } from "../plugins/Auth";
 import KError, { KErrorCode } from "src/KError";
 import { notifications } from "src/plugins/Notifications";
 import locate from "src/plugins/Location";
@@ -14,7 +14,6 @@ export interface LoginPayload {
 }
 
 export interface UserState {
-  userInfo?: User;
   tokens?: AuthData;
   myUserId?: string;
   /**
@@ -25,15 +24,6 @@ export interface UserState {
    * Subscription to push notifications.
    */
   subscription?: NotificationsSubscription;
-}
-
-/**
- * Load OIDC user info.
- */
-async function loadUserInfo(accessToken: string, { commit }: ActionContext<UserState, never>) {
-  return auth.getUserInfo(accessToken).then(userInfo => {
-    commit("userInfo", userInfo);
-  });
 }
 
 /**
@@ -57,12 +47,10 @@ async function loadUserData(accessToken: string,
   const currencyUrl = user.members[0].group.relationships.currency.links.related;
   // https://.../accounting/<GROUP>/currency
   const currencyCode = currencyUrl.split('/').slice(-2)[0];
-  const accountUrl = user.members[0].relationships.account.links.related;
-  // https://.../accounting/<GROUP>/accounts/<CODE>
-  const accountCode = accountUrl.split('/').slice(-1)[0];
+  const accountId = user.members[0].relationships.account.data.id
 
   // Fetch currency and account from accounting API.
-  await dispatch("accounts/load", {group: currencyCode, code: accountCode, include: "currency"});
+  await dispatch("accounts/load", {group: currencyCode, code: accountId, include: "currency"});
   commit("myUserId", user.id);
   
   // If we don't have the user location yet, initialize to the member configured location.
@@ -84,19 +72,14 @@ async function loadUser(
   accessToken: string,
   context: ActionContext<UserState, never>
 ) {
-  // Get the OIDC userInfo data.
-  const action1 = loadUserInfo(accessToken, context);
   // Load the Social API users/me endpoint.
-  const action2 = loadUserData(accessToken, context);
-  // Run these two calls in "parallel".
-  await Promise.all([action1, action2]);
+  return await loadUserData(accessToken, context);
 }
 
 export default {
   state: () => ({
     tokens: undefined,
     // It is important to define the properties even if undefined in order to add the reactivity.
-    userInfo: undefined,
     myUserId: undefined,
     accountId: undefined,
     location: undefined,
@@ -104,7 +87,6 @@ export default {
   } as UserState),
   getters: {
     isLoggedIn: state =>
-      state.userInfo !== undefined &&
       state.myUserId !== undefined &&
       auth.isAuthorized(state.tokens),
     isActive: (state, getters) =>
@@ -132,7 +114,6 @@ export default {
   },
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
-    userInfo: (state, userInfo) => (state.userInfo = userInfo),
     myUserId: (state, myUserId) => (state.myUserId = myUserId),
     location: (state, location) => (state.location = location),
     subscription: (state, subscription) => (state.subscription = subscription),
@@ -187,7 +168,6 @@ export default {
       await context.dispatch("unsubscribe");
       await auth.logout();
       context.commit("tokens", undefined);
-      context.commit("userInfo", undefined);
       context.commit("myUserId", undefined);
     },
     /**

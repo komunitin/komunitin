@@ -93,8 +93,7 @@ const submit = async () => {
   }
   
   if (store.getters.isLoggedIn) {
-    const name = store.state.me.userInfo?.name;
-    $q.notify({type: "positive", message: t('sucessfulLogin', {name})});
+    $q.notify({type: "positive", message: t('sucessfulLogin', {name: email.value})});
     
     // If user came here due to a redirect when trying to access a protected route,
     // bring them to where they tried to go. 
