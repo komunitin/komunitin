@@ -35,6 +35,7 @@ import { defineComponent, computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { useStore } from "vuex"
+import { useQuasar } from "quasar"
 import TransactionCard from '../../components/TransactionCard.vue'
 import PageHeader from "../../layouts/PageHeader.vue"
 import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
@@ -57,26 +58,35 @@ export default defineComponent({
   setup(props) {
     const store = useStore()
     const router = useRouter()
+    const quasar = useQuasar()
+
     const {t} = useI18n()
 
     const transfer = computed(() => store.getters["transfers/current"])
     
     const onSubmit = async () => {
-      transfer.value.attributes.state = "committed"
-      await store.dispatch("transfers/create", {
-        group: props.code,
-        resource: transfer.value
-      });
-      
-      notifyTransactionState(transfer.value.attributes.state, t)
-
-      router.push({
-        name: "Transaction",
-        params: {
-          code: props.code,
-          transferCode: transfer.value.id
-        }
+      quasar.loading.show({
+        delay: 200
       })
+      try {
+        transfer.value.attributes.state = "committed"
+        await store.dispatch("transfers/create", {
+          group: props.code,
+          resource: transfer.value
+        });
+        
+        notifyTransactionState(transfer.value.attributes.state, t)
+
+        router.push({
+          name: "Transaction",
+          params: {
+            code: props.code,
+            transferCode: transfer.value.id
+          }
+        })
+      } finally {
+        quasar.loading.hide()
+      }
     }
     const onBack = () => {
       router.back()
