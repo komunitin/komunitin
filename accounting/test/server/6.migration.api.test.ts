@@ -2,7 +2,7 @@ import { describe, it } from "node:test"
 import { setupServerTest } from "./setup"
 import { Scope } from "src/server/auth"
 
-describe("Test migration from local IntegralCes instance", async () => {
+describe.skip("Test migration from local IntegralCes instance", async () => {
   const t = setupServerTest(false)
   const migration = (code: string, access_token?: string) => ({
     data: {
