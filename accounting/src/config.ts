@@ -15,7 +15,7 @@ const loadConfig = () => {
     MASTER_PASSWORD_SALT: process.env.MASTER_PASSWORD_SALT || undefined,
     AUTH_JWKS_URL: process.env.AUTH_JWKS_URL || "https://komunitin.org/.well-known/jwks.json",
     AUTH_JWT_ISSUER: process.env.AUTH_JWT_ISSUER || "https://komunitin.org",
-    AUTH_JWT_AUDIENCE: process.env.AUTH_JWT_AUDIENCE || "https://komunitin.org",
+    AUTH_JWT_AUDIENCE: process.env.AUTH_JWT_AUDIENCE?.split(',') || ['komunitin-app', 'komunitin-notifications'],
     API_BASE_URL: process.env.API_BASE_URL || "https://komunitin.org/accounting",
     NOTIFICATIONS_API_URL: process.env.NOTIFICATIONS_API_URL || "https://notifications.komunitin.org",
     NOTIFICATIONS_API_USERNAME: process.env.NOTIFICATIONS_API_USERNAME,

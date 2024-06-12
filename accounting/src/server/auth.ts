@@ -12,6 +12,13 @@ const jwt = authJwt({
   issuer: config.AUTH_JWT_ISSUER,
   audience: config.AUTH_JWT_AUDIENCE,
   jwksUri: config.AUTH_JWKS_URL,
+  validators: {
+    // IntegralCES creates JWTs with a null sub claim for the tokens
+    // requested by the notifications service. The default validator
+    // in express-oauth2-jwt-bearer does not allow null values for 
+    // the sub claim.
+    sub: (sub) => typeof sub === "string" || sub === null,
+  }
 })
 
 /**

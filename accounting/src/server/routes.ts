@@ -52,7 +52,7 @@ export function getRoutes(controller: SharedController) {
   )
 
   // List accounts
-  router.get('/:code/accounts', auth(Scope.Accounting), 
+  router.get('/:code/accounts', auth([Scope.Accounting, Scope.AccountingReadAll]), 
     currencyCollectionHandler(controller, async (currencyController, ctx, params) => {
       return await currencyController.getAccounts(ctx, params)
     }, AccountSerializer, {
@@ -63,7 +63,7 @@ export function getRoutes(controller: SharedController) {
   )
 
   // Get account
-  router.get('/:code/accounts/:id', auth(Scope.Accounting), 
+  router.get('/:code/accounts/:id', auth([Scope.Accounting, Scope.AccountingReadAll]), 
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getAccount(ctx, id)
     }, AccountSerializer, {
@@ -79,7 +79,7 @@ export function getRoutes(controller: SharedController) {
   )
 
   // Get account settings
-  router.get('/:code/accounts/:id/settings', auth(Scope.Accounting),
+  router.get('/:code/accounts/:id/settings', auth([Scope.Accounting, Scope.AccountingReadAll]),
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getAccountSettings(ctx, id)
     }, AccountSettingsSerializer, {})
@@ -117,7 +117,7 @@ export function getRoutes(controller: SharedController) {
     res.status(204).end()
   }))
 
-  router.get('/:code/transfers/:id', auth(Scope.Accounting), 
+  router.get('/:code/transfers/:id', auth([Scope.Accounting, Scope.AccountingReadAll]), 
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getTransfer(ctx, id)
     }, TransferSerializer, {
@@ -125,7 +125,7 @@ export function getRoutes(controller: SharedController) {
     })
   )
 
-  router.get('/:code/transfers', auth(Scope.Accounting),
+  router.get('/:code/transfers', auth([Scope.Accounting, Scope.AccountingReadAll]),
     currencyCollectionHandler(controller, async (currencyController, ctx, params) => {
       return await currencyController.getTransfers(ctx, params)
     }, TransferSerializer, {

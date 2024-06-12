@@ -286,6 +286,7 @@ export class LedgerController implements BaseController {
   async stop() {
     this.cronTask.stop()
     this.ledger.stop()
+    this.emitter.removeAllListeners()
     await this._db.$disconnect()
   }
 

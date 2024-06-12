@@ -2,6 +2,8 @@ import { describe, it } from "node:test"
 import { setupServerTest } from './setup'
 import assert from "node:assert"
 import { clearEvents, getEvents } from "./net.mock"
+import { Scope } from "src/server/auth"
+import { testAccount } from "./api.data"
 
 describe("Send events to notifications service", async () => {
   const t = setupServerTest()
@@ -53,4 +55,28 @@ describe("Send events to notifications service", async () => {
     assert.equal(events[0].attributes.name, "TransferPending")
     assert.equal(events[1].attributes.name, "TransferRejected")
   })
+
+  await it('notifications service can use api', async() => {
+    const response = await t.api.get('/TEST/transfers', {
+      user: null,
+      scopes: [Scope.AccountingReadAll],
+      audience: "komunitin-notifications"
+    })
+    assert.equal(response.status, 200)
+    const tansfers = response.body.data
+    assert.equal(tansfers.length, 2)
+  })
+
+  await it('notifications service cannot write', async() => {
+    await t.api.post("/TEST/accounts", testAccount("123"), {
+      user: null,
+      scopes: [Scope.AccountingReadAll],
+      audience: "komunitin-notifications"
+    }, 403)
+    await t.api.post("/TEST/accounts", testAccount(null as any as string), {
+      user: null,
+      scopes: [Scope.AccountingReadAll],
+      audience: "komunitin-notifications"
+    }, 403)
+  }) 
 })
