@@ -71,6 +71,19 @@ func GetGroupMembers(ctx context.Context, code string) ([]*Member, error) {
 	return members, nil
 }
 
+func GetAccountMembers(ctx context.Context, code string, accountIds []string) ([]*Member, error) {
+	members := make([]*Member, 0)
+	accountsParam := strings.Join(accountIds, ",")
+	result, err := getResources(ctx, config.KomunitinSocialUrl, code, "members", reflect.TypeOf((*Member)(nil)), nil, map[string][]string{"account": {accountsParam}}, nil)
+	if err != nil {
+		return nil, err
+	}
+	for _, member := range result {
+		members = append(members, member.(*Member))
+	}
+	return members, nil
+}
+
 // Get all users associated with a member. This function fetches also
 // the user settings.
 func GetMemberUsers(ctx context.Context, memberId string) ([]*User, error) {

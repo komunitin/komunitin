@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { checkExact } from 'express-validator';
 import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
 import { context } from 'src/utils/context';
-import { SharedController } from '../controller';
+import { SharedController, MigrationController } from '../controller';
 import { Scope, auth, noAuth } from './auth';
 import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
 import { input } from './parse';
@@ -135,9 +135,12 @@ export function getRoutes(controller: SharedController) {
     })
   )
 
+  // Migrations (WIP)
+
   router.post('/migrations', auth(Scope.Accounting), checkExact(Validators.isCreateMigration()), asyncHandler(async (req, res) => {
     const data = input(req)
-    const result = await controller.createMigration(context(req), data)
+    const migration = new MigrationController(controller)
+    const result = await migration.createMigration(context(req), data)
     res.status(200).json(result)
   }))
 

@@ -1,10 +1,10 @@
 
 import { CollectionOptions } from "../server/request"
 import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings } from "../model"
-export { createController } from "./controller"
+export { createController } from "./base-controller"
 import { Context } from "../utils/context"
-import { CreateMigration, Migration } from "./migration/migration"
 import TypedEmitter from "typed-emitter"
+export { MigrationController } from './migration'
 
 export type ControllerEvents = {
   /**
@@ -22,10 +22,7 @@ export interface SharedController {
   createCurrency(ctx: Context, currency: CreateCurrency): Promise<Currency>
   getCurrencies(ctx: Context): Promise<Currency[]>
 
-  getCurrencyController(code: string): Promise<CurrencyController>
-
-  createMigration(ctx: Context, migration: CreateMigration): Promise<Migration>
-   
+  getCurrencyController(code: string): Promise<CurrencyController>   
   stop(): Promise<void>
   
   addListener: TypedEmitter<ControllerEvents>['addListener']

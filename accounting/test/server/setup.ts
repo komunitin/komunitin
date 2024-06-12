@@ -1,6 +1,6 @@
 import { before, after } from "node:test"
 import { client } from "./net.client"
-import { server } from "./net.mock"
+import { clearEvents, server } from "./net.mock"
 import { clearDb } from "./db"
 import { createApp, closeApp, ExpressExtended } from "../../src/server/app"
 import { testAccount, testCurrency, testTransfer, userAuth } from "./api.data"
@@ -52,6 +52,8 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
     test.app = await createApp()
     test.api = client(test.app)
     server.listen({ onUnhandledRequest: "bypass" })
+    clearEvents()
+
     if (createData) {
       // Create currency TEST
       await test.api.post('/currencies', testCurrency(), test.admin)

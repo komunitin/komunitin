@@ -2,7 +2,6 @@ import { Keypair } from "@stellar/stellar-sdk";
 import Big from "big.js";
 import type { KeyObject } from "node:crypto";
 import TypedEmitter from "typed-emitter";
-import { validate as isUuid } from "uuid";
 import { ControllerEvents, CurrencyController } from ".";
 import { LedgerCurrency, LedgerCurrencyState } from "../ledger";
 import {

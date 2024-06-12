@@ -6,22 +6,23 @@ import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 import { Context, systemContext } from "src/utils/context"
 import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
 import TypedEmitter from "typed-emitter"
-import { ControllerEvents, SharedController } from "."
+import { ControllerEvents, SharedController as BaseController } from "."
 import { config } from "../config"
 import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, createStellarLedger } from "../ledger"
 import { friendbot } from "../ledger/stellar/friendbot"
 import { CreateCurrency, Currency, currencyToRecord, recordToCurrency } from "../model/currency"
 import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
 import { logger } from "../utils/logger"
-import { LedgerCurrencyController, storeCurrencyKey } from "./currency"
+import { LedgerCurrencyController, storeCurrencyKey } from "./currency-controller"
 import { migrateFromIntegralces } from "./migration/integralces"
 import { CreateMigration, Migration } from "./migration/migration"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
 import { EventEmitter } from "node:events"
-import { initUpdateCreditOnPayment } from "./features/update-credit-on-payment"
+import { initUpdateCreditOnPayment } from "./features/credit-on-payment"
+import { initNotifications } from "./features/notificatons"
 
 
-export async function createController(): Promise<SharedController> {
+export async function createController(): Promise<BaseController> {
   // Master symmetric key for encrypting secrets.
   const masterPassword = config.MASTER_PASSWORD
   let masterKeyObject: KeyObject
@@ -91,7 +92,7 @@ const currencyData = (currency: Currency): LedgerCurrencyData => {
 }
 
 
-export class LedgerController implements SharedController {
+export class LedgerController implements BaseController {
   
   ledger: Ledger
   private _db: PrismaClient
@@ -127,6 +128,9 @@ export class LedgerController implements SharedController {
 
     // Feature: update credit limit on received payments (for enabled currencies and accounts)
     initUpdateCreditOnPayment(this)
+
+    // Feature: post events to notifications service.
+    initNotifications(this)
 
     // run cron every 5 minutes.
     this.cronTask = cron.schedule("* * * * */5", () => {
@@ -234,7 +238,7 @@ export class LedgerController implements SharedController {
 
   }
   /**
-   * Implements {@link SharedController.getCurrencies}
+   * Implements {@link BaseController.getCurrencies}
    */
   async getCurrencies(ctx: Context): Promise<Currency[]> {
     const records = await this.privilegedDb().currency.findMany()
@@ -305,15 +309,6 @@ export class LedgerController implements SharedController {
       }
     } catch (e) {
       logger.error(e, "Error running cron")
-    }
-  }
-
-  async createMigration(ctx: Context, migration: CreateMigration): Promise<Migration> {
-    // TODO: store migrations in DB.
-    if (migration.source.platform === "integralces") {
-      return await migrateFromIntegralces(ctx, this, migration)
-    } else {
-      throw badRequest(`Unsupported platform ${migration.source.platform}`) 
     }
   }
 }

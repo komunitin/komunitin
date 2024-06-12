@@ -17,17 +17,22 @@ const loadConfig = () => {
     AUTH_JWT_ISSUER: process.env.AUTH_JWT_ISSUER || "https://komunitin.org",
     AUTH_JWT_AUDIENCE: process.env.AUTH_JWT_AUDIENCE || "https://komunitin.org",
     API_BASE_URL: process.env.API_BASE_URL || "https://komunitin.org/accounting",
+    NOTIFICATIONS_API_URL: process.env.NOTIFICATIONS_API_URL || "https://notifications.komunitin.org",
+    NOTIFICATIONS_API_USERNAME: process.env.NOTIFICATIONS_API_USERNAME,
+    
     // SECRETS
     // TODO: Using environment variables for secrets is a reasonable practice but not a 
     // best practice. Consider other mechanisms for providing secrets to the application.
     SPONSOR_PRIVATE_KEY: process.env.SPONSOR_PRIVATE_KEY || undefined,
     MASTER_PASSWORD: process.env.MASTER_PASSWORD || undefined,
     NEW_MASTER_PASSWORD: process.env.NEW_MASTER_PASSWORD || undefined,
+    NOTIFICATIONS_API_PASSWORD: process.env.NOTIFICATIONS_API_PASSWORD,
   }
   // Remove secrets from the process.env so other libraries don't use/leak them.
   delete process.env.SPONSOR_PRIVATE_KEY
   delete process.env.MASTER_ENCRYPTION_KEY
   delete process.env.NEW_MASTER_ENCRYPTION_KEY
+  delete process.env.NOTIFICATIONS_API_PASSWORD
 
   // Validate some config
   if (!["testnet", "local", "public"].includes(config.STELLAR_NETWORK)) {
