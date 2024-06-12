@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, urlencoded } from "express"
+import { NextFunction, Request, Response } from "express"
 import { CurrencyController, SharedController } from "src/controller"
 import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, collectionParams, resourceParams } from "./request"
 import { Context, context } from "src/utils/context"
@@ -13,7 +13,7 @@ import { config } from "src/config"
 export const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await fn(req,res)
+      await fn(req, res)
     } catch (err) {
       next(err)
     }

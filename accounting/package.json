@@ -16,7 +16,6 @@
 	"dependencies": {
 		"@prisma/client": "5.13.0",
 		"@stellar/stellar-sdk": "^11.3.0",
-		"@types/uuid": "^9.0.8",
 		"big.js": "^6.2.1",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.5",
@@ -28,8 +27,7 @@
 		"pino": "^9.0.0",
 		"pino-http": "^10.1.0",
 		"qs": "^6.12.1",
-		"ts-japi": "^1.11.3",
-		"uuid": "^9.0.1"
+		"ts-japi": "^1.11.3"
 	},
 	"devDependencies": {
 		"@tsconfig/node20": "^20.1.4",
@@ -39,6 +37,7 @@
 		"@types/node-cron": "^3.0.11",
 		"@types/qs": "^6.9.15",
 		"@types/supertest": "^6.0.2",
+		"@types/uuid": "^9.0.8",
 		"esbuild": "^0.20.2",
 		"jose": "^5.3.0",
 		"msw": "^2.3.0",
@@ -47,6 +46,7 @@
 		"supertest": "^7.0.0",
 		"tsx": "^4.7.3",
 		"typed-emitter": "^2.1.0",
-		"typescript": "^5.4.5"
+		"typescript": "^5.4.5",
+		"uuid": "^9.0.1"
 	}
 }

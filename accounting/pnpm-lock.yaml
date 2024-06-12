@@ -14,9 +14,6 @@ importers:
       '@stellar/stellar-sdk':
         specifier: ^11.3.0
         version: 11.3.0
-      '@types/uuid':
-        specifier: ^9.0.8
-        version: 9.0.8
       big.js:
         specifier: ^6.2.1
         version: 6.2.1
@@ -53,9 +50,6 @@ importers:
       ts-japi:
         specifier: ^1.11.3
         version: 1.11.3
-      uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.4
@@ -78,6 +72,9 @@ importers:
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.2
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       esbuild:
         specifier: ^0.20.2
         version: 0.20.2
@@ -105,6 +102,9 @@ importers:
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
 
 packages:
 

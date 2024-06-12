@@ -33,16 +33,14 @@ export function getRoutes(controller: SharedController) {
   }))
 
   // Get currency
-  router.get('/:code/currency', noAuth(), asyncHandler(async (req,res) => {
-    const currency = await controller.getCurrency(context(req), req.params.code)
-    const result = await CurrencySerializer.serialize(currency)
-    res.status(200).json(result)
-  }))
+  router.get('/:code/currency', noAuth(), currencyResourceHandler(controller, async (currencyController, ctx) => {
+    return await currencyController.getCurrency(ctx)
+  }, CurrencySerializer, {}))
 
   // Update currency
   router.patch('/:code/currency', auth(Scope.Accounting), checkExact(Validators.isUpdateCurrency()), 
     currencyInputHandler(controller, async (currencyController, ctx, data: UpdateCurrency) => {
-      return await currencyController.update(ctx, data)
+      return await currencyController.updateCurrency(ctx, data)
     }, CurrencySerializer)
   )
 

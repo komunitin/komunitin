@@ -111,7 +111,7 @@ export namespace Validators {
   const isCreateTransferRelationships = (path: string) => [
     ...isResourceId(`${path}.payer`, "accounts"),
     ...isResourceId(`${path}.payee`, "accounts"),
-    ...isResourceId(`${path}.currency`, "currencies"),
+    ...isOptionalResourceId(`${path}.currency`, "currencies"),
   ]
 
   export const isCreateTransfer = () => [

@@ -1,22 +1,24 @@
-import { PrismaClient, Currency as CurrencyRecord } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 import { Keypair } from "@stellar/stellar-sdk"
-import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, LedgerCurrencyState, createStellarLedger } from "../ledger"
-import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
-import { SharedController } from "."
-import { friendbot } from "../ledger/stellar/friendbot"
-import { logger } from "../utils/logger"
-import { config } from "../config"
+import cron from "node-cron"
 import { KeyObject } from "node:crypto"
-import { CreateCurrency, Currency, recordToCurrency, currencyToRecord } from "../model/currency"
-import { badConfig, badRequest, internalError, notFound, unauthorized } from "src/utils/error"
-import { LedgerCurrencyController, amountToLedger, storeCurrencyKey } from "./currency"
-import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
 import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 import { Context, systemContext } from "src/utils/context"
-import { initUpdateCreditOnPayment } from "./features/update-credit-on-payment"
-import cron from "node-cron"
-import { CreateMigration, Migration } from "./migration/migration"
+import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
+import TypedEmitter from "typed-emitter"
+import { ControllerEvents, SharedController } from "."
+import { config } from "../config"
+import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, createStellarLedger } from "../ledger"
+import { friendbot } from "../ledger/stellar/friendbot"
+import { CreateCurrency, Currency, currencyToRecord, recordToCurrency } from "../model/currency"
+import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
+import { logger } from "../utils/logger"
+import { LedgerCurrencyController, storeCurrencyKey } from "./currency"
 import { migrateFromIntegralces } from "./migration/integralces"
+import { CreateMigration, Migration } from "./migration/migration"
+import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
+import { EventEmitter } from "node:events"
+import { initUpdateCreditOnPayment } from "./features/update-credit-on-payment"
 
 
 export async function createController(): Promise<SharedController> {
@@ -95,6 +97,8 @@ export class LedgerController implements SharedController {
   private _db: PrismaClient
   private cronTask: cron.ScheduledTask
 
+  emitter: TypedEmitter<ControllerEvents>
+
   private sponsorKey: () => Promise<Keypair>
   private masterKey: () => Promise<KeyObject>
 
@@ -103,6 +107,7 @@ export class LedgerController implements SharedController {
     this._db = db
     this.sponsorKey = sponsorKey
     this.masterKey = masterKey
+    this.emitter = new EventEmitter() as TypedEmitter<ControllerEvents>
 
     // External trade sync
     initUpdateExternalOffers(ledger,
@@ -127,6 +132,14 @@ export class LedgerController implements SharedController {
     this.cronTask = cron.schedule("* * * * */5", () => {
       this.cron()
     })
+  }
+
+  public addListener<E extends keyof ControllerEvents>(event: E, listener: ControllerEvents[E]) {
+    return this.emitter.addListener(event, listener)
+  }
+
+  public removeListener<E extends keyof ControllerEvents>(event: E, listener: ControllerEvents[E]) {
+    return this.emitter.removeListener(event, listener)
   }
 
   privilegedDb(): PrivilegedPrismaClient {
@@ -229,13 +242,6 @@ export class LedgerController implements SharedController {
     return currencies
   }
 
-  /**
-   * Implements {@link SharedController.getCurrency}
-   */
-  async getCurrency(ctx: Context, code: string): Promise<Currency> {
-    return this.loadCurrency(code)
-  }
-
   private async loadCurrency(code: string): Promise<Currency> {
     const record = await this.tenantDb(code).currency.findUnique({where: { code }})
     if (!record) {
@@ -284,8 +290,9 @@ export class LedgerController implements SharedController {
     const ledgerCurrency = this.ledger.getCurrency(currencyConfig(currency), currencyData(currency), currency.state)
     const db = this.tenantDb(code)
     const encryptionKey = () => this.retrieveKey(code, currency.encryptionKey)
-    return new LedgerCurrencyController(currency, ledgerCurrency, db, encryptionKey, this.sponsorKey)
+    return new LedgerCurrencyController(currency, ledgerCurrency, db, encryptionKey, this.sponsorKey, this.emitter)
   }
+
   async cron() {
     logger.info("Running cron")
     // Run cron for each currency.
@@ -299,10 +306,6 @@ export class LedgerController implements SharedController {
     } catch (e) {
       logger.error(e, "Error running cron")
     }
-  }
-
-  getLedger(): Ledger {
-    return this.ledger
   }
 
   async createMigration(ctx: Context, migration: CreateMigration): Promise<Migration> {

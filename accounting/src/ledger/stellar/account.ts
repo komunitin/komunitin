@@ -204,6 +204,9 @@ export class StellarAccount implements LedgerAccount {
       hash: transaction.hash
     }
     
+    // This should be done as a reaction to a stream listener on horizon server, but we don't have
+    // any means to efficiently listen all payments in a currency right now. Maybe having our own
+    // filtered Horizon server could do the job, or using stellar.expert or another API.
     this.currency.ledger.emitter.emit("transfer", this.currency, transfer)
     
     logger.info({hash: transaction.hash}, `Account ${this.account?.accountId()} paid ${payment.amount} to ${payment.payeePublicKey}`)

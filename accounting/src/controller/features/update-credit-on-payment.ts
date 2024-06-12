@@ -1,37 +1,36 @@
-import { LedgerCurrency, LedgerTransfer } from "src/ledger";
-import { SharedController } from "..";
+import { Transfer } from "src/model";
 import { systemContext } from "src/utils/context";
-import { amountFromLedger } from "../currency";
+import { CurrencyController, SharedController } from "..";
 
+/**
+ * Add support for updating the credit limit of an account when a payment is received,
+ * based on the defaultOnPaymentCreditLimit setting of the currency and onPaymentCreditLimit
+ * setting of the account.
+ */
 export const initUpdateCreditOnPayment = (controller: SharedController) => {
-  const onTransfer = async (_ledgerCurrency: LedgerCurrency, transfer: LedgerTransfer) => {
-    const code = transfer.asset.code // dest asset in case of external transfer.
+  const onTransferUpdated = async (transfer: Transfer, currencyController: CurrencyController) => {
+    // Only handle committed transfers.
+    if (transfer.state !== "committed") {
+      return
+    }
     const ctx = systemContext()
-    const currency = await controller.getCurrency(ctx, code)
+    const currency = await currencyController.getCurrency(ctx)
     // Check if the currency supports this feature.
-    if (currency.settings.defaultOnPaymentCreditLimit !== undefined ) {
-      // Don't handle payments from the credit account as it would be an infinite recursion.
-      if (transfer.payer == currency.keys?.credit) {
-        return
-      }
-      // Load account settings
-      const currencyController = await controller.getCurrencyController(code)
-      const account = await currencyController.getAccountByKey(ctx, transfer.payee)
-      if (!account) {
-        // This is an error because it means we've noticed a transfer to an account that is
-        // not in our database.
-        throw new Error(`Account not found in the DB for currency ${code} and key ${transfer.payee}.`)
-      }
-      const maxLimit = account.settings.onPaymentCreditLimit ?? currency.settings.defaultOnPaymentCreditLimit
-      if (account.creditLimit < maxLimit) {
-        const newLimit = Math.min(maxLimit, account.creditLimit + amountFromLedger(currency, transfer.amount))
-        await currencyController.updateAccount(ctx, {
-          id: account.id,
-          creditLimit: newLimit
-        })
-      }
+    if (currency.settings.defaultOnPaymentCreditLimit === undefined ) {
+      return
+    }
+    // Do the job.
+    // We are interested in the destination account of the transaction.
+    const account = transfer.payee
+    const maxLimit = account.settings.onPaymentCreditLimit ?? currency.settings.defaultOnPaymentCreditLimit
+    if (account.creditLimit < maxLimit) {
+      const newLimit = Math.min(maxLimit, account.creditLimit + transfer.amount)
+      await currencyController.updateAccount(ctx, {
+        id: account.id,
+        creditLimit: newLimit
+      })
     }
   }  
 
-  controller.getLedger().addListener("transfer", onTransfer)
+  controller.addListener("transferStateChanged", onTransferUpdated)
 }
