@@ -112,7 +112,7 @@ export default {
         (Object.values(group.associations) as Association[]).forEach(
           association => {
             links[association.name] = {
-              related: urlSocial + "/" + group.code + "/" + association.name
+              related: ((association.name == "currency") ? urlAccounting : urlSocial) + "/" + group.code + "/" + association.name
             };
           }
         );
