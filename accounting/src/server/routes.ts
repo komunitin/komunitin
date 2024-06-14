@@ -22,7 +22,7 @@ export function getRoutes(controller: SharedController) {
     const currency = await controller.createCurrency(context(req), data)
     // Serialize currency to JSON:API
     const result = await CurrencySerializer.serialize(currency)
-    res.status(200).json(result)
+    res.status(201).json(result)
   }))
 
   // List currencies
@@ -48,7 +48,7 @@ export function getRoutes(controller: SharedController) {
   router.post('/:code/accounts', auth(Scope.Accounting), checkExact(Validators.isCreateAccount()), 
     currencyInputHandler(controller, async (currencyController, ctx, data: InputAccount) => {
       return await currencyController.createAccount(ctx, data)
-    }, AccountSerializer)
+    }, AccountSerializer, 201)
   )
 
   // List accounts
@@ -102,7 +102,7 @@ export function getRoutes(controller: SharedController) {
   router.post('/:code/transfers', auth(Scope.Accounting), checkExact(Validators.isCreateTransfer()), 
     currencyInputHandler(controller, async (currencyController, ctx, data: InputTransfer) => {
       return await currencyController.createTransfer(ctx, data)
-    }, TransferSerializer)
+    }, TransferSerializer, 201)
   )
 
   router.patch('/:code/transfers/:id', auth(Scope.Accounting), checkExact(Validators.isUpdateTransfer()),
@@ -141,7 +141,7 @@ export function getRoutes(controller: SharedController) {
     const data = input(req)
     const migration = new MigrationController(controller)
     const result = await migration.createMigration(context(req), data)
-    res.status(200).json(result)
+    res.status(201).json(result)
   }))
 
   return router

@@ -181,7 +181,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   /**
    * The API base URL.
    */
-  readonly baseUrl: string;
+  baseUrl: string;
 
   /**
    * @param type The resource type.
@@ -190,6 +190,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   public constructor(type: string, baseUrl: string) {
     this.type = type;
     this.baseUrl = baseUrl;
+  }
+
+  public setBaseUrl(baseUrl: string) {
+    this.baseUrl = baseUrl
   }
 
   /**

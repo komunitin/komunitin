@@ -155,7 +155,7 @@ describe('Accounts endpoints', async () => {
     await api.delete(`/TEST/accounts/${account0.id}`, user2, 403)
   })
   it('user can delete own account', async () => {
-    await api.delete(`/TEST/accounts/${account1.id}`, user2, 204)
+    await api.delete(`/TEST/accounts/${account1.id}`, user2)
   })
 
 })

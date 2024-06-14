@@ -142,13 +142,13 @@ const myMember = computed(() => store.getters.myMember)
 const isActive = computed(() => store.getters.isActive)
 
 const fetched = ref(false)
-const isLoading = computed(() => !(fetched.value || member.value && member.value.account !== null && member.value.contacts !== null))
+const isLoading = computed(() => !(fetched.value || member.value && member.value.contacts !== null && (!isActive.value || member.value.account !== null)))
 
 const fetchData = async (memberCode: string) => {
   await store.dispatch("members/load", {
     code: memberCode,
     group: props.code,
-    include: "contacts,offers,needs,account"
+    include: "contacts,offers,needs" + (isActive.value ? ",account" : "")
   });
   fetched.value = true;
 }

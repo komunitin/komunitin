@@ -61,7 +61,7 @@
         :rules="[() => !v$.price.$invalid || $t('offerPriceRequired')]"
       >
         <template #append>
-          <span class="text-h6 text-onsurface-m">{{ myAccount.currency.attributes.symbol }}</span>
+          <span class="text-h6 text-onsurface-m">{{ currency.attributes.symbol }}</span>
         </template>
       </q-input>
       <date-field
@@ -141,7 +141,7 @@ const rules = {
 const v$ = useVuelidate(rules, {images, description, category, expiration, title, price})
 const store = useStore()
 
-const myAccount = computed(() => store.getters.myAccount)
+const currency = computed(() => store.getters.myCurrency)
 
 const onSubmit = async () => {
   const isFormCorrect = await v$.value.$validate()

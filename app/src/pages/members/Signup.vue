@@ -84,7 +84,13 @@ const group = computed(() => store.getters["groups/current"])
 const settings = computed(() => group.value?.['signup-settings']?.attributes)
 
 const page = ref("terms")
-const needsTerms = computed(() => settings.value?.requireAcceptTerms)
+const needsTerms = computed<boolean|undefined>(() => settings.value?.requireAcceptTerms)
+
+const toPage = (name: string) => {
+  page.value = name
+  const el = document.getElementById("page-signup") as Element
+  getScrollTarget(el).scrollTo(0, 0)
+}
 
 watchEffect(() => {
   if (needsTerms.value === false && page.value == "terms") {
@@ -97,12 +103,6 @@ const credentials = ref({
   email: "",
   password: "",
 })
-
-const toPage = (name: string) => {
-  page.value = name
-  const el = document.getElementById("page-signup") as Element
-  getScrollTarget(el).scrollTo(0, 0)
-}
 
 const loading = ref(false)
 const locale = useLocale()
@@ -171,7 +171,7 @@ const auth = new Auth()
 const resendEmail = async () => {
   loading.value = true
   try {
-    await auth.resendValidationEmail(credentials.value.email)
+    await auth.resendValidationEmail(credentials.value.email, props.code)
   } finally {
     loading.value = false
   }

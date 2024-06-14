@@ -11,12 +11,8 @@
       "mode": "remote",
       "port": 40000,
       "host": "localhost",
-      "substitutePath": [
-        {
-          "from": "${workspaceRoot}/notifications",
-          "to": "/opt/notifications"
-        }
-      ]
+      "remotePath": "/opt/notifications",
+      "cwd": "${workspaceRoot}/notifications",
     },
   ]
 }

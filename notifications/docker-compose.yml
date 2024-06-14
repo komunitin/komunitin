@@ -6,8 +6,6 @@ services:
     restart: unless-stopped
     volumes:
       - redisdata:/data
-    networks:
-      - komunitin  
 
   notifications:
     depends_on:
@@ -17,11 +15,11 @@ services:
     ports:
      - 2028:2028 
     environment:
-      - KOMUNITIN_ACCOUNTING_URL=http://integralces/ces/api/accounting
-      - KOMUNITIN_SOCIAL_URL=http://integralces/ces/api/social
-      - KOMUNITIN_AUTH_URL=http://integralces/oauth2
-      - KOMUNITIN_APP_URL=https://localhost:2030
-      - NOTIFICATIONS_CLIENT_ID=notifications-service
+      - KOMUNITIN_ACCOUNTING_URL=https://integralces.net/ces/api/accounting
+      - KOMUNITIN_SOCIAL_URL=https://integralces.net/ces/api/social
+      - KOMUNITIN_AUTH_URL=https://integralces.net/oauth2
+      - KOMUNITIN_APP_URL=https://komunitin.org
+      - NOTIFICATIONS_CLIENT_ID=komunitin-notifications
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
       - NOTIFICATIONS_EVENTS_USERNAME=integralces
       - NOTIFICATIONS_EVENTS_PASSWORD=komunitin
@@ -32,9 +30,6 @@ services:
 
     profiles:
      - "run"
-    
-    networks:
-     - komunitin
   
   notifications-dev:
     build:
@@ -46,11 +41,11 @@ services:
     volumes:
       - .:/opt/notifications
     environment:
-      - KOMUNITIN_ACCOUNTING_URL=http://integralces:2029/ces/api/accounting
-      - KOMUNITIN_SOCIAL_URL=http://integralces:2029/ces/api/social
-      - KOMUNITIN_AUTH_URL=http://integralces:2029/oauth2
+      - KOMUNITIN_ACCOUNTING_URL=http://localhost:2025/
+      - KOMUNITIN_SOCIAL_URL=http://localhost:2029/ces/api/social
+      - KOMUNITIN_AUTH_URL=http://localhost:2029/oauth2
       - KOMUNITIN_APP_URL=https://localhost:2030
-      - NOTIFICATIONS_CLIENT_ID=notifications-service
+      - NOTIFICATIONS_CLIENT_ID=komunitin-notifications
       - NOTIFICATIONS_CLIENT_SECRET=komunitin
       - NOTIFICATIONS_EVENTS_USERNAME=integralces
       - NOTIFICATIONS_EVENTS_PASSWORD=komunitin
@@ -58,12 +53,9 @@ services:
       - SEND_MAILS=true
     profiles:
       - "dev"
-    networks:
-      komunitin:
-        aliases:
-          - notifications
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-      
   redis-commander:
     image: rediscommander/redis-commander:latest
     restart: unless-stopped
@@ -73,13 +65,6 @@ services:
      - "2027:8081" 
     profiles:
       - "dev"
-    networks:
-      - komunitin
 
 volumes:
   redisdata:
-
-networks:
-  komunitin:
-    name: komunitin
-    external: true

@@ -59,7 +59,7 @@ func getAuthorizationToken(ctx context.Context) (string, error) {
 	if accessTokenExpiry.After(time.Now().Add(time.Minute)) {
 		return accessToken, nil
 	}
-	authUrl := config.KomunitinAuthUrl
+	authUrl := fixUrl(config.KomunitinAuthUrl)
 	clientId := config.NotificationsClientId
 	clientSecret := config.NotificationsClientSecret
 

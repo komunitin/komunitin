@@ -18,7 +18,7 @@ const loadConfig = () => {
     AUTH_JWT_AUDIENCE: process.env.AUTH_JWT_AUDIENCE?.split(',') || ['komunitin-app', 'komunitin-notifications'],
     API_BASE_URL: process.env.API_BASE_URL || "https://komunitin.org/accounting",
     NOTIFICATIONS_API_URL: process.env.NOTIFICATIONS_API_URL || "https://notifications.komunitin.org",
-    NOTIFICATIONS_API_USERNAME: process.env.NOTIFICATIONS_API_USERNAME,
+    NOTIFICATIONS_API_USERNAME: process.env.NOTIFICATIONS_API_USERNAME || "accounting",
     
     // SECRETS
     // TODO: Using environment variables for secrets is a reasonable practice but not a 
@@ -26,7 +26,7 @@ const loadConfig = () => {
     SPONSOR_PRIVATE_KEY: process.env.SPONSOR_PRIVATE_KEY || undefined,
     MASTER_PASSWORD: process.env.MASTER_PASSWORD || undefined,
     NEW_MASTER_PASSWORD: process.env.NEW_MASTER_PASSWORD || undefined,
-    NOTIFICATIONS_API_PASSWORD: process.env.NOTIFICATIONS_API_PASSWORD,
+    NOTIFICATIONS_API_PASSWORD: process.env.NOTIFICATIONS_API_PASSWORD || undefined,
   }
   // Remove secrets from the process.env so other libraries don't use/leak them.
   delete process.env.SPONSOR_PRIVATE_KEY

@@ -40,7 +40,7 @@ export function client(app: Express) {
         request(app).get(path), 
         auth, status)
     },
-    post: async (path: string, data: any, auth?: AuthInfo, status: number = 200) => {
+    post: async (path: string, data: any, auth?: AuthInfo, status: number = 201) => {
       return await completeRequest(
         sendData(request(app).post(path), data),
         auth, status)
@@ -50,7 +50,7 @@ export function client(app: Express) {
         sendData(request(app).patch(path), data),
         auth, status)
     },
-    delete: async (path: string, auth?: AuthInfo, status: number = 200) => {
+    delete: async (path: string, auth?: AuthInfo, status: number = 204) => {
       return await completeRequest(
         request(app).delete(path),
         auth, status)

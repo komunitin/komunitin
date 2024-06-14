@@ -153,16 +153,17 @@ export class Auth {
     this.checkResponse(response)
   }
 
-  public async resendValidationEmail(email: string): Promise<void> {
-    const params = new URLSearchParams(); 
-    params.append("email", email);
-    params.append("client_id", this.clientId);
+  public async resendValidationEmail(email: string, code: string): Promise<void> {
+    const params = new URLSearchParams()
+    params.append("email", email)
+    params.append("client_id", this.clientId)
+    params.append("group", code)
 
     const response = await fetch(KOptions.url.auth + "/resend-validation", {
       method: "POST",
       body: params,
       headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    });
+    })
 
     this.checkResponse(response)
   }

@@ -1,12 +1,21 @@
 import { Currency, User, Account, Transfer, AccountSettings } from '../model';
-import { Paginator, Relator, Serializer, SingleOrArray } from 'ts-japi';
+import { Metaizer, Paginator, Relator, Serializer, SingleOrArray } from 'ts-japi';
 
 const projection = <T>(fields: (keyof T)[]) => {
   return Object.fromEntries(fields.map(field => [field, 1]))
 }
 export const UserSerializer = new Serializer<User>("users", {
   version: null,
-  projection: null
+  projection: null,
+  metaizers: {
+    resource: new Metaizer<[User]>(() => ({
+      external: true,
+      // The user is a resource from the social api. At this point we don't know the
+      // url of the social api so we can't generate the href. However this is not 
+      // really used so we will just return an empty string.
+      href: ""
+    }))
+  }
 })
 // JSON:API resource serializers
 export const CurrencySerializer = new Serializer<Currency>("currencies", {

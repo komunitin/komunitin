@@ -2,7 +2,7 @@ import { CurrencyController, SharedController } from "..";
 import { systemContext } from "src/utils/context";
 import { config } from "src/config";
 import { Transfer, User } from "src/model";
-import { Relator, Serializer } from "ts-japi";
+import { Metaizer, Relator, Serializer } from "ts-japi";
 import { UserSerializer } from "src/server/serialize";
 
 enum EventName {
@@ -31,7 +31,9 @@ const event = (name: EventName, code: string, data: Record<string, any>, user: U
 
 const EventSerializer = new Serializer<Event>("events", {
   relators: {
-    user: new Relator<Event, User>(async (event) => event.user, UserSerializer, { relatedName: "user"})
+    user: new Relator<Event, User>(async (event) => event.user, UserSerializer, { 
+      relatedName: "user",
+    })
   },
 })
 

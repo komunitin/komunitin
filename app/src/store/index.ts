@@ -117,17 +117,24 @@ export default createStore({
     offers,
     needs,
     categories,
+    "signup-settings": signupSettings,
     // Accounting API resource modules.
     currencies,
     accounts,
     "account-settings": accountSettings,
     transfers,
-    "signup-settings": signupSettings
   },
   // enable strict mode (adds overhead!) for dev mode only
   strict: process.env.DEV === "true",
   plugins: [createPersistPlugin("komunitin")]
 });
+
+export const setAccountingApiUrl = (url: string) => {
+  accounts.setBaseUrl(url);
+  currencies.setBaseUrl(url);
+  accountSettings.setBaseUrl(url);
+  transfers.setBaseUrl(url);
+}
 
 declare module '@vue/runtime-core' {
   interface State {
