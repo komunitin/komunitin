@@ -10,7 +10,7 @@ describe("Send events to notifications service", async () => {
 
   let transfer: any
   await it('sends pending event', async () => {
-    transfer = await t.payment(t.account1.id, t.account2.id, 100, "Test notifications", "committed", t.user2, 200)
+    transfer = await t.payment(t.account1.id, t.account2.id, 100, "Test notifications", "committed", t.user2)
     assert.equal(transfer.attributes.state, "pending")
     const events = getEvents()
     assert.equal(events.length, 1)
@@ -41,7 +41,7 @@ describe("Send events to notifications service", async () => {
 
   await it('sends rejected event', async () => {
     clearEvents()
-    transfer = await t.payment(t.account1.id, t.account2.id, 100, "Test notifications", "committed", t.user2, 200)
+    transfer = await t.payment(t.account1.id, t.account2.id, 100, "Test notifications", "committed", t.user2)
     transfer = (await t.api.patch(`/TEST/transfers/${transfer.id}`, {
       data: {
         attributes: {

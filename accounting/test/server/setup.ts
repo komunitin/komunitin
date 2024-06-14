@@ -41,7 +41,7 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
       return response.body.data
     },
 
-    payment: async (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus = 200) => {
+    payment: async (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus = 201) => {
       const response = await test.api?.post('/TEST/transfers', testTransfer(payer, payee, amount, meta, state), auth, httpStatus)
       return response.body.data
     }
