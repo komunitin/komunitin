@@ -68,7 +68,7 @@ export function currencyResourceHandler<T extends Dictionary<any>>(controller: S
     return serializer.serialize(resource, {
       include: params.include
     })
-  })
+  }, status)
 }
 
 type CurrencyCollectionHandler<T> = (controller: CurrencyController, context: Context, params: CollectionOptions) => Promise<T|T[]>
@@ -85,7 +85,7 @@ export function currencyCollectionHandler<T extends Dictionary<any>>(controller:
         paginator: paginatorHelper(resource, params, req)
       }
     })
-  })
+  }, status)
 }
 
 type CurrencyInputHandler<T,D> = (controller: CurrencyController, context: Context, data: D) => Promise<T>
@@ -97,5 +97,5 @@ export function currencyInputHandler<T extends Dictionary<any>, D>(controller: S
     const data = input(req)
     const resource = await fn(currencyController, ctx, data)
     return serializer.serialize(resource)
-  })
+  }, status)
 }
