@@ -39,10 +39,13 @@ set +a
 
 # Start the services
 if [ "$public" = true ]; then
-  docker compose -f docker-compose.yml -f docker-compose.public.yml up -d
+  docker compose -f compose.yml -f compose.public.yml up -d
 else
   docker compose up -d
 fi
+
+echo "Waiting for the services to start..."
+sleep 10
 
 # Install IntegralCES
 

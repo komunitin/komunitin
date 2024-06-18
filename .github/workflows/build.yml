@@ -104,7 +104,7 @@ jobs:
         docker login -u komunitin -p ${{ secrets.DOCKER_PASS }}
         docker push komunitin/komunitin-accounting
 
-  update-test:
+  update-demo:
     runs-on: ubuntu-latest
     needs: [build-app, build-notifications, build-accounting]
     if: github.ref == 'refs/heads/master'
@@ -118,14 +118,11 @@ jobs:
         known_hosts: 'will-be-set-now'
     
     - name: Add remote server to Known Hosts.
-      run: ssh-keyscan -H test.komunitin.org >> ~/.ssh/known_hosts
+      run: ssh-keyscan -H demo.komunitin.org >> ~/.ssh/known_hosts
 
-    - name: Copy the deployment code
-      run: rsync -avz deploy deploy@test.komunitin.org:/opt/test.komunitin.org
-
-    - name: Deploy test.komunitin.org
+    - name: Deploy demo.komunitin.org
       run: > 
-        ssh deploy@$test.komunitin.org 
+        ssh deploy@$demo.komunitin.org 
         "export KOMUNITIN_DOMAIN=demo.komunitin.org
         && export KOMUNITIN_APP_URL=https://demo.komunitin.org
         && export KOMUNITIN_ACCOUNTING_URL=https://accounting.demo.komunitin.org
