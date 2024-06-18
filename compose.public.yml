@@ -1,6 +1,6 @@
 services:
   app:
-    ports: []
+    ports: !reset []
     expose:
       - "80"
     labels:
@@ -14,7 +14,7 @@ services:
       - default
   
   notifications:
-    ports: []
+    ports: !reset []
     expose:
       - "2028"
     labels:
@@ -28,7 +28,7 @@ services:
       - default
   
   accounting:
-    ports: []
+    ports: !reset []
     expose:
       - "2025"
     labels:
@@ -42,7 +42,7 @@ services:
       - default
   
   integralces:
-    ports: []
+    ports: !reset []
     expose:
       - "2029"
     labels:
