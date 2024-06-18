@@ -9,6 +9,9 @@ services:
       - "traefik.http.routers.app.entrypoints=websec"
       - "traefik.http.routers.app.tls=true"
       - "traefik.http.routers.app.tls.certresolver=myresolver"
+    networks:
+      - ${KOMUNITIN_DOMAIN}
+      - default
   
   notifications:
     ports: []
@@ -20,6 +23,9 @@ services:
       - "traefik.http.routers.notifications.entrypoints=websec"
       - "traefik.http.routers.notifications.tls=true"
       - "traefik.http.routers.notifications.tls.certresolver=myresolver"
+    networks:
+      - ${KOMUNITIN_DOMAIN}
+      - default
   
   accounting:
     ports: []
@@ -31,6 +37,9 @@ services:
       - "traefik.http.routers.accounting.entrypoints=websec"
       - "traefik.http.routers.accounting.tls=true"
       - "traefik.http.routers.accounting.tls.certresolver=myresolver"
+    networks:
+      - ${KOMUNITIN_DOMAIN}
+      - default
   
   integralces:
     ports: []
@@ -42,8 +51,14 @@ services:
       - "traefik.http.routers.integralces.entrypoints=websec"
       - "traefik.http.routers.integralces.tls=true"
       - "traefik.http.routers.integralces.tls.certresolver=myresolver"
+    networks:
+      - ${KOMUNITIN_DOMAIN}
+      - default
+
+  
 
 networks:
-  default:
+  ${KOMUNITIN_DOMAIN}:
     name: ${KOMUNITIN_DOMAIN}
     external: true
+  default:
