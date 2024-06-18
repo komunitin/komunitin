@@ -47,6 +47,7 @@ services:
       - "2029"
     labels:
       - "traefik.enable=true"
+      - "traefik.http.services.integralces.loadbalancer.server.port=2029"
       - "traefik.http.routers.integralces.rule=Host(`integralces.${KOMUNITIN_DOMAIN}`)"
       - "traefik.http.routers.integralces.entrypoints=websec"
       - "traefik.http.routers.integralces.tls=true"
