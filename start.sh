@@ -1,7 +1,7 @@
 # parse args
 # Function to display usage
 usage() {
-    echo "Usage: $0 [--ices] [--demo] [--public]"
+    echo "Usage: $0 [--up] [--ices] [--demo] [--public]"
     exit 1
 }
 
@@ -9,9 +9,13 @@ usage() {
 ices=false
 demo=false
 public=false
+up=false
 
 while [[ "$1" != "" ]]; do
     case "$1" in
+        --up)
+            up=true
+            ;;
         --ices)
             ices=true
             ;;
@@ -38,6 +42,8 @@ set -a
 set +a
 
 # Start the services
+if [ "$up" = true ]; then
+
 if [ "$public" = true ]; then
   docker compose -f compose.yml -f compose.public.yml up -d
 else
@@ -46,6 +52,8 @@ fi
 
 echo "Waiting for the services to start..."
 sleep 10
+  
+fi
 
 # Install IntegralCES
 
