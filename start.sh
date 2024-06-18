@@ -19,7 +19,7 @@ while [[ "$1" != "" ]]; do
             demo=true
             ;;
         --public)
-            demo=public
+            public=true
             ;;
         --)
             shift
