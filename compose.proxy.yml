@@ -20,12 +20,12 @@ services:
       - "letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - ${KOMUNITIN_DOMAIN}
+      - komunitin
 
 volumes:
   letsencrypt:
 
 networks:
-  :${KOMUNITIN_DOMAIN}
+  komunitin:
     name: ${KOMUNITIN_DOMAIN}
     

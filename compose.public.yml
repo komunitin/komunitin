@@ -10,7 +10,7 @@ services:
       - "traefik.http.routers.app.tls=true"
       - "traefik.http.routers.app.tls.certresolver=myresolver"
     networks:
-      - ${KOMUNITIN_DOMAIN}
+      - proxy
       - default
   
   notifications:
@@ -24,7 +24,7 @@ services:
       - "traefik.http.routers.notifications.tls=true"
       - "traefik.http.routers.notifications.tls.certresolver=myresolver"
     networks:
-      - ${KOMUNITIN_DOMAIN}
+      - proxy
       - default
   
   accounting:
@@ -38,7 +38,7 @@ services:
       - "traefik.http.routers.accounting.tls=true"
       - "traefik.http.routers.accounting.tls.certresolver=myresolver"
     networks:
-      - ${KOMUNITIN_DOMAIN}
+      - proxy
       - default
   
   integralces:
@@ -52,13 +52,13 @@ services:
       - "traefik.http.routers.integralces.tls=true"
       - "traefik.http.routers.integralces.tls.certresolver=myresolver"
     networks:
-      - ${KOMUNITIN_DOMAIN}
+      - proxy
       - default
 
   
 
 networks:
-  ${KOMUNITIN_DOMAIN}:
+  proxy:
     name: ${KOMUNITIN_DOMAIN}
     external: true
   default:
