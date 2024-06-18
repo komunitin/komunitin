@@ -4,6 +4,7 @@ import { config } from "src/config";
 import { Transfer, User } from "src/model";
 import { Metaizer, Relator, Serializer } from "ts-japi";
 import { UserSerializer } from "src/server/serialize";
+import { fixUrl } from "src/utils/net";
 
 enum EventName {
   TransferCommitted = "TransferCommitted",
@@ -43,7 +44,7 @@ const sendEvent = async (event: Event) => {
   // Send event to notifications service
   const url = `${config.NOTIFICATIONS_API_URL}/events`
   const basicAuth = Buffer.from(`${config.NOTIFICATIONS_API_USERNAME}:${config.NOTIFICATIONS_API_PASSWORD}`).toString("base64")
-  await fetch(url, {
+  await fetch(fixUrl(url), {
     method: "POST",
     headers: {
       "Content-Type": "application/vnd.api+json",

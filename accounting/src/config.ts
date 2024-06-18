@@ -19,6 +19,7 @@ const loadConfig = () => {
     API_BASE_URL: process.env.API_BASE_URL || "https://komunitin.org/accounting",
     NOTIFICATIONS_API_URL: process.env.NOTIFICATIONS_API_URL || "https://notifications.komunitin.org",
     NOTIFICATIONS_API_USERNAME: process.env.NOTIFICATIONS_API_USERNAME || "accounting",
+    DOCKER: process.env.DOCKER === "true" || false,
     
     // SECRETS
     // TODO: Using environment variables for secrets is a reasonable practice but not a 

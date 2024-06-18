@@ -8,10 +8,10 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
       POSTGRES_APP_USER: accounting
-      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-password}
+      POSTGRES_APP_PASSWORD: accounting
   stellar:
     image: stellar/quickstart
     container_name: stellar

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test"
 import { setupServerTest } from "./setup"
 import { Scope } from "src/server/auth"
+import { fixUrl } from "src/utils/net"
 
 describe.skip("Test migration from local IntegralCes instance", async () => {
   const t = setupServerTest(false)
@@ -18,28 +19,39 @@ describe.skip("Test migration from local IntegralCes instance", async () => {
     }
   })
 
-  it ('migrate local integralces NET1', async () => {
-    // Get token
-    const mig = migration("NET1")
-    const response = await fetch(`${mig.data.attributes.source.url}/oauth2/token`, {
+  const getToken = async(baseUrl: string, username: string, password: string) => {
+    const response = await fetch(`${fixUrl(baseUrl)}/oauth2/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       },
       body: new URLSearchParams({
         grant_type: 'password',
-        username: 'riemann@integralces.net',
-        password: 'integralces',
+        username,
+        password,
         client_id: 'komunitin-app',
         scope: 'openid email profile komunitin_social komunitin_accounting offline_access komunitin_social_read_all'
       })
     })
 
     const token = await response.json() as any
-    mig.data.attributes.source.access_token = token.access_token
-    
-    await t.api.post('/migrations', mig, {user: "12345", scopes: [Scope.Accounting]})
+    return token.access_token
+  }
 
+  await it ('migrate local integralces NET1', async () => {
+    // Get token
+    const mig = migration("NET1")
+    mig.data.attributes.source.access_token = await getToken(mig.data.attributes.source.url, "riemann@integralces.net", "integralces")
+    await t.api.post('/migrations', mig, {user: "12345", scopes: [Scope.Accounting]})
   })
+
+  await it('migrate local integralces NET2', async () => {
+    // Get token
+    const mig = migration("NET2")
+    mig.data.attributes.source.access_token = await getToken(mig.data.attributes.source.url, "fermat@integralces.net", "integralces")
+    await t.api.post('/migrations', mig, {user: "67890", scopes: [Scope.Accounting]})
+  })
+
+
   
 })

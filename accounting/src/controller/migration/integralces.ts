@@ -4,6 +4,7 @@ import { CurrencyController, SharedController } from "..";
 import { CreateMigration, Migration } from "./migration";
 import { Account, Currency, InputTransfer, Transfer, User } from "src/model";
 import { logger } from "src/utils/logger";
+import { fixUrl } from "src/utils/net";
 
 /**
  * Migrate a currency from IntegralCES to Komunitin accounting.
@@ -46,15 +47,14 @@ export async function migrateFromIntegralces(ctx: Context, controller: SharedCon
 }
 
 const gcd = (a: number, b: number): number => b == 0 ? a : gcd(b, a % b)
+
 const get = async (url: string, token?: string) => {
-  const response = await fetch(url, {
+  const response = await fetch(fixUrl(url), {
     headers: {
       'Authorization': `Bearer ${token}`,
     }
   })
-  if (!response.ok) {
-    throw new Error(`Failed to get data from ${url}: ${response.statusText}`)
-  }
+
   return await response.json() as any
 }
 
@@ -83,8 +83,9 @@ async function migrateCurrency(ctx: Context, controller: SharedController, migra
       d: (10 ** 6) / d
     },
     settings: {
-      // TODO: handle this better
-      defaultInitialCreditLimit: 1000,
+      // Default of 10h of initial credit. 
+      // TODO: better handle this!
+      defaultInitialCreditLimit: 10 * (10**6 / resource.attributes.value) * Math.pow(10, resource.attributes.scale),
     }
   } as Currency
 

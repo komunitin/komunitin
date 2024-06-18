@@ -26,6 +26,7 @@ func main() {
 	// Setup CORS middleware.
 	allowedOrigins := handlers.AllowedOrigins([]string{
 		"http://localhost:8080",
+		"http://localhost:2030",
 		"https://localhost:2030",
 		"https://integralces.net",
 		"https://www.integralces.net",

@@ -1,0 +1,32 @@
+services:
+  traefik:
+    image: "traefik:2.10"
+    container_name: "traefik"
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websec.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websec"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.myresolver.acme.email=badia.orive@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - ${KOMUNITIN_DOMAIN}
+
+volumes:
+  letsencrypt:
+
+networks:
+  :${KOMUNITIN_DOMAIN}
+    name: ${KOMUNITIN_DOMAIN}
+    external: true
+    

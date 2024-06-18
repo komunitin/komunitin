@@ -3,14 +3,17 @@
 const fs = require('fs')
 const { configure } = require('quasar/wrappers')
 const ESLintPlugin = require('eslint-webpack-plugin')
-const qenv = require('./.quasar.env.json');
-const environment = qenv[process.env.QENV];
 const IgnorePlugin = require("webpack").IgnorePlugin
+const {config} = require('dotenv')
+
+// This is for development purposes only. It will load the .env file and make it available
+// so the process.env.ENV_VAR will be replaced at build time. For production, the environment
+// variables should be set in the server environment and are replaced via a bash script at
+// /docker/replace_env_vars.sh at application start time.
+const environment = config().parsed
+console.info("Environment:", environment)
 
 //const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
-
-console.log("Environment:")
-console.log(environment);
 
 module.exports = configure(function(ctx) {
   return {
@@ -113,7 +116,9 @@ module.exports = configure(function(ctx) {
         
 
       },
-      env: environment
+      // Pass the current .env file to the build process in dev mode,
+      // but don't pass it in production mode.
+      env: ctx.dev ? environment : undefined
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer

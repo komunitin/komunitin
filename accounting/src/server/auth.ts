@@ -2,6 +2,7 @@
 import { auth as authJwt, scopeIncludesAny } from "express-oauth2-jwt-bearer"
 import { config } from "../config"
 import { NextFunction,Request, Response } from "express"
+import { fixUrl } from "src/utils/net"
 
 export enum Scope {
   Accounting = "komunitin_accounting",
@@ -11,7 +12,7 @@ export enum Scope {
 const jwt = authJwt({
   issuer: config.AUTH_JWT_ISSUER,
   audience: config.AUTH_JWT_AUDIENCE,
-  jwksUri: config.AUTH_JWKS_URL,
+  jwksUri: fixUrl(config.AUTH_JWKS_URL),
   validators: {
     // IntegralCES creates JWTs with a null sub claim for the tokens
     // requested by the notifications service. The default validator
