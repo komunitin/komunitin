@@ -18,7 +18,7 @@ RUN pnpm install
 COPY . .
 
 # Build prisma sources
-RUN pnpm run prisma generate
+RUN pnpm prisma generate
 
 # Build App
 RUN pnpm run build
