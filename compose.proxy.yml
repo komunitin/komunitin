@@ -28,5 +28,4 @@ volumes:
 networks:
   :${KOMUNITIN_DOMAIN}
     name: ${KOMUNITIN_DOMAIN}
-    external: true
     

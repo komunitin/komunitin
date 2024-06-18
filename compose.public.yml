@@ -46,3 +46,4 @@ services:
 networks:
   default:
     name: ${KOMUNITIN_DOMAIN}
+    external: true
