@@ -12,7 +12,6 @@ services:
       - "traefik.http.routers.app.tls.certresolver=myresolver"
     networks:
       - proxy
-      - default
   
   notifications:
     ports: !reset []
@@ -27,7 +26,6 @@ services:
       - "traefik.http.routers.notifications.tls.certresolver=myresolver"
     networks:
       - proxy
-      - default
   
   accounting:
     ports: !reset []
@@ -42,7 +40,6 @@ services:
       - "traefik.http.routers.accounting.tls.certresolver=myresolver"
     networks:
       - proxy
-      - default
   
   integralces:
     ports: !reset []
@@ -57,12 +54,20 @@ services:
       - "traefik.http.routers.integralces.tls.certresolver=myresolver"
     networks:
       - proxy
-      - default
 
+  redis:
+    networks:
+      - proxy
+
+  db-integralces:
+    networks:
+      - proxy
   
+  db-accounting:
+    networks:
+      - proxy
 
 networks:
   proxy:
     name: ${KOMUNITIN_DOMAIN}
     external: true
-  default:
