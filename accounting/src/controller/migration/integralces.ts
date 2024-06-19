@@ -96,22 +96,26 @@ async function migrateCurrency(ctx: Context, controller: SharedController, migra
 async function migrateAccounts(ctx: Context, controller: CurrencyController, migration: CreateMigration, currency: Currency) {
   // The route to get the users owning accounts is a bit involved. We need to get all "members" of a group,
   // then get all accounts and users for each member.
-  const base = socialUrl(migration.source.url)
-  const membersUrl = `${base}/${migration.code}/members`
+  const socialBase = socialUrl(migration.source.url)
+  const accountingBase = accountingUrl(migration.source.url)
+
+  const membersUrl = `${socialBase}/${migration.code}/members`
   // TODO: pagination
   const accounts = [] as Account[]
   const members = await get(membersUrl, migration.source.access_token)
   for (const member of members.data) {
     const accountId = member.relationships.account.data.id
     // External related resource link.
-    const accountUrl = member.relationships.account.data.meta.href
+    // Note that we can't use the provided link as since the thwo services may be under the same
+    // reverse proxy, the public URL may not be accessible from here.
+    const accountUrl = `${accountingBase}/${migration.code}/accounts/${accountId}`
     // get the account with settings
     const doc = await get(`${accountUrl}?include=settings`, migration.source.access_token)
     const resource = doc.data
     const included = doc.included
     const settings = included.find((i: any) => i.type === 'account-settings')
     // now fetch user
-    const userUrl = `${base}/users?filter[members]=${member.id}`
+    const userUrl = `${socialBase}/users?filter[members]=${member.id}`
     const users = await get(userUrl, migration.source.access_token)
     // TODO: handle multiple users.
     const user = users.data[0]
