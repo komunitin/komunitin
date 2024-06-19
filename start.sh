@@ -101,7 +101,7 @@ JSON_DATA=$(cat <<EOF
       "code": "$CODE",
       "source": {
         "platform": "integralces",
-        "url": "$ICES_URL",
+        "url": "http://integralces:2029",
         "access_token": "$ACCESS_TOKEN"
       }
     }
