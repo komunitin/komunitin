@@ -69,9 +69,8 @@ fi
 # Migrate NET1 and NET2 to the accounting service
 
 if [ "$demo" = true ]; then
-  
-docker compose exec integralces drush sql-query "UPDATE ces_exchange SET data='a:4:{s:19:\"registration_offers\";i:1;s:18:\"registration_wants\";i:0;}' WHERE code='NET1'"
-docker compose exec integralces drush sql-query "UPDATE ces_exchange SET data='a:4:{s:19:\"registration_offers\";i:0;s:18:\"registration_wants\";i:0;}' WHERE code='NET2'"
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0
 
 # Install Accounting service
 
@@ -123,8 +122,8 @@ migrate "riemann@integralces.net" "integralces" "NET1"
 migrate "fermat@integralces.net" "integralces" "NET2"
 
 # Configure NET1 and NET2 in integralces to use the accounting service
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL
 docker compose exec integralces drush vset ces_komunitin_app_url $KOMUNITIN_APP_URL
-docker compose exec integralces drush sql-query "UPDATE ces_exchange SET data='a:4:{s:19:\"registration_offers\";i:1;s:18:\"registration_wants\";i:0;s:28:\"komunitin_accounting_api_url\";s:21:\"http://localhost:2025\";s:17:\"komunitin_app_url\";s:22:\"https://localhost:2030\";}' WHERE code='NET1'"
-docker compose exec integralces drush sql-query "UPDATE ces_exchange SET data='a:4:{s:19:\"registration_offers\";i:0;s:18:\"registration_wants\";i:0;s:28:\"komunitin_accounting_api_url\";s:21:\"http://localhost:2025\";s:17:\"komunitin_app_url\";s:22:\"https://localhost:2030\";}' WHERE code='NET2'"
 
 fi
