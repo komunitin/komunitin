@@ -2,7 +2,7 @@
 # Function to display usage
 usage() {
     echo "Usage: $0 [--up] [--ices] [--demo] [--public]"
-    exit 1
+    exit
 }
 
 # Parse arguments
@@ -24,10 +24,6 @@ while [[ "$1" != "" ]]; do
             ;;
         --public)
             public=true
-            ;;
-        --)
-            shift
-            break
             ;;
         *)
             usage
@@ -118,8 +114,8 @@ echo $RESPONSE
 }
 
 # Migrate NET1 and NET2 to the accounting service
-migrate "riemann@integralces.net" "integralces" "NET1"
-migrate "fermat@integralces.net" "integralces" "NET2"
+migrate "riemann@komunitin.org" "komunitin" "NET1"
+migrate "fermat@komunitin.org" "komunitin" "NET2"
 
 # Configure NET1 and NET2 in integralces to use the accounting service
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL

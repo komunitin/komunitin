@@ -4,37 +4,44 @@ Open System for Exchange Communities
 
 ![build status](https://github.com/komunitin/komunitin/workflows/Build/badge.svg)
 
-Komunitin features mutual credit currency management for communities. It is the natural successor of [IntegralCES](https://integralces.net) and it wants to be a
-useful tool for local communities to build more resilient and sustainable economic structures.
+Komunitin is an app featuring a local community currency wallet and a marketplace allowing these local communities to easily trade between themselves and other communities. It effectively facilitates trade between a decentralized set of local community currencies.
 
 ## Demo
-Check the installed version of the current `master` branch at [test.komunitin.org](https://test.komunitin.org). It uses dummy data from [demo.integralces.net](https://demo.integralces.net)
+Quickly check Komunitin in action at [demo.komunitin.org](https://demo.komunitin.org). 
 
-* user: noether@integralces.net
-* password: integralces
+Login credentials:
 
-## Structure
-The Komunitin system is made of several units:
- - Komunitin app: [ALPHA] The client application with user interface. See the [app](app/) folder.
- - Notifications service: [ALPHA] The backend for the messaging system including push notifications. See the [notifications](notifications/) folder.
- - IntegralCES: The backend for the social and accounting APIs. These will be moved to two separate microservices but the APIs are provided by the classic 
- IntegralCES by now. See the [ices Drupal project](https://drupal.org/project/ices).
- - Accounting service: [IN PROGRESS]: The new decentralized backend for the accounting API. See the [accounting](accounting) folder.
+* user: noether@komunitin.org
+* password: komunitin
+
+## System structure
+The Komunitin system is made of several microservices:
+ - Komunitin app: The client application with user interface. See the [app](app/) folder.
+ - Notifications service: The backend service for the messaging system including mails and push notifications. See the [notifications](notifications/) folder.
+ - Accounting service: [IN PROGRESS]: The decentralized backend for the accounting API based on the [Stellar](https://stellar.org) blockchain. See the [accounting](accounting) folder.
+ - IntegralCES: The current backend for the social APIs based on the legacy project built on Drupal. See the [ices project](https://drupal.org/project/ices). This will be rewritten to a new service.
  - Social service: [TODO] The new decentralized backend for the social API.
 
 ## Run with Docker
 In order to run the whole system with docker compose, you need the peer dependency IntegralCES. Clone it in the same parent folder as Komunitin.
 
 ```bash
+git clone https://github.com/komunitin/komunitin.git
 git clone https://git.drupalcode.org/project/ices.git
 ```
 
-Before running the system you need to setup some environment variables. Use the `.env.template` file as a reference and create a `.env` file with the correct values. Also, create the file `komunitin-project-firebase-adminsdk.json` in the `notifications` folder with the firebase admin sdk credentials.
+Before running the system you need to setup some environment variables. You may use the `.env.template` file as a reference and create a new `.env` file with the correct values. Also, create the file `komunitin-project-firebase-adminsdk.json` in the `notifications` folder with the firebase admin sdk credentials.
 
-Then you can run the start script with the options to 1) start the containers, 2) initialize IntegralCES and 3) seed the system with demo data.
+Then you can run the start script with the options `--up` to start the containers, `--ices` to install the IntegralCES site and `--demo` to seed the system with demo data.
 
 ```bash
-. ./start.sh --ices --demo
+$ ./start.sh --ices --demo
+```
+
+If you want just to start the containers you can run:
+  
+```bash
+$ docker-compose up -d
 ```
 
 The published services are:
@@ -43,20 +50,16 @@ The published services are:
  - Notifications service: [http://localhost:2028](http://localhost:2028)
  - Accounting service: [http://localhost:2025](http://localhost:2025)
 
-You can now try Komunitin at [http://localhost:2030](http://localhost:2030) with the email `noether@integralces.net` and password `integralces`.
+You can now try Komunitin at [http://localhost:2030](http://localhost:2030) with the email `noether@komunitin.org` and password `komunitin`.
 
 ## Public deployment
-In case of deployment in a public server, you need to add the flag `--public` to the start script. For example:
-
-```bash
-. ./start.sh --ices --public
-```
-
-This will configure the system not to publish any port and with [Traefik](https://traefik.io) labels to be used by a the reverse proxy. Then you need to start the reverse proxy with:
+The public deployment uses the [Traefik](https://traefik.io) reverse proxy to forward the traffic to the different services. The proxy is provided separately because its configuration may vary heavily depending on the server setup. You need to start the reverse proxy first with:
 
 ```bash
 docker-compose -f docker-compose.proxy.yml up -d
 ```
+Then you should to add the flag `--public` to the start script. For example:
 
-The proxy is provided separately because it may be shared with other services in the same server and may need to be customized.
-
+```bash
+./start.sh --ices --public
+```

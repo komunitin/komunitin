@@ -41,14 +41,14 @@ describe.skip("Test migration from local IntegralCes instance", async () => {
   await it ('migrate local integralces NET1', async () => {
     // Get token
     const mig = migration("NET1")
-    mig.data.attributes.source.access_token = await getToken(mig.data.attributes.source.url, "riemann@integralces.net", "integralces")
+    mig.data.attributes.source.access_token = await getToken(mig.data.attributes.source.url, "riemann@komunitin.org", "komunitin")
     await t.api.post('/migrations', mig, {user: "12345", scopes: [Scope.Accounting]})
   })
 
   await it('migrate local integralces NET2', async () => {
     // Get token
     const mig = migration("NET2")
-    mig.data.attributes.source.access_token = await getToken(mig.data.attributes.source.url, "fermat@integralces.net", "integralces")
+    mig.data.attributes.source.access_token = await getToken(mig.data.attributes.source.url, "fermat@komunitin.org", "komunitin")
     await t.api.post('/migrations', mig, {user: "67890", scopes: [Scope.Accounting]})
   })
 
