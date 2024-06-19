@@ -29,9 +29,9 @@ services:
       - redis
     restart: unless-stopped
     environment:
-      KOMUNITIN_ACCOUNTING_URL: ${KOMUNITIN_ACCOUNTING_URL}
-      KOMUNITIN_SOCIAL_URL: ${ICES_URL}/ces/api/social
-      KOMUNITIN_AUTH_URL: ${ICES_URL}/oauth2
+      KOMUNITIN_ACCOUNTING_URL: http://accounting:2025
+      KOMUNITIN_SOCIAL_URL: http://integralces:2029/ces/api/social
+      KOMUNITIN_AUTH_URL: http://integralces:2029/oauth2
       KOMUNITIN_APP_URL: ${KOMUNITIN_APP_URL}
       NOTIFICATIONS_CLIENT_ID: komunitin-notifications
       NOTIFICATIONS_CLIENT_SECRET: ${KOMUNITIN_NOTIFICATIONS_SECRET}
@@ -73,10 +73,10 @@ services:
       STELLAR_FRIENDBOT_URL: ${STELLAR_HORIZON_URL}/friendbot
       DOMAIN: ${KOMUNITIN_DOMAIN}
       MASTER_PASSWORD_SALT: ${KOMUNITIN_ACCOUNTING_MASTER_PASSWORD_SALT}
-      AUTH_JWKS_URL: ${ICES_URL}/.well-known/jwks.json
+      AUTH_JWKS_URL: http://integralces:2029/.well-known/jwks.json
       AUTH_JWT_ISSUER: ${ICES_URL}/
       AUTH_JWT_AUDIENCE: "komunitin-app,komunitin-notifications"
-      NOTIFICATIONS_API_URL: ${KOMUNITIN_NOTIFICATIONS_URL}
+      NOTIFICATIONS_API_URL: http://notifications:2028
       API_BASE_URL: ${KOMUNITIN_ACCOUNTING_URL}
       NOTIFICATIONS_API_USERNAME: komunitin
       NOTIFICATIONS_API_PASSWORD: ${KOMUNITIN_NOTIFICATIONS_SECRET}
@@ -107,10 +107,11 @@ services:
     environment:
       NOTIFICATIONS_CLIENT_ID: komunitin-notifications
       NOTIFICATIONS_CLIENT_SECRET: ${KOMUNITIN_NOTIFICATIONS_SECRET}
-      NOTIFICATIONS_API_URL: ${KOMUNITIN_NOTIFICATIONS_URL}
+      NOTIFICATIONS_API_URL: http://notifications:2028
       NOTIFICATIONS_EVENTS_USERNAME: komunitin
       NOTIFICATIONS_EVENTS_PASSWORD: ${KOMUNITIN_NOTIFICATIONS_SECRET}
       MAILERSEND_API_KEY: ${MAILERSEND_API_KEY}
+      CES_USER_GOOGLE_MAPS_KEY: ${GOOGLE_MAPS_KEY}
     volumes:
       - "integralces-files:/var/www/html/sites/default"
       - "../ices:/var/www/html/sites/all/modules/ices"
