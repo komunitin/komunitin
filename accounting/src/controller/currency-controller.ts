@@ -413,7 +413,10 @@ export class LedgerCurrencyController implements CurrencyController {
     const payee = await this.getAccount(ctx, data.payee)
 
     // Check that the user is allowed to transfer from the payer account.
-    if (!(this.isAdmin(user) || userHasAccount(user, payer) || userHasAccount(user, payee))) {
+    if (!(this.isAdmin(user) 
+      || (userHasAccount(user, payer) && (payer.settings.allowPayments ?? this.model.settings.defaultallowPayments))
+      || (userHasAccount(user, payee) && (payee.settings.allowPaymentRequests ?? this.model.settings.defaultallowPaymentRequests))
+    )) {
       throw forbidden("User is not allowed to transfer from this account")
     }
 
@@ -602,7 +605,8 @@ export class LedgerCurrencyController implements CurrencyController {
     // Check that the user is only updating allowed settings.
 
     // We can make this list configurable in the future.
-    const userSettings = ["acceptPaymentsAutomatically"]
+    const userSettings = ["acceptPaymentsAutomatically", "acceptPaymentsWhitelist"]
+
     if (!this.isAdmin(user) && Object.keys(settings).some(k => !["id", "type"].includes(k) && !userSettings.includes(k))) {
       throw forbidden("User is not allowed to update this account setting")
     }

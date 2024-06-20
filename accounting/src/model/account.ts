@@ -47,6 +47,12 @@ export type AccountSettings = {
   // time this account receives a payment by the same amount until the
   // limit is reached.
   onPaymentCreditLimit?: number
+
+  // This account can perform payments.
+  allowPayments?: boolean
+
+  // This account can request payments form other accounts.
+  allowPaymentRequests?: boolean
 }
 
 // No input needed for creating an account (beyond implicit currency)!

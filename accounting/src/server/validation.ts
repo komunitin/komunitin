@@ -24,6 +24,9 @@ export namespace Validators {
     body(`${path}.defaultAcceptPaymentsWhitelist`).optional().isArray(),
     body(`${path}.defaultAcceptPaymentsAfter`).optional().isInt({min: 0}),
     body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.defaultAllowPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowPaymentRequests`).optional().isBoolean(),
+    
   ]
 
   const isUpdateCurrencyAttributes = (path: string) => [
@@ -152,6 +155,8 @@ export namespace Validators {
     body(`${path}.acceptPaymentsWhitelist`).optional().isArray(),
     body(`${path}.acceptPaymentsAfter`).optional().isInt({min: 0}),
     body(`${path}.onPaymentCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.allowPayments`).optional().isBoolean(),
+    body(`${path}.allowPaymentRequests`).optional().isBoolean(),
   ]
 
   export const isUpdateAccountSettings = () => [

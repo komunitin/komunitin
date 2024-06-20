@@ -59,5 +59,12 @@ export const TransferSerializer = new Serializer<Transfer>("transfers", {
 
 export const AccountSettingsSerializer = new Serializer<AccountSettings>("account-settings", {
   version: null,
-  projection: projection<AccountSettings>(['acceptPaymentsAutomatically', 'acceptPaymentsWhitelist', 'acceptPaymentsAfter', 'onPaymentCreditLimit'])
+  projection: projection<AccountSettings>([
+    'acceptPaymentsAutomatically', 
+    'acceptPaymentsWhitelist', 
+    'acceptPaymentsAfter', 
+    'onPaymentCreditLimit',
+    'allowPayments',
+    'allowPaymentRequests'
+  ])
 })

@@ -2,11 +2,12 @@ import { PrismaClient } from "@prisma/client"
 import { Keypair } from "@stellar/stellar-sdk"
 import cron from "node-cron"
 import { KeyObject } from "node:crypto"
+import { EventEmitter } from "node:events"
 import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 import { Context, systemContext } from "src/utils/context"
 import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
 import TypedEmitter from "typed-emitter"
-import { ControllerEvents, SharedController as BaseController } from "."
+import { SharedController as BaseController, ControllerEvents } from "."
 import { config } from "../config"
 import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, createStellarLedger } from "../ledger"
 import { friendbot } from "../ledger/stellar/friendbot"
@@ -14,12 +15,9 @@ import { CreateCurrency, Currency, currencyToRecord, recordToCurrency } from "..
 import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
 import { logger } from "../utils/logger"
 import { LedgerCurrencyController, storeCurrencyKey } from "./currency-controller"
-import { migrateFromIntegralces } from "./migration/integralces"
-import { CreateMigration, Migration } from "./migration/migration"
-import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
-import { EventEmitter } from "node:events"
 import { initUpdateCreditOnPayment } from "./features/credit-on-payment"
 import { initNotifications } from "./features/notificatons"
+import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
 
 
 export async function createController(): Promise<BaseController> {
@@ -176,6 +174,8 @@ export class LedgerController implements BaseController {
       defaultAcceptPaymentsAfter: 15*24*60*60, // 15 days,
       defaultAcceptPaymentsWhitelist: [],
       defaultOnPaymentCreditLimit: undefined,
+      defaultallowPayments: true,
+      defaultallowPaymentRequests: true,
       ...currency.settings
     }
 

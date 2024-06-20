@@ -123,21 +123,9 @@ jobs:
     - name: Deploy demo.komunitin.org
       run: > 
         ssh deploy@$demo.komunitin.org 
-        "export KOMUNITIN_DOMAIN=demo.komunitin.org
-        && export KOMUNITIN_APP_URL=https://demo.komunitin.org
-        && export KOMUNITIN_ACCOUNTING_URL=https://accounting.demo.komunitin.org
-        && export KOMUNITIN_NOTIFICATIONS_URL=https://notifications.demo.komunitin.org
-        && export ICES_URL=https://integralces.demo.komunitin.org
-        && export ICES_ADMIN_PASSWORD=${{ secrets.TEST_KOMUNITIN_SECRET }}
-        && export KOMUNITIN_NOTIFICATIONS_SECRET=${{ secrets.TEST_KOMUNITIN_SECRET }}
-        && export STELLAR_NETWORK=testnet
-        && export STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
-        && export KOMUNITIN_ACCOUNTING_MASTER_PASSWORD=${{ secrets.TEST_KOMUNITIN_SECRET }}
-        && export KOMUNITIN_ACCOUNTING_MASTER_PASSWORD_SALT=wekjnc8jc8wjceuwcenwi98ecepopfewdda
-        && export MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
-        && export PUSH_SERVER_KEY=${{ secrets.PUSH_SERVER_KEY }}
-        && cd /opt/demo.komunitin.org
+        "cd /opt/demo.komunitin.org
         && cd ices && git pull && cd ..
         && cd komunitin && git pull
-        && . ./start.sh --ices --demo --public"
+        && docker compose down -v --remove-orphans
+        && ./start.sh --up --ices --demo --public"
     
