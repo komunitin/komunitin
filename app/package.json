@@ -6,8 +6,7 @@
   "author": "komunitin <komunitinbox@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "quasar dev",
-    "dev-pwa": "quasar dev -m pwa",
+    "dev": "quasar dev -m pwa",
     "build": "quasar build -m pwa",
     "test": "./node_modules/jest/bin/jest.js .",
     "lint": "eslint --ext .ts,.vue --ignore-path .gitignore --max-warnings 0 ./src",
