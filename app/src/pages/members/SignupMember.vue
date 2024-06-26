@@ -79,7 +79,7 @@
 import PageHeader from "../../layouts/PageHeader.vue"
 import ProfileForm from "./ProfileForm.vue"
 import OfferForm from "../offers/OfferForm.vue"
-import { computed, onMounted, ref } from "vue"
+import { computed, ref } from "vue"
 import { useStore } from "vuex"
 import { Contact, Member, Offer } from "src/store/model"
 import { DeepPartial } from "quasar"
@@ -108,17 +108,11 @@ store.dispatch("members/load", {
   include: "contacts"
 }).then(() => {
   member.value = myMember.value
+  updateContacts(myMember.value.contacts)
 })
 
 const group = computed(() => store.getters["groups/current"])
 const settings = computed(() => group.value?.['signup-settings']?.attributes)
-
-
-const verifyEmail = async () => {
-  // ...
-  
-}
-onMounted(verifyEmail)
 
 const loadingSaveMember = ref(false)
 

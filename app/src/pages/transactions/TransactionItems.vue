@@ -5,7 +5,7 @@
     v-slot="slotProps"
     :code="code"
     module-name="transfers"
-    include="currency,payer,payee"
+    include="payer,payee,currency"
     sort="-updated"
     :filter="{ account: account.id }"
     @page-loaded="fetchMembers"

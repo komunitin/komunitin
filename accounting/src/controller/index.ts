@@ -1,28 +1,40 @@
 
-import { CollectionOptions } from "../server/request";
-import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings } from "../model";
-export { createController } from "./controller";
-import { Context } from "../utils/context";
-import { Ledger } from "src/ledger";
+import { CollectionOptions } from "../server/request"
+import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings } from "../model"
+export { createController } from "./base-controller"
+import { Context } from "../utils/context"
+import TypedEmitter from "typed-emitter"
+export { MigrationController } from './migration'
+
+export type ControllerEvents = {
+  /**
+   * This event is emitted when a transfer is created, committed,
+   * rejected, deleted, etc.
+   */
+  transferStateChanged: (transfer: Transfer, controller: CurrencyController) => void
+}
+
 /**
  * Controller for operations not related to a particular currency.
  */
 export interface SharedController {
-  getLedger(): Ledger
   
   createCurrency(ctx: Context, currency: CreateCurrency): Promise<Currency>
   getCurrencies(ctx: Context): Promise<Currency[]>
-  getCurrency(ctx: Context, code: string): Promise<Currency>
 
-  getCurrencyController(code: string): Promise<CurrencyController>
+  getCurrencyController(code: string): Promise<CurrencyController>   
   stop(): Promise<void>
+  
+  addListener: TypedEmitter<ControllerEvents>['addListener']
+  removeListener: TypedEmitter<ControllerEvents>['removeListener']
 }
 /**
  * Controller for operations related to a particular currency.
  */
 export interface CurrencyController {
   // Currency
-  update(ctx: Context, currency: UpdateCurrency): Promise<Currency>
+  getCurrency(ctx: Context): Promise<Currency>
+  updateCurrency(ctx: Context, currency: UpdateCurrency): Promise<Currency>
   
   // Accounts
   createAccount(ctx: Context, account: InputAccount): Promise<Account>
@@ -39,6 +51,7 @@ export interface CurrencyController {
   // Transfers
   createTransfer(ctx: Context, transfer: InputTransfer): Promise<Transfer>
   getTransfer(ctx: Context, id: string): Promise<Transfer>
+  getTransferByHash(ctx: Context, hash: string): Promise<Transfer>
   getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]>
   updateTransfer(ctx: Context, transfer: UpdateTransfer): Promise<Transfer>
   deleteTransfer(ctx: Context, id: string): Promise<void>

@@ -1,11 +1,31 @@
 import { before, after } from "node:test"
 import { client } from "./net.client"
-import { server } from "./net.mock"
+import { clearEvents, server } from "./net.mock"
 import { clearDb } from "./db"
 import { createApp, closeApp, ExpressExtended } from "../../src/server/app"
 import { testAccount, testCurrency, testTransfer, userAuth } from "./api.data"
 
-export function setupServerTest() {
+interface TestSetup {
+  app: ExpressExtended,
+  api: ReturnType<typeof client>,
+  createAccount: (user: string) => Promise<any>,
+  payment: (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus?: number) => Promise<any>,
+}
+
+interface TestSetupWithCurrency extends TestSetup {
+  admin: ReturnType<typeof userAuth>,
+  user1: ReturnType<typeof userAuth>,
+  user2: ReturnType<typeof userAuth>,
+  account0: any,
+  account1: any,
+  account2: any,
+}
+
+export function setupServerTest(createData: false): TestSetup;
+export function setupServerTest(createData: true): TestSetupWithCurrency;
+export function setupServerTest(): TestSetupWithCurrency;
+
+export function setupServerTest(createData: boolean = true): TestSetupWithCurrency {
   const test = {
     app: undefined as any as ExpressExtended,
     api: undefined as any as ReturnType<typeof client>,
@@ -21,7 +41,7 @@ export function setupServerTest() {
       return response.body.data
     },
 
-    payment: async (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus = 200) => {
+    payment: async (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus = 201) => {
       const response = await test.api?.post('/TEST/transfers', testTransfer(payer, payee, amount, meta, state), auth, httpStatus)
       return response.body.data
     }
@@ -32,13 +52,16 @@ export function setupServerTest() {
     test.app = await createApp()
     test.api = client(test.app)
     server.listen({ onUnhandledRequest: "bypass" })
+    clearEvents()
 
-    // Create currency TEST
-    await test.api.post('/currencies', testCurrency(), test.admin)
-    // Create 3 accounts
-    test.account0 = await test.createAccount(test.admin.user)
-    test.account1 = await test.createAccount(test.user1.user)
-    test.account2 = await test.createAccount(test.user2.user)
+    if (createData) {
+      // Create currency TEST
+      await test.api.post('/currencies', testCurrency(), test.admin)
+      // Create 3 accounts
+      test.account0 = await test.createAccount(test.admin.user)
+      test.account1 = await test.createAccount(test.user1.user)
+      test.account2 = await test.createAccount(test.user2.user)
+    }
   })
 
   after(async () => {

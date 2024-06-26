@@ -24,6 +24,9 @@ export namespace Validators {
     body(`${path}.defaultAcceptPaymentsWhitelist`).optional().isArray(),
     body(`${path}.defaultAcceptPaymentsAfter`).optional().isInt({min: 0}),
     body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.defaultAllowPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowPaymentRequests`).optional().isBoolean(),
+    
   ]
 
   const isUpdateCurrencyAttributes = (path: string) => [
@@ -91,6 +94,7 @@ export namespace Validators {
 
   export const isCreateAccount = () => [
     ...jsonApiDoc("accounts"),
+    ...isUpdateAccountAttibutes("data.attributes"),
     ...isCollectionRelationship("data", "users", "users"),
     ...isIncludedTypes(["users"]),
   ]
@@ -99,6 +103,8 @@ export namespace Validators {
     body(`${path}.meta`).isString(),
     body(`${path}.amount`).isInt({gt: 0}),
     body(`${path}.state`).isIn(["new", "committed"]),
+    body(`${path}.created`).optional(),
+    body(`${path}.updated`).optional(),
   ]
 
   const isResourceId = (path: string, type: string) => [
@@ -109,6 +115,7 @@ export namespace Validators {
   const isCreateTransferRelationships = (path: string) => [
     ...isResourceId(`${path}.payer`, "accounts"),
     ...isResourceId(`${path}.payee`, "accounts"),
+    ...isOptionalResourceId(`${path}.currency`, "currencies"),
   ]
 
   export const isCreateTransfer = () => [
@@ -134,6 +141,7 @@ export namespace Validators {
     body(path).optional(),
     ...isOptionalResourceId(`${path}.payer`, "accounts"),
     ...isOptionalResourceId(`${path}.payee`, "accounts"),
+    ...isOptionalResourceId(`${path}.currency`, "currencies"),
   ]
 
   export const isUpdateTransfer = () => [
@@ -148,12 +156,25 @@ export namespace Validators {
     body(`${path}.acceptPaymentsWhitelist`).optional().isArray(),
     body(`${path}.acceptPaymentsAfter`).optional().isInt({min: 0}),
     body(`${path}.onPaymentCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.allowPayments`).optional().isBoolean(),
+    body(`${path}.allowPaymentRequests`).optional().isBoolean(),
   ]
 
   export const isUpdateAccountSettings = () => [
     ...jsonApiDoc("account-settings"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
     ...isUpdateAccountSettingsAttributes("data.attributes"),
+  ]
+
+  const isCreateMigrationAttributes = (path: string) => [
+    body(`${path}.code`).isString().notEmpty(),
+    body(`${path}.source.url`).isString().notEmpty(),
+    body(`${path}.source.platform`).isString().notEmpty(),
+    body(`${path}.source.access_token`).isString().notEmpty(),
+  ]
+  export const isCreateMigration = () => [
+    ...jsonApiDoc("migrations"),
+    ...isCreateMigrationAttributes("data.attributes"),
   ]
 
 }

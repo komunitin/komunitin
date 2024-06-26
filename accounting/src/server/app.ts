@@ -21,7 +21,10 @@ export async function createApp() : Promise<ExpressExtended> {
   // Add some security headers.
   app.use(helmet())
   // Add CORS so this API can be called from any domain.
-  app.use(cors())
+  app.use(cors({
+    origin: true,
+    credentials: true
+  }))
 
   // Express middlewares
   app.use(express.json({

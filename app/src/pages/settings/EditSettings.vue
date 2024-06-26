@@ -135,7 +135,7 @@ const accountSettings = computed(() => store.getters["account-settings/current"]
 
 const loadAccountSettings = async () => {
   await store.dispatch("account-settings/load", {
-    code: myAccount.value.attributes.code,
+    code: myAccount.value.id,
     group: myAccount.value.currency.attributes.code
   })
 }
@@ -153,7 +153,7 @@ const changes = ref<typeof SaveChanges>()
 
 const saveAccountSettings = async (resource: DeepPartial<AccountSettings>) => {
   const fn = () => store.dispatch("account-settings/update", {
-    code: myAccount.value.attributes.code,
+    code: myAccount.value.id,
     group: myAccount.value.currency.attributes.code,
     resource
   })

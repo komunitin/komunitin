@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { KOptions } from "../boot/koptions";
-import { TokenResponse, User } from "../plugins/Auth";
+import { TokenResponse } from "../plugins/Auth";
 import { Server, Response } from "miragejs";
 
 export function mockToken(scope: string, emptyUser = false): TokenResponse {
@@ -12,17 +12,6 @@ export function mockToken(scope: string, emptyUser = false): TokenResponse {
     expires_in: 3600,
     scope: scope
   };
-}
-
-function mockUserInfo(): User {
-  return {
-    email: "example@example.com",
-    emailVerified: true,
-    name: "Alice",
-    preferredUsername: "Alice",
-    sub: '1',
-    zoneinfo: "Europe/Madrid"
-  }
 }
 
 /**
@@ -40,13 +29,6 @@ export default {
         const data = mockToken(params.get("scope") as string, param === "empty_user");
         return new Response(200, {}, data);
       }
-    );
-
-    /**
-     * Auth UserInfo
-     */
-    server.get(KOptions.url.auth + "/UserInfo", () =>
-      mockUserInfo()
     );
   }
 };

@@ -1,15 +1,13 @@
-import { Request, Response, NextFunction, Router } from 'express';
-import { Validators } from './validation';
-import { checkExact, param } from 'express-validator';
-import { CurrencyController, SharedController } from '../controller';
-import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, collectionParams, resourceParams } from './request';
+import { Router } from 'express';
+import { checkExact } from 'express-validator';
+import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
+import { context } from 'src/utils/context';
+import { SharedController, MigrationController } from '../controller';
 import { Scope, auth, noAuth } from './auth';
-import { Context, context } from 'src/utils/context';
+import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
 import { input } from './parse';
 import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, TransferSerializer } from './serialize';
-import { Dictionary, Serializer } from 'ts-japi';
-import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
-import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
+import { Validators } from './validation';
 
 export function getRoutes(controller: SharedController) {
   const router = Router()
@@ -24,7 +22,7 @@ export function getRoutes(controller: SharedController) {
     const currency = await controller.createCurrency(context(req), data)
     // Serialize currency to JSON:API
     const result = await CurrencySerializer.serialize(currency)
-    res.status(200).json(result)
+    res.status(201).json(result)
   }))
 
   // List currencies
@@ -35,16 +33,14 @@ export function getRoutes(controller: SharedController) {
   }))
 
   // Get currency
-  router.get('/:code/currency', noAuth(), asyncHandler(async (req,res) => {
-    const currency = await controller.getCurrency(context(req), req.params.code)
-    const result = await CurrencySerializer.serialize(currency)
-    res.status(200).json(result)
-  }))
+  router.get('/:code/currency', noAuth(), currencyResourceHandler(controller, async (currencyController, ctx) => {
+    return await currencyController.getCurrency(ctx)
+  }, CurrencySerializer, {}))
 
   // Update currency
   router.patch('/:code/currency', auth(Scope.Accounting), checkExact(Validators.isUpdateCurrency()), 
     currencyInputHandler(controller, async (currencyController, ctx, data: UpdateCurrency) => {
-      return await currencyController.update(ctx, data)
+      return await currencyController.updateCurrency(ctx, data)
     }, CurrencySerializer)
   )
 
@@ -52,26 +48,26 @@ export function getRoutes(controller: SharedController) {
   router.post('/:code/accounts', auth(Scope.Accounting), checkExact(Validators.isCreateAccount()), 
     currencyInputHandler(controller, async (currencyController, ctx, data: InputAccount) => {
       return await currencyController.createAccount(ctx, data)
-    }, AccountSerializer)
+    }, AccountSerializer, 201)
   )
 
   // List accounts
-  router.get('/:code/accounts', auth(Scope.Accounting), 
+  router.get('/:code/accounts', auth([Scope.Accounting, Scope.AccountingReadAll]), 
     currencyCollectionHandler(controller, async (currencyController, ctx, params) => {
       return await currencyController.getAccounts(ctx, params)
     }, AccountSerializer, {
       filter: ["id", "code"],
       sort: ["code", "balance", "creditLimit", "maximumBalance", "created", "updated"],
-      include: ["currency"]
+      include: ["currency", "settings"]
     })
   )
 
   // Get account
-  router.get('/:code/accounts/:id', auth(Scope.Accounting), 
+  router.get('/:code/accounts/:id', auth([Scope.Accounting, Scope.AccountingReadAll]), 
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getAccount(ctx, id)
     }, AccountSerializer, {
-      include: ["currency"]
+      include: ["currency", "settings"]
     })
   )
 
@@ -83,7 +79,7 @@ export function getRoutes(controller: SharedController) {
   )
 
   // Get account settings
-  router.get('/:code/accounts/:id/settings', auth(Scope.Accounting),
+  router.get('/:code/accounts/:id/settings', auth([Scope.Accounting, Scope.AccountingReadAll]),
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getAccountSettings(ctx, id)
     }, AccountSettingsSerializer, {})
@@ -106,7 +102,7 @@ export function getRoutes(controller: SharedController) {
   router.post('/:code/transfers', auth(Scope.Accounting), checkExact(Validators.isCreateTransfer()), 
     currencyInputHandler(controller, async (currencyController, ctx, data: InputTransfer) => {
       return await currencyController.createTransfer(ctx, data)
-    }, TransferSerializer)
+    }, TransferSerializer, 201)
   )
 
   router.patch('/:code/transfers/:id', auth(Scope.Accounting), checkExact(Validators.isUpdateTransfer()),
@@ -121,23 +117,32 @@ export function getRoutes(controller: SharedController) {
     res.status(204).end()
   }))
 
-  router.get('/:code/transfers/:id', auth(Scope.Accounting), 
+  router.get('/:code/transfers/:id', auth([Scope.Accounting, Scope.AccountingReadAll]), 
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getTransfer(ctx, id)
     }, TransferSerializer, {
-      include: ["currency", "payer", "payee"]
+      include: ["payer", "payee", "currency"]
     })
   )
 
-  router.get('/:code/transfers', auth(Scope.Accounting),
+  router.get('/:code/transfers', auth([Scope.Accounting, Scope.AccountingReadAll]),
     currencyCollectionHandler(controller, async (currencyController, ctx, params) => {
       return await currencyController.getTransfers(ctx, params)
     }, TransferSerializer, {
-      filter: ["payer", "payee"],
+      filter: ["payer", "payee", "account"],
       sort: ["created", "updated"],
-      include: ["payer", "payee"]
+      include: ["payer", "payee", "currency"]
     })
   )
+
+  // Migrations (WIP)
+
+  router.post('/migrations', auth(Scope.Accounting), checkExact(Validators.isCreateMigration()), asyncHandler(async (req, res) => {
+    const data = input(req)
+    const migration = new MigrationController(controller)
+    const result = await migration.createMigration(context(req), data)
+    res.status(201).json(result)
+  }))
 
   return router
 

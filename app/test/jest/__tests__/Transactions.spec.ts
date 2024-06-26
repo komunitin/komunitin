@@ -65,35 +65,73 @@ describe("Transactions", () => {
     expect(text).toContain("Committed");
     expect(text).toContain("Group 0");
   })
-  it("creates new transaction", async () =>  {
+  it("creates payment request", async () =>  {
     await wrapper.vm.$router.push("/login");
     await flushPromises();
     // Click transactions link
     await wrapper.get("#menu-transactions").trigger("click");
     await flushPromises();
-    await wrapper.get("#create-transaction").trigger("click");
+    await wrapper.get("#request-payment").trigger("click");
     await flushPromises();
-    await wrapper.getComponent(SelectMember).get('div').trigger("click");
-    await flushPromises()
+    expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/EmilianoLemke57/transactions/receive");
     await wrapper.vm.$wait()
+    await wrapper.getComponent(SelectMember).get('div').trigger("click");
+    await wrapper.vm.$wait()
+
     const list = wrapper.getComponent(QDialog).getComponent(QList)
     expect(list.text()).toContain("Carol")
     const payer = list.findAllComponents(MemberHeader)[2]
     await payer.trigger("click")
     await flushPromises();
     await wrapper.get("[name='description']").setValue("Test transaction description.")
+    const button = wrapper.get("button[type='submit']")
+    expect(button.attributes("disabled")).toBeDefined()
     await wrapper.get("[name='amount']").setValue("123")
+    expect(button.attributes("disabled")).toBeUndefined()
+
+    await button.trigger("click")
+    await flushPromises();
+
+    const text = wrapper.text();
+    expect(text).toContain("Carol")
+    expect(text).toContain("Emiliano")
+    expect(text).toContain("123")
+    expect(text).toContain("Test transaction description.")
+    expect(text).toContain("today")
+    expect(text).toContain("New")
+
+
+    await wrapper.get("#confirm-transaction").trigger("click")
+    await wrapper.vm.$wait();
+    expect(wrapper.text()).toContain("Committed")
+
+  })
+
+  it("creates payment", async() => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
+    await wrapper.vm.$wait();
+
+    await wrapper.getComponent(SelectMember).get('div').trigger("click");
+    await flushPromises()
+    await wrapper.vm.$wait()
+
+    const list = wrapper.getComponent(QDialog).getComponent(QList)
+    expect(list.text()).toContain("Carol")
+    const payer = list.findAllComponents(MemberHeader)[2]
+    await payer.trigger("click")
+    await flushPromises();
+    await wrapper.get("[name='description']").setValue("Test payment description.")
+    await wrapper.get("[name='amount']").setValue("234")
     await wrapper.get("button[type='submit']").trigger("click")
     await flushPromises();
     const text = wrapper.text();
     expect(text).toContain("Carol");
     expect(text).toContain("Emiliano");
-    expect(text).toContain("123");
-    expect(text).toContain("Test transaction description.");
+    expect(text).toContain("234");
+    expect(text).toContain("Test payment description.");
     expect(text).toContain("today")
-    await wrapper.get("button[type='submit']").trigger("click")
+    await wrapper.get("#confirm-transaction").trigger("click")
     await wrapper.vm.$wait();
     expect(wrapper.text()).toContain("Committed")
-
   })
 })

@@ -107,13 +107,13 @@ describe('Payment requests', async () => {
     await t.api.delete(`/TEST/transfers/${committed.id}`, t.user1, 400)
 
     // delete rejected.
-    await t.api.delete(`/TEST/transfers/${rejected.id}`, t.user1, 204)
+    await t.api.delete(`/TEST/transfers/${rejected.id}`, t.user1)
     // delete new
     const response = await t.api.post("/TEST/transfers", testTransfer(t.account2.id, t.account1.id, 100, "Draft", "new"), t.user1)
-    await t.api.delete(`/TEST/transfers/${response.body.data.id}`, t.user1, 204)
+    await t.api.delete(`/TEST/transfers/${response.body.data.id}`, t.user1)
     // delete pending
     const response2 = await t.api.post("/TEST/transfers", testTransfer(t.account2.id, t.account1.id, 100, "Pending", "new"), t.user1)
-    await t.api.delete(`/TEST/transfers/${response2.body.data.id}`, t.user1, 204)
+    await t.api.delete(`/TEST/transfers/${response2.body.data.id}`, t.user1)
 
     const result = await t.api.get(`/TEST/transfers`, t.user1)
     // Committed transfer still there

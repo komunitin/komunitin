@@ -58,7 +58,6 @@ describe('Creates stellar elements', async () => {
     const config = {
       code: "TEST",
       rate: {n: 1, d: 10}, //1 TEST = 0.1 HOUR
-      defaultInitialCredit: "1000"
     }
     currencyKeys = await ledger.createCurrency(config, sponsor)
     currency = ledger.getCurrency(config, {
@@ -81,6 +80,8 @@ describe('Creates stellar elements', async () => {
   let accountKey: Keypair
   await it('should be able to create a new account', async () => {
     const result = await currency.createAccount({
+      initialCredit: "1000"
+    }, {
       sponsor: sponsor,
       issuer: currencyKeys.issuer,
       credit: currencyKeys.credit
@@ -94,7 +95,9 @@ describe('Creates stellar elements', async () => {
 
   let account2Key: Keypair
   await it('should be able to pay from one account to another', async() => {
-    account2Key = (await currency.createAccount({sponsor, issuer: currencyKeys.issuer, credit: currencyKeys.credit})).key
+    account2Key = (await currency.createAccount({
+      initialCredit: "1000"
+    }, {sponsor, issuer: currencyKeys.issuer, credit: currencyKeys.credit})).key
     const account = await currency.getAccount(accountKey.publicKey())
     await account.pay({payeePublicKey: account2Key.publicKey(), amount: "100"}, {account: accountKey, sponsor})
     await account.update()
@@ -120,8 +123,7 @@ describe('Creates stellar elements', async () => {
     const config = {
       code: "TES2",
       rate: {n: 1, d: 2}, // 1TES2 = 0.5 HOUR
-      defaultInitialCredit: "1000",
-      externalTraderInitialCredit: "10000"
+      externalTraderInitialCredit: "1000"
     } 
     currency2Keys = await ledger.createCurrency(config, sponsor)
     currency2 = ledger.getCurrency(config, {
@@ -142,12 +144,16 @@ describe('Creates stellar elements', async () => {
     }))
     // Create account from currency 2
     const {key: key2} = await currency2.createAccount({
+      initialCredit: "1000"
+    }, {
       sponsor,
       issuer: currency2Keys.issuer,
       credit: currency2Keys.credit
     })
     // Create account from currency 1
     const {key: key1} = await currency.createAccount({
+      initialCredit: "1000"
+    }, {
       sponsor,
       issuer: currencyKeys.issuer,
       credit: currencyKeys.credit

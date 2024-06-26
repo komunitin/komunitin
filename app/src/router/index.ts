@@ -26,6 +26,8 @@ export default function( { store } : {store: Store<State>} ): Router {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   });
 
+
+
   store.commit("previousRoute", undefined)
   let first = true;
   

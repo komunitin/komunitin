@@ -8,12 +8,40 @@ import { User } from "./user";
 export { CurrencyRecord }
 
 export type CurrencySettings = {
+  /**
+   * The credit limit that will have new qccounts by default.
+   */
   defaultInitialCreditLimit: number
+  /**
+   * The maximum balance that will have new accounts by default. Set
+   * to undefined for no limit.
+   */
   defaultInitialMaximumBalance?: number
+  /**
+   * Users need to accept payments by default (false) or they are charged automatically (true)
+   */
   defaultAcceptPaymentsAutomatically?: boolean
+  /**
+   * List of payee account id's that can get payments without manual acceptance
+   */
   defaultAcceptPaymentsWhitelist?: string[]
+  /**
+   * Number of seconds after which payments are accepted automatically
+   */
   defaultAcceptPaymentsAfter?: number
+  /**
+   * If set, the dynamic on-payment credit limit scheme will be activated. Then, the
+   * value of this field is the hard credit limit.
+   */
   defaultOnPaymentCreditLimit?: number
+  /**
+   * Users can perform payments by default.
+   */
+  defaultAllowPayments?: boolean
+  /**
+   * Users can request payments by default.
+   */
+  defaultAllowPaymentRequests?: boolean
 }
 
 export type CurrencyStatus = "new" | "active"

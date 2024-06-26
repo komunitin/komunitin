@@ -7,8 +7,8 @@ This service uses the [Stellar](https://stellar.org) blockchain to define the cu
 $ pnpm install
 ```
 
-## Run dev server
-Start the dependecy services (database by now) and the Accounting service at http://localhost:3000.
+## Run dev server locally
+Start the dependecy services (database and local Stellar Network) and the Komunitin Accounting service at http://localhost:2025.
 ```bash
 $ docker compose up -d
 $ pnpm dev

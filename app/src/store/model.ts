@@ -334,7 +334,9 @@ export interface Account extends ResourceObject {
 
 export interface AccountSettings extends ResourceObject {
   attributes: {
-    acceptPaymentsAutomatically: boolean
+    acceptPaymentsAutomatically: boolean,
+    allowPayments?: boolean,
+    allowPaymentRequests?: boolean,
   }
   relationships: {
     account: RelatedResource

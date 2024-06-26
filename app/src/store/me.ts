@@ -1,9 +1,10 @@
 import { Module, ActionContext } from "vuex";
-import { Auth, User, AuthData } from "../plugins/Auth";
+import { Auth, AuthData } from "../plugins/Auth";
 import KError, { KErrorCode } from "src/KError";
 import { notifications } from "src/plugins/Notifications";
 import locate from "src/plugins/Location";
 import {Member, NotificationsSubscription, UserSettings} from "./model"
+import { setAccountingApiUrl } from ".";
 
 // Exported just for testing purposes.
 export const auth = new Auth()
@@ -14,7 +15,6 @@ export interface LoginPayload {
 }
 
 export interface UserState {
-  userInfo?: User;
   tokens?: AuthData;
   myUserId?: string;
   /**
@@ -28,41 +28,52 @@ export interface UserState {
 }
 
 /**
- * Load OIDC user info.
+ * Helper function that loads the user data after being logged in and having
+ * the credentials.
+ *
+ * @param accessToken The access token
+ * @param commit The local commit function.
+ * @param dispatch The vuex Dispatch object.
  */
-async function loadUserInfo(accessToken: string, { commit }: ActionContext<UserState, never>) {
-  return auth.getUserInfo(accessToken).then(userInfo => {
-    commit("userInfo", userInfo);
-  });
-}
-
-/**
- * Load member and account resources for current user.
- */
-async function loadUserData(accessToken: string,
+async function loadUser(
   { commit, dispatch, state, getters, rootGetters }: ActionContext<UserState, never>
 ) {
   // Resource actions allow including external relationships such as members.account,
-  // but we can't use it right here because we still don't know the group code, which
-  // is necessary for this process to work. So we manually do the twy calls.
+  // but we can't use it right here because we still don't know the group code (nor 
+  // the accounting api url), which is necessary for this process to work. So we 
+  // manually do the two calls.
   await dispatch("users/load", {
     include: "members,members.group,settings"
   });
   const user = rootGetters["users/current"];
 
+  // This is the currency URL from the Accounting API.
+  const currencyUrl = user.members[0].group.relationships.currency.links.related;
+  // https://.../accounting/<GROUP>/currency
+  
+  // Get the accounting API URL from the currency URL and update it in the store. This is
+  // a way we have to be able to have multiple different accounting APIs for different
+  // currencies. That may not be necessary in the future when we finish the migration to
+  // the new API.
+  const accountingApiUrl = currencyUrl.split('/').slice(0, -2).join('/');
+  // https://.../accounting
+  setAccountingApiUrl(accountingApiUrl)
+  
   // We here compute the currency code and account code from their URLS so we can fetch 
   // them using the store methods. This is kind of a perversion of HATEOAS since we could 
   // more coherently fetch them directly from the provided link. But we have all the store 
   // infrastructure like this, so this is a little hack that I hope won't make problems.
-  const currencyUrl = user.members[0].group.relationships.currency.links.related;
-  // https://.../accounting/<GROUP>/currency
   const currencyCode = currencyUrl.split('/').slice(-2)[0];
-  const accountUrl = user.members[0].relationships.account.links.related;
-  // https://.../accounting/<GROUP>/accounts/<CODE>
-  const accountCode = accountUrl.split('/').slice(-1)[0];
 
-  // Fetch currency and account from accounting API.
-  await dispatch("accounts/load", {group: currencyCode, code: accountCode, include: "currency"});
+  // pending or deleted members don't have related account.
+  if (["active", "suspended"].includes(user.members[0].attributes.state)) {
+    const accountId = user.members[0].relationships.account.data.id
+    await dispatch("accounts/load", {group: currencyCode, code: accountId, include: "currency,settings"});
+  } else {
+  // otherwise get currency at least.
+    await dispatch("currencies/load", {code: currencyCode});
+  }
+
   commit("myUserId", user.id);
   
   // If we don't have the user location yet, initialize to the member configured location.
@@ -72,31 +83,10 @@ async function loadUserData(accessToken: string,
   }
 }
 
-/**
- * Helper function that loads the user data after being logged in and having
- * the credentials.
- *
- * @param accessToken The access token
- * @param commit The local commit function.
- * @param dispatch The vuex Dispatch object.
- */
-async function loadUser(
-  accessToken: string,
-  context: ActionContext<UserState, never>
-) {
-  // Get the OIDC userInfo data.
-  const action1 = loadUserInfo(accessToken, context);
-  // Load the Social API users/me endpoint.
-  const action2 = loadUserData(accessToken, context);
-  // Run these two calls in "parallel".
-  await Promise.all([action1, action2]);
-}
-
 export default {
   state: () => ({
     tokens: undefined,
     // It is important to define the properties even if undefined in order to add the reactivity.
-    userInfo: undefined,
     myUserId: undefined,
     accountId: undefined,
     location: undefined,
@@ -104,7 +94,6 @@ export default {
   } as UserState),
   getters: {
     isLoggedIn: state =>
-      state.userInfo !== undefined &&
       state.myUserId !== undefined &&
       auth.isAuthorized(state.tokens),
     isActive: (state, getters) =>
@@ -125,14 +114,20 @@ export default {
       return undefined;
     },
     myAccount: (state, getters) => {
-      return getters.myMember?.account
+      return getters.isActive 
+        ? getters.myMember?.account 
+        : false
+    },
+    myCurrency: (state, getters) => {
+      return getters.isActive
+        ? getters.myAccount?.currency
+        : getters.myMember?.group?.currency
     },
     accessToken: (state) => 
       state.tokens?.accessToken
   },
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
-    userInfo: (state, userInfo) => (state.userInfo = userInfo),
     myUserId: (state, myUserId) => (state.myUserId = myUserId),
     location: (state, location) => (state.location = location),
     subscription: (state, subscription) => (state.subscription = subscription),
@@ -148,7 +143,7 @@ export default {
     ) => {
       const tokens = await auth.login(payload.email, payload.password);
       context.commit("tokens", tokens);
-      await loadUser(tokens.accessToken, context);
+      await loadUser(context);
     },
     /**
      * Silently authorize user using stored credentials. Throws exception (rejects)
@@ -160,7 +155,7 @@ export default {
           const storedTokens = await auth.getStoredTokens();
           const tokens = await auth.authorize(storedTokens);
           context.commit("tokens", tokens);
-          await loadUser(tokens.accessToken, context);
+          await loadUser(context);
         } catch (error) {
           // Couldn't authorize. Delete credentials so we don't attempt another
           // call next time.
@@ -178,7 +173,7 @@ export default {
     authorizeWithCode: async (context: ActionContext<UserState, never>, payload: {code: string}) => {
       const tokens = await auth.authorizeWithCode(payload.code);
       context.commit("tokens", tokens);
-      await loadUser(tokens.accessToken, context);
+      await loadUser(context);
     },
     /**
      * Logout current user.
@@ -187,7 +182,6 @@ export default {
       await context.dispatch("unsubscribe");
       await auth.logout();
       context.commit("tokens", undefined);
-      context.commit("userInfo", undefined);
       context.commit("myUserId", undefined);
     },
     /**

@@ -60,30 +60,36 @@ describe("Needs", () => {
   it ("Creates a need", async () => {
     await wrapper.vm.$router.push("/groups/GRP0/needs/new")
     await wrapper.vm.$wait();
-    await wrapper.get("[name='description']").setValue("I really need this unit test to pass.")
+
     const select = wrapper.getComponent(SelectCategory).getComponent(QSelect)
     await select.trigger("click");
     await wrapper.vm.$wait();
-    
     const menu = select.findAllComponents(QItem);
     await menu[1].trigger("click");
     await flushPromises();
+
+    await wrapper.get("[name='description']").setValue("I really need this test to pass.")
 
     await wrapper.get("[type='submit']").trigger("click");
     await wrapper.vm.$wait();
     
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs/I-really-n/preview");
+    await wrapper.vm.$wait();
+
     const text = wrapper.text();
-    expect(text).toContain("I really need this unit test to pass.");
+    expect(text).toContain("I really need this test to pass.");
     expect(text).toContain("Updated today");
     expect(text).toContain("Computers");
+
     await wrapper.get(".q-btn--fab").trigger("click");
     await wrapper.vm.$wait();
+
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/members/EmilianoLemke57");
     expect(wrapper.vm.$route.hash).toBe("#needs");
     await wrapper.vm.$wait();
+
     const text2 = wrapper.text();
-    expect(text2).toContain("I really need this unit test to pass.");
+    expect(text2).toContain("I really need this test to pass.");
   });
 
   it ("Updates a need", async () => {

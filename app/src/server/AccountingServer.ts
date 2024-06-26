@@ -74,6 +74,12 @@ export default {
       decimals: 2,
       value: 100000,
       scale: 4,
+      settings: {
+        defaultInitialCreditLimit: 100000,
+        defaultAcceptPaymentsAutomatically: true,
+        defaultAllowPayments: true,
+        defaultAllowPaymentRequests: true
+      }
     }),
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
@@ -92,7 +98,7 @@ export default {
       }
     }),
     accountSettings: Factory.extend({
-      acceptPaymentsAutomatically: true,
+      acceptPaymentsAutomatically: true
     })
   },
   /**
@@ -157,21 +163,21 @@ export default {
     });
     // Single account
     server.get(
-      urlAccounting + "/:currency/accounts/:code",
+      urlAccounting + "/:currency/accounts/:id",
       (schema: any, request) => {
         const currency = schema.currencies.findBy({
           code: request.params.currency
         });
         return schema.accounts.findBy({
-          code: request.params.code,
+          id: request.params.id,
           currencyId: currency.id
         });
       }
     );
     // Account settings
-    server.get(`${urlAccounting}/:currency/accounts/:code/settings`, (schema: any, request) => {
+    server.get(`${urlAccounting}/:currency/accounts/:id/settings`, (schema: any, request) => {
       const currency = schema.currencies.findBy({code: request.params.currency});
-      const account = schema.accounts.findBy({code: request.params.code, currencyId: currency.id});
+      const account = schema.accounts.findBy({id: request.params.id, currencyId: currency.id});
       return schema.accountSettings.findBy({accountId: account.id});
     });
       
@@ -211,9 +217,9 @@ export default {
       }
     )
     // Edit settings
-    server.patch(`${urlAccounting}/:currency/accounts/:code/settings`, (schema: any, request: any) => {
+    server.patch(`${urlAccounting}/:currency/accounts/:id/settings`, (schema: any, request: any) => {
       const currency = schema.currencies.findBy({code: request.params.currency});
-      const account = schema.accounts.findBy({code: request.params.code, currencyId: currency.id});
+      const account = schema.accounts.findBy({id: request.params.id, currencyId: currency.id});
       const settings = schema.accountSettings.findBy({accountId: account.id});
       const body = JSON.parse(request.requestBody);
       settings.update(body.data.attributes);

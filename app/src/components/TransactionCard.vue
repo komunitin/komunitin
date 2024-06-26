@@ -44,7 +44,7 @@
     <q-card-section class="text-body2">
       <!-- details -->
       <div><span class="text-onsurface-d">{{ $t("state") }}</span><span class="q-pl-sm">{{ state }}</span></div>
-      <div><span class="text-onsurface-d">{{ $t("group") }}</span><span class="q-pl-sm">{{ transfer.currency.group.attributes.name }}</span></div>
+      <div><span class="text-onsurface-d">{{ $t("group") }}</span><span class="q-pl-sm">{{ group.attributes.name }}</span></div>
     </q-card-section>
     <slot />
   </q-card>
@@ -98,11 +98,13 @@ export default defineComponent({
       throw new KError(KErrorCode.InvalidTransferState);
     })
 
+    const group = computed(() => props.transfer.payee.member.group)
+
     // We are using this code to build the member links. Not really sure if this 
     // is reliable. Otherways we could load the group from the member and get the code.
-    const code = computed(() => props.transfer.currency.group.attributes.code)
+    const code = computed(() => group.value.attributes.code)
 
-    return {FormatCurrency, positive, state, code}
+    return {FormatCurrency, positive, state, group, code}
   }
 })
 </script>

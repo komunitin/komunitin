@@ -104,17 +104,25 @@ func handleMemberEvent(ctx context.Context, event *events.Event, store *store.St
 }
 
 func handleTransferEvent(ctx context.Context, event *events.Event, store *store.Store, dest TransferEventDestination) error {
-	members := make([]string, 0, 2)
+	accounts := make([]string, 0, 2)
 	if dest == Both || dest == Payer {
-		members = append(members, event.Data["payer"])
+		accounts = append(accounts, event.Data["payer"])
 	}
 	if dest == Both || dest == Payee {
-		members = append(members, event.Data["payee"])
+		accounts = append(accounts, event.Data["payee"])
+	}
+	// Get members from account ids
+	members, err := api.GetAccountMembers(ctx, event.Code, accounts)
+	if err != nil {
+		return err
+	}
+	memberIds := make([]string, len(members))
+	for i, member := range members {
+		memberIds[i] = member.Id
 	}
 
 	// Notify members
-	return notifyMembers(ctx, store, members, event, MyAccount)
-
+	return notifyMembers(ctx, store, memberIds, event, MyAccount)
 }
 
 func handleGroupEvent(ctx context.Context, event *events.Event, store *store.Store, eventType string) error {

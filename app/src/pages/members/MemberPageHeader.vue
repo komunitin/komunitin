@@ -27,7 +27,10 @@
           <div class="text-overline text-uppercase text-onsurface-d">
             {{ memberTypeLabel }}
           </div>
-          <div class="text-h6 text-onsurface">
+          <div 
+            v-if="member.account" 
+            class="text-h6 text-onsurface"
+          >
             {{ member.account.attributes.code }}
           </div>
         </div>
@@ -35,7 +38,7 @@
           <div class="text-overline text-uppercase text-onsurface-d q-mt-md">
             {{ $t("balance") }}
           </div>
-          <div>
+          <div v-if="member.account">
             <span
               class="text-h6 q-mr-md"
               :class="

@@ -1,164 +1,164 @@
 <template>
   <page-header 
-    :title="$t('createTransaction')" 
+    :title="title" 
     balance 
-    :back="`/groups/${code}/members/${memberCode}/transactions`"
+    :back="`/groups/${code}/members/${myMemberCode}/transactions`"
   />
   <q-page-container class="row justify-center">
     <q-page 
       padding 
       class="q-py-lg col-12 col-sm-8 col-md-6"
     >
-      <q-form @submit="onSubmit">
-        <div class="q-gutter-y-lg column">  
-          <div>
-            <div class="text-subtitle1">
-              {{ $t('enterTransactionData') }}
-            </div>
-            <div class="text-onsurface-m">
-              {{ $t('transactionFormHelpText') }}
-            </div>
-          </div>
-          <select-member
-            v-model="member"  
-            name="payer"
-            :code="code"
-            :label="$t('selectPayer')"
-            :hint="$t('transactionPayerHint')"
-            :rules="[() => !v$.member.$error || $t('payerRequired')]"
-            @close-dialog="v$.member.$touch()"
-          />
-          <q-input 
-            v-model="concept"
-            name="description"  
-            :label="$t('description')" 
-            :hint="$t('transactionDescriptionHint')" 
-            outlined 
-            autogrow 
-            required
-            :rules="[() => !v$.concept.$invalid || $t('descriptionRequired')]"
-          >
-            <template #append>
-              <q-icon name="notes" />
-            </template>
-          </q-input>
-          <q-input 
-            v-model="amount"
-            name="amount"
-            :label="$t('amountIn', {currency: myAccount.currency.attributes.namePlural})"
-            :hint="$t('transactionAmountHint')"
-            outlined
-            required
-            :rules="[
-              () => !v$.amount.$invalid || $t('invalidAmount'),
-            ]"
-          >
-            <template #append>
-              <span class="text-h6 text-onsurface-m">{{ myAccount.currency.attributes.symbol }}</span>
-            </template>
-          </q-input>
-          <q-btn
-            :label="$t('charge')"
-            type="submit"
-            color="primary"
-            unelevated
-          />
-        </div>
-      </q-form>
+      <create-transaction-form 
+        v-if="state !== 'loading'"
+        v-show="state === 'define'"
+        :code="code"
+        :select-payer="selectPayer"
+        :payer-member="payerMember"
+        :select-payee="selectPayee"
+        :payee-member="payeeMember"
+        :currency="currency"
+        :text="text"
+        :submit-label="submitLabel"
+        :model-value="transfer"
+        @update:model-value="onFilled"
+      />
+      <confirm-create-transaction 
+        v-if="state === 'confirm'"
+        :code="code"
+        :transfer="transfer"
+        @back="state = 'define'"
+      />
     </q-page>
   </q-page-container>
 </template>
-<script lang="ts">
-import useVuelidate from "@vuelidate/core"
-import { minValue, numeric, required } from "@vuelidate/validators"
-import { v4 as uuid } from "uuid"
-import { computed, defineComponent, Ref, ref } from "vue"
-import { useRouter } from "vue-router"
+<script setup lang="ts">
+import {computed, ref, watchEffect } from "vue"
 import { useStore } from "vuex"
-import SelectMember from "../../components/SelectMember.vue"
 import PageHeader from "../../layouts/PageHeader.vue"
-import { Member } from "../../store/model"
+import { Account, Currency, Member, Transfer } from "../../store/model"
+import { useI18n } from "vue-i18n"
+import CreateTransactionForm from "./CreateTransactionForm.vue"
+import ConfirmCreateTransaction from "./ConfirmCreateTransaction.vue"
+import { DeepPartial } from "quasar"
 
-export default defineComponent({
-  components: {
-    PageHeader,
-    SelectMember
-  },
-  props: {
-    code: {
-      type: String,
-      required: true
-    },
-    memberCode: {
-      type: String,
-      required: true
-    }
-  },
-  setup(props) {
-    // Store
-    const store = useStore()
-    const myAccount = store.getters.myAccount
-    const currency = myAccount.currency;
-    
-    // Form state.
-    const currentTransfer = store.getters["transfers/current"]
-    let member: Ref, concept: Ref<string>, amount: Ref<number|undefined>;
-    if (currentTransfer !== undefined && currentTransfer.attributes.state == "new") {
-      member = ref(currentTransfer.payer.member)
-      concept = ref(currentTransfer.attributes.meta)
-      amount = ref(currentTransfer.attributes.amount / Math.pow(10, currency.attributes.scale))
-    } else {
-      member = ref(null)
-      concept = ref('')
-      amount = ref<number>()
-    }
-    // Validation.
-    const isMember = (member: Member|undefined|null) => (member !== undefined && member !== null && member.id !== undefined)
-    const rules = computed(() => ({
-      member: { isMember },
-      concept: { required },
-      amount: { required, numeric, nonNegative: minValue(0)}
-    }))
-    const v$ = useVuelidate(rules, {member, concept, amount});
-    // Router
-    const router = useRouter()
-    // Submit
-    const onSubmit = () => {
-      // Build transfer object
-      const transfer = {
-        id: uuid(),
-        type: "transfers",
-        attributes: {
-          amount: (amount.value as number) * Math.pow(10, currency.attributes.scale),
-          meta: concept.value,
-          state: "new",
-          created: new Date().toUTCString(),
-          updated: new Date().toUTCString(),
-        },
-        relationships: {
-          payer: {data: {type: "accounts", id: member.value.account.id}},
-          payee: {data: {type: "accounts", id: myAccount.id}},
-          currency: {data: {type: "currencies", id: currency.id}}
-        }
-      };
-      // Store transfer object as current store object.
-      store.dispatch("transfers/setCurrent", transfer)
-      // Go to confirm page.
-      router.push({
-        name: "ConfirmCreateTransaction", 
-        params: props
-      })
-    }
+const props = defineProps<{
+  /**
+   * Group code
+   */
+  code: string,
+  /**
+   * Whether the payer is configurable. 
+   * If false, the payer needs to be provided or defauls to the current member.
+   */
+  selectPayer: boolean,
+  /**
+   * Payer member code. Mandatory if selectPayer is false.
+   */
+  payerMemberCode?: string,
+  /**
+   * Whether the payee is configurable.
+   * If false, the payee needs to be provided or defaults to the current member.
+   */
+  selectPayee: boolean
+  /**
+   * Payee member code. Mandatory if selectPayee is false.
+   */
+  payeeMemberCode?: string
+}>()
 
-    return {
-      member,
-      concept,
-      amount,
-      myAccount: store.getters.myAccount,
-      v$,
-      onSubmit,
-      ...props
-    }
+// Store
+const store = useStore()
+const { t } = useI18n()
+
+const myAccount = computed<Account & {currency: Currency}>(() => store.getters.myAccount)
+const myMember = computed<Member & {account: Account}>(() => store.getters.myMember)
+const myMemberCode = computed<string>(() => myMember.value.attributes.code)
+const currency = computed<Currency>(() => myAccount.value.currency);
+
+
+const direction = computed(() => {
+  if (!props.selectPayer && props.selectPayee) {
+    return "payment"
+  } else if (props.selectPayer && !props.selectPayee) {
+    return "paymentRequest"
+  } else {
+    return "transfer"
   }
 })
+
+const title = computed(() => {
+  switch (direction.value) {
+    case "payment":
+      return t("sendPayment")
+    case "paymentRequest":
+      return t("receivePayment")
+    default:
+      return t("createTransaction")
+  }
+})
+
+const text = computed(() => {
+  switch (direction.value) {
+    case "payment":
+      return t("sendPaymentText")
+    case "paymentRequest":
+      return t("receivePaymentText")
+    default:
+      return t("createTransactionText")
+  }
+})
+
+const submitLabel = computed(() => {
+  switch (direction.value) {
+    case "payment":
+      return t("sendPayment")
+    case "paymentRequest":
+      return t("receivePayment")
+    default:
+      return t("submitTransaction")
+  }
+})
+
+const loadMember = (isSelect: boolean, memberCode?: string) => {
+  const member = ref<Member & {account: Account}>()
+  if (memberCode) {
+    store.dispatch("members/load", {
+      group: props.code, 
+      code: memberCode, 
+      include: "account,group"
+    }).then(() => {
+      member.value = store.getters["members/current"]
+    })
+  } else if (!isSelect) {
+    member.value = myMember.value
+  }
+  return member
+}
+
+const payerMember = loadMember(props.selectPayer, props.payerMemberCode)
+const payeeMember = loadMember(props.selectPayee, props.payeeMemberCode)
+
+// Transfer model
+const transfer = ref<DeepPartial<Transfer>>()
+const state = ref<"loading"|"define"|"confirm">("loading")
+
+watchEffect(() => {
+  if (state.value === "loading"
+    && (props.selectPayer || payerMember.value)
+    && (props.selectPayee || payeeMember.value)) {
+    state.value = "define"
+  }
+})
+
+// 
+const onFilled = (value: DeepPartial<Transfer>) => {
+  // This operation is not the same as just doing transfer.value = value,
+  // because the store adds some attributes to the transfer (such as transfer.payer, etc).
+  store.dispatch("transfers/setCurrent", value)
+  transfer.value = store.getters["transfers/current"]
+  
+  state.value = "confirm"
+}
+
 </script>

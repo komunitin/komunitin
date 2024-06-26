@@ -1,11 +1,12 @@
-# Dockerfile that builds 3 images komunitin-app-develop, komunitin-app-build and 
-# komunitin-app-production from the komunitin app.
+# Dockerfile that builds 2 images:
+# komunitin-app-build: image that builds the komunitin app from the source code.
+# komunitin-app: lightweight image that runs the komunitin app in a production environment.
+#
+
+# Build stage
 
 
-# Develop stage
-
-# Use the latest official node image.
-FROM node:18 as komunitin-app-develop
+FROM node:20 as komunitin-app-build
 WORKDIR /app
 
 # Install mkcert
@@ -20,8 +21,8 @@ ENV LOCAL_CA_ROOT=/root/.local/share/mkcert/rootCA.pem
 # Create self-signed certificates.
 RUN mkdir -p tmp/certs && mkcert -cert-file tmp/certs/localhost.pem -key-file tmp/certs/localhost-key.pem localhost
 
-# Copy just package.json so when there's no package changes we don't 
-# need to update the install step.
+# Copy just package.json (and package-lock.json) so when there's no package changes we don't 
+# need to redo the install step.
 COPY package*.json ./
 
 # Install quasar framework
@@ -36,30 +37,23 @@ RUN npm rebuild node-sass
 # Copy sources 
 COPY . .
 
-# Build stage
-
-# Use the image created in develop stage.
-FROM komunitin-app-develop as komunitin-app-build
-
-# Set the build flavour. Allowed options are:
-# QENV=mirage, QENV=local, QENV=demo, QENV=build
-ARG QENV=build
-ENV QENV=$QENV
-
 # Build App using the quasar CLI app.
 RUN quasar build -m pwa
 
-# Production stage
+# Production image komunitin-app
 
 # Use the latest stable Nginx HTTP server over Alpine Linux.
-FROM nginx:stable-alpine
+FROM nginx:stable-alpine as komunitin-app
+
 # Copy the built application from Build stage to nginx HTML folder.
 COPY --from=komunitin-app-build /app/dist/pwa /usr/share/nginx/html
+
 # Configure nginx so that load/refresh works with virtual routes
 RUN rm /etc/nginx/conf.d/default.conf
 COPY docker/localhost.conf /etc/nginx/conf.d/
 
+# Copy and make executable the pre-start script
+COPY docker/replace_env_vars.sh /docker-entrypoint.d/replace_env_vars.sh
+RUN chmod +x /docker-entrypoint.d/replace_env_vars.sh
+
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-
-

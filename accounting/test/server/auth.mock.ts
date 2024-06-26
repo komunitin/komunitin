@@ -7,15 +7,15 @@ const keys = generateKeyPairSync("rsa", {
   modulusLength: 2048,
 })
 
-export async function token(user: string, scopes?: Scope[]) {
+export async function token(user: string|null, scopes?: Scope[], audience?: string) {
   const payload = {} as Record<string, string>
   if (scopes) {
     payload.scope = scopes.join(" ")
   }
   const token = await new SignJWT(payload)
-    .setAudience(config.AUTH_JWT_AUDIENCE)
+    .setAudience(audience ?? config.AUTH_JWT_AUDIENCE[0])
     .setIssuer(config.AUTH_JWT_ISSUER)
-    .setSubject(user)
+    .setSubject(user as string)
     .setIssuedAt()
     .setExpirationTime("1h")
     .setProtectedHeader({alg: "RS256"})

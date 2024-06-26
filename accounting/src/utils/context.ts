@@ -4,7 +4,7 @@ export interface Context {
   /**
    * The context type
    */
-  type: "system" | "user"
+  type: "system" | "user" | "anonymous"
   /**
    * The user ID of the authenticated user.
    */
@@ -12,9 +12,23 @@ export interface Context {
 }
 
 export const context = (req: Request): Context => {
-  return {
-    userId: req.auth?.payload?.sub,
-    type: "user"
+  const payload = req.auth?.payload
+  if (!payload) {
+    return {
+      type: "anonymous"
+    }
+  } else if (typeof payload.sub === "string") {
+    return {
+      userId: payload.sub,
+      type: "user"
+    }
+  // This case happens when the notifications service uses the service.
+  } else if (payload.sub === null) {
+    return {
+      type: "system"
+    }
+  } else {
+    throw new Error("Invalid sub claim in JWT")
   }
 }
 

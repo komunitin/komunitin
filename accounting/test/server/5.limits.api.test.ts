@@ -2,7 +2,7 @@ import { describe, it } from "node:test"
 import assert from "node:assert"
 import { setupServerTest } from "./setup"
 import { waitFor } from "./utils"
-import { LedgerController } from "src/controller/controller"
+import { LedgerController } from "src/controller/base-controller"
 import { sleep } from "src/utils/sleep"
 
 describe("OnPayment credit limit", async () => {
@@ -116,6 +116,41 @@ describe("OnPayment credit limit", async () => {
         }
       }
     }, t.admin, 400)
+  })
+
+  await it('allow payments setting', async() => {
+    const s1 = await t.api.patch(`/TEST/accounts/${t.account1.id}/settings`, {
+      data: {
+        attributes: {
+          allowPayments: false,
+          allowPaymentRequests: true
+        }
+      }
+    }, t.admin)
+    assert.equal(s1.body.data.attributes.allowPayments, false)
+    assert.equal(s1.body.data.attributes.allowPaymentRequests, true)
+    
+    await t.payment(t.account1.id, t.account2.id, 10, "Cant pay", "committed", t.user1, 403)
+    const t1 = await t.payment(t.account2.id, t.account1.id, 10, "Can request", "committed", t.user1)
+    assert.equal(t1.attributes.state, "pending")   
+
+  })
+
+  await it('allow payment requests setting', async() => {
+    const s1 = await t.api.patch(`/TEST/accounts/${t.account1.id}/settings`, {
+      data: {
+        attributes: {
+          allowPayments: true,
+          allowPaymentRequests: false
+        }
+      }
+    }, t.admin)
+    assert.equal(s1.body.data.attributes.allowPayments, true)
+    assert.equal(s1.body.data.attributes.allowPaymentRequests, false)
+
+    const t1 = await t.payment(t.account1.id, t.account2.id, 10, "Can pay", "committed", t.user1)
+    assert.equal(t1.attributes.state, "committed")
+    await t.payment(t.account2.id, t.account1.id, 10, "Cant request", "committed", t.user1, 403)
   })
 
 })

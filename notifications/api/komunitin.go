@@ -18,7 +18,7 @@ import (
 
 func fixUrl(url string) string {
 	// This is for development purposes only.
-	url = strings.Replace(url, "/localhost:2029/", "/integralces/", 1)
+	url = strings.Replace(url, "localhost", "host.docker.internal", 1)
 	return url
 }
 
@@ -65,6 +65,19 @@ func GetGroupMembers(ctx context.Context, code string) ([]*Member, error) {
 		return nil, err
 	}
 	// Fix Member type
+	for _, member := range result {
+		members = append(members, member.(*Member))
+	}
+	return members, nil
+}
+
+func GetAccountMembers(ctx context.Context, code string, accountIds []string) ([]*Member, error) {
+	members := make([]*Member, 0)
+	accountsParam := strings.Join(accountIds, ",")
+	result, err := getResources(ctx, config.KomunitinSocialUrl, code, "members", reflect.TypeOf((*Member)(nil)), nil, map[string][]string{"account": {accountsParam}}, nil)
+	if err != nil {
+		return nil, err
+	}
 	for _, member := range result {
 		members = append(members, member.(*Member))
 	}

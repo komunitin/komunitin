@@ -4,18 +4,6 @@ import KError, { KErrorCode } from "src/KError";
 
 import LocalStorage from "./LocalStorage";
 
-/**
- * User data fetched from OIDC /userinfo endpoint.
- * https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
- */
-export interface User {
-  sub: string;
-  email: string;
-  emailVerified: boolean;
-  name: string;
-  preferredUsername: string;
-  zoneinfo: string;
-}
 
 export interface TokenResponse {
   access_token: string;
@@ -53,13 +41,11 @@ export class Auth {
   public static readonly AUTH_SCOPE = "komunitin_auth";
 
   private readonly tokenEndpoint: string;
-  private readonly userInfoEndpoint: string;
   private readonly resetPasswordEndpoint: string;
   private readonly clientId: string;
 
   constructor() {
     this.tokenEndpoint = KOptions.url.auth + "/token";
-    this.userInfoEndpoint = KOptions.url.auth + "/UserInfo"
     this.resetPasswordEndpoint = KOptions.url.auth + "/reset-password"
     this.clientId = KOptions.oauth.clientid
   }
@@ -167,16 +153,17 @@ export class Auth {
     this.checkResponse(response)
   }
 
-  public async resendValidationEmail(email: string): Promise<void> {
-    const params = new URLSearchParams(); 
-    params.append("email", email);
-    params.append("client_id", this.clientId);
+  public async resendValidationEmail(email: string, code: string): Promise<void> {
+    const params = new URLSearchParams()
+    params.append("email", email)
+    params.append("client_id", this.clientId)
+    params.append("group", code)
 
     const response = await fetch(KOptions.url.auth + "/resend-validation", {
       method: "POST",
       body: params,
       headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    });
+    })
 
     this.checkResponse(response)
   }
@@ -184,7 +171,7 @@ export class Auth {
   /**
    * Authenticate using external OpenID Connect provider.
    */
-  public async authenticate(provider: "google" | "facebook"): Promise<User> {
+  public async authenticate(provider: "google" | "facebook"): Promise<void> {
     throw new KError(
       KErrorCode.NotImplemented,
       "Authentication with " + provider + "not implemented yet"
@@ -218,29 +205,6 @@ export class Auth {
       } else {
         throw new KError(KErrorCode.ServerBadResponse, `Server error ${response.status}`, {error: response.statusText});
       }
-    }
-  }
-  /**
-   * Load this.userInfo from /UserInfo OIDC endpoint.
-   */
-  public async getUserInfo(accessToken: string): Promise<User> {
-    try {
-      const response = await fetch(this.userInfoEndpoint, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      this.checkResponse(response)
-      const data = await response.json();
-      const userInfo = {
-        sub: data.sub,
-        email: data.email,
-        emailVerified: data.email_verified,
-        name: data.name,
-        preferredUsername: data.preferred_username,
-        zoneinfo: data.zoneinfo
-      };
-      return userInfo;
-    } catch (error) {
-      throw KError.getKError(error);
     }
   }
 

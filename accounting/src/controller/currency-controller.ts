@@ -1,21 +1,32 @@
-import { LedgerCurrency, LedgerCurrencyState } from "../ledger";
-import { CurrencyController } from ".";
-import { TenantPrismaClient } from "./multitenant";
 import { Keypair } from "@stellar/stellar-sdk";
-import { decrypt, encrypt } from "../utils/crypto";
-import type { KeyObject } from "node:crypto"
-import { badRequest, forbidden, internalError, notFound, notImplemented } from "../utils/error";
-import { CollectionOptions } from "../server/request";
-import { includeRelations, whereFilter } from "./query";
-import { Currency, UpdateCurrency, currencyToRecord, recordToCurrency, Account, 
-  InputAccount, UpdateAccount, recordToAccount, InputTransfer, Transfer, 
-  TransferState, UpdateTransfer, User, recordToTransfer, 
-  AccountSettings,
-  userHasAccount} from "../model";
-import { Context } from "../utils/context";
-import { AtLeast, WithRequired } from "../utils/types";
 import Big from "big.js";
-import { PaymentCallBuilder } from "@stellar/stellar-sdk/lib/horizon/payment_call_builder";
+import type { KeyObject } from "node:crypto";
+import TypedEmitter from "typed-emitter";
+import { ControllerEvents, CurrencyController } from ".";
+import { LedgerCurrency, LedgerCurrencyState } from "../ledger";
+import {
+  Account,
+  AccountSettings,
+  Currency,
+  InputAccount,
+  InputTransfer, Transfer,
+  TransferState,
+  UpdateAccount,
+  UpdateCurrency,
+  UpdateTransfer, User,
+  currencyToRecord,
+  recordToAccount,
+  recordToCurrency,
+  recordToTransfer,
+  userHasAccount
+} from "../model";
+import { CollectionOptions } from "../server/request";
+import { Context, systemContext } from "../utils/context";
+import { decrypt, encrypt } from "../utils/crypto";
+import { badRequest, forbidden, notFound, notImplemented } from "../utils/error";
+import { AtLeast, WithRequired } from "../utils/types";
+import { TenantPrismaClient } from "./multitenant";
+import { includeRelations, whereFilter } from "./query";
 
 /**
  * Return the Key id (= the public key).
@@ -43,16 +54,18 @@ export class LedgerCurrencyController implements CurrencyController {
   model: Currency
   ledger: LedgerCurrency
   db: TenantPrismaClient
+  emitter: TypedEmitter<ControllerEvents>
 
   private encryptionKey: () => Promise<KeyObject>
   private sponsorKey: () => Promise<Keypair>
 
-  constructor(model: Currency, ledger: LedgerCurrency, db: TenantPrismaClient, encryptionKey: () => Promise<KeyObject>, sponsorKey: () => Promise<Keypair>) {
+  constructor(model: Currency, ledger: LedgerCurrency, db: TenantPrismaClient, encryptionKey: () => Promise<KeyObject>, sponsorKey: () => Promise<Keypair>, emitter: TypedEmitter<ControllerEvents>) {
     this.db = db
     this.model = model
     this.ledger = ledger
     this.encryptionKey = encryptionKey
     this.sponsorKey = sponsorKey
+    this.emitter = emitter
   }
 
   creditKey() {
@@ -74,7 +87,34 @@ export class LedgerCurrencyController implements CurrencyController {
     if (ctx.type === "system") {
       return this.model.admin as User
     }
-    const record = await this.db.user.findUnique({where: {id: ctx.userId}})
+    if (!ctx.userId) {
+      throw forbidden("User not set")
+    }
+    let where
+    
+
+    if (/^\d+$/.test(ctx.userId)) {
+      // The id is a number. This can be a user id provided by IntegralCES
+      // auth provider, where the id in the token is the Drupal user id, while
+      // the user id's from the api are derived UUID-like id's.
+      // We have a mapping from the id to the UUID-like id in the database:
+      // 75736572-2020-[4 random digits]-[4 random digits]-[zero padded user id]
+      where = {
+        OR: [{
+          id: {
+            startsWith: "75736572-2020-",
+            endsWith: "-" + ctx.userId.padStart(12, "0")
+          }
+        }, {
+          id: ctx.userId
+        }]
+      }
+    } else {
+      // Regular case, the id in the token is directly what we have in the database.
+      where = { id: ctx.userId }
+    }
+    
+    const record = await this.db.user.findFirst({ where })
     if (!record) {
       throw forbidden(`User not found in currency ${this.model.code}`)
     }
@@ -98,7 +138,7 @@ export class LedgerCurrencyController implements CurrencyController {
     return user
   }
 
-  async update(ctx: Context, currency: UpdateCurrency) {
+  async updateCurrency(ctx: Context, currency: UpdateCurrency) {
     await this.checkAdmin(ctx)
 
     if (currency.code && currency.code !== this.model.code) {
@@ -133,6 +173,13 @@ export class LedgerCurrencyController implements CurrencyController {
     return this.model
   }
 
+  /**
+   * Implements {@link CurrencyController.getCurrency}
+   */
+  public async getCurrency(_ctx: Context): Promise<Currency> {
+    return this.model
+  }
+
   async updateState(state: LedgerCurrencyState) {
     await this.db.currency.update({
       data: { state },
@@ -151,7 +198,12 @@ export class LedgerCurrencyController implements CurrencyController {
     const userIds = account.users?.map(u => u.id) ?? [admin.id]
 
     // Find next free account code.
-    const code = await this.getFreeCode()
+    let code = account.code
+    if (code) {
+      await this.checkFreeCode(account.code)
+    } else {
+      code = await this.getFreeCode()
+    }
     // get required keys from DB.
     const keys = {
       issuer: await this.retrieveKey(this.model.keys?.issuer as string),
@@ -159,17 +211,23 @@ export class LedgerCurrencyController implements CurrencyController {
       sponsor: await this.sponsorKey()
     }
     // Create account in ledger with default credit limit & max balance.
-    const {key} = await this.ledger.createAccount(keys)
+    const maximumBalance = account.maximumBalance ?? this.model.settings.defaultInitialMaximumBalance
+    const creditLimit = account.creditLimit ?? this.model.settings.defaultInitialCreditLimit
+    const options = {
+      initialCredit: this.amountToLedger(creditLimit),
+      maximumBalance: maximumBalance ? this.amountToLedger(maximumBalance) : undefined
+    }
+    const {key} = await this.ledger.createAccount(options, keys)
     // Store key
     const keyId = await this.storeKey(key)
     // Store account in DB
     const record = await this.db.account.create({
       data: {
+        id: account.id,
         code,
-
         // Initialize ledger values with what we have just created.
-        creditLimit: this.model.settings.defaultInitialCreditLimit,
-        maximumBalance: this.model.settings.defaultInitialMaximumBalance,
+        creditLimit,
+        maximumBalance,
         balance: 0,
 
         // Initialize some account settings (others will be taken from currency settings if not set)
@@ -195,13 +253,7 @@ export class LedgerCurrencyController implements CurrencyController {
     const account = await this.getAccount(ctx, data.id)
     // code, creditLimit and maximumBalance can be updated
     if (data.code && data.code !== account.code) {
-      const existing = await this.getAccountByCode(ctx, data.code)
-      if (existing) {
-        throw badRequest(`Code ${data.code} is already in use`)
-      }
-      if (!data.code.startsWith(this.model.code)) {
-        throw badRequest(`Code must start with ${this.model.code}`)
-      }
+      await this.checkFreeCode(data.code)
     }
     // Update credit limit
     if (data.creditLimit && data.creditLimit !== account.creditLimit) {
@@ -214,12 +266,19 @@ export class LedgerCurrencyController implements CurrencyController {
     }
     // Update maximum balance
     if (data.maximumBalance && data.maximumBalance !== account.maximumBalance) {
-      throw notImplemented("Updating maximum balance not implemented")
+      throw notImplemented("Updating maximum balance not implemented yet")
+    }
+    if (data.users) {
+      throw notImplemented("Updating account users not implemented yet")
     }
     // Update db.
     const updated = await this.db.account.update({
-      data,
-      where: {id: account.id}
+      data: {
+        code: data.code,
+        creditLimit: data.creditLimit,
+        maximumBalance: data.maximumBalance,
+      },
+      where: {id: account.id},
     })
 
     return recordToAccount(updated, this.model)
@@ -355,7 +414,10 @@ export class LedgerCurrencyController implements CurrencyController {
     const payee = await this.getAccount(ctx, data.payee)
 
     // Check that the user is allowed to transfer from the payer account.
-    if (!(this.isAdmin(user) || userHasAccount(user, payer) || userHasAccount(user, payee))) {
+    if (!(this.isAdmin(user) 
+      || (userHasAccount(user, payer) && (payer.settings.allowPayments ?? this.model.settings.defaultAllowPayments))
+      || (userHasAccount(user, payee) && (payee.settings.allowPaymentRequests ?? this.model.settings.defaultAllowPaymentRequests))
+    )) {
       throw forbidden("User is not allowed to transfer from this account")
     }
 
@@ -427,6 +489,7 @@ export class LedgerCurrencyController implements CurrencyController {
         },
         where: {id: transfer.id}
       })
+      this.emitter.emit("transferStateChanged", transfer, this)
     }
 
     // Trying to commit the transfer
@@ -543,7 +606,8 @@ export class LedgerCurrencyController implements CurrencyController {
     // Check that the user is only updating allowed settings.
 
     // We can make this list configurable in the future.
-    const userSettings = ["acceptPaymentsAutomatically"]
+    const userSettings = ["acceptPaymentsAutomatically", "acceptPaymentsWhitelist"]
+
     if (!this.isAdmin(user) && Object.keys(settings).some(k => !["id", "type"].includes(k) && !userSettings.includes(k))) {
       throw forbidden("User is not allowed to update this account setting")
     }
@@ -569,13 +633,21 @@ export class LedgerCurrencyController implements CurrencyController {
     return code
   }
 
-  /**
-   * Implements {@link CurrencyController.getTransfer}
-   */
-  public async getTransfer(ctx: Context, id: string): Promise<Transfer> {
+  private async checkFreeCode(code: string) {
+    if (!code.startsWith(this.model.code)) {
+      throw badRequest(`Code must start with ${this.model.code}`)
+    }
+    const existing = await this.getAccountByCode(systemContext(), code)
+    if (existing) {
+      throw badRequest(`Code ${code} is already in use`)
+    }
+    
+  }
+
+  private async loadTransferWhere(ctx: Context, where: {id?: string, hash?: string}) {
     const user = await this.checkUser(ctx)
-    const transfer = await this.db.transfer.findUnique({
-      where: {id},
+    const transfer = await this.db.transfer.findFirst({
+      where,
       include: {
         payer: {
           include: {
@@ -590,7 +662,7 @@ export class LedgerCurrencyController implements CurrencyController {
       }
     })
     if (!transfer) {
-      throw notFound(`Transfer with id ${id} not found`)
+      throw notFound(`Transfer ${where.id ?? where.hash} not found`)
     }
     const payer = recordToAccount(transfer.payer, this.model)
     const payee = recordToAccount(transfer.payee, this.model)
@@ -603,25 +675,54 @@ export class LedgerCurrencyController implements CurrencyController {
     return recordToTransfer(transfer, { payer, payee })
   }
 
+  /**
+   * Implements {@link CurrencyController.getTransfer}
+   */
+  public async getTransfer(ctx: Context, id: string): Promise<Transfer> {
+    return await this.loadTransferWhere(ctx, {id})
+  }
+
+  /**
+   * Implements {@link CurrencyController.getTransferByHash}
+   */
+  public async getTransferByHash(ctx: Context, hash: string): Promise<Transfer> {
+    return await this.loadTransferWhere(ctx, {hash})
+  }
+
   public async getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]> {
     const user = await this.checkUser(ctx)
 
-    const where = whereFilter(params.filters)
+    const {account, ...filters} = params.filters
+    const where = whereFilter(filters)
+    // Special account filter.
+    if (account !== undefined) {
+      where.OR = [
+        {payer: {id: account}},
+        {payee: {id: account}}
+      ]
+    }
     
     // Regular users can only transfers where they are involved.
     if (!this.isAdmin(user)) {
-      where.OR = [
-        {payer: {users: {some: {id: user.id}}}},
-        {payee: {users: {some: {id: user.id}}}}
-      ]
+      where.AND = {
+        OR: [
+          {payer: {users: {some: {id: user.id}}}},
+          {payee: {users: {some: {id: user.id}}}}
+        ]
+      }
     }
-
     // default state filter.
     if (!where.state) {
       where.state = {not: "deleted"}
     }
 
     const include = includeRelations(params.include)
+
+    // Currency is defined as a transfer relationship in API model
+    // but not in DB.
+    if (include?.currency) {
+      delete include.currency
+    }
 
     const records = await this.db.transfer.findMany({
       where,

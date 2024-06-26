@@ -32,13 +32,9 @@ yarn-error.log*
 *.njsproj
 *.sln
 
-# Varios
-.magtrabajos
-/docs
+# Environment files
 .env
-*.swp
-pre-push.sh
-pre-master.sh
+.env.local
 
 
 # Test reports
