@@ -93,9 +93,9 @@
   "dismiss": "Ignora",
   "createTransaction": "Crear transacción",
   "enterTransactionData": "Entra los datos de la transacción",
-  "transactionFormHelpText": "Rellena los campos siguientes para crear una transacción que transferirá cierta cantidad de moneda a tu cuenta.",
   "selectPayer": "Escoge el pagador o pagadora",
   "transactionPayerHint": "La cuenta de la persona o entidad que va a pagar.",
+  "transactionPayeeHint": "La cuenta de la persona o entidad que va a recibir el pago.",
   "description": "Descripción",
   "transactionDescriptionHint": "Breve descripción del concepto de la venta. Por ejemplo '2kg de patatas'.",
   "amountIn": "Cantidad en {currency}",
@@ -238,6 +238,16 @@
   "weekly": "Semanal",
   "monthly": "Mensual",
   "quarterly": "Trimestral",
+  "receivePayment": "Recibir pago",
+  "sendPayment": "Enviar pago",
+  "submitTransaction": "Enviar transacción",
+  "createTransactionText": "Completa los siguientes campos para crear una transferencia entre dos cuentas.",
+  "sendPaymentText": "Selecciona el miembro al que quieres pagar, una descripción y la cantidad que quieres transferir a su cuenta.",
+  "receivePaymentText": "Selecciona el miembro que te va a pagar, una descripción y la cantidad que va a transferir a tu cuenta.",
+  "selectPayee": "Selecciona el pagador o pagadora",
+  "send": "Enviar",
+  "receive": "Recibir",
+
 
   "ErrorAuthNoCredentials": "Error: email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta"

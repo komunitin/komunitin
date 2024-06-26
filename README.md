@@ -35,13 +35,13 @@ Before running the system you need to setup some environment variables. You may 
 Then you can run the start script with the options `--up` to start the containers, `--ices` to install the IntegralCES site and `--demo` to seed the system with demo data.
 
 ```bash
-$ ./start.sh --ices --demo
+$ ./start.sh --up --ices --demo
 ```
 
 If you want just to start the containers you can run:
   
 ```bash
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 The published services are:
@@ -53,13 +53,13 @@ The published services are:
 You can now try Komunitin at [http://localhost:2030](http://localhost:2030) with the email `noether@komunitin.org` and password `komunitin`.
 
 ## Public deployment
-The public deployment uses the [Traefik](https://traefik.io) reverse proxy to forward the traffic to the different services. The proxy is provided separately because its configuration may vary heavily depending on the server setup. You need to start the reverse proxy first with:
+The public deployment uses the [Traefik](https://traefik.io) reverse proxy to forward the traffic to the different services. The proxy is provided separately because its configuration may vary depending on the server setup. You need to start the reverse proxy first with:
 
 ```bash
-docker-compose -f docker-compose.proxy.yml up -d
+docker compose -f docker-compose.proxy.yml up -d
 ```
 Then you should to add the flag `--public` to the start script. For example:
 
 ```bash
-./start.sh --ices --public
+./start.sh --up --ices --public
 ```

@@ -74,6 +74,12 @@ export default {
       decimals: 2,
       value: 100000,
       scale: 4,
+      settings: {
+        defaultInitialCreditLimit: 100000,
+        defaultAcceptPaymentsAutomatically: true,
+        defaultAllowPayments: true,
+        defaultAllowPaymentRequests: true
+      }
     }),
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
@@ -92,7 +98,7 @@ export default {
       }
     }),
     accountSettings: Factory.extend({
-      acceptPaymentsAutomatically: true,
+      acceptPaymentsAutomatically: true
     })
   },
   /**

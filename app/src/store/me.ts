@@ -68,7 +68,7 @@ async function loadUser(
   // pending or deleted members don't have related account.
   if (["active", "suspended"].includes(user.members[0].attributes.state)) {
     const accountId = user.members[0].relationships.account.data.id
-    await dispatch("accounts/load", {group: currencyCode, code: accountId, include: "currency"});
+    await dispatch("accounts/load", {group: currencyCode, code: accountId, include: "currency,settings"});
   } else {
   // otherwise get currency at least.
     await dispatch("currencies/load", {code: currencyCode});

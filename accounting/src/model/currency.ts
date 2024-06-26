@@ -37,11 +37,11 @@ export type CurrencySettings = {
   /**
    * Users can perform payments by default.
    */
-  defaultallowPayments?: boolean
+  defaultAllowPayments?: boolean
   /**
    * Users can request payments by default.
    */
-  defaultallowPaymentRequests?: boolean
+  defaultAllowPaymentRequests?: boolean
 }
 
 export type CurrencyStatus = "new" | "active"

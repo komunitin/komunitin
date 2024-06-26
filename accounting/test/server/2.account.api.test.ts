@@ -54,6 +54,24 @@ describe('Accounts endpoints', async () => {
     assert.equal(response.body.data.attributes.code, 'TEST0001')
   })
 
+  await it('admin creates account with attributes', async () => {
+    const response = await api.post('/TEST/accounts', {
+      data: {
+        attributes: { 
+          code: 'TEST2000', 
+          creditLimit: 2000,
+          maximumBalance: 20000
+        }
+      }
+    }, admin)
+
+    assert(isUuid(response.body.data.id), "The account id is not a valid UUID")
+    assert.equal(response.body.data.type, 'accounts')
+    assert.equal(response.body.data.attributes.code, 'TEST2000')
+    assert.equal(response.body.data.attributes.creditLimit, 2000)
+    assert.equal(response.body.data.attributes.maximumBalance, 20000)
+  })
+
   it('unauthorized creation', async () => {
     await api.post('/TEST/accounts', { 
       data: { 
@@ -71,7 +89,7 @@ describe('Accounts endpoints', async () => {
   let account1: any;
   it('user lists accounts', async () => {
     const response = await api.get('/TEST/accounts', user2)
-    assert.equal(response.body.data.length, 2)
+    assert.equal(response.body.data.length, 3)
     account0 = response.body.data[0]
     account1 = response.body.data[1]
     assert.equal(account0.attributes.code, 'TEST0000')
@@ -99,6 +117,13 @@ describe('Accounts endpoints', async () => {
     assert.equal(response.body.included[0].type, 'currencies')
     assert.equal(response.body.included[0].attributes.code, 'TEST')
     assert.equal(response.body.included[0].attributes.symbol, 'T$')
+  })
+
+  it('including settings', async() => {
+    const response = await api.get(`/TEST/accounts/${account0.id}?include=settings`, user2)
+    assert.equal(response.body.data.attributes.code, 'TEST0000')
+    assert.equal(response.body.included[0].type, 'account-settings')
+    assert.equal(response.body.included[0].attributes.acceptPaymentsAutomatically, false)
   })
 
   it('unauthorized get account', async() => {

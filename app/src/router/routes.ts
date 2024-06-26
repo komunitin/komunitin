@@ -111,14 +111,29 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/transactions/TransactionList.vue')
       },
       {
-        path: '/groups/:code/members/:memberCode/transactions/new',
-        props: true,
-        name: 'CreateTransaction',
+        path: '/groups/:code/members/:payerMemberCode/transactions/send',
+        props: route => ({ ...route.params, selectPayer: false, selectPayee: true }),
+        name: 'Send',
         component: () => import('../pages/transactions/CreateTransaction.vue')
       },
       {
-        path: '/groups/:code/members/:memberCode/transactions/confirm',
-        props: true,
+        path: '/groups/:code/members/:payeeMemberCode/transactions/receive',
+        props: route => ({ ...route.params, selectPayer: true, selectPayee: false }),
+        name: 'Receive',
+        component: () => import('../pages/transactions/CreateTransaction.vue')
+      },
+      // Looks like these confirmation page could be merged into the CreateTransaction page
+      {
+        path: '/groups/:code/members/:payerMemberCode/transactions/send/confirm',
+        name: 'ConfirmCreateTransaction',
+        component: () => import('../pages/transactions/ConfirmCreateTransaction.vue'),
+        meta: {
+          // do not allow to go back to this page
+          back: false
+        }
+      },
+      {
+        path: '/groups/:code/members/:payeeMemberCode/transactions/receive/confirm',
         name: 'ConfirmCreateTransaction',
         component: () => import('../pages/transactions/ConfirmCreateTransaction.vue'),
         meta: {

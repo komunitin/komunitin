@@ -1,5 +1,5 @@
-import { Currency, User, Account, Transfer, AccountSettings } from '../model';
-import { Metaizer, Paginator, Relator, Serializer, SingleOrArray } from 'ts-japi';
+import { Metaizer, Relator, Serializer } from 'ts-japi';
+import { Account, AccountSettings, Currency, Transfer, User } from '../model';
 
 const projection = <T>(fields: (keyof T)[]) => {
   return Object.fromEntries(fields.map(field => [field, 1]))
@@ -28,6 +28,19 @@ export const CurrencySerializer = new Serializer<Currency>("currencies", {
     }, UserSerializer, { relatedName: "admins" })
   }
 })
+
+export const AccountSettingsSerializer = new Serializer<AccountSettings>("account-settings", {
+  version: null,
+  projection: projection<AccountSettings>([
+    'acceptPaymentsAutomatically', 
+    'acceptPaymentsWhitelist', 
+    'acceptPaymentsAfter', 
+    'onPaymentCreditLimit',
+    'allowPayments',
+    'allowPaymentRequests'
+  ])
+})
+
 export const AccountSerializer = new Serializer<Account>("accounts", {
   version: null,
   projection: projection<Account>(['code', 'balance', 'creditLimit', 
@@ -38,7 +51,10 @@ export const AccountSerializer = new Serializer<Account>("accounts", {
     }, CurrencySerializer, { relatedName: "currency" }),
     users: new Relator<Account,User>(async (account) => {
       return account.users
-    }, UserSerializer)
+    }, UserSerializer),
+    settings: new Relator<Account, AccountSettings>(async (account) => {
+      return account.settings
+    }, AccountSettingsSerializer, { relatedName: "settings" })
   }
 })
 export const TransferSerializer = new Serializer<Transfer>("transfers", {
@@ -55,16 +71,4 @@ export const TransferSerializer = new Serializer<Transfer>("transfers", {
       return transfer.payee.currency
     }, CurrencySerializer, { relatedName: "currency" })
   }
-})
-
-export const AccountSettingsSerializer = new Serializer<AccountSettings>("account-settings", {
-  version: null,
-  projection: projection<AccountSettings>([
-    'acceptPaymentsAutomatically', 
-    'acceptPaymentsWhitelist', 
-    'acceptPaymentsAfter', 
-    'onPaymentCreditLimit',
-    'allowPayments',
-    'allowPaymentRequests'
-  ])
 })

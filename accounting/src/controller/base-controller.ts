@@ -174,8 +174,8 @@ export class LedgerController implements BaseController {
       defaultAcceptPaymentsAfter: 15*24*60*60, // 15 days,
       defaultAcceptPaymentsWhitelist: [],
       defaultOnPaymentCreditLimit: undefined,
-      defaultallowPayments: true,
-      defaultallowPaymentRequests: true,
+      defaultAllowPayments: true,
+      defaultAllowPaymentRequests: true,
       ...currency.settings
     }
 

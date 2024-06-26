@@ -212,8 +212,9 @@ export class LedgerCurrencyController implements CurrencyController {
     }
     // Create account in ledger with default credit limit & max balance.
     const maximumBalance = account.maximumBalance ?? this.model.settings.defaultInitialMaximumBalance
+    const creditLimit = account.creditLimit ?? this.model.settings.defaultInitialCreditLimit
     const options = {
-      initialCredit: this.amountToLedger(account.creditLimit ?? this.model.settings.defaultInitialCreditLimit),
+      initialCredit: this.amountToLedger(creditLimit),
       maximumBalance: maximumBalance ? this.amountToLedger(maximumBalance) : undefined
     }
     const {key} = await this.ledger.createAccount(options, keys)
@@ -225,8 +226,8 @@ export class LedgerCurrencyController implements CurrencyController {
         id: account.id,
         code,
         // Initialize ledger values with what we have just created.
-        creditLimit: this.model.settings.defaultInitialCreditLimit,
-        maximumBalance: this.model.settings.defaultInitialMaximumBalance,
+        creditLimit,
+        maximumBalance,
         balance: 0,
 
         // Initialize some account settings (others will be taken from currency settings if not set)
@@ -414,8 +415,8 @@ export class LedgerCurrencyController implements CurrencyController {
 
     // Check that the user is allowed to transfer from the payer account.
     if (!(this.isAdmin(user) 
-      || (userHasAccount(user, payer) && (payer.settings.allowPayments ?? this.model.settings.defaultallowPayments))
-      || (userHasAccount(user, payee) && (payee.settings.allowPaymentRequests ?? this.model.settings.defaultallowPaymentRequests))
+      || (userHasAccount(user, payer) && (payer.settings.allowPayments ?? this.model.settings.defaultAllowPayments))
+      || (userHasAccount(user, payee) && (payee.settings.allowPaymentRequests ?? this.model.settings.defaultAllowPaymentRequests))
     )) {
       throw forbidden("User is not allowed to transfer from this account")
     }

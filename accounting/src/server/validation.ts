@@ -94,6 +94,7 @@ export namespace Validators {
 
   export const isCreateAccount = () => [
     ...jsonApiDoc("accounts"),
+    ...isUpdateAccountAttibutes("data.attributes"),
     ...isCollectionRelationship("data", "users", "users"),
     ...isIncludedTypes(["users"]),
   ]

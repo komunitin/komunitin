@@ -41,9 +41,9 @@ set +a
 if [ "$up" = true ]; then
 
 if [ "$public" = true ]; then
-  docker compose -f compose.yml -f compose.public.yml up -d
+  docker compose -f compose.yml -f compose.public.yml up -d --build
 else
-  docker compose up -d
+  docker compose up -d --build
 fi
 
 echo "Waiting for the services to start..."
