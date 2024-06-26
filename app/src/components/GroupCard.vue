@@ -95,7 +95,7 @@ export default defineComponent({
     }
   },
   computed: {
-    url() {
+    url(): string {
       const base = window?.location.origin ?? "";
       return (
         base + this.$router.resolve("groups/" + this.group.attributes.code).href
