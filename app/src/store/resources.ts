@@ -264,7 +264,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       let response = await request()
       if (!response.ok && response.status == 401) {
         // Unauthorized. Refresh token and retry
-        await context.dispatch("authorize", null, {root: true})
+        await context.dispatch("authorize", {force: true}, {root: true})
         response = await request()
       }
       await this.checkResponse(response)
