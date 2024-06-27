@@ -27,7 +27,9 @@
     :maximized="$q.screen.lt.sm"
     @hide="closeDialog()"
   >
-    <q-card>
+    <q-card
+      class="select-member-dialog"
+    >
       <q-card-section class="q-px-none">
         <q-toolbar class="text-onsurface-m">
           <q-btn
@@ -62,11 +64,17 @@
         </q-toolbar>
       </q-card-section>
       <q-separator />
-      <q-card-section class="members-list scroll">
+      <q-card-section class="q-pa-none">
+        <select-group
+          v-model="group"
+        />
+      </q-card-section>
+      <q-separator />
+      <q-card-section class="members-list q-pa-none">
         <resource-cards
           ref="memberItems"
           v-slot="slotProps"
-          :code="code"
+          :code="group.attributes.code"
           module-name="members"
           include="contacts,account"
           :query="searchText"
@@ -91,14 +99,17 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import MemberHeader from "./MemberHeader.vue"
+import SelectGroup from "./SelectGroup.vue"
 import ResourceCards from "../pages/ResourceCards.vue"
-import { Member } from 'src/store/model';
+import { Group, Member } from 'src/store/model';
 import { QField } from 'quasar';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   components: {
     MemberHeader,
-    ResourceCards
+    ResourceCards,
+    SelectGroup
   },
   inheritAttrs: false,
   props: {
@@ -120,18 +131,24 @@ export default defineComponent({
       dialog.value = true
     }
 
-    const value = computed({
+    const value = computed<Member & {group: Group} | undefined>({
       get() {
-        return props.modelValue
+        return props.modelValue as Member & {group: Group}
       },
       set(value) {
         emit('update:modelValue', value)
       }
     })
-    const select = (selectedMember: Member) => {
+
+    const select = (selectedMember: Member & {group: Group}) => {
       value.value = selectedMember
       dialog.value = false
     }
+
+    const store = useStore()
+    const myGroup = computed(() => store.getters.myMember?.group)
+    
+    const group = ref<Group>(props.modelValue?.group ?? myGroup.value)
     
     const searchText = ref('')
 
@@ -155,15 +172,16 @@ export default defineComponent({
       fieldRef,
       value,
       closeDialog,
+      group
     }
   }
 })
 </script>
 <style lang="scss" scoped>
 @media (min-width: $breakpoint-sm-min) {
-  .members-list {
-    height: 75vh;
-    width: 50vw;
+  .select-member-dialog {
+    width: 540px;
+    height: 85vh;
   }
 }
 .searchbar {
