@@ -85,10 +85,13 @@ export class Auth {
   /**
    * Try to silently authorize it using stored refresh token.
    * If can't suceed it rejects the promise (throws exception).
+   * 
+   * @param force If true, it will try to refresh the access token even
+   * if the current one is still valid.
    */
-  public async authorize(tokens: AuthData | undefined): Promise<AuthData> {
+  public async authorize(tokens?: AuthData, force = false): Promise<AuthData> {
     // 1. Maybe we're already authorized.
-    if (this.isAuthorized(tokens)) {
+    if (!force && this.isAuthorized(tokens)) {
       return tokens as AuthData
     }
     // 2. Maybe we can use the refresh token.

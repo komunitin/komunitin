@@ -14,6 +14,10 @@ export interface LoginPayload {
   password: string;
 }
 
+export type AuthorizePayload = {
+  force: boolean
+} | undefined | null
+
 export interface UserState {
   tokens?: AuthData;
   myUserId?: string;
@@ -149,11 +153,14 @@ export default {
      * Silently authorize user using stored credentials. Throws exception (rejects)
      * on failed authorization.
      */
-    authorize: async (context: ActionContext<UserState, never>) => {
-      if (!context.getters.isLoggedIn) {
+    authorize: async (
+      context: ActionContext<UserState, never>,
+      payload: AuthorizePayload
+    ) => {
+      if (!context.getters.isLoggedIn || payload?.force) {
         try {
           const storedTokens = await auth.getStoredTokens();
-          const tokens = await auth.authorize(storedTokens);
+          const tokens = await auth.authorize(storedTokens, payload?.force);
           context.commit("tokens", tokens);
           await loadUser(context);
         } catch (error) {
