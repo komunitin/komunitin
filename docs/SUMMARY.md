@@ -1,3 +1,5 @@
 # Table of contents
 
-* [Komunitin](README.md)
+* [Overview](README.md)
+* [Features](features.md)
+* [New community](new-community.md)
