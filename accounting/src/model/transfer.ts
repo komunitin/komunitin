@@ -1,7 +1,19 @@
 import { AtLeast } from "src/utils/types"
-import { Account } from "./account"
-import { Transfer as TransferRecord } from "@prisma/client"
-import { User } from "."
+import { Account, AccountRecord, recordToAccount } from "./account"
+import { Transfer as TransferRecord, ExternalTransfer as ExternalTransferRecord } from "@prisma/client"
+import { Currency, User } from "."
+import { ExternalResource, ExternalResourceRecord, recordToExternalResource, RelatedResource } from "./resource"
+
+export { TransferRecord }
+
+export type TransferRecordWithAccounts = TransferRecord & {
+  payer: AccountRecord,
+  payee: AccountRecord,
+  externalTransfer?: ExternalTransferRecord & {
+    externalPayer?: ExternalResourceRecord | null,
+    externalPayee?: ExternalResourceRecord | null
+  } | null
+}
 
 /**
  * Possible state transitions for a transfer.
@@ -31,13 +43,21 @@ export interface Transfer {
   payer: Account
   payee: Account
 
+  externalPayer?: ExternalResource<Account>
+  externalPayee?: ExternalResource<Account>
+
   user: User
 }
 
-export type InputTransfer = AtLeast<Omit<Transfer, "created" | "updated" | "payer" | "payee">, "amount" | "meta" | "state"> & {payer: string, payee: string}
-export type UpdateTransfer = AtLeast<Omit<Transfer, "created" | "updated" | "payer" | "payee"> & {payer: string, payee: string}, "id">
+export type InputTransfer = AtLeast<Omit<Transfer, "created" | "updated" | "payer" | "payee">, "amount" | "meta" | "state"> & {payer: RelatedResource, payee: RelatedResource}
+export type UpdateTransfer = AtLeast<Omit<Transfer, "created" | "updated" | "payer" | "payee"> & {payer: RelatedResource, payee: RelatedResource}, "id">
 
-export const recordToTransfer = (record: TransferRecord, accounts: {payer: Account, payee: Account}): Transfer => ({
+export const recordToTransfer = (record: TransferRecord, accounts: {
+  payer: Account, 
+  payee: Account,
+  externalPayer?: ExternalResource<Account>,
+  externalPayee?: ExternalResource<Account>
+}): Transfer => ({
   id: record.id,
   state: record.state as TransferState,
   amount: record.amount,
@@ -47,5 +67,17 @@ export const recordToTransfer = (record: TransferRecord, accounts: {payer: Accou
   updated: record.updated,
   payer: accounts.payer,
   payee: accounts.payee,
+  externalPayer: accounts.externalPayer,
+  externalPayee: accounts.externalPayee,
   user: {id: record.userId}
 })
+
+export const recordToTransferWithAccounts = (record: TransferRecordWithAccounts, currency: Currency) => 
+  recordToTransfer(record, {
+    payer: recordToAccount(record.payer, currency),
+    payee: recordToAccount(record.payee, currency),
+    externalPayer: record.externalTransfer?.externalPayer 
+      ? recordToExternalResource(record.externalTransfer.externalPayer) : undefined,
+    externalPayee: record.externalTransfer?.externalPayee 
+      ? recordToExternalResource(record.externalTransfer.externalPayee) : undefined
+  })

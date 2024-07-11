@@ -93,14 +93,19 @@ export type LedgerCurrencyState = {
  */
 export type LedgerEvents = {
   /**
+   * Called after a local payment is made.
+   * */
+  transfer: (currency: LedgerCurrency, transfer: LedgerTransfer) => Promise<void>
+  
+  /**
    * Called when a new external payment is received.
    */
-  incommingTrade: (currency: LedgerCurrency) => Promise<void>
+  incommingTransfer: (currency: LedgerCurrency, transfer: LedgerTransfer) => Promise<void>
 
   /**
    * Called when a new external payment is sent.
    */
-  outgoingTrade: (currency: LedgerCurrency) => Promise<void>
+  outgoingTransfer: (currency: LedgerCurrency, transfer: LedgerTransfer) => Promise<void>
 
   /**
    * Called when a new external payment is received and it used
@@ -119,11 +124,6 @@ export type LedgerEvents = {
       amount: string
       created: boolean
     }) => Promise<void>
-
-  /**
-   * Called after a payment is made.
-   * */
-  transfer: (currency: LedgerCurrency, transfer: LedgerTransfer) => Promise<void>
 
   /**
    * Called when the currency state is updated and the state should be 
@@ -242,6 +242,14 @@ export interface LedgerCurrency {
    * @param keys 
    */
   updateExternalOffer(sellingAsset: LedgerAsset, keys: { sponsor: KeyPair; externalTrader: KeyPair }): Promise<void>
+
+
+  /**
+   * Fetches a transaction from the ledger and returns the transfer information associated to it.
+   * 
+   * @param hash The transaction hash.
+   */
+  getTransfer(hash: string): Promise<LedgerTransfer|LedgerExternalTransfer>
 }
 
 export interface PathQuote {
@@ -326,6 +334,9 @@ export interface LedgerTransfer {
   hash: string,
 }
 
+/**
+ * A payment in the ledger involving different currencies
+ */
 export interface LedgerExternalTransfer extends LedgerTransfer {
   sourceAsset: LedgerAsset,
   sourceAmount: string,

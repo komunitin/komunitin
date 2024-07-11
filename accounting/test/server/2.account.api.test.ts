@@ -2,15 +2,15 @@ import { describe, before, after, it } from "node:test"
 import assert from "node:assert"
 import { validate as isUuid } from "uuid"
 import { ExpressExtended, closeApp, createApp } from "src/server/app"
-import { client } from "./net.client"
-import { server } from "./net.mock"
+import { TestApiClient, client } from "./net.client"
+import { startServer, stopServer } from "./net.mock"
 import { Scope } from "src/server/auth"
 import { clearDb } from "./db"
 import { testCurrency } from "./api.data"
 
 describe('Accounts endpoints', async () => {
   let app: ExpressExtended
-  let api: ReturnType<typeof client>
+  let api: TestApiClient
 
   const admin = { user: "1", scopes: [Scope.Accounting] }
   const user2 = { user: "2", scopes: [Scope.Accounting] }
@@ -20,13 +20,13 @@ describe('Accounts endpoints', async () => {
     await clearDb()
     app = await createApp()
     api = client(app)
-    server.listen({ onUnhandledRequest: "bypass" })
+    startServer(app)
     // Create currency TEST
     await api.post('/currencies', testCurrency(), admin)
   })
   
   after(async () => {
-    server.close()
+    stopServer()
     await closeApp(app)
   })
 
@@ -126,11 +126,12 @@ describe('Accounts endpoints', async () => {
     assert.equal(response.body.included[0].attributes.acceptPaymentsAutomatically, false)
   })
 
+  // Account endpoints are public.
   it('unauthorized get account', async() => {
-    await api.get(`/TEST/accounts/${account0.id}`, undefined, 401)
+    await api.get(`/TEST/accounts/${account0.id}`, undefined, 200)
   })
-  it('forbidden get account', async() => {
-    await api.get(`/TEST/accounts/${account0.id}`, user3, 403)
+  it('external user get account', async() => {
+    await api.get(`/TEST/accounts/${account0.id}`, user3, 200)
   })
 
   it('admin updates credit limit', async () => {

@@ -1,11 +1,10 @@
 import { body } from "express-validator"
 
+
 export namespace Validators {
   
   const jsonApiAnyResource = (path: string) => [
     body(`${path}.id`).optional().isString().notEmpty(),
-    body(`${path}.attributes.id`).not().exists(),
-    body(`${path}.attributes.type`).not().exists(),
   ]
   const jsonApiResource = (path: string, type: string) => [
     ...jsonApiAnyResource(path),
@@ -103,6 +102,7 @@ export namespace Validators {
     body(`${path}.meta`).isString(),
     body(`${path}.amount`).isInt({gt: 0}),
     body(`${path}.state`).isIn(["new", "committed"]),
+    body(`${path}.hash`).optional().isString(),
     body(`${path}.created`).optional(),
     body(`${path}.updated`).optional(),
   ]
@@ -112,9 +112,22 @@ export namespace Validators {
     body(`${path}.data.type`).equals(type),
   ]
 
+  const isExternalResourceId = (path: string, type: string) => [
+    ...isResourceId(path, type),
+    body(`${path}.data.meta.external`).equals("true"),
+    body(`${path}.data.meta.href`).isString().notEmpty(),
+  ]
+
+  // Resource id that is optionally external
+  const isRelatedResourceId = (path: string, type: string) => [
+    ...isResourceId(path, type),
+    body(`${path}.data.meta.external`).optional().equals("true"),
+    body(`${path}.data.meta.href`).optional().isString().notEmpty(),
+  ]
+
   const isCreateTransferRelationships = (path: string) => [
-    ...isResourceId(`${path}.payer`, "accounts"),
-    ...isResourceId(`${path}.payee`, "accounts"),
+    ...isRelatedResourceId(`${path}.payer`, "accounts"),
+    ...isRelatedResourceId(`${path}.payee`, "accounts"),
     ...isOptionalResourceId(`${path}.currency`, "currencies"),
   ]
 
@@ -128,17 +141,16 @@ export namespace Validators {
   const isUpdateTransferAttributes = (path: string) => [
     body(`${path}.meta`).optional().isString(),
     body(`${path}.amount`).optional().isInt({gt: 0}),
+    body(`${path}.hash`).optional().isString(),
     body(`${path}.state`).optional().isIn(["new", "committed", "rejected", "deleted"]),
   ]
 
   const isOptionalResourceId = (path: string, type: string) => [
-    body(`${path}`).optional(),
-    body(`${path}.data.id`).if(body(`${path}`).exists()).isUUID(),
-    body(`${path}.data.type`).if(body(`${path}`).exists()).equals(type),
+    body(`${path}.data.id`).isUUID().optional(),
+    body(`${path}.data.type`).equals(type).optional()
   ]
 
   const isUpdateTransferRelationships = (path: string) => [
-    body(path).optional(),
     ...isOptionalResourceId(`${path}.payer`, "accounts"),
     ...isOptionalResourceId(`${path}.payee`, "accounts"),
     ...isOptionalResourceId(`${path}.currency`, "currencies"),
@@ -177,6 +189,12 @@ export namespace Validators {
     ...isCreateMigrationAttributes("data.attributes"),
   ]
 
+  export const isCreateTrustline = () => [
+    ...jsonApiDoc("trustlines"),
+    body("data.id").optional().isUUID(),
+    body("data.attributes.limit").isInt({min: 0}),
+    ...isExternalResourceId("data.relationships.trusted", "currencies"),
+  ]
 }
 
 

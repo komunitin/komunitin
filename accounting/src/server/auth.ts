@@ -4,6 +4,8 @@ import { config } from "../config"
 import { NextFunction,Request, Response } from "express"
 import { fixUrl } from "src/utils/net"
 import { logger } from "src/utils/logger"
+import { unauthorized } from "src/utils/error"
+import { verifyExternalToken } from "src/controller/external-jwt"
 
 export enum Scope {
   Accounting = "komunitin_accounting",
@@ -27,16 +29,64 @@ const buildJwt = () => {
 
 let jwt = buildJwt()
 let lastInvalidTokenRetry = 0
+
 /**
  * Require a valid JWT token in the request. If the scopes parameter is provided, require also
  * that the JWT includes at least one of the scopes in the parameter.
  * @param scopes 
  * @returns 
  */
-export const auth = (scopes?: Scope|Scope[]) => {
+export const userAuth = (scopes?: Scope|Scope[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     handleAuthRequest(scopes, req, res, next)
   }
+}
+
+/**
+ * Require a valid JWT token in the request. This JWT token is expected to be signed
+ * by an account private key and is used to authorize external requests. 
+ */
+export const externalAuth = () => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const header = req.header("authorization")
+    if (!header) {
+      return next(unauthorized("Authorization header is required."))
+    }
+    const parts = header.split(" ")
+    if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
+      next(unauthorized("Invalid Authorization header."))
+    }
+    const token = parts[1]
+    verifyExternalToken(token)
+      .then((auth) => {
+        req.auth = auth
+        next()
+      })
+      .catch(next)
+  }
+}
+
+type Middleware = (req: Request, res: Response, next: NextFunction) => void
+
+export const anyAuth = (auth1: Middleware, auth2: Middleware) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    auth1(req, res, (err) => {
+      if (err) {
+        auth2(req, res, next)
+      } else {
+        next()
+      }
+    })
+  }
+}
+
+/**
+ * Middleware that allows any request without authentication. 
+ * 
+ * It does nothig but it helps flag the routes that do not require authentication.
+ * */
+export const noAuth = () => (req: Request, res: Response, next: NextFunction) => {
+  next()
 }
 
 const handleAuthRequest = (scopes: Scope|Scope[]|undefined, req: Request, res: Response, next: NextFunction) => {
@@ -59,14 +109,5 @@ const handleAuthRequest = (scopes: Scope|Scope[]|undefined, req: Request, res: R
       next()
     }
   })
-}
-
-/**
- * Middleware that allows any request without authentication. 
- * 
- * It does nothig but it helps flag the routes that do not require authentication.
- * */
-export const noAuth = () => (req: Request, res: Response, next: NextFunction) => {
-  next()
 }
 

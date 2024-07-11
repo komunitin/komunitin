@@ -31,6 +31,7 @@ function forTenant(tenantId: string) {
   return Prisma.defineExtension((prisma) =>
     prisma.$extends({
       query: {
+        // Set the varaible "app.current_tenant_id" in every query
         $allOperations: async ({ args, query }) => {
           const [, result] = await prisma.$transaction([
             prisma.$executeRaw`SELECT set_config('app.current_tenant_id', ${tenantId}, TRUE)`,
@@ -39,6 +40,10 @@ function forTenant(tenantId: string) {
           return result;
         },
       },
+      client: {
+        // Make the tenantId easily available for the client.
+        tenantId: tenantId
+      }
     })
   );
 }

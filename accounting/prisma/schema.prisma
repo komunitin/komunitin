@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -16,17 +16,20 @@ datasource db {
 
 model User {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
-  id       String @id
+  id       String
 
   created DateTime @default(now())
   updated DateTime @updatedAt
 
   // Account users
-  accounts Account[] @relation()
+  accounts  AccountUser[] @relation()
   // Currency admins
-  currency Currency[] @relation()
+  currency  Currency[] @relation()
   // Transfer users
   transfers Transfer[] @relation()
+
+  // Same user could log in to different tenants.
+  @@id([tenantId, id])
 }
 
 model Currency {
@@ -50,7 +53,7 @@ model Currency {
   settings Json?
 
   // Currency state to be persisted between runs. 
-  
+
   // This object contains cursors for keeping track of the point
   // until this currency has been updated from the ledger.
   state Json?
@@ -70,8 +73,12 @@ model Currency {
   externalTraderKeyId String? @unique @db.VarChar(255)
 
   // Currency admin user.
-  adminId   String
-  admin     User @relation(fields: [adminId], references: [id])
+  adminId String
+  admin   User   @relation(fields: [adminId, tenantId], references: [id, tenantId])
+
+  // Currency external virtual account
+  externalAccountId String? @unique
+  externalAccount   Account? @relation("externalAccount", fields: [externalAccountId], references: [id])
 
   encryptionKey     EncryptedSecret? @relation("encryption", fields: [encryptionKeyId], references: [id])
   issuerKey         EncryptedSecret? @relation("issuer", fields: [issuerKeyId], references: [id])
@@ -81,22 +88,42 @@ model Currency {
   externalTraderKey EncryptedSecret? @relation("externalTrader", fields: [externalTraderKeyId], references: [id])
 
   accounts Account[] @relation()
+
+  trustlines Trustline[] @relation()
+}
+
+enum AccountType {
+  user
+  virtual
+}
+
+model AccountUser {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+
+  accountId String
+  account Account @relation(fields: [accountId], references: [id])
+
+  userId String
+  user User @relation(fields: [tenantId, userId], references: [tenantId, id])
+
+  @@id([accountId, userId])
 }
 
 model Account {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   id       String @id @default(uuid())
   code     String @unique @db.VarChar(255)
-  
-  status   String @default("active") @db.VarChar(31)
+
+  status String @default("active") @db.VarChar(31)
+  type   AccountType @default(user)
 
   keyId      String @unique @db.VarChar(255)
   currencyId String
 
-  users     User[] @relation()
-  
+  users AccountUser[] @relation()
+
   // Account settings defined by currency admin and the user.
-  settings Json? 
+  settings Json?
 
   // These three fields are just a cache from the Stellar network.
   balance        Int
@@ -111,11 +138,13 @@ model Account {
 
   payerTransfers Transfer[] @relation("payer")
   payeeTransfers Transfer[] @relation("payee")
+
+  externalAccount Currency? @relation("externalAccount")
 }
 
 model Transfer {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
-  id       String @id @default(uuid())
+  id       String @default(uuid())
 
   state  String @default("new") @db.VarChar(31)
   amount Int
@@ -130,10 +159,15 @@ model Transfer {
   payee   Account @relation("payee", fields: [payeeId], references: [id])
 
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [tenantId, userId], references: [tenantId, id])
 
   created DateTime @default(now())
   updated DateTime @updatedAt
+
+  externalTransfer ExternalTransfer? @relation()
+
+  @@id([tenantId, id])
+  @@unique([tenantId, hash])
 }
 
 model EncryptedSecret {
@@ -154,4 +188,59 @@ model EncryptedSecret {
   adminCurrency          Currency? @relation("admin")
   externalIssuerCurrency Currency? @relation("externalIssuer")
   externalTraderCurrency Currency? @relation("externalTrader")
+}
+
+model Trustline {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+  id       String @id @default(uuid())
+
+  // This is the trustline limit from the local external account to the remote external account.
+  limit   Int
+  // This is the balance of the local external account minus the balance of the remote external account.
+  balance Int
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+  
+  trustedId String
+  trusted ExternalResource @relation(fields: [trustedId], references: [id])
+
+  currencyId String
+  currency Currency @relation(fields: [currencyId], references: [id])
+}
+
+model ExternalTransfer {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+  
+  // Same id as transfer
+  id       String @db.VarChar(255)
+  transfer Transfer @relation(fields: [tenantId, id], references: [tenantId, id])
+
+  externalPayerId String?
+  externalPayer ExternalResource? @relation("externalPayer", fields: [externalPayerId], references: [id])
+
+  externalPayeeId String?
+  externalPayee ExternalResource? @relation("externalPayee", fields: [externalPayeeId], references: [id])
+
+  @@id([tenantId, id])
+}
+
+model ExternalResource {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+
+  // Same id as external resource
+  id   String @id
+  
+  type String @db.VarChar(255)
+  href String @db.VarChar(255)
+
+  // Cached resource data.
+  resource Json? 
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  trustlines Trustline[] @relation()
+  externalPayerTransfers ExternalTransfer[] @relation("externalPayer")
+  externalPayeeTransfers ExternalTransfer[] @relation("externalPayee")
 }

@@ -25,7 +25,7 @@ export const initUpdateCreditOnPayment = (controller: SharedController) => {
     const maxLimit = account.settings.onPaymentCreditLimit ?? currency.settings.defaultOnPaymentCreditLimit
     if (account.creditLimit < maxLimit) {
       const newLimit = Math.min(maxLimit, account.creditLimit + transfer.amount)
-      await currencyController.updateAccount(ctx, {
+      await currencyController.accounts.updateAccount(ctx, {
         id: account.id,
         creditLimit: newLimit
       })

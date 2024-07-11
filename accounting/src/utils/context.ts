@@ -4,11 +4,15 @@ export interface Context {
   /**
    * The context type
    */
-  type: "system" | "user" | "anonymous"
+  type: "system" | "user" | "external" | "anonymous"
   /**
    * The user ID of the authenticated user.
    */
   userId?: string
+  /**
+   * The account public key of the authenticated user.
+   */
+  accountKey?: string
 }
 
 export const context = (req: Request): Context => {
@@ -16,6 +20,12 @@ export const context = (req: Request): Context => {
   if (!payload) {
     return {
       type: "anonymous"
+    }
+  // This case happens when the token is the "external jwt" token
+  } else if ("type" in payload && payload.type === "external") {
+    return {
+      type: "external",
+      accountKey: payload.sub
     }
   } else if (typeof payload.sub === "string") {
     return {

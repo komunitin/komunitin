@@ -3,23 +3,21 @@ import assert from "node:assert"
 import { ExpressExtended, closeApp, createApp } from "src/server/app"
 import {validate as isUuid} from "uuid"
 import { Scope } from "src/server/auth"
-import { server } from "./net.mock"
-import { client } from "./net.client"
+import { TestApiClient, client } from "./net.client"
 import { clearDb } from "./db"
+import { startServer, stopServer } from "./net.mock"
 
 describe('Currencies endpoints', async () => {
   let app: ExpressExtended
-  let api: ReturnType<typeof client>
+  let api: TestApiClient
   before(async () => {
     await clearDb()
     app = await createApp()
     api = client(app)
-    server.listen({
-      onUnhandledRequest: "bypass"
-    })
+    startServer(app)
   })
   after(async () => {
-    server.close()
+    stopServer()
     await closeApp(app)
   })
   const admin1 = {user: "1", scopes: [Scope.Accounting]}

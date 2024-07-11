@@ -1,7 +1,9 @@
 import { AtLeast } from 'src/utils/types'
 import { Currency } from './currency'
-import { Account as AccountRecord, User as UserRecord, Prisma } from '@prisma/client'
+import { Account as AccountRecord, User as UserRecord, AccountUser as AccountUserRecord, Prisma } from '@prisma/client'
 import { User } from './user'
+
+export { AccountRecord}
 
 export enum AccountStatus {
   Active = "active",
@@ -69,8 +71,8 @@ export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInp
   }
 }
 
-export const recordToAccount = (record: AccountRecord & {users?: UserRecord[]}, currency: Currency): Account => {
-  const users = record.users ? record.users.map(user => ({id: user.id})) : undefined;
+export const recordToAccount = (record: AccountRecord & {users?: {user: UserRecord}[]}, currency: Currency): Account => {
+  const users = record.users ? record.users.map(accountUser => ({id: accountUser.user.id})) : undefined;
   return {
     id: record.id,
     status: record.status as AccountStatus,
