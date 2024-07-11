@@ -58,7 +58,6 @@ export default {
     transfer: Model.extend({
       payer: belongsTo("account", {inverse: null}),
       payee: belongsTo("account", {inverse: null}),
-      currency: belongsTo(),
     }),
     accountSettings: Model.extend({
       account: belongsTo(),
@@ -72,7 +71,10 @@ export default {
       namePlural: () => faker.hacker.noun() + "s",
       symbol: () => faker.finance.currencySymbol(),
       decimals: 2,
-      value: 100000,
+      rate: (i: number) => ({
+        n: 1,
+        d: (10 ** i)
+      }),
       scale: 4,
       settings: {
         defaultInitialCreditLimit: 100000,
@@ -132,18 +134,15 @@ export default {
     // Generate 25 transactions between the first account and the following 5 accounts.
     const accounts = server.schema.accounts.all();
     const account = accounts.models[0];
-    const currency = account.currency;
     for (let i = 1; i < 6; i++) {
       const other = accounts.models[i];
       server.createList("transfer", 2, {
         payer: account,
         payee: other,
-        currency
       });
       server.createList("transfer", 3, {
         payer: other,
         payee: account,
-        currency
       });
     }
     // Generate account settings.
@@ -155,6 +154,10 @@ export default {
     // Single currency
     server.get(urlAccounting + "/:code/currency", (schema: any, request) => {
       return schema.currencies.findBy({ code: request.params.code });
+    });
+    // List currencies
+    server.get(urlAccounting + "/currencies", (schema: any, request) => {
+      return filter(schema.currencies.all(), request);
     });
     // Accounts list
     server.get(urlAccounting + "/:code/accounts", (schema: any, request) => {
@@ -211,7 +214,6 @@ export default {
         resource.update({
           payer: schema.accounts.find(transfer.relationships.payer.data.id),
           payee: schema.accounts.find(transfer.relationships.payee.data.id),
-          currency: schema.currencies.find(transfer.relationships.currency.data.id)
         })
         return new Response(201, undefined, resource)
       }

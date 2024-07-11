@@ -25,6 +25,7 @@
           v-slot="slotProps"
           code=""
           module-name="groups"
+          include="currency"
         >
           <q-list
             v-if="slotProps.resources"

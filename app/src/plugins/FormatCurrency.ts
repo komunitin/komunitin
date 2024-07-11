@@ -61,3 +61,13 @@ export function formatPrice(price: string, currency: Currency, options?: Currenc
     return price
   }
 }
+
+/**
+ * Convert numeric amount from one currency to another. The result must then be formatted
+ * with the target currency.
+ */
+export function convertCurrency(amount: number, from: Currency, to: Currency): number {
+  return amount 
+    * (from.attributes.rate.n / from.attributes.rate.d)
+    * (to.attributes.rate.d / to.attributes.rate.n)
+}

@@ -46,7 +46,7 @@
       <q-input 
         v-model="amount"
         name="amount"
-        :label="$t('amountIn', {currency: currency.attributes.namePlural})"
+        :label="$t('amountIn', {currency: myCurrency.attributes.namePlural})"
         :hint="$t('transactionAmountHint')"
         outlined
         required
@@ -55,7 +55,19 @@
         ]"
       >
         <template #append>
-          <span class="text-h6 text-onsurface-m">{{ currency.attributes.symbol }}</span>
+          <span class="text-h6 text-onsurface-m">{{ myCurrency.attributes.symbol }}</span>
+        </template>
+      </q-input>
+      <q-input
+        v-if="otherCurrency"
+        :model-value="otherAmount"
+        readonly
+        disabled
+        outlined
+        :label="$t('amountIn', {currency: otherCurrency.attributes.namePlural})"
+      >
+        <template #append>
+          <span class="text-h6 text-onsurface-m">{{ otherCurrency.attributes.symbol }}</span>
         </template>
       </q-input>
       <q-btn
@@ -69,23 +81,24 @@
   </q-form>
 </template>
 <script setup lang="ts">
-import { ref, computed } from "vue"
 import { useVuelidate } from "@vuelidate/core"
 import { minValue, numeric, required } from "@vuelidate/validators"
-import { Member, Account, Currency, Transfer } from "src/store/model"
-import KError, { KErrorCode } from "src/KError"
-import { v4 as uuid } from "uuid"
 import { DeepPartial } from "quasar"
+import KError, { KErrorCode } from "src/KError"
 import SelectMember from "src/components/SelectMember.vue"
+import { convertCurrency } from "src/plugins/FormatCurrency"
+import { Account, Currency, ExternalRelatedResource, Member, Transfer } from "src/store/model"
+import { v4 as uuid } from "uuid"
+import { computed, ref } from "vue"
+import { useStore } from "vuex"
 
 const props = defineProps<{
   modelValue: DeepPartial<Transfer> | undefined,
   code: string,
   selectPayer: boolean,
-  payerMember?: Member & {account: Account},
+  payerMember?: Member & {account: Account & {currency: Currency}},
   selectPayee: boolean,
-  payeeMember?: Member & {account: Account},
-  currency: Currency,
+  payeeMember?: Member & {account: Account & {currency: Currency}},
   text: string,
   submitLabel: string
 }>()
@@ -99,8 +112,8 @@ const transfer = computed({
   set: (value) => emit('update:modelValue', value as DeepPartial<Transfer>)
 })
 
-const payerMember = ref<Member & {account: Account} | undefined>(props.payerMember)
-const payeeMember = ref<Member & {account: Account} | undefined>(props.payeeMember)
+const payerMember = ref(props.payerMember)
+const payeeMember = ref(props.payeeMember)
 const concept = ref("")
 const amount = ref<number>()
 
@@ -121,25 +134,63 @@ const v$ = useVuelidate(rules, {
   amount
 });
 
+const store = useStore()
+const myCurrency = computed(() => store.getters.myAccount.currency)
+
+const otherCurrency = computed(() =>  {
+  if (props.selectPayer && payerMember.value && payerMember.value.account.currency.id !== myCurrency.value.id) {
+    return payerMember.value?.account.currency
+  } else if (props.selectPayee && payeeMember.value && payeeMember.value.account.currency.id !== myCurrency.value.id) {
+    return payeeMember.value?.account.currency
+  }
+  return null
+})
+
+const otherAmount = computed(() => {
+  if (otherCurrency.value && amount.value) {
+    return convertCurrency(amount.value, myCurrency.value, otherCurrency.value)
+  } else {
+    return null
+  }
+})
+
 const onSubmit = () => {
   if (!payerMember.value?.account || !payeeMember.value?.account) {
     throw new KError(KErrorCode.ScriptError, "Both payer and payee must be defined before submit.")
   }
+  if (amount.value === undefined) {
+    throw new KError(KErrorCode.ScriptError, "Amount must be defined before submit.")
+  }
+
+  const payeeAmount = myCurrency.value.id == payeeMember.value.account.currency.id ? 
+    amount.value: convertCurrency(amount.value, myCurrency.value, payeeMember.value.account.currency)
+  const transferAmount = payeeAmount * Math.pow(10, payeeMember.value.account.currency.attributes.scale)
+
+  const accountRelationship = (account: Account & {currency: Currency}) => {
+    const relationship = {data: {type: "accounts", id: account.id}} as ExternalRelatedResource
+    if (account.currency.id !== myCurrency.value.id) {
+      relationship.data.meta = {
+        external: true,
+        href: account.links.self
+      }
+    }
+    return relationship
+  }
+
   // Build transfer object
   transfer.value = {
     id: uuid(),
     type: "transfers",
     attributes: {
-      amount: (amount.value as number) * Math.pow(10, props.currency.attributes.scale),
+      amount: transferAmount,
       meta: concept.value,
       state: "new",
       created: new Date().toUTCString(),
       updated: new Date().toUTCString(),
     },
     relationships: {
-      payer: {data: {type: "accounts", id: payerMember.value.account.id}},
-      payee: {data: {type: "accounts", id: payeeMember.value.account.id}},
-      currency: {data: {type: "currencies", id: props.currency.id}}
+      payer: accountRelationship(payerMember.value.account),
+      payee: accountRelationship(payeeMember.value.account),
     }
   };
 }

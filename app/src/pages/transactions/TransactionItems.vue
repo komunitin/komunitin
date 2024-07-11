@@ -5,7 +5,7 @@
     v-slot="slotProps"
     :code="code"
     module-name="transfers"
-    include="payer,payee,currency"
+    include="payer,payee,payee.currency"
     sort="-updated"
     :filter="{ account: account.id }"
     @page-loaded="fetchMembers"
@@ -66,7 +66,7 @@
                     : 'negative-amount'
                 "
               >
-                {{ FormatCurrency(signedAmount(transfer), transfer.currency) }}
+                {{ FormatCurrency(signedAmount(transfer), currency) }}
               </div>
             </div>
           </template>
@@ -79,12 +79,12 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 
-import FormatCurrency from "../../plugins/FormatCurrency";
+import FormatCurrency, { convertCurrency } from "../../plugins/FormatCurrency";
 
 import ResourceCards from "../ResourceCards.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
 
-import { ExtendedTransfer, Member, Account } from "../../store/model";
+import { ExtendedTransfer, Member, Account, Currency } from "../../store/model";
 import { LoadListPayload } from "src/store/resources";
 
 export default defineComponent({
@@ -115,8 +115,11 @@ export default defineComponent({
     transferLoaded: {} as Record<string, boolean>,
   }),
   computed: {
-    account() : Account {
+    account() : Account & {currency: Currency} {
       return this.member.account;
+    },
+    currency() : Currency {
+      return this.account.currency;
     }
   },
   methods: {
@@ -128,7 +131,11 @@ export default defineComponent({
       return other.member;
     },
     signedAmount(transfer: ExtendedTransfer): number {
-      return (transfer.payer.id == this.account.id ? -1 : 1) * transfer.attributes.amount;
+      let amount = transfer.attributes.amount
+      if (transfer.payee.currency.id != this.currency.id) {
+        amount = convertCurrency(amount, transfer.payee.currency, this.currency)
+      }
+      return (transfer.payer.id == this.account.id ? -1 : 1) * amount;
     },
     /**
      * Fetch the member objects associated to the just loaded transfers.
@@ -173,7 +180,7 @@ export default defineComponent({
     fetchResources(search: string): void {
       (this.$refs.resourceCards as {fetchResources: (s: string) => void}).fetchResources(search);
     }
-  }
+  },
 })
 </script>
 <style lang="scss" scoped>

@@ -393,6 +393,10 @@ export default {
           }
         }
       }
+      // Create some mebers in 2nd group just to test external transfers.
+      if (i == 1) {
+        server.createList("member", 5, { group } as any);
+      }
     });
     // Create test user for the first member.
     const member = (server.schema as any).members.first();

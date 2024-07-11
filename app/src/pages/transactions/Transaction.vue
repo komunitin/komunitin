@@ -74,7 +74,7 @@ const fetchData = async (transferCode: string) => {
   await store.dispatch("transfers/load", {
     code: transferCode,
     group: props.code,
-    include: "payer,payee,currency"
+    include: "payer,payee,payee.currency"
   })
   // fetch account members in a separate call, since the relation
   // account => member does not exist, only the member => account relation.
