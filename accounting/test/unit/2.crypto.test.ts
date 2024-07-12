@@ -34,7 +34,10 @@ describe('Crypto', async () => {
     const token = await createExternalToken(key)
     // change last char
     const corrupted = token.slice(0, token.length - 1) + (token[token.length - 1] == "a" ? "b" : "a")
-    await assert.rejects(verifyExternalToken(corrupted))
+    await assert.rejects(async () => {
+      // Using a function to ensure errors are converted to promise rejections.
+      await verifyExternalToken(corrupted)
+    })
   })
 
 })
