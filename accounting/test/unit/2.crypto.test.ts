@@ -30,11 +30,20 @@ describe('Crypto', async () => {
   })
 
   it('Fails to verify external token with wrong signature', async () => {
+    const replaceChar = (str: string, index: number) => {
+      const char = str[index]
+      const newChar = char == "a" ? "b" : "a"
+      return str.slice(0, index) + newChar + str.slice(index + 1)
+    }
+
     const key = Keypair.random()
     const token = await createExternalToken(key)
     // change last char
     console.log(token)
-    const corrupted = token.slice(0, token.length - 1) + (token[token.length - 1] == "a" ? "b" : "a")
+
+    // Caange an arbitrary character in the token signature
+    const corrupted = replaceChar(token, token.length - 4)
+    
     console.log(corrupted)
     await assert.rejects(async () => {
       // Using a function to ensure errors are converted to promise rejections.
