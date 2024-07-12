@@ -6,7 +6,7 @@ import MemberHeader from "../../../src/components/MemberHeader.vue";
 import SelectMember from "../../../src/components/SelectMember.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import { seeds } from "src/server";
-import { QDialog, QList } from "quasar";
+import { QCard, QDialog, QList } from "quasar";
 
 describe("Transactions", () => {
   let wrapper: VueWrapper;
@@ -34,34 +34,34 @@ describe("Transactions", () => {
     await wrapper.vm.$wait();
     const transactions = wrapper.getComponent(TransactionList).findAllComponents(MemberHeader)
     expect(transactions.length).toBe(20);
-    const first = transactions[4];
-    expect(first.text()).toContain("Pending");
-    expect(first.text()).toContain("Arnoldo");
-    expect(first.text()).toContain("$-0.42");
-    expect(first.text()).toContain("Synchronised");
+    const first = transactions[5];
+    expect(first.text()).toContain("Rejected");
+    expect(first.text()).toContain("Florida");
+    expect(first.text()).toContain("$-17.88");
+    expect(first.text()).toContain("holistic");
 
     const second = transactions[1];
     expect(second.text()).toContain("today");
     expect(second.text()).toContain("Oleta");
-    expect(second.text()).toContain("$-83.13");
-    expect(second.text()).toContain("Progressive");
+    expect(second.text()).toContain("$33.01");
+    expect(second.text()).toContain("challenge");
     // Search
-    wrapper.getComponent(PageHeader).vm.$emit("search", "net");
+    wrapper.getComponent(PageHeader).vm.$emit("search", "open");
     await wrapper.vm.$wait();
     // Check result!
-    expect(wrapper.getComponent(TransactionList).findAllComponents(MemberHeader).length).toBe(3);
+    expect(wrapper.getComponent(TransactionList).findAllComponents(MemberHeader).length).toBe(2);
   });
   it("renders single transaction", async () => {
-    await wrapper.vm.$router.push("/groups/GRP0/transactions/2d1985aa-d963-4c7d-bffd-89d7f9342b3c");
+    await wrapper.vm.$router.push("/groups/GRP0/transactions/6d9c00a8-4304-4371-ac11-83da505abd4e");
     await wrapper.vm.$wait();
     const text = wrapper.text();
     expect(text).toContain("Emiliano");
     expect(text).toContain("GRP00000");
     expect(text).toContain("Oleta");
     expect(text).toContain("GRP00003");
-    expect(text).toContain("$-49.37");
+    expect(text).toContain("$33.01");
     expect(text).toContain("today at");
-    expect(text).toContain("Polarised");
+    expect(text).toContain("heuristic");
     expect(text).toContain("Committed");
     expect(text).toContain("Group 0");
   })
@@ -78,9 +78,9 @@ describe("Transactions", () => {
     await wrapper.getComponent(SelectMember).get('div').trigger("click");
     await wrapper.vm.$wait()
 
-    const list = wrapper.getComponent(QDialog).getComponent(QList)
-    expect(list.text()).toContain("Carol")
-    const payer = list.findAllComponents(MemberHeader)[2]
+    const dialog = wrapper.getComponent(QDialog).getComponent(QCard)
+    expect(dialog.text()).toContain("Carol")
+    const payer = dialog.findAllComponents(MemberHeader)[2]
     await payer.trigger("click")
     await flushPromises();
     await wrapper.get("[name='description']").setValue("Test transaction description.")
@@ -115,7 +115,7 @@ describe("Transactions", () => {
     await flushPromises()
     await wrapper.vm.$wait()
 
-    const list = wrapper.getComponent(QDialog).getComponent(QList)
+    const list = wrapper.getComponent(QDialog).getComponent(QCard)
     expect(list.text()).toContain("Carol")
     const payer = list.findAllComponents(MemberHeader)[2]
     await payer.trigger("click")

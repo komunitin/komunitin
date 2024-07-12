@@ -53,7 +53,7 @@ export default defineComponent({
 import { Group } from "src/store/model";
 import ResourceCards from "../pages/ResourceCards.vue";
 import GroupHeader from "./GroupHeader.vue";
-import { defineProps, defineEmits, computed, ref } from "vue";
+import { defineEmits, computed, ref } from "vue";
 
 const props = defineProps<{
   modelValue?: Group
