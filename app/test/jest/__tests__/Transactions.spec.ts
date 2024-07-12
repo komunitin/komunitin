@@ -7,6 +7,8 @@ import SelectMember from "../../../src/components/SelectMember.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import { seeds } from "src/server";
 import { QCard, QDialog, QList } from "quasar";
+import SelectGroup from "src/components/SelectGroup.vue";
+import GroupHeader from "src/components/GroupHeader.vue";
 
 describe("Transactions", () => {
   let wrapper: VueWrapper;
@@ -130,6 +132,46 @@ describe("Transactions", () => {
     expect(text).toContain("234");
     expect(text).toContain("Test payment description.");
     expect(text).toContain("today")
+    await wrapper.get("#confirm-transaction").trigger("click")
+    await wrapper.vm.$wait();
+    expect(wrapper.text()).toContain("Committed")
+  })
+
+  it("creates external payment", async() => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
+    await wrapper.vm.$wait();
+
+    await wrapper.getComponent(SelectMember).get('div').trigger("click");
+    await flushPromises()
+    await wrapper.vm.$wait()
+
+    const dialog = wrapper.getComponent(QDialog).getComponent(QCard)
+    const groups = dialog.getComponent(SelectGroup)
+    await groups.trigger("click")
+    // Choose group 1
+    await groups.getComponent(QList).findAllComponents(GroupHeader)[1].trigger("click")
+    await flushPromises()
+    await wrapper.vm.$wait()
+    expect(dialog.text()).toContain("Jaunita")
+    await dialog.findAllComponents(MemberHeader)[1].trigger("click")
+    await flushPromises();
+
+    await wrapper.get("[name='description']").setValue("Test external payment")
+    await wrapper.get("[name='amount']").setValue("12")
+    await flushPromises()
+    expect((wrapper.get("input[aria-label='Amount in sensors']").element as HTMLInputElement).value).toEqual("120")
+
+    await wrapper.get("button[type='submit']").trigger("click")
+    await flushPromises();
+    
+    const text = wrapper.text();
+    expect(text).toContain("Jaunita");
+    expect(text).toContain("Emiliano");
+    expect(text).toContain("$-12.00");
+    expect(text).toContain("($-120.00)");
+    expect(text).toContain("Test external payment");
+    expect(text).toContain("today")
+
     await wrapper.get("#confirm-transaction").trigger("click")
     await wrapper.vm.$wait();
     expect(wrapper.text()).toContain("Committed")
