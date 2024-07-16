@@ -31,12 +31,12 @@
         class="text-h4"
         :class="positive ? 'positive-amount' : 'negative-amount'"
       >
-        {{ FormatCurrency((positive ? 1 : -1) * myAmount, myCurrency) }}
+        {{ FormatCurrency((positive ? 1 : -1) * transfer.attributes.amount, myCurrency) }}
         <span 
           v-if="otherCurrency && otherAmount" 
           class="text-h5 text-onsurface-m"
         >
-          ({{ FormatCurrency((positive ? 1 : -1) * otherAmount as number, otherCurrency) }})
+          ({{ FormatCurrency((positive ? 1 : -1) * otherAmount, otherCurrency) }})
         </span>
       </div>
       <div class="text-subtitle1 text-onsurface-m">
@@ -115,17 +115,10 @@ const otherCurrency = computed(() => {
     return payerCurrency.value.id == myCurrency.value.id ? null : payerCurrency.value;
   }
 })
-const myAmount = computed(() => {
-  // Transfer amount is always in payee's currency.
-  if (payeeCurrency.value.id == myCurrency.value.id) {
-    return props.transfer.attributes.amount;
-  } else {
-    return convertCurrency(props.transfer.attributes.amount, payeeCurrency.value, myCurrency.value);
-  }
-})
+
 const otherAmount = computed(() => {
   if (otherCurrency.value) {
-    return convertCurrency(props.transfer.attributes.amount, payeeCurrency.value, otherCurrency.value);
+    return convertCurrency(props.transfer.attributes.amount, myCurrency.value, otherCurrency.value);
   }
   return null;
 })

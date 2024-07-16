@@ -79,7 +79,7 @@
 <script lang="ts">
 import { defineComponent } from "vue"
 
-import FormatCurrency, { convertCurrency } from "../../plugins/FormatCurrency";
+import FormatCurrency from "../../plugins/FormatCurrency";
 
 import ResourceCards from "../ResourceCards.vue";
 import MemberHeader from "../../components/MemberHeader.vue";
@@ -132,9 +132,6 @@ export default defineComponent({
     },
     signedAmount(transfer: ExtendedTransfer): number {
       let amount = transfer.attributes.amount
-      if (transfer.payee.currency.id != this.currency.id) {
-        amount = convertCurrency(amount, transfer.payee.currency, this.currency)
-      }
       return (transfer.payer.id == this.account.id ? -1 : 1) * amount;
     },
     /**

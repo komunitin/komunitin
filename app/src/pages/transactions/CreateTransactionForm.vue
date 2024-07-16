@@ -86,7 +86,7 @@ import { minValue, numeric, required } from "@vuelidate/validators"
 import { DeepPartial } from "quasar"
 import KError, { KErrorCode } from "src/KError"
 import SelectMember from "src/components/SelectMember.vue"
-import { convertCurrency } from "src/plugins/FormatCurrency"
+import formatCurrency, { convertCurrency } from "src/plugins/FormatCurrency"
 import { Account, Currency, ExternalRelatedResource, Member, Transfer } from "src/store/model"
 import { v4 as uuid } from "uuid"
 import { computed, ref } from "vue"
@@ -148,7 +148,8 @@ const otherCurrency = computed(() =>  {
 
 const otherAmount = computed(() => {
   if (otherCurrency.value && amount.value) {
-    return convertCurrency(amount.value, myCurrency.value, otherCurrency.value)
+    const num = convertCurrency(amount.value, myCurrency.value, otherCurrency.value)
+    return formatCurrency(num, otherCurrency.value, {symbol: false, scale: false})
   } else {
     return null
   }
@@ -162,9 +163,7 @@ const onSubmit = () => {
     throw new KError(KErrorCode.ScriptError, "Amount must be defined before submit.")
   }
 
-  const payeeAmount = myCurrency.value.id == payeeMember.value.account.currency.id ? 
-    amount.value: convertCurrency(amount.value, myCurrency.value, payeeMember.value.account.currency)
-  const transferAmount = payeeAmount * Math.pow(10, payeeMember.value.account.currency.attributes.scale)
+  const transferAmount = amount.value * Math.pow(10, myCurrency.value.attributes.scale)
 
   const accountRelationship = (account: Account & {currency: Currency}) => {
     const relationship = {data: {type: "accounts", id: account.id}} as ExternalRelatedResource

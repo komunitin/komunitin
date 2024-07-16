@@ -7,6 +7,8 @@ import { startServer, stopServer } from "./net.mock"
 import { Scope } from "src/server/auth"
 import { clearDb } from "./db"
 import { testCurrency } from "./api.data"
+import { config } from "src/config"
+import { response } from "express"
 
 describe('Accounts endpoints', async () => {
   let app: ExpressExtended
@@ -103,6 +105,12 @@ describe('Accounts endpoints', async () => {
     await api.get('/TEST/accounts', user3, 403)
   })
 
+  it('allowed anonymous list accounts by id', async () => {
+    const response = await api.get('/TEST/accounts?filter[id]=' + account0.id, undefined)
+    assert.equal(response.body.data.length, 1)
+    assert.equal(response.body.data[0].links.self, `${config.API_BASE_URL}/TEST/accounts/${account0.id}`)
+  })
+
   await it('user get account', async () => {
     const response1 = await api.get('/TEST/accounts?filter[code]=TEST0000', user2)
     assert.equal(response1.body.data.length, 1)
@@ -117,6 +125,7 @@ describe('Accounts endpoints', async () => {
     assert.equal(response.body.included[0].type, 'currencies')
     assert.equal(response.body.included[0].attributes.code, 'TEST')
     assert.equal(response.body.included[0].attributes.symbol, 'T$')
+    assert.equal(response.body.data.links.self, `${config.API_BASE_URL}/TEST/accounts/${account0.id}`)
   })
 
   it('including settings', async() => {

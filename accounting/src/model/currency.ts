@@ -51,6 +51,7 @@ export type CurrencySettings = {
    * The maximum balance in local currency that the external trader account may have.
    */
   externalTraderMaximumBalance?: number
+  
 }
 
 export type CurrencyStatus = "new" | "active"

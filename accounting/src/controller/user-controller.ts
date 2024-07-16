@@ -9,6 +9,7 @@ export class UserController extends AbstractCurrencyController {
   constructor(readonly currencyController: LedgerCurrencyController) {
     super(currencyController)
   }
+
   /**
    * Check that the current user has an account in this currency.
    * @param ctx 

@@ -116,6 +116,13 @@ export default {
             };
           }
         );
+        // Only include members, offers and needs for the first two groups, emulating
+        // forbidden access.
+        if (!["GRP0", "GRP1"].includes(group.code)) {
+          delete links['members']
+          delete links['offers']
+          delete links['needs']
+        }
         return links;
       },
       shouldIncludeLinkageData(relationshipKey: string, model: any) {

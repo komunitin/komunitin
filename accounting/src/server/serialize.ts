@@ -1,8 +1,8 @@
-import { Metaizer, Relator, Serializer } from 'ts-japi';
+import { Linker, Metaizer, Relator, Serializer } from 'ts-japi';
 import { Account, AccountSettings, Currency, Transfer, User } from '../model';
 import { Trustline } from 'src/model/trustline';
 import { ExternalResource } from 'src/model/resource';
-import ResourceIdentifier from 'ts-japi/lib/models/resource-identifier.model';
+import { config } from 'src/config';
 
 const projection = <T>(fields: (keyof T)[]) => {
   return Object.fromEntries(fields.map(field => [field, 1]))
@@ -19,6 +19,8 @@ const externalResourceSerializer = <T>(type: string) => new Serializer<ExternalR
     }))
   }
 })
+
+
 
 export const UserSerializer = externalResourceSerializer("users")
 

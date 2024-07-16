@@ -30,13 +30,15 @@
           <q-list
             v-if="slotProps.resources"
           >
-            <group-header
-              v-for="option in slotProps.resources"
-              :key="option.id"
-              :group="option"
-              clickable
-              @click="select(option)"
-            />
+            <template v-for="option in slotProps.resources">
+              <group-header
+                v-if="option.id === group?.id || option.relationships.members?.links?.related"
+                :key="option.id"
+                :group="option"
+                clickable
+                @click="select(option)"
+              />
+            </template>
           </q-list>    
         </resource-cards>
       </div>

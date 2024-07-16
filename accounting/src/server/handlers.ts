@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express"
 import { CurrencyController, SharedController } from "src/controller"
 import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, collectionParams, resourceParams } from "./request"
 import { Context, context } from "src/utils/context"
-import { DataDocument, Dictionary, Paginator, Serializer } from "ts-japi"
+import { DataDocument, Dictionary, Linker, Paginator, Serializer } from "ts-japi"
 import { input } from "./parse"
 import { config } from "src/config"
 
@@ -66,7 +66,13 @@ export function currencyResourceHandler<T extends Dictionary<any>>(controller: S
     const params = resourceParams(req, paramOptions)
     const resource = await fn(currencyController, ctx, req.params.id, params)
     return serializer.serialize(resource, {
-      include: params.include
+      include: params.include,
+      linkers: {
+        resource: new Linker(() => {
+          // A convenient way to solve it, but we could compute the URL from the resource as well.
+          return `${config.API_BASE_URL}${req.path}`
+        })
+      }
     })
   }, status)
 }
@@ -82,7 +88,10 @@ export function currencyCollectionHandler<T extends Dictionary<any>>(controller:
     return serializer.serialize(resource, {
       include: params.include,
       linkers: {
-        paginator: paginatorHelper(resource, params, req)
+        paginator: paginatorHelper(resource, params, req),
+        resource: new Linker((resource) => {
+          return `${config.API_BASE_URL}${req.path}/${resource.id}`
+        })
       }
     })
   }, status)
@@ -96,6 +105,13 @@ export function currencyInputHandler<T extends Dictionary<any>, D>(controller: S
   return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
     const data = input(req)
     const resource = await fn(currencyController, ctx, data)
-    return serializer.serialize(resource)
+    return serializer.serialize(resource, {
+      linkers: {
+        resource: new Linker(() => {
+          // A convenient way to solve it, but we could compute the URL from the resource as well.
+          return `${config.API_BASE_URL}${req.path}` + (req.method === 'POST' ? `/${resource.id}` : '')
+        })
+      }
+    })
   }, status)
 }

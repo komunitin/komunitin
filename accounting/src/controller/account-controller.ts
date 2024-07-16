@@ -2,7 +2,7 @@ import { Account, AccountSettings, InputAccount, recordToAccount, UpdateAccount,
 import { LedgerCurrencyController } from "./currency-controller";
 import { Context, systemContext } from "src/utils/context";
 import { AbstractCurrencyController } from "./abstract-currency-controller";
-import { badRequest, forbidden, notFound, notImplemented } from "src/utils/error";
+import { badRequest, forbidden, notFound, notImplemented, unauthorized } from "src/utils/error";
 import { AccountType } from "@prisma/client";
 import { WithRequired } from "src/utils/types";
 import { CollectionOptions } from "src/server/request";
@@ -173,7 +173,17 @@ export class AccountController extends AbstractCurrencyController{
   }
 
   async getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]> {
-    await this.users().checkUser(ctx)
+    // Anonymous users can access this endpoint if they provide an id filter. 
+    const allowAnonymous = params.filters?.id
+
+    if (!allowAnonymous) {
+      if (ctx.type === "anonymous") {
+        throw unauthorized("No anonymous access allowed")
+      } else {
+        await this.users().checkUser(ctx)
+      }
+    }
+    
     // Allow filtering by code and by id.
     const filter = whereFilter(params.filters)
     

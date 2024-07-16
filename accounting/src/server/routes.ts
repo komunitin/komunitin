@@ -53,7 +53,7 @@ export function getRoutes(controller: SharedController) {
   )
 
   // List accounts
-  router.get('/:code/accounts', userAuth([Scope.Accounting, Scope.AccountingReadAll]), 
+  router.get('/:code/accounts', anyAuth(userAuth([Scope.Accounting, Scope.AccountingReadAll]), noAuth()), 
     currencyCollectionHandler(controller, async (currencyController, ctx, params) => {
       return await currencyController.accounts.getAccounts(ctx, params)
     }, AccountSerializer, {
