@@ -9,25 +9,27 @@
           {{ text }}
         </div>
       </div>
-      <select-member
+      <select-account
         v-if="selectPayer"
-        v-model="payerMember"  
+        v-model="payerAccount"  
         name="payer"
         :code="code"
+        :payer="true"
         :label="$t('selectPayer')"
         :hint="$t('transactionPayerHint')"
-        :rules="[() => !v$.payerMember?.$error || $t('payerRequired')]"
-        @close-dialog="v$.payerMember?.$touch()"
+        :rules="[() => !v$.payerAccount?.$error || $t('payerRequired')]"
+        @close-dialog="v$.payerAccount?.$touch()"
       />
-      <select-member
+      <select-account
         v-if="selectPayee"
-        v-model="payeeMember"  
+        v-model="payeeAccount"  
         name="payee"
         :code="code"
+        :payer="false"
         :label="$t('selectPayee')"
         :hint="$t('transactionPayeeHint')"
-        :rules="[() => !v$.payeeMember?.$error || $t('payeeRequired')]"
-        @close-dialog="v$.payeeMember?.$touch()"
+        :rules="[() => !v$.payeeAccount?.$error || $t('payeeRequired')]"
+        @close-dialog="v$.payeeAccount?.$touch()"
       />
       <q-input 
         v-model="concept"
@@ -85,7 +87,7 @@ import { useVuelidate } from "@vuelidate/core"
 import { minValue, numeric, required } from "@vuelidate/validators"
 import { DeepPartial } from "quasar"
 import KError, { KErrorCode } from "src/KError"
-import SelectMember from "src/components/SelectMember.vue"
+import SelectAccount from "src/components/SelectAccount.vue"
 import formatCurrency, { convertCurrency } from "src/plugins/FormatCurrency"
 import { Account, Currency, ExternalRelatedResource, Member, Transfer } from "src/store/model"
 import { v4 as uuid } from "uuid"
@@ -96,9 +98,9 @@ const props = defineProps<{
   modelValue: DeepPartial<Transfer> | undefined,
   code: string,
   selectPayer: boolean,
-  payerMember?: Member & {account: Account & {currency: Currency}},
+  payerAccount?: Account & {currency: Currency, member?: Member},
   selectPayee: boolean,
-  payeeMember?: Member & {account: Account & {currency: Currency}},
+  payeeAccount?: Account & {currency: Currency, member?: Member},
   text: string,
   submitLabel: string
 }>()
@@ -112,24 +114,24 @@ const transfer = computed({
   set: (value) => emit('update:modelValue', value as DeepPartial<Transfer>)
 })
 
-const payerMember = ref(props.payerMember)
-const payeeMember = ref(props.payeeMember)
+const payerAccount = ref(props.payerAccount)
+const payeeAccount = ref(props.payeeAccount)
 const concept = ref("")
 const amount = ref<number>()
 
 // Validation.
-const isMember = (member: Member|undefined) => (member && member.id !== undefined)
+const isAccount = (member: Account|undefined) => (member && member.id !== undefined)
 
 const rules = computed(() => ({
-  ...(props.selectPayer && {payerMember: {isMember}}),
-  ...(props.selectPayee && {payeeMember: {isMember}}),
+  ...(props.selectPayer && {payerAccount: {isAccount}}),
+  ...(props.selectPayee && {payeeAccount: {isAccount}}),
   concept: { required },
   amount: { required, numeric, nonNegative: minValue(0)}
 }))
 
 const v$ = useVuelidate(rules, {
-  ...(props.selectPayer && {payerMember}),
-  ...(props.selectPayee && {payeeMember}),
+  ...(props.selectPayer && {payerAccount}),
+  ...(props.selectPayee && {payeeAccount}),
   concept, 
   amount
 });
@@ -138,10 +140,10 @@ const store = useStore()
 const myCurrency = computed(() => store.getters.myAccount.currency)
 
 const otherCurrency = computed(() =>  {
-  if (props.selectPayer && payerMember.value && payerMember.value.account.currency.id !== myCurrency.value.id) {
-    return payerMember.value?.account.currency
-  } else if (props.selectPayee && payeeMember.value && payeeMember.value.account.currency.id !== myCurrency.value.id) {
-    return payeeMember.value?.account.currency
+  if (props.selectPayer && payerAccount.value && payerAccount.value.currency.id !== myCurrency.value.id) {
+    return payerAccount.value.currency
+  } else if (props.selectPayee && payeeAccount.value && payeeAccount.value.currency.id !== myCurrency.value.id) {
+    return payeeAccount.value.currency
   }
   return null
 })
@@ -156,7 +158,7 @@ const otherAmount = computed(() => {
 })
 
 const onSubmit = () => {
-  if (!payerMember.value?.account || !payeeMember.value?.account) {
+  if (!payerAccount.value || !payeeAccount.value) {
     throw new KError(KErrorCode.ScriptError, "Both payer and payee must be defined before submit.")
   }
   if (amount.value === undefined) {
@@ -188,8 +190,8 @@ const onSubmit = () => {
       updated: new Date().toUTCString(),
     },
     relationships: {
-      payer: accountRelationship(payerMember.value.account),
-      payee: accountRelationship(payeeMember.value.account),
+      payer: accountRelationship(payerAccount.value),
+      payee: accountRelationship(payeeAccount.value),
     }
   };
 }

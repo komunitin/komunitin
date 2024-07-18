@@ -32,7 +32,7 @@
           >
             <template v-for="option in slotProps.resources">
               <group-header
-                v-if="option.id === group?.id || option.relationships.members?.links?.related"
+                v-if="showGroup(option)"
                 :key="option.id"
                 :group="option"
                 clickable
@@ -52,13 +52,14 @@ export default defineComponent({
 })
 </script>
 <script setup lang="ts">
-import { Group } from "src/store/model";
+import { Currency, Group } from "src/store/model";
 import ResourceCards from "../pages/ResourceCards.vue";
 import GroupHeader from "./GroupHeader.vue";
 import { defineEmits, computed, ref } from "vue";
 
 const props = defineProps<{
-  modelValue?: Group
+  modelValue?: Group,
+  payer?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -79,6 +80,15 @@ const group = computed({
 const select = (value: Group) => {
   group.value = value
   dialog.value = false
+}
+
+const showGroup = (group: Group & {currency: Currency}) => {
+  // Only show groups that allow external payments / requests.
+  if (props.payer) {
+    return group.currency.attributes.settings.enableExternalPaymentRequests
+  } else {
+    return group.currency.attributes.settings.enableExternalPayments
+  }
 }
 
 </script>

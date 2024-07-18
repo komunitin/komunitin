@@ -332,6 +332,13 @@ export interface Currency extends ResourceObject {
       n: number,
       d: number
     }
+    settings: {
+      defaultAllowPayments?: boolean
+      defaultAllowPaymentRequests?: boolean
+
+      enableExternalPayments?: boolean
+      enableExternalPaymentRequests?: boolean
+    }
   };
 }
 
@@ -358,8 +365,13 @@ export interface Account extends ResourceObject {
 export interface AccountSettings extends ResourceObject {
   attributes: {
     acceptPaymentsAutomatically: boolean,
+    
     allowPayments?: boolean,
     allowPaymentRequests?: boolean,
+
+    allowExternalPayments?: boolean,
+    allowExternalPaymentRequests?: boolean,
+
   }
   relationships: {
     account: RelatedResource

@@ -3,7 +3,8 @@ import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import TransactionList from "../../../src/pages/transactions/TransactionList.vue";
 import MemberHeader from "../../../src/components/MemberHeader.vue";
-import SelectMember from "../../../src/components/SelectMember.vue";
+import AccountHeader from "src/components/AccountHeader.vue";
+import SelectAccount from "../../../src/components/SelectAccount.vue";
 import PageHeader from "../../../src/layouts/PageHeader.vue";
 import { seeds } from "src/server";
 import { QCard, QDialog, QList } from "quasar";
@@ -34,7 +35,7 @@ describe("Transactions", () => {
     // Further wait to load members.
     await flushPromises();
     await wrapper.vm.$wait();
-    const transactions = wrapper.getComponent(TransactionList).findAllComponents(MemberHeader)
+    const transactions = wrapper.getComponent(TransactionList).findAllComponents(AccountHeader)
     expect(transactions.length).toBe(20);
     const first = transactions[5];
     expect(first.text()).toContain("Rejected");
@@ -51,7 +52,7 @@ describe("Transactions", () => {
     wrapper.getComponent(PageHeader).vm.$emit("search", "open");
     await wrapper.vm.$wait();
     // Check result!
-    expect(wrapper.getComponent(TransactionList).findAllComponents(MemberHeader).length).toBe(2);
+    expect(wrapper.getComponent(TransactionList).findAllComponents(AccountHeader).length).toBe(2);
   });
   it("renders single transaction", async () => {
     await wrapper.vm.$router.push("/groups/GRP0/transactions/6d9c00a8-4304-4371-ac11-83da505abd4e");
@@ -77,7 +78,7 @@ describe("Transactions", () => {
     await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/EmilianoLemke57/transactions/receive");
     await wrapper.vm.$wait()
-    await wrapper.getComponent(SelectMember).get('div').trigger("click");
+    await wrapper.getComponent(SelectAccount).get('div').trigger("click");
     await wrapper.vm.$wait()
 
     const dialog = wrapper.getComponent(QDialog).getComponent(QCard)
@@ -113,7 +114,7 @@ describe("Transactions", () => {
     await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
     await wrapper.vm.$wait();
 
-    await wrapper.getComponent(SelectMember).get('div').trigger("click");
+    await wrapper.getComponent(SelectAccount).get('div').trigger("click");
     await flushPromises()
     await wrapper.vm.$wait()
 
@@ -141,7 +142,7 @@ describe("Transactions", () => {
     await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
     await wrapper.vm.$wait();
 
-    await wrapper.getComponent(SelectMember).get('div').trigger("click");
+    await wrapper.getComponent(SelectAccount).get('div').trigger("click");
     await flushPromises()
     await wrapper.vm.$wait()
 

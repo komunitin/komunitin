@@ -177,6 +177,11 @@ export class LedgerController implements BaseController {
       defaultAllowPaymentRequests: true,
       externalTraderCreditLimit: currency.settings.defaultInitialCreditLimit,
       externalTraderMaximumBalance: undefined,
+      defaultAllowExternalPayments: true,
+      defaultAllowExternalPaymentRequests: false,
+      enableExternalPayments: true,
+      enableExternalPaymentRequests: false,
+      defaultAcceptExternalPaymentsAutomatically: false,
       ...currency.settings
     }
 

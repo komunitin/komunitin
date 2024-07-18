@@ -26,7 +26,7 @@ export default {
         "/" +
         account.currency.code +
         "/accounts/" +
-        account.code
+        account.id
     }),
     accountSettings: ApiSerializer.extend({
       selfLink: (model: any) => urlAccounting + "/" + 
@@ -76,12 +76,16 @@ export default {
         d: (10 ** i)
       }),
       scale: 4,
-      settings: {
+      settings: (i: number) => ({
         defaultInitialCreditLimit: 100000,
         defaultAcceptPaymentsAutomatically: true,
         defaultAllowPayments: true,
-        defaultAllowPaymentRequests: true
-      }
+        defaultAllowPaymentRequests: true,
+        defaultAllowExternalPayments: true,
+        defaultAllowExternalPaymentRequests: false,
+        enableExternalPayments: true,
+        enableExternalPaymentRequests: (i < 3)
+      })
     }),
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
@@ -149,6 +153,11 @@ export default {
     server.schema.accounts.all().models.forEach((account: any) => {
       server.create("accountSettings", {account});
     })
+    // Generate some accounts for GRP2.
+    server.createList("account", 5, {
+      code: (i: number) => `GRP2${(i % 5).toString().padStart(4, "0")}`,
+      currency: server.schema.currencies.findBy({ code: "GRP2" }),
+    })
   },
   routes(server: Server) {
     // Single currency
@@ -162,7 +171,8 @@ export default {
     // Accounts list
     server.get(urlAccounting + "/:code/accounts", (schema: any, request) => {
       const currency = schema.currencies.findBy({ code: request.params.code });
-      return filter(schema.accounts.where({ currencyId: currency.id }), request);
+      const all = schema.accounts.where({ currencyId: currency.id })
+      return filter(all, request);
     });
     // Single account
     server.get(

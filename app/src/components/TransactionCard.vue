@@ -8,9 +8,8 @@
       <div class="text-overline text-uppercase text-onsurface-d q-pl-md">
         {{ $t("payer") }}
       </div>
-      <member-header
-        :member="transfer.payer.member"
-        :to="`/groups/${payerGroup.attributes.code}/members/${transfer.payer.member.attributes.code}`"
+      <account-header
+        :account="transfer.payer"
       />
     </q-card-section>
     <q-separator />
@@ -19,9 +18,8 @@
       <div class="text-overline text-uppercase text-onsurface-d q-pl-md">
         {{ $t("payee") }}
       </div>
-      <member-header
-        :member="transfer.payee.member"
-        :to="`/groups/${payeeGroup.attributes.code}/members/${transfer.payee.member.attributes.code}`"
+      <account-header
+        :account="transfer.payee"
       />
     </q-card-section>
     <q-separator />
@@ -60,7 +58,7 @@ import KError, { KErrorCode } from "src/KError";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStore } from "vuex";
-import MemberHeader from "./MemberHeader.vue"
+import AccountHeader from "./AccountHeader.vue"
 import FormatCurrency, { convertCurrency } from "../plugins/FormatCurrency"
 import { ExtendedTransfer } from "src/store/model";
 
@@ -102,7 +100,6 @@ const state = computed(() => {
 const payerGroup = computed(() => props.transfer.payer.member.group)
 const payerCurrency = computed(() => props.transfer.payer.currency)
 
-const payeeGroup = computed(() => props.transfer.payee.member.group)
 const payeeCurrency = computed(() => props.transfer.payee.currency)
 
 const myCurrency = computed(() => myAccount.currency)

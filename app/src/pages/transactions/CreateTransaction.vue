@@ -14,9 +14,9 @@
         v-show="state === 'define'"
         :code="code"
         :select-payer="selectPayer"
-        :payer-member="payerMember"
+        :payer-account="payerAccount"
         :select-payee="selectPayee"
-        :payee-member="payeeMember"
+        :payee-account="payeeAccount"
         :currency="currency"
         :text="text"
         :submit-label="submitLabel"
@@ -71,7 +71,7 @@ const props = defineProps<{
 const store = useStore()
 const { t } = useI18n()
 
-const myAccount = computed<Account & {currency: Currency}>(() => store.getters.myAccount)
+const myAccount = computed<Account & {currency: Currency, member: Member}>(() => store.getters.myAccount)
 const myMember = computed<Member & {account: Account}>(() => store.getters.myMember)
 const myMemberCode = computed<string>(() => myMember.value.attributes.code)
 const currency = computed<Currency>(() => myAccount.value.currency);
@@ -120,24 +120,24 @@ const submitLabel = computed(() => {
   }
 })
 
-const loadMember = (isSelect: boolean, memberCode?: string) => {
-  const member = ref<Member & {account: Account}>()
+const loadAccount = (isSelect: boolean, memberCode?: string) => {
+  const account = ref<Account & {member: Member}>()
   if (memberCode) {
     store.dispatch("members/load", {
       group: props.code, 
       code: memberCode, 
       include: "account,group"
     }).then(() => {
-      member.value = store.getters["members/current"]
+      account.value = store.getters["members/current"].account
     })
   } else if (!isSelect) {
-    member.value = myMember.value
+    account.value = myAccount.value
   }
-  return member
+  return account
 }
 
-const payerMember = loadMember(props.selectPayer, props.payerMemberCode)
-const payeeMember = loadMember(props.selectPayee, props.payeeMemberCode)
+const payerAccount = loadAccount(props.selectPayer, props.payerMemberCode)
+const payeeAccount = loadAccount(props.selectPayee, props.payeeMemberCode)
 
 // Transfer model
 const transfer = ref<DeepPartial<Transfer>>()
@@ -145,13 +145,12 @@ const state = ref<"loading"|"define"|"confirm">("loading")
 
 watchEffect(() => {
   if (state.value === "loading"
-    && (props.selectPayer || payerMember.value)
-    && (props.selectPayee || payeeMember.value)) {
+    && (props.selectPayer || payerAccount.value)
+    && (props.selectPayee || payeeAccount.value)) {
     state.value = "define"
   }
 })
 
-// 
 const onFilled = (value: DeepPartial<Transfer>) => {
   // This operation is not the same as just doing transfer.value = value,
   // because the store adds some attributes to the transfer (such as transfer.payer, etc).

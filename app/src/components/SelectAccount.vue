@@ -8,15 +8,17 @@
   >
     <template #control>
       <member-header
-        v-if="modelValue"
-        :member="modelValue"
+        v-if="value?.member"
+        :member="value?.member"
         clickable
       />
       <div
         v-else 
         tabindex="0" 
         @keydown.enter="onClick"
-      />
+      >
+        {{ value?.attributes.code ?? "" }}
+      </div>
     </template>
     <template #append>
       <q-icon name="arrow_drop_down" />
@@ -64,14 +66,19 @@
         </q-toolbar>
       </q-card-section>
       <q-separator />
-      <q-card-section class="q-pa-none">
+      <q-card-section 
+        v-if="selectGroup"
+        class="q-pa-none" 
+      >
         <select-group
           v-model="group"
+          :payer="payer"
         />
       </q-card-section>
       <q-separator />
-      <q-card-section class="members-list q-pa-none">
+      <q-card-section class="q-pa-none">
         <resource-cards
+          v-if="listGroupMembers"
           ref="memberItems"
           v-slot="slotProps"
           :code="group.attributes.code"
@@ -91,6 +98,13 @@
             />
           </q-list>
         </resource-cards>
+        <account-code-form
+          v-else
+          v-model="value"
+          :group="group"
+          class="q-py-md q-px-xl q-mx-lg"
+          @submit="dialog = false"
+        />
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -100,27 +114,37 @@
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import MemberHeader from "./MemberHeader.vue"
 import SelectGroup from "./SelectGroup.vue"
+import AccountCodeForm from "./AccountCodeForm.vue"
 import ResourceCards from "../pages/ResourceCards.vue"
-import { Group, Member } from 'src/store/model';
+import { Account, AccountSettings, Group, Member } from 'src/store/model';
 import { QField } from 'quasar';
 import { useStore } from 'vuex';
 
+/**
+ * Using defineComponent instead of <script setup> because of inheritAttrs. Change that once we update to Vue 3.3+
+ */
 export default defineComponent({
   components: {
     MemberHeader,
     ResourceCards,
-    SelectGroup
+    SelectGroup,
+    AccountCodeForm
   },
   inheritAttrs: false,
   props: {
     modelValue: {
-      type: Object,
+      type: Object, // Account
       required: false,
       default: undefined
     },
     code: {
       type: String,
       required: true
+    },
+    payer: {
+      type: Boolean,
+      required: false,
+      default: true
     }
   },
   emits: ["update:modelValue", "close-dialog"],
@@ -131,17 +155,17 @@ export default defineComponent({
       dialog.value = true
     }
 
-    const value = computed<Member & {group: Group} | undefined>({
+    const value = computed<Account & {member?: Member} | undefined>({
       get() {
-        return props.modelValue as Member & {group: Group}
+        return props.modelValue as Account
       },
       set(value) {
         emit('update:modelValue', value)
       }
     })
 
-    const select = (selectedMember: Member & {group: Group}) => {
-      value.value = selectedMember
+    const select = (selectedMember: Member & {account: Account}) => {
+      value.value = selectedMember.account
       dialog.value = false
     }
 
@@ -164,6 +188,24 @@ export default defineComponent({
       }
       emit("close-dialog");
     }
+
+    const myCurrency = computed(() => store.getters.myAccount.currency)
+    const myAccountSettings = computed<AccountSettings>(() => store.getters.myAccount.settings)
+    
+    const selectGroup = computed(() => {
+      if (props.payer) {
+        return myAccountSettings.value.attributes.allowExternalPaymentRequests ?? 
+        myCurrency.value.attributes.settings.defaultAllowExternalPaymentRequests
+      } else {
+        return myAccountSettings.value.attributes.allowExternalPayments ?? 
+        myCurrency.value.attributes.settings.defaultAllowExternalPayments
+      }
+    })
+
+    const listGroupMembers = computed(() => {
+      return group.value && (group.value.id == myGroup.value.id || group.value.relationships?.members?.links?.related)
+    })
+
     return {
       onClick,
       dialog,
@@ -172,7 +214,9 @@ export default defineComponent({
       fieldRef,
       value,
       closeDialog,
-      group
+      group,
+      selectGroup,
+      listGroupMembers
     }
   }
 })

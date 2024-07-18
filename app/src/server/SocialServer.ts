@@ -400,7 +400,7 @@ export default {
           }
         }
       }
-      // Create some mebers in 2nd group just to test external transfers.
+      // Create some mebers in GRP1 just to test external transfers.
       if (i == 1) {
         server.createList("member", 5, { group } as any);
       }
