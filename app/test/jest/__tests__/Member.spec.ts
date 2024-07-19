@@ -1,13 +1,14 @@
 import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
-import { QTab, QInnerLoading } from "quasar";
+import { QTab } from "quasar";
 import NeedCard from "../../../src/components/NeedCard.vue";
 import OfferCard from "../../../src/components/OfferCard.vue";
 import MemberList from "../../../src/pages/members/MemberList.vue";
 import MemberHeader from "../../../src/components/MemberHeader.vue";
 import TransactionItems from "../../../src/pages/transactions/TransactionItems.vue";
 import { seeds } from "src/server";
+import AccountHeader from "src/components/AccountHeader.vue";
 
 describe("Member", () => {
   let wrapper: VueWrapper;
@@ -104,7 +105,7 @@ describe("Member", () => {
     tabs[3].trigger("click");
     await wrapper.vm.$nextTick();
     await wrapper.vm.$wait();
-    const transactions = wrapper.getComponent(TransactionItems).findAllComponents(MemberHeader);
+    const transactions = wrapper.getComponent(TransactionItems).findAllComponents(AccountHeader);
     expect(transactions.length).toBe(5);
   });
 
