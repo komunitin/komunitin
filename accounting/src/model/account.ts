@@ -38,7 +38,7 @@ export type AccountSettings = {
   acceptPaymentsAutomatically?: boolean
 
   // If acceptPaymentsAutomatically is false, this is a list of account id's
-  // for which payments are automatically accepted.
+  // for which payments are automatically accepted. Work for external accounts too.
   acceptPaymentsWhitelist?: string[]
 
   // If acceptPaymentsAutomatically is false, accept payments after this
@@ -50,11 +50,22 @@ export type AccountSettings = {
   // limit is reached.
   onPaymentCreditLimit?: number
 
-  // This account can perform payments.
+  // This account can make payments.
   allowPayments?: boolean
 
   // This account can request payments form other accounts.
   allowPaymentRequests?: boolean
+
+  // This account can make external payments.
+  allowExternalPayments?: boolean
+
+  // This account can request external payments.
+  allowExternalPaymentRequests?: boolean
+
+  // Payments from external accounts are automatically accepted. 
+  // If acceptPaymentsAutomatically is false, this is taken as false too.
+  acceptExternalPaymentsAutomatically?: boolean
+
 }
 
 // No input needed for creating an account (beyond implicit currency)!

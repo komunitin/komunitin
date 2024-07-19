@@ -7,9 +7,6 @@ import { Context } from "src/utils/context";
 import { LedgerCurrencyController } from "./currency-controller";
 import { ExternalTransferController } from "./external-transfer-controller";
 import { includeRelations, whereFilter } from "./query";
-import { UNABLE_TO_FIND_POSTINSTALL_TRIGGER_JSON_PARSE_ERROR } from "@prisma/client/scripts/postinstall.js";
-import { recordToExternalResource } from "src/model/resource";
-import { ExternalResource } from "@prisma/client";
 
 export class TransferController  extends AbstractCurrencyController {
   private externalTransfers: ExternalTransferController
@@ -51,7 +48,7 @@ export class TransferController  extends AbstractCurrencyController {
     }
     
     // If this is an external transfer, let the specialized controller handle it.
-    if (this.externalTransfers.isExternalTransfer(data)) {
+    if (this.externalTransfers.isExternalInputTransfer(data)) {
       return await this.externalTransfers.createExternalTransfer(ctx, data)
     }
 
@@ -177,18 +174,18 @@ export class TransferController  extends AbstractCurrencyController {
       if (this.users().isAdmin(user)
         || userHasAccount(user, transfer.payer) 
         || (userHasAccount(user, transfer.payee) && this.submitPaymentRequestImmediately(transfer))) {
-        this.saveTransferState(transfer, "submitted")
+        await this.saveTransferState(transfer, "submitted")
         try {
           const transaction = await this.submitTransfer(transfer, this.users().isAdmin(user))
           transfer.hash = transaction.hash
-          this.saveTransferState(transfer, "committed")
+          await this.saveTransferState(transfer, "committed")
         } catch (e) {
-          this.saveTransferState(transfer, "failed")
+          await this.saveTransferState(transfer, "failed")
           throw e
         }
       // Payment request with payer user without automaticallyAcceptPayments flag
       } else if (userHasAccount(user, transfer.payee)) {
-        this.saveTransferState(transfer, "pending")
+        await this.saveTransferState(transfer, "pending")
       } else {
         throw forbidden("User is not allowed to commit this transfer")
       }
@@ -196,7 +193,7 @@ export class TransferController  extends AbstractCurrencyController {
 
     if (state == "rejected") { 
       if (userHasAccount(user, transfer.payer)) {
-        this.saveTransferState(transfer, "rejected")
+        await this.saveTransferState(transfer, "rejected")
       } else {
         throw forbidden("User is not allowed to reject this transfer")
       }
@@ -205,7 +202,7 @@ export class TransferController  extends AbstractCurrencyController {
     if (state == "deleted") {
       // Only transfer creator can delete it.
       if (this.users().isAdmin(user) || transfer.user.id == user.id) {
-        this.saveTransferState(transfer, "deleted")
+        await this.saveTransferState(transfer, "deleted")
       } else {
         throw forbidden("User is not allowed to delete this transfer")
       }
@@ -213,9 +210,17 @@ export class TransferController  extends AbstractCurrencyController {
   }
 
   private submitPaymentRequestImmediately(transfer: Transfer) {
-    const whitelist = transfer.payer.settings.acceptPaymentsWhitelist
-    return transfer.payer.settings.acceptPaymentsAutomatically || 
-     whitelist && whitelist.includes(transfer.payee.id)
+    const whitelist = transfer.payer.settings.acceptPaymentsWhitelist ?? this.currency().settings.defaultAcceptPaymentsWhitelist
+
+    return (transfer.payer.settings.acceptPaymentsAutomatically ?? this.currency().settings.defaultAcceptPaymentsAutomatically) 
+      || whitelist && whitelist.includes(transfer.payee.id)
+  }
+
+  public async updateAccountBalances(transfer: Transfer) {
+    return await Promise.all([
+      this.accounts().updateAccountBalance(transfer.payer),
+      this.accounts().updateAccountBalance(transfer.payee)
+    ])
   }
 
   /**
@@ -231,16 +236,13 @@ export class TransferController  extends AbstractCurrencyController {
       account: await (admin ? this.keys().adminKey() : this.keys().retrieveKey(transfer.payer.key))
     })
 
-    await Promise.all([
-      this.accounts().updateAccountBalance(transfer.payer),
-      this.accounts().updateAccountBalance(transfer.payee)
-    ])
+    await this.updateAccountBalances(transfer)
     
     return transaction
   }
 
   private async loadTransferWhere(ctx: Context, where: {id?: string, hash?: string}) {
-    const user = await this.users().checkUser(ctx)
+    // We first get the transfer and later check if the user is allowed to access it.
     const record = await this.db().transfer.findUnique({
       where: {
         ...(where.id ? {tenantId_id: {
@@ -274,16 +276,23 @@ export class TransferController  extends AbstractCurrencyController {
     const transfer = recordToTransferWithAccounts(record, this.currency())
 
     // Transfers can be accessed by admin and by involved parties.
-    if (!(this.users().isAdmin(user) || userHasAccount(user, transfer.payer) || userHasAccount(user, transfer.payee))) {
-      throw forbidden("User is not allowed to access this transfer")
+    if (ctx.type === "external") {
+      // External users have access to the transfers they are involved in.
+      if (!(ctx.accountKey === transfer.externalPayee?.resource.key || ctx.accountKey === transfer.externalPayer?.resource.key)) {
+        throw forbidden("User is not allowed to access this transfer")
+      }
+    } else {
+      const user = await this.users().checkUser(ctx)
+      if (!(this.users().isAdmin(user) || userHasAccount(user, transfer.payer) || userHasAccount(user, transfer.payee))) {
+        throw forbidden("User is not allowed to access this transfer")
+      }
     }
     
     return transfer
-    
   }
 
   /**
-   * Implements {@link CurrencyController.getTransfer}
+   * Implements getTransfer()
    */
   public async getTransfer(ctx: Context, id: string): Promise<Transfer> {
     return await this.loadTransferWhere(ctx, {id})
@@ -363,8 +372,13 @@ export class TransferController  extends AbstractCurrencyController {
    * Implements {@link CurrencyController.updateTransfer}
    */
   public async updateTransfer(ctx: Context, data: UpdateTransfer): Promise<Transfer> {
-    const user = await this.users().checkUser(ctx)
     let transfer = await this.getTransfer(ctx, data.id)
+
+    if (this.externalTransfers.isExternalTransfer(transfer)) {
+      return this.externalTransfers.updateExternalTransfer(ctx, data, transfer)
+    }
+
+    const user = await this.users().checkUser(ctx)
 
     // Update transfer attributes, if still not submitted.
     if (transfer.state === "new") {

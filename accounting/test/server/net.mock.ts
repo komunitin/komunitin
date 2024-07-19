@@ -5,12 +5,34 @@ import { setupServer, SetupServerApi } from 'msw/node'
 import { logger } from "src/utils/logger"
 import request from "supertest"
 import { Express } from "express"
+import TestAgent from "supertest/lib/agent"
 
 
 const events: any[] = []
 
 export const getEvents = () => events
 export const clearEvents = () => events.splice(0, events.length)
+
+
+const pipeRequest = async (info: any, app: any, method: (r: TestAgent, path: string) => any) => {
+  const url = info.request.url
+  const path = url.substring(config.API_BASE_URL.length)
+  const body = info.request.body ? await info.request.json() as any : null
+
+  const headers = {} as Record<string, string>
+  info.request.headers.forEach((value: any, key: any) => {
+    headers[key] = value
+  })
+  const req = method(request(app), path).set(headers)
+  
+  if (body) {
+    req.send(body)
+  }
+
+  const response = await req
+
+  return HttpResponse.json(response.body, { status: response.status })
+}
 
 const getHandlers = (app: Express) => [
   
@@ -32,28 +54,15 @@ const getHandlers = (app: Express) => [
   // Redirect requests to the API server itself (for external resources) to
   // the test server interface.
   http.get(`${config.API_BASE_URL}/*`, async (info) => {
-    const url = info.request.url
-    const path = url.substring(config.API_BASE_URL.length)
-    const response = await request(app).get(path)
-    return HttpResponse.json(response.body, { status: response.status })
+    return pipeRequest(info, app, (r, path) => r.get(path))
   }),
 
-  // Redirect requests to the API server itself (for external resources) to
-  // the test server interface.
   http.post(`${config.API_BASE_URL}/*`, async (info) => {
-    const url = info.request.url
-    const path = url.substring(config.API_BASE_URL.length)
-    const body = await info.request.json() as any
+    return pipeRequest(info, app, (r, path) => r.post(path))
+  }),
 
-    const headers = {} as Record<string, string>
-    info.request.headers.forEach((value, key) => {
-      headers[key] = value
-    })
-    const response = await request(app)
-      .post(path)
-      .set(headers)
-      .send(body)
-    return HttpResponse.json(response.body, { status: response.status })
+  http.patch(`${config.API_BASE_URL}/*`, async (info) => {
+    return pipeRequest(info, app, (r, path) => r.patch(path))
   })
 ]
 

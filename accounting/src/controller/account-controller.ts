@@ -271,7 +271,7 @@ export class AccountController extends AbstractCurrencyController{
     // Check that the user is only updating allowed settings.
 
     // We can make this list configurable in the future.
-    const userSettings = ["acceptPaymentsAutomatically", "acceptPaymentsWhitelist"]
+    const userSettings = ["acceptPaymentsAutomatically", "acceptPaymentsWhitelist", "acceptExternalPaymentsAutomatically"]
 
     if (!this.users().isAdmin(user) && Object.keys(settings).some(k => !["id", "type"].includes(k) && !userSettings.includes(k))) {
       throw forbidden("User is not allowed to update this account setting")

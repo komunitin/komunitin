@@ -36,11 +36,11 @@ export type CurrencySettings = {
    */
   defaultOnPaymentCreditLimit?: number
   /**
-   * Users can perform payments by default.
+   * Users can make payments by default.
    */
   defaultAllowPayments?: boolean
   /**
-   * Users can request payments by default.
+   * Users can make payment requests by default.
    */
   defaultAllowPaymentRequests?: boolean
   /**
@@ -51,7 +51,26 @@ export type CurrencySettings = {
    * The maximum balance in local currency that the external trader account may have.
    */
   externalTraderMaximumBalance?: number
-  
+  /**
+   * Users can make external payments by default.
+   */
+  defaultAllowExternalPayments?: boolean
+  /**
+   * Users can make external payment requests by default.
+   */
+  defaultAllowExternalPaymentRequests?: boolean
+  /**
+   * Whether this currency supports external payments.
+   */
+  enableExternalPayments?: boolean
+  /**
+   * Whether this currency supports external payment requests.
+   */
+  enableExternalPaymentRequests?: boolean
+  /**
+   * Default accept external payments automatically
+   */
+  defaultAcceptExternalPaymentsAutomatically?: boolean
 }
 
 export type CurrencyStatus = "new" | "active"

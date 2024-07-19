@@ -16,7 +16,7 @@ describe("External transfers", async () => {
   let eAccount1: any
   let eTrustline: any
 
-  const externalPayment = async (currency: any, externalCurrency: any, payer: any, payee: any, amount: number, meta: string, state: string, auth: any, httpStatus = 201) => {
+  const externalTransfer = async (currency: any, externalCurrency: any, payer: any, payee: any, amount: number, meta: string, state: string, auth: any, httpStatus = 201) => {
     const transfer = testTransfer(payer.id, payee.id, amount, meta, state)
     if (payer.relationships.currency.data.id !== currency.id) {
       (transfer.data.relationships.payer.data as any).meta = { 
@@ -49,8 +49,8 @@ describe("External transfers", async () => {
   })
 
   await it('unsuccesful external transfer - no trust', async () => {
-    await externalPayment(t.currency, eCurrency, t.account1, eAccount1, 100, "TEST => EXTR", "committed", t.user1, 400)
-    await externalPayment(eCurrency, t.currency, eAccount1, t.account1, 100, "EXTR => TEST", "committed", eUser1, 400)
+    await externalTransfer(t.currency, eCurrency, t.account1, eAccount1, 100, "TEST => EXTR", "committed", t.user1, 400)
+    await externalTransfer(eCurrency, t.currency, eAccount1, t.account1, 100, "EXTR => TEST", "committed", eUser1, 400)
   })
 
   await it('set trust to currency', async () => {
@@ -119,7 +119,7 @@ describe("External transfers", async () => {
       retry: true
     })
 
-    const transfer = await externalPayment(t.currency, eCurrency, t.account1, eAccount1, 100, "TEST => EXTR", "committed", t.user1)
+    const transfer = await externalTransfer(t.currency, eCurrency, t.account1, eAccount1, 100, "TEST => EXTR", "committed", t.user1)
 
     const checkTransfer = (transfer: any, test: boolean) => {
       assert.equal(transfer.attributes.amount, test ? 100 : 20)
@@ -160,5 +160,76 @@ describe("External transfers", async () => {
     checkTransfer(transfer2, true)
 
   })
+
+  await it('succesful external payment request (immediate)', async () => {
+    // Enable external payment requests in both currencies
+    await t.api.patch(`/TEST/currency`, { data: { attributes: { settings: { 
+      enableExternalPaymentRequests: true,
+      defaultAllowExternalPaymentRequests: true, 
+      defaultAcceptExternalPaymentsAutomatically: true 
+    } } } }, t.admin)
+    await t.api.patch(`/EXTR/currency`, { data: { attributes: { settings: { 
+      enableExternalPaymentRequests: true,
+      defaultAllowExternalPaymentRequests: true, 
+    } } } }, eAdmin)
+
+    // EXTR <= TEST
+    const transfer = await externalTransfer(eCurrency, t.currency, t.account1, eAccount1, 20, "EXTR <= TEST", "committed", eUser1)
+    // Check balances
+    const a1 = (await t.api.get(`/TEST/accounts/${t.account1.id}`, t.user1)).body.data
+    assert.equal(a1.attributes.balance, -200)
+    const e1 = (await t.api.get(`/EXTR/accounts/${eAccount1.id}`, eUser1)).body.data
+    assert.equal(e1.attributes.balance, 40)
+    // Check transfers
+    const transfer1 = (await t.api.get('/EXTR/transfers/' + transfer.id, eUser1)).body.data
+    assert.equal(transfer1.attributes.state, "committed")
+    assert.equal(transfer1.attributes.amount, 20)
+    assert.strictEqual(transfer.relationships.payer.data.meta.external, true)
+    
+    const transfer2 = (await t.api.get('/TEST/transfers/' + transfer.id, t.user1)).body.data
+    assert.equal(transfer2.attributes.state, "committed")
+    assert.equal(transfer2.attributes.amount, 100)
+    assert.strictEqual(transfer2.relationships.payee.data.meta.external, true)
+  })
+
+  await it('succesful external payment request (approval)', async () => {
+    await t.api.patch(`/TEST/accounts/${t.account1.id}/settings`, { data: { attributes: { 
+      acceptExternalPaymentsAutomatically: false
+    }}}, t.user1)
+    // Create request EXTR <= TEST
+    const transfer = await externalTransfer(eCurrency, t.currency, t.account1, eAccount1, 20, "EXTR <= TEST", "committed", eUser1)
+    assert.equal(transfer.attributes.state, "pending")
+    
+    // Check transfers before approval
+    const transfer1 = (await t.api.get('/EXTR/transfers/' + transfer.id, eUser1)).body.data
+    assert.equal(transfer1.attributes.state, "pending")
+    assert.equal(transfer1.attributes.amount, 20)
+    assert.strictEqual(transfer.relationships.payer.data.meta.external, true)
+    
+    const transfer2 = (await t.api.get('/TEST/transfers/' + transfer.id, t.user1)).body.data
+    assert.equal(transfer2.attributes.state, "pending")
+    assert.equal(transfer2.attributes.amount, 100)
+    assert.strictEqual(transfer2.relationships.payee.data.meta.external, true)
+
+    // Approve request
+    const approved = (await t.api.patch(`/TEST/transfers/${transfer.id}`, { data: { attributes: { state: "committed" } } }, t.user1)).body.data
+    assert.equal(approved.attributes.state, "committed")
+
+    // Check balances
+    const a1 = (await t.api.get(`/TEST/accounts/${t.account1.id}`, t.user1)).body.data
+    assert.equal(a1.attributes.balance, -300)
+    const e1 = (await t.api.get(`/EXTR/accounts/${eAccount1.id}`, eUser1)).body.data
+    assert.equal(e1.attributes.balance, 60)
+
+    // Check transfer after approval
+    const approved1 = (await t.api.get('/EXTR/transfers/' + transfer.id, eUser1)).body.data
+    assert.equal(approved1.attributes.state, "committed")
+    
+    // Check transfer after approval
+    const approved2 = (await t.api.get('/TEST/transfers/' + transfer.id, t.user1)).body.data
+    assert.equal(approved2.attributes.state, "committed")
+
+  })
+
 
 })

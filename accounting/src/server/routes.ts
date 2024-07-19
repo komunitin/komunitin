@@ -107,7 +107,7 @@ export function getRoutes(controller: SharedController) {
     }, TransferSerializer, 201)
   )
 
-  router.patch('/:code/transfers/:id', userAuth(Scope.Accounting), checkExact(Validators.isUpdateTransfer()),
+  router.patch('/:code/transfers/:id', anyAuth(userAuth(Scope.Accounting), externalAuth()), checkExact(Validators.isUpdateTransfer()),
     currencyInputHandler(controller, async (currencyController, ctx, data: UpdateTransfer) => {
       return await currencyController.transfers.updateTransfer(ctx, data)
     }, TransferSerializer)

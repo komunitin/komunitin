@@ -25,6 +25,13 @@ export namespace Validators {
     body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
     body(`${path}.defaultAllowPayments`).optional().isBoolean(),
     body(`${path}.defaultAllowPaymentRequests`).optional().isBoolean(),
+    body(`${path}.externalTraderCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.externalTraderMaximumBalance`).optional().isInt({min: 0}),
+    body(`${path}.defaultAllowExternalPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowExternalPaymentRequests`).optional().isBoolean(),
+    body(`${path}.enableExternalPayments`).optional().isBoolean(),
+    body(`${path}.enableExternalPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAcceptExternalPaymentsAutomatically`).optional().isBoolean(),
     
   ]
 
@@ -170,6 +177,10 @@ export namespace Validators {
     body(`${path}.onPaymentCreditLimit`).optional().isInt({min: 0}),
     body(`${path}.allowPayments`).optional().isBoolean(),
     body(`${path}.allowPaymentRequests`).optional().isBoolean(),
+    body(`${path}.allowExternalPayments`).optional().isBoolean(),
+    body(`${path}.allowExternalPaymentRequests`).optional().isBoolean(),
+    body(`${path}.acceptExternalPaymentsAutomatically`).optional().isBoolean(),
+
   ]
 
   export const isUpdateAccountSettings = () => [
