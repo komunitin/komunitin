@@ -122,7 +122,7 @@ jobs:
 
     - name: Deploy demo.komunitin.org
       run: > 
-        ssh deploy@$demo.komunitin.org 
+        ssh deploy@demo.komunitin.org 
         "cd /opt/demo.komunitin.org
         && cd ices && git pull && cd ..
         && cd komunitin && git pull
