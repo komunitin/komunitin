@@ -5,6 +5,9 @@ import { testCurrency, testTransfer, userAuth } from "./api.data"
 import { config } from "src/config"
 import { logger } from "src/utils/logger"
 import { LedgerCurrencyController } from "src/controller/currency-controller"
+import { clearEvents, getEvents } from "./net.mock"
+import { waitFor } from "./utils"
+import { EventName } from "src/controller/features/notificatons"
 
 describe("External transfers", async () => {
   const t = setupServerTest()
@@ -228,6 +231,53 @@ describe("External transfers", async () => {
     // Check transfer after approval
     const approved2 = (await t.api.get('/TEST/transfers/' + transfer.id, t.user1)).body.data
     assert.equal(approved2.attributes.state, "committed")
+
+  })
+
+  await it('unsuccesful external payment request (rejected)', async () => {
+    clearEvents()
+    // Create request EXTR <= TEST
+    const transfer = await externalTransfer(eCurrency, t.currency, t.account1, eAccount1, 20, "EXTR <= TEST", "committed", eUser1)
+    assert.equal(transfer.attributes.state, "pending")
+    
+    let events: any[] = []
+    // Check transferPending notification
+    await waitFor(async () => {
+      events = getEvents()
+      return events.length === 2
+    }, "Expected 2 events", 500)
+    assert.equal(events[0].attributes.name, EventName.TransferPending)
+    assert.equal(events[0].attributes.code, "TEST")
+    assert.equal(events[1].attributes.name, EventName.TransferPending)
+    assert.equal(events[1].attributes.code, "EXTR")
+    
+    clearEvents()
+    const rejected = (await t.api.patch(`/TEST/transfers/${transfer.id}`, { data: { attributes: { state: "rejected" } } }, t.user1)).body.data
+    assert.equal(rejected.attributes.state, "rejected")
+    await waitFor(async () => {
+      events = getEvents()
+      return events.length === 2
+    }, "Expected 2 events", 500)
+    
+    
+    assert.equal(events[0].attributes.name, EventName.TransferRejected)
+    assert.equal(events[0].attributes.code, "TEST")
+    assert.equal(events[1].attributes.name, EventName.TransferRejected)
+    assert.equal(events[1].attributes.code, "EXTR")
+
+    // Check balances
+    const a1 = (await t.api.get(`/TEST/accounts/${t.account1.id}`, t.user1)).body.data
+    assert.equal(a1.attributes.balance, -300)
+    const e1 = (await t.api.get(`/EXTR/accounts/${eAccount1.id}`, eUser1)).body.data
+    assert.equal(e1.attributes.balance, 60)
+
+    // Check transfer after rejection
+    const rejected1 = (await t.api.get('/EXTR/transfers/' + transfer.id, eUser1)).body.data
+    assert.equal(rejected1.attributes.state, "rejected")
+    
+    // Check transfer after approval
+    const rejected2 = (await t.api.get('/TEST/transfers/' + transfer.id, t.user1)).body.data
+    assert.equal(rejected2.attributes.state, "rejected")
 
   })
 

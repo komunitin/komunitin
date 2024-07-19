@@ -416,11 +416,6 @@ export class ExternalTransferController extends AbstractCurrencyController {
           await this.transfers().saveTransferState(transfer, "failed")
           throw e
         }
-        // Notify the external server about the transfer if the action was initiated locally. 
-        // If the action was initiated by the external server, the request response will do the job.
-        if (ctx.type !== "external") {
-          await this.notifyTransferExternalPayee(ctx, transfer, isUpdate)
-        }
       } else if (ctx.type === "external") {
         // In case the transfer was externally initiated but not immediately submitted, save it as 
         // "pending" waiting for the payer to approve it.
@@ -429,8 +424,13 @@ export class ExternalTransferController extends AbstractCurrencyController {
         throw forbidden("User is not allowed to commit this external transfer")
       }
     } else if (state ===  "rejected") {
-      
       await this.transfers().saveTransferState(transfer, "rejected")
+    }
+    
+    // Notify the external server about the transfer if the action was initiated locally. 
+    // If the action was initiated by the external server, the request response will do the job.
+    if (ctx.type !== "external") {
+      await this.notifyTransferExternalPayee(ctx, transfer, isUpdate)
     }
   }
 

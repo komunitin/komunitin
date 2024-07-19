@@ -6,13 +6,13 @@ import { Relator, Serializer } from "ts-japi";
 import { UserSerializer } from "src/server/serialize";
 import { fixUrl } from "src/utils/net";
 
-enum EventName {
+export enum EventName {
   TransferCommitted = "TransferCommitted",
   TransferPending = "TransferPending",
   TransferRejected = "TransferRejected",
 }
 
-type Event = {
+export type Event = {
   name: EventName
   source: string
   time: string
