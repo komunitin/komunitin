@@ -24,7 +24,7 @@ export default defineComponent({
     }
   },
   computed: {
-    header() {
+    header(): string {
       return this.text == "" ? this.$t('nothingHere') : this.text;
     }
   }

@@ -19,7 +19,6 @@
       >
         {{ member.attributes.name }}
       </q-item-label>
-      <!-- Offer updated date -->
       <q-item-label caption>
         <slot name="caption">
           {{ account }}

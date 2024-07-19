@@ -1,21 +1,24 @@
 import { before, after } from "node:test"
-import { client } from "./net.client"
-import { clearEvents, server } from "./net.mock"
+import { TestApiClient, client } from "./net.client"
+import { clearEvents, startServer, stopServer } from "./net.mock"
 import { clearDb } from "./db"
 import { createApp, closeApp, ExpressExtended } from "../../src/server/app"
 import { testAccount, testCurrency, testTransfer, userAuth } from "./api.data"
 
+type UserAuth = ReturnType<typeof userAuth>
+
 interface TestSetup {
   app: ExpressExtended,
-  api: ReturnType<typeof client>,
-  createAccount: (user: string) => Promise<any>,
+  api: TestApiClient,
+  createAccount: (user: string, code?: string, admin?: UserAuth) => Promise<any>,
   payment: (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus?: number) => Promise<any>,
 }
 
 interface TestSetupWithCurrency extends TestSetup {
-  admin: ReturnType<typeof userAuth>,
-  user1: ReturnType<typeof userAuth>,
-  user2: ReturnType<typeof userAuth>,
+  admin: UserAuth,
+  user1: UserAuth,
+  user2: UserAuth,
+  currency: any,
   account0: any,
   account1: any,
   account2: any,
@@ -28,16 +31,17 @@ export function setupServerTest(): TestSetupWithCurrency;
 export function setupServerTest(createData: boolean = true): TestSetupWithCurrency {
   const test = {
     app: undefined as any as ExpressExtended,
-    api: undefined as any as ReturnType<typeof client>,
+    api: undefined as any as TestApiClient,
     admin: userAuth("0"),
     user1: userAuth("1"),
     user2: userAuth("2"),
+    currency: undefined as any,
     account0: undefined as any,
     account1: undefined as any,
     account2: undefined as any,
 
-    createAccount: async (user: string) => {
-      const response = await test.api?.post('/TEST/accounts', testAccount(user), test.admin)
+    createAccount: async (user: string, code = "TEST", admin = userAuth("0")) => {
+      const response = await test.api?.post(`/${code}/accounts`, testAccount(user), admin)
       return response.body.data
     },
 
@@ -51,12 +55,13 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
     await clearDb()
     test.app = await createApp()
     test.api = client(test.app)
-    server.listen({ onUnhandledRequest: "bypass" })
+    startServer(test.app)
     clearEvents()
 
     if (createData) {
       // Create currency TEST
-      await test.api.post('/currencies', testCurrency(), test.admin)
+      const currency = await test.api.post('/currencies', testCurrency(), test.admin)
+      test.currency = currency.body.data
       // Create 3 accounts
       test.account0 = await test.createAccount(test.admin.user)
       test.account1 = await test.createAccount(test.user1.user)
@@ -65,7 +70,7 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
   })
 
   after(async () => {
-    server.close()
+    stopServer()
     if (test.app) {
       await closeApp(test.app)
     }

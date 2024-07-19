@@ -10,6 +10,10 @@ export interface CurrencyFormat {
    * Whether to apply the currency scale so the input value in an integer. Default to true.
    */
   scale?: boolean;
+  /**
+   * Whether to use the currency symbol. Default to true.
+   */
+  symbol?: boolean;
 }
 
 /**
@@ -28,10 +32,12 @@ export default function formatCurrency(
   // Decimals and scale are true if undefined.
   const decimals = options?.decimals ?? true;
   const scale = options?.scale ?? true;
+  const symbol = options?.symbol ?? true;
+
   if (scale) {
     amount = amount / 10 ** currency.attributes.scale;
   }
-  const amountString = decimals
+  let amountString = decimals
     ? n(amount, {
       minimumFractionDigits: currency.attributes.decimals,
       maximumFractionDigits: currency.attributes.decimals,
@@ -39,10 +45,13 @@ export default function formatCurrency(
     : n(amount);
 
   // Append or prepend the currency symbol depending on the locale.
-  const sampleCurrency = n(1, {style: 'currency', currency: 'USD'})
-  return sampleCurrency.startsWith('1') 
-    ? `${amountString}${currency.attributes.symbol}` 
-    : `${currency.attributes.symbol}${amountString}`
+  if (symbol) {
+    const sampleCurrency = n(1, {style: 'currency', currency: 'USD'})
+    amountString = sampleCurrency.startsWith('1') 
+      ? `${amountString}${currency.attributes.symbol}` 
+      : `${currency.attributes.symbol}${amountString}` 
+  }
+  return amountString;
 }
 
 /**
@@ -60,4 +69,14 @@ export function formatPrice(price: string, currency: Currency, options?: Currenc
   } else {
     return price
   }
+}
+
+/**
+ * Convert numeric amount from one currency to another. The result must then be formatted
+ * with the target currency.
+ */
+export function convertCurrency(amount: number, from: Currency, to: Currency): number {
+  return amount 
+    * (from.attributes.rate.n / from.attributes.rate.d)
+    * (to.attributes.rate.d / to.attributes.rate.n)
 }

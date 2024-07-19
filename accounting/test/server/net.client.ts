@@ -57,3 +57,5 @@ export function client(app: Express) {
     }
   }
 }
+
+export type TestApiClient = ReturnType<typeof client>

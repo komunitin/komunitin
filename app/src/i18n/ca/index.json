@@ -247,7 +247,7 @@
   "createTransactionText": "Omple els camps següents per crear una transferència entre dos comptes.",
   "sendPaymentText": "Selecciona el membre a qui vols pagar, una descripció i la quantitat que vols transferir des del teu compte.",
   "receivePaymentText": "Selecciona el membre que et paga, una descripció i la quantitat que vols rebre al teu compte.",
-  "selectPayee": "Selecciona el pagador o pagadora",
+  "selectPayee": "Selecciona destinatari",
   "send": "Enviar",
   "receive": "Rebre",
 

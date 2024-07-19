@@ -177,6 +177,8 @@ export default defineComponent({
     this.ready = true
     // Refresh results if search query change.
     this.$watch(() => this.query, (newQuery: string) => this.fetchResources(newQuery))
+    // Refresh results if code changes.
+    this.$watch(() => this.code, () => this.fetchResources(this.query))
   },
   methods: {
     /**

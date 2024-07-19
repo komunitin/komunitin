@@ -131,7 +131,7 @@ async function migrateAccounts(ctx: Context, controller: CurrencyController, mig
         acceptPaymentsAutomatically: settings.attributes.acceptPaymentsAutomatically,
       }
     }
-    const account = await controller.createAccount(ctx, model)
+    const account = await controller.accounts.createAccount(ctx, model)
     accounts.push(account)
   }
   return accounts
@@ -156,15 +156,15 @@ async function migrateTransfers(ctx: Context, controller: CurrencyController, mi
       amount: transfer.attributes.amount,
       meta: transfer.attributes.meta,
       state: transfer.attributes.state,
-      payer: transfer.relationships.payer.data.id as string,
-      payee: transfer.relationships.payee.data.id as string,
+      payer: transfer.relationships.payer.data,
+      payee: transfer.relationships.payee.data,
       // TODO (or not): migrate user
       user: currency.admin as User,
       // TODO: migrate created/updated transfers.
       //created: new Date(transfer.attributes.created),
       //updated: new Date(transfer.attributes.updated)
     }
-    migrated.push(await controller.createTransfer(ctx, model))
+    migrated.push(await controller.transfers.createTransfer(ctx, model))
   }
   return migrated
 }

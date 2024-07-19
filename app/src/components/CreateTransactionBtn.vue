@@ -31,7 +31,7 @@
   </q-page-sticky>
 </template>
 <script lang="ts" setup>
-import { AccountSettings } from 'src/store/model'
+import { AccountSettings, Currency } from 'src/store/model'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 
@@ -41,9 +41,15 @@ const myMember = computed(() => store.getters.myMember)
 const myAccount = computed(() => store.getters.myAccount)
 
 const settings = computed<AccountSettings>(() => myAccount.value.settings)
-const currency = computed(() => myAccount.value.currency)
+const currency = computed<Currency>(() => myAccount.value.currency)
 
-const allowPayments = computed(() => settings.value.attributes.allowPayments ?? currency.value.attributes.settings.defaultAllowPayments)
-const allowPaymentRequests = computed(() => settings.value.attributes.allowPaymentRequests ?? currency.value.attributes.settings.defaultAllowPaymentRequests)
+const allowPayments = computed(() => 
+  settings.value.attributes.allowPayments ?? 
+  currency.value.attributes.settings.defaultAllowPayments
+)
+const allowPaymentRequests = computed(() => 
+  settings.value.attributes.allowPaymentRequests ?? 
+  currency.value.attributes.settings.defaultAllowPaymentRequests
+)
 
 </script>

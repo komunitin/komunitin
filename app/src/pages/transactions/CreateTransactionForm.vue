@@ -9,25 +9,27 @@
           {{ text }}
         </div>
       </div>
-      <select-member
+      <select-account
         v-if="selectPayer"
-        v-model="payerMember"  
+        v-model="payerAccount"  
         name="payer"
         :code="code"
+        :payer="true"
         :label="$t('selectPayer')"
         :hint="$t('transactionPayerHint')"
-        :rules="[() => !v$.payerMember?.$error || $t('payerRequired')]"
-        @close-dialog="v$.payerMember?.$touch()"
+        :rules="[() => !v$.payerAccount?.$error || $t('payerRequired')]"
+        @close-dialog="v$.payerAccount?.$touch()"
       />
-      <select-member
+      <select-account
         v-if="selectPayee"
-        v-model="payeeMember"  
+        v-model="payeeAccount"  
         name="payee"
         :code="code"
+        :payer="false"
         :label="$t('selectPayee')"
         :hint="$t('transactionPayeeHint')"
-        :rules="[() => !v$.payeeMember?.$error || $t('payeeRequired')]"
-        @close-dialog="v$.payeeMember?.$touch()"
+        :rules="[() => !v$.payeeAccount?.$error || $t('payeeRequired')]"
+        @close-dialog="v$.payeeAccount?.$touch()"
       />
       <q-input 
         v-model="concept"
@@ -46,7 +48,7 @@
       <q-input 
         v-model="amount"
         name="amount"
-        :label="$t('amountIn', {currency: currency.attributes.namePlural})"
+        :label="$t('amountIn', {currency: myCurrency.attributes.namePlural})"
         :hint="$t('transactionAmountHint')"
         outlined
         required
@@ -55,7 +57,19 @@
         ]"
       >
         <template #append>
-          <span class="text-h6 text-onsurface-m">{{ currency.attributes.symbol }}</span>
+          <span class="text-h6 text-onsurface-m">{{ myCurrency.attributes.symbol }}</span>
+        </template>
+      </q-input>
+      <q-input
+        v-if="otherCurrency"
+        :model-value="otherAmount"
+        readonly
+        disabled
+        outlined
+        :label="$t('amountIn', {currency: otherCurrency.attributes.namePlural})"
+      >
+        <template #append>
+          <span class="text-h6 text-onsurface-m">{{ otherCurrency.attributes.symbol }}</span>
         </template>
       </q-input>
       <q-btn
@@ -69,23 +83,24 @@
   </q-form>
 </template>
 <script setup lang="ts">
-import { ref, computed } from "vue"
 import { useVuelidate } from "@vuelidate/core"
 import { minValue, numeric, required } from "@vuelidate/validators"
-import { Member, Account, Currency, Transfer } from "src/store/model"
-import KError, { KErrorCode } from "src/KError"
-import { v4 as uuid } from "uuid"
 import { DeepPartial } from "quasar"
-import SelectMember from "src/components/SelectMember.vue"
+import KError, { KErrorCode } from "src/KError"
+import SelectAccount from "src/components/SelectAccount.vue"
+import formatCurrency, { convertCurrency } from "src/plugins/FormatCurrency"
+import { Account, Currency, ExternalRelatedResource, Member, Transfer } from "src/store/model"
+import { v4 as uuid } from "uuid"
+import { computed, ref } from "vue"
+import { useStore } from "vuex"
 
 const props = defineProps<{
   modelValue: DeepPartial<Transfer> | undefined,
   code: string,
   selectPayer: boolean,
-  payerMember?: Member & {account: Account},
+  payerAccount?: Account & {currency: Currency, member?: Member},
   selectPayee: boolean,
-  payeeMember?: Member & {account: Account},
-  currency: Currency,
+  payeeAccount?: Account & {currency: Currency, member?: Member},
   text: string,
   submitLabel: string
 }>()
@@ -99,47 +114,84 @@ const transfer = computed({
   set: (value) => emit('update:modelValue', value as DeepPartial<Transfer>)
 })
 
-const payerMember = ref<Member & {account: Account} | undefined>(props.payerMember)
-const payeeMember = ref<Member & {account: Account} | undefined>(props.payeeMember)
+const payerAccount = ref(props.payerAccount)
+const payeeAccount = ref(props.payeeAccount)
 const concept = ref("")
 const amount = ref<number>()
 
 // Validation.
-const isMember = (member: Member|undefined) => (member && member.id !== undefined)
+const isAccount = (member: Account|undefined) => (member && member.id !== undefined)
 
 const rules = computed(() => ({
-  ...(props.selectPayer && {payerMember: {isMember}}),
-  ...(props.selectPayee && {payeeMember: {isMember}}),
+  ...(props.selectPayer && {payerAccount: {isAccount}}),
+  ...(props.selectPayee && {payeeAccount: {isAccount}}),
   concept: { required },
   amount: { required, numeric, nonNegative: minValue(0)}
 }))
 
 const v$ = useVuelidate(rules, {
-  ...(props.selectPayer && {payerMember}),
-  ...(props.selectPayee && {payeeMember}),
+  ...(props.selectPayer && {payerAccount}),
+  ...(props.selectPayee && {payeeAccount}),
   concept, 
   amount
 });
 
+const store = useStore()
+const myCurrency = computed(() => store.getters.myAccount.currency)
+
+const otherCurrency = computed(() =>  {
+  if (props.selectPayer && payerAccount.value && payerAccount.value.currency.id !== myCurrency.value.id) {
+    return payerAccount.value.currency
+  } else if (props.selectPayee && payeeAccount.value && payeeAccount.value.currency.id !== myCurrency.value.id) {
+    return payeeAccount.value.currency
+  }
+  return null
+})
+
+const otherAmount = computed(() => {
+  if (otherCurrency.value && amount.value) {
+    const num = convertCurrency(amount.value, myCurrency.value, otherCurrency.value)
+    return formatCurrency(num, otherCurrency.value, {symbol: false, scale: false})
+  } else {
+    return null
+  }
+})
+
 const onSubmit = () => {
-  if (!payerMember.value?.account || !payeeMember.value?.account) {
+  if (!payerAccount.value || !payeeAccount.value) {
     throw new KError(KErrorCode.ScriptError, "Both payer and payee must be defined before submit.")
   }
+  if (amount.value === undefined) {
+    throw new KError(KErrorCode.ScriptError, "Amount must be defined before submit.")
+  }
+
+  const transferAmount = amount.value * Math.pow(10, myCurrency.value.attributes.scale)
+
+  const accountRelationship = (account: Account & {currency: Currency}) => {
+    const relationship = {data: {type: "accounts", id: account.id}} as ExternalRelatedResource
+    if (account.currency.id !== myCurrency.value.id) {
+      relationship.data.meta = {
+        external: true,
+        href: account.links.self
+      }
+    }
+    return relationship
+  }
+
   // Build transfer object
   transfer.value = {
     id: uuid(),
     type: "transfers",
     attributes: {
-      amount: (amount.value as number) * Math.pow(10, props.currency.attributes.scale),
+      amount: transferAmount,
       meta: concept.value,
       state: "new",
       created: new Date().toUTCString(),
       updated: new Date().toUTCString(),
     },
     relationships: {
-      payer: {data: {type: "accounts", id: payerMember.value.account.id}},
-      payee: {data: {type: "accounts", id: payeeMember.value.account.id}},
-      currency: {data: {type: "currencies", id: props.currency.id}}
+      payer: accountRelationship(payerAccount.value),
+      payee: accountRelationship(payeeAccount.value),
     }
   };
 }

@@ -1,6 +1,6 @@
 import { Scope } from "src/server/auth"
 
-export const testCurrency = () => ({
+export const testCurrency = (props?: any) => ({
   data: {
     type: "currencies",
     attributes: {
@@ -12,8 +12,10 @@ export const testCurrency = () => ({
       scale: 4,
       rate: {n: 1, d: 10},
       settings: {
-        defaultInitialCreditLimit: 1000
-      }
+        defaultInitialCreditLimit: 1000,
+        ...(props?.settings)
+      },
+      ...props
     }
   }
 })

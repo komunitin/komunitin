@@ -8,9 +8,8 @@
       <div class="text-overline text-uppercase text-onsurface-d q-pl-md">
         {{ $t("payer") }}
       </div>
-      <member-header
-        :member="transfer.payer.member"
-        :to="`/groups/${code}/members/${transfer.payer.member.attributes.code}`"
+      <account-header
+        :account="transfer.payer"
       />
     </q-card-section>
     <q-separator />
@@ -19,9 +18,8 @@
       <div class="text-overline text-uppercase text-onsurface-d q-pl-md">
         {{ $t("payee") }}
       </div>
-      <member-header
-        :member="transfer.payee.member"
-        :to="`/groups/${code}/members/${transfer.payee.member.attributes.code}`"
+      <account-header
+        :account="transfer.payee"
       />
     </q-card-section>
     <q-separator />
@@ -31,9 +29,15 @@
         class="text-h4"
         :class="positive ? 'positive-amount' : 'negative-amount'"
       >
-        {{ FormatCurrency((positive ? 1 : -1) * transfer.attributes.amount, transfer.currency) }}
+        {{ FormatCurrency((positive ? 1 : -1) * transfer.attributes.amount, myCurrency) }}
+        <span 
+          v-if="otherCurrency && otherAmount" 
+          class="text-h5 text-onsurface-m"
+        >
+          ({{ FormatCurrency((positive ? 1 : -1) * otherAmount, otherCurrency) }})
+        </span>
       </div>
-      <div class="text-subtitle1 text-onsurface-d">
+      <div class="text-subtitle1 text-onsurface-m">
         {{ $formatDate(transfer.attributes.updated) }}
       </div>
       <div class="text-body1">
@@ -44,67 +48,76 @@
     <q-card-section class="text-body2">
       <!-- details -->
       <div><span class="text-onsurface-d">{{ $t("state") }}</span><span class="q-pl-sm">{{ state }}</span></div>
-      <div><span class="text-onsurface-d">{{ $t("group") }}</span><span class="q-pl-sm">{{ group.attributes.name }}</span></div>
+      <div><span class="text-onsurface-d">{{ $t("group") }}</span><span class="q-pl-sm">{{ payerGroup.attributes.name }}</span></div>
     </q-card-section>
     <slot />
   </q-card>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import KError, { KErrorCode } from "src/KError";
-import { computed, defineComponent } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStore } from "vuex";
-import MemberHeader from "./MemberHeader.vue"
-import FormatCurrency from "../plugins/FormatCurrency"
-export default defineComponent({
-  components: {
-    MemberHeader
-  },
-  props: {
-    transfer: {
-      type: Object,
-      required: true,
-    }
-  },
-  setup(props) {
-    // Store
-    const store = useStore()
-    const myAccount = store.getters.myAccount
+import AccountHeader from "./AccountHeader.vue"
+import FormatCurrency, { convertCurrency } from "../plugins/FormatCurrency"
+import { ExtendedTransfer } from "src/store/model";
 
-    // Note that when the current account is neither the payer nor the payee,
-    // the amount is considered as positive.
-    const positive = computed(() => {
-      return props.transfer.payer.id != myAccount.id;
-    });
+const props = defineProps<{
+  transfer: ExtendedTransfer
+}>()
 
-    const { t } = useI18n()
+// Store
+const store = useStore()
+const myAccount = store.getters.myAccount
 
-    const state = computed(() => {
-      const state = props.transfer.attributes.state
-      switch(state) {
-        case "new":
-          return t("new").toString();
-        case "pending":
-          return t("pending").toString();
-        case "accepted":
-          return t("accepted").toString();
-        case "committed":
-          return t("committed").toString();
-        case "rejected":
-          return t("rejected").toString();
-        case "deleted":
-          return t("deleted").toString();
-      }
-      throw new KError(KErrorCode.InvalidTransferState);
-    })
+// Note that when the current account is neither the payer nor the payee,
+// the amount is considered as positive.
+const positive = computed(() => {
+  return props.transfer.payer.id != myAccount.id;
+});
 
-    const group = computed(() => props.transfer.payee.member.group)
+const { t } = useI18n()
 
-    // We are using this code to build the member links. Not really sure if this 
-    // is reliable. Otherways we could load the group from the member and get the code.
-    const code = computed(() => group.value.attributes.code)
+const state = computed(() => {
+  const state = props.transfer.attributes.state
+  switch (state) {
+    case "new":
+      return t("new").toString();
+    case "pending":
+      return t("pending").toString();
+    case "accepted":
+      return t("accepted").toString();
+    case "committed":
+      return t("committed").toString();
+    case "rejected":
+      return t("rejected").toString();
+    case "deleted":
+      return t("deleted").toString();
+  }
+  throw new KError(KErrorCode.InvalidTransferState);
+})
 
-    return {FormatCurrency, positive, state, group, code}
+const payerGroup = computed(() => props.transfer.payer.member.group)
+const payerCurrency = computed(() => props.transfer.payer.currency)
+
+const payeeCurrency = computed(() => props.transfer.payee.currency)
+
+const myCurrency = computed(() => myAccount.currency)
+
+const otherCurrency = computed(() => {
+  if (myCurrency.value.id == payerCurrency.value.id) {
+    return payeeCurrency.value.id == myCurrency.value.id ? null : payeeCurrency.value;
+  } else {
+    // We're assuming that the user has the same currency as one of the two.
+    return payerCurrency.value.id == myCurrency.value.id ? null : payerCurrency.value;
   }
 })
+
+const otherAmount = computed(() => {
+  if (otherCurrency.value) {
+    return convertCurrency(props.transfer.attributes.amount, myCurrency.value, otherCurrency.value);
+  }
+  return null;
+})
+
 </script>
