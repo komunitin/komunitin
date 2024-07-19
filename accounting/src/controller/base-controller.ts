@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { AccountType, PrismaClient } from "@prisma/client"
 import { Keypair } from "@stellar/stellar-sdk"
 import cron from "node-cron"
 import { KeyObject } from "node:crypto"
@@ -14,10 +14,12 @@ import { friendbot } from "../ledger/stellar/friendbot"
 import { CreateCurrency, Currency, currencyToRecord, recordToCurrency } from "../model/currency"
 import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
 import { logger } from "../utils/logger"
-import { LedgerCurrencyController, storeCurrencyKey } from "./currency-controller"
+import { LedgerCurrencyController, amountToLedger } from "./currency-controller"
 import { initUpdateCreditOnPayment } from "./features/credit-on-payment"
 import { initNotifications } from "./features/notificatons"
+import { initLedgerListener } from "./ledger-listener"
 import { PrivilegedPrismaClient, TenantPrismaClient, privilegedDb, tenantDb } from "./multitenant"
+import { storeCurrencyKey } from "./key-controller"
 
 
 export async function createController(): Promise<BaseController> {
@@ -72,6 +74,8 @@ const currencyConfig = (currency: CreateCurrency): LedgerCurrencyConfig => {
   return {
     code: currency.code,
     rate: currency.rate,
+    externalTraderInitialCredit: amountToLedger(currency, currency.settings.externalTraderCreditLimit as number),
+    externalTraderMaximumBalance: currency.settings.externalTraderMaximumBalance ? amountToLedger(currency, currency.settings.externalTraderMaximumBalance) : undefined
   }
 }
 
@@ -114,15 +118,10 @@ export class LedgerController implements BaseController {
       async (currency) => {
         const code = currency.asset().code
         const controller = await this.getCurrencyController(code)
-        return controller.externalTraderKey()
+        return controller.keys.externalTraderKey()
       })
-
-    // Save the state of the currency in the DB when it changes.
-    this.ledger.addListener("stateUpdated", async (currency, state) => {
-      const code = currency.asset().code
-      const controller = await this.getCurrencyController(code)
-      await controller.updateState(state)
-    })
+    
+    initLedgerListener(this)
 
     // Feature: update credit limit on received payments (for enabled currencies and accounts)
     initUpdateCreditOnPayment(this)
@@ -171,11 +170,18 @@ export class LedgerController implements BaseController {
       // defaultInitialCreditLimit: 0,
       defaultInitialMaximumBalance: undefined,
       defaultAcceptPaymentsAutomatically: false,
-      defaultAcceptPaymentsAfter: 15*24*60*60, // 15 days,
       defaultAcceptPaymentsWhitelist: [],
+      defaultAcceptPaymentsAfter: 15*24*60*60, // 15 days,
       defaultOnPaymentCreditLimit: undefined,
       defaultAllowPayments: true,
       defaultAllowPaymentRequests: true,
+      externalTraderCreditLimit: currency.settings.defaultInitialCreditLimit,
+      externalTraderMaximumBalance: undefined,
+      defaultAllowExternalPayments: true,
+      defaultAllowExternalPaymentRequests: false,
+      enableExternalPayments: true,
+      enableExternalPaymentRequests: false,
+      defaultAcceptExternalPaymentsAutomatically: false,
       ...currency.settings
     }
 
@@ -186,7 +192,7 @@ export class LedgerController implements BaseController {
     // Use logged in user as admin if not provided.
     const admin = currency.admin?.id ?? ctx.userId
     // Check that the user is not already being used in other tenant.
-    const user = await this.privilegedDb().user.findUnique({where: { id: admin }})
+    const user = await this.privilegedDb().user.findFirst({where: { id: admin }})
     if (user) {
       throw badRequest(`User ${admin} is already being used in another tenant`)
     }
@@ -202,7 +208,12 @@ export class LedgerController implements BaseController {
         },
         admin: {
           connectOrCreate: {
-            where: { id: admin },
+            where: { 
+              tenantId_id: {
+                id: admin,
+                tenantId: db.tenantId
+              }
+            },
             create: { id: admin }
           }
         }
@@ -224,13 +235,35 @@ export class LedgerController implements BaseController {
       externalIssuerKeyId: await storeKey(keys.externalIssuer),
       externalTraderKeyId: await storeKey(keys.externalTrader)
     }
-    
+
+    // Create the virtual local account for external transactions
+    const externalAccountRecord = await db.account.create({
+      data: {
+        code: `${inputRecord.code}EXTR`,
+        type: AccountType.virtual,
+        status: "active",
+        balance: 0,
+        creditLimit: 0,
+        key: { connect: { id: currencyKeyIds.externalTraderKeyId }},
+        settings: {
+          allowPayments: false,
+          allowPaymentRequests: false
+        },
+        currency: { connect: { id: record.id }},
+        // no users for virtual account.
+      }
+    })
+
     // Update the currency record in DB
     record = await db.currency.update({
       where: { id: record.id },
       data: {
         status: "active",
-        ...currencyKeyIds
+        ...currencyKeyIds,
+        externalAccountId: externalAccountRecord.id
+      },
+      include: {
+        externalAccount: true
       }
     })
 
@@ -247,7 +280,12 @@ export class LedgerController implements BaseController {
   }
 
   private async loadCurrency(code: string): Promise<Currency> {
-    const record = await this.tenantDb(code).currency.findUnique({where: { code }})
+    const record = await this.tenantDb(code).currency.findUnique({
+      where: { code },
+      include: {
+        externalAccount: true
+      }
+    })
     if (!record) {
       throw notFound(`Currency with code ${code} not found`)
     }

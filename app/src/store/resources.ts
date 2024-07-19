@@ -120,7 +120,7 @@ export interface LoadListPayload {
 /**
  * Object argument for the `load` action.
  */
-export interface LoadPayload {
+interface LoadByCodePayload {
   /**
    * The resource code.
    */
@@ -134,6 +134,19 @@ export interface LoadPayload {
    */
   include?: string;
 }
+
+interface LoadByUrlPayload {
+  /**
+   * The resource group. We still need that even if loading from URL
+   */
+  group: string;
+  /**
+   * The resource URL.
+   */
+  url: string;
+}
+
+export type LoadPayload = LoadByCodePayload | LoadByUrlPayload;
 
 /**
  * Payload for the `loadNext` action.
@@ -753,11 +766,14 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: LoadPayload
   ) {
     let id = null
-    // transaction code is the resource id.
-    if (context.state.resources[payload.code]) {
+    if ("url" in payload) {
+      // In case of load by url, don't use the cache. We could try to 
+      // get the id and/or code from the url.
+    } else if (context.state.resources[payload.code]) {
+      // payload.code is sometimes just the resource id.
       id = payload.code
     } else {
-    // in other resources the code is an attribute.
+      // and sometimes the code attribute.
       const cached = context.getters['find']({
         code: payload.code,
       })
@@ -766,6 +782,20 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       }
     }
     context.commit("currentId", id)
+  }
+  protected resourceUrl(payload: LoadPayload) {
+    let url: string
+    if ("url" in payload) {
+      url = payload.url
+    } else {
+      url = this.resourceEndpoint(payload.code, payload.group)
+      if (payload.include) {
+        const params = new URLSearchParams();
+        params.set("include", payload.include);
+        url += "?" + params.toString();
+      }
+    }
+    return url
   }
   /**
    * Fetches the current reaource.
@@ -779,17 +809,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     this.loadCached(context, payload)
     
     // Fetch (or revalidate) the content.
-    let url = this.resourceEndpoint(payload.code, payload.group);
-    if (payload.include) {
-      const params = new URLSearchParams();
-      params.set("include", payload.include);
-      url += "?" + params.toString();
-    }
+    const url = this.resourceUrl(payload);
     // Call API
     try {
       const data = await this.request(context, url);
+      const resource = (Array.isArray(data.data) && data.data.length == 1) 
+        ? data.data[0] 
+        : data.data
       // Commit mutation(s).
-      this.setCurrent(context, data.data)
+      this.setCurrent(context, resource)
       if (data.included) {
         await Resources.handleIncluded(
           data.included,

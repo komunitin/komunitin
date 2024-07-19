@@ -3,13 +3,14 @@ import { LedgerCurrencyState } from "../ledger";
 import { Rate } from "../utils/types";
 import { Currency as CurrencyRecord, Prisma } from "@prisma/client"
 import { User } from "./user";
+import { Account, AccountRecord, recordToAccount } from "./account";
 
 
 export { CurrencyRecord }
 
 export type CurrencySettings = {
   /**
-   * The credit limit that will have new qccounts by default.
+   * The credit limit that will have new accounts by default.
    */
   defaultInitialCreditLimit: number
   /**
@@ -35,13 +36,41 @@ export type CurrencySettings = {
    */
   defaultOnPaymentCreditLimit?: number
   /**
-   * Users can perform payments by default.
+   * Users can make payments by default.
    */
   defaultAllowPayments?: boolean
   /**
-   * Users can request payments by default.
+   * Users can make payment requests by default.
    */
   defaultAllowPaymentRequests?: boolean
+  /**
+   * The credit limit in local currency that the external trader account will have.
+   */
+  externalTraderCreditLimit?: number
+  /**
+   * The maximum balance in local currency that the external trader account may have.
+   */
+  externalTraderMaximumBalance?: number
+  /**
+   * Users can make external payments by default.
+   */
+  defaultAllowExternalPayments?: boolean
+  /**
+   * Users can make external payment requests by default.
+   */
+  defaultAllowExternalPaymentRequests?: boolean
+  /**
+   * Whether this currency supports external payments.
+   */
+  enableExternalPayments?: boolean
+  /**
+   * Whether this currency supports external payment requests.
+   */
+  enableExternalPaymentRequests?: boolean
+  /**
+   * Default accept external payments automatically
+   */
+  defaultAcceptExternalPaymentsAutomatically?: boolean
 }
 
 export type CurrencyStatus = "new" | "active"
@@ -64,13 +93,15 @@ export interface Currency {
 
   encryptionKey: string
 
-  keys?: {
-    issuer: string,
-    credit: string,
-    admin: string,
-    externalTrader: string,
+  keys: {
+    issuer: string
+    credit: string
+    admin: string
+    externalTrader: string
     externalIssuer: string
   }
+
+  externalAccount: Account
 
   settings: CurrencySettings
   state: LedgerCurrencyState
@@ -104,8 +135,8 @@ export function currencyToRecord(currency: CreateCurrency | UpdateCurrency): Pri
   }
 }
 
-export const recordToCurrency = (record: CurrencyRecord): Currency => {
-  return {
+export const recordToCurrency = (record: CurrencyRecord & {externalAccount?: AccountRecord | null }): Currency => {
+  const currency = {
     id: record.id,
     code: record.code,
     status: record.status as Currency["status"],
@@ -118,13 +149,13 @@ export const recordToCurrency = (record: CurrencyRecord): Currency => {
     rate: { n: record.rateN, d: record.rateD },
     
     encryptionKey: record.encryptionKeyId,
-    keys: record.issuerKeyId ? {
+    keys: {
       issuer: record.issuerKeyId as string,
       credit: record.creditKeyId as string,
       admin: record.adminKeyId as string,
       externalTrader: record.externalTraderKeyId as string,
       externalIssuer: record.externalIssuerKeyId as string
-    } : undefined,
+    },
     
     settings: record.settings as CurrencySettings,
     state: record.state as LedgerCurrencyState,
@@ -134,6 +165,11 @@ export const recordToCurrency = (record: CurrencyRecord): Currency => {
 
     admin: {
       id: record.adminId
-    }
+    },
+  } as Currency
+  
+  if (record.externalAccount) {
+    currency.externalAccount = recordToAccount(record.externalAccount, currency)
   }
+  return currency
 }

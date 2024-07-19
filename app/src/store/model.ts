@@ -7,7 +7,15 @@ export interface ResourceIdentifierObject {
   type: string;
   id: string;
 }
-export type Relationship = RelatedResource | RelatedLinkedCollection | RelatedCollection ;
+
+export interface ExternalResourceIdentifierObject extends ResourceIdentifierObject {
+  meta: {
+    external: true
+    href: string
+  }
+}
+
+export type Relationship = ExternalRelatedResource | RelatedResource | RelatedLinkedCollection | RelatedCollection ;
 export interface ResourceObject extends ResourceIdentifierObject {
   links: {
     self: string;
@@ -112,6 +120,13 @@ export interface RelatedResource {
     related: string;
   },
   data: ResourceIdentifierObject
+}
+
+export interface ExternalRelatedResource {
+  links?: {
+    related: string;
+  },
+  data: ExternalResourceIdentifierObject
 }
 
 /**
@@ -308,7 +323,22 @@ export interface Currency extends ResourceObject {
     symbol: string;
     decimals: number;
     scale: number;
+    /**
+     * @deprecated Use rate instead.
+     */
     value: number;
+    
+    rate: {
+      n: number,
+      d: number
+    }
+    settings: {
+      defaultAllowPayments?: boolean
+      defaultAllowPaymentRequests?: boolean
+
+      enableExternalPayments?: boolean
+      enableExternalPaymentRequests?: boolean
+    }
   };
 }
 
@@ -335,8 +365,13 @@ export interface Account extends ResourceObject {
 export interface AccountSettings extends ResourceObject {
   attributes: {
     acceptPaymentsAutomatically: boolean,
+    
     allowPayments?: boolean,
     allowPaymentRequests?: boolean,
+
+    allowExternalPayments?: boolean,
+    allowExternalPaymentRequests?: boolean,
+
   }
   relationships: {
     account: RelatedResource
@@ -364,11 +399,11 @@ export interface Transfer extends ResourceObject {
 export interface ExtendedTransfer extends Transfer {
   payer: ExtendedAccount;
   payee: ExtendedAccount;
-  currency: Currency
 }
 
 export interface ExtendedAccount extends Account {
-  member: Member;
+  member: Member & {group: Group}
+  currency: Currency
 }
 
 /**

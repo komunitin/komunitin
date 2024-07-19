@@ -26,7 +26,7 @@ export default {
         "/" +
         account.currency.code +
         "/accounts/" +
-        account.code
+        account.id
     }),
     accountSettings: ApiSerializer.extend({
       selfLink: (model: any) => urlAccounting + "/" + 
@@ -58,7 +58,6 @@ export default {
     transfer: Model.extend({
       payer: belongsTo("account", {inverse: null}),
       payee: belongsTo("account", {inverse: null}),
-      currency: belongsTo(),
     }),
     accountSettings: Model.extend({
       account: belongsTo(),
@@ -72,14 +71,21 @@ export default {
       namePlural: () => faker.hacker.noun() + "s",
       symbol: () => faker.finance.currencySymbol(),
       decimals: 2,
-      value: 100000,
+      rate: (i: number) => ({
+        n: 1,
+        d: (10 ** i)
+      }),
       scale: 4,
-      settings: {
+      settings: (i: number) => ({
         defaultInitialCreditLimit: 100000,
         defaultAcceptPaymentsAutomatically: true,
         defaultAllowPayments: true,
-        defaultAllowPaymentRequests: true
-      }
+        defaultAllowPaymentRequests: true,
+        defaultAllowExternalPayments: true,
+        defaultAllowExternalPaymentRequests: false,
+        enableExternalPayments: true,
+        enableExternalPaymentRequests: (i < 3)
+      })
     }),
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
@@ -132,23 +138,25 @@ export default {
     // Generate 25 transactions between the first account and the following 5 accounts.
     const accounts = server.schema.accounts.all();
     const account = accounts.models[0];
-    const currency = account.currency;
     for (let i = 1; i < 6; i++) {
       const other = accounts.models[i];
       server.createList("transfer", 2, {
         payer: account,
         payee: other,
-        currency
       });
       server.createList("transfer", 3, {
         payer: other,
         payee: account,
-        currency
       });
     }
     // Generate account settings.
     server.schema.accounts.all().models.forEach((account: any) => {
       server.create("accountSettings", {account});
+    })
+    // Generate some accounts for GRP2.
+    server.createList("account", 5, {
+      code: (i: number) => `GRP2${(i % 5).toString().padStart(4, "0")}`,
+      currency: server.schema.currencies.findBy({ code: "GRP2" }),
     })
   },
   routes(server: Server) {
@@ -156,10 +164,15 @@ export default {
     server.get(urlAccounting + "/:code/currency", (schema: any, request) => {
       return schema.currencies.findBy({ code: request.params.code });
     });
+    // List currencies
+    server.get(urlAccounting + "/currencies", (schema: any, request) => {
+      return filter(schema.currencies.all(), request);
+    });
     // Accounts list
     server.get(urlAccounting + "/:code/accounts", (schema: any, request) => {
       const currency = schema.currencies.findBy({ code: request.params.code });
-      return filter(schema.accounts.where({ currencyId: currency.id }), request);
+      const all = schema.accounts.where({ currencyId: currency.id })
+      return filter(all, request);
     });
     // Single account
     server.get(
@@ -211,7 +224,6 @@ export default {
         resource.update({
           payer: schema.accounts.find(transfer.relationships.payer.data.id),
           payee: schema.accounts.find(transfer.relationships.payee.data.id),
-          currency: schema.currencies.find(transfer.relationships.currency.data.id)
         })
         return new Response(201, undefined, resource)
       }

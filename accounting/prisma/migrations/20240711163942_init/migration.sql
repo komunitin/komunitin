@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "AccountType" AS ENUM ('user', 'virtual');
+
 -- CreateTable
 CREATE TABLE "User" (
     "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
@@ -5,7 +8,7 @@ CREATE TABLE "User" (
     "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("tenantId","id")
 );
 
 -- CreateTable
@@ -32,8 +35,18 @@ CREATE TABLE "Currency" (
     "externalIssuerKeyId" VARCHAR(255),
     "externalTraderKeyId" VARCHAR(255),
     "adminId" TEXT NOT NULL,
+    "externalAccountId" TEXT,
 
     CONSTRAINT "Currency_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AccountUser" (
+    "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
+    "accountId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "AccountUser_pkey" PRIMARY KEY ("accountId","userId")
 );
 
 -- CreateTable
@@ -42,6 +55,7 @@ CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
     "code" VARCHAR(255) NOT NULL,
     "status" VARCHAR(31) NOT NULL DEFAULT 'active',
+    "type" "AccountType" NOT NULL DEFAULT 'user',
     "keyId" VARCHAR(255) NOT NULL,
     "currencyId" TEXT NOT NULL,
     "settings" JSONB,
@@ -68,7 +82,7 @@ CREATE TABLE "Transfer" (
     "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Transfer_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Transfer_pkey" PRIMARY KEY ("tenantId","id")
 );
 
 -- CreateTable
@@ -85,9 +99,40 @@ CREATE TABLE "EncryptedSecret" (
 );
 
 -- CreateTable
-CREATE TABLE "_AccountToUser" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
+CREATE TABLE "Trustline" (
+    "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
+    "id" TEXT NOT NULL,
+    "limit" INTEGER NOT NULL,
+    "balance" INTEGER NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated" TIMESTAMP(3) NOT NULL,
+    "trustedId" TEXT NOT NULL,
+    "currencyId" TEXT NOT NULL,
+
+    CONSTRAINT "Trustline_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ExternalTransfer" (
+    "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
+    "id" VARCHAR(255) NOT NULL,
+    "externalPayerId" TEXT,
+    "externalPayeeId" TEXT,
+
+    CONSTRAINT "ExternalTransfer_pkey" PRIMARY KEY ("tenantId","id")
+);
+
+-- CreateTable
+CREATE TABLE "ExternalResource" (
+    "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
+    "id" TEXT NOT NULL,
+    "type" VARCHAR(255) NOT NULL,
+    "href" VARCHAR(255) NOT NULL,
+    "resource" JSONB,
+    "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ExternalResource_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -112,19 +157,22 @@ CREATE UNIQUE INDEX "Currency_externalIssuerKeyId_key" ON "Currency"("externalIs
 CREATE UNIQUE INDEX "Currency_externalTraderKeyId_key" ON "Currency"("externalTraderKeyId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Currency_externalAccountId_key" ON "Currency"("externalAccountId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Account_code_key" ON "Account"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_keyId_key" ON "Account"("keyId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_AccountToUser_AB_unique" ON "_AccountToUser"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_AccountToUser_B_index" ON "_AccountToUser"("B");
+CREATE UNIQUE INDEX "Transfer_tenantId_hash_key" ON "Transfer"("tenantId", "hash");
 
 -- AddForeignKey
-ALTER TABLE "Currency" ADD CONSTRAINT "Currency_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Currency" ADD CONSTRAINT "Currency_adminId_tenantId_fkey" FOREIGN KEY ("adminId", "tenantId") REFERENCES "User"("id", "tenantId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Currency" ADD CONSTRAINT "Currency_externalAccountId_fkey" FOREIGN KEY ("externalAccountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Currency" ADD CONSTRAINT "Currency_encryptionKeyId_fkey" FOREIGN KEY ("encryptionKeyId") REFERENCES "EncryptedSecret"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -145,6 +193,12 @@ ALTER TABLE "Currency" ADD CONSTRAINT "Currency_externalIssuerKeyId_fkey" FOREIG
 ALTER TABLE "Currency" ADD CONSTRAINT "Currency_externalTraderKeyId_fkey" FOREIGN KEY ("externalTraderKeyId") REFERENCES "EncryptedSecret"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "AccountUser" ADD CONSTRAINT "AccountUser_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccountUser" ADD CONSTRAINT "AccountUser_tenantId_userId_fkey" FOREIGN KEY ("tenantId", "userId") REFERENCES "User"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_keyId_fkey" FOREIGN KEY ("keyId") REFERENCES "EncryptedSecret"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -157,10 +211,19 @@ ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_payerId_fkey" FOREIGN KEY ("paye
 ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_payeeId_fkey" FOREIGN KEY ("payeeId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_tenantId_userId_fkey" FOREIGN KEY ("tenantId", "userId") REFERENCES "User"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_AccountToUser" ADD CONSTRAINT "_AccountToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Trustline" ADD CONSTRAINT "Trustline_trustedId_fkey" FOREIGN KEY ("trustedId") REFERENCES "ExternalResource"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_AccountToUser" ADD CONSTRAINT "_AccountToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Trustline" ADD CONSTRAINT "Trustline_currencyId_fkey" FOREIGN KEY ("currencyId") REFERENCES "Currency"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_tenantId_id_fkey" FOREIGN KEY ("tenantId", "id") REFERENCES "Transfer"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_externalPayerId_fkey" FOREIGN KEY ("externalPayerId") REFERENCES "ExternalResource"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_externalPayeeId_fkey" FOREIGN KEY ("externalPayeeId") REFERENCES "ExternalResource"("id") ON DELETE SET NULL ON UPDATE CASCADE;

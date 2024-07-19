@@ -61,7 +61,7 @@ export default defineComponent({
   },
   computed: {
     navigatorShare: () => navigatorShare,
-    pageurl() {
+    pageurl(): string {
       return this.url || window.location.href
     }
   },

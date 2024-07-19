@@ -1,7 +1,9 @@
 import { AtLeast } from 'src/utils/types'
 import { Currency } from './currency'
-import { Account as AccountRecord, User as UserRecord, Prisma } from '@prisma/client'
+import { Account as AccountRecord, User as UserRecord, AccountUser as AccountUserRecord, Prisma } from '@prisma/client'
 import { User } from './user'
+
+export { AccountRecord}
 
 export enum AccountStatus {
   Active = "active",
@@ -36,7 +38,7 @@ export type AccountSettings = {
   acceptPaymentsAutomatically?: boolean
 
   // If acceptPaymentsAutomatically is false, this is a list of account id's
-  // for which payments are automatically accepted.
+  // for which payments are automatically accepted. Work for external accounts too.
   acceptPaymentsWhitelist?: string[]
 
   // If acceptPaymentsAutomatically is false, accept payments after this
@@ -48,11 +50,22 @@ export type AccountSettings = {
   // limit is reached.
   onPaymentCreditLimit?: number
 
-  // This account can perform payments.
+  // This account can make payments.
   allowPayments?: boolean
 
   // This account can request payments form other accounts.
   allowPaymentRequests?: boolean
+
+  // This account can make external payments.
+  allowExternalPayments?: boolean
+
+  // This account can request external payments.
+  allowExternalPaymentRequests?: boolean
+
+  // Payments from external accounts are automatically accepted. 
+  // If acceptPaymentsAutomatically is false, this is taken as false too.
+  acceptExternalPaymentsAutomatically?: boolean
+
 }
 
 // No input needed for creating an account (beyond implicit currency)!
@@ -69,8 +82,8 @@ export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInp
   }
 }
 
-export const recordToAccount = (record: AccountRecord & {users?: UserRecord[]}, currency: Currency): Account => {
-  const users = record.users ? record.users.map(user => ({id: user.id})) : undefined;
+export const recordToAccount = (record: AccountRecord & {users?: {user: UserRecord}[]}, currency: Currency): Account => {
+  const users = record.users ? record.users.map(accountUser => ({id: accountUser.user.id})) : undefined;
   return {
     id: record.id,
     status: record.status as AccountStatus,

@@ -5,7 +5,7 @@
     v-slot="slotProps"
     :code="code"
     module-name="transfers"
-    include="payer,payee,currency"
+    include="payer,payee,payee.currency"
     sort="-updated"
     :filter="{ account: account.id }"
     @page-loaded="fetchMembers"
@@ -19,8 +19,8 @@
         :key="transfer.id"
       >
         <q-separator />
-        <member-header
-          :member="otherMember(transfer)"
+        <account-header
+          :account="otherAccount(transfer)"
           clickable
           class="transaction-item"
           :class="transfer.attributes.state"
@@ -66,11 +66,11 @@
                     : 'negative-amount'
                 "
               >
-                {{ FormatCurrency(signedAmount(transfer), transfer.currency) }}
+                {{ FormatCurrency(signedAmount(transfer), currency) }}
               </div>
             </div>
           </template>
-        </member-header>
+        </account-header>
       </template>
       <q-separator />
     </q-list>
@@ -82,15 +82,15 @@ import { defineComponent } from "vue"
 import FormatCurrency from "../../plugins/FormatCurrency";
 
 import ResourceCards from "../ResourceCards.vue";
-import MemberHeader from "../../components/MemberHeader.vue";
+import AccountHeader from "../../components/AccountHeader.vue";
 
-import { ExtendedTransfer, Member, Account } from "../../store/model";
+import { ExtendedTransfer, Account, Currency, ExternalRelatedResource } from "../../store/model";
 import { LoadListPayload } from "src/store/resources";
 
 export default defineComponent({
   name:"TransactionItems",
   components: {
-    MemberHeader,
+    AccountHeader,
     ResourceCards
   },
   props: {
@@ -115,20 +115,24 @@ export default defineComponent({
     transferLoaded: {} as Record<string, boolean>,
   }),
   computed: {
-    account() : Account {
+    account() : Account & {currency: Currency} {
       return this.member.account;
+    },
+    currency() : Currency {
+      return this.account.currency;
     }
   },
   methods: {
-    otherMember(transfer: ExtendedTransfer): Member {
-      const payer = transfer.payer;
-      const payee = transfer.payee;
+    otherAccount(transfer: ExtendedTransfer): Account {
+      const payer = transfer.payer
+      const payee = transfer.payee
       // We can't directly compare object references because they're not the same.
-      const other = this.account.id == payer.id ? payee : payer;
-      return other.member;
+      const other = this.account.id == payer.id ? payee : payer
+      return other
     },
     signedAmount(transfer: ExtendedTransfer): number {
-      return (transfer.payer.id == this.account.id ? -1 : 1) * transfer.attributes.amount;
+      let amount = transfer.attributes.amount
+      return (transfer.payer.id == this.account.id ? -1 : 1) * amount;
     },
     /**
      * Fetch the member objects associated to the just loaded transfers.
@@ -168,12 +172,16 @@ export default defineComponent({
      * which does have the reactive properties.
      */
     loadedTransfers(transfers: ExtendedTransfer[]): ExtendedTransfer[] {
-      return transfers.filter(transfer => this.transferLoaded[transfer.id] || (transfer.payer.member && transfer.payee.member));
+      return transfers.filter(transfer => this.transferLoaded[transfer.id] || (
+        (transfer.payer.member || (transfer.relationships.payer as ExternalRelatedResource).data.meta?.external) 
+        && 
+        (transfer.payee.member || (transfer.relationships.payee as ExternalRelatedResource).data.meta?.external)
+      ))
     },
     fetchResources(search: string): void {
       (this.$refs.resourceCards as {fetchResources: (s: string) => void}).fetchResources(search);
     }
-  }
+  },
 })
 </script>
 <style lang="scss" scoped>

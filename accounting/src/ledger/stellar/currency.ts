@@ -1,11 +1,11 @@
 import { Asset, Operation, AuthRequiredFlag, AuthRevocableFlag, AuthClawbackEnabledFlag, AuthFlag, TransactionBuilder, Keypair, Horizon } from "@stellar/stellar-sdk"
-import { LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData, LedgerCurrencyState, PathQuote } from "../ledger"
+import { LedgerCurrency, LedgerCurrencyConfig, LedgerCurrencyData, LedgerCurrencyState, LedgerExternalTransfer, LedgerTransfer, PathQuote } from "../ledger"
 import { StellarAccount } from "./account"
 import { StellarLedger } from "./ledger"
 import Big from "big.js"
 import { logger } from "src/utils/logger"
 import { retry, sleep } from "src/utils/sleep"
-import { badRequest, internalError } from "src/utils/error"
+import { badRequest, internalError, notFound } from "src/utils/error"
 import { CallBuilder } from "@stellar/stellar-sdk/lib/horizon/call_builder"
 
 interface StreamData {
@@ -15,6 +15,21 @@ interface StreamData {
 }
 const STREAM_NAMES = [ "externalTrades" ] as const
 type StreamName = typeof STREAM_NAMES[number]
+
+const pathPaymentToTransfer = (pathPayment: Horizon.HorizonApi.PathPaymentOperationResponse): LedgerExternalTransfer => ({
+  ...paymentToTransfer(pathPayment),
+  sourceAmount: pathPayment.source_amount,
+  sourceAsset: new Asset(pathPayment.source_asset_code as string, pathPayment.source_asset_issuer),
+})
+
+// Type modification so we can use the same function for both path and simple payments.
+const paymentToTransfer = (payment: Omit<Horizon.HorizonApi.PaymentOperationResponse, "type" | "type_i">): LedgerTransfer => ({
+  payer: payment.from,
+  payee: payment.to,
+  amount: payment.amount,
+  asset: new Asset(payment.asset_code as string, payment.asset_issuer),
+  hash: payment.transaction_hash
+})
 
 export class StellarCurrency implements LedgerCurrency {
   static GLOBAL_ASSET_CODE = "HOUR"
@@ -140,6 +155,11 @@ export class StellarCurrency implements LedgerCurrency {
     const hour = this.hour()
     const asset = this.asset()
 
+    const tradeToTransfer = async (trade: Horizon.ServerApi.TradeRecord): Promise<LedgerTransfer> => {
+      const operation = await trade.operation()
+      return pathPaymentToTransfer(operation as Horizon.ServerApi.PathPaymentOperationRecord)
+    }
+
     if (trade.base_is_seller // Selling
       && base.equals(hour) // this HOUR
       && counter.code == StellarCurrency.GLOBAL_ASSET_CODE // by external HOUR
@@ -159,16 +179,16 @@ export class StellarCurrency implements LedgerCurrency {
     } else if (base.equals(asset) && counter.equals(hour)) {
       if (trade.base_is_seller) {
         // selling local by hours, so this is an incomming payment.
-        this.ledger.emitter.emit("incommingTrade", this)
+        this.ledger.emitter.emit("incommingTransfer", this, await tradeToTransfer(trade))
       } else {
-        this.ledger.emitter.emit("outgoingTrade", this)
+        this.ledger.emitter.emit("outgoingTransfer", this, await tradeToTransfer(trade))
       }
     } else if (base.equals(hour) && counter.equals(asset)) {
       if (trade.base_is_seller) {
         // selling hours by local, so this is an outgoing payment.
-        this.ledger.emitter.emit("outgoingTrade", this)
+        this.ledger.emitter.emit("outgoingTransfer", this, await tradeToTransfer(trade))
       } else {
-        this.ledger.emitter.emit("incommingTrade", this)
+        this.ledger.emitter.emit("incommingTransfer", this, await tradeToTransfer(trade))
       }
     } else {
       throw internalError("Unexpected trade", trade)
@@ -698,6 +718,9 @@ export class StellarCurrency implements LedgerCurrency {
     const destAsset = new Asset(data.destCode, data.destIssuer)
     const noPathFound = new Error("No viable path found")
     const fn = async () => {
+      
+      logger.debug(`source_assets=${this.asset().code}:${this.asset().issuer}&destination_asset_type=credit_alphanum4&destination_asset_code=${destAsset.code}&destination_asset_issuer=${destAsset.issuer}&destination_amount=${data.amount}`)
+      
       const paths = await this.ledger.server.strictReceivePaths(
         [this.asset()],
         destAsset,
@@ -735,6 +758,31 @@ export class StellarCurrency implements LedgerCurrency {
         throw error
       }
     }
+  }
+
+  /**
+   * Fetch a transfer from the ledger.
+   */
+  async getTransfer(hash: string): Promise<LedgerTransfer|LedgerExternalTransfer> {
+    const transaction = await this.ledger.server.transactions().transaction(hash).call()
+    if (!transaction) {
+      throw notFound(`Transaction ${hash} not found`)
+    }
+    const operations = await transaction.operations({limit: 100})
+    const payment = operations.records.find((op) => [
+      Horizon.HorizonApi.OperationResponseType.payment, 
+      Horizon.HorizonApi.OperationResponseType.pathPayment
+    ].includes(op.type))
+
+    if (!payment) {
+      throw badRequest(`No payment operation found in transaction ${hash}`)
+    }
+
+    const transfer = payment.type === Horizon.HorizonApi.OperationResponseType.payment
+      ? paymentToTransfer(payment)
+      : pathPaymentToTransfer(payment as Horizon.HorizonApi.PathPaymentOperationResponse)
+    
+    return transfer
   }
 
 }

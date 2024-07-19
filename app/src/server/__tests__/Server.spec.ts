@@ -26,7 +26,7 @@ describe("MirageJS Server", () => {
     const data = await response.json();
     const account = data.included.find((resource: ResourceObject) => resource.type == "accounts");
     expect(account.meta.external).toBe(true);
-    expect(account.links.self).toBe(`${urlAccounting}/GRP0/accounts/GRP00000`);
+    expect(account.links.self).toBe(`${urlAccounting}/GRP0/accounts/${account.id}`);
     expect(account.attributes).toBeUndefined();
     expect(account.relationships).toBeUndefined();
   });

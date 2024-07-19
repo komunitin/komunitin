@@ -249,6 +249,12 @@
   "selectPayee": "Select payee",
   "send": "Send",
   "receive": "Receive",
+  "accountCode": "Account code",
+  "accountCodeHint": "Account number in the form {code}0123",
+  "setAccount": "Set account",
+  "accountCodeRequired": "Please enter the account code",
+  "accountCodeInvalid": "We can't validate this account code. Check your spelling or your internet connection.",
+  "chooseAccountNoListingText": "Type the account code in the external group '{group}'. You can also use the code scanner feature to read the transfer.",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

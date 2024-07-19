@@ -1,4 +1,4 @@
-import { hkdf, generateKey, KeyObject, createSecretKey, createCipheriv, randomBytes, createDecipheriv } from "node:crypto";
+import { hkdf, generateKey, KeyObject, createSecretKey, createCipheriv, randomBytes, createDecipheriv, createPrivateKey, createPublicKey } from "node:crypto";
 /**
  * Derive a 32 byte key from a password and a salt
  * @param password 
@@ -81,3 +81,48 @@ export const exportKey = (key: KeyObject) => {
 export const importKey = (key: String) => {
   return createSecretKey(Buffer.from(key, "hex"))
 }
+
+export const importEd25519RawPrivateKey = async (key: Buffer) => {
+  // Node does not provide a way to import raw Ed25519 keys, so we need to create a DER encoded key
+
+  // The DER encoding of an Ed25519 key is a binary sequence containing a fixed header identifying 
+  // the key type and the key itself. The key is a 32 byte sequence.
+  const header = Buffer.from([
+    0x30, 0x2e, 0x02, 0x01, 
+    0x00, 0x30, 0x05, 0x06, 
+    0x03, 0x2b, 0x65, 0x70, 
+    0x04, 0x22, 0x04, 0x20
+  ])
+  const der = Buffer.concat([header, key])
+ 
+  // Create a byte sequence containing the OID and key
+  const keyObj = createPrivateKey({
+    key: der,
+    format: "der",
+    type: "pkcs8",
+  })
+
+  return keyObj
+}
+
+export const importEd25519RawPublicKey = async (key: Buffer) => {
+  // The DER encoding of an Ed25519 key is a binary sequence containing a fixed header identifying 
+  // the key type and the key itself. The key is a 32 byte sequence.
+  const header = Buffer.from([
+    0x30, 0x2a, 0x30, 0x05,
+    0x06, 0x03, 0x2b, 0x65,
+    0x70, 0x03, 0x21, 0x00
+  ])
+  const der = Buffer.concat([header, key])
+ 
+  // Create a byte sequence containing the OID and key
+  const keyObj = createPublicKey({
+    key: der,
+    format: "der",
+    type: "spki",
+  })
+
+  return keyObj
+}
+
+

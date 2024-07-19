@@ -35,6 +35,9 @@ importers:
       helmet:
         specifier: ^7.1.0
         version: 7.1.0
+      jose:
+        specifier: ^5.3.0
+        version: 5.3.0
       node-cron:
         specifier: ^3.0.3
         version: 3.0.3
@@ -78,9 +81,6 @@ importers:
       esbuild:
         specifier: ^0.20.2
         version: 0.20.2
-      jose:
-        specifier: ^5.3.0
-        version: 5.3.0
       msw:
         specifier: ^2.3.0
         version: 2.3.0(typescript@5.4.5)
