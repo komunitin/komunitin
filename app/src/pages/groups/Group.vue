@@ -251,13 +251,15 @@ export default defineComponent({
     // Group info.
     async fetchGroup(code: string) {
       return this.$store.dispatch("groups/load", {
-        code,
+        id: code,
         include: "contacts,categories"
       });
     },
     // Currency info.
     async fetchCurrency(code: string) {
-      return this.$store.dispatch("currencies/load", { code });
+      return this.$store.dispatch("currencies/load", { 
+        id: code 
+      });
     },
     // Categories info.
     buildCategoryItems(type: "offers" | "needs"): string[] {

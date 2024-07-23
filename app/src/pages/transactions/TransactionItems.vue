@@ -54,6 +54,9 @@
                 <span v-else-if="transfer.attributes.state == 'rejected'">
                   {{ $t("rejected") }}
                 </span>
+                <span v-else-if="transfer.attributes.state == 'failed'">
+                  {{ $t("failed") }}
+                </span>
                 <span v-else>
                   {{ $formatDate(transfer.attributes.updated) }}
                 </span>
@@ -84,7 +87,7 @@ import FormatCurrency from "../../plugins/FormatCurrency";
 import ResourceCards from "../ResourceCards.vue";
 import AccountHeader from "../../components/AccountHeader.vue";
 
-import { ExtendedTransfer, Account, Currency, ExternalRelatedResource } from "../../store/model";
+import { ExtendedTransfer, Account, Currency } from "../../store/model";
 import { LoadListPayload } from "src/store/resources";
 
 export default defineComponent({
@@ -127,12 +130,12 @@ export default defineComponent({
       const payer = transfer.payer
       const payee = transfer.payee
       // We can't directly compare object references because they're not the same.
-      const other = this.account.id == payer.id ? payee : payer
+      const other = this.account.id == transfer.relationships.payer.data.id ? payee : payer
       return other
     },
     signedAmount(transfer: ExtendedTransfer): number {
       let amount = transfer.attributes.amount
-      return (transfer.payer.id == this.account.id ? -1 : 1) * amount;
+      return (transfer.relationships.payer.data.id == this.account.id ? -1 : 1) * amount;
     },
     /**
      * Fetch the member objects associated to the just loaded transfers.
@@ -173,9 +176,9 @@ export default defineComponent({
      */
     loadedTransfers(transfers: ExtendedTransfer[]): ExtendedTransfer[] {
       return transfers.filter(transfer => this.transferLoaded[transfer.id] || (
-        (transfer.payer.member || (transfer.relationships.payer as ExternalRelatedResource).data.meta?.external) 
+        (transfer.payer?.member || transfer.relationships.payer.data.meta?.external && transfer.payer) 
         && 
-        (transfer.payee.member || (transfer.relationships.payee as ExternalRelatedResource).data.meta?.external)
+        (transfer.payee?.member || transfer.relationships.payee.data.meta?.external && transfer.payee)
       ))
     },
     fetchResources(search: string): void {
@@ -198,7 +201,7 @@ export default defineComponent({
       color: $error;
     }
   }
-  .rejected {
+  .rejected, .failed {
     background: $light-background;
     .positive-amount, .negative-amount, .section-extra {
       color: $onsurface-d;

@@ -3,7 +3,7 @@ import { LedgerAccount, LedgerTransfer, PathQuote } from "../ledger"
 import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
 import { logger } from "../../utils/logger"
-import { badTransaction, internalError } from "../../utils/error"
+import { transactionError, internalError, insufficientBalance } from "../../utils/error"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
@@ -186,7 +186,7 @@ export class StellarAccount implements LedgerAccount {
    */
   async pay(payment: { payeePublicKey: string; amount: string }, keys: { account: Keypair; sponsor: Keypair }) {
     if (Big(this.balance()).lt(payment.amount)) {
-      throw badTransaction("Insufficient balance")
+      throw insufficientBalance(`Payer's balance ${this.balance()} is not sufficient for a payment of ${payment.amount}`)
     }
     const builder = this.currency.ledger.transactionBuilder(this)
     builder.addOperation(Operation.payment({
@@ -231,7 +231,7 @@ export class StellarAccount implements LedgerAccount {
   async externalPay(payment: { payeePublicKey: string, amount: string, path: PathQuote }, keys: { account: Keypair; sponsor: Keypair }) {
 
     if (Big(this.balance()).lt(payment.path.sourceAmount)) {
-      throw badTransaction("Insufficient balance")
+      throw insufficientBalance("Insufficient balance")
     }
 
     const builder = this.currency.ledger.transactionBuilder(this)

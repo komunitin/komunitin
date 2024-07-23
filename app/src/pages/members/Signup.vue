@@ -77,7 +77,7 @@ const props = defineProps<{
 const store = useStore()
 
 store.dispatch("groups/load", {
-  code: props.code,
+  id: props.code,
   include: "signup-settings"
 })
 const group = computed(() => store.getters["groups/current"])

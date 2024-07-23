@@ -184,7 +184,7 @@ export default defineComponent({
   methods: {
     async fetchData(offerCode: string) {
       await this.$store.dispatch("offers/load", {
-        code: offerCode,
+        id: offerCode,
         group: this.code,
         include: "category,member,member.contacts,member.account,member.account.currency"
       });

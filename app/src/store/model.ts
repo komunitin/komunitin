@@ -6,6 +6,7 @@
 export interface ResourceIdentifierObject {
   type: string;
   id: string;
+  meta?: Record<string, unknown>
 }
 
 export interface ExternalResourceIdentifierObject extends ResourceIdentifierObject {
@@ -15,7 +16,7 @@ export interface ExternalResourceIdentifierObject extends ResourceIdentifierObje
   }
 }
 
-export type Relationship = ExternalRelatedResource | RelatedResource | RelatedLinkedCollection | RelatedCollection ;
+export type Relationship = RelatedResource | RelatedLinkedCollection | RelatedCollection ;
 export interface ResourceObject extends ResourceIdentifierObject {
   links: {
     self: string;
@@ -119,14 +120,7 @@ export interface RelatedResource {
   links: {
     related: string;
   },
-  data: ResourceIdentifierObject
-}
-
-export interface ExternalRelatedResource {
-  links?: {
-    related: string;
-  },
-  data: ExternalResourceIdentifierObject
+  data: ResourceIdentifierObject | ExternalResourceIdentifierObject
 }
 
 /**
@@ -378,7 +372,7 @@ export interface AccountSettings extends ResourceObject {
   }
 }
 
-export type TransferState = "new" | "pending" | "accepted" | "committed" | "rejected" | "deleted"
+export type TransferState = "new" | "pending" | "accepted" | "committed" | "rejected" | "failed" | "deleted"
 
 export interface Transfer extends ResourceObject {
   attributes: {

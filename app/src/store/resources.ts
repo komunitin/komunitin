@@ -54,9 +54,9 @@ type DeepPartial<T> = T extends object ? {
 
 export interface UpdatePayload<T extends ResourceObject> {
   /**
-   * The resource code.
+   * The resource id/code.
    */
-  code: string
+  id: string
   /**
    * The group where the record belongs to.
    */
@@ -75,7 +75,7 @@ export interface DeletePayload {
   /**
    * The resource code.
    */
-  code: string
+  id: string
   /**
    * The group where the record belongs to.
    */
@@ -117,8 +117,10 @@ export interface LoadListPayload {
    */
   onlyResources?: boolean
 }
+
 /**
- * Object argument for the `load` action.
+ * Use this payload to load a resource using a URL of the form
+ * <BASE_URL>/:group/<resource_type>?filter[code]=:code
  */
 interface LoadByCodePayload {
   /**
@@ -135,6 +137,28 @@ interface LoadByCodePayload {
   include?: string;
 }
 
+/**
+ * Use this payload to load a resource using a URL of the form
+ * <BASE_URL>/:group/<resource_type>/:id
+ */
+interface LoadByIdPayload {
+  /**
+   * The resource id.
+   */
+  id: string;
+  /**
+   * The resource group.
+   */
+  group: string;
+  /**
+   * Optional comma-separated list of included relationship resources.
+   */
+  include?: string;
+}
+
+/**
+ * Use this payload to load an external resource given its URL.
+  */
 interface LoadByUrlPayload {
   /**
    * The resource group. We still need that even if loading from URL
@@ -146,7 +170,10 @@ interface LoadByUrlPayload {
   url: string;
 }
 
-export type LoadPayload = LoadByCodePayload | LoadByUrlPayload;
+/**
+ * Object argument for the `load` action.
+ */
+export type LoadPayload = LoadByIdPayload | LoadByCodePayload | LoadByUrlPayload;
 
 /**
  * Payload for the `loadNext` action.
@@ -223,14 +250,14 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * Endpoint for a single resource of this type. Override if
    * your resource doesn't follow the standard:`
    * ```
-   *  collectionEndpoint(groupCode)/{code}.
+   *  collectionEndpoint(groupCode)/{id}.
    * ```
    *
    * @param code The code of the resource
    * @param groupCode The code of the group
    */
-  protected resourceEndpoint(code: string, groupCode: string) {
-    return this.collectionEndpoint(groupCode) + `/${code}`;
+  protected resourceEndpoint(id: string, groupCode: string) {
+    return this.collectionEndpoint(groupCode) + `/${id}`;
   }
 
   /**
@@ -310,37 +337,29 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     dispatch: Dispatch
   ) {
     // Here we commit all included resources and accumulate all external resources for later fetch.
-    const external: Record<string, ExternalResourceObject[]> = {};
+    const external: ExternalResourceObject[] = []
     included.forEach(resource => {
       if (!(resource as ExternalResourceObject).meta?.external) {
         // Standard included resource. Commit change!
         commit(resource.type + "/addResource", resource, { root: true });
       } else {
         // External included resource.
-        if (!external[resource.type]) {
-          external[resource.type] = [];
-        }
-        external[resource.type].push(resource as ExternalResourceObject);
+        external.push(resource as ExternalResourceObject)
       }
-    });
-    // Fetch external resources.
-    const promises = Object.keys(external).map(name => {
-      const ids = external[name].map(resource => resource.id);
-      return dispatch(
-        `${name}/loadList`,
-        {
-          group,
-          filter: {
-            id: ids
-          },
-          onlyResources: true
-        } as LoadListPayload,
-        { root: true }
-      );
-    });
-
+    })
+    // Fetch external resources
+    const promises = external.map(external => {
+      return dispatch(`${external.type}/load`, {
+        url: external.meta.href,
+        group
+      }, {
+        root: true
+      })
+    })
     await Promise.all(promises);
+    
   }
+
 
   /**
    * Commits the results provided by AxiosResponse and then it eventually fetches
@@ -767,32 +786,41 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   ) {
     let id = null
     if ("url" in payload) {
-      // In case of load by url, don't use the cache. We could try to 
-      // get the id and/or code from the url.
-    } else if (context.state.resources[payload.code]) {
-      // payload.code is sometimes just the resource id.
-      id = payload.code
+      // In case of load by url, don't quickly provide the resource from 
+      // cache, although we could get the id/code from the URL.
+    } else if ("id" in payload && context.state.resources[payload.id]) {
+      // payload sometimes contains the id
+      id = payload.id
     } else {
-      // and sometimes the code attribute.
-      const cached = context.getters['find']({
-        code: payload.code,
-      })
+      // and sometimes payload contains the code attribute which can 
+      // be used to find the resource as well.
+      const code = (payload as LoadByCodePayload).code ?? (payload as LoadByIdPayload).id
+      const cached = context.getters['find']({ code })
       if (cached) {
         id = cached.id
       }
     }
     context.commit("currentId", id)
   }
+
   protected resourceUrl(payload: LoadPayload) {
     let url: string
     if ("url" in payload) {
       url = payload.url
     } else {
-      url = this.resourceEndpoint(payload.code, payload.group)
+      const params = new URLSearchParams();
+      if ("code" in payload) {
+        url = this.collectionEndpoint(payload.group)
+        params.set("filter[code]", payload.code)
+      } else {
+        url = this.resourceEndpoint(payload.id, payload.group)
+      }
       if (payload.include) {
-        const params = new URLSearchParams();
         params.set("include", payload.include);
-        url += "?" + params.toString();
+      }
+      const query = params.toString()
+      if (query.length > 0) {
+        url += "?" + query;
       }
     }
     return url
@@ -848,7 +876,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     } catch (error) {
       throw KError.getKError(error);
     }
-    
   }
   /**
    * Updates a resource by patching the given resource to the API.
@@ -858,7 +885,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     context: ActionContext<ResourcesState<T>, S>,
     payload: UpdatePayload<T>
   ) {
-    const url = this.resourceEndpoint(payload.code, payload.group);
+    const url = this.resourceEndpoint(payload.id, payload.group);
     const resource = payload.resource;
     const body = {data: resource, ...{included: payload.included}};
     try {
@@ -878,9 +905,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     context: ActionContext<ResourcesState<T>, S>,
     payload: DeletePayload
   ) {
-    const resource = context.getters.find({code: payload.code})
+    const resource = context.getters.find({code: payload.id})
     const id = resource.id
-    const url = this.resourceEndpoint(payload.code, payload.group)
+    const url = this.resourceEndpoint(payload.id, payload.group)
     try {
       await this.request(context, url, "delete")
       // Remove from current pointer.

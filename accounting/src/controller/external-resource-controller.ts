@@ -12,7 +12,10 @@ export class ExternalResourceController extends AbstractCurrencyController {
   public async getExternalResource<T extends Record<string,any>>(ctx: Context, id: ExternalResourceIdentifier): Promise<ExternalResource<T>> {
     let record = await this.db().externalResource.findUnique({
       where: {
-        id: id.id,
+        tenantId_id: {
+          tenantId: this.db().tenantId,
+          id: id.id
+        },
         type: id.type
       }
     })
@@ -26,7 +29,12 @@ export class ExternalResourceController extends AbstractCurrencyController {
         resource
       }
       record = await this.db().externalResource.upsert({
-        where: { id: id.id },
+        where: { 
+          tenantId_id: {
+            tenantId: this.db().tenantId,
+            id: id.id
+          }
+        },
         create: externalResource,
         update: externalResource
       })

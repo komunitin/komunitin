@@ -31,7 +31,6 @@ import TransactionCard from '../../components/TransactionCard.vue'
 import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
 import { Transfer } from "src/store/model"
 import KError, { KErrorCode } from "src/KError"
-import { clone } from "lodash-es"
 
 const props = defineProps<{
   code: string;
@@ -51,20 +50,23 @@ const onSubmit = async () => {
   quasar.loading.show({
     delay: 200
   })
-  const transfer = clone(props.transfer)
 
-  if (!transfer.attributes) {
+  if (!props.transfer.attributes) {
     throw new KError(KErrorCode.ScriptError, "Transfer attributes are missing")
   }
 
   try {
-    transfer.attributes.state = "committed"
     await store.dispatch("transfers/create", {
       group: props.code,
-      resource: props.transfer
+      resource: {
+        ...props.transfer,
+        attributes: {
+          ...props.transfer.attributes,
+          state: "committed"
+        }
+      }
     });
-    
-    notifyTransactionState(transfer.attributes.state, t)
+    notifyTransactionState(props.transfer.attributes.state as string, t)
     router.push({
       name: "Transaction",
       params: {

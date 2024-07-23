@@ -4,23 +4,27 @@ export enum KErrorCode {
   BadConfig = "BadConfig",
   NotFound = "NotFound",
   InternalError = "InternalError",
-  BadTransaction = "BadTransaction",
   NotImplemented = "NotImplemented",
   FieldValidationError = "FieldValidationError",
   Unauthorized = "Unauthorized",
-  Forbidden = "Forbidden"
+  Forbidden = "Forbidden",
+  TransactionError = "TransactionError",
+  InsufficientBalance = "InsufficientBalance",
+  NoTrustPath = "NoTrustPath",
 }
 
 const errorDefinitions: Record<KErrorCode, [number, string]> = {
   [KErrorCode.BadRequest]: [400, "Bad Request"],
-  [KErrorCode.BadTransaction]: [400, "Transaction Error"],
+  [KErrorCode.TransactionError]: [400, "Transaction Error"],
   [KErrorCode.NotFound]: [404, "Not Found"],
   [KErrorCode.BadConfig]: [500, "Bad Configuration"],
   [KErrorCode.NotImplemented]: [500, "Not Implemented"],
   [KErrorCode.InternalError]: [500, "Internal Error"],
   [KErrorCode.FieldValidationError]: [400, "Field validation Error"],
   [KErrorCode.Unauthorized]: [401, "Unauthorized"],
-  [KErrorCode.Forbidden]: [403, "Forbidden"]
+  [KErrorCode.Forbidden]: [403, "Forbidden"],
+  [KErrorCode.InsufficientBalance]: [400, "Insufficient Balance"],
+  [KErrorCode.NoTrustPath]: [400, "No trust path between currencies"],
 } as const
 
 const status = (code: KErrorCode) => errorDefinitions[code][0]
@@ -50,7 +54,9 @@ export const badRequest = (message: string, cause?: unknown) => new KError(KErro
 export const internalError = (message: string, cause?: unknown) => new KError(KErrorCode.InternalError, message, { cause })
 export const notFound = (message: string) => new KError(KErrorCode.NotFound, message)
 export const notImplemented = (message: string, cause?: unknown) => new KError(KErrorCode.NotImplemented, message, { cause })
-export const badTransaction = (message: string, cause?: unknown) => new KError(KErrorCode.BadTransaction, message, { cause })
+export const transactionError = (message: string, cause?: unknown) => new KError(KErrorCode.TransactionError, message, { cause })
 export const fieldValidationError = (message: string, cause?: unknown) => new KError(KErrorCode.FieldValidationError, message, { cause })
 export const unauthorized = (message: string) => new KError(KErrorCode.Unauthorized, message)
 export const forbidden = (message: string) => new KError(KErrorCode.Forbidden, message)
+export const insufficientBalance = (message: string) => new KError(KErrorCode.InsufficientBalance, message)
+export const noTrustPath = (message: string) => new KError(KErrorCode.NoTrustPath, message)

@@ -189,10 +189,15 @@ describe("External transfers", async () => {
     assert.equal(transfer1.attributes.amount, 20)
     assert.strictEqual(transfer.relationships.payer.data.meta.external, true)
     
-    const transfer2 = (await t.api.get('/TEST/transfers/' + transfer.id, t.user1)).body.data
+    // Include external resource.
+    const response = (await t.api.get(`/TEST/transfers/${transfer.id}?include=payee`, t.user1)).body
+    const transfer2 = response.data
     assert.equal(transfer2.attributes.state, "committed")
     assert.equal(transfer2.attributes.amount, 100)
     assert.strictEqual(transfer2.relationships.payee.data.meta.external, true)
+    // Check included resource
+    assert.equal(response.included.length, 1)
+    assert.equal(response.included[0].id, transfer2.relationships.payee.data.id)
   })
 
   await it('succesful external payment request (approval)', async () => {

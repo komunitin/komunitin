@@ -38,8 +38,8 @@ const offer = ref<Offer & {category: Category} | null>(null)
 
 const fetchData = async () => {
   await store.dispatch("offers/load", {
+    id: props.offerCode,
     group: props.code,
-    code: props.offerCode,
     include: "category"
   })
   offer.value = store.getters["offers/current"]
@@ -50,8 +50,8 @@ const router = useRouter()
 
 const onSubmit = async (resource: DeepPartial<Offer>) => {
   await store.dispatch("offers/update", {
+    id: resource.attributes?.code,
     group: props.code,
-    code: resource.attributes?.code,
     resource
   })
   const offer = store.getters["offers/current"]

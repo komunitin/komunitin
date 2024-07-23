@@ -26,7 +26,7 @@ const lastError: Record<string, number> = {}
 function showError(error: KError) {
   // Sometimes, specially during development, we dont want the UI to continually
   // show the same error message. We show these errors ony once every 5 min. 
-  const showOnceErrors = [KErrorCode.VueWarning, KErrorCode.UnknownServer, 
+  const showOnceErrors = [KErrorCode.VueWarning,
     KErrorCode.Unknown, KErrorCode.UnknownVueError, KErrorCode.UnknownScript, 
     KErrorCode.ErrorHandling, KErrorCode.NotificationsPermissionDenied, 
     KErrorCode.ScriptError, KErrorCode.UserLoggingOut

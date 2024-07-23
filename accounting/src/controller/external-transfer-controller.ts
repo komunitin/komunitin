@@ -2,7 +2,7 @@ import { Account, Currency, InputTransfer, Transfer, TransferState, UpdateTransf
 import { AbstractCurrencyController } from "./abstract-currency-controller";
 import { isExternalResourceIdentifier } from "./external-resource-controller";
 import { Context } from "src/utils/context";
-import { badRequest, badTransaction, forbidden, internalError } from "src/utils/error";
+import { badRequest, forbidden, internalError, noTrustPath } from "src/utils/error";
 import { ExternalResource, ExternalResourceIdentifier } from "src/model/resource";
 import { WithRequired } from "src/utils/types";
 import { amountToLedger, convertAmount } from "./currency-controller";
@@ -452,7 +452,7 @@ export class ExternalTransferController extends AbstractCurrencyController {
 
     // There is no trust path between these two accounts. The transfer is not possible.
     if (!path) {
-      throw badTransaction(`No trust path between currencies ${this.currency().code} and ${externalCurrency.resource.code}`)
+      throw noTrustPath(`No trust path between currencies ${this.currency().code} and ${externalCurrency.resource.code}`)
     }
     // There is a trust path! Submit the transaction.
 

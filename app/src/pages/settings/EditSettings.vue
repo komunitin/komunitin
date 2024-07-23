@@ -135,14 +135,14 @@ const accountSettings = computed(() => store.getters["account-settings/current"]
 
 const loadAccountSettings = async () => {
   await store.dispatch("account-settings/load", {
-    code: myAccount.value.id,
+    id: myAccount.value.id,
     group: myAccount.value.currency.attributes.code
   })
 }
 
 const loadUserSettings = async () => {
   await store.dispatch("user-settings/load", {
-    code: myMember.value.attributes.code,
+    id: myMember.value.attributes.code,
     group: myMember.value.group.attributes.code
   })
 }
@@ -153,7 +153,7 @@ const changes = ref<typeof SaveChanges>()
 
 const saveAccountSettings = async (resource: DeepPartial<AccountSettings>) => {
   const fn = () => store.dispatch("account-settings/update", {
-    code: myAccount.value.id,
+    id: myAccount.value.id,
     group: myAccount.value.currency.attributes.code,
     resource
   })
@@ -162,7 +162,7 @@ const saveAccountSettings = async (resource: DeepPartial<AccountSettings>) => {
 
 const saveUserSettings = async (resource: DeepPartial<UserSettings>) => {
   const fn = () => store.dispatch("user-settings/update", {
-    code: myMember.value.attributes.code,
+    id: myMember.value.attributes.code,
     group: myMember.value.group.attributes.code,
     resource
   })
