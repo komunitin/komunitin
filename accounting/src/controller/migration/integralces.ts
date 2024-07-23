@@ -86,6 +86,10 @@ async function migrateCurrency(ctx: Context, controller: SharedController, migra
       // Default of 10h of initial credit. 
       // TODO: better handle this!
       defaultInitialCreditLimit: 10 * (10**6 / resource.attributes.value) * Math.pow(10, resource.attributes.scale),
+      enableExternalPaymentRequests: true,
+      enableExternalPayments: true,
+      defaultAllowExternalPayments: true,
+      defaultAllowExternalPaymentRequests: true,
     }
   } as Currency
 
