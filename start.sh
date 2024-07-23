@@ -72,54 +72,13 @@ docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/dru
 
 docker compose exec accounting pnpm prisma migrate reset --force
 
-migrate() {
-
-local USERNAME=$1
-local PASSWORD=$2
-local CODE=$3
-
-RESPONSE=$(curl -s -X POST $ICES_URL/oauth2/token \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "grant_type=password" \
--d "client_id=komunitin-app" \
--d "username=$USERNAME" \
--d "password=$PASSWORD" \
--d "scope=openid email profile komunitin_social komunitin_accounting offline_access komunitin_social_read_all")
-
-ACCESS_TOKEN=$(echo $RESPONSE | grep -o '"access_token":"[^"]*' | sed 's/"access_token":"//')
-
-JSON_DATA=$(cat <<EOF
-{
-  "data": {
-    "type": "migrations",
-    "attributes": {
-      "code": "$CODE",
-      "source": {
-        "platform": "integralces",
-        "url": "http://integralces:2029",
-        "access_token": "$ACCESS_TOKEN"
-      }
-    }
-  }
-}
-EOF
-)
-
-RESPONSE=$(curl -s -X POST $KOMUNITIN_ACCOUNTING_URL/migrations \
-  -H "Content-Type: application/vnd.api+json" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -d "$JSON_DATA")
-
-echo $RESPONSE
-}
-
 # Migrate NET1 and NET2 to the accounting service
-migrate "riemann@komunitin.org" "komunitin" "NET1"
-migrate "fermat@komunitin.org" "komunitin" "NET2"
+./accounting/cli/migrate.sh "riemann@komunitin.org" "komunitin" "NET1"
+./accounting/cli/migrate.sh "fermat@komunitin.org" "komunitin" "NET2"
 
 # Configure NET1 and NET2 in integralces to use the accounting service
-docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL
-docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL --komunitin_allow_anonymous_member_list=1
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL --komunitin_allow_anonymous_member_list=1
 docker compose exec integralces drush vset ces_komunitin_app_url $KOMUNITIN_APP_URL
 
 fi
