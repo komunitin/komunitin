@@ -82,10 +82,12 @@ describe("Needs", () => {
     expect(text).toContain("Computers");
 
     await wrapper.get(".q-btn--fab").trigger("click");
+    await flushPromises();
     await wrapper.vm.$wait();
 
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/members/EmilianoLemke57");
     expect(wrapper.vm.$route.hash).toBe("#needs");
+    await flushPromises();
     await wrapper.vm.$wait();
 
     const text2 = wrapper.text();
