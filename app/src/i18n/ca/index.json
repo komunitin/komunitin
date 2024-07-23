@@ -4,8 +4,6 @@
   "menu": "Menú",
   "findYourLocalGroup": "Cerqueu la vostra xarxa",
   "openSystemForExchangeCommunities": "Sistema obert per a comunitats d'intercanvi",
-  "failed": "Error",
-  "success": "Acció processada",
   "komunitinIs": "Komunitin es una plataforma de codi obert que ofereix la gestió de moneda social per a les comunitats d'intercanvi.",
   "newInKomunitin": "Nou/va a komunitin?",
   "alreadyRegisteredToALocalGroup": "Ja estàs registrat en un grup?",
@@ -78,6 +76,7 @@
   "accepted": "Acceptada",
   "committed": "Confirmada",
   "rejected": "Rebutjada",
+  "failed": "Fallida",
   "deleted": "Eliminada",
   "payer": "Pagador/a",
   "payee": "Cobrador/a",
@@ -134,6 +133,7 @@
   "cancel": "Cancel·la",
   "cantBeUndone": "Aquesta acció no es pot desfer.",
   "needDeleted": "Necessitat eliminada",
+  "offerDeleted": "Oferta eliminada",
   "expired": "Caducada",
   "hidden": "Amagada",
 
@@ -252,5 +252,8 @@
   "receive": "Rebre",
 
   "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
-  "ErrorInvalidPassword": "Contrasenya incorrecta"
+  "ErrorInvalidPassword": "Contrasenya incorrecta",
+  "ErrorInsufficientBalance": "Saldo insufucient",
+  "ErrorNoTrustPath": "La transacció ha fallat perquè no hi ha cap camí d'intercanvi entre les dues monedes",
+  "ErrorTransactionError": "La transacció ha fallat"
 }

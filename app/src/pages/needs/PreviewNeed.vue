@@ -41,7 +41,7 @@ const publish = async (need: Need) => {
   need.attributes.state = 'published'
 
   await store.dispatch('needs/update', {
-    code: props.needCode,
+    id: props.needCode,
     group: props.code,
     resource: need
   })

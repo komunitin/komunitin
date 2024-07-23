@@ -155,3 +155,59 @@ declare module '@vue/runtime-core' {
     $store: Store<State>
   }
 }
+/*
+export const parseResourceUrl = (url: string, type: string) : {baseUrl: string, group?: string, id?: string}|undefined => {
+  if (["contacts", "members", "offers", "needs", "categories", "accounts", "transfers"].includes(type)) {
+    const match = url.match(new RegExp(`^([.]*)/([a-zA-Z0-9]*)/(${type})/([^/]*)$`))
+    if (match) {
+      return {
+        baseUrl: match[1],
+        group: match[2],
+        id: match[4]
+      }
+    }
+  } else if (type === "currencies") {
+    const match = url.match(new RegExp(`^([.]*)/([a-zA-Z0-9]*)/currency$`))
+    if (match) {
+      return {
+        baseUrl: match[1],
+        group: match[2],
+      }
+    }
+  } else if (type === "users") {
+    const match = url.match(new RegExp(`^([.]*)/users/([^/]*)$`))
+    if (match) {
+      return {
+        baseUrl: match[1],
+        id: match[2]
+      }
+    }
+  } else if (type === "account-settings") {
+    const match = url.match(new RegExp(`^([.]*)/([a-zA-Z0-9]*)/accounts/([^/]*)/settings$`))
+    if (match) {
+      return {
+        baseUrl: match[1],
+        group: match[2],
+        id: match[3]
+      }
+    }
+  } else if (type === "user-settings") {
+    const match = url.match(new RegExp(`^([.]*)/users/([^/]*)/settings$`))
+    if (match) {
+      return {
+        baseUrl: match[1],
+        id: match[2]
+      }
+    }
+  } else if (type === "group") {
+    const match = url.match(new RegExp(`^([.]*)/([^/]*)$`))
+    if (match) {
+      return {
+        baseUrl: match[1],
+        id: match[2]
+      }
+    }
+  }
+  return undefined
+}
+*/

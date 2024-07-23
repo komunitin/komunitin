@@ -124,8 +124,8 @@ const loadAccount = (isSelect: boolean, memberCode?: string) => {
   const account = ref<Account & {member: Member}>()
   if (memberCode) {
     store.dispatch("members/load", {
-      group: props.code, 
-      code: memberCode, 
+      id: memberCode,
+      group: props.code,
       include: "account,group"
     }).then(() => {
       account.value = store.getters["members/current"].account

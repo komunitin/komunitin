@@ -91,6 +91,8 @@ const state = computed(() => {
       return t("committed").toString();
     case "rejected":
       return t("rejected").toString();
+    case "failed":
+      return t("failed").toString();
     case "deleted":
       return t("deleted").toString();
   }

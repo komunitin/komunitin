@@ -69,7 +69,7 @@ const onSubmit = async () => {
   loading.value = true
   try {
     await store.dispatch("users/update", {
-      code: myMember.value.id,
+      id: myMember.value.id,
       group: code.value,
       resource: {
         attributes: {

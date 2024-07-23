@@ -89,7 +89,7 @@ import { DeepPartial } from "quasar"
 import KError, { KErrorCode } from "src/KError"
 import SelectAccount from "src/components/SelectAccount.vue"
 import formatCurrency, { convertCurrency } from "src/plugins/FormatCurrency"
-import { Account, Currency, ExternalRelatedResource, Member, Transfer } from "src/store/model"
+import { Account, Currency, Member, Transfer, RelatedResource } from "src/store/model"
 import { v4 as uuid } from "uuid"
 import { computed, ref } from "vue"
 import { useStore } from "vuex"
@@ -168,7 +168,7 @@ const onSubmit = () => {
   const transferAmount = amount.value * Math.pow(10, myCurrency.value.attributes.scale)
 
   const accountRelationship = (account: Account & {currency: Currency}) => {
-    const relationship = {data: {type: "accounts", id: account.id}} as ExternalRelatedResource
+    const relationship = {data: {type: "accounts", id: account.id}} as RelatedResource
     if (account.currency.id !== myCurrency.value.id) {
       relationship.data.meta = {
         external: true,

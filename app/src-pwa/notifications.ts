@@ -23,7 +23,7 @@ export function notificationBuilder(store: Store<any>) {
         case "TransferRejected": {
           // Get transfer details.
           await store.dispatch("transfers/load", {
-            code: payload.data.transfer,
+            id: payload.data.transfer,
             group,
             include: "currency,payer,payee"
           })
@@ -81,7 +81,7 @@ export function notificationBuilder(store: Store<any>) {
         case "OfferPublished": {
           // Get offer details.
           await store.dispatch("offers/load", {
-            code: payload.data.offer,
+            id: payload.data.offer,
             group,
             include: "member"
           })
@@ -100,7 +100,7 @@ export function notificationBuilder(store: Store<any>) {
         case "NeedPublished": {
           // Get need details.
           await store.dispatch("needs/load", {
-            code: payload.data.need,
+            id: payload.data.need,
             group,
             include: "member"
           })
@@ -118,7 +118,7 @@ export function notificationBuilder(store: Store<any>) {
         }
         case "OfferExpired": {
           await store.dispatch("offers/load", {
-            code: payload.data.offer,
+            id: payload.data.offer,
             group
           })
           const offer = store.getters["offers/current"]
@@ -135,7 +135,7 @@ export function notificationBuilder(store: Store<any>) {
         }
         case "NeedExpired": {
           await store.dispatch("needs/load", {
-            code: payload.data.need,
+            id: payload.data.need,
             group
           })
           const need = store.getters["needs/current"]
@@ -153,7 +153,7 @@ export function notificationBuilder(store: Store<any>) {
         case "MemberJoined": {
           // Get member details.
           await store.dispatch("members/load", {
-            code: payload.data.member,
+            id: payload.data.member,
             group,
             include: "group"
           })

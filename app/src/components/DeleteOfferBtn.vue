@@ -34,9 +34,8 @@ const { t } = useI18n()
 const router = useRouter()
 
 const deleteOffer = async () => {
-  if (!props.offer.attributes?.code) return
   await store.dispatch('offers/delete', {
-    code: props.offer.attributes.code,
+    id: props.offer.attributes?.code,
     group: props.code
   })
   $q.notify({

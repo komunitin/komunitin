@@ -63,7 +63,6 @@ const onSubmit = async () => {
       group: props.code,
       resource: props.transfer
     });
-    
     notifyTransactionState(transfer.attributes.state, t)
     router.push({
       name: "Transaction",
@@ -72,6 +71,9 @@ const onSubmit = async () => {
         transferCode: props.transfer.id
       }
     })
+  } catch (error) {
+    transfer.attributes.state = "failed"
+    throw error
   } finally {
     quasar.loading.hide()
   }

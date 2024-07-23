@@ -43,10 +43,10 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void
+  (e: "update:modelValue", value: string|undefined): void
 }>()
 
-const email = ref<string>(props.modelValue)
+const email = ref<string|undefined>(props.modelValue)
 const password = ref<string>('')
 const passwordInvalid = ref(false)
 
@@ -62,7 +62,7 @@ const { t } = useI18n()
 const changePassword = async () => {
   try {
     await store.dispatch("users/update", {
-      code: props.user.id,
+      id: props.user.id,
       group: props.group.attributes.code,
       resource: {
         attributes: {

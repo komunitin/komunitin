@@ -4,8 +4,6 @@
   "menu": "Menu",
   "findYourLocalGroup": "Find your local group",
   "openSystemForExchangeCommunities": "Open System for Exchange Communities",
-  "failed": "Action failed",
-  "success": "Action was successful",
   "komunitinIs": "Komunitin is an open source platform that offers social currency management for group communities.",
   "newInKomunitin": "New to komunitin?",
   "alreadyRegisteredToALocalGroup": "Already registered to a local group?",
@@ -78,6 +76,7 @@
   "accepted": "Accepted",
   "committed": "Committed",
   "rejected": "Rejected",
+  "failed": "Failed",
   "deleted": "Deleted",
   "payer": "Payer",
   "payee": "Payee",
@@ -135,6 +134,7 @@
   "cancel": "Cancel",
   "cantBeUndone": "This action can't be undone.",
   "needDeleted": "The need has been deleted",
+  "offerDeleted": "The offer has been deleted",
   "expired": "Expired",
   "hidden": "Hidden",
   "createOffer": "Create offer",
@@ -271,8 +271,12 @@
   "ErrorNotificationsPermissionDenied": "Error: Permission denied while trying to subscribe to push notifications",
   "ErrorVueWarning": "VUE warning",
   "ErrorIncorrectCredentials": "Error: Incorrect email or password",
-  "ErrorAuthNoCredentials": "Error: Incorrect email or password",
   "ErrorNotImplemented": "Error: Not Implemented",
   "ErrorInvalidTransferState": "Error: Invalid Transfer State",
-  "ErrorInvalidPassword": "The password is not correct"
+  
+  "ErrorAuthNoCredentials": "Incorrect email or password",
+  "ErrorInvalidPassword": "The password is not correct",
+  "ErrorInsufficientBalance": "Insufficient balance",
+  "ErrorNoTrustPath": "Transaction failed because there is no exchange path between the two currencies",
+  "ErrorTransactionError": "Transaction failed"
 }

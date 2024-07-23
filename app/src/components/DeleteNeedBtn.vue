@@ -37,7 +37,7 @@ const router = useRouter()
 const deleteNeed = async () => {
   if (!props.need.attributes?.code) return
   await store.dispatch('needs/delete', {
-    code: props.need.attributes.code,
+    id: props.need.attributes.code,
     group: props.code
   })
   $q.notify({

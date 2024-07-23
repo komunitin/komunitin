@@ -4,8 +4,6 @@
   "menu": "Menu",
   "findYourLocalGroup": "Encuentra tu grupo local",
   "openSystemForExchangeCommunities": "Sistema abierto de comunidades de intercambio",
-  "failed": "Error en proceso",
-  "success": "Proceso concluido",
   "komunitinIs": "Komunitin es una plataforma de código abierto que ofrece la gestión de moneda social para las comunidades de intercambio.",
   "newInKomunitin": "¿Nuevo/a en komunitin?",
   "alreadyRegisteredToALocalGroup": "¿Ya estás registrado en un grupo?",
@@ -78,6 +76,7 @@
   "accepted": "Aceptada",
   "committed": "Confirmada",
   "rejected": "Rechazada",
+  "failed": "Fallida",
   "deleted": "Eliminada",
   "payer": "Pagador/a",
   "payee": "Cobrador/a",
@@ -131,6 +130,7 @@
   "cancel": "Cancelar",
   "cantBeUndone": "Esta acción no se puede deshacer.",
   "needDeleted": "Necessidad eliminada",
+  "offerDeleted": "Oferta eliminada",
   "expired": "Caducada",
   "hidden": "Oculta",
 
@@ -249,6 +249,9 @@
   "receive": "Recibir",
 
 
-  "ErrorAuthNoCredentials": "Error: email o password incorrectos",
-  "ErrorInvalidPassword": "Contraseña incorrecta"
+  "ErrorAuthNoCredentials": "Email o password incorrectos",
+  "ErrorInvalidPassword": "Contraseña incorrecta",
+  "ErrorInsufficientBalance": "Saldo insuficiente",
+  "ErrorNoTrustPath": "La transacción ha fallado porque no existe ningún camino de intercambio entre las dos monedas",
+  "ErrorTransactionError": "La transacción ha fallado"
 }

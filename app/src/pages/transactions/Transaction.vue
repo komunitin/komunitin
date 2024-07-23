@@ -50,6 +50,7 @@ import { useI18n } from "vue-i18n"
 import TransactionCard from "../../components/TransactionCard.vue"
 import { UpdatePayload } from "../../store/resources"
 import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
+import { useFullTransfer } from "src/composables/fullyLoad"
 
 const props = defineProps<{
   code: string,
@@ -69,22 +70,9 @@ const transfer = computed<ExtendedTransfer>(() => store.getters["transfers/curre
 const isLoading = computed(() => !(ready.value || transfer.value && transfer.value.payee.member && transfer.value.payer.member))
 const isPendingMe = computed(() => (transfer.value?.attributes.state == 'pending') && (myAccount.value.id == transfer.value.payer.id))
 
-const fetchData = async (transferCode: string) => {
+const fetchData = async () => {
   // fetch transfer and accounts.
-  await store.dispatch("transfers/load", {
-    code: transferCode,
-    group: props.code,
-    include: "payer,payee,payee.currency"
-  })
-  // fetch account members in a separate call, since the relation
-  // account => member does not exist, only the member => account relation.
-  await store.dispatch("members/loadList", {
-    group: props.code,
-    filter: {
-      account: transfer.value.payee.id + "," + transfer.value.payer.id
-    },
-    onlyResources: true
-  })
+  await useFullTransfer(props.code, props.transferCode)
   ready.value = true
 }
 
@@ -94,7 +82,7 @@ const updateTransactionState = async(state: TransferState) => {
       delay: 200
     })
     const payload: UpdatePayload<Transfer> = {
-      code: props.transferCode,
+      id: props.transferCode,
       group: props.code,
       resource: {
         id: transfer.value.id,
@@ -110,7 +98,7 @@ const updateTransactionState = async(state: TransferState) => {
     quasar.loading.hide()
   }
   // Fetch transfer again so it also updates accounts (and the user balance).
-  await fetchData(props.transferCode)
+  await fetchData()
 }
 
 watch(() => props.transferCode, fetchData, { immediate: true })

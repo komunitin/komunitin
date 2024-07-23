@@ -97,13 +97,13 @@ const myUser = computed(() => store.getters.myUser)
 
 // Fetch group
 store.dispatch("groups/load", {
-  code: props.code,
+  id: props.code,
   include: "signup-settings"
 })
 // Load member
 const member = ref(myMember.value)
 store.dispatch("members/load", {
-  code: myMember.value.id,
+  id: myMember.value.id,
   group: props.code,
   include: "contacts"
 }).then(() => {
@@ -137,7 +137,7 @@ const saveMember = async () => {
   loadingSaveMember.value = true
   try {
     await store.dispatch("members/update", {
-      code: member.value.id,
+      id: member.value.id,
       group: props.code,
       resource: member.value,
       included: member.value.contacts

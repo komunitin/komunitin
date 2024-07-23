@@ -47,7 +47,7 @@ const user = ref()
 
 const loadMember = async () => {
   await store.dispatch("members/load", {
-    code: myMember.value.id,
+    id: myMember.value.id,
     group: code.value,
     include: "contacts,group"
   })
@@ -59,7 +59,7 @@ const changes = ref<typeof SaveChanges>()
 
 const saveMember = async (resource: DeepPartial<Member>) => {
   const fn = () => store.dispatch("members/update", {
-    code: myMember.value.id,
+    id: myMember.value.id,
     group: code.value,
     resource : {
       attributes: resource.attributes
@@ -71,7 +71,7 @@ const saveMember = async (resource: DeepPartial<Member>) => {
 const saveContacts = async (resources: DeepPartial<Contact>[]) => {
   const fn = () => store.dispatch("members/update", {
     code: myMember.value.id,
-    group: code.value,
+    id: code.value,
     resource: {
       relationships: {
         contacts: {

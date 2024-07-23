@@ -52,8 +52,8 @@ const onSubmit = async (resource: DeepPartial<Need>) => {
     })
   } else {
     await store.dispatch("needs/update", {
+      id: resource.attributes?.code,
       group: props.code,
-      code: resource.attributes?.code,
       resource
     })
   }

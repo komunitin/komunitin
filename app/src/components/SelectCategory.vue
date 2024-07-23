@@ -31,7 +31,7 @@ const store = useStore()
 watch([props], () => {
   if (props.code) {
     store.dispatch("groups/load", {
-      code: props.code,
+      id: props.code,
       include: "contacts,categories"
     })
   }

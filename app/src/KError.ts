@@ -1,11 +1,19 @@
 export enum KErrorCode {
-  // Server errors codes.
-  NotImplemented = "NotImplemented",
+  // Shared server errors codes.
   Unauthorized = "Unauthorized",
   Forbidden = "Forbidden",
   NotFound = "NotFound",
+  NotImplemented = "NotImplemented",
+
+  // Accounting service error codes.
+  TransactionError = "TransactionError",
+  InsufficientBalance = "InsufficientBalance",
+  NoTrustPath = "NoTrustPath",
+
+  // Social service error codes.
   InvalidPassword = "InvalidPassword", 
   DuplicatedEmail = "DuplicatedEmail",
+
   // There are more server errors but we're not identifying them and
   // they are all piped to UnknownServer.
   UnknownServer = "UnknownServer",

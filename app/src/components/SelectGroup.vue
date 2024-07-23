@@ -47,6 +47,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { useStore } from "vuex";
 export default defineComponent({
   inheritAttrs: false,
 })
@@ -55,7 +56,7 @@ export default defineComponent({
 import { Currency, Group } from "src/store/model";
 import ResourceCards from "../pages/ResourceCards.vue";
 import GroupHeader from "./GroupHeader.vue";
-import { defineEmits, computed, ref } from "vue";
+import { computed, ref, ComputedRef } from "vue";
 
 const props = defineProps<{
   modelValue?: Group,
@@ -77,18 +78,34 @@ const group = computed({
   set: (value) => emit("update:modelValue", value)
 })
 
+const store = useStore()
+
 const select = (value: Group) => {
   group.value = value
   dialog.value = false
 }
 
+const myGroup = computed<Group>(() => store.getters.myMember.group)
+
+const showGroups : Record<string, ComputedRef<boolean>> = {}
+
 const showGroup = (group: Group & {currency: Currency}) => {
-  // Only show groups that allow external payments / requests.
-  if (props.payer) {
-    return group.currency.attributes.settings.enableExternalPaymentRequests
-  } else {
-    return group.currency.attributes.settings.enableExternalPayments
+  if (!(group.id in showGroups)) {
+    showGroups[group.id] = computed(() => {
+      // Always show selected group
+      if (group.id === props.modelValue?.id || group.id === myGroup.value.id) {
+        return true
+      }
+      const currency = store.getters["currency/one"](group.relationships.currency.data.id)
+      // Only show groups that allow external payments / requests.
+      if (props.payer) {
+        return currency?.attributes.settings.enableExternalPaymentRequests ?? false
+      } else {
+        return currency?.attributes.settings.enableExternalPayments ?? false
+      }
+    })
   }
+  return showGroups[group.id]
 }
 
 </script>
