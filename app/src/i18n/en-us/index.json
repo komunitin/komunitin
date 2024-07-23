@@ -103,6 +103,7 @@
   "descriptionRequired" : "Transaction description is required.",
   "invalidAmount" : "Invalid amount. Enter a positive number.",
   "payerRequired": "Choose the payer member",
+  "payeeRequired": "Choose the payee member",
   "sucessfulLogin": "Sucessfully logged in as {name}!",
   "confirm": "Confirm",
   "transactionCommitted": "Transacion committed",

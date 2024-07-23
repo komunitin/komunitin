@@ -103,6 +103,7 @@
   "descriptionRequired" : "Entra una descripción de la transacción.",
   "invalidAmount" : "Cantidad inválida. Entra un número positivo.",
   "payerRequired": "Escoge la cuenta pagadora.",
+  "payeeRequired": "Escoge la cuenta destino.",
   "sucessfulLogin": "Sessión iniciada como {name}!",
   "confirm": "Confirmar",
   "accept": "Acceptar",

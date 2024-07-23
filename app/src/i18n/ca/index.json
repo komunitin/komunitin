@@ -103,6 +103,7 @@
   "descriptionRequired" : "Entra una descripció de la transacció.",
   "invalidAmount" : "Quantitat invàlida. Entra un número positiu.",
   "payerRequired": "Escull el compte pagador",
+  "payeeRequired": "Escull el compte destí",
   "sucessfulLogin": "Sessió iniciada com a {name}!",
   "confirm": "Confirma",
   "transactionCommitted": "Transacció confirmada",
