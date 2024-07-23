@@ -40,24 +40,22 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import { computed } from "vue"
 import { useQuasar } from "quasar"
 import { useStore } from "vuex"
 import PageHeader from "../../layouts/PageHeader.vue"
-import {ExtendedTransfer, Transfer, TransferState} from "../../store/model"
+import {Transfer, TransferState} from "../../store/model"
 import { useI18n } from "vue-i18n"
 
 import TransactionCard from "../../components/TransactionCard.vue"
 import { UpdatePayload } from "../../store/resources"
 import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
-import { useFullTransfer } from "src/composables/fullyLoad"
+import { useFullTransfer } from "src/composables/fullTransfer"
 
 const props = defineProps<{
   code: string,
   transferCode: string
 }>()
-
-const ready = ref(false)
 
 const store = useStore()
 const { t } = useI18n()
@@ -66,15 +64,13 @@ const quasar = useQuasar()
 const myAccount = computed(() => store.getters.myAccount)
 const myMember = computed(() => store.getters.myMember)
 
-const transfer = computed<ExtendedTransfer>(() => store.getters["transfers/current"])
+const transferId = computed(() => ({
+  group: props.code,
+  id: props.transferCode
+}))
+const {transfer, ready, refresh} = useFullTransfer(transferId)
 const isLoading = computed(() => !(ready.value || transfer.value && transfer.value.payee.member && transfer.value.payer.member))
 const isPendingMe = computed(() => (transfer.value?.attributes.state == 'pending') && (myAccount.value.id == transfer.value.payer.id))
-
-const fetchData = async () => {
-  // fetch transfer and accounts.
-  await useFullTransfer(props.code, props.transferCode)
-  ready.value = true
-}
 
 const updateTransactionState = async(state: TransferState) => {
   try {
@@ -98,8 +94,6 @@ const updateTransactionState = async(state: TransferState) => {
     quasar.loading.hide()
   }
   // Fetch transfer again so it also updates accounts (and the user balance).
-  await fetchData()
+  await refresh()
 }
-
-watch(() => props.transferCode, fetchData, { immediate: true })
 </script>

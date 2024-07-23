@@ -348,9 +348,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       }
     })
     // Fetch external resources
-    const promises = external.map(r => {
-      return dispatch(`${r.type}/load`, {
-        url: r.links.self,
+    const promises = external.map(external => {
+      return dispatch(`${external.type}/load`, {
+        url: external.meta.href,
         group
       }, {
         root: true

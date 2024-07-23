@@ -1,7 +1,7 @@
+import { ExternalResource } from 'src/model/resource';
+import { Trustline } from 'src/model/trustline';
 import { Linker, Metaizer, Relator, Serializer, SerializerOptions } from 'ts-japi';
 import { Account, AccountSettings, Currency, Transfer, User } from '../model';
-import { Trustline } from 'src/model/trustline';
-import { ExternalResource } from 'src/model/resource';
 import { config } from 'src/config';
 
 const projection = <T>(fields: (keyof T)[]) => {
@@ -33,6 +33,9 @@ export const CurrencySerializer = new Serializer<Currency>("currencies", {
     admins: new Relator<Currency,User>(async (currency) => {
       return currency.admin ? [currency.admin] : undefined
     }, UserSerializer, { relatedName: "admins" })
+  },
+  linkers: {
+    resource: new Linker((currency: Currency) => `${config.API_BASE_URL}/${currency.code}/currency`)
   }
 })
 
@@ -62,6 +65,9 @@ export const AccountSerializer = new Serializer<Account>("accounts", {
     settings: new Relator<Account, AccountSettings>(async (account) => {
       return account.settings
     }, AccountSettingsSerializer, { relatedName: "settings" })
+  },
+  linkers: {
+    resource: new Linker((account: Account) => `${config.API_BASE_URL}/${account.currency.code}/accounts/${account.id}`)
   }
 })
 
