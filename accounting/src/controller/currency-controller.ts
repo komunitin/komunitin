@@ -155,7 +155,10 @@ export class LedgerCurrencyController implements CurrencyController {
         limit: data.limit,
         balance: 0,
 
-        trusted: { connect: { id: trustedExternalResource.id } },
+        trusted: { connect: { tenantId_id: {
+          tenantId: this.db.tenantId,
+          id: trustedExternalResource.id
+        } } },
         currency: { connect: { id: this.model.id } }
       }
     })

@@ -1,4 +1,4 @@
-import { Linker, Metaizer, Relator, Serializer } from 'ts-japi';
+import { Linker, Metaizer, Relator, Serializer, SerializerOptions } from 'ts-japi';
 import { Account, AccountSettings, Currency, Transfer, User } from '../model';
 import { Trustline } from 'src/model/trustline';
 import { ExternalResource } from 'src/model/resource';
@@ -67,22 +67,39 @@ export const AccountSerializer = new Serializer<Account>("accounts", {
 
 // Serializer customization to merge "externalPayee" into the "payee" relationship.
 class CustomTransferSerializer extends Serializer<Transfer> {
-  async serialize(transfer: Transfer|Transfer[], ...args: any[]) {
-    const fixExternalAccounts = (resource: any) => {
+  async serialize(transfer: Transfer|Transfer[], options?: Partial<SerializerOptions<Transfer>>) {
+    const omittedAccountIds: string[] = []
+    const fixRelationships = (resource: any) => {
       if (resource.relationships?.externalPayee) {
+        omittedAccountIds.push(resource.relationships.payee.data.id)
         resource.relationships.payee = resource.relationships.externalPayee
         delete resource.relationships["externalPayee"]
       }
       if (resource.relationships?.externalPayer) {
+        omittedAccountIds.push(resource.relationships.payer.data.id)
         resource.relationships.payer = resource.relationships.externalPayer
         delete resource.relationships["externalPayer"]
       }
     }
-    const result = await super.serialize(transfer, ...args)
+    
+    if (options && options.include && Array.isArray(options.include)) {
+      if (options.include.includes("payer")) {
+        options.include.push("externalPayer")
+      }
+      if (options.include.includes("payee")) {
+        options.include.push("externalPayee")
+      }
+    }
+    const result = await super.serialize(transfer, options)
     if (result.data && Array.isArray(result.data)) {
-      result.data.forEach((resource) => fixExternalAccounts(resource))
+      result.data.forEach((resource) => fixRelationships(resource))
     } else if (result.data) {
-      fixExternalAccounts(result.data)
+      fixRelationships(result.data)
+    }
+    if (result.included) {
+      result.included = result.included.filter((resource) => {
+        return !omittedAccountIds.includes(resource.id)
+      })
     }
     return result
   }

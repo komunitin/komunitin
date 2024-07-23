@@ -203,7 +203,7 @@ model Trustline {
   updated DateTime @updatedAt
   
   trustedId String
-  trusted ExternalResource @relation(fields: [trustedId], references: [id])
+  trusted ExternalResource @relation(fields: [tenantId, trustedId], references: [tenantId, id])
 
   currencyId String
   currency Currency @relation(fields: [currencyId], references: [id])
@@ -217,10 +217,10 @@ model ExternalTransfer {
   transfer Transfer @relation(fields: [tenantId, id], references: [tenantId, id])
 
   externalPayerId String?
-  externalPayer ExternalResource? @relation("externalPayer", fields: [externalPayerId], references: [id])
+  externalPayer ExternalResource? @relation("externalPayer", fields: [tenantId, externalPayerId], references: [tenantId, id])
 
   externalPayeeId String?
-  externalPayee ExternalResource? @relation("externalPayee", fields: [externalPayeeId], references: [id])
+  externalPayee ExternalResource? @relation("externalPayee", fields: [tenantId, externalPayeeId], references: [tenantId, id])
 
   @@id([tenantId, id])
 }
@@ -229,7 +229,7 @@ model ExternalResource {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
 
   // Same id as external resource
-  id   String @id
+  id   String
   
   type String @db.VarChar(255)
   href String @db.VarChar(255)
@@ -243,4 +243,6 @@ model ExternalResource {
   trustlines Trustline[] @relation()
   externalPayerTransfers ExternalTransfer[] @relation("externalPayer")
   externalPayeeTransfers ExternalTransfer[] @relation("externalPayee")
+
+  @@id([tenantId, id])
 }

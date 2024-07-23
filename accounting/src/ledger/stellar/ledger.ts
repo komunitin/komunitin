@@ -7,7 +7,7 @@ import Big from "big.js"
 import { logger } from "../../utils/logger"
 import TypedEmitter from "typed-emitter"
 import {EventEmitter} from "node:events"
-import { KError, badTransaction, internalError, notImplemented } from "../../utils/error"
+import { KError, transactionError, internalError, notImplemented } from "../../utils/error"
 
 export type StellarLedgerConfig = {
   server: string,
@@ -193,7 +193,7 @@ export class StellarLedger implements Ledger {
       const expiration = parseInt(inner.timeBounds?.maxTime ?? "0")
 
       if (Date.now() >= expiration * 1000) {
-        throw badTransaction("Transaction expired. Create a new one and submit it again.", error)
+        throw transactionError("Transaction expired. Create a new one and submit it again.", error)
       }
 
       return await this.submitTransactionWithRetry(transaction, 2 * timeout)
@@ -262,10 +262,10 @@ export class StellarLedger implements Ledger {
       if (data.extras) {
         // Transaction failed
         const result = data.extras.result_codes
-        return badTransaction(msg, {operations, results: result.operations, result: result.transaction})
+        return transactionError(msg, {operations, results: result.operations, result: result.transaction})
       } else {
         // Other Horizon error
-        return badTransaction(msg, {operations, data})
+        return transactionError(msg, {operations, data})
       }
     } else if (error instanceof Error) {
       return internalError(`Error submitting transaction: ${error.message}`, {operations, error})

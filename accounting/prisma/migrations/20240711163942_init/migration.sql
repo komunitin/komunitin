@@ -132,7 +132,7 @@ CREATE TABLE "ExternalResource" (
     "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "ExternalResource_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ExternalResource_pkey" PRIMARY KEY ("tenantId","id")
 );
 
 -- CreateIndex
@@ -214,7 +214,7 @@ ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_payeeId_fkey" FOREIGN KEY ("paye
 ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_tenantId_userId_fkey" FOREIGN KEY ("tenantId", "userId") REFERENCES "User"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Trustline" ADD CONSTRAINT "Trustline_trustedId_fkey" FOREIGN KEY ("trustedId") REFERENCES "ExternalResource"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Trustline" ADD CONSTRAINT "Trustline_tenantId_trustedId_fkey" FOREIGN KEY ("tenantId", "trustedId") REFERENCES "ExternalResource"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Trustline" ADD CONSTRAINT "Trustline_currencyId_fkey" FOREIGN KEY ("currencyId") REFERENCES "Currency"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -223,7 +223,7 @@ ALTER TABLE "Trustline" ADD CONSTRAINT "Trustline_currencyId_fkey" FOREIGN KEY (
 ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_tenantId_id_fkey" FOREIGN KEY ("tenantId", "id") REFERENCES "Transfer"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_externalPayerId_fkey" FOREIGN KEY ("externalPayerId") REFERENCES "ExternalResource"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_tenantId_externalPayerId_fkey" FOREIGN KEY ("tenantId", "externalPayerId") REFERENCES "ExternalResource"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_externalPayeeId_fkey" FOREIGN KEY ("externalPayeeId") REFERENCES "ExternalResource"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ExternalTransfer" ADD CONSTRAINT "ExternalTransfer_tenantId_externalPayeeId_fkey" FOREIGN KEY ("tenantId", "externalPayeeId") REFERENCES "ExternalResource"("tenantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE;

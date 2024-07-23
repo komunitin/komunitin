@@ -173,8 +173,8 @@ export class AccountController extends AbstractCurrencyController{
   }
 
   async getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]> {
-    // Anonymous users can access this endpoint if they provide an id filter. 
-    const allowAnonymous = params.filters?.id
+    // Anonymous users can access this endpoint if they provide an id or a single code filter. 
+    const allowAnonymous = params.filters?.id || params.filters?.code
 
     if (!allowAnonymous) {
       if (ctx.type === "anonymous") {
