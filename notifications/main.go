@@ -28,6 +28,8 @@ func main() {
 		"http://localhost:8080",
 		"http://localhost:2030",
 		"https://localhost:2030",
+		"http://localhost:2031",
+		"https://localhost:2031",
 		"https://integralces.net",
 		"https://www.integralces.net",
 		"https://demo.integralces.net",
