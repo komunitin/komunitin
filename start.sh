@@ -81,4 +81,8 @@ docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/dru
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL --komunitin_allow_anonymous_member_list=1
 docker compose exec integralces drush vset ces_komunitin_app_url $KOMUNITIN_APP_URL
 
+# Configure mutual trust between NET1 and NET2
+./accounting/cli/trust.sh "riemann@komunitin.org" "komunitin" "NET1" "NET2" 1000
+./accounting/cli/trust.sh "fermat@komunitin.org" "komunitin" "NET2" "NET1" 10000
+
 fi
