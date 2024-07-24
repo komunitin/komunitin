@@ -20,7 +20,12 @@ services:
       - "letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
-      - komunitin
+      komunitin:
+        aliases:
+          - ${KOMUNITIN_DOMAIN}
+          - accounting.${KOMUNITIN_DOMAIN}
+          - notifications.${KOMUNITIN_DOMAIN}
+          - integralces.${KOMUNITIN_DOMAIN}
 
 volumes:
   letsencrypt:
