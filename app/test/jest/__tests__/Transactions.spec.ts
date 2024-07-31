@@ -204,7 +204,7 @@ describe("Transactions", () => {
     const wait = await waitForEqual(() => dialog.findAllComponents(AccountHeader).length, 1)
     expect(wait).toBeTruthy()
     // Found account
-    dialog.getComponent(AccountHeader).trigger("click")
+    await dialog.getComponent(AccountHeader).trigger("click")
     await flushPromises()
     await wrapper.vm.$wait()
 
