@@ -204,7 +204,8 @@ describe("Transactions", () => {
     const wait = await waitForEqual(() => dialog.findAllComponents(AccountHeader).length, 1)
     expect(wait).toBeTruthy()
     // Found account
-    await input.trigger("keydown.enter")
+    dialog.getComponent(AccountHeader).trigger("click")
+    await flushPromises()
     await wrapper.vm.$wait()
 
     await wrapper.get("[name='description']").setValue("Test external payment 2")
