@@ -18,8 +18,8 @@
         :label="$t('selectPayer')"
         :hint="$t('transactionPayerHint')"
         :rules="[() => !v$.payerAccount?.$error || $t('payerRequired')]"
-        @blur="v$.payerAccount?.$touch()"
         outlined
+        @blur="v$.payerAccount?.$touch()"
       />
       <select-account
         v-if="selectPayee"
@@ -30,8 +30,8 @@
         :label="$t('selectPayee')"
         :hint="$t('transactionPayeeHint')"
         :rules="[() => !v$.payeeAccount?.$error || $t('payeeRequired')]"
-        @blur="v$.payeeAccount?.$touch()"
         outlined
+        @blur="v$.payeeAccount?.$touch()"
       />
       <q-input 
         v-model="concept"
