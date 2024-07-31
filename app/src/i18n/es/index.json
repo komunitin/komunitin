@@ -248,6 +248,11 @@
   "selectPayee": "Selecciona destinatario",
   "send": "Enviar",
   "receive": "Recibir",
+  "accountCode": "Número de cuenta",
+  "accountCodeInvalid": "Número de cuenta inválido",
+  "chooseAccountNoListingText": "Entra el número de cuenta del grupo externo '{group}'.",
+  "noAccountsFound": "No se ha enconctrado ninguna cuenta",
+  "loading": "Cargando...",
 
 
   "ErrorAuthNoCredentials": "Email o password incorrectos",
