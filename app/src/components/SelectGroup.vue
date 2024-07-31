@@ -2,7 +2,7 @@
   <group-header
     v-if="modelValue"  
     id="select-group-header"
-    class="bg-active"
+    class="bg-light"
     :group="modelValue"
     clickable
     @click="onClick"

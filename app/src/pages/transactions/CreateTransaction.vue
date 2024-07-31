@@ -123,6 +123,14 @@ const submitLabel = computed(() => {
 const loadAccount = (isSelect: boolean, memberCode?: string) => {
   const account = ref<Account & {member: Member}>()
   if (memberCode) {
+    // Load from cache
+    const member = store.getters["members/find"]({
+      code: memberCode
+    })
+    if (member && member.group && member.account) {
+      account.value = member.account
+    }
+    // Revalidate from server
     store.dispatch("members/load", {
       id: memberCode,
       group: props.code,

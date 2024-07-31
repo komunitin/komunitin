@@ -11,25 +11,27 @@
       </div>
       <select-account
         v-if="selectPayer"
-        v-model="payerAccount"  
+        v-model="payerAccountValue"
         name="payer"
         :code="code"
         :payer="true"
         :label="$t('selectPayer')"
         :hint="$t('transactionPayerHint')"
         :rules="[() => !v$.payerAccount?.$error || $t('payerRequired')]"
-        @close-dialog="v$.payerAccount?.$touch()"
+        @blur="v$.payerAccount?.$touch()"
+        outlined
       />
       <select-account
         v-if="selectPayee"
-        v-model="payeeAccount"  
+        v-model="payeeAccountValue"  
         name="payee"
         :code="code"
         :payer="false"
         :label="$t('selectPayee')"
         :hint="$t('transactionPayeeHint')"
         :rules="[() => !v$.payeeAccount?.$error || $t('payeeRequired')]"
-        @close-dialog="v$.payeeAccount?.$touch()"
+        @blur="v$.payeeAccount?.$touch()"
+        outlined
       />
       <q-input 
         v-model="concept"
@@ -114,13 +116,13 @@ const transfer = computed({
   set: (value) => emit('update:modelValue', value as DeepPartial<Transfer>)
 })
 
-const payerAccount = ref(props.payerAccount)
-const payeeAccount = ref(props.payeeAccount)
+const payerAccountValue = ref(props.payerAccount)
+const payeeAccountValue = ref(props.payeeAccount)
 const concept = ref("")
 const amount = ref<number>()
 
 // Validation.
-const isAccount = (member: Account|undefined) => (member && member.id !== undefined)
+const isAccount = (account: Account|undefined) => (account && account.id !== undefined)
 
 const rules = computed(() => ({
   ...(props.selectPayer && {payerAccount: {isAccount}}),
@@ -130,8 +132,8 @@ const rules = computed(() => ({
 }))
 
 const v$ = useVuelidate(rules, {
-  ...(props.selectPayer && {payerAccount}),
-  ...(props.selectPayee && {payeeAccount}),
+  ...(props.selectPayer && {payerAccount: payerAccountValue}),
+  ...(props.selectPayee && {payeeAccount: payeeAccountValue}),
   concept, 
   amount
 });
@@ -140,10 +142,10 @@ const store = useStore()
 const myCurrency = computed(() => store.getters.myAccount.currency)
 
 const otherCurrency = computed(() =>  {
-  if (props.selectPayer && payerAccount.value && payerAccount.value.currency.id !== myCurrency.value.id) {
-    return payerAccount.value.currency
-  } else if (props.selectPayee && payeeAccount.value && payeeAccount.value.currency.id !== myCurrency.value.id) {
-    return payeeAccount.value.currency
+  if (props.selectPayer && payerAccountValue.value && payerAccountValue.value.currency.id !== myCurrency.value.id) {
+    return payerAccountValue.value.currency
+  } else if (props.selectPayee && payeeAccountValue.value && payeeAccountValue.value.currency.id !== myCurrency.value.id) {
+    return payeeAccountValue.value.currency
   }
   return null
 })
@@ -158,7 +160,7 @@ const otherAmount = computed(() => {
 })
 
 const onSubmit = () => {
-  if (!payerAccount.value || !payeeAccount.value) {
+  if (!payerAccountValue.value || !payeeAccountValue.value) {
     throw new KError(KErrorCode.ScriptError, "Both payer and payee must be defined before submit.")
   }
   if (amount.value === undefined) {
@@ -190,8 +192,8 @@ const onSubmit = () => {
       updated: new Date().toUTCString(),
     },
     relationships: {
-      payer: accountRelationship(payerAccount.value),
-      payee: accountRelationship(payeeAccount.value),
+      payer: accountRelationship(payerAccountValue.value),
+      payee: accountRelationship(payeeAccountValue.value),
     }
   };
 }

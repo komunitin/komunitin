@@ -1,6 +1,6 @@
 import { VueWrapper, flushPromises } from "@vue/test-utils";
 import { seeds } from "src/server";
-import { mountComponent } from "../utils";
+import { mountComponent, waitForEqual } from "../utils";
 import App from "../../../src/App.vue";
 import GroupCard from "../../../src/components/GroupCard.vue";
 import { QBtn, QDialog, QInput, QItem, QSelect } from "quasar";
@@ -118,8 +118,8 @@ describe("Signup", () => {
     const cat = wrapper.getComponent(QSelect)
     await cat.trigger("click");
     await wrapper.vm.$wait();
-    const catMenu = cat.findAllComponents(QItem);
-    await catMenu[1].trigger("click");
+    await waitForEqual(() => cat.findAllComponents(QItem).length > 2, true)
+    await cat.findAllComponents(QItem)[1].trigger("click");
 
     await wrapper.get("[name='title']").setValue("Test Offer");
     await wrapper.get("[name='description']").setValue("This is a test offer.");
