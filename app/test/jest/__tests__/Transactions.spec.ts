@@ -210,6 +210,7 @@ describe("Transactions", () => {
     await wrapper.get("[name='description']").setValue("Test external payment 2")
     await wrapper.get("[name='amount']").setValue("13")
     await flushPromises()
+    await wrapper.vm.$wait();
     expect((wrapper.get("input[aria-label='Amount in programs']").element as HTMLInputElement).value).toEqual("1,300.00")
 
     await wrapper.get("button[type='submit']").trigger("click")
