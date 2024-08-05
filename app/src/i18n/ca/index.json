@@ -278,6 +278,7 @@
   "ErrorInvalidPassword": "Contrasenya incorrecta",
   "ErrorInsufficientBalance": "Saldo insufucient",
   "ErrorNoTrustPath": "La transacció ha fallat perquè no hi ha cap camí d'intercanvi entre les dues monedes",
+  "ErrorTransactionError": "La transacció ha fallat",
   "ErrorInvalidTransfersCSVFileLineColumn": "Error llegint el fitxer CSV a la línia {line} columna {column}",
   "ErrorInvalidTransfersCSVFile": "Error llegint el fitxer"
 }
