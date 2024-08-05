@@ -16,6 +16,13 @@ export interface CurrencyFormat {
   symbol?: boolean;
 }
 
+export interface CurrencyParse {
+  /**
+   * Whether to apply the currency scale so the output value in an integer. Default to true.
+   */
+  scale?: boolean;
+}
+
 /**
  * Format the given amount as a currency.
  *
@@ -79,4 +86,48 @@ export function convertCurrency(amount: number, from: Currency, to: Currency): n
   return amount 
     * (from.attributes.rate.n / from.attributes.rate.d)
     * (to.attributes.rate.d / to.attributes.rate.n)
+}
+
+/**
+ * Returns the numeric amount from input string. Returns false if the input is not a valid amount.
+ * TODO: localization
+ * @param amount 
+ * @param currency 
+ */
+export function parseAmount(amount: string, currency: Currency, options?: CurrencyParse): number | false {
+  // check if string represents a number
+  let numeric = parseFloat(amount)
+  if (isNaN(numeric) || isNaN(Number(amount))) {
+    return false
+  }
+  if (options?.scale ?? true) {
+    numeric = numeric * 10 ** currency.attributes.scale
+  }
+  return numeric  
+}
+
+/**
+ * Best effort to convert a string into a valid account number in the form
+ * ABCD0123 where ABCD is the currency code and 0123 is the account number.
+ * Examples:
+ * - "003" => "ABCD0003"
+ * - "ABCD003" => "ABCD0003"
+ * - "abcd0003" => "ABCD0003"
+ * - "" => "ABCD0000"
+ * - "hello" => "ABCDhello"
+ */
+export function normalizeAccountCode(search: string, currency: Currency) {
+  search = search.trim()
+  const currencyCode = currency.attributes.code
+  // strip currency code (to be added later)
+  if (search.toLowerCase().startsWith(currencyCode.toLowerCase())) {
+    search = search.substring(currencyCode.length)
+  }
+  // pad number
+  if (search.match(/^[0-9]+$/)) {
+    search = search.padStart(4, '0')
+  }
+  // add currency code
+  search = currencyCode + search
+  return search
 }

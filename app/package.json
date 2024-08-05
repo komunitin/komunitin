@@ -26,6 +26,7 @@
     "firebase": "^10.12.2",
     "i18n-iso-countries": "^7.7.0",
     "leaflet": "^1.9.3",
+    "lil-csv": "^1.4.6",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
     "markdown-to-txt": "^2.0.1",

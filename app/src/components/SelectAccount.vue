@@ -7,6 +7,7 @@
     :option-disable="accountDisabled"
     :loading="loading"
     :input-debounce="0"
+    input-style="position: absolute"
     @input-value="searchText = $event"
     @virtual-scroll="onScroll"
     @popup-show="popupOpened = true"
@@ -22,7 +23,7 @@
     </template>
     <template #selected>
       <account-header
-        v-if="account && !popupOpened"
+        v-if="account && !popupOpened && searchText === ''"
         :account="account"
         to=""
       />
@@ -60,15 +61,18 @@ import { useStore } from 'vuex'
 import { QSelect } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import { normalizeAccountCode } from 'src/plugins/FormatCurrency';
 
 type ExtendedAccount = Account & {member?: ExtendedMember & {group: Group}, currency?: Currency}
 type ExtendedMember = Member & {account?: ExtendedAccount }
 
 const props = defineProps<{
-  modelValue?: ExtendedAccount,
+  modelValue?: ExtendedAccount|undefined,
   code: string,
   payer: boolean
+  lazy?: boolean
 }>()
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value: ExtendedAccount|undefined): void
 }>()
@@ -77,7 +81,7 @@ const field = ref<QSelect>()
 const loading = ref(false)
 const popupOpened = ref(false)
 
-const account = computed({
+const account = computed<ExtendedAccount|undefined>({
   get: () => props.modelValue,
   set: (v: ExtendedAccount|undefined) => emit('update:modelValue', v)
 })
@@ -142,22 +146,6 @@ watch(options, async (options) => {
   }
 })
 
-const normalizeAccountCode = (search: string) => {
-  search = search.trim()
-  const currencyCode = group.value.currency.attributes.code
-  // strip currency code (to be added later)
-  if (search.toLowerCase().startsWith(currencyCode.toLowerCase())) {
-    search = search.substring(currencyCode.length)
-  }
-  // pad number
-  if (search.match(/^[0-9]+$/)) {
-    search = search.padStart(4, '0')
-  }
-  // add currency code
-  search = currencyCode + search
-  return search
-}
-
 const fetchExternalAccountByCode = async (search?: string) => {
   if (!search || search === "") {
     // For some unknown reason, when changing the group, the account.value is not
@@ -168,7 +156,7 @@ const fetchExternalAccountByCode = async (search?: string) => {
       options.value = []
     }
   } else {
-    const code = normalizeAccountCode(search)
+    const code = normalizeAccountCode(search, group.value.currency)
     const currencyUrl = group.value.relationships.currency.links.related
     const baseUrl = currencyUrl.replace('/currency', '')
     const accountUrl = `${baseUrl}/accounts?filter[code]=${code}`
@@ -188,6 +176,7 @@ const fetchResources = async (search?: string) => {
         search,
         include: "account",
         group: group.value.attributes.code,
+        cache: 1000*60*5
       })
     } else {
       await fetchExternalAccountByCode(search)
@@ -204,6 +193,7 @@ const loadNextPage = async () => {
       await store.dispatch("members/loadNext", {
         group: group.value.attributes.code,
         include: "account",
+        cache: 1000*60*5
       });
     }
   } finally {
@@ -212,9 +202,11 @@ const loadNextPage = async () => {
 }
 
 // Fetch first page when showing the component
-onMounted(async () => {
-  await fetchResources(props.modelValue?.attributes.code) 
-})
+if (!props.lazy) {
+  onMounted(async () => {
+    await fetchResources(props.modelValue?.attributes.code) 
+  })
+}
 
 // Reactivity idea (to be correctly implemented):
 // [search text, group change] => fetch resources => store gets updated (possibly more than once due to cache) => update members => update options
@@ -224,6 +216,9 @@ onMounted(async () => {
 
 // Debounced watch for search text
 watchDebounced(searchText, async (search) => {
+  if (searchText.value !== "") {
+    field.value?.showPopup()
+  }
   await fetchResources(search !== "" ? search : undefined)
 }, { debounce: 300 })
 
@@ -262,3 +257,6 @@ const noOptionsText = computed(() => {
 })
 
 </script>
+<style lang="scss">
+
+</style>

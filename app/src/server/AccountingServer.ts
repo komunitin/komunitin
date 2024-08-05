@@ -1,13 +1,11 @@
 // Mirage typings are not perfect and sometimes we must use any.
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Model, Factory, Server, ModelInstance, Response, belongsTo, hasMany } from "miragejs";
+import { Model, Factory, Server, ModelInstance, Response, belongsTo, hasMany, Collection } from "miragejs";
 import faker from "faker";
 import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { filter, sort, search } from "./ServerUtils";
 import { inflections } from "inflected"
-
-
 
 const urlAccounting = KOptions.url.accounting;
 inflections("en", function (inflect) {
@@ -35,18 +33,10 @@ export default {
         model.account.code + 
         "/settings"
     }),
-    transaction: ApiSerializer.extend({
-      selfLink: (transaction: any) => `${urlAccounting}/${transaction.currency.code}/transactions/${transaction.id}`,
-      shouldIncludeLinkageData(relationshipKey: string, model: any) {
-        return (
-          ApiSerializer.prototype.shouldIncludeLinkageData.apply(this, [
-            relationshipKey,
-            model
-          ]) || relationshipKey == "transfers"
-        );
-      },
+    transfer: ApiSerializer.extend({
+      selfLink: (model: any) => urlAccounting + "/" + 
+        model.payer.currency.code + "/transfers/" + model.id
     }),
-    transfer: ApiSerializer,
   },
   models: {
     currency: Model,
@@ -219,13 +209,29 @@ export default {
     server.post(`${urlAccounting}/:currency/transfers`,
       (schema: any, request: any) => {
         const body = JSON.parse(request.requestBody)
-        const transfer = body.data;
-        const resource = schema.transfers.create({id: transfer.id, type: transfer.type, ...transfer.attributes});
-        resource.update({
-          payer: schema.accounts.find(transfer.relationships.payer.data.id),
-          payee: schema.accounts.find(transfer.relationships.payee.data.id),
+        const data = body.data;
+
+        const dbResource = (resource: any) => ({
+          id: resource.id, 
+          type: resource.type, 
+          ...resource.attributes,
+          payer: schema.accounts.find(resource.relationships.payer.data.id),
+          payee: schema.accounts.find(resource.relationships.payee.data.id),
         })
-        return new Response(201, undefined, resource)
+
+        let created
+        if (Array.isArray(data)) {
+          created = data.map((resource: any) => 
+            schema.transfers.create(dbResource(resource))
+          )
+          // eslint-disable-next-line
+          // @ts-ignore
+          created = new Collection("transfer", created)
+        } else {
+          created = schema.transfers.create(dbResource(data))
+        }
+        
+        return new Response(201, undefined, created)
       }
     )
     // Edit settings

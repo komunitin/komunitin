@@ -14,7 +14,7 @@ export interface ResourcesState<T extends ResourceObject> {
   /**
    * Dictionary of resources indexed by id.
    */
-  resources: { [id: string]: T };
+  resources: Record<string, T>;
   /**
    * Queried object ids. Concretely:
    * pages[group][query][page] = [id1, id2, ...]
@@ -36,6 +36,13 @@ export interface ResourcesState<T extends ResourceObject> {
    * The cache key for this list.
    */
   currentQueryKey: string | null;
+  /**
+   * Timestamps for each resource id and pages, so we can know when they were last updated.
+   * 
+   * The keys are the strings "resources/:id" or "pages/:query/:page". Currently this is not
+   * persisted, but could be used to implement cache invalidation in browser storage.
+   */
+  timestamps: Record<string, number>
 }
 export interface CreatePayload<T extends ResourceObject> {
   /**
@@ -47,6 +54,17 @@ export interface CreatePayload<T extends ResourceObject> {
    * The resource
    */
   resource: T;
+}
+export interface CreateListPayload<T extends ResourceObject> {
+  /**
+   * The group where the records belong to.
+   */
+  group: string;
+
+  /**
+   * The resources
+   */
+  resources: T[];
 }
 
 type DeepPartial<T> = T extends object ? {
@@ -117,13 +135,21 @@ export interface LoadListPayload {
    * Set to false in calls to load auxiliar resources (not the current main list).
    */
   onlyResources?: boolean
+  /**
+   * Cache time in milliseconds. If the resource is already in cache and the cache time
+   * has not expired, the resource is returned from cache. If the cache time has expired,
+   * the resource is revalidated from the server.
+   * 
+   * By default, always revalidate from server.
+   */
+  cache?: number
 }
 
 /**
  * Use this payload to load a resource using a URL of the form
  * <BASE_URL>/:group/<resource_type>?filter[code]=:code
  */
-interface LoadByCodePayload {
+export interface LoadByCodePayload {
   /**
    * The resource code.
    */
@@ -142,7 +168,7 @@ interface LoadByCodePayload {
  * Use this payload to load a resource using a URL of the form
  * <BASE_URL>/:group/<resource_type>/:id
  */
-interface LoadByIdPayload {
+export interface LoadByIdPayload {
   /**
    * The resource id.
    */
@@ -160,7 +186,7 @@ interface LoadByIdPayload {
 /**
  * Use this payload to load an external resource given its URL.
   */
-interface LoadByUrlPayload {
+export interface LoadByUrlPayload {
   /**
    * The resource group. We still need that even if loading from URL
    */
@@ -192,6 +218,10 @@ export interface LoadNextPayload {
    * Sort the results using this field.
    */
   sort?: string;
+  /**
+   * Cache time in milliseconds. See `LoadListPayload.cache`.
+   */
+  cache?: number
 }
 
 type Getter = 
@@ -472,7 +502,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     currentId: null,
     next: undefined,
     currentPage: null,
-    currentQueryKey: null
+    currentQueryKey: null,
+    timestamps: {}
   } as ResourcesState<T>;
 
   getters = {
@@ -559,9 +590,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       const queryKey = state.currentQueryKey
       if (queryKey !== null && queryKey in state.pages && Array.isArray(state.pages[queryKey])) {
         return ([] as string[]).concat(...(state.pages[queryKey])) // flatten
-          .filter(id => id !== undefined)
           .map(id => state.resources[id])
-          .filter(resource => resource !== undefined)
           .map(resource => this.relatedGetters(rootGetters, resource))
       } else {
         return undefined
@@ -584,6 +613,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         state.pages[key] = []
       }
       state.pages[key][page] = ids;
+      state.timestamps["pages/" + key + "/" + page] = Date.now()
     },
     /**
      * Add a resource to the dictionary without updating the current resource.
@@ -595,14 +625,17 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      * Add the given resources to the resource list, without modifying current resource pointers.
      */
     addResources: (state: ResourcesState<T>, resources: T[]) => {
+      const now = Date.now()
       resources.forEach(resource => {
         state.resources[resource.id] = resource
+        state.timestamps["resources/" + resource.id] = now
       });
     },
     /**
      * Removes resource from list.
      */
     removeResource: (state: ResourcesState<T>, id: string) => {
+      delete state.timestamps["resources/" + id]
       delete state.resources[id]
     },
     /**
@@ -648,6 +681,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context: ActionContext<ResourcesState<T>, S>,
       payload: CreatePayload<T>
     ) => this.create(context, payload),
+    createList: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: CreateListPayload<T>
+    ) => this.createList(context, payload),
     update: (
       context: ActionContext<ResourcesState<T>, S>,
       payload: UpdatePayload<T>
@@ -738,8 +775,18 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context.commit("next", undefined)
     }
     
-    // At this point the data may already be cached and hence available to the UI. 
-    // However we revalidate the data by doing the request.
+    // At this point the data may already be cached and hence available to the UI.
+
+    if (payload.cache) {
+      const timestamp = context.state.timestamps["pages/" + queryKey + "/0"]
+      if (timestamp && timestamp + payload.cache > Date.now()) {
+        // We have the value in cache and it's not expired, so we're done. Note that having the timestamps
+        // entry already means that we have the value entry.
+        return
+      }
+    }
+
+    // Revalidate the data by doing the request.
 
     let url = this.collectionEndpoint(payload.group);
     const query = this.buildQuery(payload);
@@ -776,8 +823,15 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
       context.commit("currentPage", page)
 
-      // At this point the data may be already cached and available for the UI. We however 
-      // revalidate that by calling the endpoint.
+      // At this point the data may be already cached and available for the UI.
+      if (payload.cache) {
+        const timestamp = context.state.timestamps["pages/" + queryKey + "/" + page]
+        if (timestamp && timestamp + payload.cache > Date.now()) {
+          // We have the value in cache and it's not expired, so we're done. Note that having the timestamps
+          // entry already means that we have the value entry.
+          return
+        }
+      }
 
       // Well, if the endpoint is null it means that there's no next page.
       if (context.state.next === null) {
@@ -891,6 +945,31 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       const data = await this.request(context, url, "post", body)
       const resource = data.data
       this.setCurrent(context, resource)
+    } catch (error) {
+      throw KError.getKError(error);
+    }
+  }
+  /**
+   * Create multiple resources by posting the given resources to the API.
+   * This action is only available for transfers at the moment. The response
+   * is updated to the current resource list.
+   */
+  protected async createList(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: CreateListPayload<T>
+  ) {
+    const url = this.collectionEndpoint(payload.group)
+    const resources = payload.resources;
+    const body = {data: resources};
+    try {
+      const data = await this.request(context, url, "post", body)
+      const resources = data.data
+      // Update the current list of resources. Use a special Key for this list.
+      const queryKey = "createList"
+      this.setPageResources(context, queryKey, 0, resources)
+      context.commit("currentQueryKey", queryKey)
+      context.commit("currentPage", 0)
+      context.commit("next", null) // No next.
     } catch (error) {
       throw KError.getKError(error);
     }

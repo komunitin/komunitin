@@ -26,6 +26,7 @@
           code=""
           module-name="groups"
           include="currency"
+          :cache="1000*60*5"
         >
           <q-list
             v-if="slotProps.resources"
