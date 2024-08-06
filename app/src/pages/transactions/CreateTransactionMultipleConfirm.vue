@@ -25,6 +25,7 @@
       <q-btn
         class="q-ml-md"
         color="primary"
+        type="submit"
         :label="$t('confirm')"
         unelevated
         padding="xs lg"

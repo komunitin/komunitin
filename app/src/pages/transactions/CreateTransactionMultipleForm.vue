@@ -57,6 +57,7 @@
             >
               <select-account
                 v-model="slot.row.payer"
+                :name="`payer[${slot.rowIndex}]`"
                 :code="code"
                 :payer="true"
                 borderless
@@ -72,6 +73,7 @@
             >
               <select-account
                 v-model="slot.row.payee"
+                :name="`payee[${slot.rowIndex}]`"
                 :code="code"
                 :payer="false"
                 borderless
@@ -86,6 +88,7 @@
             >
               <q-input
                 v-model="slot.row.description"
+                :name="`description[${slot.rowIndex}]`"
                 borderless
                 :rules="[() => emptyRow(slot.row) || checkDescription(slot.row) || $t('descriptionRequired')]"
                 hide-bottom-space
@@ -98,6 +101,7 @@
             >
               <q-input
                 v-model="slot.row.amount"
+                :name="`amount[${slot.rowIndex}]`"
                 input-class="text-right"
                 borderless
                 :rules="[() => emptyRow(slot.row) || checkAmount(slot.row) || $t('invalidAmount')]"

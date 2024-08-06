@@ -229,4 +229,40 @@ describe("Transactions", () => {
     await wrapper.vm.$wait();
     expect(wrapper.text()).toContain("Committed")
   })
+
+  it('creates multiple payments', async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
+    await wrapper.vm.$wait();
+    await wrapper.get("a[href='/groups/GRP0/members/EmilianoLemke57/transactions/send/multiple']").trigger("click")
+    await wrapper.vm.$wait();
+    const payees = wrapper.findAllComponents(SelectAccount)
+    expect(payees.length).toBe(5)
+    for (let i = 0; i < 4; i++) {
+      console.log(i)
+      await payees[i].get('input').trigger("click");
+      await waitForEqual(() => payees[i].getComponent(QMenu).findAllComponents(AccountHeader).length > 0, true)
+      const payee = payees[i].getComponent(QMenu).findAllComponents(AccountHeader)[i+1]
+      await payee.trigger("click")
+      await flushPromises()
+      await wrapper.get(`[name='description[${i}]']`).setValue(`Test multi ${i+1}`)
+      await wrapper.get(`[name='amount[${i}]']`).setValue(`${i+1}`)
+      // It required to wait for the menu to close before opening the next one since otherwise
+      // the vue framework will throw an error.
+      await waitForEqual(() => payees[i].findComponent(QMenu).exists(), false)
+    }
+    await wrapper.get("button[type='submit']").trigger("click")
+    await flushPromises();
+    const names = ["Arnoldo", "Carol", "Oleta", "Florida"]
+    for (let i = 0; i < 4; i++) {
+      expect(wrapper.text()).toContain(names[i])
+      expect(wrapper.text()).toContain(`Test multi ${i+1}`)
+      expect(wrapper.text()).toContain(`$-${i+1}.00`)
+    }
+    await wrapper.get("button[type='submit']").trigger("click")
+    
+    await waitForEqual(() => wrapper.vm.$route.fullPath, "/groups/GRP0/members/EmilianoLemke57/transactions")
+
+    expect(wrapper.text()).toContain(`Test multi 1`)
+    expect(wrapper.text()).toContain(`Test multi 4`)
+  })
 })
