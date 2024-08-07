@@ -85,11 +85,18 @@ export class StellarLedger implements Ledger {
     })
 
     // Horizon has a limit of PER_HOUR_RATE_LIMIT requests/hour/IP. This is set to 3600 by default and
-    // 72000 in local standalone network. Then it also sets a maximum "burst" of 100 requests. This means
-    // that we can send 100 requests concurrently, but then we need to wait for the time allocated for
-    // these 100 requests. This is (1 hour / PER_HOUR_RATE_LIMIT) * 100.
-    const timeWindow = (3600 * 1000 / (config.hourlyRateLimit ?? 72000)) * 100 // = 5 sec by default
-    this.rateLimiter = rateLimitRunner(100, timeWindow)
+    // 72000 in local standalone network as per Stellar documentation. Then it also sets a maximum "burst"
+    // of 100 requests. This means that we can send 100 requests concurrently, but then we need to wait 
+    // for the time allocated for these 100 requests. This is (1 hour / PER_HOUR_RATE_LIMIT) * 100.
+    
+    // For local that'd be 5s, and for testnet 100s. However, in practice, local horizon returns 6 (seconds) 
+    // in header x-ratelimit-reset and the testnet seems to support a greater number of concurrent requests (?).
+    // Maybe the testnet works better because of a longer ledger time and hence naturally more time between 
+    // requests.
+
+    // We set the rate at 90 requests per 6 seconds.
+    
+    this.rateLimiter = rateLimitRunner(90, 6000)
     
     // Always log errors in event handlers.
     this.addListener("error", (error: any) => {
@@ -405,14 +412,20 @@ export class StellarLedger implements Ledger {
     return this.currencies[data.issuerPublicKey]
   }
 
-  private getTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: unknown): KError {
+  private getTransactionError(transaction: Transaction<Memo<MemoType>, Operation[]> | FeeBumpTransaction, error: any): KError {
     const inner = transaction instanceof FeeBumpTransaction ? transaction.innerTransaction : transaction
     const operations = inner.operations.map(op => op.type)
-    if (error && (error as any).response?.data?.title) {
-      const nerror = error as NetworkError
-      const msg = `Horizon Error: ${nerror.response.data?.title}`
-      const data = nerror.response.data as Horizon.HorizonApi.ErrorResponseData.TransactionFailed
-      if (data.extras) {
+    if (error.response && error.response.data) {
+      const msg = `Horizon Error: ${error.response.data.title}`
+      const data = error.response.data as Horizon.HorizonApi.ErrorResponseData
+      if (data.status === 429) { // Too many requests 1
+        if (error.response.headers) {
+          const {"x-ratelimit-limit": limit, "x-ratelimit-reset": reset} = error.response.headers
+          return internalError(msg + `(limit: ${limit}, retry in: ${reset})`, {operations, data})
+        } else {
+          return internalError(msg, {operations, data})
+        }
+      } else if (data.status === 400 && data.extras) {
         // Transaction failed
         const result = data.extras.result_codes
         return transactionError(msg, {operations, results: result.operations, result: result.transaction})

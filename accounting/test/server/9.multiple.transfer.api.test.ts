@@ -11,7 +11,7 @@ logger.level = "debug"
 
 describe('Runs multiple transfers in parallel', async () => {
   // Wait for other tests/requests to stop counting in Horizon rate limit.
-  const wait5secPromise = sleep(5000)
+  const wait5secPromise = sleep(6000)
   setConfig({
     STELLAR_CHANNEL_ACCOUNTS_ENABLED: true
   })

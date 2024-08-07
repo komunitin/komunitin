@@ -471,9 +471,16 @@ export class TransferController  extends AbstractCurrencyController {
     await this.users().checkUser(ctx)
     // We trigger all transfers in parallel. The ledger driver will handle the
     // batching of the transactions
-    const createdTransfers = await Promise.allSettled(transfers.map((data) => this.createTransfer(ctx, data)))
-    // Log errors:
-    createdTransfers.filter(t => t.status === "rejected").forEach(t => logger.error(t.reason))
+    const createdTransfers = await Promise.allSettled(transfers.map(async (data) => {
+      try {
+        const transfer = await this.createTransfer(ctx, data)
+        return transfer
+      } catch (e) {
+        // Log errors without waiting for all tasks to fisish.
+        logger.error(e)
+        throw e
+      }
+    }))
     // Return transfers that were successfully created.
     return createdTransfers.filter(t => t.status === "fulfilled").map(t => t.value)
   }
