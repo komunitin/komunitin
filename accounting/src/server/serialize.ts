@@ -48,7 +48,7 @@ export const AccountSettingsSerializer = new Serializer<AccountSettings>("accoun
     'onPaymentCreditLimit',
     'allowPayments',
     'allowPaymentRequests'
-  ])
+  ]),
 })
 
 export const AccountSerializer = new Serializer<Account>("accounts", {
@@ -132,7 +132,11 @@ export const TransferSerializer = new CustomTransferSerializer("transfers", {
     currency: new Relator<Transfer,Currency>(async (transfer) => {
       return transfer.payee.currency
     }, CurrencySerializer, { relatedName: "currency" })
-  }
+  },
+  linkers: {
+    // note that both payer and payee are local in Transfer object.
+    resource: new Linker((transfer: Transfer) => `${config.API_BASE_URL}/${transfer.payee.currency.code}/transfers/${transfer.id}`)
+  } 
 })
 
 

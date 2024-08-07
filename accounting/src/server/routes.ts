@@ -1,14 +1,16 @@
 import { Router } from 'express';
-import { checkExact } from 'express-validator';
-import { AccountSettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
+import { check, checkExact, oneOf } from 'express-validator';
+import { AccountSettings, CreateCurrency, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
 import { context } from 'src/utils/context';
 import { SharedController, MigrationController } from '../controller';
 import { Scope, userAuth, noAuth, anyAuth, externalAuth } from './auth';
-import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyResourceHandler } from './handlers';
+import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyInputHandlerMultiple, currencyResourceHandler } from './handlers';
 import { input } from './parse';
 import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, TransferSerializer, TrustlineSerializer } from './serialize';
 import { Validators } from './validation';
 import { InputTrustline, Trustline } from 'src/model/trustline';
+import { badRequest } from 'src/utils/error';
+import { CreateMigration } from 'src/controller/migration/migration';
 
 export function getRoutes(controller: SharedController) {
   const router = Router()
@@ -20,7 +22,10 @@ export function getRoutes(controller: SharedController) {
   // Create currency
   router.post('/currencies', userAuth(Scope.Accounting), checkExact(Validators.isCreateCurrency()), asyncHandler(async (req, res) => {
     const data = input(req)
-    const currency = await controller.createCurrency(context(req), data)
+    if (Array.isArray(data)) {
+      throw badRequest("Expected a single currency")
+    }
+    const currency = await controller.createCurrency(context(req), data as CreateCurrency)
     // Serialize currency to JSON:API
     const result = await CurrencySerializer.serialize(currency)
     res.status(201).json(result)
@@ -101,9 +106,13 @@ export function getRoutes(controller: SharedController) {
   }))
 
   // Create transfer. This endpoint can be accessed either from local users or from external accounts.
-  router.post('/:code/transfers', anyAuth(userAuth(Scope.Accounting), externalAuth()), checkExact(Validators.isCreateTransfer()), 
-    currencyInputHandler(controller, async (currencyController, ctx, data: InputTransfer) => {
-      return await currencyController.transfers.createTransfer(ctx, data)
+  router.post('/:code/transfers', anyAuth(userAuth(Scope.Accounting), externalAuth()), oneOf([Validators.isCreateTransfer(), Validators.isCreateTransfers()]), 
+    currencyInputHandlerMultiple(controller, async (currencyController, ctx, data: InputTransfer|InputTransfer[]) => {
+      if (Array.isArray(data)) {
+        return await currencyController.transfers.createMultipleTransfers(ctx, data)
+      } else {
+        return await currencyController.transfers.createTransfer(ctx, data)
+      }
     }, TransferSerializer, 201)
   )
 
@@ -164,7 +173,7 @@ export function getRoutes(controller: SharedController) {
   router.post('/migrations', userAuth(Scope.Accounting), checkExact(Validators.isCreateMigration()), asyncHandler(async (req, res) => {
     const data = input(req)
     const migration = new MigrationController(controller)
-    const result = await migration.createMigration(context(req), data)
+    const result = await migration.createMigration(context(req), data as CreateMigration)
     res.status(201).json(result)
   }))
 

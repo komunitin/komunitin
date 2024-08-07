@@ -135,6 +135,17 @@ CREATE TABLE "ExternalResource" (
     CONSTRAINT "ExternalResource_pkey" PRIMARY KEY ("tenantId","id")
 );
 
+-- CreateTable
+CREATE TABLE "Value" (
+    "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
+    "key" VARCHAR(255) NOT NULL,
+    "value" JSONB NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Value_pkey" PRIMARY KEY ("tenantId","key")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Currency_code_key" ON "Currency"("code");
 

@@ -2,7 +2,7 @@ import {describe, it, before, after} from "node:test"
 import assert from "node:assert"
 
 import { Ledger, LedgerCurrency, LedgerCurrencyKeys, PathQuote } from "../../src/ledger"
-import { StellarLedger } from "../../src/ledger/stellar"
+import { createStellarLedger, StellarLedger } from "../../src/ledger/stellar"
 import { Keypair } from "@stellar/stellar-sdk"
 import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 import { friendbot } from "src/ledger/stellar/friendbot"
@@ -34,12 +34,12 @@ describe('Creates stellar elements', async () => {
     await friendbot(config.STELLAR_FRIENDBOT_URL, sponsor.publicKey())
 
     // Instantiate the ledger.
-    ledger = new StellarLedger({
+    ledger = await createStellarLedger({
       server: config.STELLAR_HORIZON_URL,
       network: config.STELLAR_NETWORK,
       sponsorPublicKey: sponsor.publicKey(),
       domain: "example.com"
-    })
+    }, sponsor)
 
     // Needed for external trade.
     initUpdateExternalOffers(ledger, async() => sponsor, async(currency) => {

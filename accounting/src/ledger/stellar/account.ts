@@ -3,7 +3,7 @@ import { LedgerAccount, LedgerTransfer, PathQuote } from "../ledger"
 import { StellarCurrency } from "./currency"
 import {Big} from "big.js"
 import { logger } from "../../utils/logger"
-import { transactionError, internalError, insufficientBalance } from "../../utils/error"
+import { internalError, insufficientBalance } from "../../utils/error"
 
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
@@ -24,7 +24,7 @@ export class StellarAccount implements LedgerAccount {
   }
 
   async update() {
-    this.account = await this.currency.ledger.server.loadAccount(this.stellarAccount().accountId())
+    this.account = await this.currency.ledger.loadAccount(this.stellarAccount().accountId())
     return this
   }
   
@@ -157,9 +157,11 @@ export class StellarAccount implements LedgerAccount {
     sponsor: Keypair
   }) {
     const builder = this.currency.ledger.transactionBuilder(this)
+    const source = this.account?.accountId() as string
     // Send all the balance to the credit account.
     if (Big(this.balance()).gt(0)) {
       builder.addOperation(Operation.payment({
+        source,
         destination: this.currency.data.creditPublicKey,
         asset: this.currency.asset(),
         amount: this.balance()
@@ -167,11 +169,13 @@ export class StellarAccount implements LedgerAccount {
     }
     // Remove the trustline.
     builder.addOperation(Operation.changeTrust({
+      source,
       asset: this.currency.asset(),
       limit: "0"
     }))
     // Delete the account.
     builder.addOperation(Operation.accountMerge({
+      source,
       destination: this.currency.ledger.sponsorPublicKey.publicKey()
     }))
     await this.currency.ledger.submitTransaction(builder, [keys.admin], keys.sponsor)
@@ -182,7 +186,9 @@ export class StellarAccount implements LedgerAccount {
   }
 
   /**
-   * Implements {@link LedgerAccount.pay}
+   * Implements LedgerAccount.pay().
+   * 
+   * Uses channel accounts if more than one payment is concurrently made with the same account.
    */
   async pay(payment: { payeePublicKey: string; amount: string }, keys: { account: Keypair; sponsor: Keypair }) {
     if (Big(this.balance()).lt(payment.amount)) {
@@ -190,6 +196,7 @@ export class StellarAccount implements LedgerAccount {
     }
     const builder = this.currency.ledger.transactionBuilder(this)
     builder.addOperation(Operation.payment({
+      source: this.account?.accountId() as string,
       destination: payment.payeePublicKey,
       asset: this.currency.asset(),
       amount: payment.amount
@@ -235,8 +242,10 @@ export class StellarAccount implements LedgerAccount {
     }
 
     const builder = this.currency.ledger.transactionBuilder(this)
+    const source = this.account?.accountId() as string
 
     builder.addOperation(Operation.pathPaymentStrictReceive({
+      source,
       sendAsset: payment.path.sourceAsset as Asset,
       sendMax: payment.path.sourceAmount,
       destination: payment.payeePublicKey,

@@ -2,15 +2,30 @@ import {matchedData, validationResult} from "express-validator"
 import {Request} from "express"
 import {badRequest} from "../utils/error"
 import { RelatedResource } from "src/model/resource"
-import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 
-export const mount = (data: Record<string, any>, included?: Record<string, any>[], depth = 0) => {
+export type Resource = {
+  id?: string
+  [key: string]: any
+}
+
+// Note that here D refers to the model type (Currency, Account, etc.)
+export function mount<D extends Resource>(data: Resource, included?: Resource[]): D
+export function mount<D extends Resource>(data: Resource[], included?: Resource[]): D[]
+export function mount<D extends Resource>(data: Resource|Resource[], included?: Resource[]) : D|D[] {
+  if (Array.isArray(data)) {
+    return data.map(resource => mountResource(resource, included))
+  } else {
+    return mountResource(data, included)
+  }
+}
+
+const mountResource = <D extends Resource>(data: Resource, included?: Resource[], depth=0): D => {
   if (depth > 3) {
     throw badRequest("Too deep relationships")
   }
 
   // build relationships
-  let relationships: Record<string, any> = {}
+  let relationships: Resource = {}
   if (data.relationships) {
     Object.entries(data.relationships).forEach(([key, value]: [string, any]) => {
       if (!value.data) {
@@ -18,7 +33,7 @@ export const mount = (data: Record<string, any>, included?: Record<string, any>[
       }
       const includedResource = (resourceId: RelatedResource) => {
         const resource = included?.find(resource => resource.id === resourceId.id && resource.type === resourceId.type)
-        return resource ? mount(resource, included, depth + 1) : resourceId
+        return resource ? mountResource(resource, included, depth + 1) : resourceId
       }
       const includedResources = (resourceIds: RelatedResource[]) => {
         return resourceIds.map(resourceId => includedResource(resourceId))
@@ -58,13 +73,12 @@ export const validateInput = (req: Request) => {
  * 
  * @return The data object with 
  */
-export const input = (req: Request) => {
+export const input = <D extends Resource>(req: Request): D|D[] => {
   
   const input = validateInput(req)
-
-  const data = mount(input.data, input.included)
+  const data = mount<D>(input.data, input.included)
   // Check id.
-  if (req.params.id) {
+  if (req.params.id && !Array.isArray(data)) {
     if (data.id && req.params.id !== data.id) {
       throw badRequest("Route 'id' does not match with resource 'id")
     }

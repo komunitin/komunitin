@@ -64,6 +64,7 @@ export interface AccountController {
 
 export interface TransferController {
   createTransfer(ctx: Context, transfer: InputTransfer): Promise<Transfer>
+  createMultipleTransfers(ctx: Context, transfers: InputTransfer[]): Promise<Transfer[]>
   getTransfer(ctx: Context, id: string): Promise<Transfer>
   getTransferByHash(ctx: Context, hash: string): Promise<Transfer>
   getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]>

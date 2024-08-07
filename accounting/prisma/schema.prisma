@@ -246,3 +246,15 @@ model ExternalResource {
 
   @@id([tenantId, id])
 }
+
+model Value {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+  key   String @db.VarChar(255)
+  
+  value Json
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@id([tenantId, key])
+}
