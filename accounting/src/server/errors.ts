@@ -34,26 +34,26 @@ const getKError = (error: any): KError => {
     && error.errors[0].msg) {
     const first = error.errors[0]
     if (first.type === "field") {
-      return fieldValidationError(`Field ${first.path} is invalid in request ${first.location}.`, error.errors)
+      return fieldValidationError(`Field ${first.path} is invalid in request ${first.location}.`, { details: error.errors, cause: error })
     } else {
-      return badRequest(error.msg, error.errors)
+      return badRequest(error.msg, { details: error.errors, cause: error })
     }
   // authorization errors
   } else if (error instanceof UnauthorizedError) {
     if (error.status === 400) {
-      return badRequest(error.message, error)
+      return badRequest(error.message, {cause: error})
     } else if (error.status === 401) {
-      return unauthorized(error.message)
+      return unauthorized(error.message, {cause: error})
     } else if (error.status === 403) {
-      return forbidden(error.message)
+      return forbidden(error.message, {cause: error})
     } else {
-      return internalError(error.message, error)
+      return internalError(error.message, {cause: error})
     }
   // general unexpected errors
   } else if (error instanceof Error) {
-    return internalError(error.message, error)
+    return internalError(error.message, {cause: error})
   } else {
-    return internalError("Unexpected error", error)
+    return internalError("Unexpected error", {cause: error})
   }
 }
 

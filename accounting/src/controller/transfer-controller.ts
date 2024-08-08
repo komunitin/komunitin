@@ -482,7 +482,7 @@ export class TransferController  extends AbstractCurrencyController {
       }
     }))
     // Return transfers that were successfully created.
-    return createdTransfers.filter(t => t.status === "fulfilled").map(t => t.value)
+    return createdTransfers.filter(t => t.status === "fulfilled").map((t) => (t as PromiseFulfilledResult<Transfer>).value)
   }
 
 }

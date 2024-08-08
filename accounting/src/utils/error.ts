@@ -30,14 +30,19 @@ const errorDefinitions: Record<KErrorCode, [number, string]> = {
 const status = (code: KErrorCode) => errorDefinitions[code][0]
 const title = (code: KErrorCode) => errorDefinitions[code][1]
 
+interface KErrorOptions extends ErrorOptions {
+  details?: any
+}
 
 
 export class KError extends Error {
   public readonly code: KErrorCode
+  public readonly details?: any
 
-  constructor(code: KErrorCode, message: string, options?: ErrorOptions) {
-    super(message, options)
+  constructor(code: KErrorCode, message: string, options?: KErrorOptions) {
+    super(message, { cause: options?.cause })
     this.code = code
+    this.details = options?.details
   }
 
   public getStatus() {
@@ -49,14 +54,14 @@ export class KError extends Error {
   }
 }
 
-export const badConfig = (message: string) => new KError(KErrorCode.BadConfig, message)
-export const badRequest = (message: string, cause?: unknown) => new KError(KErrorCode.BadRequest, message, { cause })
-export const internalError = (message: string, cause?: unknown) => new KError(KErrorCode.InternalError, message, { cause })
-export const notFound = (message: string) => new KError(KErrorCode.NotFound, message)
-export const notImplemented = (message: string, cause?: unknown) => new KError(KErrorCode.NotImplemented, message, { cause })
-export const transactionError = (message: string, cause?: unknown) => new KError(KErrorCode.TransactionError, message, { cause })
-export const fieldValidationError = (message: string, cause?: unknown) => new KError(KErrorCode.FieldValidationError, message, { cause })
-export const unauthorized = (message: string) => new KError(KErrorCode.Unauthorized, message)
-export const forbidden = (message: string) => new KError(KErrorCode.Forbidden, message)
-export const insufficientBalance = (message: string) => new KError(KErrorCode.InsufficientBalance, message)
-export const noTrustPath = (message: string) => new KError(KErrorCode.NoTrustPath, message)
+export const badConfig = (message: string, options?: KErrorOptions) => new KError(KErrorCode.BadConfig, message, options)
+export const badRequest = (message: string, options?: KErrorOptions) => new KError(KErrorCode.BadRequest, message, options)
+export const internalError = (message: string, options?: KErrorOptions) => new KError(KErrorCode.InternalError, message, options)
+export const notFound = (message: string, options?: KErrorOptions) => new KError(KErrorCode.NotFound, message, options)
+export const notImplemented = (message: string, options?: KErrorOptions) => new KError(KErrorCode.NotImplemented, message, options)
+export const transactionError = (message: string, options?: KErrorOptions) => new KError(KErrorCode.TransactionError, message, options)
+export const fieldValidationError = (message: string, options?: KErrorOptions) => new KError(KErrorCode.FieldValidationError, message, options)
+export const unauthorized = (message: string, options?: KErrorOptions) => new KError(KErrorCode.Unauthorized, message, options)
+export const forbidden = (message: string, options?: KErrorOptions) => new KError(KErrorCode.Forbidden, message, options)
+export const insufficientBalance = (message: string, options?: KErrorOptions) => new KError(KErrorCode.InsufficientBalance, message, options)
+export const noTrustPath = (message: string, options?: KErrorOptions) => new KError(KErrorCode.NoTrustPath, message, options)

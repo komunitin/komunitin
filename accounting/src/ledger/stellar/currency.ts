@@ -148,7 +148,7 @@ export class StellarCurrency implements LedgerCurrency {
     // We want to catch the Hx => Ht (selling local hours by external hours)
     // trade if it is done by this external trader.
     if (trade.base_asset_type == "native" || trade.counter_asset_type == "native") {
-      throw internalError("Unexpected trade with native token", trade)
+      throw internalError("Unexpected trade with native token", {details: trade})
     }
     const base = new Asset(trade.base_asset_code as string, trade.base_asset_issuer)
     const counter = new Asset(trade.counter_asset_code as string, trade.counter_asset_issuer)
@@ -191,7 +191,7 @@ export class StellarCurrency implements LedgerCurrency {
         this.ledger.emitter.emit("incommingTransfer", this, await tradeToTransfer(trade))
       }
     } else {
-      throw internalError("Unexpected trade", trade)
+      throw internalError("Unexpected trade", {details: trade})
     }
   }
 

@@ -150,7 +150,7 @@ export class StellarLedger implements Ledger {
     }
     // Set class member
     if (results.some(r => r.status === "rejected")) {
-      throw internalError("Failed to create channel accounts", results)
+      throw internalError("Failed to create channel accounts", {details: results})
     }
     this.channelAccounts = results.map(r => (r as PromiseFulfilledResult<Horizon.AccountResponse>).value)
     logger.info(`Loaded ${this.channelAccounts.length} channel accounts`)
@@ -305,7 +305,7 @@ export class StellarLedger implements Ledger {
       const expiration = parseInt(inner.timeBounds?.maxTime ?? "0")
 
       if (Date.now() >= expiration * 1000) {
-        throw transactionError("Transaction expired. Create a new one and submit it again.", error)
+        throw transactionError("Transaction expired. Create a new one and submit it again.", {cause: error})
       }
 
       return await this.submitTransactionWithRetry(transaction, 2 * timeout)
@@ -339,7 +339,7 @@ export class StellarLedger implements Ledger {
         logger.debug(`Submitting transaction from ${key}`)
         // operation
         const result = await this.concurrentTransactions[key]
-        return result
+        return result as Horizon.HorizonApi.SubmitTransactionResponse
       } finally {
         // release lock
         delete this.concurrentTransactions[key]  
@@ -421,22 +421,22 @@ export class StellarLedger implements Ledger {
       if (data.status === 429) { // Too many requests 1
         if (error.response.headers) {
           const {"x-ratelimit-limit": limit, "x-ratelimit-reset": reset} = error.response.headers
-          return internalError(msg + `(limit: ${limit}, retry in: ${reset})`, {operations, data})
+          return internalError(msg, {details: {limit, reset, operations, data}, cause: error})
         } else {
-          return internalError(msg, {operations, data})
+          return internalError(msg, {details: {operations, data}, cause: error})
         }
       } else if (data.status === 400 && data.extras) {
         // Transaction failed
         const result = data.extras.result_codes
-        return transactionError(msg, {operations, results: result.operations, result: result.transaction})
+        return transactionError(msg, {details: {operations, results: result.operations, result: result.transaction}, cause: error})
       } else {
         // Other Horizon error
-        return transactionError(msg, {operations, data})
+        return transactionError(msg, {details: {operations, data}, cause: error})
       }
     } else if (error instanceof Error) {
-      return internalError(`Error submitting transaction: ${error.message}`, {operations, error})
+      return internalError(`Error submitting transaction: ${error.message}`, {details: {operations}, cause: error})
     } else {
-      return internalError(`Error submitting transaction: ${error}`, {operations, error})
+      return internalError(`Error submitting transaction: ${error}`, {details: {operations}, cause: error})
     }
   }
 }
