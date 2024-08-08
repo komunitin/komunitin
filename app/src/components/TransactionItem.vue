@@ -1,10 +1,10 @@
 <template>
   <account-header
     :account="otherAccount(transfer)"
-    clickable
+    :clickable="!!transfer.id"
     class="transaction-item"
     :class="transfer.attributes.state"
-    :to="`/groups/${code}/transactions/${transfer.id}`"
+    :to="transfer.id ? `/groups/${code}/transactions/${transfer.id}` : null"
   >
     <template
       v-if="$q.screen.lt.md" 
