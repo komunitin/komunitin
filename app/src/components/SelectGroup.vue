@@ -2,7 +2,7 @@
   <group-header
     v-if="modelValue"  
     id="select-group-header"
-    class="bg-active"
+    class="bg-light"
     :group="modelValue"
     clickable
     @click="onClick"
@@ -26,6 +26,7 @@
           code=""
           module-name="groups"
           include="currency"
+          :cache="1000*60*5"
         >
           <q-list
             v-if="slotProps.resources"

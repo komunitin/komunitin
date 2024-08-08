@@ -3,8 +3,9 @@ import { CurrencyController, SharedController } from "src/controller"
 import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, collectionParams, resourceParams } from "./request"
 import { Context, context } from "src/utils/context"
 import { DataDocument, Dictionary, Linker, Paginator, Serializer } from "ts-japi"
-import { input } from "./parse"
+import { input, Resource } from "./parse"
 import { config } from "src/config"
+import { badRequest } from "src/utils/error"
 
 
 /**
@@ -97,21 +98,26 @@ export function currencyCollectionHandler<T extends Dictionary<any>>(controller:
   }, status)
 }
 
-type CurrencyInputHandler<T,D> = (controller: CurrencyController, context: Context, data: D) => Promise<T>
+type CurrencyInputHandler<T,D> = ((controller: CurrencyController, context: Context, data: D) => Promise<T>)
+type CurrencyInputHandlerMultiple<T,D> = ((controller: CurrencyController, context: Context, data: D|D[]) => Promise<T|T[]>)
 /**
  * Helper for route handlers that require input data.
  */
-export function currencyInputHandler<T extends Dictionary<any>, D>(controller: SharedController, fn: CurrencyInputHandler<T,D>, serializer: Serializer<T>, status = 200) {
+export function currencyInputHandler<T extends Dictionary<any>, D extends Resource>(controller: SharedController, fn: CurrencyInputHandler<T,D>, serializer: Serializer<T>, status = 200) {
   return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
-    const data = input(req)
+    const data = input<D>(req)
+    if (Array.isArray(data)) {
+      throw badRequest("Expected a single resource")
+    }
     const resource = await fn(currencyController, ctx, data)
-    return serializer.serialize(resource, {
-      linkers: {
-        resource: new Linker(() => {
-          // A convenient way to solve it, but we could compute the URL from the resource as well.
-          return `${config.API_BASE_URL}${req.path}` + (req.method === 'POST' ? `/${resource.id}` : '')
-        })
-      }
-    })
+    return serializer.serialize(resource)
+  }, status)
+}
+
+export function currencyInputHandlerMultiple<T extends Dictionary<any>, D extends Resource>(controller: SharedController, fn: CurrencyInputHandlerMultiple<T,D>, serializer: Serializer<T>, status = 200) {
+  return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
+    const data = input<D>(req)
+    const resource = await fn(currencyController, ctx, data)
+    return serializer.serialize(resource)
   }, status)
 }

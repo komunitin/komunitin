@@ -1,13 +1,12 @@
 import { flushPromises, VueWrapper } from "@vue/test-utils";
-import App from "../../../src/App.vue";
-import { mountComponent } from "../utils";
-import TransactionList from "../../../src/pages/transactions/TransactionList.vue";
-import MemberHeader from "../../../src/components/MemberHeader.vue";
+import App from "src/App.vue";
+import { mountComponent, waitForEqual } from "../utils";
+import TransactionList from "src/pages/transactions/TransactionList.vue";
 import AccountHeader from "src/components/AccountHeader.vue";
-import SelectAccount from "../../../src/components/SelectAccount.vue";
-import PageHeader from "../../../src/layouts/PageHeader.vue";
+import SelectAccount from "src/components/SelectAccount.vue";
+import PageHeader from "src/layouts/PageHeader.vue";
 import { seeds } from "src/server";
-import { QCard, QDialog, QList } from "quasar";
+import { QList, QMenu } from "quasar";
 import SelectGroup from "src/components/SelectGroup.vue";
 import GroupHeader from "src/components/GroupHeader.vue";
 
@@ -78,12 +77,12 @@ describe("Transactions", () => {
     await flushPromises();
     expect(wrapper.vm.$route.fullPath).toBe("/groups/GRP0/members/EmilianoLemke57/transactions/receive");
     await wrapper.vm.$wait()
-    await wrapper.getComponent(SelectAccount).get('div').trigger("click");
+    await wrapper.getComponent(SelectAccount).get('input').trigger("click");
     await wrapper.vm.$wait()
 
-    const dialog = wrapper.getComponent(QDialog).getComponent(QCard)
-    expect(dialog.text()).toContain("Carol")
-    const payer = dialog.findAllComponents(MemberHeader)[2]
+    const dialog = wrapper.getComponent(SelectAccount).getComponent(QMenu)
+    const payer = dialog.findAllComponents(AccountHeader)[2]
+    expect(payer.text()).toContain("Carol")
     await payer.trigger("click")
     await flushPromises();
     await wrapper.get("[name='description']").setValue("Test transaction description.")
@@ -114,15 +113,16 @@ describe("Transactions", () => {
     await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
     await wrapper.vm.$wait();
 
-    await wrapper.getComponent(SelectAccount).get('div').trigger("click");
+    await wrapper.getComponent(SelectAccount).get('input').trigger("click");
     await flushPromises()
     await wrapper.vm.$wait()
 
-    const list = wrapper.getComponent(QDialog).getComponent(QCard)
-    expect(list.text()).toContain("Carol")
-    const payer = list.findAllComponents(MemberHeader)[2]
-    await payer.trigger("click")
+    const dialog = wrapper.getComponent(SelectAccount).getComponent(QMenu)
+    const payee = dialog.findAllComponents(AccountHeader)[2]
+    expect(payee.text()).toContain("Carol")
+    await payee.trigger("click")
     await flushPromises();
+
     await wrapper.get("[name='description']").setValue("Test payment description.")
     await wrapper.get("[name='amount']").setValue("234")
     await wrapper.get("button[type='submit']").trigger("click")
@@ -138,23 +138,24 @@ describe("Transactions", () => {
     expect(wrapper.text()).toContain("Committed")
   })
 
-  it("creates external payment", async() => {
+  it("creates external payment - account list", async() => {
     await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
     await wrapper.vm.$wait();
 
-    await wrapper.getComponent(SelectAccount).get('div').trigger("click");
+    await wrapper.getComponent(SelectAccount).get('input').trigger("click");
     await flushPromises()
     await wrapper.vm.$wait()
 
-    const dialog = wrapper.getComponent(QDialog).getComponent(QCard)
+    const dialog = wrapper.getComponent(SelectAccount).getComponent(QMenu)
     const groups = dialog.getComponent(SelectGroup)
     await groups.trigger("click")
     // Choose group 1
     await groups.getComponent(QList).findAllComponents(GroupHeader)[1].trigger("click")
     await flushPromises()
     await wrapper.vm.$wait()
-    expect(dialog.text()).toContain("Jaunita")
-    await dialog.findAllComponents(MemberHeader)[1].trigger("click")
+    const payee = dialog.findAllComponents(AccountHeader)[1]
+    expect(payee.text()).toContain("Jaunita")
+    await payee.trigger("click")
     await flushPromises();
 
     await wrapper.get("[name='description']").setValue("Test external payment")
@@ -176,5 +177,92 @@ describe("Transactions", () => {
     await wrapper.get("#confirm-transaction").trigger("click")
     await wrapper.vm.$wait();
     expect(wrapper.text()).toContain("Committed")
+  })
+
+  it("creates external payment - no list", async() => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
+    await wrapper.vm.$wait();
+
+    const input = wrapper.getComponent(SelectAccount).get('input')
+    await input.trigger("click");
+    await flushPromises()
+    await wrapper.vm.$wait()
+
+    const dialog = wrapper.getComponent(SelectAccount).getComponent(QMenu)
+    const groups = dialog.getComponent(SelectGroup)
+    await groups.trigger("click")
+    // Choose group 2
+    const group2 = groups.getComponent(QList).findAllComponents(GroupHeader)[2]
+    expect(group2.text()).toContain("Group 2")
+    await group2.trigger("click")
+    await flushPromises()
+    await wrapper.vm.$wait()
+    // No accounts
+    expect(dialog.findAllComponents(AccountHeader).length).toBe(0)
+    
+    await input.setValue("002")
+    const wait = await waitForEqual(() => dialog.findAllComponents(AccountHeader).length, 1)
+    expect(wait).toBeTruthy()
+    // Found account
+    await dialog.getComponent(AccountHeader).trigger("click")
+    await flushPromises()
+    await wrapper.vm.$wait()
+
+    await wrapper.get("[name='description']").setValue("Test external payment 2")
+    await wrapper.get("[name='amount']").setValue("13")
+    await flushPromises()
+    await wrapper.vm.$wait();
+    expect((wrapper.get("input[aria-label='Amount in programs']").element as HTMLInputElement).value).toEqual("1,300.00")
+
+    await wrapper.get("button[type='submit']").trigger("click")
+    await flushPromises();
+
+    const text = wrapper.text();
+    expect(text).toContain("GRP20002");
+    expect(text).toContain("Emiliano");
+    expect(text).toContain("$-13.00");
+    expect(text).toContain("(R$-1,300.00)");
+    expect(text).toContain("Test external payment 2");
+    expect(text).toContain("today")
+
+    await wrapper.get("#confirm-transaction").trigger("click")
+    await wrapper.vm.$wait();
+    expect(wrapper.text()).toContain("Committed")
+  })
+
+  it('creates multiple payments', async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send")
+    await wrapper.vm.$wait();
+    await wrapper.get("a[href='/groups/GRP0/members/EmilianoLemke57/transactions/send/multiple']").trigger("click")
+    await wrapper.vm.$wait();
+    const payees = wrapper.findAllComponents(SelectAccount)
+    expect(payees.length).toBe(5)
+    for (let i = 0; i < 4; i++) {
+      console.log(i)
+      await payees[i].get('input').trigger("click");
+      await waitForEqual(() => payees[i].getComponent(QMenu).findAllComponents(AccountHeader).length > 0, true)
+      const payee = payees[i].getComponent(QMenu).findAllComponents(AccountHeader)[i+1]
+      await payee.trigger("click")
+      await flushPromises()
+      await wrapper.get(`[name='description[${i}]']`).setValue(`Test multi ${i+1}`)
+      await wrapper.get(`[name='amount[${i}]']`).setValue(`${i+1}`)
+      // It required to wait for the menu to close before opening the next one since otherwise
+      // the vue framework will throw an error.
+      await waitForEqual(() => payees[i].findComponent(QMenu).exists(), false)
+    }
+    await wrapper.get("button[type='submit']").trigger("click")
+    await flushPromises();
+    const names = ["Arnoldo", "Carol", "Oleta", "Florida"]
+    for (let i = 0; i < 4; i++) {
+      expect(wrapper.text()).toContain(names[i])
+      expect(wrapper.text()).toContain(`Test multi ${i+1}`)
+      expect(wrapper.text()).toContain(`$-${i+1}.00`)
+    }
+    await wrapper.get("button[type='submit']").trigger("click")
+    
+    await waitForEqual(() => wrapper.vm.$route.fullPath, "/groups/GRP0/members/EmilianoLemke57/transactions")
+
+    expect(wrapper.text()).toContain(`Test multi 1`)
+    expect(wrapper.text()).toContain(`Test multi 4`)
   })
 })

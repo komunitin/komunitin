@@ -19,61 +19,12 @@
         :key="transfer.id"
       >
         <q-separator />
-        <account-header
-          :account="otherAccount(transfer)"
-          clickable
-          class="transaction-item"
-          :class="transfer.attributes.state"
-          :to="`/groups/${code}/transactions/${transfer.id}`"
-        >
-          <template
-            v-if="$q.screen.lt.md" 
-            #caption
-          >
-            {{ transfer.attributes.meta }}
-          </template>
-          <template 
-            v-if="$q.screen.gt.sm" 
-            #extra
-          >
-            <q-item-section class="section-extra">
-              <q-item-label lines="2">
-                {{ transfer.attributes.meta }}
-              </q-item-label>
-            </q-item-section>
-          </template>
-          <template #side>
-            <div class="column items-end section-right">
-              <q-item-label
-                caption
-                class="col top-right-label"
-              >
-                <span v-if="transfer.attributes.state == 'pending'">
-                  {{ $t("pending") }}
-                </span>
-                <span v-else-if="transfer.attributes.state == 'rejected'">
-                  {{ $t("rejected") }}
-                </span>
-                <span v-else-if="transfer.attributes.state == 'failed'">
-                  {{ $t("failed") }}
-                </span>
-                <span v-else>
-                  {{ $formatDate(transfer.attributes.updated) }}
-                </span>
-              </q-item-label>
-              <div
-                class="col transaction-amount text-h6"
-                :class="
-                  signedAmount(transfer) >= 0
-                    ? 'positive-amount'
-                    : 'negative-amount'
-                "
-              >
-                {{ FormatCurrency(signedAmount(transfer), currency) }}
-              </div>
-            </div>
-          </template>
-        </account-header>
+        <transaction-item 
+          :transfer="transfer"
+          :code="code"
+          :account="account"
+          :clickable="false"
+        />
       </template>
       <q-separator />
     </q-list>
@@ -81,11 +32,8 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue"
-
-import FormatCurrency from "../../plugins/FormatCurrency";
-
 import ResourceCards from "../ResourceCards.vue";
-import AccountHeader from "../../components/AccountHeader.vue";
+import TransactionItem from "src/components/TransactionItem.vue";
 
 import { ExtendedTransfer, Account, Currency } from "../../store/model";
 import { LoadListPayload } from "src/store/resources";
@@ -93,8 +41,8 @@ import { LoadListPayload } from "src/store/resources";
 export default defineComponent({
   name:"TransactionItems",
   components: {
-    AccountHeader,
-    ResourceCards
+    ResourceCards,
+    TransactionItem
   },
   props: {
     code: {
@@ -107,9 +55,6 @@ export default defineComponent({
       required: true
     }
   },
-  setup() {
-    return { FormatCurrency }
-  },
   data: () => ({
     /**
      * A dictionary transfer id => true, for transfers such that the
@@ -121,22 +66,8 @@ export default defineComponent({
     account() : Account & {currency: Currency} {
       return this.member.account;
     },
-    currency() : Currency {
-      return this.account.currency;
-    }
   },
   methods: {
-    otherAccount(transfer: ExtendedTransfer): Account {
-      const payer = transfer.payer
-      const payee = transfer.payee
-      // We can't directly compare object references because they're not the same.
-      const other = this.account.id == transfer.relationships.payer.data.id ? payee : payer
-      return other
-    },
-    signedAmount(transfer: ExtendedTransfer): number {
-      let amount = transfer.attributes.amount
-      return (transfer.relationships.payer.data.id == this.account.id ? -1 : 1) * amount;
-    },
     /**
      * Fetch the member objects associated to the just loaded transfers.
      * 
@@ -187,35 +118,3 @@ export default defineComponent({
   },
 })
 </script>
-<style lang="scss" scoped>
-  /*
-   * Set negative margin-top so the transaction amount so that it is 
-   * inline with the transaction description and not too low.
-   */
-  .transaction-amount {
-    margin-top: -12px;
-  }
-  .pending {
-    background-color: $light-error;
-    .top-right-label{
-      color: $error;
-    }
-  }
-  .rejected, .failed {
-    background: $light-background;
-    .positive-amount, .negative-amount, .section-extra {
-      color: $onsurface-d;
-    }
-  }
-  @media (min-width: $breakpoint-sm-min) {
-    .transaction-item {
-    .section-extra{
-      flex: 20000 1 0%;
-    }
-    .section-right {
-      width: 200px;
-    }
-  }  
-  }
-  
-</style>

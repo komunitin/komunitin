@@ -117,7 +117,7 @@ export class StellarCurrency implements LedgerCurrency {
   }
   start() {  
     this.listenStream("externalTrades", "externalTradesStreamCursor", 
-      this.ledger.server.trades().forAccount(this.data.externalTraderPublicKey),
+      this.ledger.getServerWithoutRateProtection().trades().forAccount(this.data.externalTraderPublicKey),
       (trade) => this.handleExternalTradeEvent(trade)
     )
     // TODO: Listen for local payments too.
@@ -148,7 +148,7 @@ export class StellarCurrency implements LedgerCurrency {
     // We want to catch the Hx => Ht (selling local hours by external hours)
     // trade if it is done by this external trader.
     if (trade.base_asset_type == "native" || trade.counter_asset_type == "native") {
-      throw internalError("Unexpected trade with native token", trade)
+      throw internalError("Unexpected trade with native token", {details: trade})
     }
     const base = new Asset(trade.base_asset_code as string, trade.base_asset_issuer)
     const counter = new Asset(trade.counter_asset_code as string, trade.counter_asset_issuer)
@@ -191,7 +191,7 @@ export class StellarCurrency implements LedgerCurrency {
         this.ledger.emitter.emit("incommingTransfer", this, await tradeToTransfer(trade))
       }
     } else {
-      throw internalError("Unexpected trade", trade)
+      throw internalError("Unexpected trade", {details: trade})
     }
   }
 
@@ -199,12 +199,13 @@ export class StellarCurrency implements LedgerCurrency {
    * Get an offer from the trader account selling the given asset and buying hours.
    */
   private async fetchExternalSellingOffer(asset: Asset) {
-    const offers = await this.ledger.server.offers()
-    .seller(this.data.externalTraderPublicKey)
-    .selling(asset)
-    .buying(this.hour())
-    .limit(1).call()
-
+    const offers = await this.ledger.callServer((server) =>
+      server.offers()
+        .seller(this.data.externalTraderPublicKey)
+        .selling(asset)
+        .buying(this.hour())
+        .limit(1).call()
+    )
     if (offers.records.length > 0) {
       return offers.records[0]
     } else {
@@ -223,6 +224,7 @@ export class StellarCurrency implements LedgerCurrency {
 
     const builder = this.ledger.transactionBuilder(trader)
     const sellOfferOptions = {
+      source: this.data.externalTraderPublicKey,
       selling: asset,
       buying: this.hour(),
       amount: balance.toString(),
@@ -307,7 +309,7 @@ export class StellarCurrency implements LedgerCurrency {
     admin: Keypair
   }): Promise<void> {
     
-    const builder = await this.ledger.sponsorTransactionBuilder()
+    const builder = this.ledger.sponsorTransactionBuilder()
     builder
       // 1. Issuer.
       .addOperation(Operation.beginSponsoringFutureReserves({
@@ -380,6 +382,7 @@ export class StellarCurrency implements LedgerCurrency {
     }))
     // 1.1 Create account
     .addOperation(Operation.createAccount({
+      source: this.data.issuerPublicKey,
       destination: this.data.externalIssuerPublicKey,
       startingBalance: "0"
     }))
@@ -475,6 +478,7 @@ export class StellarCurrency implements LedgerCurrency {
       const external = await this.externalIssuerAccount()
       const builder = this.ledger.transactionBuilder(external)
         .addOperation(Operation.payment({
+          source: this.data.externalIssuerPublicKey,
           destination: this.data.externalTraderPublicKey,
           asset: this.hour(),
           amount
@@ -514,6 +518,7 @@ export class StellarCurrency implements LedgerCurrency {
       const issuerAccount = await this.issuerAccount()
       const builder = this.ledger.transactionBuilder(issuerAccount)
         .addOperation(Operation.payment({
+          source: this.data.issuerPublicKey,
           destination: this.data.creditPublicKey,
           asset: this.asset(),
           amount: diff.toString()
@@ -643,7 +648,7 @@ export class StellarCurrency implements LedgerCurrency {
    */
   async getAccount(publicKey: string, update = true): Promise<StellarAccount> {
     if (!this.accounts[publicKey]) {
-      this.accounts[publicKey] = this.ledger.server.loadAccount(publicKey).then((account) => {
+      this.accounts[publicKey] = this.ledger.loadAccount(publicKey).then((account) => {
         return new StellarAccount(account, this)
       })
       return await this.accounts[publicKey]
@@ -694,9 +699,14 @@ export class StellarCurrency implements LedgerCurrency {
       asset: this.hour(),
       amount: limit
     }))
-    .addOperation(Operation.changeTrust({asset,limit}))
+    .addOperation(Operation.changeTrust({
+      source: this.data.externalTraderPublicKey,
+      asset,
+      limit
+    }))
     // Sell own HOUR's by external HOUR's at 1:1 rate for path payments
     .addOperation(Operation.createPassiveSellOffer({
+      source: this.data.externalTraderPublicKey,
       selling: this.hour(),
       buying: asset,
       amount: limit,
@@ -721,11 +731,13 @@ export class StellarCurrency implements LedgerCurrency {
       
       logger.debug(`source_assets=${this.asset().code}:${this.asset().issuer}&destination_asset_type=credit_alphanum4&destination_asset_code=${destAsset.code}&destination_asset_issuer=${destAsset.issuer}&destination_amount=${data.amount}`)
       
-      const paths = await this.ledger.server.strictReceivePaths(
-        [this.asset()],
-        destAsset,
-        data.amount
-      ).call()
+      const paths = await this.ledger.callServer((server) =>
+        server.strictReceivePaths(
+          [this.asset()],
+          destAsset,
+          data.amount
+        ).call()
+      )
 
       // Filter out paths that are not sneding the required amount.
       const viable = paths.records.filter((p) => Big(p.destination_amount).gte(data.amount))
@@ -764,7 +776,8 @@ export class StellarCurrency implements LedgerCurrency {
    * Fetch a transfer from the ledger.
    */
   async getTransfer(hash: string): Promise<LedgerTransfer|LedgerExternalTransfer> {
-    const transaction = await this.ledger.server.transactions().transaction(hash).call()
+    const transaction = await this.ledger.callServer((server) => server.transactions().transaction(hash).call())
+    
     if (!transaction) {
       throw notFound(`Transaction ${hash} not found`)
     }

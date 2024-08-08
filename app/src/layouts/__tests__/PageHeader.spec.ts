@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { config, mount, VueWrapper } from "@vue/test-utils";
 import { createStore, Store } from "vuex";
 

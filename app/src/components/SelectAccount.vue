@@ -1,234 +1,262 @@
 <template>
-  <q-field
-    ref="fieldRef"
-    v-model="value"
-    v-bind="$attrs"
-    outlined
-    class="cursor-pointer"
+  <q-select
+    ref="field"
+    v-model="account"
+    :options="options"
+    use-input
+    :option-disable="accountDisabled"
+    :loading="loading"
+    :input-debounce="0"
+    input-style="position: absolute"
+    @input-value="searchText = $event"
+    @virtual-scroll="onScroll"
+    @popup-show="popupOpened = true"
+    @popup-hide="popupOpened = false"
+    @keydown.backspace="account = undefined"
   >
-    <template #control>
-      <member-header
-        v-if="value?.member"
-        :member="value?.member"
-        clickable
+    <template #option="{itemProps, opt}">
+      <account-header
+        v-bind="itemProps"
+        :account="opt"
+        to=""
       />
-      <div
-        v-else 
-        tabindex="0" 
-        @keydown.enter="onClick"
+    </template>
+    <template #selected>
+      <account-header
+        v-if="account && !popupOpened && searchText === ''"
+        :account="account"
+        to=""
+      />
+    </template>
+    <template #before-options>
+      <select-group
+        v-model="group"
+        :payer="payer"
+      />
+    </template>
+    <template #no-option>
+      <select-group
+        v-model="group"
+        :payer="payer"
+      />
+      <div 
+        style="position: relative; min-height: 140px;"
       >
-        {{ value?.attributes.code ?? "" }}
+        <div 
+          class="text-onsurface-m q-pa-lg"
+          style="position: absolute"
+        >
+          {{ noOptionsText }}
+        </div>
       </div>
     </template>
-    <template #append>
-      <q-icon name="arrow_drop_down" />
-    </template>
-  </q-field>
-  <q-dialog 
-    v-model="dialog" 
-    :maximized="$q.screen.lt.sm"
-    @hide="closeDialog()"
-  >
-    <q-card
-      class="select-member-dialog"
-    >
-      <q-card-section class="q-px-none">
-        <q-toolbar class="text-onsurface-m">
-          <q-btn
-            flat
-            round
-            dense
-            icon="arrow_back"
-            @click="dialog = false"
-          />
-          <q-input
-            v-model="searchText"
-            dense
-            outlined
-            class="q-mx-md searchbar"
-            type="search"
-            debounce="250"
-            autofocus
-          >
-            <template #append>
-              <q-icon
-                v-if="searchText === ''"
-                name="search"
-              />
-              <q-icon
-                v-else
-                name="clear"
-                class="cursor-pointer"
-                @click="searchText = ''"
-              />
-            </template>
-          </q-input>
-        </q-toolbar>
-      </q-card-section>
-      <q-separator />
-      <q-card-section 
-        v-if="selectGroup"
-        class="q-pa-none" 
-      >
-        <select-group
-          v-model="group"
-          :payer="payer"
-        />
-      </q-card-section>
-      <q-separator />
-      <q-card-section class="q-pa-none">
-        <resource-cards
-          v-if="listGroupMembers"
-          ref="memberItems"
-          v-slot="slotProps"
-          :code="group.attributes.code"
-          module-name="members"
-          include="contacts,account"
-          :query="searchText"
-        >
-          <q-list
-            v-if="slotProps.resources"
-            padding
-          >
-            <member-header
-              v-for="candidate of slotProps.resources"
-              :key="candidate.id"
-              :member="candidate"
-              @click="select(candidate)"
-            />
-          </q-list>
-        </resource-cards>
-        <account-code-form
-          v-else
-          v-model="value"
-          :group="group"
-          class="q-py-md q-px-xl q-mx-lg"
-          @submit="dialog = false"
-        />
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+  </q-select>
 </template>
+<script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue';
+import { Account, Currency, Group, Member } from 'src/store/model';
+import AccountHeader from './AccountHeader.vue';
+import SelectGroup from './SelectGroup.vue';
+import { useStore } from 'vuex'
+import { QSelect } from 'quasar';
+import { watchDebounced } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
+import { normalizeAccountCode } from 'src/plugins/FormatCurrency';
 
-<script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue';
-import MemberHeader from "./MemberHeader.vue"
-import SelectGroup from "./SelectGroup.vue"
-import AccountCodeForm from "./AccountCodeForm.vue"
-import ResourceCards from "../pages/ResourceCards.vue"
-import { Account, AccountSettings, Group, Member } from 'src/store/model';
-import { QField } from 'quasar';
-import { useStore } from 'vuex';
+type ExtendedAccount = Account & {member?: ExtendedMember & {group: Group}, currency?: Currency}
+type ExtendedMember = Member & {account?: ExtendedAccount }
 
-/**
- * Using defineComponent instead of <script setup> because of inheritAttrs. Change that once we update to Vue 3.3+
- */
-export default defineComponent({
-  components: {
-    MemberHeader,
-    ResourceCards,
-    SelectGroup,
-    AccountCodeForm
-  },
-  inheritAttrs: false,
-  props: {
-    modelValue: {
-      type: Object, // Account
-      required: false,
-      default: undefined
-    },
-    code: {
-      type: String,
-      required: true
-    },
-    payer: {
-      type: Boolean,
-      required: false,
-      default: true
+const props = defineProps<{
+  modelValue?: ExtendedAccount|undefined,
+  code: string,
+  payer: boolean
+  lazy?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: ExtendedAccount|undefined): void
+}>()
+
+const field = ref<QSelect>()
+const loading = ref(false)
+const popupOpened = ref(false)
+
+const account = computed<ExtendedAccount|undefined>({
+  get: () => props.modelValue,
+  set: (v: ExtendedAccount|undefined) => emit('update:modelValue', v)
+})
+const store = useStore()
+
+const myGroup = computed(() => store.getters.myMember?.group)
+const group = ref<Group & {currency: Currency}>(props.modelValue?.member?.group ?? myGroup.value)
+
+const searchText = ref("")
+
+// Not all groups allow us to list their members.
+// We know that (quite indirectly) by checking the existence of the
+// related link in the "members" relationship of the group.
+const canListMembers = computed(() => {
+  return group.value && (group.value.id === myGroup.value.id || group.value.relationships?.members?.links?.related)
+})
+
+// Current queried list of members.
+const members = computed(() => store.getters["members/currentList"])
+// Current displayed list of options.
+const options = ref<ExtendedAccount[]>([])
+
+watch(members, (members) => {
+  // When the user types and this component fetches a new query, the result
+  // is null while waiting for the response. We only update the options list
+  // when we have a valid response (empty array included).
+
+  // We need to add the canListMembers in order to update the options list
+  // after returning async request when switching to a group that doesn't allow 
+  // listing members.
+  if (canListMembers.value) {
+    if (members) {
+      options.value = members.map((member: ExtendedMember) => member.account)
+    } else if (searchText.value !== "") {
+      // This is the case when the cache is empty for this particular search.
+      // We do a local search among the current options while waiting for the
+      // server response.
+      options.value = options.value.filter((account) => 
+        ((account.attributes.code.toLowerCase() + " " + account.member?.attributes.name.toLowerCase()).includes(searchText.value.toLowerCase()))
+      )
     }
-  },
-  emits: ["update:modelValue", "close-dialog"],
-  setup(props, {emit}) {
-    const dialog = ref(false)
+  }
+}, {immediate: true})
 
-    const onClick = () => { 
-      dialog.value = true
-    }
-
-    const value = computed<Account & {member?: Member} | undefined>({
-      get() {
-        return props.modelValue as Account
-      },
-      set(value) {
-        emit('update:modelValue', value)
-      }
-    })
-
-    const select = (selectedMember: Member & {account: Account}) => {
-      value.value = selectedMember.account
-      dialog.value = false
-    }
-
-    const store = useStore()
-    const myGroup = computed(() => store.getters.myMember?.group)
-    
-    const group = ref<Group>(props.modelValue?.group ?? myGroup.value)
-    
-    const searchText = ref('')
-
-    // https://github.com/quasarframework/quasar/issues/8956
-    // We don't emit the click from QField component to aviod a Vue warning.
-    const fieldRef = ref<QField>();
-    onMounted(() => { (fieldRef.value as QField).$el.onclick = onClick });
-
-    const closeDialog = () => {
-      // Set value so the validation refreshes cache.
-      if (!value.value) {
-        value.value = undefined;
-      }
-      emit("close-dialog");
-    }
-
-    const myCurrency = computed(() => store.getters.myAccount.currency)
-    const myAccountSettings = computed<AccountSettings>(() => store.getters.myAccount.settings)
-    
-    const selectGroup = computed(() => {
-      if (props.payer) {
-        return myAccountSettings.value.attributes.allowExternalPaymentRequests ?? 
-        myCurrency.value.attributes.settings.defaultAllowExternalPaymentRequests
-      } else {
-        return myAccountSettings.value.attributes.allowExternalPayments ?? 
-        myCurrency.value.attributes.settings.defaultAllowExternalPayments
-      }
-    })
-
-    const listGroupMembers = computed(() => {
-      return group.value && (group.value.id == myGroup.value.id || group.value.relationships?.members?.links?.related)
-    })
-
-    return {
-      onClick,
-      dialog,
-      searchText,
-      select,
-      fieldRef,
-      value,
-      closeDialog,
-      group,
-      selectGroup,
-      listGroupMembers
-    }
+const currentAccount = computed(() => store.getters["accounts/current"])
+watch(currentAccount, (currentAccount) => {
+  if (!canListMembers.value && searchText.value !== "") {
+    options.value = currentAccount ? [currentAccount] : []
   }
 })
-</script>
-<style lang="scss" scoped>
-@media (min-width: $breakpoint-sm-min) {
-  .select-member-dialog {
-    width: 540px;
-    height: 85vh;
+
+// After updating the options list, focus the first one if we've searched something
+watch(options, async (options) => {
+  if (searchText.value !== "" && options.length > 0) {
+    // This setTimeout is hacky indeed, but it is the only way I've found to
+    // do it after the option list in the select field is updated.
+    setTimeout(() => {
+      // Unselect and move to skip disabled options.
+      field.value?.setOptionIndex(-1)
+      field.value?.moveOptionSelection(1)
+    }, 10)
+  }
+})
+
+const fetchExternalAccountByCode = async (search?: string) => {
+  if (!search || search === "") {
+    // For some unknown reason, when changing the group, the account.value is not
+    // always undefined here. So we check if the selected account has correct group.
+    if (account.value && group.value.currency.id === account.value.currency?.id) {
+      options.value = [account.value]
+    } else {
+      options.value = []
+    }
+  } else {
+    const code = normalizeAccountCode(search, group.value.currency)
+    const currencyUrl = group.value.relationships.currency.links.related
+    const baseUrl = currencyUrl.replace('/currency', '')
+    const accountUrl = `${baseUrl}/accounts?filter[code]=${code}`
+
+    await store.dispatch('accounts/load', {
+      url: accountUrl,
+      group: group.value.currency.attributes.code
+    })
   }
 }
-.searchbar {
-  width: 100%;
+
+const fetchResources = async (search?: string) => {
+  try {
+    loading.value = true
+    if (canListMembers.value) {
+      await store.dispatch("members/loadList", {
+        search,
+        include: "account",
+        group: group.value.attributes.code,
+        cache: 1000*60*5
+      })
+    } else {
+      await fetchExternalAccountByCode(search)
+    }
+  } finally {
+    loading.value = false
+  }
 }
+
+const loadNextPage = async () => {
+  try {
+    loading.value = true
+    if (store.getters["members/hasNext"]) {
+      await store.dispatch("members/loadNext", {
+        group: group.value.attributes.code,
+        include: "account",
+        cache: 1000*60*5
+      });
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// Fetch first page when showing the component
+if (!props.lazy) {
+  onMounted(async () => {
+    await fetchResources(props.modelValue?.attributes.code) 
+  })
+}
+
+// Reactivity idea (to be correctly implemented):
+// [search text, group change] => fetch resources => store gets updated (possibly more than once due to cache) => update members => update options
+// [scroll down] => fetch next page => store gets updated (again posisbly twice) => update members => update options
+
+// <disabled> [search text] => locally filter options from existing full members list (for a quicker experience) => update options
+
+// Debounced watch for search text
+watchDebounced(searchText, async (search) => {
+  if (searchText.value !== "") {
+    field.value?.showPopup()
+  }
+  await fetchResources(search !== "" ? search : undefined)
+}, { debounce: 300 })
+
+// Immediate watch for group change
+watch(group, async () => {
+  field.value?.setOptionIndex(-1)
+  account.value = undefined
+  options.value = []
+  field.value?.focus()
+  await fetchResources(searchText.value !== "" ? searchText.value : undefined)
+})
+
+const onScroll = async({to, direction}: {to:number, direction: string}) => {
+  if (!loading.value && canListMembers.value && direction === 'increase' && options.value && to > options.value.length - 10) {
+    await loadNextPage()
+  }
+}
+
+// Show logged in account as disabled.
+const myAccount = computed(() => store.getters.myAccount)
+const accountDisabled = (account: Account) => {
+  return account.id == myAccount.value?.id
+}
+
+const { t } = useI18n()
+const noOptionsText = computed(() => {
+  if (loading.value) {
+    return t('loading')
+  } else if (canListMembers.value) {
+    return t('noAccountsFound')
+  } else if (searchText.value != "") {
+    return t('accountCodeInvalid')
+  } else {
+    return t('chooseAccountNoListingText', {group: group.value.attributes.name})
+  }
+})
+
+</script>
+<style lang="scss">
+
 </style>

@@ -7,7 +7,9 @@ export function search(records: any, request: any) {
     records = records.filter((record: any) =>
       Object.values(record.attrs).some(
         (value: any) => value && value.toString().toLowerCase().includes(fragment.toLowerCase())
-      )
+      ) 
+      // Special case for members and account codes.
+      || (record.account?.attrs.code.toLowerCase().includes(fragment.toLowerCase()))
     );
   }
   return records;

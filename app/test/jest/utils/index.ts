@@ -144,3 +144,17 @@ declare module "@vue/runtime-core" {
     $nextTicks(): Promise<void>;
   }
 }
+
+/**
+ * Wait for the content of a function to be equal to the expected value, up to a timeout.
+ */
+export const waitForEqual = async (fn: () => any, expected: any, timeout = 1000) => {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (fn() === expected) {
+      return true;
+    }
+    await new Promise(r => setTimeout(r, 50));
+  }
+  return false
+}

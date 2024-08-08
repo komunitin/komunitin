@@ -126,6 +126,14 @@ export default defineComponent({
       type: String,
       required: false,
       default: ""
+    },
+    /**
+     * Cache time in milliseconds.
+     */
+    cache: {
+      type: Number,
+      required: false,
+      default: undefined
     }
   },
   emits: ['page-loaded'],
@@ -192,6 +200,7 @@ export default defineComponent({
         group: this.code,
         filter: this.filter,
         sort: this.sort,
+        cache: this.cache
       });
       this.$emit("page-loaded", 0);
     },
@@ -204,6 +213,7 @@ export default defineComponent({
           group: this.code,
           include: this.include,
           sort: this.sort,
+          cache: this.cache
         });
         this.$emit("page-loaded", this.storeState.currentPage);
       }

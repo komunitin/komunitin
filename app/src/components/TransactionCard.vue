@@ -47,8 +47,15 @@
     <q-separator />
     <q-card-section class="text-body2">
       <!-- details -->
-      <div><span class="text-onsurface-d">{{ $t("state") }}</span><span class="q-pl-sm">{{ state }}</span></div>
-      <div><span class="text-onsurface-d">{{ $t("group") }}</span><span class="q-pl-sm">{{ payerGroup.attributes.name }}</span></div>
+      <div>
+        <span class="text-onsurface-d">{{ $t("state") }}</span><span class="q-pl-sm">{{ state }}</span>
+      </div>
+      <div>
+        <span class="text-onsurface-d">{{ otherCurrency ? $t('payerGroup') : $t("group") }}</span><span class="q-pl-sm">{{ payerGroup.attributes.name }}</span>
+      </div>
+      <div v-if="otherCurrency">
+        <span class="text-onsurface-d">{{ $t('payeeGroup') }}</span><span class="q-pl-sm">{{ payeeGroup.attributes.name }}</span>
+      </div>
     </q-card-section>
     <slot />
   </q-card>
@@ -60,7 +67,7 @@ import { useI18n } from "vue-i18n";
 import { useStore } from "vuex";
 import AccountHeader from "./AccountHeader.vue"
 import FormatCurrency, { convertCurrency } from "../plugins/FormatCurrency"
-import { ExtendedTransfer } from "src/store/model";
+import { Currency, ExtendedTransfer, Group } from "src/store/model";
 
 const props = defineProps<{
   transfer: ExtendedTransfer
@@ -99,7 +106,9 @@ const state = computed(() => {
   throw new KError(KErrorCode.InvalidTransferState);
 })
 
-const payerGroup = computed(() => props.transfer.payer.member.group)
+const payerGroup = computed(() => (props.transfer.payer.currency as Currency & {group: Group}).group)
+const payeeGroup = computed(() => (props.transfer.payee.currency as Currency & {group: Group}).group)
+
 const payerCurrency = computed(() => props.transfer.payer.currency)
 
 const payeeCurrency = computed(() => props.transfer.payee.currency)

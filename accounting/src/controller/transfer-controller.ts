@@ -7,6 +7,7 @@ import { Context } from "src/utils/context";
 import { LedgerCurrencyController } from "./currency-controller";
 import { ExternalTransferController } from "./external-transfer-controller";
 import { includeRelations, whereFilter } from "./query";
+import { logger } from "src/utils/logger";
 
 export class TransferController  extends AbstractCurrencyController {
   private externalTransfers: ExternalTransferController
@@ -15,10 +16,8 @@ export class TransferController  extends AbstractCurrencyController {
     super(currencyController)
     this.externalTransfers = new ExternalTransferController(currencyController)
   }
-  /**
-   * Implements CurrencyController.createTransfer()
-   */
-  async createTransfer(ctx: Context, data: InputTransfer): Promise<Transfer> {
+
+  private async validateInputTransfer(data: InputTransfer) {
     // Check id. Allow for user-defined ids, but check for duplicates.
     if (data.id) {
       const existing = await this.db().transfer.findUnique({where: {
@@ -46,15 +45,8 @@ export class TransferController  extends AbstractCurrencyController {
     if (data.payer.id === data.payee.id) {
       throw badRequest("Payer and payee must be different")
     }
-    
-    // If this is an external transfer, let the specialized controller handle it.
-    if (this.externalTransfers.isExternalInputTransfer(data)) {
-      return await this.externalTransfers.createExternalTransfer(ctx, data)
-    }
-
-    // Otherwise, this is a transfer between two accounts in this currency.
-    const user = await this.users().checkUser(ctx)
-   
+  }
+  private async validateTransferAccounts(ctx: Context, user: User, data: InputTransfer)  {
     // Already throw exception if accounts not found.
     const payer = await this.accounts().getAccount(ctx, data.payer.id)
     const payee = await this.accounts().getAccount(ctx, data.payee.id)
@@ -66,6 +58,22 @@ export class TransferController  extends AbstractCurrencyController {
     )) {
       throw forbidden("User is not allowed to transfer from this account")
     }
+    return {payer, payee}
+  }
+  /**
+   * Implements CurrencyController.createTransfer()
+   */
+  async createTransfer(ctx: Context, data: InputTransfer): Promise<Transfer> {
+    await this.validateInputTransfer(data)
+
+    // If this is an external transfer, let the specialized controller handle it.
+    if (this.externalTransfers.isExternalInputTransfer(data)) {
+      return await this.externalTransfers.createExternalTransfer(ctx, data)
+    }
+
+    // Otherwise, this is a transfer between two accounts in this currency.
+    const user = await this.users().checkUser(ctx)
+    const {payer, payee} = await this.validateTransferAccounts(ctx, user, data)
 
     const transfer = await this.createTransferRecord(data, payer, payee, user)
 
@@ -456,6 +464,25 @@ export class TransferController  extends AbstractCurrencyController {
         await this.updateTransferState(transfer, "committed", this.currency().admin as User)
       }
     }
+  }
+
+  async createMultipleTransfers(ctx: Context, transfers: InputTransfer[]): Promise<Transfer[]> {
+    // Multiple transfers are only allowed for logged in users.
+    await this.users().checkUser(ctx)
+    // We trigger all transfers in parallel. The ledger driver will handle the
+    // batching of the transactions
+    const createdTransfers = await Promise.allSettled(transfers.map(async (data) => {
+      try {
+        const transfer = await this.createTransfer(ctx, data)
+        return transfer
+      } catch (e) {
+        // Log errors without waiting for all tasks to fisish.
+        logger.error(e)
+        throw e
+      }
+    }))
+    // Return transfers that were successfully created.
+    return createdTransfers.filter(t => t.status === "fulfilled").map((t) => (t as PromiseFulfilledResult<Transfer>).value)
   }
 
 }

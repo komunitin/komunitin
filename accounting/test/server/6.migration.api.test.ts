@@ -3,6 +3,9 @@ import { setupServerTest } from "./setup"
 import { Scope } from "src/server/auth"
 import { fixUrl } from "src/utils/net"
 
+/**
+ * Not part of the CI/CD pipeline because it requires a local IntegralCES instance.
+ */
 describe.skip("Test migration from local IntegralCes instance", async () => {
   const t = setupServerTest(false)
   const migration = (code: string, access_token?: string) => ({

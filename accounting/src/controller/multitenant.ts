@@ -3,12 +3,18 @@ import { Prisma, PrismaClient } from "@prisma/client";
 export type PrivilegedPrismaClient = ReturnType<typeof privilegedDb>
 export type TenantPrismaClient = ReturnType<typeof tenantDb>
 
+export const GLOBAL_TENANT_ID = "GLOBAL"
+
 export function privilegedDb(prisma: PrismaClient) {
   return prisma.$extends(bypassRLS())
 }
 
 export function tenantDb(prisma: PrismaClient, tenantId: string) {
   return prisma.$extends(forTenant(tenantId))
+}
+
+export function globalTenantDb(prisma: PrismaClient) {
+  return tenantDb(prisma, GLOBAL_TENANT_ID)
 }
 
 function bypassRLS() {

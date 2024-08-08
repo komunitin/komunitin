@@ -16,6 +16,11 @@ export namespace Validators {
     ...jsonApiAnyResource("included.*"),
   ]
 
+  const jsonApiDocArray = (type: string) => [
+    body("data").isArray(),
+    ...jsonApiResource("data.*", type),
+  ]
+
   const isUpdateCurrencySettings = (path: string) => [
     body(`${path}.defaultInitialCreditLimit`).optional().isInt({min: 0}).default(0),
     body(`${path}.defaultInitialMaximumBalance`).optional().isInt({min: 0}),
@@ -143,6 +148,12 @@ export namespace Validators {
     body("data.id").optional().isUUID(), // Support client-defined UUID.
     ...isCreateTransferAttributes("data.attributes"),
     ...isCreateTransferRelationships("data.relationships")
+  ]
+
+  export const isCreateTransfers = () => [
+    ...jsonApiDocArray("transfers"),
+    ...isCreateTransferAttributes("data.*.attributes"),
+    ...isCreateTransferRelationships("data.*.relationships")
   ]
 
   const isUpdateTransferAttributes = (path: string) => [

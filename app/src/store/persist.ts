@@ -25,16 +25,14 @@ export default function createPersistPlugin<T>(name: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buildState = (state: any, index: string[], value: any, end: number = index.length) => {
     let current = state;
-    for (let i = 0; i < end - 1; i++) {
+    for (let i = 0; i < end; i++) {
       if (current[index[i]] === undefined) {
-        current[index[i]] = {};
+        // in last interation we set value instead of {}.
+        current[index[i]] = (i < end - 1) ? {} : value
       }
       current = current[index[i]]
     }
-    // last iteration set value instead of {}
-    current[index[end - 1]] = value
-
-    return value
+    return current
   }
 
 

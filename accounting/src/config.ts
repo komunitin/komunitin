@@ -11,6 +11,7 @@ const loadConfig = () => {
     STELLAR_NETWORK: (process.env.STELLAR_NETWORK || "testnet") as "testnet" | "local" | "public",
     STELLAR_HORIZON_URL: process.env.STELLAR_HORIZON_URL ||  "https://horizon-testnet.stellar.org",
     STELLAR_FRIENDBOT_URL: process.env.STELLAR_FRIENDBOT_URL || "https://friendbot.stellar.org",
+    STELLAR_CHANNEL_ACCOUNTS_ENABLED: process.env.STELLAR_CHANNEL_ACCOUNTS_ENABLED === "true" || false,
     DOMAIN: process.env.DOMAIN || "komunitin.org",
     MASTER_PASSWORD_SALT: process.env.MASTER_PASSWORD_SALT || undefined,
     AUTH_JWKS_URL: process.env.AUTH_JWKS_URL || "https://komunitin.org/.well-known/jwks.json",

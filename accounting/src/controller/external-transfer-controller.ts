@@ -10,6 +10,7 @@ import { TransferSerializer } from "src/server/serialize";
 import { createExternalToken } from "./external-jwt";
 import { config } from "src/config";
 import { mount } from "src/server/parse";
+import { header } from "express-validator";
 
 type ExternalPayeeTransfer = WithRequired<Transfer, "externalPayee">
 type ExternalPayerTransfer = WithRequired<Transfer, "externalPayer">
@@ -596,7 +597,15 @@ export class ExternalTransferController extends AbstractCurrencyController {
     })
     // Check the response
     if (!response.ok) {
-      throw internalError(`Failed to notify transfer to ${url}`, response.json())
+      let body = undefined
+      try {
+        body = await response.text()
+      } catch (e) {}
+      throw internalError(`Failed to notify transfer to ${url}`, { details: {
+        status: response.status,
+        body,
+        headers: response.headers
+      }})
     }
     const resource = await response.json() as { data: any }
     const result = mount(resource.data)

@@ -111,35 +111,24 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/transactions/TransactionList.vue')
       },
       {
-        path: '/groups/:code/members/:payerMemberCode/transactions/send',
-        props: route => ({ ...route.params, selectPayer: false, selectPayee: true }),
-        name: 'Send',
-        component: () => import('../pages/transactions/CreateTransaction.vue')
-      },
-      {
-        path: '/groups/:code/members/:payeeMemberCode/transactions/receive',
-        props: route => ({ ...route.params, selectPayer: true, selectPayee: false }),
-        name: 'Receive',
-        component: () => import('../pages/transactions/CreateTransaction.vue')
-      },
-      // Looks like these confirmation page could be merged into the CreateTransaction page
-      {
-        path: '/groups/:code/members/:payerMemberCode/transactions/send/confirm',
-        name: 'ConfirmCreateTransaction',
-        component: () => import('../pages/transactions/ConfirmCreateTransaction.vue'),
-        meta: {
-          // do not allow to go back to this page
-          back: false
-        }
-      },
-      {
-        path: '/groups/:code/members/:payeeMemberCode/transactions/receive/confirm',
-        name: 'ConfirmCreateTransaction',
-        component: () => import('../pages/transactions/ConfirmCreateTransaction.vue'),
-        meta: {
-          // do not allow to go back to this page
-          back: false
-        }
+        path: '/groups/:code/members/:memberCode/transactions/:direction',
+        props: route => ({code: route.params.code, direction: route.params.direction}),
+        name: 'CreateTransaction',
+        component: () => import('../pages/transactions/CreateTransaction.vue'),
+        children: [
+          {
+            path: '',
+            props: true,
+            name: 'CreateTransactionSingle',
+            component: () => import('../pages/transactions/CreateTransactionSingle.vue'),
+          },
+          {
+            path: 'multiple',
+            props: true,
+            name: 'CreateTransactionMultiple',
+            component: () => import('../pages/transactions/CreateTransactionMultiple.vue'),
+          }
+        ]
       },
       {
         path: '/groups/:code/offers/new',

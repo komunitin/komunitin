@@ -51,6 +51,9 @@ sleep 10
   
 fi
 
+# Install Accounting service
+docker compose exec accounting pnpm prisma migrate reset --force
+
 # Install IntegralCES
 
 if [ "$ices" = true ]; then
@@ -68,9 +71,7 @@ if [ "$demo" = true ]; then
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0
 
-# Install Accounting service
 
-docker compose exec accounting pnpm prisma migrate reset --force
 
 # Migrate NET1 and NET2 to the accounting service
 ./accounting/cli/migrate.sh "riemann@komunitin.org" "komunitin" "NET1"
