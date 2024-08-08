@@ -21,6 +21,8 @@ import { initLedgerListener } from "./ledger-listener"
 import { PrivilegedPrismaClient, TenantPrismaClient, globalTenantDb, privilegedDb, tenantDb } from "./multitenant"
 import { storeCurrencyKey } from "./key-controller"
 import { Store } from "./store"
+import { PrismaClientExtends } from "@prisma/client/extension"
+import { sleep } from "src/utils/sleep"
 
 
 const getMasterKey = async () => {
@@ -89,9 +91,21 @@ const getChannelAccountKeys = async (store: Store) => {
   }
 }
 
+const waitForDb = async (db: PrismaClient) => {
+  try {
+    // Do a simple query to check if the DB is ready.
+    await db.value.findFirst()
+  } catch (error) {
+    logger.info("Waiting for DB connection")
+    await sleep(1000)
+    return waitForDb(db)
+  }
+}
+
 export async function createController(): Promise<BaseController> {
   // Create DB client.
   const db = new PrismaClient()
+  await waitForDb(db)
 
   // Create global key-value store.
   const globalDb = globalTenantDb(db)
