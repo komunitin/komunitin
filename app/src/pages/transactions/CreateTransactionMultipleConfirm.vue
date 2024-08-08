@@ -99,10 +99,13 @@ const onSubmit = async () => {
     await store.dispatch("transfers/createList", {
       group: props.code,
       resources: transfers.value.map(t => ({
-        ...t,
+        type: t.type,
         attributes: {
           ...t.attributes,
           state: "committed"
+        },
+        relationships: {
+          ...t.relationships
         }
       }))
     })
