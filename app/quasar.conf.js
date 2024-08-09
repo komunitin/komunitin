@@ -13,7 +13,7 @@ const {config} = require('dotenv')
 const environment = config().parsed
 console.info("Environment:", environment)
 
-//const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
+const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
 
 module.exports = configure(function(ctx) {
   return {
@@ -23,9 +23,9 @@ module.exports = configure(function(ctx) {
     boot: [
       "errors",
       "i18n",
-      "mirage",
       "auth",
-      "gtm"
+      "gtm",
+      ...(environment.MOCK_ENABLE === "true" ? ["mirage"]: [])
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -108,11 +108,11 @@ module.exports = configure(function(ctx) {
           .plugin('webpack-ignore-plugin')
           .use(IgnorePlugin, [{ resourceRegExp: /^leaflet$/}])
         
-        /*
+        
         chain
           .plugin('statoscope-webpack-plugin')
           .use(StatoscopeWebpackPlugin, [{saveReportTo: "statoscope-report-[name]-[hash].html"}])
-          */
+          
         
 
       },

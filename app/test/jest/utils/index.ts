@@ -9,7 +9,7 @@ import {Quasar, LocalStorage, Notify, Loading} from 'quasar';
 // Boot files.
 import bootErrors from '../../../src/boot/errors';
 import bootI18n from '../../../src/boot/i18n';
-import bootMirage from '../../../src/boot/mirage';
+import '../../../src/boot/mirage';
 import bootAuth from '../../../src/boot/auth';
 import { Auth } from '../../../src/plugins/Auth';
 import { auth } from '../../../src/store/me';
@@ -95,7 +95,7 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
   const app = wrapper["__app"];
   
   // Call boot files.
-  const boots = [bootErrors,bootI18n,bootMirage,bootAuth]
+  const boots = [bootErrors, bootI18n, bootAuth]
   const redirect = (url:RouteLocationRaw) => {window.location.href = url.toString()};
   for (const boot of boots) {
     await boot({
