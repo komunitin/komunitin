@@ -11,7 +11,7 @@
       <q-page
         v-if="!isLoading"
         padding
-        class="q-py-lg col-12 col-sm-8 col-md-6"
+        class="q-py-lg q-px-md col-12 col-sm-8 col-md-6"
       >
         <transaction-card :transfer="transfer">
           <div v-if="isPendingMe">
@@ -50,7 +50,7 @@ import { useI18n } from "vue-i18n"
 import TransactionCard from "../../components/TransactionCard.vue"
 import { UpdatePayload } from "../../store/resources"
 import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
-import { useFullTransfer } from "src/composables/fullTransfer"
+import { useFullTransferById } from "src/composables/fullTransfer"
 
 const props = defineProps<{
   code: string,
@@ -68,7 +68,7 @@ const transferId = computed(() => ({
   group: props.code,
   id: props.transferCode
 }))
-const {transfer, ready, refresh} = useFullTransfer(transferId)
+const {transfer, ready, refresh} = useFullTransferById(transferId)
 const isLoading = computed(() => !(ready.value || transfer.value && transfer.value.payee.member && transfer.value.payer.member))
 const isPendingMe = computed(() => (transfer.value?.attributes.state == 'pending') && (myAccount.value.id == transfer.value.payer.id))
 

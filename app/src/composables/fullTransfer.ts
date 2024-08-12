@@ -3,36 +3,24 @@ import { LoadPayload } from 'src/store/resources'
 import { watch, Ref, computed, ref } from 'vue'
 import { Store, useStore } from 'vuex'
 
-/**
- * Loads a transfer and all associated resources: account, member,
- * currency and group for both payer and payee.
- * 
- * For some external transfers, depending on external group configuration,
- * it won't be possible to fetch the member object.
- */
-export const useFullTransfer = (id: Ref<{group: string, id: string}>) => {
-  const store = useStore()
-  // Load transfer and accounts. Note that this call already loads accounts
-  // even if they are external. Also note that this updates the current logged
-  // in account (if involved in transfer) and hence its balance.
-  const refresh = async () => {
-    await store.dispatch('transfers/load', { 
-      id: id.value.id,
-      group: id.value.group,
-      include: "payer,payee"
-    } as LoadPayload)
-  }
-  
-  watch(id, refresh, { immediate: true })
 
-  const transfer = computed<ExtendedTransfer>(() => store.getters['transfers/current'])
+/**
+ * Loads all associated resources to this transfer resource: member,
+ * currency and group for both payer and payee. Not that the transfer
+ * must have at least the payer and payee accounts already loaded.
+ */
+export const useFullTransferByResource = (transfer: Ref<ExtendedTransfer|undefined>) => {
+  const store = useStore()
   const ready = ref(false)
   
   watch(transfer, async (transfer) => {
+    if (!transfer) { return }
     const isExternalPayer = transfer.relationships.payer.data.meta?.external
     const isExternalPayee = transfer.relationships.payee.data.meta?.external
     // Load local members (except for the logged in account which is already loaded).
     const myAccount = store.getters.myAccount
+    const myCurrency = myAccount.currency
+
     const localAccountIds = []
     if (!isExternalPayer && transfer.payer.id !== myAccount.id) {
       localAccountIds.push(transfer.payer.id)
@@ -42,7 +30,7 @@ export const useFullTransfer = (id: Ref<{group: string, id: string}>) => {
     }
     if (localAccountIds.length > 0) {
       await store.dispatch("members/loadList", {
-        group: id.value.group,
+        group: myCurrency.attributes.code,
         filter: {
           account: localAccountIds.join(",")
         },
@@ -62,10 +50,42 @@ export const useFullTransfer = (id: Ref<{group: string, id: string}>) => {
   })
   
   return {
+    ready
+  }
+}
+
+/**
+ * Loads a transfer and all associated resources: account, member,
+ * currency and group for both payer and payee.
+ * 
+ * For some external transfers, depending on external group configuration,
+ * it won't be possible to fetch the member object.
+ */
+export const useFullTransferById = (id: Ref<{group: string, id: string}>) => {
+  const store = useStore()
+  // Load transfer and accounts. Note that this call already loads accounts
+  // even if they are external. Also note that this updates the current logged
+  // in account (if involved in transfer) and hence its balance.
+  const refresh = async () => {
+    await store.dispatch('transfers/load', { 
+      id: id.value.id,
+      group: id.value.group,
+      include: "payer,payee"
+    } as LoadPayload)
+  }
+  
+  watch(id, refresh, { immediate: true })
+
+  const transfer = computed<ExtendedTransfer>(() => store.getters['transfers/one'](id.value.id))
+
+  const { ready } = useFullTransferByResource(transfer)
+
+  return {
     transfer,
     ready,
     refresh
   }
+  
 }
 
 const loadExternalAccountRelationships = async (account: Account & {member?: Member, currency?: Currency}, store: Store<unknown>) => {

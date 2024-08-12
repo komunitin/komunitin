@@ -37,6 +37,7 @@ export enum KErrorCode {
   RequestError = "RequestError",
   InvalidTransferState = "InvalidTransferState",
   InvalidTransfersCSVFile = "InvalidTransfersCSVFile",
+  QRCodeError = "QRCodeError",
   /**
    * This condition should not happen and it indicates a programming bug
    * that needs to be solved by the development team. Use it to assert complex

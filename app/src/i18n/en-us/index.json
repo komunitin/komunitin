@@ -278,6 +278,11 @@
   "transactionsCommitted": "{num} transactions successfully committed",
   "transactionsPending": "{num} transactions are pending approval by the payer",
   "transactionsRejected": "{num} transactions have been rejected and won't be applied",
+  "qrCode": "QR code",
+  "showQRCode": "Show QR code",
+  "enterTransactionDataQR": "Set a description and an amount to build the transaction QR code.",
+  "scanThisQR": "Scan this QR code with the app to make the transfer",
+  "scanQRCode": "Scan the transfer QR code",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

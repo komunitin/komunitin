@@ -188,10 +188,6 @@ export interface LoadByIdPayload {
   */
 export interface LoadByUrlPayload {
   /**
-   * The resource group. We still need that even if loading from URL
-   */
-  group: string;
-  /**
    * The resource URL.
    */
   url: string;
@@ -363,7 +359,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    */
   protected static async handleIncluded(
     included: ResourceObject[],
-    group: string,
     commit: Commit,
     dispatch: Dispatch
   ) {
@@ -382,8 +377,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     const promises = external.map(external => {
       return dispatch(`${external.type}/load`, {
         url: external.meta.href,
-        group
-      }, {
+      } as LoadByUrlPayload, {
         root: true
       })
     })
@@ -399,7 +393,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   protected async handleCollectionResponse(
     data: CollectionResponseInclude<T, ResourceObject>,
     context: ActionContext<ResourcesState<T>, S>,
-    group: string,
     key: string,
     page: number,
     onlyResources?: boolean
@@ -408,7 +401,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     
     // Commit included resources.
     if (data.included) {
-      await Resources.handleIncluded(data.included, group, commit, dispatch);
+      await Resources.handleIncluded(data.included, commit, dispatch);
     }
 
     // Commit mutation(s) after commiting included and eventualy fetched external resources.
@@ -797,7 +790,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       await this.handleCollectionResponse(
         data,
         context,
-        payload.group,
         queryKey,
         0,
         payload.onlyResources
@@ -844,7 +836,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       await this.handleCollectionResponse(
         data,
         context,
-        payload.group,
         queryKey,
         page,
       );
@@ -858,8 +849,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   ) {
     let id = null
     if ("url" in payload) {
-      // In case of load by url, don't quickly provide the resource from 
-      // cache, although we could get the id/code from the URL.
+      // Try to get the ID from the URL. That may work for accounts and other resources 
+      // if the /accounts/:id, but there are other valid URLs that don't have the id.
+      const lastUrlParam = payload.url.split("/").pop()
+      if (lastUrlParam && context.state.resources[lastUrlParam]) {
+        id = lastUrlParam
+      }
     } else if ("id" in payload && context.state.resources[payload.id]) {
       // payload sometimes contains the id
       id = payload.id
@@ -921,7 +916,6 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       if (data.included) {
         await Resources.handleIncluded(
           data.included,
-          payload.group,
           context.commit,
           context.dispatch
         );

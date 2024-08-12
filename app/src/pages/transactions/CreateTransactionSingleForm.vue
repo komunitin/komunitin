@@ -90,8 +90,9 @@ import { minValue, numeric, required } from "@vuelidate/validators"
 import { DeepPartial } from "quasar"
 import KError, { KErrorCode } from "src/KError"
 import SelectAccount from "src/components/SelectAccount.vue"
+import { transferAccountRelationships } from "src/composables/fullAccount"
 import formatCurrency, { convertCurrency } from "src/plugins/FormatCurrency"
-import { Account, Currency, Member, Transfer, RelatedResource } from "src/store/model"
+import { Account, Currency, Member, Transfer } from "src/store/model"
 import { v4 as uuid } from "uuid"
 import { computed, ref } from "vue"
 import { useStore } from "vuex"
@@ -111,6 +112,9 @@ const emit = defineEmits<{
   (e: 'update:modelValue', transfer: DeepPartial<Transfer>): void
 }>()
 
+const store = useStore()
+const myCurrency = computed(() => store.getters.myAccount.currency)
+
 const transfer = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value as DeepPartial<Transfer>)
@@ -118,8 +122,8 @@ const transfer = computed({
 
 const payerAccountValue = ref(props.payerAccount)
 const payeeAccountValue = ref(props.payeeAccount)
-const concept = ref("")
-const amount = ref<number>()
+const concept = ref(props.modelValue?.attributes?.meta ?? "")
+const amount = ref<number|undefined>(props.modelValue?.attributes?.amount ? props.modelValue.attributes.amount / Math.pow(10, myCurrency.value.attributes.scale) : undefined)
 
 // Validation.
 const isAccount = (account: Account|undefined) => (account && account.id !== undefined)
@@ -137,9 +141,6 @@ const v$ = useVuelidate(rules, {
   concept, 
   amount
 });
-
-const store = useStore()
-const myCurrency = computed(() => store.getters.myAccount.currency)
 
 const otherCurrency = computed(() =>  {
   if (props.selectPayer && payerAccountValue.value && payerAccountValue.value.currency.id !== myCurrency.value.id) {
@@ -160,25 +161,13 @@ const otherAmount = computed(() => {
 })
 
 const onSubmit = () => {
-  if (!payerAccountValue.value || !payeeAccountValue.value) {
-    throw new KError(KErrorCode.ScriptError, "Both payer and payee must be defined before submit.")
-  }
   if (amount.value === undefined) {
     throw new KError(KErrorCode.ScriptError, "Amount must be defined before submit.")
   }
 
   const transferAmount = amount.value * Math.pow(10, myCurrency.value.attributes.scale)
 
-  const accountRelationship = (account: Account & {currency: Currency}) => {
-    const relationship = {data: {type: "accounts", id: account.id}} as RelatedResource
-    if (account.currency.id !== myCurrency.value.id) {
-      relationship.data.meta = {
-        external: true,
-        href: account.links.self
-      }
-    }
-    return relationship
-  }
+  
 
   // Build transfer object
   transfer.value = {
@@ -191,10 +180,7 @@ const onSubmit = () => {
       created: new Date().toUTCString(),
       updated: new Date().toUTCString(),
     },
-    relationships: {
-      payer: accountRelationship(payerAccountValue.value),
-      payee: accountRelationship(payeeAccountValue.value),
-    }
+    relationships: transferAccountRelationships(payerAccountValue.value, payeeAccountValue.value, myCurrency.value),
   };
 }
 
