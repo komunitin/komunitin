@@ -26,7 +26,7 @@
 </template>
 <script setup lang="ts">
 import { Account, ExtendedTransfer } from "src/store/model"
-import { computed, Ref, ref } from "vue"
+import { computed, Ref, ref, watch } from "vue"
 import { useStore } from "vuex"
 import { transferAccountRelationships, useCreateTransferPayerAccount } from "src/composables/fullAccount"
 import { QrcodeStream } from "vue-qrcode-reader"
@@ -44,6 +44,7 @@ type DetectedCode = {
 const props = defineProps<{
   code: string,
   memberCode?: string,
+  qr?: string,
 }>()
 
 const store = useStore()
@@ -60,16 +61,22 @@ useFullTransferByResource(transfer)
 const errorMessage = ref<string>()
 const { t } = useI18n()
 
-const onDetect = async (detectedCodes: DetectedCode[]) => {
-  try {
-    const url = new URL(detectedCodes[0].rawValue)
-    const payeeHref = url.searchParams.get("t")
-    const amount = url.searchParams.get("a")
-    const meta = url.searchParams.get("m")
+const parsePaymentUrl = (paymentUrl: string) => {
+  const url = new URL(paymentUrl)
+  const payeeHref = url.searchParams.get("t")
+  const amount = url.searchParams.get("a")
+  const meta = url.searchParams.get("m")
 
-    if (!payeeHref || !amount) {
-      throw new KError(KErrorCode.QRCodeError, "Invalid transfer URL")
-    }
+  if (!payeeHref || !amount) {
+    throw new KError(KErrorCode.QRCodeError, "Invalid transfer URL")
+  }
+
+  return { payeeHref, amount, meta } 
+}
+
+const onPaymentUrl = async (paymentUrl: string) => {
+  try {
+    const {payeeHref, amount, meta} = parsePaymentUrl(paymentUrl)
 
     await store.dispatch("accounts/load", {
       url: payeeHref,
@@ -110,28 +117,40 @@ const onDetect = async (detectedCodes: DetectedCode[]) => {
   }
 }
 
+const onDetect = async (detectedCodes: DetectedCode[]) => {
+  if (detectedCodes.length > 0) {
+    await onPaymentUrl(detectedCodes[0].rawValue)
+  }
+}
 
 const onError = (error: Error) => {
-    if (error.name === 'NotAllowedError') {
-      // user denied camera access permission
-      errorMessage.value = t('ErrorCamNotAllowed')
-      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
-    } else if (error.name === 'NotFoundError') {
-      // no suitable camera device installed
-      errorMessage.value = t('ErrorCamNotFound')
-      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
-    } else if (error.name === 'NotReadableError') {
-      // maybe camera is already in use
-      errorMessage.value = t('ErrorCamNotReadable')
-      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
-    } else {
-      // did you request the front camera although there is none?
-      // browser seems to be lacking features
-      // page is not served over HTTPS (or localhost)
-      errorMessage.value = t('ErrorCamUnknown')
-      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
-    }
+  if (error.name === 'NotAllowedError') {
+    // user denied camera access permission
+    errorMessage.value = t('ErrorCamNotAllowed')
+    throw new KError(KErrorCode.QRCodeError, errorMessage.value)
+  } else if (error.name === 'NotFoundError') {
+    // no suitable camera device installed
+    errorMessage.value = t('ErrorCamNotFound')
+    throw new KError(KErrorCode.QRCodeError, errorMessage.value)
+  } else if (error.name === 'NotReadableError') {
+    // maybe camera is already in use
+    errorMessage.value = t('ErrorCamNotReadable')
+    throw new KError(KErrorCode.QRCodeError, errorMessage.value)
+  } else {
+    // did you request the front camera although there is none?
+    // browser seems to be lacking features
+    // page is not served over HTTPS (or localhost)
+    errorMessage.value = t('ErrorCamUnknown')
+    throw new KError(KErrorCode.QRCodeError, errorMessage.value)
   }
+}
+
+// Redirection from payment Pay.vue. 
+watch(() => props.qr, async () => {
+  if (props.qr) {
+    await onPaymentUrl(props.qr)
+  }
+}, {immediate: true})
 
 </script>
 <style scoped lang="scss">

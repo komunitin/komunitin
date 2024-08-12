@@ -124,7 +124,7 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'qr',
-            props: true,
+            props: route => ({...route.params, qr: route.query.qr}),
             name: 'CreateTransactionSendQR',
             component: () => import('../pages/transactions/CreateTransactionSendQR.vue'),
           },
@@ -225,6 +225,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../pages/transactions/Transaction.vue")
       }
     ]
+  },
+  {
+    path: '/pay',
+    component: () => import('../pages/transactions/Pay.vue'),
+    name: 'Pay',
   }
 ];
 
