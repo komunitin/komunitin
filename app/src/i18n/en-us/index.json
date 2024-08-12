@@ -284,6 +284,7 @@
   "scanThisQR": "Scan this QR code with the app to make the transfer",
   "scanQRCode": "Scan the transfer QR code",
 
+
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
   "ErrorServerNoResponse": "Error: Server do not respond",
@@ -308,5 +309,9 @@
   "ErrorNoTrustPath": "Transaction failed because there is no exchange path between the two currencies",
   "ErrorTransactionError": "Transaction failed",
   "ErrorInvalidTransfersCSVFileLineColumn": "Error parsing the CSV file in line {line} column {column}",
-  "ErrorInvalidTransfersCSVFile": "Error reading the file"
+  "ErrorInvalidTransfersCSVFile": "Error reading the file",
+  "ErrorCamNotAllowed": "The app does not have permission to use the camera. You can allow it in the browser settings.",
+  "ErrorCamNotFound": "No camera found in this device",
+  "ErrorCamNotReadable": "Could not read camera. Maybe it is being used by another app.",
+  "ErrorCamUnknown": "Unknown camera error."
 }

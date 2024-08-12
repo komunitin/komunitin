@@ -34,6 +34,7 @@ import CreateTransactionSingleConfirm from "./CreateTransactionSingleConfirm.vue
 import KError, { KErrorCode } from "src/KError"
 import { LoadByUrlPayload } from "src/store/resources"
 import { useFullTransferByResource } from "src/composables/fullTransfer"
+import { useI18n } from "vue-i18n"
 
 type DetectedCode = {
   format: "qr_code" | string,
@@ -55,6 +56,9 @@ const payeeAccount = ref<Account>()
 
 const transfer = ref<ExtendedTransfer>()
 useFullTransferByResource(transfer)
+
+const errorMessage = ref<string>()
+const { t } = useI18n()
 
 const onDetect = async (detectedCodes: DetectedCode[]) => {
   try {
@@ -97,6 +101,7 @@ const onDetect = async (detectedCodes: DetectedCode[]) => {
 
     state.value = "confirm"
   } catch (error) {
+    errorMessage.value = t('qrInvalidError')
     if (error instanceof KError) {
       throw new KError(KErrorCode.QRCodeError, error.message, error)  
     } else {
@@ -105,10 +110,28 @@ const onDetect = async (detectedCodes: DetectedCode[]) => {
   }
 }
 
+
 const onError = (error: Error) => {
-  // TODO: better error handling
-  throw new KError(KErrorCode.QRCodeError, error.message)
-}
+    if (error.name === 'NotAllowedError') {
+      // user denied camera access permission
+      errorMessage.value = t('ErrorCamNotAllowed')
+      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
+    } else if (error.name === 'NotFoundError') {
+      // no suitable camera device installed
+      errorMessage.value = t('ErrorCamNotFound')
+      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
+    } else if (error.name === 'NotReadableError') {
+      // maybe camera is already in use
+      errorMessage.value = t('ErrorCamNotReadable')
+      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
+    } else {
+      // did you request the front camera although there is none?
+      // browser seems to be lacking features
+      // page is not served over HTTPS (or localhost)
+      errorMessage.value = t('ErrorCamUnknown')
+      throw new KError(KErrorCode.QRCodeError, errorMessage.value)
+    }
+  }
 
 </script>
 <style scoped lang="scss">
