@@ -25,7 +25,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Account, ExtendedTransfer } from "src/store/model"
+import { Account, Currency, ExtendedAccount, ExtendedTransfer } from "src/store/model"
 import { computed, Ref, ref, watch } from "vue"
 import { useStore } from "vuex"
 import { transferAccountRelationships, useCreateTransferPayerAccount } from "src/composables/fullAccount"
@@ -33,8 +33,9 @@ import { QrcodeStream } from "vue-qrcode-reader"
 import CreateTransactionSingleConfirm from "./CreateTransactionSingleConfirm.vue"
 import KError, { KErrorCode } from "src/KError"
 import { LoadByUrlPayload } from "src/store/resources"
-import { useFullTransferByResource } from "src/composables/fullTransfer"
+import { loadExternalAccountRelationships, useFullTransferByResource } from "src/composables/fullTransfer"
 import { useI18n } from "vue-i18n"
+import { convertCurrency } from "src/plugins/FormatCurrency"
 
 type DetectedCode = {
   format: "qr_code" | string,
@@ -81,17 +82,23 @@ const onPaymentUrl = async (paymentUrl: string) => {
     await store.dispatch("accounts/load", {
       url: payeeHref,
     } as LoadByUrlPayload)
-
+    
     payeeAccount.value = store.getters["accounts/current"]
 
     if (!payeeAccount.value) {
       throw new KError(KErrorCode.QRCodeError, "Payee account not found")
     }
+    let localAmount = Number(amount)
+    if (payeeAccount.value.relationships.currency.data.id !== myCurrency.value.id) {
+      // Payee is external. Load currency.
+      await loadExternalAccountRelationships(payeeAccount.value, store)
+      localAmount = convertCurrency(localAmount, (payeeAccount.value as ExtendedAccount).currency, myCurrency.value)
+    }
 
     const resource = {
       type: "transfers",
       attributes: {
-        amount: Number(amount),
+        amount: localAmount,
         meta: meta ?? "",
         state: "new",
         created: new Date().toISOString(),

@@ -88,7 +88,7 @@ export const useFullTransferById = (id: Ref<{group: string, id: string}>) => {
   
 }
 
-const loadExternalAccountRelationships = async (account: Account & {member?: Member, currency?: Currency}, store: Store<unknown>) => {
+export const loadExternalAccountRelationships = async (account: Account & {member?: Member, currency?: Currency}, store: Store<unknown>) => {
   const accountUrl = account.links.self
   const urlPrefix = accountUrl.substring(0, accountUrl.indexOf("/accounts/"))
 
