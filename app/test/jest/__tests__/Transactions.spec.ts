@@ -9,6 +9,7 @@ import { seeds } from "src/server";
 import { QList, QMenu } from "quasar";
 import SelectGroup from "src/components/SelectGroup.vue";
 import GroupHeader from "src/components/GroupHeader.vue";
+import CreateTransactionSendQR from "src/pages/transactions/CreateTransactionSendQR.vue";
 
 describe("Transactions", () => {
   let wrapper: VueWrapper;
@@ -264,5 +265,44 @@ describe("Transactions", () => {
 
     expect(wrapper.text()).toContain(`Test multi 1`)
     expect(wrapper.text()).toContain(`Test multi 4`)
+  })
+
+  it('Generate transfer QR', async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/receive/qr")
+    await waitForEqual(() => wrapper.text().includes("build the transaction QR code"), true)
+    expect(wrapper.get("button[type='submit']").attributes("disabled")).toBeDefined()
+    await wrapper.get("[name='description']").setValue("Test QR description")
+    await wrapper.get("[name='amount']").setValue("12")
+    expect(wrapper.get("button[type='submit']").attributes("disabled")).toBeUndefined()
+    await wrapper.get("button[type='submit']").trigger("click")
+    await waitForEqual(() => wrapper.text().includes("$12.00"), true)
+    expect(wrapper.text()).toContain("$12.00")
+    expect(wrapper.text()).toContain("Test QR description")
+    await waitForEqual(() => wrapper.find(".q-img img").exists(), true)
+    expect(wrapper.get(".q-img img").attributes("src")).toContain("data:image/png;base64")
+  })
+
+  it('Scan transfer QR', async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send/qr")
+    await waitForEqual(() => wrapper.text().includes("Scan the transfer QR code"), true)
+    
+    await (wrapper.getComponent(CreateTransactionSendQR) as any)
+      .vm.onDetect([{rawValue: "http://localhost:8080/pay?t=http://localhost:8080/accounting/GRP0/accounts/e61b417a-d4da-45c2-afaa-69c7cde76d70&m=Test%20QR%20description&a=120000"}])
+    await waitForEqual(() => wrapper.text().includes("$-12.00"), true)
+    expect(wrapper.text()).toContain("Test QR description")
+    expect(wrapper.text()).toContain("GRP00004")
+    expect(wrapper.text()).toContain("Florida")
+    await wrapper.get("button[type='submit']").trigger("click")
+    await waitForEqual(() => wrapper.text().includes("Committed"), true)
+  })
+
+  it('Payment link', async () => {
+    await wrapper.vm.$router.push("/pay?t=http://localhost:8080/accounting/GRP0/accounts/e61b417a-d4da-45c2-afaa-69c7cde76d70&m=Test%20QR%20link&a=135000")
+    await waitForEqual(() => wrapper.text().includes("$-13.50"), true)
+    expect(wrapper.text()).toContain("Test QR link")
+    expect(wrapper.text()).toContain("GRP00004")
+    expect(wrapper.text()).toContain("Florida")
+    await wrapper.get("button[type='submit']").trigger("click")
+    await waitForEqual(() => wrapper.text().includes("Committed"), true)
   })
 })

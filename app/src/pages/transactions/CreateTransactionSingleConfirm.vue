@@ -71,12 +71,13 @@ const onSubmit = async () => {
         }
       }
     });
+    const created = store.getters["transfers/current"]
     notifyTransactionState(props.transfer.attributes.state as string, t)
     router.push({
       name: "Transaction",
       params: {
         code: props.code,
-        transferCode: props.transfer.id
+        transferCode: created.id
       }
     })
   } finally {

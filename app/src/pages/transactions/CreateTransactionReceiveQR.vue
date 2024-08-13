@@ -81,8 +81,9 @@ const onFilled = (value: Transfer) => {
   state.value = "show"
 }
 
+const base = window?.location.origin ?? ""
+
 const qrData = computed(() => {
-  const base = window?.location.origin ?? ""
   const query = new URLSearchParams()
   query.set("t", payeeAccount.value?.links.self ?? "")
   query.set("a", transfer.value?.attributes.amount.toString() ?? "")

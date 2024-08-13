@@ -2,7 +2,7 @@
   <q-img :src="qrDataUrl" />
 </template>
 <script setup lang="ts">
-import QRCode from 'qrcode'
+import qrcode from 'qrcode'
 import { ref, watch } from 'vue'
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const props = defineProps<{
 
 const qrDataUrl = ref<string>()
 watch(() => props.data, async (data) => {
-  qrDataUrl.value = await QRCode.toDataURL(data, {errorCorrectionLevel: 'low', color: {dark: "#222"}})
+  qrDataUrl.value = await qrcode.toDataURL(data, {errorCorrectionLevel: 'low', color: {dark: "#222"}})
 }, { immediate: true })
 
 </script>

@@ -57,8 +57,8 @@ describe("Front page and login", () => {
     // Button is disabled since form is empty.
     expect(wrapper.find("button[type='submit']").attributes("disabled"))
       .toBeDefined();
-    wrapper.find("input[type='email']").setValue("example@example.com");
-    wrapper.find("input[type='password']").setValue("password");
+    await wrapper.find("input[type='email']").setValue("example@example.com");
+    await wrapper.find("input[type='password']").setValue("password");
     await wrapper.vm.$nextTick();
     // Button is enabled now.
     expect(

@@ -54,12 +54,20 @@ Object.defineProperty(global, 'Notification', {value: MockNotification})
 jest.mock("../../../src/plugins/Notifications");
 jest.mock("firebase/messaging");
 
+jest.mock("qrcode", () => ({
+  default: {
+    toCanvas: jest.fn(),
+    toDataURL: jest.fn().mockImplementation(() => Promise.resolve("data:image/png;base64,"))
+  }
+}));
+jest.mock("vue-qrcode-reader", () => ({
+  QrcodeStream: jest.fn(),
+}))
+
 // Set a value on scrollHeight property so QInfiniteScrolling doesn't load all resources.
 Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {configurable: true, value: 1500});
 Object.defineProperty(SVGSVGElement.prototype, "pauseAnimations", {value: jest.fn()});
 Object.defineProperty(SVGSVGElement.prototype, "unpauseAnimations", {value: jest.fn()});
-
-
 
 export async function mountComponent(component: ReturnType<typeof defineComponent>, options?: MountingOptions<any, any> & {login?: true}): Promise<VueWrapper> {
   LocalStorage.clear();
@@ -84,7 +92,9 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
         // stub map components since they throw errors in test environment.
         LMap: true,
         LTileLayer: true,
-        LMarker: true
+        LMarker: true,
+        // stub camera component
+        QrcodeStream: true,
       },
     },
     attachTo: document.body,
@@ -152,9 +162,9 @@ export const waitForEqual = async (fn: () => any, expected: any, timeout = 1000)
   const start = Date.now();
   while (Date.now() - start < timeout) {
     if (fn() === expected) {
-      return true;
+      expect(fn()).toBe(expected);
     }
     await new Promise(r => setTimeout(r, 50));
   }
-  return false
+  expect(fn()).toBe(expected);
 }
