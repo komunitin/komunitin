@@ -25,7 +25,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Account, Currency, ExtendedAccount, ExtendedTransfer } from "src/store/model"
+import { Account, ExtendedAccount, ExtendedTransfer } from "src/store/model"
 import { computed, Ref, ref, watch } from "vue"
 import { useStore } from "vuex"
 import { transferAccountRelationships, useCreateTransferPayerAccount } from "src/composables/fullAccount"
