@@ -8,7 +8,7 @@
       v-if="settings && group" 
       id="page-signup"
       padding
-      class="q-py-lg col-12 col-sm-8 col-md-6 q-mb-xl"
+      class="q-py-lg q-px-md col-12 col-sm-8 col-md-6 q-mb-xl"
     >
       <signup-accept-terms-form
         v-if="page == 'terms'"  

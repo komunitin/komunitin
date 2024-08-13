@@ -17,6 +17,11 @@
           icon="edit"
         />
         <q-route-tab
+          :to="`/groups/${code}/members/${myMemberCode}/transactions/${direction}/qr`"
+          :label="$t('qrCode')"
+          icon="qr_code"
+        />
+        <q-route-tab
           :to="`/groups/${code}/members/${myMemberCode}/transactions/${direction}/multiple`"
           :label="$t('multiple')"
           icon="list"

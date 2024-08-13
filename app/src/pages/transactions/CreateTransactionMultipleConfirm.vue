@@ -27,6 +27,7 @@
         color="primary"
         type="submit"
         :label="$t('confirm')"
+        name="confirm"
         unelevated
         padding="xs lg"
         @click="onSubmit"

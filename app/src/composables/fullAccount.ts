@@ -1,5 +1,5 @@
 import { MaybeRefOrGetter, toValue } from "@vueuse/core"
-import { ExtendedAccount } from "src/store/model"
+import { Account, Currency, ExtendedAccount, RelatedResource } from "src/store/model"
 import { ref, watchEffect } from "vue"
 import { useStore } from "vuex"
 
@@ -68,3 +68,24 @@ export const useCreateTransferPayeeAccount = (groupCode: string, memberCode: str
   return useCreateTransferAccount(groupCode, memberCode, direction, "receive")
 }
 
+/**
+ * HElper function for creating the transfer relationships object frm the account resources objects.
+ */
+export const transferAccountRelationships = (payer: Account|undefined, payee: Account|undefined, myCurrency: Currency) => {
+  const accountRelationship = (account: Account) => {
+    const relationship = {data: {type: "accounts", id: account.id}} as RelatedResource
+    if (account.relationships.currency.data.id !== myCurrency.id) {
+      relationship.data.meta = {
+        external: true,
+        href: account.links.self
+      }
+    }
+    return relationship
+  }
+
+  const relationships = {
+    ...(payer ? { payer: accountRelationship(payer)} : {}),
+    ...(payee ? { payee: accountRelationship(payee)} : {}),
+  }
+  return relationships
+}

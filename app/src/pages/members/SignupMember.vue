@@ -6,7 +6,7 @@
     <q-page 
       id="page-signup"
       padding 
-      class="q-py-lg col-12 col-sm-8 col-md-6 q-mb-xl"
+      class="q-py-lg q-px-md col-12 col-sm-8 col-md-6 q-mb-xl"
     >
       <div v-if="page=='profile'">
         <q-form 

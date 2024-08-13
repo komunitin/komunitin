@@ -64,6 +64,23 @@ const server = new Server({
     this.passthrough("/service-worker.js");
     this.passthrough("https://firebaseinstallations.googleapis.com/**");
     this.passthrough("https://fcmregistrations.googleapis.com/**");
+    // Load the ZXing WASM file from the CDN required for QR scanning.
+    this.passthrough("https://fastly.jsdelivr.net/**");
+
+    // Needed because Chrome recognizes that the Mirage Response is not a real response
+    // with setting instantiateStreaming to null we fallback to legacy WebAssembly instantiation
+    // this works with the Mirage Response, therefore the app can start
+    // for more details see: https://github.com/miragejs/miragejs/issues/339
+    Object.defineProperty(window.WebAssembly, 'instantiateStreaming', {value: null});
+    const oldPassthroughRequests = (this.pretender as any).passthroughRequest.bind(this.pretender);
+    (this.pretender as any).passthroughRequest = (verb: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, request: any) => {
+      // Needed because responseType is not set correctly in Mirages passthrough
+      // for more details see: https://github.com/miragejs/miragejs/issues/1915
+      if (verb === 'GET' && path.match(/\.wasm$/)) {
+        request.responseType = 'arraybuffer';
+      }
+      return oldPassthroughRequests(verb, path, request);
+    };
   }
 });
 
@@ -80,3 +97,5 @@ function _createAllData(server: Server<Registry<AnyModels, AnyFactories>>): void
   SocialServer.seeds(server);
   AccountingServer.seeds(server);
 }
+
+

@@ -111,23 +111,55 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/transactions/TransactionList.vue')
       },
       {
-        path: '/groups/:code/members/:memberCode/transactions/:direction',
-        props: route => ({code: route.params.code, direction: route.params.direction}),
-        name: 'CreateTransaction',
+        path: '/groups/:code/members/:memberCode/transactions/send',
+        props: route => ({code: route.params.code, direction: "send"}),
+        name: 'CreateTransactionSend',
         component: () => import('../pages/transactions/CreateTransaction.vue'),
         children: [
           {
             path: '',
-            props: true,
-            name: 'CreateTransactionSingle',
+            props: route => ({direction: 'send', ...route.params}),
+            name: 'CreateTransactionSendSingle',
             component: () => import('../pages/transactions/CreateTransactionSingle.vue'),
           },
           {
+            path: 'qr',
+            props: route => ({...route.params, qr: route.query.qr}),
+            name: 'CreateTransactionSendQR',
+            component: () => import('../pages/transactions/CreateTransactionSendQR.vue'),
+          },
+          {
             path: 'multiple',
-            props: true,
-            name: 'CreateTransactionMultiple',
+            props: route => ({direction: 'send', ...route.params}),
+            name: 'CreateTransactionSendMultiple',
             component: () => import('../pages/transactions/CreateTransactionMultiple.vue'),
-          }
+          },          
+        ]
+      },
+      {
+        path: '/groups/:code/members/:memberCode/transactions/receive',
+        props: route => ({code: route.params.code, direction: "receive"}),
+        name: 'CreateTransactionReceive',
+        component: () => import('../pages/transactions/CreateTransaction.vue'),
+        children: [
+          {
+            path: '',
+            props: route => ({direction: 'receive', ...route.params}),
+            name: 'CreateTransactionReceiveSingle',
+            component: () => import('../pages/transactions/CreateTransactionSingle.vue'),
+          },
+          {
+            path: 'qr',
+            props: true,
+            name: 'CreateTransactionReceiveQR',
+            component: () => import('../pages/transactions/CreateTransactionReceiveQR.vue'),
+          },
+          {
+            path: 'multiple',
+            props: route => ({direction: 'receive', ...route.params}),
+            name: 'CreateTransactionReceiveMultiple',
+            component: () => import('../pages/transactions/CreateTransactionMultiple.vue'),
+          },   
         ]
       },
       {
@@ -193,6 +225,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../pages/transactions/Transaction.vue")
       }
     ]
+  },
+  {
+    path: '/pay',
+    component: () => import('../pages/transactions/Pay.vue'),
+    name: 'Pay',
   }
 ];
 

@@ -1,9 +1,4 @@
-import { boot } from 'quasar/wrappers'
+// Start mirage server.
+import server from "../server";
 
-export default boot(async () => {
-  if (process.env.MOCK_ENABLE == "true") {
-    await import("../server");
-  }
-});
-
-
+export { server }
