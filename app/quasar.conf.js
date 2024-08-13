@@ -112,7 +112,6 @@ module.exports = configure(function(ctx) {
         chain
           .plugin('statoscope-webpack-plugin')
           .use(StatoscopeWebpackPlugin, [{saveReportTo: "statoscope-report-[name]-[hash].html"}])
-          
         
 
       },

@@ -202,8 +202,7 @@ describe("Transactions", () => {
     expect(dialog.findAllComponents(AccountHeader).length).toBe(0)
     
     await input.setValue("002")
-    const wait = await waitForEqual(() => dialog.findAllComponents(AccountHeader).length, 1)
-    expect(wait).toBeTruthy()
+    await waitForEqual(() => dialog.findAllComponents(AccountHeader).length, 1)
     // Found account
     await dialog.getComponent(AccountHeader).trigger("click")
     await flushPromises()
@@ -249,7 +248,7 @@ describe("Transactions", () => {
       await wrapper.get(`[name='amount[${i}]']`).setValue(`${i+1}`)
       // It required to wait for the menu to close before opening the next one since otherwise
       // the vue framework will throw an error.
-      await waitForEqual(() => payees[i].findComponent(QMenu).exists(), false)
+      await waitForEqual(() => payees[i].findComponent(QMenu).isVisible(), false)
     }
     await wrapper.get("button[type='submit']").trigger("click")
     await flushPromises();
