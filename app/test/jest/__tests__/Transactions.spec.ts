@@ -238,7 +238,6 @@ describe("Transactions", () => {
     const payees = wrapper.findAllComponents(SelectAccount)
     expect(payees.length).toBe(5)
     for (let i = 0; i < 4; i++) {
-      console.log(i)
       await payees[i].get('input').trigger("click");
       await waitForEqual(() => payees[i].getComponent(QMenu).findAllComponents(AccountHeader).length > 0, true)
       const payee = payees[i].getComponent(QMenu).findAllComponents(AccountHeader)[i+1]
@@ -251,14 +250,15 @@ describe("Transactions", () => {
       await waitForEqual(() => payees[i].findComponent(QMenu).isVisible(), false)
     }
     await wrapper.get("button[type='submit']").trigger("click")
-    await flushPromises();
+    await waitForEqual(() => wrapper.find("button[name='confirm']").isVisible(), true)
+
     const names = ["Arnoldo", "Carol", "Oleta", "Florida"]
     for (let i = 0; i < 4; i++) {
       expect(wrapper.text()).toContain(names[i])
       expect(wrapper.text()).toContain(`Test multi ${i+1}`)
       expect(wrapper.text()).toContain(`$-${i+1}.00`)
     }
-    await wrapper.get("button[type='submit']").trigger("click")
+    await wrapper.get("button[name='confirm']").trigger("click")
     
     await waitForEqual(() => wrapper.vm.$route.fullPath, "/groups/GRP0/members/EmilianoLemke57/transactions")
 
