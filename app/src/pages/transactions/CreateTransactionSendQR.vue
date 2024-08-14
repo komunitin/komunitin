@@ -91,6 +91,8 @@ const onPaymentUrl = async (paymentUrl: string) => {
     let localAmount = Number(amount)
     if (payeeAccount.value.relationships.currency.data.id !== myCurrency.value.id) {
       // Payee is external. Load currency.
+      // Note that the useFullTransferByResource already calls this function so probably there's a more 
+      // elegant way to accomplish the same with just one call.
       await loadExternalAccountRelationships(payeeAccount.value, store)
       localAmount = convertCurrency(localAmount, (payeeAccount.value as ExtendedAccount).currency, myCurrency.value)
     }

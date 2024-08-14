@@ -64,15 +64,18 @@ const onSubmit = async () => {
     await store.dispatch("transfers/create", {
       group: props.code,
       resource: {
-        ...props.transfer,
+        type: "transfers",
         attributes: {
           ...props.transfer.attributes,
           state: "committed"
+        },
+        relationships: {
+          ...props.transfer.relationships
         }
       }
     });
     const created = store.getters["transfers/current"]
-    notifyTransactionState(props.transfer.attributes.state as string, t)
+    notifyTransactionState(created.attributes.state as string, t)
     router.push({
       name: "Transaction",
       params: {
