@@ -283,7 +283,15 @@
   "enterTransactionDataQR": "Set a description and an amount to build the transaction QR code.",
   "scanThisQR": "Scan this QR code with the app to make the transfer",
   "scanQRCode": "Scan the transfer QR code",
-
+  "nfcTags": "NFC tags",
+  "nfcTagsText": "Convert any NFT tag into a digital wallet linked to your account.",
+  "deleteNFCTagConfirmation": "Are you sure you want to delete the NFC tag with name {name}?",
+  "addTag": "Add tag",
+  "editTag": "Edit tag",
+  "nfcTag": "NFC tag",
+  "nfcTagHint": "Tap to start scanning. If using a phone, the reader is in the back.",
+  "noTags": "There are no NFC tags associated to your account yet.",
+  "scanningNfc": "Scanning NFC...",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
@@ -313,5 +321,7 @@
   "ErrorCamNotAllowed": "The app does not have permission to use the camera. You can allow it in the browser settings.",
   "ErrorCamNotFound": "No camera found in this device",
   "ErrorCamNotReadable": "Could not read camera. Maybe it is being used by another app.",
-  "ErrorCamUnknown": "Unknown camera error."
+  "ErrorCamUnknown": "Unknown camera error.",
+  "ErrorNFCUnavailable": "Web NFC is not available in your system. Currently only Chrome in Android is supported.",
+  "ErrorNFCReadError": "Error reading the NFC tag."
 }

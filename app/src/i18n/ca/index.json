@@ -278,6 +278,15 @@
   "enterTransactionDataQR": "Generar un codi QR de transacció amb una descrició i una quantitat",
   "scanThisQR": "Llegeix aquest codi QR per a completar la transacció",
   "scanQRCode": "Llegeix el codi QR de la transacció",
+  "nfcTags": "Etiquetes NFC",
+  "nfcTagsText": "Converteix qualsevol etiqueta NFT en un moneder digital associat al teu compte",
+  "deleteNFCTagConfirmation": "Segur que vols esborrar l'etiqueta NFC amb nom {name}?",
+  "addTag": "Afegeix NFC",
+  "editTag": "Edita NFC",
+  "nfcTag": "NFC",
+  "nfcTagHint": "Toca per començar a escanejar. Si utilitzes un mòbil, el lector NFC és al darrera.",
+  "noTags": "Encara no hi ha etiquetes NFC associades al teu compte.",
+  "scanningNfc": "Escanejant NFC...",
 
   "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
   "ErrorInvalidPassword": "Contrasenya incorrecta",
@@ -289,5 +298,7 @@
   "ErrorCamNotAllowed": "La app no té permís per accedir a la càmera. Pots activar-ho des de la configuració del navegador.",
   "ErrorCamNotFound": "No s'ha trobat cap càmera en aquest dispositiu.",
   "ErrorCamNotReadable": "No es pot llegir la càmera. Pot ser que estigui ocupada.",
-  "ErrorCamUnknown": "Error desconegut de la càmera."
+  "ErrorCamUnknown": "Error desconegut de la càmera.",
+  "ErrorNFCUnavailable": "El teu sistema no és compatible amb Web NFC. Actualment només és possible amb Chrome en Android.",
+  "ErrorNFCReadError": "Error llegint l'etiqueta NFC."
 }

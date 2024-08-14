@@ -356,6 +356,12 @@ export interface Account extends ResourceObject {
   }
 }
 
+export interface NFCTag {
+  name: string,
+  tag: string,
+  date: string
+}
+
 export interface AccountSettings extends ResourceObject {
   attributes: {
     acceptPaymentsAutomatically: boolean,
@@ -365,6 +371,9 @@ export interface AccountSettings extends ResourceObject {
 
     allowExternalPayments?: boolean,
     allowExternalPaymentRequests?: boolean,
+
+    allowNfcTagPayments?: boolean
+    nfcTags?: NFCTag[]
 
   }
   relationships: {

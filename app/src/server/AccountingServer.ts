@@ -94,7 +94,9 @@ export default {
       }
     }),
     accountSettings: Factory.extend({
-      acceptPaymentsAutomatically: true
+      acceptPaymentsAutomatically: true,
+      allowNfcTagPayments: true,
+      nfcTags: [],
     })
   },
   /**

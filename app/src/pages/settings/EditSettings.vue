@@ -19,6 +19,17 @@
           :hint="$t('acceptPaymentsHint')"
         />
       </div>
+      <div v-if="accountSettings?.attributes.allowNfcTagPayments">
+        <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
+          {{ $t('nfcTags') }}
+        </div>
+        <div class="text-body2 text-onsurface-m q-mb-sm">
+          {{ $t('nfcTagsText') }}
+        </div>
+        <nfc-tags-list
+          v-model="tags"
+        />
+      </div>
       <div class="q-mt-lg">
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
           {{ $t('app') }}
@@ -95,9 +106,10 @@ import { useStore } from 'vuex';
 import PageHeader from '../../layouts/PageHeader.vue';
 import ToggleItem from '../../components/ToggleItem.vue';
 import SaveChanges from '../../components/SaveChanges.vue';
+import NfcTagsList from '../../components/NfcTagsList.vue';
 
 import langs, {LangName, normalizeLocale} from "../../i18n";
-import { AccountSettings, MailingFrequency, UserSettings } from '../../store/model';
+import { AccountSettings, MailingFrequency, NFCTag, UserSettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
 import { watchDebounced } from "@vueuse/shared";
@@ -171,15 +183,35 @@ const saveUserSettings = async (resource: DeepPartial<UserSettings>) => {
 
 // Account settings
 const acceptPayments = ref<boolean|undefined>()
+const tags = ref()
 watchEffect(() => {
   acceptPayments.value = accountSettings.value?.attributes.acceptPaymentsAutomatically
+  tags.value = accountSettings.value?.attributes.nfcTags
 })
 
-watch([acceptPayments], () => {
+const tagsEqual = (a: NFCTag[], b?: NFCTag[]) => {
+  if (!b) {
+    return a.length === 0
+  }
+  if (a.length !== b.length) {
+    return false
+  }
+  return a.every((tag, i) => tag.name === b[i].name && tag.tag === b[i].tag)
+}
+
+watch([acceptPayments, tags], async () => {
+  let save = false
+  const attributes: Partial<AccountSettings["attributes"]> = {}
   if (acceptPayments.value !== undefined && acceptPayments.value !== accountSettings.value?.attributes.acceptPaymentsAutomatically) {
-    saveAccountSettings({
-      attributes: {acceptPaymentsAutomatically: acceptPayments.value}
-    })
+    attributes.acceptPaymentsAutomatically = acceptPayments.value
+    save = true
+  }
+  if (tags.value !== undefined && !tagsEqual(tags.value, accountSettings.value?.attributes.nfcTags)) {
+    attributes.nfcTags = tags.value
+    save = true
+  }
+  if (save) {
+    await saveAccountSettings({ attributes })
   }
 })
 
