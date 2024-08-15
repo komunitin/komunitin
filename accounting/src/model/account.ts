@@ -1,6 +1,6 @@
 import { AtLeast } from 'src/utils/types'
 import { Currency } from './currency'
-import { Account as AccountRecord, User as UserRecord, AccountUser as AccountUserRecord, Prisma } from '@prisma/client'
+import { Account as AccountRecord, User as UserRecord, AccountTag as AccountTagRecord, Prisma } from '@prisma/client'
 import { User } from './user'
 
 export { AccountRecord}
@@ -29,6 +29,27 @@ export interface Account {
   
   settings: AccountSettings
 }
+
+export type Tag = {
+  /**
+   * Unique identifier for the tag.
+   */
+  id?: string
+  /**
+   * Name of the tag
+   */
+  name: string
+  /**
+   * Arbitrary unique value for the tag.
+   * Only present in the request.
+   */
+  value?: string
+  /**
+   * Only present in the response.
+   */
+  updated?: Date
+}
+
 
 export type AccountSettings = {
   // Same id as the account
@@ -66,6 +87,16 @@ export type AccountSettings = {
   // If acceptPaymentsAutomatically is false, this is taken as false too.
   acceptExternalPaymentsAutomatically?: boolean
 
+  // Allow this account to make payments with tags.
+  // Concretely, allow this account to define tags and allow other accounts
+  // to pre-authorize payments using these tags.
+  allowTagPayments?: boolean
+
+  // Allow this account to request payments preauthorized with tags.
+  allowTagPaymentRequests?: boolean
+
+  // Tags that can be used to pre-authorize payments.
+  tags?: Tag[]
 }
 
 // No input needed for creating an account (beyond implicit currency)!
@@ -73,17 +104,30 @@ export type InputAccount = Pick<Account, "id" | "code" | "creditLimit" | "maximu
 export type UpdateAccount = AtLeast<InputAccount, "id">
 
 export function accountToRecord(account: UpdateAccount): Prisma.AccountUpdateInput {
-  return {
+  const accountRecord: Prisma.AccountUpdateInput = {
     id: account.id,
     code: account.code,
     creditLimit: account.creditLimit,
     maximumBalance: account.maximumBalance ?? null,
-    settings: account.settings,
   }
+
+  if (account.settings) {
+    const {tags, ...settings} = account.settings
+    accountRecord.settings = settings
+  }
+
+  return accountRecord
 }
 
-export const recordToAccount = (record: AccountRecord & {users?: {user: UserRecord}[]}, currency: Currency): Account => {
+type AccountRecordComplete = AccountRecord & {users?: {user: UserRecord}[], tags?: AccountTagRecord[]}
+
+export const recordToAccount = (record: AccountRecordComplete, currency: Currency): Account => {
   const users = record.users ? record.users.map(accountUser => ({id: accountUser.user.id})) : undefined;
+  const tags = record.tags ? record.tags.map(tag => ({
+    id: tag.id,
+    name: tag.name,
+    updated: tag.updated,
+  })) : undefined
   return {
     id: record.id,
     status: record.status as AccountStatus,
@@ -99,7 +143,10 @@ export const recordToAccount = (record: AccountRecord & {users?: {user: UserReco
     // Relationships
     users,
     currency,
-    settings: record.settings as AccountSettings,
+    settings: {
+      tags,
+      ...(record.settings as AccountSettings)
+    },
   }
 }
 

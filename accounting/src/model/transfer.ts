@@ -28,6 +28,14 @@ export const TransferStates = ["new", "pending", "rejected", "submitted", "faile
 
 export type TransferState = typeof TransferStates[number]
 
+export type TransferAuthorization = {
+  type: "tag",
+  // Value only presentin initial call.
+  value?: string
+  // Hash present in response.
+  hash?: string
+}
+
 export interface Transfer {
   id: string
 
@@ -39,6 +47,8 @@ export interface Transfer {
 
   created: Date
   updated: Date
+
+  authorization?: TransferAuthorization
   
   payer: Account
   payee: Account
@@ -63,6 +73,7 @@ export const recordToTransfer = (record: TransferRecord, accounts: {
   amount: record.amount,
   meta: record.meta,
   hash: record.hash ?? undefined,
+  authorization: record.authorization as TransferAuthorization ?? undefined,
   created: record.created,
   updated: record.updated,
   payer: accounts.payer,

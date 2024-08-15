@@ -47,7 +47,10 @@ export const AccountSettingsSerializer = new Serializer<AccountSettings>("accoun
     'acceptPaymentsAfter', 
     'onPaymentCreditLimit',
     'allowPayments',
-    'allowPaymentRequests'
+    'allowPaymentRequests',
+    'allowTagPayments',
+    'allowTagPaymentRequests',
+    'tags',
   ]),
 })
 

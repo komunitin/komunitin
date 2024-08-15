@@ -244,6 +244,8 @@ export class LedgerController implements BaseController {
       enableExternalPayments: true,
       enableExternalPaymentRequests: false,
       defaultAcceptExternalPaymentsAutomatically: false,
+      defaultAllowTagPayments: false,
+      defaultAllowTagPaymentRequests: false,
       ...currency.settings
     }
 

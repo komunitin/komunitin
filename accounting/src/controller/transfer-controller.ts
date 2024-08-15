@@ -1,13 +1,13 @@
-import { Account, AccountRecord, InputTransfer, recordToAccount, recordToTransfer, recordToTransferWithAccounts, Transfer, TransferRecord, TransferRecordWithAccounts, TransferState, UpdateTransfer, User, userHasAccount } from "src/model";
+import { Account, InputTransfer, recordToTransfer, recordToTransferWithAccounts, Transfer, TransferAuthorization, TransferState, UpdateTransfer, User, userHasAccount } from "src/model";
 import { badRequest, forbidden, notFound } from "src/utils/error";
 import { AbstractCurrencyController } from "./abstract-currency-controller";
 
 import { CollectionOptions } from "src/server/request";
-import { Context } from "src/utils/context";
+import { Context, systemContext } from "src/utils/context";
+import { logger } from "src/utils/logger";
 import { LedgerCurrencyController } from "./currency-controller";
 import { ExternalTransferController } from "./external-transfer-controller";
 import { includeRelations, whereFilter } from "./query";
-import { logger } from "src/utils/logger";
 
 export class TransferController  extends AbstractCurrencyController {
   private externalTransfers: ExternalTransferController
@@ -45,20 +45,57 @@ export class TransferController  extends AbstractCurrencyController {
     if (data.payer.id === data.payee.id) {
       throw badRequest("Payer and payee must be different")
     }
+    if (data.authorization) {
+      if (data.authorization.type !== "tag" || !data.authorization.value) {
+        throw badRequest("Invalid authorization")
+      }
+    }
   }
+
+  /**
+   * Check that the user is allowed to perform this transfer.
+   */
   private async validateTransferAccounts(ctx: Context, user: User, data: InputTransfer)  {
     // Already throw exception if accounts not found.
     const payer = await this.accounts().getAccount(ctx, data.payer.id)
     const payee = await this.accounts().getAccount(ctx, data.payee.id)
 
-    // Check that user is allowed to perform the transaction (and that at least one of the accounts is local).
-    if (!(this.users().isAdmin(user)
-      || (userHasAccount(user, payer) && (payer.settings.allowPayments ?? this.currency().settings.defaultAllowPayments))
-      || (userHasAccount(user, payee) && (payee.settings.allowPaymentRequests ?? this.currency().settings.defaultAllowPaymentRequests))
-    )) {
-      throw forbidden("User is not allowed to transfer from this account")
+    // Check that user is allowed to perform the transaction
+    let allowed = false
+
+    // Admins are allowed to do anything.
+    if (this.users().isAdmin(user)) {
+      allowed = true
+    }
+    // Payer may be allowed to transfer from their account.
+    else if (userHasAccount(user, payer)) {
+      allowed = payer.settings.allowPayments ?? this.currency().settings.defaultAllowPayments ?? false
+    }
+    // Payee may be allowed to receive payments.
+    else if (userHasAccount(user, payee)) {
+      if (data.authorization) {
+        if (data.authorization.type === "tag") {
+          allowed = payee.settings.allowTagPaymentRequests ?? this.currency().settings.defaultAllowTagPaymentRequests ?? false
+        }
+      } else {
+        allowed = payee.settings.allowPaymentRequests ?? this.currency().settings.defaultAllowPaymentRequests ?? false
+      }
+    }
+    
+    if (!allowed) {
+      throw forbidden("User is not allowed to create this transfer")
     }
     return {payer, payee}
+  }
+
+  async digestAuthorization(data?: TransferAuthorization) {
+    if (data && data.type === "tag" && data.value) {
+      return {
+        type: "tag" as const,
+        hash: await this.accounts().accountTagHash(data.value)
+      }
+    }
+    return undefined
   }
   /**
    * Implements CurrencyController.createTransfer()
@@ -73,6 +110,8 @@ export class TransferController  extends AbstractCurrencyController {
 
     // Otherwise, this is a transfer between two accounts in this currency.
     const user = await this.users().checkUser(ctx)
+    data.authorization = await this.digestAuthorization(data.authorization)
+
     const {payer, payee} = await this.validateTransferAccounts(ctx, user, data)
 
     const transfer = await this.createTransferRecord(data, payer, payee, user)
@@ -91,6 +130,7 @@ export class TransferController  extends AbstractCurrencyController {
         state: "new",
         amount: data.amount,
         meta: data.meta,
+        authorization: data.authorization,
         payer: { connect: { id: payer.id } },
         payee: { connect: { id: payee.id } },
         user: { connect: { tenantId_id: {
@@ -178,10 +218,10 @@ export class TransferController  extends AbstractCurrencyController {
       // Cases for direct submission.
       // 1 - Admin user
       // 2 - Payer user
-      // 3 - Payee user with automaticallyAcceptPayments flag
+      // 3 - Payee user with authorized payment request.
       if (this.users().isAdmin(user)
         || userHasAccount(user, transfer.payer) 
-        || (userHasAccount(user, transfer.payee) && this.submitPaymentRequestImmediately(transfer))) {
+        || (userHasAccount(user, transfer.payee) && (await this.submitPaymentRequestImmediately(transfer)))) {
         await this.saveTransferState(transfer, "submitted")
         try {
           const transaction = await this.submitTransfer(transfer, this.users().isAdmin(user))
@@ -191,9 +231,14 @@ export class TransferController  extends AbstractCurrencyController {
           await this.saveTransferState(transfer, "failed")
           throw e
         }
-      // Payment request with payer user without automaticallyAcceptPayments flag
       } else if (userHasAccount(user, transfer.payee)) {
-        await this.saveTransferState(transfer, "pending")
+        // Payment request pending authorization
+        if (transfer.authorization) {
+          await this.saveTransferState(transfer, "failed")
+          throw forbidden("Invalid authorization")
+        } else {
+          await this.saveTransferState(transfer, "pending")
+        }
       } else {
         throw forbidden("User is not allowed to commit this transfer")
       }
@@ -217,11 +262,25 @@ export class TransferController  extends AbstractCurrencyController {
     }
   }
 
-  private submitPaymentRequestImmediately(transfer: Transfer) {
-    const whitelist = transfer.payer.settings.acceptPaymentsWhitelist ?? this.currency().settings.defaultAcceptPaymentsWhitelist
+  private async submitPaymentRequestImmediately(transfer: Transfer) {
+    // Option 1: acceptPaymentsAutomatically
+    if (transfer.payer.settings.acceptPaymentsAutomatically ?? this.currency().settings.defaultAcceptPaymentsAutomatically) {
+      return true
+    }
 
-    return (transfer.payer.settings.acceptPaymentsAutomatically ?? this.currency().settings.defaultAcceptPaymentsAutomatically) 
-      || whitelist && whitelist.includes(transfer.payee.id)
+    // Option 2: acceptPaymentsWhitelist
+    const whitelist = transfer.payer.settings.acceptPaymentsWhitelist ?? this.currency().settings.defaultAcceptPaymentsWhitelist
+    if (whitelist && whitelist.includes(transfer.payee.id)) {
+      return true
+    }
+
+    // Option 3: tag authorization
+    if (transfer.authorization?.type === "tag" && transfer.authorization.hash) {
+      const authorizer = await this.accounts().getAccountByTag(systemContext(), transfer.authorization.hash, true)
+      if (authorizer && authorizer.id === transfer.payer.id) {
+        return true
+      }
+    }
   }
 
   public async updateAccountBalances(transfer: Transfer) {
@@ -458,7 +517,7 @@ export class TransferController  extends AbstractCurrencyController {
       const expired = lapse && transfer.updated.getTime() + lapse*1000 < Date.now()
       // Also do it if the account just changed their config to "acceptPaymentsAutomatically"
       // or updated their whitelist.
-      const immediate = this.submitPaymentRequestImmediately(transfer)
+      const immediate = await this.submitPaymentRequestImmediately(transfer)
       if (expired || immediate) {
         // Submit this transfer as admin.
         await this.updateTransferState(transfer, "committed", this.currency().admin as User)

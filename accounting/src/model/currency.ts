@@ -71,6 +71,14 @@ export type CurrencySettings = {
    * Default accept external payments automatically
    */
   defaultAcceptExternalPaymentsAutomatically?: boolean
+  /**
+   * Default allow accounts to have authorization tags.
+   */
+  defaultAllowTagPayments?: boolean;
+  /**
+   * Default allow accounts to make payment request authorized with tags.
+   */
+  defaultAllowTagPaymentRequests?: boolean;
 }
 
 export type CurrencyStatus = "new" | "active"

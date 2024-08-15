@@ -24,9 +24,9 @@ model User {
   // Account users
   accounts  AccountUser[] @relation()
   // Currency admins
-  currency  Currency[] @relation()
+  currency  Currency[]    @relation()
   // Transfer users
-  transfers Transfer[] @relation()
+  transfers Transfer[]    @relation()
 
   // Same user could log in to different tenants.
   @@id([tenantId, id])
@@ -77,7 +77,7 @@ model Currency {
   admin   User   @relation(fields: [adminId, tenantId], references: [id, tenantId])
 
   // Currency external virtual account
-  externalAccountId String? @unique
+  externalAccountId String?  @unique
   externalAccount   Account? @relation("externalAccount", fields: [externalAccountId], references: [id])
 
   encryptionKey     EncryptedSecret? @relation("encryption", fields: [encryptionKeyId], references: [id])
@@ -101,10 +101,10 @@ model AccountUser {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
 
   accountId String
-  account Account @relation(fields: [accountId], references: [id])
+  account   Account @relation(fields: [accountId], references: [id])
 
   userId String
-  user User @relation(fields: [tenantId, userId], references: [tenantId, id])
+  user   User   @relation(fields: [tenantId, userId], references: [tenantId, id])
 
   @@id([accountId, userId])
 }
@@ -114,7 +114,7 @@ model Account {
   id       String @id @default(uuid())
   code     String @unique @db.VarChar(255)
 
-  status String @default("active") @db.VarChar(31)
+  status String      @default("active") @db.VarChar(31)
   type   AccountType @default(user)
 
   keyId      String @unique @db.VarChar(255)
@@ -140,6 +140,24 @@ model Account {
   payeeTransfers Transfer[] @relation("payee")
 
   externalAccount Currency? @relation("externalAccount")
+
+  tags AccountTag[] @relation()
+}
+
+model AccountTag {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+
+  id String @id @default(uuid())
+
+  // The hash of the tag value.
+  hash String @db.VarChar(255)
+  name String @db.VarChar(255)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
 }
 
 model Transfer {
@@ -151,6 +169,8 @@ model Transfer {
   meta   String @db.Text
 
   hash String? @db.VarChar(255)
+
+  authorization Json?
 
   payerId String
   payer   Account @relation("payer", fields: [payerId], references: [id])
@@ -201,26 +221,26 @@ model Trustline {
 
   created DateTime @default(now())
   updated DateTime @updatedAt
-  
+
   trustedId String
-  trusted ExternalResource @relation(fields: [tenantId, trustedId], references: [tenantId, id])
+  trusted   ExternalResource @relation(fields: [tenantId, trustedId], references: [tenantId, id])
 
   currencyId String
-  currency Currency @relation(fields: [currencyId], references: [id])
+  currency   Currency @relation(fields: [currencyId], references: [id])
 }
 
 model ExternalTransfer {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
-  
+
   // Same id as transfer
-  id       String @db.VarChar(255)
+  id       String   @db.VarChar(255)
   transfer Transfer @relation(fields: [tenantId, id], references: [tenantId, id])
 
   externalPayerId String?
-  externalPayer ExternalResource? @relation("externalPayer", fields: [tenantId, externalPayerId], references: [tenantId, id])
+  externalPayer   ExternalResource? @relation("externalPayer", fields: [tenantId, externalPayerId], references: [tenantId, id])
 
   externalPayeeId String?
-  externalPayee ExternalResource? @relation("externalPayee", fields: [tenantId, externalPayeeId], references: [tenantId, id])
+  externalPayee   ExternalResource? @relation("externalPayee", fields: [tenantId, externalPayeeId], references: [tenantId, id])
 
   @@id([tenantId, id])
 }
@@ -229,18 +249,18 @@ model ExternalResource {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
 
   // Same id as external resource
-  id   String
-  
+  id String
+
   type String @db.VarChar(255)
   href String @db.VarChar(255)
 
   // Cached resource data.
-  resource Json? 
+  resource Json?
 
   created DateTime @default(now())
   updated DateTime @updatedAt
 
-  trustlines Trustline[] @relation()
+  trustlines             Trustline[]        @relation()
   externalPayerTransfers ExternalTransfer[] @relation("externalPayer")
   externalPayeeTransfers ExternalTransfer[] @relation("externalPayee")
 
@@ -249,8 +269,8 @@ model ExternalResource {
 
 model Value {
   tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
-  key   String @db.VarChar(255)
-  
+  key      String @db.VarChar(255)
+
   value Json
 
   created DateTime @default(now())

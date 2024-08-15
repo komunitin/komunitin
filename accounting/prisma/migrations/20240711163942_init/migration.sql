@@ -69,6 +69,19 @@ CREATE TABLE "Account" (
 );
 
 -- CreateTable
+CREATE TABLE "AccountTag" (
+    "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
+    "id" TEXT NOT NULL,
+    "hash" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated" TIMESTAMP(3) NOT NULL,
+    "accountId" TEXT NOT NULL,
+
+    CONSTRAINT "AccountTag_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Transfer" (
     "tenantId" VARCHAR(31) NOT NULL DEFAULT (current_setting('app.current_tenant_id'))::text,
     "id" TEXT NOT NULL,
@@ -76,6 +89,7 @@ CREATE TABLE "Transfer" (
     "amount" INTEGER NOT NULL,
     "meta" TEXT NOT NULL,
     "hash" VARCHAR(255),
+    "authorization" JSONB,
     "payerId" TEXT NOT NULL,
     "payeeId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -214,6 +228,9 @@ ALTER TABLE "Account" ADD CONSTRAINT "Account_keyId_fkey" FOREIGN KEY ("keyId") 
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_currencyId_fkey" FOREIGN KEY ("currencyId") REFERENCES "Currency"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccountTag" ADD CONSTRAINT "AccountTag_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transfer" ADD CONSTRAINT "Transfer_payerId_fkey" FOREIGN KEY ("payerId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
