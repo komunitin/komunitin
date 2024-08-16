@@ -90,9 +90,9 @@ const onSubmit = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (props.autoConfirm) {
-    onSubmit()
+    await onSubmit()
   }
 })
 

@@ -123,7 +123,7 @@ const onDetected = async (tag: string) => {
     attributes: {
       amount: editTransfer.value.attributes.amount,
       meta: editTransfer.value.attributes.meta,
-      state: "committed",
+      state: "new",
       authorization: {
         type: "tag",
         value: tag
