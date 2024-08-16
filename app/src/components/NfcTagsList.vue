@@ -1,7 +1,7 @@
 <template>
   <q-list>
     <div 
-      v-if="!modelValue.length" 
+      v-if="!(modelValue?.length)" 
       class="q-py-md text-onsurface"
     >
       {{ $t('noTags') }}
@@ -100,11 +100,11 @@ import { useI18n } from "vue-i18n"
 import { AccountTag } from "src/store/model"
 
 const props = defineProps<{
-  modelValue: AccountTag[]
+  modelValue: AccountTag[] | undefined
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: AccountTag[]): void
+  (e: 'update:modelValue', value: AccountTag[]|undefined): void
 }>()
 
 // Not using computed model property since we have more fine-grained control
@@ -121,7 +121,7 @@ const tagName = ref<string>()
 const tagValue = ref<string>()
 
 const deleteTag = (tag: AccountTag) => {
-  emit('update:modelValue', props.modelValue.filter(t => t !== tag))
+  emit('update:modelValue', props.modelValue?.filter(t => t !== tag))
 }
 
 const addTag = () => {
@@ -134,7 +134,7 @@ const addTag = () => {
 
 const editTag = (tag: AccountTag) => {
   action.value = "edit"
-  editingTagIndex.value = props.modelValue.indexOf(tag)
+  editingTagIndex.value = (props.modelValue as AccountTag[]).indexOf(tag)
   tagName.value = tag.name
   tagValue.value = ""
   showDialog.value = true
@@ -144,7 +144,7 @@ const saveTag = () => {
   if (!(tagName.value && tagValue.value)) {
     return
   }
-  const tags = [...props.modelValue]
+  const tags = [...(props.modelValue ?? [])]
   if (action.value === "edit") {
     tags[editingTagIndex.value].name = tagName.value
     if (tagValue.value) {
