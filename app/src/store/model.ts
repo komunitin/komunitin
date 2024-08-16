@@ -356,6 +356,14 @@ export interface Account extends ResourceObject {
   }
 }
 
+export interface AccountTag {
+  id?: string,
+  name: string,
+  value?: string,
+  hash?: string,
+  updated?: string
+}
+
 export interface AccountSettings extends ResourceObject {
   attributes: {
     acceptPaymentsAutomatically: boolean,
@@ -365,6 +373,11 @@ export interface AccountSettings extends ResourceObject {
 
     allowExternalPayments?: boolean,
     allowExternalPaymentRequests?: boolean,
+
+    allowTagPayments?: boolean
+    allowTagPaymentRequests?: boolean
+    
+    tags?: AccountTag[]
 
   }
   relationships: {
@@ -379,6 +392,10 @@ export interface Transfer extends ResourceObject {
     amount: number,
     meta: string,
     state: TransferState;
+    authorization?: {
+      type: "tag",
+      value: string
+    }
     expires?: string;
     created: string;
     updated: string;

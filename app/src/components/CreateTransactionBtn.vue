@@ -7,7 +7,7 @@
     <div class="full-width row q-col-gutter-md">
       <div class="col-6 text-right">
         <q-btn
-          v-if="allowPaymentRequests"
+          v-if="settings.allowPaymentRequests"
           id="request-payment"
           fab
           icon="arrow_downward"
@@ -18,7 +18,7 @@
       </div>
       <div class="col-6">
         <q-btn
-          v-if="allowPayments"
+          v-if="settings.allowPayments"
           id="make-payment"
           fab
           icon="arrow_upward"
@@ -31,25 +31,13 @@
   </q-page-sticky>
 </template>
 <script lang="ts" setup>
-import { AccountSettings, Currency } from 'src/store/model'
+import { useMyAccountSettings } from 'src/composables/accountSettings'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 const store = useStore()
 
 const myMember = computed(() => store.getters.myMember)
-const myAccount = computed(() => store.getters.myAccount)
-
-const settings = computed<AccountSettings>(() => myAccount.value.settings)
-const currency = computed<Currency>(() => myAccount.value.currency)
-
-const allowPayments = computed(() => 
-  settings.value.attributes.allowPayments ?? 
-  currency.value.attributes.settings.defaultAllowPayments
-)
-const allowPaymentRequests = computed(() => 
-  settings.value.attributes.allowPaymentRequests ?? 
-  currency.value.attributes.settings.defaultAllowPaymentRequests
-)
+const settings = useMyAccountSettings()
 
 </script>

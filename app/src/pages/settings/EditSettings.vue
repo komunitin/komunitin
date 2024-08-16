@@ -19,6 +19,17 @@
           :hint="$t('acceptPaymentsHint')"
         />
       </div>
+      <div v-if="effectiveSettings.allowTagPayments">
+        <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
+          {{ $t('nfcTags') }}
+        </div>
+        <div class="text-body2 text-onsurface-m q-mb-sm">
+          {{ $t('nfcTagsText') }}
+        </div>
+        <nfc-tags-list
+          v-model="tags"
+        />
+      </div>
       <div class="q-mt-lg">
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
           {{ $t('app') }}
@@ -95,13 +106,15 @@ import { useStore } from 'vuex';
 import PageHeader from '../../layouts/PageHeader.vue';
 import ToggleItem from '../../components/ToggleItem.vue';
 import SaveChanges from '../../components/SaveChanges.vue';
+import NfcTagsList from '../../components/NfcTagsList.vue';
 
 import langs, {LangName, normalizeLocale} from "../../i18n";
-import { AccountSettings, MailingFrequency, UserSettings } from '../../store/model';
+import { AccountSettings, MailingFrequency, AccountTag, UserSettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
 import { watchDebounced } from "@vueuse/shared";
 import { useI18n } from 'vue-i18n';
+import { useMyAccountSettings } from 'src/composables/accountSettings';
 
 const { t } = useI18n()
 const frequencies = [
@@ -171,15 +184,35 @@ const saveUserSettings = async (resource: DeepPartial<UserSettings>) => {
 
 // Account settings
 const acceptPayments = ref<boolean|undefined>()
+const tags = ref()
 watchEffect(() => {
   acceptPayments.value = accountSettings.value?.attributes.acceptPaymentsAutomatically
+  tags.value = accountSettings.value?.attributes.tags
 })
 
-watch([acceptPayments], () => {
+const tagsEqual = (a: AccountTag[], b?: AccountTag[]) => {
+  if (!b) {
+    return a.length === 0
+  }
+  if (a.length !== b.length) {
+    return false
+  }
+  return a.every((tag, i) => tag.id === b[i].id)
+}
+
+watch([acceptPayments, tags], async () => {
+  let save = false
+  const attributes: Partial<AccountSettings["attributes"]> = {}
   if (acceptPayments.value !== undefined && acceptPayments.value !== accountSettings.value?.attributes.acceptPaymentsAutomatically) {
-    saveAccountSettings({
-      attributes: {acceptPaymentsAutomatically: acceptPayments.value}
-    })
+    attributes.acceptPaymentsAutomatically = acceptPayments.value
+    save = true
+  }
+  if (tags.value !== undefined && !tagsEqual(tags.value, accountSettings.value?.attributes.tags)) {
+    attributes.tags = tags.value
+    save = true
+  }
+  if (save) {
+    await saveAccountSettings({ attributes })
   }
 })
 
@@ -242,5 +275,7 @@ watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers, ema
     locale.value = language.value.value
   }
 }, {debounce: 1000})
+
+const effectiveSettings = useMyAccountSettings()
 
 </script>

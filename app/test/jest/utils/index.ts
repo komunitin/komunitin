@@ -64,6 +64,14 @@ jest.mock("vue-qrcode-reader", () => ({
   QrcodeStream: jest.fn(),
 }))
 
+// Mock Web NFC api
+class MockNDEFReader {
+  constructor() {}
+  public scan = jest.fn(() => new Promise(() => {}));
+  public addEventListener = jest.fn();  
+}
+Object.defineProperty(global, "NDEFReader", {value: MockNDEFReader});
+
 // Set a value on scrollHeight property so QInfiniteScrolling doesn't load all resources.
 Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {configurable: true, value: 1500});
 Object.defineProperty(SVGSVGElement.prototype, "pauseAnimations", {value: jest.fn()});
@@ -158,7 +166,7 @@ declare module "@vue/runtime-core" {
 /**
  * Wait for the content of a function to be equal to the expected value, up to a timeout.
  */
-export const waitForEqual = async (fn: () => any, expected: any, timeout = 1000) => {
+export const waitFor = async (fn: () => any, expected: any = true, timeout = 1000) => {
   const start = Date.now();
   while (Date.now() - start < timeout) {
     if (fn() === expected) {

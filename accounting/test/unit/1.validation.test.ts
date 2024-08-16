@@ -71,5 +71,25 @@ describe('Input validation', async () => {
       }
     }, false)
 
+    const testTransfer = {
+      data: {
+        type: "transfers",
+        attributes: {
+          state: "committed",
+          amount: 100,
+          meta: "hello",
+        },
+        relationships: {
+          payer: { data: {id: "3bc8e447-32cb-4dc7-b7ec-6a6f33c6c99e", type: "accounts"} },
+          payee: { data: {id: "3bc8e447-32cb-4dc7-b7ec-6a6f33c6c99e", type: "accounts"} },
+        }
+      }
+    } as any
+    await testValidation(Validators.isCreateTransfer(), testTransfer)
+    testTransfer.data.attributes.authorization = {
+      type: "tag",
+      value: "1234567890"
+    }
+    await testValidation(Validators.isCreateTransfer(), testTransfer)
   })
 })

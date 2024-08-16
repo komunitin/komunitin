@@ -155,6 +155,12 @@ const routes: RouteRecordRaw[] = [
             component: () => import('../pages/transactions/CreateTransactionReceiveQR.vue'),
           },
           {
+            path: 'nfc',
+            props: true,
+            name: 'CreateTransactionReceiveNFC',
+            component: () => import('../pages/transactions/CreateTransactionReceiveNFC.vue')
+          },
+          {
             path: 'multiple',
             props: route => ({direction: 'receive', ...route.params}),
             name: 'CreateTransactionReceiveMultiple',

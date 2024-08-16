@@ -1,4 +1,4 @@
-import { hkdf, generateKey, KeyObject, createSecretKey, createCipheriv, randomBytes, createDecipheriv, createPrivateKey, createPublicKey } from "node:crypto";
+import { hkdf, generateKey, KeyObject, createSecretKey, createCipheriv, randomBytes, createDecipheriv, createPrivateKey, createPublicKey, createHash } from "node:crypto";
 /**
  * Derive a 32 byte key from a password and a salt
  * @param password 
@@ -124,5 +124,3 @@ export const importEd25519RawPublicKey = async (key: Buffer) => {
 
   return keyObj
 }
-
-

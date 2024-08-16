@@ -8,7 +8,6 @@ import { Scope } from "src/server/auth"
 import { clearDb } from "./db"
 import { testCurrency } from "./api.data"
 import { config } from "src/config"
-import { response } from "express"
 
 describe('Accounts endpoints', async () => {
   let app: ExpressExtended

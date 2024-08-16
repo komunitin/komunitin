@@ -90,6 +90,9 @@ async function migrateCurrency(ctx: Context, controller: SharedController, migra
       enableExternalPayments: true,
       defaultAllowExternalPayments: true,
       defaultAllowExternalPaymentRequests: true,
+      // Allow tag payments (useful in demo)
+      defaultAllowTagPaymentRequests: true,
+      defaultAllowTagPayments: true,
     }
   } as Currency
 

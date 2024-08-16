@@ -36,10 +36,12 @@ import TransactionCard from '../../components/TransactionCard.vue'
 import {notifyTransactionState} from "../../plugins/NotifyTransactionState"
 import { Transfer } from "src/store/model"
 import KError, { KErrorCode } from "src/KError"
+import { onMounted } from "vue"
 
 const props = defineProps<{
   code: string;
   transfer: DeepPartial<Transfer>;
+  autoConfirm?: boolean;
 }>()
 
 const emit = defineEmits<{
@@ -87,5 +89,11 @@ const onSubmit = async () => {
     quasar.loading.hide()
   }
 }
+
+onMounted(async () => {
+  if (props.autoConfirm) {
+    await onSubmit()
+  }
+})
 
 </script>

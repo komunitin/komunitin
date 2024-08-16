@@ -1,4 +1,4 @@
-import { Account, AccountSettings, InputAccount, recordToAccount, UpdateAccount, userHasAccount } from "src/model";
+import { Account, AccountSettings, InputAccount, recordToAccount, Tag, UpdateAccount, userHasAccount } from "src/model";
 import { LedgerCurrencyController } from "./currency-controller";
 import { Context, systemContext } from "src/utils/context";
 import { AbstractCurrencyController } from "./abstract-currency-controller";
@@ -7,6 +7,7 @@ import { AccountType } from "@prisma/client";
 import { WithRequired } from "src/utils/types";
 import { CollectionOptions } from "src/server/request";
 import { whereFilter } from "./query";
+import { deriveKey, exportKey } from "src/utils/crypto";
 
 export class AccountController extends AbstractCurrencyController{
   constructor (readonly currencyController: LedgerCurrencyController) {
@@ -122,13 +123,15 @@ export class AccountController extends AbstractCurrencyController{
    * Implements {@link CurrencyController.getAccount}
    */
   async getAccount(ctx: Context, id: string): Promise<WithRequired<Account, "users">> {
-
     const record = await this.db().account.findUnique({
       where: { 
         id,
         status: "active",
       },
-      include: { users: { include: { user: true } } }
+      include: { 
+        users: { include: { user: true } },
+        tags: true
+      }
     })
     if (!record) {
       throw notFound(`Account id ${id} not found in currency ${this.currency().code}`)
@@ -136,22 +139,26 @@ export class AccountController extends AbstractCurrencyController{
     return recordToAccount(record, this.currency()) as WithRequired<Account, "users">
   }
 
-  /**
-   * Implements {@link CurrencyController.getAccountByCode}
-   */
-  async getAccountByCode(ctx: Context, code: string): Promise<Account|undefined> {
-    await this.users().checkUser(ctx)
+  async getAccountBy(ctx: Context, field: "code"|"keyId", value: string): Promise<Account | undefined> {
     const record = await this.db().account.findUnique({
       where: { 
-        code,
+        code: field === "code" ? value : undefined,
+        keyId: field === "keyId" ? value : undefined,
         status: "active",
       },
-      include: { users: { include: { user: true } } }
     })
     if (!record) {
       return undefined
     }
     return recordToAccount(record, this.currency())
+  }
+
+  /**
+   * Implements {@link CurrencyController.getAccountByCode}
+   */
+  async getAccountByCode(ctx: Context, code: string): Promise<Account|undefined> {
+    // Anonymous users can access this endpoint.
+    return this.getAccountBy(ctx, "code", code)
   }
 
   /**
@@ -159,22 +166,28 @@ export class AccountController extends AbstractCurrencyController{
    */
   async getAccountByKey(ctx: Context, key: string): Promise<Account | undefined> {
     await this.users().checkUser(ctx)
-    const record = await this.db().account.findUnique({
-      where: { 
-        status: "active",
-        keyId: key,
-      },
-      include: { users: { include: { user: true } } }
+    return this.getAccountBy(ctx, "keyId", key)
+  }
+
+  async getAccountByTag(ctx: Context, tag: string, hashed = false): Promise<Account|undefined> {
+    const hash = hashed ? tag : await this.accountTagHash(tag)
+    const record = await this.db().accountTag.findFirst({
+      where: { hash },
+      include: { account: true }
     })
-    if (!record) {
+    if (!record || record.account.status !== "active") {
       return undefined
     }
-    return recordToAccount(record, this.currency())
+    return recordToAccount(record.account, this.currency())
   }
 
   async getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]> {
-    // Anonymous users can access this endpoint if they provide an id or a single code filter. 
-    const allowAnonymous = params.filters?.id || params.filters?.code
+    // Anonymous users can access this endpoint if they provide an single id, code or tag filter. 
+    const isSingleCode = (typeof params.filters?.code === 'string')
+    const isSingleTag = (typeof params.filters?.tag === 'string')
+    const isSingleId = (typeof params.filters?.id === 'string')
+    
+    const allowAnonymous = isSingleCode || isSingleTag || isSingleId
 
     if (!allowAnonymous) {
       if (ctx.type === "anonymous") {
@@ -183,8 +196,16 @@ export class AccountController extends AbstractCurrencyController{
         await this.users().checkUser(ctx)
       }
     }
+
+    if (!isSingleTag && params.filters.tag) {
+      throw badRequest("Only one tag filter allowed")
+    }
+
+    if (isSingleTag) {
+      const account = await this.getAccountByTag(ctx, params.filters.tag as string) 
+      return account ? [account] : []
+    }
     
-    // Allow filtering by code and by id.
     const filter = whereFilter(params.filters)
     
     const records = await this.db().account.findMany({
@@ -271,21 +292,88 @@ export class AccountController extends AbstractCurrencyController{
     // Check that the user is only updating allowed settings.
 
     // We can make this list configurable in the future.
-    const userSettings = ["acceptPaymentsAutomatically", "acceptPaymentsWhitelist", "acceptExternalPaymentsAutomatically"]
+    const userSettings = [
+      "acceptPaymentsAutomatically",
+      "acceptPaymentsWhitelist", 
+      "acceptExternalPaymentsAutomatically",
+      "tags"
+    ]
 
     if (!this.users().isAdmin(user) && Object.keys(settings).some(k => !["id", "type"].includes(k) && !userSettings.includes(k))) {
       throw forbidden("User is not allowed to update this account setting")
     }
 
-    const record = await this.db().account.update({
-      data: { settings },
-      where: { id: account.id }
-    })
-    const updated = recordToAccount(record, this.currency())
-    return {
-      id: updated.id,
-      ...updated.settings
+    const deleteUndefined = (obj: any) => {
+      for (const key in obj) {
+        if (obj[key] === undefined) {
+          delete obj[key]
+        }
+      }
     }
+
+    const {tags, id, ...updateSettings} = settings
+    deleteUndefined(updateSettings)
+
+    if (tags) {
+      await this.updateAccountTags(account, tags)
+    }
+    if (updateSettings && Object.keys(updateSettings).length) {
+      // Since settings is a single Json value in table, we need to provide the full object.
+      // And we need to remove the tags entry too, since they are saved in separate DB table.
+      const {tags, ...oldSettings} = account.settings
+      const fullSettings = {
+        ...oldSettings,
+        ...updateSettings
+      }
+      await this.db().account.update({
+        data: { settings: fullSettings },
+        where: { id: account.id }
+      })
+    }
+
+    return await this.getAccountSettings(ctx, settings.id as string)
+    
+  }
+
+  async updateAccountTags(account: Account, tags: Tag[]) {
+    // Check all tags have name and either value or id (it is ok to update the name of a tag without changing the vaue)
+    if (tags.some(t => !t.name || (!t.value && !t.id))) {
+      throw badRequest("Tag name and value are required")
+    // Check for repeated values or names
+    } else if (tags.some(t => tags.filter(t2 => t2.name === t.name || t2.value === t.value).length > 1)) {
+      throw badRequest("Repeated tag")
+    }
+    
+    // Compute tag hashes
+    const data = await Promise.all(tags.map(async t => ({
+      id: t.value ? undefined : t.id,
+      hash: t.value ? await this.accountTagHash(t.value as string) : undefined,
+      name: t.name,
+      accountId: account.id
+    })))
+
+    const newTags = data.filter(t => !t.id) // hash always defined here
+    const updateTags = data.filter(t => t.id) // hash always undefined here 
+
+    // Update tag records (delete + update + insert).
+    await this.db().$transaction([
+      // Delete ids not in the provided tags and also delete tags with
+      // same values as the provided ones.
+      this.db().accountTag.deleteMany({
+        where: { 
+          OR: [
+            { id: { notIn: updateTags.map(t => t.id as string) }},
+          ]
+        }
+      }),
+      ...updateTags.map(t => this.db().accountTag.update({
+        where: { id: t.id as string },
+        data: { name: t.name }
+      })),
+      this.db().accountTag.createMany({
+        data: newTags as {hash: string, name: string, accountId: string}[]
+      })
+    ])
   }
 
   async updateAccountBalance(account: Account): Promise<void> {
@@ -296,6 +384,15 @@ export class AccountController extends AbstractCurrencyController{
       data: { balance: account.balance },
       where: { id: account.id }
     })
+  }
+
+  /**
+   * We don't save the tag id in the DB, but a hash of the tag value.
+   * Tags need to be searchable so we can't salt the hash with a unique string.
+   */
+  async accountTagHash(value: string) {
+    const key = await deriveKey(value, "komunitin.org")
+    return exportKey(key)
   }
 
 }

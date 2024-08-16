@@ -38,13 +38,15 @@ export enum KErrorCode {
   InvalidTransferState = "InvalidTransferState",
   InvalidTransfersCSVFile = "InvalidTransfersCSVFile",
   QRCodeError = "QRCodeError",
+  NFCReadError = "NFCReadError",
+  NFCUnavailable = "NFCUnavailable",
   /**
    * This condition should not happen and it indicates a programming bug
    * that needs to be solved by the development team. Use it to assert complex
    * conditions.
    */
   ScriptError = "ScriptError",
-  UserLoggingOut = "UserLoggingOut"
+  UserLoggingOut = "UserLoggingOut",
 }
 
 /**

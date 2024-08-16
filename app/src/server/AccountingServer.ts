@@ -94,7 +94,15 @@ export default {
       }
     }),
     accountSettings: Factory.extend({
-      acceptPaymentsAutomatically: true
+      acceptPaymentsAutomatically: true,
+      allowTagPayments: true,
+      allowTagPaymentRequests: true,
+      tags: (i: number) => (i == 2 ? [{
+        id: "tag1",
+        name: "Tag 1",
+        updated: new Date().toJSON(),
+        __value__: "31:83:47:8a",
+      }] : []),
     })
   },
   /**
@@ -162,6 +170,11 @@ export default {
     server.get(urlAccounting + "/:code/accounts", (schema: any, request) => {
       const currency = schema.currencies.findBy({ code: request.params.code });
       const all = schema.accounts.where({ currencyId: currency.id })
+      if (request.queryParams["filter[tag]"]) {
+        return all.filter((account: any) => {
+          return account.settings.tags.some((tag: any) => tag.__value__ == request.queryParams["filter[tag]"])
+        })
+      }
       return filter(all, request);
     });
     // Single account

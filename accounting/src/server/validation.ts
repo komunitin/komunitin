@@ -37,7 +37,8 @@ export namespace Validators {
     body(`${path}.enableExternalPayments`).optional().isBoolean(),
     body(`${path}.enableExternalPaymentRequests`).optional().isBoolean(),
     body(`${path}.defaultAcceptExternalPaymentsAutomatically`).optional().isBoolean(),
-    
+    body(`${path}.defaultAllowTagPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowTagPaymentRequests`).optional().isBoolean(),
   ]
 
   const isUpdateCurrencyAttributes = (path: string) => [
@@ -115,6 +116,9 @@ export namespace Validators {
     body(`${path}.amount`).isInt({gt: 0}),
     body(`${path}.state`).isIn(["new", "committed"]),
     body(`${path}.hash`).optional().isString(),
+    body(`${path}.authorization`).optional().custom((value, {req}) => {
+      return value.type === "tag" && typeof value.value === "string" && value.value.length > 0
+    }),
     body(`${path}.created`).optional(),
     body(`${path}.updated`).optional(),
   ]
@@ -191,7 +195,12 @@ export namespace Validators {
     body(`${path}.allowExternalPayments`).optional().isBoolean(),
     body(`${path}.allowExternalPaymentRequests`).optional().isBoolean(),
     body(`${path}.acceptExternalPaymentsAutomatically`).optional().isBoolean(),
-
+    body(`${path}.allowTagPayments`).optional().isBoolean(),
+    body(`${path}.allowTagPaymentRequests`).optional().isBoolean(),
+    body(`${path}.tags`).optional().isArray(),
+    body(`${path}.tags.*.name`).isString().notEmpty(),
+    body(`${path}.tags.*.value`).optional().isString().notEmpty(),
+    body(`${path}.tags.*.id`).optional().isUUID(),
   ]
 
   export const isUpdateAccountSettings = () => [
