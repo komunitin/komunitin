@@ -356,10 +356,12 @@ export interface Account extends ResourceObject {
   }
 }
 
-export interface NFCTag {
+export interface AccountTag {
+  id?: string,
   name: string,
-  tag: string,
-  date: string
+  value?: string,
+  hash?: string,
+  updated?: string
 }
 
 export interface AccountSettings extends ResourceObject {
@@ -372,8 +374,10 @@ export interface AccountSettings extends ResourceObject {
     allowExternalPayments?: boolean,
     allowExternalPaymentRequests?: boolean,
 
-    allowNfcTagPayments?: boolean
-    nfcTags?: NFCTag[]
+    allowTagPayments?: boolean
+    allowTagPaymentRequests?: boolean
+    
+    tags?: AccountTag[]
 
   }
   relationships: {
@@ -388,6 +392,10 @@ export interface Transfer extends ResourceObject {
     amount: number,
     meta: string,
     state: TransferState;
+    authorization?: {
+      type: "tag",
+      value: string
+    }
     expires?: string;
     created: string;
     updated: string;

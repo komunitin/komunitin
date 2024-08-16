@@ -22,6 +22,12 @@
           icon="qr_code"
         />
         <q-route-tab
+          v-if="direction === 'receive' && myAccountSettings.attributes.allowTagPaymentRequests"
+          :to="`/groups/${code}/members/${myMemberCode}/transactions/${direction}/nfc`"
+          :label="$t('nfcTag')"
+          icon="nfc"
+        />
+        <q-route-tab
           :to="`/groups/${code}/members/${myMemberCode}/transactions/${direction}/multiple`"
           :label="$t('multiple')"
           icon="list"
@@ -33,7 +39,7 @@
 </template>
 <script setup lang="ts">
 import PageHeader from 'src/layouts/PageHeader.vue';
-import { Member } from 'src/store/model';
+import { AccountSettings, Member } from 'src/store/model';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -64,6 +70,7 @@ const { t } = useI18n()
 
 const store = useStore()
 const myMember = computed<Member>(() => store.getters.myMember)
+const myAccountSettings = computed<AccountSettings>(() => store.getters.myAccount.settings)
 const myMemberCode = computed<string>(() => myMember.value.attributes.code)
 
 </script>

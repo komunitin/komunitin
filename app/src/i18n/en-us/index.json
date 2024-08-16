@@ -292,6 +292,9 @@
   "nfcTagHint": "Tap to start scanning. If using a phone, the reader is in the back.",
   "noTags": "There are no NFC tags associated to your account yet.",
   "scanningNfc": "Scanning NFC...",
+  "enterTransactionDataNfc": "Set a transfer description and an amount before scanning the NFC tag.",
+  "scanNfc": "Scan NFC",
+  "bringNfcTag": "Bring the NFC tag close to the device to scan it.",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

@@ -19,7 +19,7 @@
           :hint="$t('acceptPaymentsHint')"
         />
       </div>
-      <div v-if="accountSettings?.attributes.allowNfcTagPayments">
+      <div v-if="accountSettings?.attributes.allowTagPayments">
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
           {{ $t('nfcTags') }}
         </div>
@@ -109,7 +109,7 @@ import SaveChanges from '../../components/SaveChanges.vue';
 import NfcTagsList from '../../components/NfcTagsList.vue';
 
 import langs, {LangName, normalizeLocale} from "../../i18n";
-import { AccountSettings, MailingFrequency, NFCTag, UserSettings } from '../../store/model';
+import { AccountSettings, MailingFrequency, AccountTag, UserSettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
 import { watchDebounced } from "@vueuse/shared";
@@ -186,17 +186,17 @@ const acceptPayments = ref<boolean|undefined>()
 const tags = ref()
 watchEffect(() => {
   acceptPayments.value = accountSettings.value?.attributes.acceptPaymentsAutomatically
-  tags.value = accountSettings.value?.attributes.nfcTags
+  tags.value = accountSettings.value?.attributes.tags
 })
 
-const tagsEqual = (a: NFCTag[], b?: NFCTag[]) => {
+const tagsEqual = (a: AccountTag[], b?: AccountTag[]) => {
   if (!b) {
     return a.length === 0
   }
   if (a.length !== b.length) {
     return false
   }
-  return a.every((tag, i) => tag.name === b[i].name && tag.tag === b[i].tag)
+  return a.every((tag, i) => tag.id === b[i].id)
 }
 
 watch([acceptPayments, tags], async () => {
@@ -206,8 +206,8 @@ watch([acceptPayments, tags], async () => {
     attributes.acceptPaymentsAutomatically = acceptPayments.value
     save = true
   }
-  if (tags.value !== undefined && !tagsEqual(tags.value, accountSettings.value?.attributes.nfcTags)) {
-    attributes.nfcTags = tags.value
+  if (tags.value !== undefined && !tagsEqual(tags.value, accountSettings.value?.attributes.tags)) {
+    attributes.tags = tags.value
     save = true
   }
   if (save) {

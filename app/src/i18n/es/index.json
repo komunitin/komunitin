@@ -279,7 +279,7 @@
   "scanThisQR": "Escanea este código QR para completar la transacción.",
   "scanQRCode": "Escanea el código QR de la transacción",
   "nfcTags": "Etiquetas NFC",
-  "nfcTagsText": "COnvierte cualquier etiqueta NFC en un monedero digital asociado a tu cuenta.",
+  "nfcTagsText": "Convierte cualquier etiqueta NFC en un monedero digital asociado a tu cuenta.",
   "deleteNFCTagConfirmation": "Seguro que quieres borrar la etiqueta NFC con nombre {name}?",
   "addTag": "Añadir NFC",
   "editTag": "Editar NFC",
@@ -287,7 +287,9 @@
   "nfcTagHint": "Toca para empezar a escanear. Si utilizas un móvil, el lector es en la parte trasera.",
   "noTags": "Aún no hay etiquetas NFC asociadas a tu cuenta.",
   "scanningNfc": "Escaneando NFC...",
-
+  "enterTransactionDataNfc": "Entra la descripción i la cantidad a transferir antes de escanear la etiqueta NFC.",
+  "scanNfc": "Escanea NFC",
+  "bringNfcTag": "Acerca la etiqueta NFC al lector.",
 
   "ErrorAuthNoCredentials": "Email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta",

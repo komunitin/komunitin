@@ -18,8 +18,11 @@
       </q-item-section>
       <q-item-section>
         <q-item-label>{{ tag.name }}</q-item-label>
-        <q-item-label caption>
-          {{ $formatDate(tag.date) }}
+        <q-item-label 
+          v-if="tag.updated"
+          caption
+        >
+          {{ $formatDate(tag.updated) }}
         </q-item-label>
       </q-item-section>
       <q-item-section side>
@@ -82,7 +85,7 @@
           unelevated
           color="primary"
           :label="$t('save')"
-          :disable="!(tagName && tagValue)"
+          :disable="saveDisabled"
           @click="saveTag()"
         />
       </q-card-section>
@@ -94,14 +97,14 @@ import { computed, ref } from "vue"
 import DeleteBtn from "./DeleteBtn.vue"
 import NfcTagInput from "./NfcTagInput.vue"
 import { useI18n } from "vue-i18n"
-import { NFCTag } from "src/store/model"
+import { AccountTag } from "src/store/model"
 
 const props = defineProps<{
-  modelValue: NFCTag[]
+  modelValue: AccountTag[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: NFCTag[]): void
+  (e: 'update:modelValue', value: AccountTag[]): void
 }>()
 
 // Not using computed model property since we have more fine-grained control
@@ -117,22 +120,23 @@ const editingTagIndex = ref<number>(-1)
 const tagName = ref<string>()
 const tagValue = ref<string>()
 
-const deleteTag = (tag: NFCTag) => {
+const deleteTag = (tag: AccountTag) => {
   emit('update:modelValue', props.modelValue.filter(t => t !== tag))
 }
 
 const addTag = () => {
   action.value = "add"
+  editingTagIndex.value = -1
   tagName.value = ""
   tagValue.value = ""
   showDialog.value = true
 }
 
-const editTag = (tag: NFCTag) => {
+const editTag = (tag: AccountTag) => {
   action.value = "edit"
   editingTagIndex.value = props.modelValue.indexOf(tag)
   tagName.value = tag.name
-  tagValue.value = tag.tag
+  tagValue.value = ""
   showDialog.value = true
 }
 
@@ -142,21 +146,21 @@ const saveTag = () => {
   }
   const tags = [...props.modelValue]
   if (action.value === "edit") {
-    tags[editingTagIndex.value] = {
-      name: tagName.value,
-      tag: tagValue.value,
-      date: new Date().toISOString()
+    tags[editingTagIndex.value].name = tagName.value
+    if (tagValue.value) {
+      tags[editingTagIndex.value].value = tagValue.value
     }
   } else if (action.value === "add") {
     tags.push({
       name: tagName.value,
-      tag: tagValue.value,
-      date: new Date().toISOString()
+      value: tagValue.value,
     })
   }
   emit('update:modelValue', tags)
   showDialog.value = false
 }
+
+const saveDisabled = computed(() => !tagName.value || (action.value === "add" && !tagValue.value))
 
 
 </script>
