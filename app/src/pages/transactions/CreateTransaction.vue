@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import { useMyAccountSettings } from 'src/composables/accountSettings';
 import PageHeader from 'src/layouts/PageHeader.vue';
-import { AccountSettings, Member } from 'src/store/model';
+import { Member } from 'src/store/model';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
