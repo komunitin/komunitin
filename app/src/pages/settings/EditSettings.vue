@@ -19,7 +19,7 @@
           :hint="$t('acceptPaymentsHint')"
         />
       </div>
-      <div v-if="accountSettings?.attributes.allowTagPayments">
+      <div v-if="effectiveSettings.allowTagPayments">
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
           {{ $t('nfcTags') }}
         </div>
@@ -114,6 +114,7 @@ import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
 import { watchDebounced } from "@vueuse/shared";
 import { useI18n } from 'vue-i18n';
+import { useMyAccountSettings } from 'src/composables/accountSettings';
 
 const { t } = useI18n()
 const frequencies = [
@@ -274,5 +275,7 @@ watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers, ema
     locale.value = language.value.value
   }
 }, {debounce: 1000})
+
+const effectiveSettings = useMyAccountSettings()
 
 </script>
