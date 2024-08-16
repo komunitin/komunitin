@@ -116,8 +116,9 @@ export namespace Validators {
     body(`${path}.amount`).isInt({gt: 0}),
     body(`${path}.state`).isIn(["new", "committed"]),
     body(`${path}.hash`).optional().isString(),
-    body(`${path}.authorization.type`).optional().isString(),
-    body(`${path}.authorization.value`).optional().isString(),
+    body(`${path}.authorization`).optional().custom((value, {req}) => {
+      return value.type === "tag" && typeof value.value === "string" && value.value.length > 0
+    }),
     body(`${path}.created`).optional(),
     body(`${path}.updated`).optional(),
   ]

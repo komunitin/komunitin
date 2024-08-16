@@ -182,11 +182,12 @@ export class AccountController extends AbstractCurrencyController{
   }
 
   async getAccounts(ctx: Context, params: CollectionOptions): Promise<Account[]> {
-    // Anonymous users can access this endpoint if they provide an single code or tag filter. For a single id they can hit the usual endpoint
+    // Anonymous users can access this endpoint if they provide an single id, code or tag filter. 
     const isSingleCode = (typeof params.filters?.code === 'string')
     const isSingleTag = (typeof params.filters?.tag === 'string')
+    const isSingleId = (typeof params.filters?.id === 'string')
     
-    const allowAnonymous = isSingleCode || isSingleTag
+    const allowAnonymous = isSingleCode || isSingleTag || isSingleId
 
     if (!allowAnonymous) {
       if (ctx.type === "anonymous") {
@@ -200,17 +201,11 @@ export class AccountController extends AbstractCurrencyController{
       throw badRequest("Only one tag filter allowed")
     }
 
-    if (isSingleCode) {
-      const account = await this.getAccountByCode(ctx, params.filters.code as string) 
-      return account ? [account] : []
-    }
     if (isSingleTag) {
       const account = await this.getAccountByTag(ctx, params.filters.tag as string) 
       return account ? [account] : []
     }
-
     
-    // Allow filtering by code, id & tag.
     const filter = whereFilter(params.filters)
     
     const records = await this.db().account.findMany({
