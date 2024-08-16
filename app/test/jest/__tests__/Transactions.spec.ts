@@ -1,6 +1,6 @@
 import { flushPromises, VueWrapper } from "@vue/test-utils";
 import App from "src/App.vue";
-import { mountComponent, waitForEqual } from "../utils";
+import { mountComponent, waitFor } from "../utils";
 import TransactionList from "src/pages/transactions/TransactionList.vue";
 import AccountHeader from "src/components/AccountHeader.vue";
 import SelectAccount from "src/components/SelectAccount.vue";
@@ -10,6 +10,7 @@ import { QList, QMenu } from "quasar";
 import SelectGroup from "src/components/SelectGroup.vue";
 import GroupHeader from "src/components/GroupHeader.vue";
 import CreateTransactionSendQR from "src/pages/transactions/CreateTransactionSendQR.vue";
+import NfcTagScanner from "src/components/NfcTagScanner.vue";
 
 describe("Transactions", () => {
   let wrapper: VueWrapper;
@@ -202,7 +203,7 @@ describe("Transactions", () => {
     expect(dialog.findAllComponents(AccountHeader).length).toBe(0)
     
     await input.setValue("002")
-    await waitForEqual(() => dialog.findAllComponents(AccountHeader).length, 1)
+    await waitFor(() => dialog.findAllComponents(AccountHeader).length, 1)
     // Found account
     await dialog.getComponent(AccountHeader).trigger("click")
     await flushPromises()
@@ -239,7 +240,7 @@ describe("Transactions", () => {
     expect(payees.length).toBe(5)
     for (let i = 0; i < 4; i++) {
       await payees[i].get('input').trigger("click");
-      await waitForEqual(() => payees[i].getComponent(QMenu).findAllComponents(AccountHeader).length > 0, true)
+      await waitFor(() => payees[i].getComponent(QMenu).findAllComponents(AccountHeader).length > 0)
       const payee = payees[i].getComponent(QMenu).findAllComponents(AccountHeader)[i+1]
       await payee.trigger("click")
       await flushPromises()
@@ -247,10 +248,10 @@ describe("Transactions", () => {
       await wrapper.get(`[name='amount[${i}]']`).setValue(`${i+1}`)
       // It required to wait for the menu to close before opening the next one since otherwise
       // the vue framework will throw an error.
-      await waitForEqual(() => payees[i].findComponent(QMenu).isVisible(), false)
+      await waitFor(() => payees[i].findComponent(QMenu).isVisible(), false)
     }
     await wrapper.get("button[type='submit']").trigger("click")
-    await waitForEqual(() => wrapper.find("button[name='confirm']").isVisible(), true)
+    await waitFor(() => wrapper.find("button[name='confirm']").isVisible())
 
     const names = ["Arnoldo", "Carol", "Oleta", "Florida"]
     for (let i = 0; i < 4; i++) {
@@ -260,7 +261,7 @@ describe("Transactions", () => {
     }
     await wrapper.get("button[name='confirm']").trigger("click")
     
-    await waitForEqual(() => wrapper.vm.$route.fullPath, "/groups/GRP0/members/EmilianoLemke57/transactions")
+    await waitFor(() => wrapper.vm.$route.fullPath, "/groups/GRP0/members/EmilianoLemke57/transactions")
 
     expect(wrapper.text()).toContain(`Test multi 1`)
     expect(wrapper.text()).toContain(`Test multi 4`)
@@ -268,40 +269,59 @@ describe("Transactions", () => {
 
   it('Generate transfer QR', async () => {
     await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/receive/qr")
-    await waitForEqual(() => wrapper.text().includes("build the transaction QR code"), true)
+    await waitFor(() => wrapper.text().includes("build the transaction QR code"))
     expect(wrapper.get("button[type='submit']").attributes("disabled")).toBeDefined()
     await wrapper.get("[name='description']").setValue("Test QR description")
     await wrapper.get("[name='amount']").setValue("12")
     expect(wrapper.get("button[type='submit']").attributes("disabled")).toBeUndefined()
     await wrapper.get("button[type='submit']").trigger("click")
-    await waitForEqual(() => wrapper.text().includes("$12.00"), true)
+    await waitFor(() => wrapper.text().includes("$12.00"))
     expect(wrapper.text()).toContain("$12.00")
     expect(wrapper.text()).toContain("Test QR description")
-    await waitForEqual(() => wrapper.find(".q-img img").exists(), true)
+    await waitFor(() => wrapper.find(".q-img img").exists())
     expect(wrapper.get(".q-img img").attributes("src")).toContain("data:image/png;base64")
   })
 
   it('Scan transfer QR', async () => {
     await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/send/qr")
-    await waitForEqual(() => wrapper.text().includes("Scan the transfer QR code"), true)
+    await waitFor(() => wrapper.text().includes("Scan the transfer QR code"))
     
     await (wrapper.getComponent(CreateTransactionSendQR) as any)
       .vm.onDetect([{rawValue: "http://localhost:8080/pay?t=http://localhost:8080/accounting/GRP0/accounts/e61b417a-d4da-45c2-afaa-69c7cde76d70&m=Test%20QR%20description&a=120000"}])
-    await waitForEqual(() => wrapper.text().includes("$-12.00"), true)
+    await waitFor(() => wrapper.text().includes("$-12.00"))
     expect(wrapper.text()).toContain("Test QR description")
     expect(wrapper.text()).toContain("GRP00004")
     expect(wrapper.text()).toContain("Florida")
     await wrapper.get("button[type='submit']").trigger("click")
-    await waitForEqual(() => wrapper.text().includes("Committed"), true)
+    await waitFor(() => wrapper.text().includes("Committed"))
   })
 
   it('Payment link', async () => {
     await wrapper.vm.$router.push("/pay?t=http://localhost:8080/accounting/GRP0/accounts/e61b417a-d4da-45c2-afaa-69c7cde76d70&m=Test%20QR%20link&a=135000")
-    await waitForEqual(() => wrapper.text().includes("$-13.50"), true)
+    await waitFor(() => wrapper.text().includes("$-13.50"))
     expect(wrapper.text()).toContain("Test QR link")
     expect(wrapper.text()).toContain("GRP00004")
     expect(wrapper.text()).toContain("Florida")
     await wrapper.get("button[type='submit']").trigger("click")
-    await waitForEqual(() => wrapper.text().includes("Committed"), true)
+    await waitFor(() => wrapper.text().includes("Committed"))
+  })
+
+  it('NFC transfer', async () => {
+    await wrapper.vm.$router.push("/groups/GRP0/members/EmilianoLemke57/transactions/receive/nfc")
+    await waitFor(() => wrapper.text().includes("before scanning the NFC tag"))
+    expect(wrapper.get("button[type='submit']").attributes("disabled")).toBeDefined()
+    await wrapper.get("[name='description']").setValue("Test NFC description")
+    await wrapper.get("[name='amount']").setValue("15")
+    expect(wrapper.get("button[type='submit']").attributes("disabled")).toBeUndefined()
+    await wrapper.get("button[type='submit']").trigger("click")
+    await waitFor(() => wrapper.text().includes("$15.00"))
+    expect(wrapper.text()).toContain("Scanning NFC...")
+    // Simulate NFC detection
+    wrapper.getComponent(NfcTagScanner).vm.$emit('detected', "31:83:47:8a")
+    await waitFor(() => wrapper.text().includes("Committed"))
+    expect(wrapper.text()).toContain("Carol")
+    expect(wrapper.text()).toContain("GRP00002")
+    expect(wrapper.text()).toContain("$15.00")
+    expect(wrapper.text()).toContain("Test NFC description")
   })
 })
