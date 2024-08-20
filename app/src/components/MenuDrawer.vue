@@ -3,7 +3,7 @@
     <member-header
       id="my-member" 
       :member="myMember" 
-      :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}`"
+      :to="`/groups/${groupCode}/members/${myMember.attributes.code}`"
       active-class="bg-active"
     >
       <template #caption>
@@ -52,7 +52,7 @@
       id="menu-transactions" 
       icon="account_balance_wallet"
       :title="$t('transactions')" 
-      :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}/transactions`"
+      :to="`/groups/${groupCode}/members/${myMember.attributes.code}/transactions`"
     />
 
     <q-separator />
@@ -64,7 +64,7 @@
       :active="groupActive"
       active-class="bg-active text-primary"
       :group="myMember.group" 
-      @click="$router.push(`/groups/${myMember.group.attributes.code}`)"
+      @click="$router.push(`/groups/${groupCode}`)"
     />
 
     <q-separator />
@@ -73,25 +73,57 @@
       id="menu-needs"
       icon="loyalty"
       :title="$t('needs')"
-      :to="`/groups/${myMember.group.attributes.code}/needs`"
+      :to="`/groups/${groupCode}/needs`"
     />
     <menu-item
       id="menu-offers"
       icon="local_offer"
       :title="$t('offers')"
-      :to="`/groups/${myMember.group.attributes.code}/offers`"
+      :to="`/groups/${groupCode}/offers`"
     />
     <menu-item
       id="menu-members"
       icon="people"
       :title="$t('members')"
-      :to="`/groups/${myMember.group.attributes.code}/members`"
+      :to="`/groups/${groupCode}/members`"
     />
+
+    <template v-if="isAdmin">
+      <q-separator />
+      <div class="text-overline text-onsurface-d q-pl-md q-pt-md text-uppercase">
+        {{ $t('administration') }}
+      </div>
+      <menu-item
+        icon="edit"
+        :title="$t('editGroup')"
+        :to="`/groups/${groupCode}/admin/edit`"
+      />
+      <menu-item
+        icon="settings"
+        :title="$t('groupSettings')"
+        :to="`/groups/${groupCode}/admin/settings`"
+      />
+      <menu-item
+        icon="category"
+        :title="$t('categories')"
+        :to="`/groups/${groupCode}/admin/categories`"
+      />
+      <menu-item
+        icon="manage_accounts"
+        :title="$t('accounts')"
+        :to="`/groups/${groupCode}/admin/accounts`"
+      />
+      <menu-item
+        icon="checklist_rtl"
+        :title="$t('transactions')"
+        :to="`/groups/${groupCode}/admin/transactions`"
+      />
+    </template>
 
     <q-separator />
 
     <menu-item
-      icon="group_work"
+      icon="user_attributes"
       :title="$t('otherGroups')"
       to="/groups"
     />
@@ -103,38 +135,31 @@
   </q-list>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
+<script setup lang="ts">
+import { computed } from "vue";
+import { useStore } from "vuex";
 import MemberHeader from "./MemberHeader.vue";
 import MenuItem from "./MenuItem.vue";
 import GroupHeader from "./GroupHeader.vue";
+import { useRoute, useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 
+const store = useStore()
+const route = useRoute()
+const router = useRouter()
+const $q = useQuasar()
 
-export default defineComponent({
-  name: "MenuDrawer",
-  components: {
-    MenuItem,
-    MemberHeader,
-    GroupHeader
-  },
-  computed: {
-    ...mapGetters(["myMember", "myAccount"]),
-    groupActive(): boolean {
-      return (
-        this.$route.fullPath ==
-        `/groups/${this.myMember.group.attributes.code}`
-      );
-    }
-  },
-  methods: {
-    async logout() {
-      await this.$store.dispatch("logout")
-      await this.$router.push("/")
-      this.$q.notify({ type: "positive", message: "Successfully logged out!" })
-    }
-  }
-});
+const myMember = computed(() => store.getters.myMember)
+const myAccount = computed(() => store.getters.myAccount)
+const groupCode = computed(() => myMember?.value.group.attributes.code)
+const isAdmin = computed(() => store.getters.isAdmin)
+
+const groupActive = computed(() => (route.fullPath ==`/groups/${myMember.value.group.attributes.code}`))
+const logout = async () => {
+  await store.dispatch("logout")
+  await router.push("/")
+  $q.notify({ type: "positive", message: "Successfully logged out!" })
+}
 </script>
 
 <style lang="scss" scoped>

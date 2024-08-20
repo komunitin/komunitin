@@ -198,6 +198,7 @@ export interface Group extends ResourceObject {
     website: string;
     access: Access;
     location: Location;
+    address: Address;
     created: string;
     updated: string;
   };

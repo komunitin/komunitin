@@ -272,6 +272,13 @@ export default {
       description: () => fakeMarkdown(4),
       image: (i: number) => (i % 2 == 0) ? fakeImage(`group${i}`) : null,
       website: () => faker.internet.url(),
+      address: () => {
+        return {
+          addressLocality: "Barcelona",
+          addressCountry: "ES",
+          addressRegion: "Catalunya"
+        }
+      },
       access: "public",
       location: () => fakeLocation(),
       created: () => faker.date.past().toJSON(),
@@ -410,6 +417,7 @@ export default {
     const user = server.create("user", {
       members: [member]
     } as any);
+
     server.create("userSettings", { user } as any);
     // Create empty user (for signup testing).
     server.create("user", {
@@ -439,6 +447,14 @@ export default {
     // Single group
     server.get(urlSocial + "/:code", (schema: any, request) => {
       return schema.groups.findBy({ code: request.params.code });
+    });
+
+    // Edit group attributes
+    server.patch(urlSocial + "/:code", (schema: any, request) => {
+      const group = schema.groups.findBy({ code: request.params.code });
+      const body = JSON.parse(request.requestBody);
+      group.update(body.data.attributes);
+      return group;
     });
 
     // Group categories.

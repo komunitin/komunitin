@@ -135,6 +135,11 @@ export default {
     },
     accessToken: (state) => 
       state.tokens?.accessToken
+    ,
+    isAdmin: (state, getters) => {
+      return state.myUserId !== undefined 
+        && getters.myCurrency?.relationships.admins.data.some((r: { id: string }) => r.id === state.myUserId)
+    }
   },
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),

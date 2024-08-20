@@ -229,6 +229,15 @@ const routes: RouteRecordRaw[] = [
         props: true,
         name: 'Transaction',
         component: () => import("../pages/transactions/Transaction.vue")
+      },
+      {
+        path: '/groups/:code/admin',
+        children: [{
+          path: 'edit',
+          props: true,
+          name: 'EditGroup',
+          component: () => import('../pages/admin/EditGroup.vue'),
+        }]
       }
     ]
   },

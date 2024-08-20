@@ -15,8 +15,9 @@ inflections("en", function (inflect) {
 export default {
   serializers: {
     currency: ApiSerializer.extend({
+      alwaysIncludeLinkageData: true, // include admins.
       selfLink: (model: { code: string }) =>
-        urlAccounting + "/" + model.code + "/currency"
+        urlAccounting + "/" + model.code + "/currency",
     }),
     account: ApiSerializer.extend({
       selfLink: (account: any) =>
@@ -39,7 +40,9 @@ export default {
     }),
   },
   models: {
-    currency: Model,
+    currency: Model.extend({
+      admins: hasMany("user"),
+    }),
     account: Model.extend({
       currency: belongsTo(),
       settings: belongsTo("accountSettings"),
@@ -156,12 +159,22 @@ export default {
       code: (i: number) => `GRP2${(i % 5).toString().padStart(4, "0")}`,
       currency: server.schema.currencies.findBy({ code: "GRP2" }),
     })
+
+    // Set currency admin user
+    server.schema.currencies.first().update({admins: [server.schema.users.first()]})
   },
   routes(server: Server) {
     // Single currency
     server.get(urlAccounting + "/:code/currency", (schema: any, request) => {
       return schema.currencies.findBy({ code: request.params.code });
     });
+    // Update currency
+    server.patch(urlAccounting + "/:code/currency", (schema: any, request: any) => {
+      const currency = schema.currencies.findBy({ code: request.params.code })
+      const body = JSON.parse(request.requestBody)
+      currency.update(body.data.attributes)
+      return currency
+    })
     // List currencies
     server.get(urlAccounting + "/currencies", (schema: any, request) => {
       return filter(schema.currencies.all(), request);

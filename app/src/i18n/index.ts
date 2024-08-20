@@ -11,6 +11,7 @@ import { QuasarLanguage } from "quasar"
 export interface LocaleDefinition {
   label: string,
   loadMessages: () => Promise<never>,
+  loadAdminMessages: () => Promise<never>,
   loadQuasar: () => Promise<QuasarLanguage>,
   loadDateFNS: () => Promise<Locale>,
   loadCountries: () => Promise<never>
@@ -20,6 +21,7 @@ const langs = {
   "ca": {
     label: "Català",
     loadMessages: async () => (await import("src/i18n/ca/index.json")).default,
+    loadAdminMessages: async () => (await import("src/i18n/ca/admin.json")).default,
     loadQuasar: async () => (await import("quasar/lang/ca")).default,
     loadDateFNS: async () => (await import("date-fns/locale/ca/index.js")).default,
     loadCountries: async () => (await import("i18n-iso-countries/langs/ca.json")).default
@@ -27,6 +29,7 @@ const langs = {
   "en-us": {
     label: "English",
     loadMessages: async () => (await import("src/i18n/en-us/index.json")).default,
+    loadAdminMessages: async () => (await import("src/i18n/en-us/admin.json")).default,
     loadQuasar: async () => (await import("quasar/lang/en-US")).default,
     loadDateFNS: async () => (await import("date-fns/locale/en-US/index.js")).default,
     loadCountries: async () => (await import("i18n-iso-countries/langs/en.json")).default
@@ -34,6 +37,7 @@ const langs = {
   "es": {
     label: "Español",
     loadMessages: async () => (await import("src/i18n/es/index.json")).default,
+    loadAdminMessages: async () => (await import("src/i18n/es/admin.json")).default,
     loadQuasar: async () => (await import("quasar/lang/es")).default,
     loadDateFNS: async () => (await import("date-fns/locale/es/index.js")).default,
     loadCountries: async () => (await import("i18n-iso-countries/langs/es.json")).default
