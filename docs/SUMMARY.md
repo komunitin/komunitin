@@ -2,6 +2,7 @@
 
 * [Overview](README.md)
   * [Monetary model](overview/monetary-model.md)
+  * [Demo](overview/demo.md)
 * [Features](features/README.md)
   * [Accounting](features/accounting/README.md)
     * [External transfers](features/accounting/external-transfers.md)
@@ -16,4 +17,8 @@
     * [Multiple payments](technology/accounting/multiple-payments.md)
     * [QR payments](technology/accounting/qr-payments.md)
     * [NFC payments](technology/accounting/nfc-payments.md)
-* [Project](project.md)
+  * [App](technology/app.md)
+  * [Notifications](technology/notifications.md)
+* [Project](project/README.md)
+  * [Terms of Use](project/terms-of-use.md)
+  * [Contact us](project/contact-us.md)
