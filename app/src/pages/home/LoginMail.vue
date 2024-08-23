@@ -13,6 +13,7 @@
       maxlength="30"
       :rules="[val => !v$.email.$invalid || $t('invalidEmail')]"
       lazy-rules
+      autocomplete="username"
     >
       <template #append>
         <q-icon name="mail" />

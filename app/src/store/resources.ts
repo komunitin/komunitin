@@ -53,7 +53,7 @@ export interface CreatePayload<T extends ResourceObject> {
   /**
    * The resource
    */
-  resource: T;
+  resource: DeepPartial<T>;
 }
 export interface CreateListPayload<T extends ResourceObject> {
   /**
@@ -64,7 +64,7 @@ export interface CreateListPayload<T extends ResourceObject> {
   /**
    * The resources
    */
-  resources: T[];
+  resources: DeepPartial<T>[];
 }
 
 type DeepPartial<T> = T extends object ? {
@@ -693,6 +693,20 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
   };
 
   /**
+   * Compute the next url from the current url and the cached content by adding the cursor.
+   */
+  protected buildNextUrl(context: ActionContext<ResourcesState<T>, S>, currentUrl: string) {  
+    const thisPage = context.getters.page(context.state.currentPage)
+    if (thisPage.length == 0) {
+      return null
+    }
+    const lastResource = thisPage[thisPage.length - 1]
+    const nextUrl = new URL(currentUrl, this.baseUrl)
+    nextUrl.searchParams.set("page[after]", lastResource.id)
+    return nextUrl.toString()
+  }
+  
+  /**
    * Creates the API query string for this list filters.
    */
   protected buildQuery(payload: LoadListPayload): string {
@@ -770,20 +784,24 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     
     // At this point the data may already be cached and hence available to the UI.
 
+    // Build fetch url.
+    let url = this.collectionEndpoint(payload.group);
+    const query = this.buildQuery(payload);
+    if (query.length > 0) url += "?" + query;
+
     if (payload.cache) {
       const timestamp = context.state.timestamps["pages/" + queryKey + "/0"]
       if (timestamp && timestamp + payload.cache > Date.now()) {
         // We have the value in cache and it's not expired, so we're done. Note that having the timestamps
-        // entry already means that we have the value entry.
+        // entry already means that we have the value entry. 
+        // We don't have, however, the next page link, but it can be computed form the current query.
+        const next = this.buildNextUrl(context, url)
+        context.commit("next", next)
         return
       }
     }
 
     // Revalidate the data by doing the request.
-
-    let url = this.collectionEndpoint(payload.group);
-    const query = this.buildQuery(payload);
-    if (query.length > 0) url += "?" + query;
     // Call API
     try {
       const data = await this.request(context, url);
@@ -816,19 +834,22 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context.commit("currentPage", page)
 
       // At this point the data may be already cached and available for the UI.
+
+      // If the endpoint is null it means that there's no next page.
+      if (context.state.next === null) {
+        context.commit("setPageIds", {key: queryKey, page, ids:[]});
+        return;
+      }
+      
       if (payload.cache) {
         const timestamp = context.state.timestamps["pages/" + queryKey + "/" + page]
         if (timestamp && timestamp + payload.cache > Date.now()) {
           // We have the value in cache and it's not expired, so we're done. Note that having the timestamps
-          // entry already means that we have the value entry.
+          // entry already means that we have the value entry. We need to compute the next page link.
+          const next = this.buildNextUrl(context, context.state.next)
+          context.commit("next", next)
           return
         }
-      }
-
-      // Well, if the endpoint is null it means that there's no next page.
-      if (context.state.next === null) {
-        context.commit("setPageIds", {key: queryKey, page, ids:[]});
-        return;
       }
       
       // Perform the request.

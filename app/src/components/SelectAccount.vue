@@ -29,13 +29,13 @@
       />
     </template>
     <template #before-options>
-      <select-group
+      <select-group-expansion
         v-model="group"
         :payer="payer"
       />
     </template>
     <template #no-option>
-      <select-group
+      <select-group-expansion
         v-model="group"
         :payer="payer"
       />
@@ -56,7 +56,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { Account, Currency, Group, Member } from 'src/store/model';
 import AccountHeader from './AccountHeader.vue';
-import SelectGroup from './SelectGroup.vue';
+import SelectGroupExpansion from './SelectGroupExpansion.vue';
 import { useStore } from 'vuex'
 import { QSelect } from 'quasar';
 import { watchDebounced } from '@vueuse/core';

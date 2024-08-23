@@ -10,38 +10,39 @@ import { inflections } from "inflected"
 const urlAccounting = KOptions.url.accounting;
 inflections("en", function (inflect) {
   inflect.irregular("accountSettings", "accountSettings")
+  inflect.irregular("currencySettings", "currencySettings")
 })
 
 export default {
   serializers: {
     currency: ApiSerializer.extend({
       alwaysIncludeLinkageData: true, // include admins.
-      selfLink: (model: { code: string }) =>
-        urlAccounting + "/" + model.code + "/currency",
+      selfLink: (model: { code: string }) => `${urlAccounting}/${model.code}/currency`,
+    }),
+    currencySettings: ApiSerializer.extend({
+      selfLink: (model: any) => `${urlAccounting}/${model.currency.code}/currency/settings`
     }),
     account: ApiSerializer.extend({
-      selfLink: (account: any) =>
-        urlAccounting +
-        "/" +
-        account.currency.code +
-        "/accounts/" +
-        account.id
+      selfLink: (account: any) => `${urlAccounting}/${account.currency.code}/accounts/${account.id}`
     }),
     accountSettings: ApiSerializer.extend({
-      selfLink: (model: any) => urlAccounting + "/" + 
-        model.account.currency.code + 
-        "/accounts/" + 
-        model.account.code + 
-        "/settings"
+      selfLink: (model: any) => `${urlAccounting}/${model.account.currency.code}/accounts/${model.account.code}/settings`
     }),
     transfer: ApiSerializer.extend({
-      selfLink: (model: any) => urlAccounting + "/" + 
-        model.payer.currency.code + "/transfers/" + model.id
+      selfLink: (model: any) => `${urlAccounting}/${model.payer.currency.code}/transfers/${model.id}`
+    }),
+    trustline: ApiSerializer.extend({
+      selfLink: (model: any) => `${urlAccounting}/${model.currency.code}/trustlines/${model.id}`
     }),
   },
   models: {
     currency: Model.extend({
+      settings: belongsTo("currencySettings"),
       admins: hasMany("user"),
+      trustlines: hasMany({inverse: "currency"}),
+    }),
+    currencySettings: Model.extend({
+      currency: belongsTo(),
     }),
     account: Model.extend({
       currency: belongsTo(),
@@ -51,10 +52,15 @@ export default {
     transfer: Model.extend({
       payer: belongsTo("account", {inverse: null}),
       payee: belongsTo("account", {inverse: null}),
+      // currency missing
     }),
     accountSettings: Model.extend({
       account: belongsTo(),
-    })
+    }),
+    trustline: Model.extend({
+      currency: belongsTo("currency", {inverse: "trustlines"}),
+      trusted: belongsTo("currency", {inverse: null}) //should be external resource
+    }),
   },
   factories: {
     currency: Factory.extend({
@@ -69,16 +75,31 @@ export default {
         d: (10 ** i)
       }),
       scale: 4,
-      settings: (i: number) => ({
-        defaultInitialCreditLimit: 100000,
-        defaultAcceptPaymentsAutomatically: true,
-        defaultAllowPayments: true,
-        defaultAllowPaymentRequests: true,
-        defaultAllowExternalPayments: true,
-        defaultAllowExternalPaymentRequests: false,
-        enableExternalPayments: true,
-        enableExternalPaymentRequests: (i < 3)
-      })
+    }),
+    currencySettings: Factory.extend({
+      defaultInitialCreditLimit: 100000,
+      defaultInitialMaximumBalance: undefined,
+      defaultAllowPayments: true,
+      defaultAllowPaymentRequests: true,
+      defaultAcceptPaymentsAutomatically: true,
+      defaultAcceptPaymentsWhitelist: [],
+      defaultAllowSimplePayments: true,
+      defaultAllowSimplePaymentRequests: true,
+      defaultAllowQrPayments: true,
+      defaultAllowQrPaymentRequests: true,
+      defaultAllowMultiplePayments: true,
+      defaultAllowMultiplePaymentRequests: true,
+      defaultAllowTagPayments: true,
+      defaultAllowTagPaymentRequests: true,
+      defaultAcceptPaymentsAfter: 2*7*24*60*60,
+      defaultOnPaymentCreditLimit: undefined,
+      enableExternalPayments: true,
+      enableExternalPaymentRequests: (i: number) => (i < 3),
+      defaultAllowExternalPayments: true,
+      defaultAllowExternalPaymentRequests: true,
+      defaultAcceptExternalPaymentsAutomatically: false,
+      externalTraderCreditLimit: 1000000,
+      externalTraderMaximumBalance: 1000000
     }),
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
@@ -106,6 +127,12 @@ export default {
         updated: new Date().toJSON(),
         __value__: "31:83:47:8a",
       }] : []),
+    }),
+    trustline: Factory.extend({
+      balance: 0,
+      limit: 100000,
+      created: new Date().toJSON(),
+      updated: new Date().toJSON(),
     })
   },
   /**
@@ -120,6 +147,8 @@ export default {
       .models.forEach((group: ModelInstance<Record<string, any>>) => {
         const currency = server.create("currency", { code: group.code });
         group.update({ currency });
+        // currency settings
+        server.create("currencySettings", {currency});
       });
     // Create an account with settings for each member
     server.schema.members
@@ -160,6 +189,27 @@ export default {
       currency: server.schema.currencies.findBy({ code: "GRP2" }),
     })
 
+    // Define some trustlines ()
+    const trustlines = [{
+      currency: "GRP0",
+      trusted: "GRP1"
+    }, {
+      currency: "GRP0",
+      trusted: "GRP2"
+    }, {
+      currency: "GRP1",
+      trusted: "GRP0"
+    }, {
+      currency: "GRP3",
+      trusted: "GRP0"
+    }]
+    trustlines.forEach((trustline) => {
+      server.create("trustline", {
+        currency: server.schema.currencies.findBy({ code: trustline.currency }),
+        trusted: server.schema.currencies.findBy({ code: trustline.trusted }),
+      })
+    })
+
     // Set currency admin user
     server.schema.currencies.first().update({admins: [server.schema.users.first()]})
   },
@@ -179,6 +229,21 @@ export default {
     server.get(urlAccounting + "/currencies", (schema: any, request) => {
       return filter(schema.currencies.all(), request);
     });
+    // Currency settings
+    server.get(`${urlAccounting}/:code/currency/settings`, (schema: any, request: any) => {
+      const currency = schema.currencies.findBy({code: request.params.code});
+      return currency.settings
+    });
+
+    // Edit currency settings
+    server.patch(`${urlAccounting}/:code/currency/settings`, (schema: any, request: any) => {
+      const currency = schema.currencies.findBy({code: request.params.code});
+      const settings = currency.settings;
+      const body = JSON.parse(request.requestBody);
+      settings.update(body.data.attributes);
+      return settings
+    });
+
     // Accounts list
     server.get(urlAccounting + "/:code/accounts", (schema: any, request) => {
       const currency = schema.currencies.findBy({ code: request.params.code });
@@ -260,7 +325,7 @@ export default {
         return new Response(201, undefined, created)
       }
     )
-    // Edit settings
+    // Edit account settings
     server.patch(`${urlAccounting}/:currency/accounts/:id/settings`, (schema: any, request: any) => {
       const currency = schema.currencies.findBy({code: request.params.currency});
       const account = schema.accounts.findBy({id: request.params.id, currencyId: currency.id});
@@ -269,5 +334,29 @@ export default {
       settings.update(body.data.attributes);
       return new Response(200, undefined, settings);
     });
+
+    // Get trustlines
+    server.get(`${urlAccounting}/:currency/trustlines`, (schema: any, request: any) => {
+      const currency = schema.currencies.findBy({code: request.params.currency});
+      return currency.trustlines
+    })
+    // Create trustline
+    server.post(`${urlAccounting}/:currency/trustlines`, (schema: any, request: any) => {
+      const currency = schema.currencies.findBy({code: request.params.currency});
+      const body = JSON.parse(request.requestBody);
+      const trustline = schema.trustlines.create({
+        ...body.data.attributes,
+        currency,
+        trusted: schema.currencies.find(body.data.relationships.trusted.data.id)
+      })
+      return new Response(201, undefined, trustline)
+    })
+    // Edit trustline
+    server.patch(`${urlAccounting}/:currency/trustlines/:id`, (schema: any, request: any) => {
+      const trustline = schema.trustlines.find(request.params.id);
+      const body = JSON.parse(request.requestBody);
+      trustline.update(body.data.attributes);
+      return new Response(200, undefined, trustline);
+    })
   }
 };

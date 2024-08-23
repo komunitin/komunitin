@@ -7,7 +7,7 @@ import SelectAccount from "src/components/SelectAccount.vue";
 import PageHeader from "src/layouts/PageHeader.vue";
 import { seeds } from "src/server";
 import { QList, QMenu } from "quasar";
-import SelectGroup from "src/components/SelectGroup.vue";
+import SelectGroupExpansion from "src/components/SelectGroupExpansion.vue";
 import GroupHeader from "src/components/GroupHeader.vue";
 import CreateTransactionSendQR from "src/pages/transactions/CreateTransactionSendQR.vue";
 import NfcTagScanner from "src/components/NfcTagScanner.vue";
@@ -149,7 +149,7 @@ describe("Transactions", () => {
     await wrapper.vm.$wait()
 
     const dialog = wrapper.getComponent(SelectAccount).getComponent(QMenu)
-    const groups = dialog.getComponent(SelectGroup)
+    const groups = dialog.getComponent(SelectGroupExpansion)
     await groups.trigger("click")
     // Choose group 1
     await groups.getComponent(QList).findAllComponents(GroupHeader)[1].trigger("click")
@@ -191,7 +191,7 @@ describe("Transactions", () => {
     await wrapper.vm.$wait()
 
     const dialog = wrapper.getComponent(SelectAccount).getComponent(QMenu)
-    const groups = dialog.getComponent(SelectGroup)
+    const groups = dialog.getComponent(SelectGroupExpansion)
     await groups.trigger("click")
     // Choose group 2
     const group2 = groups.getComponent(QList).findAllComponents(GroupHeader)[2]

@@ -210,13 +210,12 @@ export interface Group extends ResourceObject {
     needs: RelatedCollection;
     posts: RelatedCollection;
     currency: RelatedResource;
-    signupSettings: RelatedResource;
+    settings: RelatedResource;
   };
 }
 
-export interface GroupSignupSettings extends ResourceObject {
+export interface GroupSettings extends ResourceObject {
   attributes: {
-    requireAdminApproval: boolean;
     requireAcceptTerms: boolean;
     terms: string;
     minOffers: number;
@@ -475,3 +474,43 @@ export interface NotificationsSubscription extends ResourceObject {
   }
 }
 
+export interface Trustline extends ResourceObject {
+  attributes: {
+    limit: number,
+    balance: number,
+    created: string,
+    updated: string
+  };
+  relationships: {
+    trusted: RelatedResource,
+    currency: RelatedResource
+  }
+}
+
+export interface CurrencySettings extends ResourceObject {
+  attributes: {
+    defaultInitialCreditLimit: number
+    defaultInitialMaximumBalance?: number
+    defaultAllowPayments?: boolean
+    defaultAllowPaymentRequests?: boolean
+    defaultAcceptPaymentsAutomatically?: boolean
+    defaultAcceptPaymentsWhitelist?: string[]
+    defaultAllowSimplePayments?: boolean
+    defaultAllowSimplePaymentRequests?: boolean
+    defaultAllowQrPayments?: boolean
+    defaultAllowQrPaymentRequests?: boolean
+    defaultAllowMultiplePayments?: boolean
+    defaultAllowMultiplePaymentRequests?: boolean
+    defaultAllowTagPayments?: boolean;
+    defaultAllowTagPaymentRequests?: boolean;
+    defaultAcceptPaymentsAfter?: number
+    defaultOnPaymentCreditLimit?: number
+    enableExternalPayments?: boolean
+    enableExternalPaymentRequests?: boolean
+    defaultAllowExternalPayments?: boolean
+    defaultAllowExternalPaymentRequests?: boolean
+    defaultAcceptExternalPaymentsAutomatically?: boolean
+    externalTraderCreditLimit?: number
+    externalTraderMaximumBalance?: number
+  }
+}

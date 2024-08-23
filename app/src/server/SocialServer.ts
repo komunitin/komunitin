@@ -18,7 +18,7 @@ const contactTypes = Object.keys(ContactNetworks);
 
 inflections("en", function (inflect) {
   inflect.irregular("userSettings", "userSettings")
-  inflect.irregular("signupSettings", "signupSettings")
+  inflect.irregular("groupSettings", "groupSettings")
 })
 
 function fakeMarkdown(paragraphs: number): string {
@@ -198,8 +198,8 @@ export default {
     userSettings: ApiSerializer.extend({
       selfLink: () => urlSocial + "/users/me/settings"
     }),
-    signupSettings: ApiSerializer.extend({
-      selfLink: (signupSettings: any) => urlSocial + "/" + signupSettings.group.code + "/signup-settings"
+    groupSettings: ApiSerializer.extend({
+      selfLink: (groupSettings: any) => urlSocial + "/" + groupSettings.group.code + "/settings"
     }),
   },
   models: {
@@ -217,9 +217,9 @@ export default {
       offers: hasMany(),
       needs: hasMany(),
       currency: belongsTo(),
-      signupSettings: belongsTo()
+      settings: belongsTo("groupSettings")
     }),
-    signupSettings: Model.extend({
+    groupSettings: Model.extend({
       group: belongsTo()
     }),
     member: Model.extend({
@@ -352,8 +352,7 @@ export default {
       created: () => faker.date.past().toJSON(),
       updated: () => faker.date.recent().toJSON()
     }),
-    signupSettings: Factory.extend({
-      requireAdminApproval: true,
+    groupSettings: Factory.extend({
       requireAcceptTerms: true,
       terms: () => fakeMarkdown(2),
       minOffers: 1,
@@ -365,8 +364,8 @@ export default {
     // Create groups.
     server.createList("group", 7).forEach((group, i) => {
       // Create signup settings.
-      const signupSettings = server.create("signupSettings", { group } as any);
-      group.update({ signupSettings });
+      const settings = server.create("groupSettings", { group } as any);
+      group.update({ settings });
       // Create group contacts.
       faker.seed(1);
       const contacts = server.createList("contact", 4);
@@ -457,6 +456,20 @@ export default {
       return group;
     });
 
+    // Group settings
+    server.get(urlSocial + "/:code/settings", (schema: any, request) => {
+      const group = schema.groups.findBy({ code: request.params.code });
+      return group.settings;
+    });
+
+    // Edit group settings
+    server.patch(urlSocial + "/:code/settings", (schema: any, request) => {
+      const group = schema.groups.findBy({ code: request.params.code });
+      const body = JSON.parse(request.requestBody);
+      group.settings.update(body.data.attributes);
+      return group.settings;
+    });
+
     // Group categories.
     server.get(urlSocial + "/:code/categories", (schema: any, request) => {
       const group = schema.groups.findBy({ code: request.params.code });
@@ -482,9 +495,9 @@ export default {
     });
 
     // Get group signup settings
-    server.get(urlSocial + "/:code/signup-settings", (schema: any, request: any) => {
+    server.get(urlSocial + "/:code/settings", (schema: any, request: any) => {
       const group = schema.groups.findBy({ code: request.params.code });
-      return group.signupSettings;
+      return group.settings;
     });
 
     // Single member.

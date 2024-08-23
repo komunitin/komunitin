@@ -105,15 +105,6 @@
       required
       :rules="[(val: number) => val >= 0 && val <= 6 || $t('invalidValue')]"
     />
-    <q-input
-      v-model="currencyValue"
-      type="text"
-      :label="$t('currencyValue')"
-      :hint="$t('currencyValueHint')"
-      outlined
-      required
-      :rules="[(val: string) => val.match(/^\d+(\/\d+)?$/) || $t('invalidCurrencyValue')]"
-    />
   </div>
 </template>
 <script setup lang="ts">
@@ -154,7 +145,6 @@ const currencyName = ref(props.currency.attributes.name ?? "")
 const currencyNamePlural = ref(props.currency.attributes.namePlural ?? "")
 const currencySymbol = ref(props.currency.attributes.symbol ?? "")
 const decimals = ref(props.currency.attributes.decimals ?? 2)
-const currencyValue = ref(`${props.currency.attributes.rate.n}/${props.currency.attributes.rate.d}` ?? "")
 
 watchDebounced([image, name, code, description, location, city, region, country], () => {
   emit('update:group', {
@@ -182,8 +172,7 @@ watch([contacts], () => {
   emit('update:contacts', contacts.value)
 })
 
-watchDebounced([currencyName, currencyNamePlural, currencySymbol, decimals, currencyValue], () => {
-  const [n, d] = currencyValue.value.split("/").map(v => parseInt(v))
+watchDebounced([currencyName, currencyNamePlural, currencySymbol, decimals], () => {
   emit('update:currency', {
     ...props.currency,
     attributes: {
@@ -191,8 +180,7 @@ watchDebounced([currencyName, currencyNamePlural, currencySymbol, decimals, curr
       name: currencyName.value,
       namePlural: currencyNamePlural.value,
       symbol: currencySymbol.value,
-      decimals: decimals.value,
-      rate: {n, d}
+      decimals: decimals.value
     }
   } as Currency)
 })

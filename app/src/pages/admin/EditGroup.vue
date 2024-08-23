@@ -19,7 +19,7 @@
       />
       <save-changes
         ref="changes"
-        class="q-mt-xl"
+        class="q-mt-lg"
       />
     </q-page>
   </q-page-container>
@@ -29,7 +29,6 @@ import { useStore } from "vuex";
 import EditGroupForm from "./EditGroupForm.vue"
 import PageHeader from "src/layouts/PageHeader.vue";
 import SaveChanges from "src/components/SaveChanges.vue";
-import { LoadByCodePayload } from "src/store/resources";
 import { computed, ref, watch } from "vue";
 import { Currency, Group } from "src/store/model";
 import { PartialContact } from "src/components/MemberContactsField.vue";

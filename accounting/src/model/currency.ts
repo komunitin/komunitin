@@ -19,6 +19,14 @@ export type CurrencySettings = {
    */
   defaultInitialMaximumBalance?: number
   /**
+   * Users can make payments by default.
+   */
+  defaultAllowPayments?: boolean
+  /**
+   * Users can make payment requests by default.
+   */
+  defaultAllowPaymentRequests?: boolean
+  /**
    * Users need to accept payments by default (false) or they are charged automatically (true)
    */
   defaultAcceptPaymentsAutomatically?: boolean
@@ -26,6 +34,25 @@ export type CurrencySettings = {
    * List of payee account id's that can get payments without manual acceptance
    */
   defaultAcceptPaymentsWhitelist?: string[]
+  
+  /**
+   * These are user interface settings without effect in this service.
+   */
+  defaultAllowSimplePayments?: boolean
+  defaultAllowSimplePaymentRequests?: boolean
+  defaultAllowQrPayments?: boolean
+  defaultAllowQrPaymentRequests?: boolean
+  defaultAllowMultiplePayments?: boolean
+  defaultAllowMultiplePaymentRequests?: boolean
+  
+  /**
+   * Default allow accounts to have authorization tags.
+   */
+  defaultAllowTagPayments?: boolean;
+   /**
+    * Default allow accounts to make payment request authorized with tags.
+    */
+  defaultAllowTagPaymentRequests?: boolean;
   /**
    * Number of seconds after which payments are accepted automatically
    */
@@ -36,21 +63,13 @@ export type CurrencySettings = {
    */
   defaultOnPaymentCreditLimit?: number
   /**
-   * Users can make payments by default.
+   * Whether this currency supports external payments.
    */
-  defaultAllowPayments?: boolean
+  enableExternalPayments?: boolean
   /**
-   * Users can make payment requests by default.
+   * Whether this currency supports external payment requests.
    */
-  defaultAllowPaymentRequests?: boolean
-  /**
-   * The credit limit in local currency that the external trader account will have.
-   */
-  externalTraderCreditLimit?: number
-  /**
-   * The maximum balance in local currency that the external trader account may have.
-   */
-  externalTraderMaximumBalance?: number
+  enableExternalPaymentRequests?: boolean
   /**
    * Users can make external payments by default.
    */
@@ -60,25 +79,17 @@ export type CurrencySettings = {
    */
   defaultAllowExternalPaymentRequests?: boolean
   /**
-   * Whether this currency supports external payments.
-   */
-  enableExternalPayments?: boolean
-  /**
-   * Whether this currency supports external payment requests.
-   */
-  enableExternalPaymentRequests?: boolean
-  /**
    * Default accept external payments automatically
    */
   defaultAcceptExternalPaymentsAutomatically?: boolean
   /**
-   * Default allow accounts to have authorization tags.
+   * The credit limit in local currency that the external trader account will have.
    */
-  defaultAllowTagPayments?: boolean;
+  externalTraderCreditLimit?: number
   /**
-   * Default allow accounts to make payment request authorized with tags.
+   * The maximum balance in local currency that the external trader account may have.
    */
-  defaultAllowTagPaymentRequests?: boolean;
+  externalTraderMaximumBalance?: number
 }
 
 export type CurrencyStatus = "new" | "active"

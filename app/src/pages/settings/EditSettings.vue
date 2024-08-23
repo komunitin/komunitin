@@ -11,6 +11,17 @@
     >
       <div>
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
+          {{ $t('app') }}
+        </div>
+        <q-select
+          v-model="language"
+          outlined
+          :options="langOptions"
+          :label="$t('language')"
+        />
+      </div>  
+      <div class="q-mt-lg">
+        <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
           {{ $t('account') }}
         </div>
         <toggle-item 
@@ -19,7 +30,10 @@
           :hint="$t('acceptPaymentsHint')"
         />
       </div>
-      <div v-if="effectiveSettings.allowTagPayments">
+      <div 
+        v-if="effectiveSettings.allowTagPayments"
+        class="q-mt-lg"
+      >
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
           {{ $t('nfcTags') }}
         </div>
@@ -28,17 +42,6 @@
         </div>
         <nfc-tags-list
           v-model="tags"
-        />
-      </div>
-      <div class="q-mt-lg">
-        <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
-          {{ $t('app') }}
-        </div>
-        <q-select
-          v-model="language"
-          outlined
-          :options="langOptions"
-          :label="$t('language')"
         />
       </div>
       <div class="q-mt-lg">
