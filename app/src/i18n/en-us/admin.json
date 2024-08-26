@@ -86,10 +86,14 @@
   "transferMethods": "Transfer Methods",
   "transferDirections": "Transfer Directions",
   "accountStart": "Account Start",
-  "offersAndNeeds": "Offers and Needs"
-
-
-
-
+  "offersAndNeeds": "Offers and Needs",
+  "marketplace": "Marketplace",
+  "marketplaceText": "Define the settings for the offers and needs within your group.",
+  "categoriesText": "Offers and needs are organized in categories. Define the categories that will be available in your group.",
+  "deleteCategoryConfirmation": "Are you sure you want to delete the category {name}?",
+  "addCategory": "Add Category",
+  "editCategory": "Edit Category",
+  "searchIcon": "Search Icon",
+  "loadingIcons": "Loading icons..."
 
 }

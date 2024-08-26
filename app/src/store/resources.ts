@@ -92,7 +92,7 @@ export interface UpdatePayload<T extends ResourceObject> {
 
 export interface DeletePayload {
   /**
-   * The resource code.
+   * The resource id.
    */
   id: string
   /**
@@ -1017,7 +1017,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     context: ActionContext<ResourcesState<T>, S>,
     payload: DeletePayload
   ) {
-    const resource = context.getters.find({code: payload.id})
+    // We allow getting the resource from the code, but this is to be deprecated in
+    // favor of using the id.
+    const resource = context.getters.one(payload.id) 
+      ?? context.getters.find({code: payload.id})
+    
     const id = resource.id
     const url = this.resourceEndpoint(payload.id, payload.group)
     try {

@@ -104,11 +104,6 @@
         :to="`/groups/${groupCode}/admin/settings`"
       />
       <menu-item
-        icon="category"
-        :title="$t('categories')"
-        :to="`/groups/${groupCode}/admin/categories`"
-      />
-      <menu-item
         icon="manage_accounts"
         :title="$t('accounts')"
         :to="`/groups/${groupCode}/admin/accounts`"
@@ -123,7 +118,7 @@
     <q-separator />
 
     <menu-item
-      icon="user_attributes"
+      icon="group_work"
       :title="$t('otherGroups')"
       to="/groups"
     />

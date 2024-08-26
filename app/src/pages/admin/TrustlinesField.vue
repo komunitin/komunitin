@@ -65,7 +65,9 @@
       />
     </div>
     <q-dialog v-model="showDialog">
-      <q-card>
+      <q-card
+        style="min-width: 50vw;"
+      >
         <q-card-section>
           <div class="flex justify-between">
             <div class="text-h6">

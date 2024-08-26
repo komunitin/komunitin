@@ -11,6 +11,7 @@
         v-if="ready"
 
         :group-settings="groupSettings"
+        :categories="categories"
         :currency="currency"
         :currency-settings="currencySettings"
         :trustlines="trustlines"
@@ -19,11 +20,16 @@
         :updating-currency="updatingCurrency"
         :updating-currency-settings="updatingCurrencySettings"
         :updating-trustline="updatingTrustline"
+        :updating-category="updatingCategory"
+
         @update:group-settings="updateGroupSettings"
         @update:currency="updateCurrency"
         @update:currency-settings="updateCurrencySettings"
         @update:trustline="updateTrustline"
         @create:trustline="createTrustline"
+        @update:category="updateCategory"
+        @create:category="createCategory"
+        @delete:category="deleteCategory"
       />
       <save-changes
         ref="changes"
@@ -40,8 +46,8 @@ import SaveChanges from 'src/components/SaveChanges.vue';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { DeepPartial } from 'quasar';
-import { Currency, CurrencySettings, GroupSettings, ResourceIdentifierObject, ResourceObject, Trustline } from 'src/store/model';
-import { CreatePayload, UpdatePayload } from 'src/store/resources';
+import { Category, Currency, CurrencySettings, GroupSettings, ResourceIdentifierObject, ResourceObject, Trustline } from 'src/store/model';
+import { CreatePayload, DeletePayload, UpdatePayload } from 'src/store/resources';
 import { ExtendedTrustline } from './TrustlinesField.vue';
 
 const props = defineProps<{
@@ -50,20 +56,31 @@ const props = defineProps<{
 
 const store = useStore()
 
+const loadCategories = async () => {
+  await store.dispatch('categories/loadList', {
+    group: props.code
+  })
+}
+
+const loadTrustlines = async () => {
+  await store.dispatch('trustlines/loadList', {
+    group: props.code,
+    include: 'trusted'
+  })
+}
+
 const load = async () => {
   await Promise.all([
     store.dispatch('groups/load', {
       id: props.code,
       include: 'settings'
     }),
+    loadCategories(),
     store.dispatch('currencies/load', {
       id: props.code,
       include: "settings"
     }),
-    store.dispatch('trustlines/loadList', {
-      group: props.code,
-      include: 'trusted'
-    })
+    loadTrustlines()
   ])
   // Load group resources for trusted currencies
   const currency = store.getters['currencies/current']
@@ -77,13 +94,14 @@ const load = async () => {
 // (instead of "group.currency" etc) so they are reactive
 const group = computed(() => store.getters['groups/current'])
 const groupSettings = computed(() => store.getters['group-settings/one'](group.value.settings.id))
+const categories = computed(() => store.getters['categories/currentList'])
 const currency = computed(() => store.getters['currencies/one'](group.value.currency.id))
 const currencySettings = computed(() => store.getters['currency-settings/one'](currency.value.settings.id))
 const trustlines = computed(() => store.getters['trustlines/currentList'])
 
 
 const ready = computed(() => 
-  group.value && groupSettings.value && currency.value && currencySettings.value && trustlines.value
+  group.value && groupSettings.value && categories.value && currency.value && currencySettings.value && trustlines.value
 )
 
 
@@ -96,17 +114,16 @@ const updatingGroupSettings = ref(false)
 const updatingCurrency = ref(false)
 const updatingCurrencySettings = ref(false)
 const updatingTrustline = ref(false)
+const updatingCategory = ref(false)
 
-const updateResource = async <T extends ResourceObject>(action: string, payload: UpdatePayload<T> | CreatePayload<T>, updating: Ref<boolean>) => {
-  const fn = async () => {
+const updateResource = async <T extends ResourceObject>(action: string, payload: UpdatePayload<T> | CreatePayload<T> | DeletePayload, updating: Ref<boolean>) => {
+  try {
+    const fn = async () => await store.dispatch(action, payload)
     updating.value = true
-    try {
-      await store.dispatch(action, payload)
-    } finally {
-      updating.value = false
-    }
+    await changes.value?.save(fn)
+  } finally {
+    updating.value = false
   }
-  await changes.value?.save(fn)
 }
 
 const updateGroupSettings = async (settings: DeepPartial<GroupSettings> & ResourceIdentifierObject) => {
@@ -115,6 +132,42 @@ const updateGroupSettings = async (settings: DeepPartial<GroupSettings> & Resour
     group: props.code,
     resource: settings
   }, updatingGroupSettings)
+}
+
+const updateCategory = async (category: DeepPartial<Category> & ResourceIdentifierObject) => {
+  await updateResource('categories/update', {
+    id: category.id as string,
+    group: props.code,
+    resource: category
+  }, updatingCategory)
+}
+
+const createCategory = async (category: DeepPartial<Category>) => {
+  await updateResource('categories/create', {
+    group: props.code,
+    resource: category
+  }, updatingCategory)
+  // update categories list
+  try {
+    updatingCategory.value = true
+    await loadCategories()
+  } finally {
+    updatingCategory.value = false
+  }
+}
+
+const deleteCategory = async (category: DeepPartial<Category>) => {
+  await updateResource('categories/delete', {
+    id: category.id as string,
+    group: props.code
+  }, updatingCategory)
+  // update categories list
+  try {
+    updatingCategory.value = true
+    await loadCategories()
+  } finally {
+    updatingCategory.value = false
+  }
 }
 
 const updateCurrency = async (currency: DeepPartial<Currency> & ResourceIdentifierObject) =>  {
@@ -147,8 +200,11 @@ const createTrustline = async (trustline: DeepPartial<Trustline>) => {
     resource: trustline
   }, updatingTrustline)
   // update trustlines list
-  await store.dispatch('trustlines/loadList', {
-    group: props.code,  
-  })
+  try {
+    updatingTrustline.value = true
+    await loadTrustlines()
+  } finally {
+    updatingTrustline.value = false
+  }
 }
 </script>

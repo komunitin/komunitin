@@ -366,19 +366,35 @@ export interface AccountTag {
 
 export interface AccountSettings extends ResourceObject {
   attributes: {
-    acceptPaymentsAutomatically: boolean,
-    
+    // Payment directions
     allowPayments?: boolean,
     allowPaymentRequests?: boolean,
 
-    allowExternalPayments?: boolean,
-    allowExternalPaymentRequests?: boolean,
-
+    // Payment workflows
+    allowSimplePayments?: boolean,
+    allowSimplePaymentRequests?: boolean,
+    allowQrPayments?: boolean,
+    allowQrPaymentRequests?: boolean,
+    allowMultiplePayments?: boolean,
+    allowMultiplePaymentRequests?: boolean
     allowTagPayments?: boolean
     allowTagPaymentRequests?: boolean
-    
-    tags?: AccountTag[]
 
+    // PR acceptance
+    acceptPaymentsAutomatically: boolean,
+    acceptPaymentsWhitelist?: string[],
+    acceptPaymentsAfter?: number
+    
+    // External payments
+    allowExternalPayments?: boolean,
+    allowExternalPaymentRequests?: boolean,
+    acceptExternalPaymentsAutomatically?: boolean,
+
+    // Other features
+    onPaymentCreditLimit?: number
+    
+    // Tags
+    tags?: AccountTag[]
   }
   relationships: {
     account: RelatedResource

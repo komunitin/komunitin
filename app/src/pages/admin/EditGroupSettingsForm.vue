@@ -65,6 +65,27 @@
     <q-separator class="q-mt-xl" />
     <div class="q-mt-lg">
       <div class="text-subtitle1">
+        {{ $t('marketplace') }}
+      </div>
+      <div class="text-onsurface-m">
+        {{ $t('marketplaceText') }}
+      </div>
+    </div>
+    <div class="text-overline text-uppercase text-onsurface-m">
+      {{ $t('categories') }}
+    </div>
+    <div class="text-onsurface-m">
+      {{ $t('categoriesText') }}
+    </div>
+    <categories-field
+      :categories="categories"
+      @update:category="(category: DeepPartial<Category>) => $emit('update:category', category)"
+      @create:category="(category: DeepPartial<Category>) => $emit('create:category', category)"
+      @delete:category="(category: DeepPartial<Category>) => $emit('delete:category', category)"
+    />
+    <q-separator class="q-mt-xl" />
+    <div class="q-mt-lg">
+      <div class="text-subtitle1">
         {{ $t('accountDefaults') }}
       </div>
       <div class="text-onsurface-m">
@@ -252,7 +273,8 @@ import ToggleItem from 'src/components/ToggleItem.vue';
 import InputUpdate from 'src/components/InputUpdate.vue';
 import AmountInput from 'src/components/AmountInput.vue';
 import TrustlinesField from './TrustlinesField.vue';
-import { Group, GroupSettings, Currency, CurrencySettings, Trustline } from 'src/store/model';
+import CategoriesField from './CategoriesField.vue';
+import { Group, GroupSettings, Currency, CurrencySettings, Trustline, Category } from 'src/store/model';
 import { watchDebounced } from '@vueuse/shared';
 import { DeepPartial } from 'quasar';
 
@@ -265,11 +287,13 @@ export type ExtendedGroup = Group & {
 }
 const props = defineProps<{
   groupSettings: GroupSettings,
+  categories: Category[],
   currency: Currency,
   currencySettings: CurrencySettings,
   trustlines: Trustline[],
 
   updatingGroupSettings: boolean,
+  updatingCategory: boolean,
   updatingCurrency: boolean,
   updatingCurrencySettings: boolean,
   updatingTrustline: boolean
@@ -286,6 +310,9 @@ const emit = defineEmits<{
   (e: 'update:currency-settings', value: DeepPartial<CurrencySettings>): void
   (e: 'update:trustline', value: DeepPartial<Trustline>): void
   (e: 'create:trustline', value: DeepPartial<Trustline>): void
+  (e: 'update:category', value: DeepPartial<Category>): void
+  (e: 'create:category', value: DeepPartial<Category>): void
+  (e: 'delete:category', value: DeepPartial<Category>): void
 }>()
 
 // Social API

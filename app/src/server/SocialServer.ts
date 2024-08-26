@@ -173,7 +173,7 @@ export default {
         };
       },
       selfLink: (category: any) =>
-        urlSocial + "/" + category.group.code + "/categories/" + category.code
+        urlSocial + "/" + category.group.code + "/categories/" + category.id
     }),
     offer: ApiSerializer.extend({
       selfLink: (offer: any) =>
@@ -308,13 +308,13 @@ export default {
     }),
     category: Factory.extend({
       name: () => faker.commerce.department(),
-      code() {
-        return faker.helpers.slugify((this as any).name);
-      },
-      cpa: (i: number) => ["" + i, "" + 0, "" + 0],
-      description: () => faker.lorem.sentence(),
+      //code() {
+      //  return faker.helpers.slugify((this as any).name);
+      //},
+      //cpa: (i: number) => ["" + i, "" + 0, "" + 0],
+      //description: () => faker.lorem.sentence(),
       icon: (i: number) => (i % 3 == 1) ? null : fakeCategoryIconName(i),
-      access: "public",
+      //access: "public",
       created: () => faker.date.past(),
       updated: () => faker.date.past(),
     }),
@@ -475,6 +475,36 @@ export default {
       const group = schema.groups.findBy({ code: request.params.code });
       return schema.categories.where({ groupId: group.id });
     });
+
+    // Create category
+    server.post(urlSocial + "/:code/categories", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const category = {
+        ...body.data.attributes,
+        created: new Date().toJSON(),
+        updated: new Date().toJSON(),
+        groupId: schema.groups.findBy({ code: request.params.code }).id
+      }
+      return schema.categories.create(category);
+    })
+
+    // Update category
+    server.patch(urlSocial + "/:code/categories/:category", (schema: any, request: any) => {
+      const body = JSON.parse(request.requestBody);
+      const category = schema.categories.find(request.params.category);
+      category.update({
+        ...body.data.attributes,
+        updated: new Date().toJSON(),
+      })
+      return category;
+    })
+
+    // Delete category
+    server.delete(urlSocial + "/:code/categories/:category", (schema: any, request: any) => {
+      const category = schema.categories.find(request.params.category);
+      category.destroy();
+      return new Response(204);
+    })
 
     // Group offers.
     server.get(urlSocial + "/:code/offers", (schema: any, request: any) => {
