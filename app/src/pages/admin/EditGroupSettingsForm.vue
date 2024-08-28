@@ -153,7 +153,7 @@
     </div>
     <toggle-item 
       v-model="settingsRefs.defaultAcceptPaymentsAutomatically.value"
-      :label="$t('acceptPayments')"
+      :label="$t('acceptPaymentsAutomatically')"
       :hint="$t('acceptPaymentsHint')"
     />
     <toggle-item

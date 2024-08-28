@@ -55,47 +55,69 @@ export type AccountSettings = {
   // Same id as the account
   id?: string
 
-  // Payments from all accounts are automatically accepted
-  acceptPaymentsAutomatically?: boolean
+  // 1. Payment directions
 
-  // If acceptPaymentsAutomatically is false, this is a list of account id's
-  // for which payments are automatically accepted. Work for external accounts too.
-  acceptPaymentsWhitelist?: string[]
-
-  // If acceptPaymentsAutomatically is false, accept payments after this
-  // period of time in seconds if no manual action is taken.
-  acceptPaymentsAfter?: number
-
-  // If present, the credit limit for this account is increased every
-  // time this account receives a payment by the same amount until the
-  // limit is reached.
-  onPaymentCreditLimit?: number
-
-  // This account can make payments.
+  /** This account can make payments. */
   allowPayments?: boolean
 
-  // This account can request payments form other accounts.
+  /** This account can request payments form other accounts. */
   allowPaymentRequests?: boolean
 
-  // This account can make external payments.
-  allowExternalPayments?: boolean
+  // 2. Payment Workflows
 
-  // This account can request external payments.
-  allowExternalPaymentRequests?: boolean
+  allowSimplePayments?: boolean,
+  allowSimplePaymentRequests?: boolean,
+  allowQrPayments?: boolean,
+  allowQrPaymentRequests?: boolean,
+  allowMultiplePayments?: boolean,
+  allowMultiplePaymentRequests?: boolean
 
-  // Payments from external accounts are automatically accepted. 
-  // If acceptPaymentsAutomatically is false, this is taken as false too.
-  acceptExternalPaymentsAutomatically?: boolean
-
-  // Allow this account to make payments with tags.
-  // Concretely, allow this account to define tags and allow other accounts
-  // to pre-authorize payments using these tags.
+  /** Allow this account to make payments with tags.
+  * Concretely, allow this account to define tags and allow other accounts
+  * to pre-authorize payments using these tags. */
   allowTagPayments?: boolean
 
-  // Allow this account to request payments preauthorized with tags.
+  /** Allow this account to request payments preauthorized with tags. */
   allowTagPaymentRequests?: boolean
 
-  // Tags that can be used to pre-authorize payments.
+  // 3. PR acceptance
+  
+  /** Payments from all accounts are automatically accepted. */ 
+  acceptPaymentsAutomatically?: boolean
+
+  /** If acceptPaymentsAutomatically is false, accept payments after this
+  * period of time in seconds if no manual action is taken.
+  * */
+  acceptPaymentsAfter?: number
+
+  /** 
+  * If acceptPaymentsAutomatically is false, this is a list of account id's
+  * for which payments are automatically accepted. Work for external accounts too.
+  * */
+  acceptPaymentsWhitelist?: string[]
+
+  // 4. External Payments
+
+  /** This account can make external payments. */ 
+  allowExternalPayments?: boolean
+
+  /** This account can request external payments. */
+  allowExternalPaymentRequests?: boolean
+
+  /**  Payments from external accounts are automatically accepted. 
+  * If acceptPaymentsAutomatically is false, this is taken as false too.
+  * */
+  acceptExternalPaymentsAutomatically?: boolean
+
+  // 5. Others
+
+  /** If defined, the credit limit for this account is increased every
+  * time this account receives a payment by the same amount until the
+  * limit is reached.
+  * */
+  onPaymentCreditLimit?: number
+  
+  /**  Tags that can be used to pre-authorize payments. */
   tags?: Tag[]
 }
 

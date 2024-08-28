@@ -104,8 +104,8 @@ export default {
     account: Factory.extend({
       code: (i: number) => `account-${i}`,
       balance: () => faker.random.number({ max: 10000000, min: -5000000, precision: 100 }),
-      creditLimit: -1,
-      debitLimit: 5000000
+      creditLimit: 1000000,
+      maximumBalance: 5000000
     }),
     transfer: Factory.extend({
       amount: () => faker.random.number({min: 0.1*10000, max: 100*10000, precision: 100}),

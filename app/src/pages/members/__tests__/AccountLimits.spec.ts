@@ -29,7 +29,7 @@ describe('AccountLimits.vue', () => {
     const account = {
       attributes: {
         creditLimit: 5000,
-        debitLimit: -1
+        maximumBalance: -1
       },
       currency
     };
@@ -48,7 +48,7 @@ describe('AccountLimits.vue', () => {
   it("renders debit limit", () => {
     const account = {
       attributes: {
-        debitLimit: 5000,
+        maximumBalance: 5000,
         creditLimit: -1
       },
       currency
@@ -68,7 +68,7 @@ describe('AccountLimits.vue', () => {
   it("renders both limits", () => {
     const account = {
       attributes: {
-        debitLimit: 5000,
+        maximumBalance: 5000,
         creditLimit: 6000
       },
       currency

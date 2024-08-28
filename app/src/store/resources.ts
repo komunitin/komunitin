@@ -10,6 +10,8 @@ import {
   ErrorResponse
 } from "src/store/model";
 
+export const DEFAULT_PAGE_SIZE = 20
+
 export interface ResourcesState<T extends ResourceObject> {
   /**
    * Dictionary of resources indexed by id.
@@ -28,6 +30,10 @@ export interface ResourcesState<T extends ResourceObject> {
    * The url of the next page. null means no next page, undefined means unknown.
    */
   next: string | null | undefined;
+  /**
+   * The url of the previous page. null means no previous page, undefined means unknown.
+   */
+  prev: string | null | undefined;
   /**
    * The index of the current page.
    */
@@ -142,7 +148,11 @@ export interface LoadListPayload {
    * 
    * By default, always revalidate from server.
    */
-  cache?: number
+  cache?: number,
+  /*
+   * Size of the page to be fetched. If not set, the default page size is used.
+   */
+  pageSize?: number
 }
 
 /**
@@ -202,18 +212,6 @@ export type LoadPayload = LoadByIdPayload | LoadByCodePayload | LoadByUrlPayload
  * Payload for the `loadNext` action.
  */
 export interface LoadNextPayload {
-  /**
-   * The resource group.
-   */
-  group: string;
-  /**
-   * Optional comma-separated list of included relationship resources.
-   */
-  include?: string;
-  /**
-   * Sort the results using this field.
-   */
-  sort?: string;
   /**
    * Cache time in milliseconds. See `LoadListPayload.cache`.
    */
@@ -407,6 +405,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     // Commit mutation(s) after commiting included and eventualy fetched external resources.
     if (!onlyResources) {
       commit("next", data.links.next)
+      commit("prev", data.links.prev)
       this.setPageResources(context, key, page, data.data)
     } else {
       commit("addResources", data.data)
@@ -494,6 +493,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     pages: {},
     currentId: null,
     next: undefined,
+    prev: undefined,
     currentPage: null,
     currentQueryKey: null,
     timestamps: {}
@@ -594,7 +594,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      * Returns whether the current list has more resources to be fetched, or undefined if not known.
      */
     hasNext: (state: ResourcesState<T>) =>
-      state.next === undefined ? undefined : state.next !== null
+      state.next === undefined ? undefined : state.next !== null,
+
+    hasPrev: (state: ResourcesState<T>) =>
+      state.prev === undefined ? undefined : state.prev !== null
+
   };
 
   mutations = {
@@ -644,6 +648,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       state.next = next;
     },
     /**
+     * Update the previous link.
+     */
+    prev(state: ResourcesState<T>, prev: string | null | undefined) {
+      state.prev = prev;
+    },
+    /**
      * Update the current page index.
      */
     currentPage(state: ResourcesState<T>, index: number | null) {
@@ -666,6 +676,10 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       context: ActionContext<ResourcesState<T>, S>,
       payload: LoadNextPayload
     ) => this.loadNext(context, payload),
+    loadPrev: (
+      context: ActionContext<ResourcesState<T>, S>,
+      payload: LoadNextPayload
+    ) => this.loadPrev(context, payload),
     load: (
       context: ActionContext<ResourcesState<T>, S>,
       payload: LoadPayload
@@ -691,19 +705,28 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       payload: T
     ) => this.setCurrent(context, payload)
   };
-
   /**
-   * Compute the next url from the current url and the cached content by adding the cursor.
+   * Build the url for the next or previous page.
+   * 
+   * @param currentUrl The url of the current page.
+   * @param pageOffset The number of pages to move. Negative values move to previous pages.
+   * @returns 
    */
-  protected buildNextUrl(context: ActionContext<ResourcesState<T>, S>, currentUrl: string) {  
-    const thisPage = context.getters.page(context.state.currentPage)
-    if (thisPage.length == 0) {
-      return null
-    }
-    const lastResource = thisPage[thisPage.length - 1]
-    const nextUrl = new URL(currentUrl, this.baseUrl)
-    nextUrl.searchParams.set("page[after]", lastResource.id)
-    return nextUrl.toString()
+  protected buildAdjacentUrl(currentUrl: string, pageOffset: number) {
+    const adjacentUrl = new URL(currentUrl, this.baseUrl)
+
+    const cursor = adjacentUrl.searchParams.has("page[after]") 
+      ? parseInt(adjacentUrl.searchParams.get("page[after]") as string)
+      : 0
+
+    const size = adjacentUrl.searchParams.has("page[size]")
+      ? parseInt(adjacentUrl.searchParams.get("page[size]") as string)
+      : DEFAULT_PAGE_SIZE
+
+    const newCursor = cursor + pageOffset * size
+
+    adjacentUrl.searchParams.set("page[after]", newCursor.toString())
+    return adjacentUrl.toString()
   }
   
   /**
@@ -735,6 +758,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if (payload.sort) {
       params.set("sort", payload.sort);
     }
+    if (payload.pageSize) {
+      params.set("page[size]", payload.pageSize.toString());
+    }
 
     if (payload.include) {
       params.set("include", payload.include);
@@ -761,6 +787,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     }
     if (payload.sort) {
       params.set("sort", payload.sort);
+    }
+    if (payload.pageSize) {
+      params.set("pageSize", payload.pageSize.toString())
     }
     return params.toString()
   }
@@ -795,8 +824,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
         // We have the value in cache and it's not expired, so we're done. Note that having the timestamps
         // entry already means that we have the value entry. 
         // We don't have, however, the next page link, but it can be computed form the current query.
-        const next = this.buildNextUrl(context, url)
+        const next = this.buildAdjacentUrl(url, +1)
         context.commit("next", next)
+        context.commit("prev", null)
         return
       }
     }
@@ -816,7 +846,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       throw KError.getKError(error);
     }
   }
-  protected async loadNext(
+  /*protected async loadNext(
     context: ActionContext<ResourcesState<T>, S>,
     payload: LoadNextPayload
   ) {
@@ -863,7 +893,68 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     } catch (error) {
       throw KError.getKError(error);
     }
+  }*/
+  protected async loadNext(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadNextPayload
+  ) {
+    await this.loadAdjacent(context, payload, +1, context.state.next)
   }
+  protected async loadPrev(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadNextPayload
+  ) {
+    await this.loadAdjacent(context, payload, -1, context.state.prev)
+  }
+  protected async loadAdjacent(
+    context: ActionContext<ResourcesState<T>, S>,
+    payload: LoadNextPayload,
+    pageOffset: number,
+    url: string|null|undefined
+  ) {
+    if (url === undefined || context.state.currentPage === null || context.state.currentQueryKey == null) {
+      throw new KError(
+        KErrorCode.ScriptError,
+        "Unexpected call to 'loadNext/loadPrev' resource action before calling to loadList."
+      );
+    }
+    // This means there is no next/prev page
+    if (url === null) {
+      return
+    }
+    
+    const page = context.state.currentPage + pageOffset;
+    const queryKey = context.state.currentQueryKey
+
+    try {
+      // Update page number  
+      context.commit("currentPage", page)
+
+      // At this point the data may be already cached and available for the UI.
+      if (payload.cache) {
+        const timestamp = context.state.timestamps["pages/" + queryKey + "/" + page]
+        if (timestamp && timestamp + payload.cache > Date.now()) {
+          // We have the value in cache and it's not expired, so we're done. Note that having the timestamps
+          // entry already means that we have the value entry. We need to compute the next page link.
+          context.commit("next", this.buildAdjacentUrl(url, +1))
+          context.commit("prev", this.buildAdjacentUrl(url, -1))
+          return
+        }
+      }
+      
+      // Perform the request.
+      const data = await this.request(context, url);
+      await this.handleCollectionResponse(
+        data,
+        context,
+        queryKey,
+        page,
+      );
+    } catch (error) {
+      throw KError.getKError(error);
+    }
+  }
+
   protected loadCached (
     context: ActionContext<ResourcesState<T>, S>,
     payload: LoadPayload

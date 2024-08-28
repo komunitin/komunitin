@@ -94,6 +94,10 @@
   "addCategory": "Add Category",
   "editCategory": "Edit Category",
   "searchIcon": "Search Icon",
-  "loadingIcons": "Loading icons..."
-
+  "loadingIcons": "Loading icons...",
+  "creditLimit": "Credit Limit",
+  "columns": "Columns",
+  "manageAccounts": "Manage Accounts",
+  "manageAccountsText": "See below all accounts in your group. Most account settings can be set by default from the group settings page or individually. Credit Limit and Maximum Balance need to be set individually after the account is created.",
+  "search": "Search"
 }

@@ -45,7 +45,6 @@ function paginatorHelper<T>(data: T[]|T, params: CollectionOptions, req: Request
       const next = data.length === params.pagination.size ? params.pagination.cursor + params.pagination.size : null
       const prev = params.pagination.cursor >= params.pagination.size ? params.pagination.cursor - params.pagination.size : null
       
-
       return {
         first: changeCursor(0),
         last: null,

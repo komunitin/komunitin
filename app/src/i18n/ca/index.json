@@ -158,7 +158,7 @@
   "deleteOffer": "Vols esborrar l'oferta {name}?",
   "delete": "Esborra",
   "title": "Títol",
-  "acceptPayments": "Accepta els pagaments automàticament",
+  "acceptPaymentsAutomatically": "Accepta els pagaments automàticament",
   "acceptPaymentsHint": "Si actives aquesta opció, els pagaments a altres comptes es faran automàticament. Si no, hauràs de confirmar-los manualment.",
   "notificationsSettingsText": "Configura les notificacions que vols rebre al teu dispositiu.",
   "myAccountNotifications": "El meu compte",

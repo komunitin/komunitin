@@ -26,7 +26,7 @@
         </div>
         <toggle-item 
           v-model="acceptPayments"
-          :label="$t('acceptPayments')"
+          :label="$t('acceptPaymentsAutomatically')"
           :hint="$t('acceptPaymentsHint')"
         />
       </div>
@@ -190,7 +190,7 @@ const acceptPayments = ref<boolean|undefined>()
 const tags = ref()
 watchEffect(() => {
   acceptPayments.value = accountSettings.value?.attributes.acceptPaymentsAutomatically
-  tags.value = accountSettings.value?.attributes.tags
+  tags.value = accountSettings.value?.attributes.tags ?? undefined
 })
 
 const tagsEqual = (a: AccountTag[], b?: AccountTag[]) => {

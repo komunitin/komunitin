@@ -58,8 +58,10 @@ export default class KError extends Error {
   debugInfo: any;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(code = KErrorCode.Unknown, message = "", debugInfo?: any) {
-    super(message);
+  constructor(code = KErrorCode.Unknown, message = "", cause?: Error, debugInfo?: any) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore-next-line
+    super(message, { cause });
     this.code = code;
     this.debugInfo = debugInfo !== undefined ? debugInfo : null;
   }

@@ -215,7 +215,7 @@ export default {
           codes[error.TIMEOUT] = KErrorCode.PositionTimeout
           codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable
           codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied
-          const kerror = new KError(codes[error.code], error.message, error)
+          const kerror = new KError(codes[error.code], error.message, undefined, error)
           throw kerror
         }
       }

@@ -157,7 +157,7 @@
   "offerPublished": "Your offer has been published!",
   "deleteOffer": "Do you want to delete the offer {name}?",
   "delete": "Delete",
-  "acceptPayments": "Accept payments automatically",
+  "acceptPaymentsAutomatically": "Accept payments automatically",
   "acceptPaymentsHint": "When this option is enabled, payments to other accounts will be automatically accepted. Otherwise, you will have to accept them manually.",
   "notificationsSettingsText": "Configure the push notifications you receive in your devices.",
   "myAccountNotifications": "My account",

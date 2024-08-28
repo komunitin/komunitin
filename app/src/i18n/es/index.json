@@ -158,7 +158,7 @@
   "deleteOffer": "Quieres borrar la oferta {name}?",
   "delete": "Borrar",
   "title": "Título",
-  "acceptPayments": "Acepta los pagos automáticamente",
+  "acceptPaymentsAutomatically": "Acepta los pagos automáticamente",
   "acceptPaymentsHint": "Si activas esta opción, los pagos a otras cuentas se aceptarán automáticamente. Si no, tendrás que aceptarlos manualmente.",
   "notificationsSettingsText": "Configura las notificaciones que quieres recibir en tu dispositivo.",
   "myAccountNotifications": "Mi cuenta",

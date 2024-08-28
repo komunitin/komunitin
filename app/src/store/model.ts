@@ -347,7 +347,7 @@ export interface Account extends ResourceObject {
     balance: number;
     //locked: 0,
     creditLimit: number;
-    debitLimit: number;
+    maximumBalance: number;
     //capabilities: ["pay", "charge"],
   };
   relationships: {

@@ -22,14 +22,14 @@ export default defineComponent({
   },
   computed: {
     isMinAmount() : boolean {
-      return this.account.attributes.debitLimit >= 0;
+      return this.account.attributes.maximumBalance >= 0;
     },
     isMaxAmount() : boolean {
       return this.account.attributes.creditLimit >= 0;
     },
     minAmount(): string {
       return this.$t("minAmount", {
-        amount: FormatCurrency(-this.account.attributes.debitLimit, this.account.currency, {
+        amount: FormatCurrency(-this.account.attributes.maximumBalance, this.account.currency, {
           decimals: false
         })
       }) as string;

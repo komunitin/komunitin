@@ -242,6 +242,11 @@ const routes: RouteRecordRaw[] = [
           props: true,
           name: 'EditGroupSettings',
           component: () => import('../pages/admin/EditGroupSettings.vue'),
+        }, {
+          path: 'accounts',
+          props: true,
+          name: 'ManageAccounts',
+          component: () => import('../pages/admin/ManageAccounts.vue'),
         }]
       }
     ]

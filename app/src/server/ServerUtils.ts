@@ -39,7 +39,7 @@ export function filter(records: any, request: any) {
         return values.includes(record[name])
       })
     });
-    
+  records = sort(records, request);
   return records;
 }
 
@@ -48,9 +48,12 @@ export function filter(records: any, request: any) {
  */
 export function sort(records: any, request: any) {
   let field: string = request.queryParams["sort"];
+  if (!field) {
+    return records;
+  }
   let ascending = true;
   if (field.startsWith("-")) {
-    field = field.substr(1);
+    field = field.substring(1);
     ascending = false;
   }
   records = records.sort((a:any, b:any) => {

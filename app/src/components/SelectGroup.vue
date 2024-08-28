@@ -61,7 +61,6 @@ const loadNext = async () => {
   try {
     await store.dispatch('groups/loadNext', {
       cache: 1000*60*5,
-      include: 'currency'
     })
   } finally {
     loading.value = false

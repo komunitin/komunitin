@@ -191,8 +191,6 @@ const loadNextPage = async () => {
     loading.value = true
     if (store.getters["members/hasNext"]) {
       await store.dispatch("members/loadNext", {
-        group: group.value.attributes.code,
-        include: "account",
         cache: 1000*60*5
       });
     }
