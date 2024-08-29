@@ -47,7 +47,7 @@ export const effectiveSettings = (accountSettings: AccountSettings, currencySett
     attributes[key] = vals[key as keyof AccountSettings["attributes"]] ?? value
   })
 
-  return attributes
+  return attributes as AccountSettings["attributes"]
 }
 
 export const useEffectiveSettings = (accountSettings: MaybeRefOrGetter<AccountSettings|undefined>, currencySettings: MaybeRefOrGetter<CurrencySettings|undefined>) => {

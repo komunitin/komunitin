@@ -1,12 +1,14 @@
 <template>
   <div class="inline">
-    <span v-if="isMinAmount">{{ minAmount }}</span>
-    <q-separator
-      v-if="isMinAmount && isMaxAmount"
-      vertical
-      inset
-    />
-    <span v-if="isMaxAmount">{{ maxAmount }}</span>
+    <span 
+      v-if="isMinAmount"
+      class="q-mr-sm"
+    >
+      {{ minAmount }}
+    </span>
+    <span v-if="isMaxAmount">
+      {{ maxAmount }}
+    </span>
   </div>
 </template>
 <script lang="ts">

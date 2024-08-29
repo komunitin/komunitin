@@ -108,11 +108,6 @@
         :title="$t('accounts')"
         :to="`/groups/${groupCode}/admin/accounts`"
       />
-      <menu-item
-        icon="checklist_rtl"
-        :title="$t('transactions')"
-        :to="`/groups/${groupCode}/admin/transactions`"
-      />
     </template>
 
     <q-separator />

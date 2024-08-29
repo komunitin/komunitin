@@ -23,6 +23,7 @@
         :fullscreen="isFullscreen"
         flat
         @request="load"
+        @row-click="(_, row) => accountClick(row)"
       >
         <template #top>
           <div class="full-width row justify-between items-center">
@@ -140,12 +141,13 @@
 import { QTable } from 'quasar';
 import PageHeader from 'src/layouts/PageHeader.vue';
 import Avatar from 'src/components/Avatar.vue';
-import { Account, AccountSettings, CurrencySettings, Member } from 'src/store/model';
+import { Account, AccountSettings, CurrencySettings, Group, Member } from 'src/store/model';
 import { LoadListPayload } from 'src/store/resources';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import formatCurrency from 'src/plugins/FormatCurrency';
+import { useRouter } from 'vue-router';
 
 
 const props = defineProps<{
@@ -375,6 +377,14 @@ const tableRef = ref<QTable>()
 onMounted(() => {
   tableRef.value?.requestServerInteraction()
 })
+
+const router = useRouter()
+const accountClick = (account: ExtendedAccount) => {
+  router.push({name: 'Member', params: {
+    code: (account.member as Member & {group: Group}).group.attributes.code,
+    memberCode: account.member.attributes.code
+  }})
+}
 
 
 </script>
