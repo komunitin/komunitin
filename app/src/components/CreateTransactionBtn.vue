@@ -7,7 +7,7 @@
     <div class="full-width row q-col-gutter-md">
       <div class="col-6 text-right">
         <q-btn
-          v-if="settings.allowPaymentRequests"
+          v-if="settings?.allowPaymentRequests"
           id="request-payment"
           fab
           icon="arrow_downward"
@@ -18,7 +18,7 @@
       </div>
       <div class="col-6">
         <q-btn
-          v-if="settings.allowPayments"
+          v-if="settings?.allowPayments"
           id="make-payment"
           fab
           icon="arrow_upward"

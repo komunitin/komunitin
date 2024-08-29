@@ -65,19 +65,5 @@ export const useEffectiveSettings = (accountSettings: MaybeRefOrGetter<AccountSe
 
 export const useMyAccountSettings = () => {
   const store = useStore()
-
-  const settings = computed(() => {
-    const account = store.getters.myAccount
-    const accountSettings = account?.settings.attributes
-    const currencySettings = account?.currency.attributes.settings
-    // Not ready yet
-    if (accountSettings && currencySettings) {
-      return effectiveSettings(accountSettings, currencySettings)
-    } else {
-      // Not ready yet
-      return undefined
-    }
-  })
-
-  return settings
+  return useEffectiveSettings(() => store.getters.myAccount?.settings, () => store.getters.myAccount?.currency?.settings)
 }
