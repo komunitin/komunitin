@@ -59,7 +59,7 @@ const saveMember = async (resource: DeepPartial<Member>) => {
       attributes: resource.attributes
     }
   })
-  changes.value?.save(fn)
+  await changes.value?.save(fn)
 }
 
 const saveContacts = async (resources: DeepPartial<Contact>[]) => {
@@ -76,7 +76,7 @@ const saveContacts = async (resources: DeepPartial<Contact>[]) => {
     },
     included: resources
   })
-  changes.value?.save(fn)
+  await changes.value?.save(fn)
 }
 
 </script>
