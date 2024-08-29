@@ -49,16 +49,16 @@
       {{ $t('accountStart') }}
     </div>
     <amount-input
-      v-model="settingsRefs.defaultInitialCreditLimit.value"
+      v-model="defaultInitialCreditLimit"
       :label="$t('initialCredit')"
       :hint="$t('initialCreditHint')"
       :currency="currency"
       outlined
     />
     <amount-input
-      v-model="settingsRefs.defaultInitialMaximumBalance.value"
+      v-model="defaultInitialMaximumBalance"
       :label="$t('maximumBalance')"
-      :hint="$t('maximumBalanceHint')"
+      :hint="$t('initialMaximumBalanceHint')"
       :currency="currency"
       outlined
     />
@@ -92,104 +92,10 @@
         {{ $t('accountDefaultsText') }}
       </div>
     </div>
-    <div class="text-overline text-uppercase text-onsurface-m">
-      {{ $t('transferDirections') }}
-    </div>
-    <toggle-item 
-      v-model="settingsRefs.defaultAllowPayments.value"
-      :label="$t('allowPayments')"
-      :hint="$t('allowPaymentsHint')"
-    />
-    <toggle-item 
-      v-model="settingsRefs.defaultAllowPaymentRequests.value"
-      :label="$t('allowPaymentRequests')"
-      :hint="$t('allowPaymentRequestsHint')"
-    />
-    <div class="text-overline text-uppercase text-onsurface-m">
-      {{ $t('transferMethods') }}
-    </div>
-    <toggle-item
-      v-model="settingsRefs.defaultAllowSimplePayments.value"
-      :label="$t('allowSimplePayments')"
-      :hint="$t('allowSimplePaymentsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowSimplePaymentRequests.value"
-      :label="$t('allowSimplePaymentRequests')"
-      :hint="$t('allowSimplePaymentRequestsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowQrPayments.value"
-      :label="$t('allowQrPayments')"
-      :hint="$t('allowQrPaymentsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowQrPaymentRequests.value"
-      :label="$t('allowQrPaymentRequests')"
-      :hint="$t('allowQrPaymentRequestsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowTagPayments.value"
-      :label="$t('allowTagPayments')"
-      :hint="$t('allowTagPaymentsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowTagPaymentRequests.value"
-      :label="$t('allowTagPaymentRequests')"
-      :hint="$t('allowTagPaymentRequestsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowMultiplePayments.value"
-      :label="$t('allowMultiplePayments')"
-      :hint="$t('allowMultiplePaymentsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowMultiplePaymentRequests.value"
-      :label="$t('allowMultiplePaymentRequests')"
-      :hint="$t('allowMultiplePaymentRequestsHint')"
-    />
-    <div class="text-overline text-uppercase text-onsurface-m">
-      {{ $t('paymentRequests') }}
-    </div>
-    <toggle-item 
-      v-model="settingsRefs.defaultAcceptPaymentsAutomatically.value"
-      :label="$t('acceptPaymentsAutomatically')"
-      :hint="$t('acceptPaymentsHint')"
-    />
-    <toggle-item
-      v-model="enableAcceptPaymentsAfter"
-      :label="$t('enableAcceptPaymentsAfter2w')"
-      :hint="$t('enableAcceptPaymentsAfter2wHint')"
-    />
-    <div class="text-overline text-uppercase text-onsurface-m">
-      {{ $t('limits') }}
-    </div>
-    <toggle-item
-      v-model="enableOnPaymentCreditLimit"
-      :label="$t('enableOnPaymentCreditLimit')"
-      :hint="$t('enableOnPaymentCreditLimitHint')"
-    />
-    <amount-input
-      v-model="defaultOnPaymentCreditLimitValue"
+    <account-settings-fields
+      v-model:settings="accountSettings"
       :currency="currency"
-      :label="$t('onPaymentCreditLimit')"
-      outlined
-      :disable="!enableOnPaymentCreditLimit"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowExternalPayments.value"
-      :label="$t('allowExternalPayments')"
-      :hint="$t('allowExternalPaymentsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAllowExternalPaymentRequests.value"
-      :label="$t('allowExternalPaymentRequests')"
-      :hint="$t('allowExternalPaymentRequestsHint')"
-    />
-    <toggle-item
-      v-model="settingsRefs.defaultAcceptExternalPaymentsAutomatically.value"
-      :label="$t('acceptExternalPaymentsAutomatically')"
-      :hint="$t('acceptExternalPaymentsAutomaticallyHint')"
+      :limits="false"
     />
     <q-separator />
     <div class="q-mt-lg">
@@ -204,12 +110,12 @@
       {{ $t('settings') }}
     </div>
     <toggle-item
-      v-model="settingsRefs.enableExternalPayments.value"
+      v-model="enableExternalPayments"
       :label="$t('enableExternalPayments')"
       :hint="$t('enableExternalPaymentsHint')"
     />
     <toggle-item
-      v-model="settingsRefs.enableExternalPaymentRequests.value"
+      v-model="enableExternalPaymentRequests"
       :label="$t('enableExternalPaymentRequests')"
       :hint="$t('enableExternalPaymentRequestsHint')"
     />
@@ -274,9 +180,11 @@ import InputUpdate from 'src/components/InputUpdate.vue';
 import AmountInput from 'src/components/AmountInput.vue';
 import TrustlinesField from './TrustlinesField.vue';
 import CategoriesField from './CategoriesField.vue';
-import { Group, GroupSettings, Currency, CurrencySettings, Trustline, Category } from 'src/store/model';
+import AccountSettingsFields from 'src/pages/settings/AccountSettingsFields.vue';
+import { Group, GroupSettings, Currency, CurrencySettings, Trustline, Category, AccountSettings } from 'src/store/model';
 import { watchDebounced } from '@vueuse/shared';
 import { DeepPartial } from 'quasar';
+import { accountSettingsToCurrencySettingsAttributes, currencySettingsToAccountSettingsAttributes } from 'src/composables/accountSettings';
 
 export type ExtendedGroup = Group & {
   settings: GroupSettings,
@@ -360,43 +268,30 @@ watchDebounced(currencyValue, (value) => {
 
 // Currency settings
 
+// We create a fake account settings object to use the AccountSettingsFields component
+// for the account defaults section.
+const accountSettings = ref({
+  attributes: currencySettingsToAccountSettingsAttributes(currencySettings.value)
+} as AccountSettings)
+
 const vals = currencySettings.value.attributes
+const defaultInitialCreditLimit = ref(vals.defaultInitialCreditLimit ?? 0)
+const defaultInitialMaximumBalance = ref(vals.defaultInitialMaximumBalance ?? 0)
+const enableExternalPayments = ref(vals.enableExternalPayments ?? false)
+const enableExternalPaymentRequests = ref(vals.enableExternalPaymentRequests ?? false)
 
-const enableOnPaymentCreditLimit = ref(vals.defaultOnPaymentCreditLimit !== undefined)
-const defaultOnPaymentCreditLimitValue = ref(vals.defaultOnPaymentCreditLimit ?? 0)
-
-const enableAcceptPaymentsAfter = ref(vals.defaultAcceptPaymentsAfter !== undefined)
-
-
-const settingsRefs = {
-  defaultInitialCreditLimit: ref(vals.defaultInitialCreditLimit ?? 0),
-  defaultInitialMaximumBalance: ref(vals.defaultInitialMaximumBalance ?? 0),
-  defaultAllowPayments: ref(vals.defaultAllowPayments ?? false),
-  defaultAllowPaymentRequests: ref(vals.defaultAllowPaymentRequests ?? false),
-  defaultAcceptPaymentsAutomatically: ref(vals.defaultAcceptPaymentsAutomatically ?? false),
-  defaultAllowSimplePayments: ref(vals.defaultAllowSimplePayments ?? false),
-  defaultAllowSimplePaymentRequests: ref(vals.defaultAllowSimplePaymentRequests ?? false),
-  defaultAllowQrPayments: ref(vals.defaultAllowQrPayments ?? false),
-  defaultAllowQrPaymentRequests: ref(vals.defaultAllowQrPaymentRequests ?? false),
-  defaultAllowTagPayments: ref(vals.defaultAllowTagPayments ?? false),
-  defaultAllowTagPaymentRequests: ref(vals.defaultAllowTagPaymentRequests ?? false),
-  defaultAllowMultiplePayments: ref(vals.defaultAllowMultiplePayments ?? false),
-  defaultAllowMultiplePaymentRequests: ref(vals.defaultAllowMultiplePaymentRequests ?? false),
-  defaultAcceptPaymentsAfter: computed(() => enableAcceptPaymentsAfter.value ? 2*7*24*60*60 : undefined),
-  defaultOnPaymentCreditLimit: computed(() => enableOnPaymentCreditLimit.value ? defaultOnPaymentCreditLimitValue.value : undefined),
-  enableExternalPayments: ref(vals.enableExternalPayments ?? false),
-  enableExternalPaymentRequests: ref(vals.enableExternalPaymentRequests ?? false),
-  defaultAllowExternalPayments: ref(vals.defaultAllowExternalPayments ?? false),
-  defaultAllowExternalPaymentRequests: ref(vals.defaultAllowExternalPaymentRequests ?? false),
-  defaultAcceptExternalPaymentsAutomatically: ref(vals.defaultAcceptExternalPaymentsAutomatically ?? false),
-}
-
-watchDebounced(Object.values(settingsRefs), () => {
+watchDebounced([accountSettings, defaultInitialCreditLimit, defaultInitialMaximumBalance, enableExternalPayments, enableExternalPaymentRequests], () => {
   lastCurrencySettingsUpdate.value = "settings"
-  const attributes = Object.entries(settingsRefs).reduce((acc, [key, ref]) => {
-    acc[key] = ref.value
-    return acc
-  }, {} as Record<string, number|boolean|undefined>)
+
+  const accountDefaults = accountSettingsToCurrencySettingsAttributes(accountSettings.value)
+
+  const attributes = {
+    ...accountDefaults,
+    defaultInitialCreditLimit: defaultInitialCreditLimit.value,
+    defaultInitialMaximumBalance: defaultInitialMaximumBalance.value,
+    enableExternalPayments: enableExternalPayments.value,
+    enableExternalPaymentRequests: enableExternalPaymentRequests.value,
+  }
 
   emit('update:currency-settings', {
     id: currencySettings.value.id,

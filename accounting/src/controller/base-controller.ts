@@ -233,7 +233,7 @@ export class LedgerController implements BaseController {
       defaultInitialMaximumBalance: undefined,
       defaultAcceptPaymentsAutomatically: false,
       defaultAcceptPaymentsWhitelist: [],
-      defaultAcceptPaymentsAfter: 15*24*60*60, // 15 days,
+      defaultAcceptPaymentsAfter: 14*24*60*60, // 2 weeks,
       defaultOnPaymentCreditLimit: undefined,
       defaultAllowPayments: true,
       defaultAllowPaymentRequests: true,

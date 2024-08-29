@@ -247,6 +247,16 @@ const routes: RouteRecordRaw[] = [
           props: true,
           name: 'ManageAccounts',
           component: () => import('../pages/admin/ManageAccounts.vue'),
+        }, {
+          path: 'members/:memberCode/profile',
+          props: true,
+          name: 'AdminEditProfile',
+          component: () => import('../pages/members/EditProfile.vue')
+        }, {
+          path: 'members/:memberCode/settings',
+          props: true,
+          name: 'AdminEditSettings',
+          component: () => import('../pages/settings/EditSettings.vue')
         }]
       }
     ]

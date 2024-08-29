@@ -36,7 +36,10 @@ export function filter(records: any, request: any) {
         if (record.associations[name]) {
           name = record.associations[name].identifier;
         }
-        return values.includes(record[name])
+        const recordValue = record[name];
+        return Array.isArray(recordValue) 
+          ? recordValue.some((v: any) => values.includes(v)) 
+          : values.includes(recordValue);
       })
     });
   records = sort(records, request);

@@ -404,8 +404,8 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
     // Commit mutation(s) after commiting included and eventualy fetched external resources.
     if (!onlyResources) {
-      commit("next", data.links.next)
-      commit("prev", data.links.prev)
+      commit("next", data.links?.next ?? null)
+      commit("prev", data.links?.prev ?? null)
       this.setPageResources(context, key, page, data.data)
     } else {
       commit("addResources", data.data)

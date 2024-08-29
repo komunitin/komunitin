@@ -80,8 +80,10 @@ export default class KError extends Error {
   public static getKError(error: any): KError {
     if (error instanceof KError) {
       return error;
+    } else if (error instanceof Error) {
+      return new KError(KErrorCode.UnknownScript, error.message, error);
     } else {
-      return new KError(KErrorCode.UnknownScript, "Unexpected error", error);
+      return new KError(KErrorCode.UnknownScript, "Unexpected error", undefined, error);
     }
   }
 }

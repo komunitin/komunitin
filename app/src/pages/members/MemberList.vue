@@ -8,6 +8,17 @@
     />
     <q-page-container>
       <q-page>
+        <div 
+          class="text-overline text-uppercase text-onsurface-d q-pt-md q-px-md row justify-between"
+        >
+          <div>
+            {{ $t('account') }}
+          </div>
+          <div class="text-right">
+            {{ $t('balance') }}
+          </div>
+        </div>
+          
         <resource-cards
           ref="memberItems"
           v-slot="slotProps"
@@ -42,12 +53,6 @@
                       )
                     }}
                   </div>
-                  <q-item-label
-                    caption
-                    class="col"
-                  >
-                    <account-limits :account="member.account" />
-                  </q-item-label>
                 </div>
               </template>
             </member-header>
@@ -63,7 +68,6 @@ import FormatCurrency from "../../plugins/FormatCurrency";
 
 import PageHeader from "../../layouts/PageHeader.vue";
 
-import AccountLimits from "./AccountLimits.vue";
 import ResourceCards from "../ResourceCards.vue";
 
 import MemberHeader from "../../components/MemberHeader.vue";
@@ -75,7 +79,6 @@ export default defineComponent({
     MemberHeader,
     ResourceCards,
     PageHeader,
-    AccountLimits,
   },
   props: {
     code: {

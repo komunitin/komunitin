@@ -325,6 +325,7 @@ const load = async (scope: {pagination: Pagination, filter?: string}) => {
         filter: {
           id: loadedMembers.map((member: Member) => member.relationships.account.data.id)
         },
+        pageSize,
         include: 'settings',
       })
       accounts.value = loadedMembers.map((member: {account: Account}) => member.account)

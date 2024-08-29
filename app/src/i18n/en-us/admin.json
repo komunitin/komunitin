@@ -29,7 +29,7 @@
   "initialCredit": "Initial Credit",
   "initialCreditHint": "The maximum negative balance that an account can have after signing up. Changing this value will not affect existing accounts.",
   "maximumBalance": "Maximum Balance",
-  "maximumBalanceHint": "The maximum positive balance that an account can have after signing up. Changing this value will not affect existing accounts. Leave to 0 for unlimited.",
+  "initialMaximumBalanceHint": "The maximum positive balance that an account can have after signing up. Changing this value will not affect existing accounts. Leave to 0 for unlimited.",
   "accountDefaults": "Default account settings",
   "accountDefaultsText": "Define the default settings for accounts in your currency. These settings may be overriden account by account. Changing these settings affect all accounts not having a specific value.",
   "allowPayments": "Payments",
@@ -99,5 +99,10 @@
   "columns": "Columns",
   "manageAccounts": "Manage Accounts",
   "manageAccountsText": "See below all accounts in your group. Most account settings can be set by default from the group settings page or individually. Credit Limit and Maximum Balance need to be set individually after the account is created.",
-  "search": "Search"
+  "search": "Search",
+  "defaultIs": "Default: {value}",
+  "yes": "Yes",
+  "no": "No",
+  "creditLimitHint": "The maximum negative balance that this account can have.",
+  "maximumBalanceHint": "The maximum positive balance that this account can have. Leave to 0 for unlimited."
 }

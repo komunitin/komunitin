@@ -185,18 +185,18 @@ export default {
     }),
     user: ApiSerializer.extend({
       alwaysIncludeLinkageData: true,
-      selfLink: () => urlSocial + "/users/me",
+      selfLink: (user: any) => `${urlSocial}/users/${user.id}`,
       links(user: any) {
         const member = user.members.models[0];
         return {
           members: {
-            related: `${urlSocial}/${member.group.code}/members/${member.code}` 
+            related: `${urlSocial}/${member.group.code}/members/${member.id}` 
           }
         }
       }
     }),
     userSettings: ApiSerializer.extend({
-      selfLink: () => urlSocial + "/users/me/settings"
+      selfLink: (settings: any) => `${urlSocial}/users/${settings.id}/settings`
     }),
     groupSettings: ApiSerializer.extend({
       selfLink: (groupSettings: any) => urlSocial + "/" + groupSettings.group.code + "/settings"
@@ -411,13 +411,15 @@ export default {
         server.createList("member", 5, { group } as any);
       }
     });
-    // Create test user for the first member.
-    const member = (server.schema as any).members.first();
-    const user = server.create("user", {
-      members: [member]
-    } as any);
 
-    server.create("userSettings", { user } as any);
+    // Users and user settings for all members
+    (server.schema as any).members.all().models.forEach((member: any) => {
+      const user = server.create("user", {
+        members: [member]
+      } as any);
+      server.create("userSettings", { user } as any);	
+    });
+    
     // Create empty user (for signup testing).
     server.create("user", {
       email: "empty@example.com",
@@ -623,24 +625,38 @@ export default {
       return undefined as any
     })
 
+    server.get(urlSocial + "/users", (schema: any, request: any) => {
+      const users = filter(schema.users.all(), request);
+      return users;
+    });
+
     // Logged-in User
-    server.get(urlSocial + "/users/me", (schema: any, request: any) => {
+    server.get(urlSocial + "/users/:id", (schema: any, request: any) => {
       if (request.requestHeaders.Authorization.split(" ")[1] == "empty_user_access_token") {
         return schema.users.findBy({ email: "empty@example.com" });
       } else {
-        return schema.users.first();
+        return (request.params.id === "me" 
+          ? schema.users.first() 
+          : schema.users.find(request.params.id)
+        );
       }
     });
 
     // User settings
-    server.get(urlSocial + "/users/me/settings", (schema: any) => {
-      return schema.userSettings.first();
+    server.get(urlSocial + "/users/:id/settings", (schema: any, request: any) => {
+      return (request.params.id === "me" 
+        ? schema.userSettings.first() 
+        : schema.users.find(request.params.id).settings
+      )
     });
 
     // Edit user settings
-    server.patch(urlSocial + "/users/me/settings", (schema: any, request: any) => {
+    server.patch(urlSocial + "/users/:id/settings", (schema: any, request: any) => {
       const body = JSON.parse(request.requestBody);
-      const settings = schema.userSettings.first();
+      const settings = (request.params.id === "me" 
+        ? schema.userSettings.first() 
+        : schema.users.find(request.params.id).settings
+      )
       settings.update(body.data.attributes);
       return settings;
     });

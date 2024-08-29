@@ -268,6 +268,15 @@ export default {
         });
       }
     );
+    // Edit account
+    server.patch(`${urlAccounting}/:currency/accounts/:id`, (schema: any, request: any) => {
+      const currency = schema.currencies.findBy({code: request.params.currency});
+      const account = schema.accounts.findBy({id: request.params.id, currencyId: currency.id});
+      const body = JSON.parse(request.requestBody);
+      account.update(body.data.attributes);
+      return account;
+    })
+      
     // Account settings
     server.get(`${urlAccounting}/:currency/accounts/:id/settings`, (schema: any, request) => {
       const currency = schema.currencies.findBy({code: request.params.currency});

@@ -7,6 +7,7 @@
   >
     <template #default>
       <password-field
+        v-if="!isAdmin"
         v-model="password"
         :label="$t('password')"
         :hint="$t('oldPasswordHint')"
@@ -25,7 +26,7 @@
 </template>
 <script setup lang="ts">
 import { User, Group } from '../../store/model';
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import useVuelidate from "@vuelidate/core"
 import { required, email as vemail } from "@vuelidate/validators"
@@ -52,8 +53,10 @@ const passwordInvalid = ref(false)
 
 const store = useStore()
 
+const isAdmin = computed(() => store.getters.isAdmin)
+
 const v$ = useVuelidate({
-  password: {required},
+  ...(!isAdmin.value && {password: {required}}),
   email: {required, vemail}
 }, {password, email})
 
@@ -66,7 +69,7 @@ const changePassword = async () => {
       group: props.group.attributes.code,
       resource: {
         attributes: {
-          password: password.value,
+          ...(!isAdmin.value && {password: password.value}),
           email: email.value
         }
       }

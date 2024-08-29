@@ -77,8 +77,8 @@ const saveContacts = (contacts: PartialContact[]) => {
   })
 }
 const saveCurrency = (currency: Currency) => {
-  changes.value?.save(() => {
-    return store.dispatch("currencies/update", {
+  changes.value?.save(async () => {
+    return await store.dispatch("currencies/update", {
       id: props.code,
       resource: {
         attributes: {

@@ -2,11 +2,12 @@
   <dialog-form-btn 
     :label="$t('changePassword')"
     :text="$t('changePasswordText')"
-    :valid="!!(oldPassword && newPassword) && newPassword.length >= 8"
+    :valid="!!((oldPassword || isAdmin) && newPassword) && newPassword.length >= 8"
     :submit="changePassword"
   >
     <template #default>
       <password-field
+        v-if="!isAdmin"
         v-model="oldPassword"
         :label="$t('oldPassword')"
         :hint="$t('oldPasswordHint')"
@@ -23,7 +24,7 @@
 </template>
 <script setup lang="ts">
 import { User, Group } from '../../store/model'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import DialogFormBtn from '../../components/DialogFormBtn.vue'
 import PasswordField from '../../components/PasswordField.vue'
@@ -41,6 +42,8 @@ const newPassword = ref<string>('')
 const passwordInvalid = ref(false)
 
 const store = useStore()
+const isAdmin = computed(() => store.getters.isAdmin)
+
 const { t } = useI18n()
 
 const changePassword = async () => {
@@ -50,7 +53,7 @@ const changePassword = async () => {
       group: props.group.attributes.code,
       resource: {
         attributes: {
-          password: oldPassword.value,
+          ...(!isAdmin.value && {password: oldPassword.value}),
           newPassword: newPassword.value
         }
       }

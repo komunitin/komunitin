@@ -9,6 +9,14 @@
       padding 
       class="q-py-lg q-px-md col-12 col-sm-8 col-md-6"
     >
+      <account-header
+        v-if="isAdmin && account"
+        class="q-mb-md"
+        style="margin-left: -16px"
+        :account="account"
+        to=""
+      />
+
       <div>
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
           {{ $t('app') }}
@@ -20,18 +28,21 @@
           :label="$t('language')"
         />
       </div>  
-      <div class="q-mt-lg">
-        <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
-          {{ $t('account') }}
-        </div>
-        <toggle-item 
-          v-model="acceptPayments"
-          :label="$t('acceptPaymentsAutomatically')"
-          :hint="$t('acceptPaymentsHint')"
-        />
-      </div>
+      <account-settings-fields
+        v-if="accountSettings && currency && defaultSettings"
+        v-model:settings="accountSettings"
+        v-model:credit-limit="creditLimit"
+        v-model:maximum-balance="maximumBalance"
+        :credit-limit-loading="creditLimitLoading"
+        :maximum-balance-loading="maximumBalanceLoading"
+
+        class="q-pt-md"
+        :currency="currency"
+        :defaults="defaultSettings"
+        limits
+      />
       <div 
-        v-if="effectiveSettings.allowTagPayments"
+        v-if="effectiveSettings && effectiveSettings.allowTagPayments"
         class="q-mt-lg"
       >
         <div class="text-overline text-uppercase text-onsurface-m q-mb-sm">
@@ -104,20 +115,75 @@
   </q-page-container>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, watchEffect } from 'vue';
+import { computed, Ref, ref, watch, watchEffect } from 'vue';
 import { useStore } from 'vuex';
 import PageHeader from '../../layouts/PageHeader.vue';
 import ToggleItem from '../../components/ToggleItem.vue';
 import SaveChanges from '../../components/SaveChanges.vue';
 import NfcTagsList from '../../components/NfcTagsList.vue';
+import AccountHeader from 'src/components/AccountHeader.vue';
+import AccountSettingsFields from './AccountSettingsFields.vue';
 
 import langs, {LangName, normalizeLocale} from "../../i18n";
-import { AccountSettings, MailingFrequency, AccountTag, UserSettings } from '../../store/model';
+import { AccountSettings, MailingFrequency, AccountTag, UserSettings, Member, Account, Group, Currency, CurrencySettings } from '../../store/model';
 import { DeepPartial } from 'quasar';
 import { useLocale } from "../../boot/i18n"
 import { watchDebounced } from "@vueuse/shared";
 import { useI18n } from 'vue-i18n';
-import { useMyAccountSettings } from 'src/composables/accountSettings';
+import { currencySettingsToAccountSettingsAttributes, useEffectiveSettings } from 'src/composables/accountSettings';
+import { useFullMemberByCode } from 'src/composables/fullMember';
+
+const props = defineProps<{
+  code?: string,
+  memberCode?: string
+}>()
+
+const store = useStore()
+
+const isAdmin = computed(() => store.getters.isAdmin)
+
+// Load member & user.
+const {user, member} = useFullMemberByCode(() => props.code, () => props.memberCode)
+
+const userSettings = computed(() => user.value?.settings)
+
+const code = computed(() => (member.value as (Member & {group: Group}))?.group.attributes.code)
+const memberCode = computed(() => member.value?.attributes.code)
+
+// Load account and settings
+const account = ref<Account & {settings: AccountSettings, currency: Currency & {settings: CurrencySettings}}>()
+// These are the settings model and not need to be in always in sync with the account.settings
+const accountSettings = ref<AccountSettings>()
+
+watch(member, async (member) => {
+  if (member) {
+    await store.dispatch("accounts/load", {
+      id: member.relationships.account.data.id,
+      group: code.value,
+      include: "settings,currency,currency.settings"
+    })
+    account.value = store.getters["accounts/current"]
+    accountSettings.value = account.value?.settings
+  }
+}, {immediate: true})
+
+const currency = computed(() => account.value?.currency)
+const currencySettings = computed(() => currency.value?.settings)
+
+const defaultSettings = computed(() => {
+  if (currencySettings.value) {
+    return {
+      attributes: currencySettingsToAccountSettingsAttributes(currencySettings.value)
+    }
+  } else {
+    return undefined
+  }
+})
+
+const userLanguage = computed(() => {
+  const lang = userSettings.value?.attributes.language
+  return lang ? normalizeLocale(lang) : undefined
+})
 
 const { t } = useI18n()
 const frequencies = [
@@ -128,72 +194,37 @@ const frequencies = [
   {label: t('never'), value: 'never'}
 ] as const
 
-const store = useStore()
-
-const code = computed(() => {
-  return store.getters["myMember"].group.attributes.code
-})
-const memberCode = computed(() => {
-  return store.getters["myMember"].attributes.code
-})
 const langOptions = computed(() => {
   return (Object.keys(langs) as LangName[]).map((lang: LangName) => ({label: langs[lang].label, value: lang}))
 })
-
-const myAccount = computed(() => store.getters["myAccount"])
-const myMember = computed(() => store.getters["myMember"])
-const userSettings = computed(() => store.getters["user-settings/current"] as UserSettings | undefined)
-const userLanguage = computed(() => {
-  const lang = userSettings.value?.attributes.language
-  return lang ? normalizeLocale(lang) : undefined
-})
-const accountSettings = computed(() => store.getters["account-settings/current"] as AccountSettings | undefined )
-
-const loadAccountSettings = async () => {
-  await store.dispatch("account-settings/load", {
-    id: myAccount.value.id,
-    group: myAccount.value.currency.attributes.code
-  })
-}
-
-const loadUserSettings = async () => {
-  await store.dispatch("user-settings/load", {
-    id: myMember.value.attributes.code,
-    group: myMember.value.group.attributes.code
-  })
-}
-
-onMounted(async () => Promise.all([loadAccountSettings(), loadUserSettings()]))
 
 const changes = ref<typeof SaveChanges>()
 
 const saveAccountSettings = async (resource: DeepPartial<AccountSettings>) => {
   const fn = () => store.dispatch("account-settings/update", {
-    id: myAccount.value.id,
-    group: myAccount.value.currency.attributes.code,
+    id: account.value?.id,
+    group: code.value,
     resource
   })
-  changes.value?.save(fn)
+  await changes.value?.save(fn)
 }
 
 const saveUserSettings = async (resource: DeepPartial<UserSettings>) => {
   const fn = () => store.dispatch("user-settings/update", {
-    id: myMember.value.attributes.code,
-    group: myMember.value.group.attributes.code,
+    id: user.value?.id,
+    group: code.value,
     resource
   })
-  changes.value?.save(fn)
+  await changes.value?.save(fn)
 }
 
 // Account settings
-const acceptPayments = ref<boolean|undefined>()
 const tags = ref()
 watchEffect(() => {
-  acceptPayments.value = accountSettings.value?.attributes.acceptPaymentsAutomatically
   tags.value = accountSettings.value?.attributes.tags ?? undefined
 })
 
-const tagsEqual = (a: AccountTag[], b?: AccountTag[]) => {
+const tagsEqual = (a: AccountTag[], b?: AccountTag[] | null) => {
   if (!b) {
     return a.length === 0
   }
@@ -203,19 +234,73 @@ const tagsEqual = (a: AccountTag[], b?: AccountTag[]) => {
   return a.every((tag, i) => tag.id === b[i].id)
 }
 
-watch([acceptPayments, tags], async () => {
+const settingsEqual = (a: AccountSettings, b: AccountSettings) => {
+  const keys = Array.from(new Set([...Object.keys(a.attributes), ...Object.keys(b.attributes)]))
+    .filter(key => key !== "tags") as (keyof AccountSettings["attributes"])[]
+  return !keys.some((key) => a.attributes[key] !== b.attributes[key])
+}
+
+watch([accountSettings, tags], async () => {
   let save = false
-  const attributes: Partial<AccountSettings["attributes"]> = {}
-  if (acceptPayments.value !== undefined && acceptPayments.value !== accountSettings.value?.attributes.acceptPaymentsAutomatically) {
-    attributes.acceptPaymentsAutomatically = acceptPayments.value
+  let attributes: Partial<AccountSettings["attributes"]> = {}
+  
+  if (tags.value !== undefined && !tagsEqual(tags.value, account.value?.settings.attributes.tags)) {
+    attributes.tags = tags.value
     save = true
   }
-  if (tags.value !== undefined && !tagsEqual(tags.value, accountSettings.value?.attributes.tags)) {
-    attributes.tags = tags.value
+  if (accountSettings.value && account.value && !settingsEqual(accountSettings.value, account.value.settings)) {
+    attributes = {
+      ...accountSettings.value.attributes,
+      ...attributes, // overwrite tags.
+    }
     save = true
   }
   if (save) {
     await saveAccountSettings({ attributes })
+  }
+})
+
+// Credit limit & maximum balance
+const saveAccount = async (resource: DeepPartial<Account>, loading: Ref<boolean>) => {
+  try {
+    loading.value = true
+    const fn = () => store.dispatch("accounts/update", {
+      id: account.value?.id,
+      group: code.value,
+      resource
+    })
+    await changes.value?.save(fn)
+  } finally {
+    loading.value = false
+  }
+}
+
+const creditLimit = ref<number>()
+const creditLimitLoading = ref<boolean>(false)
+
+watch(creditLimit, async () => {
+  if (creditLimit.value !== account.value?.attributes.creditLimit) {
+    await saveAccount({attributes: {creditLimit: creditLimit.value}}, creditLimitLoading)
+  }
+})
+
+const maximumBalance = ref<number>()
+const maximumBalanceLoading = ref<boolean>(false)
+
+watch(account, () => {
+  if (account.value) {
+    creditLimit.value = account.value.attributes.creditLimit
+    maximumBalance.value = account.value.attributes.maximumBalance ? account.value?.attributes.maximumBalance : 0
+  }
+})
+
+watch(maximumBalance, async () => {
+  if (maximumBalance.value !== account.value?.attributes.maximumBalance) {
+    await saveAccount({
+      attributes: {
+        maximumBalance: maximumBalance.value == 0 ? false : maximumBalance.value
+      }
+    }, maximumBalanceLoading)
   }
 })
 
@@ -279,6 +364,6 @@ watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers, ema
   }
 }, {debounce: 1000})
 
-const effectiveSettings = useMyAccountSettings()
+const effectiveSettings = useEffectiveSettings(accountSettings, currencySettings)
 
 </script>

@@ -56,6 +56,8 @@ const props = defineProps<{
 
 const store = useStore()
 
+const ready = ref(false)
+
 const loadCategories = async () => {
   await store.dispatch('categories/loadList', {
     group: props.code
@@ -88,6 +90,7 @@ const load = async () => {
   await store.dispatch('groups/loadList', {
     filter: {code: codes},
   })
+  ready.value = true
 }
 
 // We need to build the objects directly from the store getters 
@@ -98,11 +101,6 @@ const categories = computed(() => store.getters['categories/currentList'])
 const currency = computed(() => store.getters['currencies/one'](group.value.currency.id))
 const currencySettings = computed(() => store.getters['currency-settings/one'](currency.value.settings.id))
 const trustlines = computed(() => store.getters['trustlines/currentList'])
-
-
-const ready = computed(() => 
-  group.value && groupSettings.value && categories.value && currency.value && currencySettings.value && trustlines.value
-)
 
 
 onMounted(load)

@@ -50,7 +50,7 @@ const users = new (class extends Resources<User, unknown> {
 
 const userSettings = new (class extends Resources<UserSettings, unknown> {
   collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "User settings cannot be listed");};
-  resourceEndpoint = () => "/users/me/settings";
+  resourceEndpoint = (id: string) => `/users/${id}/settings`;
 })("user-settings", socialUrl);
 
 // Build modules for Accounting API:
@@ -92,7 +92,7 @@ const accounts = new (class extends Resources<Account, unknown> {
 
 const accountSettings = new (class extends Resources<AccountSettings, unknown> {
   collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "Account settings cannot be listed");};
-  resourceEndpoint = (code: string, groupCode: string) => `/${groupCode}/accounts/${code}/settings`;
+  resourceEndpoint = (id: string, groupCode: string) => `/${groupCode}/accounts/${id}/settings`;
 })("account-settings", accountingUrl)
 
 const transfers = new Resources<Transfer, unknown>("transfers", accountingUrl);
