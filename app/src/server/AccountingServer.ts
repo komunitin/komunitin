@@ -212,6 +212,19 @@ export default {
 
     // Set currency admin user
     server.schema.currencies.first().update({admins: [server.schema.users.first()]})
+
+    // generate transactions between user 1 and 2 (to check admin access)
+    const account1 = accounts.models[1];
+    const account2 = accounts.models[2];
+    server.create("transfer", {
+      payer: account1,
+      payee: account2,
+    });
+    server.create("transfer", {
+      payer: account2,
+      payee: account1,
+    });
+
   },
   routes(server: Server) {
     // Single currency

@@ -5,7 +5,7 @@
         <create-transaction-single-form
           :code="code"
           :select-payer="false"
-          :select-payee="false"
+          :select-payee="direction === 'transfer'"
           :payee-account="payeeAccount"
           :currency="myCurrency"
           :text="$t('enterTransactionDataNfc')"
@@ -26,7 +26,7 @@
         >
           <account-header
             class="q-pt-md"
-            :account="payeeAccount"
+            :account="editTransfer.payee"
           />
           <q-separator />
           <q-card-section class="text-center">
@@ -68,7 +68,7 @@
 </template>
 <script setup lang="ts">
 import { transferAccountRelationships, useCreateTransferPayeeAccount } from 'src/composables/fullAccount';
-import { Currency, ExtendedTransfer, Transfer } from 'src/store/model';
+import { Currency, ExtendedTransfer } from 'src/store/model';
 import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import FormatCurrency from 'src/plugins/FormatCurrency';
@@ -82,6 +82,7 @@ import { useFullTransferByResource } from 'src/composables/fullTransfer';
 const props = defineProps<{
   code: string,
   memberCode?: string,
+  direction?: "receive" | "transfer"
 }>()
 
 const store = useStore()
@@ -89,14 +90,14 @@ const store = useStore()
 const state = ref<"define" | "scan" | "submit">("define")
 
 const myCurrency = computed<Currency>(() => store.getters.myAccount.currency)
-const payeeAccount = useCreateTransferPayeeAccount(props.code, props.memberCode, "receive")
+const payeeAccount = useCreateTransferPayeeAccount(props.code, props.memberCode, props.direction ?? "receive")
 
-const editTransfer = ref<Transfer>()
+const editTransfer = ref<ExtendedTransfer>()
 const submitTransfer = ref<ExtendedTransfer>()
 
 useFullTransferByResource(submitTransfer)
 
-const onFilled = (value: Transfer) => {
+const onFilled = (value: ExtendedTransfer) => {
   editTransfer.value = value
   state.value = "scan"
 }
@@ -132,10 +133,10 @@ const onDetected = async (tag: string) => {
       updated: new Date().toISOString()
     },
     relationships: {
-      ...transferAccountRelationships(payerAccount, payeeAccount.value, myCurrency.value),
+      ...transferAccountRelationships(payerAccount, editTransfer.value.payee, myCurrency.value),
       currency: { data: { id: myCurrency.value.id, type: "currencies" } }
     },
-    payee: payeeAccount.value,
+    payee: editTransfer.value.payee,
     payer: payerAccount
   }
   submitTransfer.value = transfer as ExtendedTransfer

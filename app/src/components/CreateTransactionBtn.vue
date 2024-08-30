@@ -6,7 +6,7 @@
     class="row justify-center"
   >
     <div 
-      class="row items-stretch q-col-gutter-x-md no-wrap"
+      class="row items-stretch q-col-gutter-md justify-center"
     >
       <div
         v-if="showRequestPayment"
@@ -36,6 +36,20 @@
           :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}/transactions/send`"
         />
       </div>
+      <div
+        v-if="showTransfer"
+        class="btn-col"
+      >
+        <q-btn
+          id="make-transfer"
+          class="full-width"
+          fab
+          icon="arrow_forward"
+          color="primary"
+          :label="$t('move')"
+          :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}/transactions/transfer`"
+        />
+      </div>
     </div>
   </q-page-sticky>
 </template>
@@ -57,6 +71,9 @@ const showRequestPayment = computed(
   // Note that QR payments don't need the allowPaymentRequests setting since they are actually always performed by the payer.
   () => settings.value?.allowPaymentRequests && (settings.value?.allowSimplePaymentRequests || settings.value.allowMultiplePaymentRequests || settings.value.allowTagPaymentRequests)
         || settings.value?.allowQrPaymentRequests
+)
+const showTransfer = computed(
+  () => store.getters.isAdmin
 )
 
 </script>

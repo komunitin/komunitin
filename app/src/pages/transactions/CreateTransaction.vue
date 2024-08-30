@@ -117,11 +117,9 @@ const showTabsReceive = () => {
 const showTabs = computed(() => {
   if (props.direction === "send") {
     return showTabsSend()
-  } else if (props.direction === "receive") {
-    return showTabsReceive()
   } else {
-    // the intersection of the two.
-    return showTabsSend().filter(tab => showTabsReceive().includes(tab))
+    // receive & transfer are the same
+    return showTabsReceive()
   }
 })
 

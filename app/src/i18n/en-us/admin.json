@@ -104,5 +104,6 @@
   "yes": "Yes",
   "no": "No",
   "creditLimitHint": "The maximum negative balance that this account can have.",
-  "maximumBalanceHint": "The maximum positive balance that this account can have. Leave to 0 for unlimited."
+  "maximumBalanceHint": "The maximum positive balance that this account can have. Leave to 0 for unlimited.",
+  "move": "Move"
 }

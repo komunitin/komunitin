@@ -306,13 +306,17 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     return {};
   }
 
+  private absoluteUrl(url: string) {
+    return url.startsWith("http") ? url : this.baseUrl + url;
+  }
+
   private async request(context: ActionContext<ResourcesState<T>, S>, url: string, method?: "get"|"post"|"patch"|"delete", data?: object) {
     if (method == undefined) {
       method = "get";
     }
     // Resolve URL. Usually we're given relative urls except for the case when retreiving
     // the next page of a list, where we're given the absolute url directly from the API.
-    url = url.startsWith("http") ? url : this.baseUrl + url;
+    url = this.absoluteUrl(url)
 
     const request = async () => fetch(url, {
       method: method?.toUpperCase() ?? "GET",
@@ -713,7 +717,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * @returns 
    */
   protected buildAdjacentUrl(currentUrl: string, pageOffset: number) {
-    const adjacentUrl = new URL(currentUrl, this.baseUrl)
+    const adjacentUrl = new URL(this.absoluteUrl(currentUrl))
 
     const cursor = adjacentUrl.searchParams.has("page[after]") 
       ? parseInt(adjacentUrl.searchParams.get("page[after]") as string)

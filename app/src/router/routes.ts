@@ -150,13 +150,13 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'qr',
-            props: true,
+            props: route => ({direction: 'receive', ...route.params}),
             name: 'CreateTransactionReceiveQR',
             component: () => import('../pages/transactions/CreateTransactionReceiveQR.vue'),
           },
           {
             path: 'nfc',
-            props: true,
+            props: route => ({direction: 'receive', ...route.params}),
             name: 'CreateTransactionReceiveNFC',
             component: () => import('../pages/transactions/CreateTransactionReceiveNFC.vue')
           },
@@ -164,6 +164,38 @@ const routes: RouteRecordRaw[] = [
             path: 'multiple',
             props: route => ({direction: 'receive', ...route.params}),
             name: 'CreateTransactionReceiveMultiple',
+            component: () => import('../pages/transactions/CreateTransactionMultiple.vue'),
+          },   
+        ]
+      },
+      {
+        path: '/groups/:code/members/:memberCode/transactions/transfer',
+        props: route => ({code: route.params.code, direction: "transfer"}),
+        name: 'CreateTransactionTransfer',
+        component: () => import('../pages/transactions/CreateTransaction.vue'),
+        children: [
+          {
+            path: '',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferSingle',
+            component: () => import('../pages/transactions/CreateTransactionSingle.vue'),
+          },
+          {
+            path: 'qr',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferQR',
+            component: () => import('../pages/transactions/CreateTransactionReceiveQR.vue'),
+          },
+          {
+            path: 'nfc',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferNFC',
+            component: () => import('../pages/transactions/CreateTransactionReceiveNFC.vue')
+          },
+          {
+            path: 'multiple',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferMultiple',
             component: () => import('../pages/transactions/CreateTransactionMultiple.vue'),
           },   
         ]

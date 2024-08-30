@@ -5,7 +5,7 @@
         <create-transaction-single-form
           :code="code"
           :select-payer="false"
-          :select-payee="false"
+          :select-payee="direction === 'transfer'"
           :payee-account="payeeAccount"
           :currency="currency"
           :text="$t('enterTransactionDataQR')"
@@ -26,7 +26,7 @@
         >
           <account-header
             class="q-pt-md"
-            :account="payeeAccount"
+            :account="transfer.payee"
           />
           <qr-code :data="qrData" />
           
@@ -53,7 +53,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Currency, Transfer } from "src/store/model";
+import { Currency, ExtendedTransfer } from "src/store/model";
 import { computed, ref } from "vue"
 import { useStore } from "vuex";
 import CreateTransactionSingleForm from "./CreateTransactionSingleForm.vue";
@@ -65,6 +65,7 @@ import FormatCurrency from "src/plugins/FormatCurrency";
 const props = defineProps<{
   code: string,
   memberCode?: string,
+  direction?: "receive" | "transfer"
 }>()
 
 const store = useStore()
@@ -72,11 +73,13 @@ const store = useStore()
 const state = ref<"define" | "show">("define")
 
 const currency = computed<Currency>(() => store.getters.myAccount.currency);
-const payeeAccount = useCreateTransferPayeeAccount(props.code, props.memberCode, "receive")
 
-const transfer = ref<Transfer>()
+// This is used as a prop for the form, it will be defined for "receive" and undefined for "transfer"
+const payeeAccount = useCreateTransferPayeeAccount(props.code, props.memberCode, props.direction ?? "receive")
 
-const onFilled = (value: Transfer) => {
+const transfer = ref<ExtendedTransfer>()
+
+const onFilled = (value: ExtendedTransfer) => {
   transfer.value = value
   state.value = "show"
 }
@@ -85,7 +88,7 @@ const base = window?.location.origin ?? ""
 
 const qrData = computed(() => {
   const query = new URLSearchParams()
-  query.set("t", payeeAccount.value?.links.self ?? "")
+  query.set("t", transfer.value?.payee.links.self ?? "")
   query.set("a", transfer.value?.attributes.amount.toString() ?? "")
   query.set("m", transfer.value?.attributes.meta ?? "")
   return `${base}/pay?${query.toString()}`
