@@ -112,6 +112,7 @@ const createUser = async () => {
   loading.value = true
   try {
     // Create a user associated with a member.
+    // TODO: send the member as included resource (instead of nested)
     await store.dispatch("users/create", {
       group: props.code,
       resource: {

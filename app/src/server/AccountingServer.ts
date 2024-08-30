@@ -225,6 +225,9 @@ export default {
       payee: account1,
     });
 
+    // set an account to zero balance to test deleting
+    server.schema.accounts.all().models[15].update({balance: 0});
+
   },
   routes(server: Server) {
     // Single currency

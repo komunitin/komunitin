@@ -192,7 +192,7 @@
   "test": "Probar",
   "changePasswordText": "Entra tu contraseña actual y la nueva que quieres usar a partir de ahora.",
   "oldPassword": "Contraseña actual",
-  "oldPasswordHint": "Tu contraseña actual para confirmar el cambio",
+  "oldPasswordHint": "Tu contraseña actual para confirmar esta acción",
   "newPassword": "Nueva contraseña",
   "newPasswordHint": "Tu nueva contraseña debe tener mínimo 8 caracteres",
   "changeEmailText": "Entra tu contraseña y el nuevo correo electrónico que quieres usar a partir de ahora.",

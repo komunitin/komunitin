@@ -107,9 +107,24 @@
           />
         </q-list>  
       </div>
+      <div class="q-mt-lg">
+        <div class="text-overline text-uppercase text-onsurface-m text-bold">
+          {{ $t('deleteAccount') }}
+        </div>
+        <div class="text-body2 text-onsurface-m q-mb-sm">
+          {{ $t('deleteAccountText') }}
+        </div>
+        <div class="row justify-right q-mt-md">
+          <delete-member-btn
+            v-if="member"
+            class="q-ml-auto"
+            :member="member"
+          />  
+        </div>
+      </div>
       <save-changes
         ref="changes"
-        class="q-mt-lg"
+        class="q-my-xl"
       />
     </q-page>
   </q-page-container>
@@ -123,6 +138,7 @@ import SaveChanges from '../../components/SaveChanges.vue';
 import NfcTagsList from '../../components/NfcTagsList.vue';
 import AccountHeader from 'src/components/AccountHeader.vue';
 import AccountSettingsFields from './AccountSettingsFields.vue';
+import DeleteMemberBtn from './DeleteMemberBtn.vue';
 
 import langs, {LangName, normalizeLocale} from "../../i18n";
 import { AccountSettings, MailingFrequency, AccountTag, UserSettings, Member, Account, Group, Currency, CurrencySettings } from '../../store/model';

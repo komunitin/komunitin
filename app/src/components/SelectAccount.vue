@@ -4,7 +4,7 @@
     v-model="account"
     :options="options"
     use-input
-    :option-disable="accountDisabled"
+    :option-disable="isAccountDisabled"
     :loading="loading"
     :input-debounce="0"
     input-style="position: absolute"
@@ -71,6 +71,7 @@ const props = defineProps<{
   code: string,
   payer: boolean
   lazy?: boolean
+  accountDisabled?: (account: Account) => boolean
 }>()
 
 const emit = defineEmits<{
@@ -237,8 +238,13 @@ const onScroll = async({to, direction}: {to:number, direction: string}) => {
 
 // Show logged in account as disabled.
 const myAccount = computed(() => store.getters.myAccount)
-const accountDisabled = (account: Account) => {
-  return account.id == myAccount.value?.id
+
+const isAccountDisabled = (account: Account) => {
+  if (props.accountDisabled) {
+    return props.accountDisabled(account)
+  } else {
+    return account.id == myAccount.value?.id
+  }
 }
 
 const { t } = useI18n()

@@ -192,7 +192,7 @@
   "test": "Provar",
   "changePasswordText": "Entra la teva contrasenya actual i la que vols fer servir a partir d'ara.",
   "oldPassword": "Contrasenya actual",
-  "oldPasswordHint": "La teva contrasenya actual per a confirmar el canvi",
+  "oldPasswordHint": "La teva contrasenya actual per a confirmar aquesta acció",
   "newPassword": "Contrasenya nova",
   "newPasswordHint": "La contrasenya ha de tenir almenys 8 caràcters",
   "changeEmailText": "Entra la teva contrasenya i el nou correu electrònic que vols fer servir a partir d'ara.",

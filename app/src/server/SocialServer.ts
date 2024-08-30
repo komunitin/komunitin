@@ -547,6 +547,19 @@ export default {
       return member;
     });
 
+    // Delete member
+    server.delete(urlSocial + "/:code/members/:id", (schema: any, request: any) => {
+      const member = schema.members.find(request.params.id);
+      const account = member.account;
+      const users = schema.users.where((user: any) => user.memberIds.some((id: any) => id == member.id));
+      
+      account.destroy();
+      member.destroy();
+      users.models.forEach((user: any) => user.destroy());
+
+      return undefined as any;
+    })
+
     // Single offer.
     server.get(urlSocial + "/:code/offers/:offer", (schema: any, request: any) => {
       return schema.offers.findBy({ code: request.params.offer });

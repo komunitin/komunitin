@@ -114,14 +114,18 @@
           </q-td>
         </template>
         <template #body-cell-actions="scope">
-          <q-td :props="scope">
+          <q-td 
+            :props="scope"
+            @click.stop
+          >
             <q-btn
+              class="q-mr-sm"
               flat
               dense
               round
               color="icon-dark"
               icon="edit"
-              :to="{name: 'AdminEditProfile', params: {code: scope.row.member.group.attributes.code, memberCode: scope.row.member.attributes.code}}"
+              :to="`/groups/${scope.row.member.group.attributes.code}/admin/members/${scope.row.member.attributes.code}/profile`" 
             />
             <q-btn
               flat
@@ -129,7 +133,7 @@
               round
               color="icon-dark"
               icon="settings"
-              :to="{name: 'AdminEditSettings', params: {code: scope.row.member.group.attributes.code, memberCode: scope.row.member.attributes.code}}" 
+              :to="`/groups/${scope.row.member.group.attributes.code}/admin/members/${scope.row.member.attributes.code}/settings`"
             />
           </q-td>
         </template>
