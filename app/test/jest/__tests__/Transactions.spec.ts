@@ -38,34 +38,34 @@ describe("Transactions", () => {
     await wrapper.vm.$wait();
     const transactions = wrapper.getComponent(TransactionList).findAllComponents(AccountHeader)
     expect(transactions.length).toBe(20);
-    const first = transactions[5];
-    expect(first.text()).toContain("Rejected");
-    expect(first.text()).toContain("Florida");
-    expect(first.text()).toContain("$-17.88");
-    expect(first.text()).toContain("holistic");
+    const first = transactions[3];
+    expect(first.text()).toContain("Pending");
+    expect(first.text()).toContain("Arnoldo");
+    expect(first.text()).toContain("$-7.45");
+    expect(first.text()).toContain("multimedia");
 
     const second = transactions[1];
     expect(second.text()).toContain("today");
-    expect(second.text()).toContain("Oleta");
-    expect(second.text()).toContain("$33.01");
-    expect(second.text()).toContain("challenge");
+    expect(second.text()).toContain("Florida");
+    expect(second.text()).toContain("$-22.09");
+    expect(second.text()).toContain("Mandatory");
     // Search
-    wrapper.getComponent(PageHeader).vm.$emit("search", "open");
+    wrapper.getComponent(PageHeader).vm.$emit("search", "object");
     await wrapper.vm.$wait();
     // Check result!
     expect(wrapper.getComponent(TransactionList).findAllComponents(AccountHeader).length).toBe(2);
   });
   it("renders single transaction", async () => {
-    await wrapper.vm.$router.push("/groups/GRP0/transactions/6d9c00a8-4304-4371-ac11-83da505abd4e");
+    await wrapper.vm.$router.push("/groups/GRP0/transactions/55fc265b-c391-4482-8d3c-096c7dc55aa9");
     await wrapper.vm.$wait();
     const text = wrapper.text();
     expect(text).toContain("Emiliano");
     expect(text).toContain("GRP00000");
     expect(text).toContain("Oleta");
     expect(text).toContain("GRP00003");
-    expect(text).toContain("$33.01");
+    expect(text).toContain("$68.73");
     expect(text).toContain("today at");
-    expect(text).toContain("heuristic");
+    expect(text).toContain("Cloned executive service-desk");
     expect(text).toContain("Committed");
     expect(text).toContain("Group 0");
   })
@@ -163,7 +163,7 @@ describe("Transactions", () => {
     await wrapper.get("[name='description']").setValue("Test external payment")
     await wrapper.get("[name='amount']").setValue("12")
     await flushPromises()
-    expect((wrapper.get("input[aria-label='Amount in sensors']").element as HTMLInputElement).value).toEqual("120.00")
+    expect((wrapper.get("input[aria-label='Amount in feeds']").element as HTMLInputElement).value).toEqual("120.00")
 
     await wrapper.get("button[type='submit']").trigger("click")
     await flushPromises();
@@ -213,7 +213,7 @@ describe("Transactions", () => {
     await wrapper.get("[name='amount']").setValue("13")
     await flushPromises()
     await wrapper.vm.$wait();
-    expect((wrapper.get("input[aria-label='Amount in programs']").element as HTMLInputElement).value).toEqual("1,300.00")
+    expect((wrapper.get("input[aria-label='Amount in feeds']").element as HTMLInputElement).value).toEqual("1,300.00")
 
     await wrapper.get("button[type='submit']").trigger("click")
     await flushPromises();
@@ -222,7 +222,7 @@ describe("Transactions", () => {
     expect(text).toContain("GRP20002");
     expect(text).toContain("Emiliano");
     expect(text).toContain("$-13.00");
-    expect(text).toContain("(R$-1,300.00)");
+    expect(text).toContain("(B/.-1,300.00)");
     expect(text).toContain("Test external payment 2");
     expect(text).toContain("today")
 
@@ -287,7 +287,7 @@ describe("Transactions", () => {
     await waitFor(() => wrapper.text().includes("Scan the transfer QR code"))
     
     await (wrapper.getComponent(CreateTransactionSendQR) as any)
-      .vm.onDetect([{rawValue: "http://localhost:8080/pay?t=http://localhost:8080/accounting/GRP0/accounts/e61b417a-d4da-45c2-afaa-69c7cde76d70&m=Test%20QR%20description&a=120000"}])
+      .vm.onDetect([{rawValue: "http://localhost:8080/pay?t=http://localhost:8080/accounting/GRP0/accounts/231baf7c-6231-46c1-9046-23da58abb09a&m=Test%20QR%20description&a=120000"}])
     await waitFor(() => wrapper.text().includes("$-12.00"))
     expect(wrapper.text()).toContain("Test QR description")
     expect(wrapper.text()).toContain("GRP00004")
@@ -297,7 +297,7 @@ describe("Transactions", () => {
   })
 
   it('Payment link', async () => {
-    await wrapper.vm.$router.push("/pay?t=http://localhost:8080/accounting/GRP0/accounts/e61b417a-d4da-45c2-afaa-69c7cde76d70&m=Test%20QR%20link&a=135000")
+    await wrapper.vm.$router.push("/pay?t=http://localhost:8080/accounting/GRP0/accounts/231baf7c-6231-46c1-9046-23da58abb09a&m=Test%20QR%20link&a=135000")
     await waitFor(() => wrapper.text().includes("$-13.50"))
     expect(wrapper.text()).toContain("Test QR link")
     expect(wrapper.text()).toContain("GRP00004")

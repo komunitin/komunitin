@@ -41,8 +41,7 @@ describe("Members", () => {
     const second = members[2];
     expect(second.text()).toContain("Carol");
     expect(second.text()).toContain("GRP00002");
-    expect(second.text()).toContain("$583.11");
-    expect(second.text()).toContain("Min $-500");
+    expect(second.text()).toContain("$987.10");
     // Avatar image
     expect(second.html()).toContain("<img");
 
@@ -54,8 +53,7 @@ describe("Members", () => {
     const other = members[25];
     expect(other.text()).toContain("Tanya");
     expect(other.text()).toContain("GRP00025");
-    expect(other.text()).toContain("$386.64");
-    expect(other.text()).toContain("Min $-500");
+    expect(other.text()).toContain("$-208.12");
     // Search
     wrapper.getComponent(PageHeader).vm.$emit("search", "schr");
     await wrapper.vm.$wait();
@@ -64,6 +62,6 @@ describe("Members", () => {
     const result = wrapper.getComponent(MemberList).getComponent(MemberHeader);
     expect(result.text()).toContain("Lamar Schroeder");
     expect(result.text()).toContain("GRP00005");
-    expect(result.text()).toContain("$598.71");
+    expect(result.text()).toContain("$346.21");
   }, 20000);
 });

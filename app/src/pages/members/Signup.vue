@@ -78,10 +78,10 @@ const store = useStore()
 
 store.dispatch("groups/load", {
   id: props.code,
-  include: "signup-settings"
+  include: "settings"
 })
 const group = computed(() => store.getters["groups/current"])
-const settings = computed(() => group.value?.['signup-settings']?.attributes)
+const settings = computed(() => group.value?.settings?.attributes)
 
 const page = ref("terms")
 const needsTerms = computed<boolean|undefined>(() => settings.value?.requireAcceptTerms)

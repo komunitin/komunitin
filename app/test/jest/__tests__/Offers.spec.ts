@@ -84,7 +84,7 @@ describe("Offers", () => {
     const text = wrapper.text();
     expect(text).toContain("This offer is a mirage.");
     expect(text).toContain("Updated today");
-    expect(text).toContain("Computers");
+    expect(text).toContain("Games");
     await wrapper.get(".q-btn--fab").trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/members/EmilianoLemke57");
