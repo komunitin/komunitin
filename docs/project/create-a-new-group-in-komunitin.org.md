@@ -12,7 +12,7 @@ Creating a community currency exchange network that is truly useful is a task th
 
 ## Import data
 
-If your network is already running on another system, maybe we can automatically import all the data without losing the history. In this case, do not fill out the form but instead [contact us](contact-us.md) directly, and we will explain how to do it.
+If your network is already running on another system, maybe we can automatically import all the data without losing the history. In this case, do not fill out the form but instead [contact us](contact.md) directly, and we will explain how to do it.
 
 ## Apply
 

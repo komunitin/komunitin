@@ -22,4 +22,4 @@
 * [Project](project/README.md)
   * [Create a new group in komunitin.org](project/create-a-new-group-in-komunitin.org.md)
   * [Terms of Use](project/terms-of-use.md)
-  * [Contact us](project/contact-us.md)
+  * [Contact](project/contact.md)
