@@ -21,7 +21,7 @@ export namespace Validators {
     ...jsonApiResource("data.*", type),
   ]
 
-  const isUpdateCurrencySettings = (path: string) => [
+  const isUpdateCurrencySettingsAttributes = (path: string) => [
     body(`${path}.defaultInitialCreditLimit`).optional().isInt({min: 0}).default(0),
     body(`${path}.defaultInitialMaximumBalance`).optional().isInt({min: 0}),
     body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),
@@ -50,7 +50,6 @@ export namespace Validators {
     body(`${path}.scale`).optional().isInt({max: 12, min: 0}),
     body(`${path}.rate.n`).optional().isInt({min: 1}).default(1),
     body(`${path}.rate.d`).optional().isInt({min: 1}).default(1),
-    ...isUpdateCurrencySettings(`${path}.settings`),
   ]
 
   const isCreateCurrencyAttributesExist = (path: string) => [
@@ -89,7 +88,13 @@ export namespace Validators {
   export const isUpdateCurrency = () => [
     ...jsonApiDoc("currencies"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
-    ...isUpdateCurrencyAttributes(`data.attributes`),
+    ...isUpdateCurrencyAttributes("data.attributes"),
+  ]
+
+  export const isUpdateCurrencySettings = () => [
+    ...jsonApiDoc("currency-settings"),
+    body("data.id").optional().isUUID(), // id optional as currency is identified by route.
+    ...isUpdateCurrencySettingsAttributes("data.attributes"),
   ]
 
   const isUpdateAccountAttibutes = (path: string) => [
@@ -220,12 +225,14 @@ export namespace Validators {
     ...isCreateMigrationAttributes("data.attributes"),
   ]
 
-  export const isCreateTrustline = () => [
+  export const isUpdateTrustline = () => [
     ...jsonApiDoc("trustlines"),
     body("data.id").optional().isUUID(),
     body("data.attributes.limit").isInt({min: 0}),
+  ]
+
+  export const isCreateTrustline = () => [
+    ...isUpdateTrustline(),
     ...isExternalResourceId("data.relationships.trusted", "currencies"),
   ]
 }
-
-

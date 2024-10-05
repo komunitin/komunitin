@@ -17,10 +17,10 @@ cd "$(dirname "$0")"
 ACCESS_TOKEN=$(./access.sh $1 $2 $ICES_URL)
 echo $ACCESS_TOKEN
 
-echo "Getting currency id for $3..."
-RESPONSE=$(curl -s -X GET $KOMUNITIN_ACCOUNTING_URL/$3/currency)
+echo "Getting currency id for trusted currency $4..."
+RESPONSE=$(curl -s -X GET $KOMUNITIN_ACCOUNTING_URL/$4/currency)
 TRUSTED_ID=$(echo $RESPONSE | grep -o '"id":"[^"]*' | head -1 | sed 's/"id":"//')
-echo "Currency id: $TRUSTED_ID"
+echo "Trusted currency id: $TRUSTED_ID"
 
 echo "Trusting $4 for a total amount of $5..."
 JSON_DATA=$(cat <<EOF

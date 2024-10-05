@@ -85,8 +85,8 @@ const load = async () => {
     loadTrustlines()
   ])
   // Load group resources for trusted currencies
-  const currency = store.getters['currencies/current']
-  const codes = currency.trustlines.map((t: ExtendedTrustline) => t.trusted.attributes.code)
+  const trustlines = store.getters['trustlines/currentList']
+  const codes = trustlines.map((t: ExtendedTrustline) => t.trusted.attributes.code)
   await store.dispatch('groups/loadList', {
     filter: {code: codes},
   })
@@ -188,7 +188,11 @@ const updateTrustline = async (trustline: DeepPartial<Trustline> & ResourceIdent
   await updateResource('trustlines/update', {
     id: trustline.id as string,
     group: props.code,
-    resource: trustline
+    resource: {
+      attributes: {
+        limit: trustline.attributes?.limit
+      }
+    }
   }, updatingTrustline)
 }
 

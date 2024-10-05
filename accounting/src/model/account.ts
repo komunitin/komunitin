@@ -166,6 +166,7 @@ export const recordToAccount = (record: AccountRecordComplete, currency: Currenc
     users,
     currency,
     settings: {
+      id: record.id,
       tags,
       ...(record.settings as AccountSettings)
     },

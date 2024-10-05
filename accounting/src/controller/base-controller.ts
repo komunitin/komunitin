@@ -23,6 +23,8 @@ import { storeCurrencyKey } from "./key-controller"
 import { Store } from "./store"
 import { PrismaClientExtends } from "@prisma/client/extension"
 import { sleep } from "src/utils/sleep"
+import { CollectionOptions, relatedCollectionParams } from "src/server/request"
+import { whereFilter } from "./query"
 
 
 const getMasterKey = async () => {
@@ -337,8 +339,18 @@ export class LedgerController implements BaseController {
   /**
    * Implements {@link BaseController.getCurrencies}
    */
-  async getCurrencies(ctx: Context): Promise<Currency[]> {
-    const records = await this.privilegedDb().currency.findMany()
+  async getCurrencies(ctx: Context, params: CollectionOptions): Promise<Currency[]> {
+    const filter = whereFilter(params.filters)
+    const records = await this.privilegedDb().currency.findMany({
+      where: {
+        ...filter
+      },
+      orderBy: {
+        [params.sort.field]: params.sort.order
+      },
+      skip: params.pagination.cursor,
+      take: params.pagination.size,
+    })
     const currencies = records.map(r => recordToCurrency(r))
     return currencies
   }
@@ -405,7 +417,7 @@ export class LedgerController implements BaseController {
     // Run cron for each currency.
     try {
       const ctx = systemContext()
-      const currencies = await this.getCurrencies(ctx)
+      const currencies = await this.getCurrencies(ctx, relatedCollectionParams())
       for (const currency of currencies) {
         const currencyController = await this.getCurrencyController(currency.code)
         await currencyController.cron(ctx)

@@ -129,6 +129,15 @@ export const collectionParams = (req: Request, options: CollectionParamsOptions)
     include: include(req, options?.include ?? [])
   }
 }
+
+export const relatedCollectionParams = (): CollectionOptions => {
+  return {
+    pagination: {cursor: 0, size: MAX_PAGE_SIZE},
+    filters: {},
+    sort: {field: "id", order: "asc"},
+    include: []
+  }
+}
 export type ResourceParamsOptions = { include?: string[] }
 export const resourceParams = (req: Request, options: ResourceParamsOptions): ResourceOptions => {
   return {

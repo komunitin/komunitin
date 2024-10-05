@@ -146,10 +146,12 @@ export default createStore({
 });
 
 export const setAccountingApiUrl = (url: string) => {
-  accounts.setBaseUrl(url);
   currencies.setBaseUrl(url);
+  currencySettings.setBaseUrl(url);
+  accounts.setBaseUrl(url);
   accountSettings.setBaseUrl(url);
   transfers.setBaseUrl(url);
+  trustlines.setBaseUrl(url);
 }
 
 declare module '@vue/runtime-core' {
@@ -157,15 +159,20 @@ declare module '@vue/runtime-core' {
     me: UserState
     ui: UIState
     users: ResourcesState<User>
+    userSettings: ResourcesState<UserSettings>
     groups: ResourcesState<Group>
+    groupSettings: ResourcesState<GroupSettings>
     contacts: ResourcesState<Contact>
     members: ResourcesState<Member>
     offers: ResourcesState<Offer>
     needs: ResourcesState<Need>
     categories: ResourcesState<Category>
     currencies: ResourcesState<Currency>
+    currencySettings: ResourcesState<CurrencySettings>
     accounts: ResourcesState<Account>
+    accountSettings: ResourcesState<AccountSettings>
     transfers: ResourcesState<Transfer>
+    trustlines: ResourcesState<Trustline>
   }
   interface ComponentCustomProperties {
     $store: Store<State>

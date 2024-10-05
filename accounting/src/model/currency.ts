@@ -10,6 +10,10 @@ export { CurrencyRecord }
 
 export type CurrencySettings = {
   /**
+   * Same id as Currency.
+   */
+  id?: string
+  /**
    * The credit limit that will have new accounts by default.
    */
   defaultInitialCreditLimit: number
@@ -176,7 +180,10 @@ export const recordToCurrency = (record: CurrencyRecord & {externalAccount?: Acc
       externalIssuer: record.externalIssuerKeyId as string
     },
     
-    settings: record.settings as CurrencySettings,
+    settings: {
+      id: record.id,
+      ...record.settings as CurrencySettings,
+    },
     state: record.state as LedgerCurrencyState,
     
     created: record.created,

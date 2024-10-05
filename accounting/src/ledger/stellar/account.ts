@@ -146,6 +146,7 @@ export class StellarAccount implements LedgerAccount {
       throw internalError("Account not found")
     }
     return (this.account.balances as Horizon.HorizonApi.BalanceLineAsset[])
+      .filter(b => b.asset_type == "credit_alphanum4" || b.asset_type == "credit_alphanum12")
       .map(b => ({asset: new Asset(b.asset_code, b.asset_issuer), balance: b.balance, limit: b.limit}))
   }
 
