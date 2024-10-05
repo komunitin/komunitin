@@ -99,25 +99,12 @@ export default class ApiSerializer extends JSONAPISerializer {
    */
   private paginate(json: any, request: any) {
     // Apply page[after].
-    let hasPrevious = false;
-    const after = request.queryParams["page[after]"];
-    if (after) {
-      const index = json.data.findIndex((elem: ResourceObject) => elem.id == after);
-      if (index == -1) {
-        throw new Error("Invalid after pagination cursor.");
-      }
-      hasPrevious = true;
-      // Delete all elements until after the cursor.
-      json.data.splice(0, index + 1);
-    }
-    // Apply page[before]
-    const before = request.queryParams["page[before]"];
-    if (before) {
-      const index = json.data.findIndex((elem: ResourceObject) => elem.id == before);
-      if (index == -1) {
-        throw new Error("Invalid before pagination cursor.");
-      }
-      json.data.splice(index);
+    const afterStr = request.queryParams["page[after]"]
+    const after = afterStr ? parseInt(afterStr) : 0;
+
+    const hasPrevious = after > 0;
+    if (hasPrevious) {
+      json.data.splice(0, after);
     }
 
     // Apply page[size] (or default size).
@@ -135,7 +122,7 @@ export default class ApiSerializer extends JSONAPISerializer {
     json.links = {};
     if (hasNext) {
       const next = new URL(request.url);
-      next.searchParams.set("page[after]", json.data[json.data.length -1].id);
+      next.searchParams.set("page[after]", (after + size).toString());
       json.links.next = next.toString();
     } else {
       json.links.next = null;
@@ -143,7 +130,7 @@ export default class ApiSerializer extends JSONAPISerializer {
 
     if (hasPrevious) {
       const prev = new URL(request.url);
-      prev.searchParams.set("page[before]", json.data[0].id);
+      prev.searchParams.set("page[after]", (after - size).toString());
       json.links.prev = prev.toString();
     } else {
       json.links.prev = null;

@@ -2,7 +2,7 @@
   <l-map
     ref="map"
     :options="{zoomControl: true, dragging: true, attributionControl: false}"
-    style="height: 200px; width: 100% ; margin: 0; z-index:0; cursor: crosshair;"
+    style="height: 200px; width: 100% ; margin: 0; z-index:0; cursor: crosshair; border-radius: 4px;"
     :zoom="zoom ?? defaultZoom"
     :center="centerLatLng"
     :use-global-leaflet="false"

@@ -26,40 +26,26 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import MenuDrawer from "../components/MenuDrawer.vue";
-
+<script setup lang="ts">
 /**
  * Main app layout.
  * 
  * Contains the left drawer but not the header, which should be defined by each page
  * using the PageHeader component.
  */
-export default defineComponent({
-  name: "Layout",
-  components: {
-    MenuDrawer
-  },
-  computed: {
-    drawerExists(): boolean {
-      return this.$store.getters.drawerExists
-    },
-    drawerState: {
-      get () {
-        return this.$store.state.ui.drawerState
-      },
-      set (val) {
-        this.$store.commit('drawerState', val)
-      }
-    }
-  },
-  methods: {
-    drawerChange(state: boolean) {
-      this.$store.commit("drawerPersistent", state);
-    },
-  }
-});
+import MenuDrawer from "../components/MenuDrawer.vue";
+import { useStore } from "vuex";
+import { computed } from "vue"
+
+const store = useStore()
+
+const drawerExists = computed(() => store.getters.drawerExists)
+const drawerState = computed({
+  get: () => store.state.ui.drawerState,
+  set: (val) => store.commit('drawerState', val)
+})
+const drawerChange = (state: boolean) => store.commit("drawerPersistent", state)
+
 </script>
 <style lang="scss" scoped>
 // Container takes 100% with in small screens. In large screens, wrap the content in a

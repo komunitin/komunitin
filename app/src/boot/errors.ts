@@ -81,13 +81,13 @@ function vueErrorHandler(error: unknown, instance: ComponentPublicInstance | nul
   if (error instanceof KError) {
     handleError(error)
   } else if (error instanceof Error){
-    handleError(new KError(KErrorCode.UnknownVueError, error.message, {error: error, info}))
+    handleError(new KError(KErrorCode.UnknownVueError, error.message, error, {info}))
   } else {
-    handleError(new KError(KErrorCode.UnknownVueError, "Unknown error", {info}))
+    handleError(new KError(KErrorCode.UnknownVueError, "Unknown error", undefined, {error, info}))
   }
 }
 function vueWarnHandler(message: string, instance: ComponentPublicInstance | null, trace: string) {
-  const error = new KError(KErrorCode.VueWarning, message + trace, {message, trace, component: instance?.$options.name});
+  const error = new KError(KErrorCode.VueWarning, message + trace, undefined, {message, trace, component: instance?.$options.name});
   handleError(error);
 }
 
@@ -117,7 +117,7 @@ if (window !== undefined) {
       kerror = event.error;
     }
     else {
-      kerror = new KError(KErrorCode.UnknownScript, event.message, {url: event.filename , line: event.lineno, column: event.colno, error: event.error})
+      kerror = new KError(KErrorCode.UnknownScript, event.message, event.error, {url: event.filename , line: event.lineno, column: event.colno})
     }
     try {
       handleError(kerror);

@@ -43,14 +43,14 @@ describe("Groups", () => {
     // Offers card
     expect(text).toContain("Offers");
     expect(text).toContain("30");
-    expect(text).toContain("6 Health");
+    expect(text).toContain("6 Computers");
     // Needs card
     expect(text).toContain("Needs");
     expect(text).toContain("4");
-    expect(text).toContain("1 Garden");
+    expect(text).toContain("1 Computers");
     // Members card
     expect(text).toContain("Members");
-    expect(text).toContain("30");
+    expect(text).toContain("31");
     expect(text).toContain("Explore");
     // Currency card
     expect(text).toContain("Currency");

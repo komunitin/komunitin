@@ -1,16 +1,17 @@
 import { Router } from 'express';
 import { check, checkExact, oneOf } from 'express-validator';
-import { AccountSettings, CreateCurrency, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
+import { AccountSettings, CreateCurrency, CurrencySettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
 import { context } from 'src/utils/context';
 import { SharedController, MigrationController } from '../controller';
 import { Scope, userAuth, noAuth, anyAuth, externalAuth } from './auth';
 import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyInputHandlerMultiple, currencyResourceHandler } from './handlers';
 import { input } from './parse';
-import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, TransferSerializer, TrustlineSerializer } from './serialize';
+import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, CurrencySettingsSerializer, TransferSerializer, TrustlineSerializer } from './serialize';
 import { Validators } from './validation';
 import { InputTrustline, Trustline } from 'src/model/trustline';
 import { badRequest } from 'src/utils/error';
 import { CreateMigration } from 'src/controller/migration/migration';
+import { collectionParams, resourceParams } from './request';
 
 export function getRoutes(controller: SharedController) {
   const router = Router()
@@ -33,21 +34,44 @@ export function getRoutes(controller: SharedController) {
 
   // List currencies
   router.get('/currencies', noAuth(), asyncHandler(async (req,res) => {
-    const currencies = await controller.getCurrencies(context(req))
-    const result = await CurrencySerializer.serialize(currencies)
+    const params = collectionParams(req, {
+      include: ["settings"],
+      sort: ["code"],
+      filter: ["code"]
+    })
+    const currencies = await controller.getCurrencies(context(req), params)
+    const result = await CurrencySerializer.serialize(currencies, {
+      include: params.include
+    })
     res.status(200).json(result)
   }))
 
   // Get currency
   router.get('/:code/currency', noAuth(), currencyResourceHandler(controller, async (currencyController, ctx) => {
     return await currencyController.getCurrency(ctx)
-  }, CurrencySerializer, {}))
+  }, CurrencySerializer, {
+    include: ["settings"]
+  }))
 
   // Update currency
   router.patch('/:code/currency', userAuth(Scope.Accounting), checkExact(Validators.isUpdateCurrency()), 
     currencyInputHandler(controller, async (currencyController, ctx, data: UpdateCurrency) => {
       return await currencyController.updateCurrency(ctx, data)
     }, CurrencySerializer)
+  )
+
+  // Get currency settings
+  router.get('/:code/currency/settings', userAuth([Scope.Accounting, Scope.AccountingReadAll]), 
+    currencyResourceHandler(controller, async (currencyController, ctx) => {
+      return await currencyController.getCurrencySettings(ctx)
+    }, CurrencySettingsSerializer, {})
+  )
+
+  // Update currency settings
+  router.patch('/:code/currency/settings', userAuth(Scope.Accounting), checkExact(Validators.isUpdateCurrencySettings()),
+    currencyInputHandler(controller, async (currencyController, ctx, data: CurrencySettings) => {
+      return await currencyController.updateCurrencySettings(ctx, data)
+    }, CurrencySettingsSerializer)
   )
 
   // Create account
@@ -158,6 +182,12 @@ export function getRoutes(controller: SharedController) {
     }, TrustlineSerializer, {
       include: ["currency"]
     })
+  )
+
+  router.patch('/:code/trustlines/:id', userAuth(Scope.Accounting), checkExact(Validators.isUpdateTrustline()),
+    currencyInputHandler(controller, async (currencyController, ctx, data: InputTrustline) => {
+      return await currencyController.updateTrustline(ctx, data)
+    }, TrustlineSerializer)
   )
 
   router.get('/:code/trustlines', userAuth([Scope.Accounting, Scope.AccountingReadAll]),

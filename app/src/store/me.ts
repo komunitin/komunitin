@@ -75,12 +75,13 @@ async function loadUser(
     await dispatch("accounts/load", {
       id: accountId, 
       group: currencyCode, 
-      include: "currency,settings"
+      include: "settings,currency,currency.settings"
     });
   } else {
   // otherwise get currency at least.
     await dispatch("currencies/load", {
-      id: currencyCode
+      id: currencyCode,
+      include: "settings"
     });
   }
 
@@ -135,6 +136,11 @@ export default {
     },
     accessToken: (state) => 
       state.tokens?.accessToken
+    ,
+    isAdmin: (state, getters) => {
+      return state.myUserId !== undefined 
+        && getters.myCurrency?.relationships.admins.data.some((r: { id: string }) => r.id === state.myUserId)
+    }
   },
   mutations: {
     tokens: (state, tokens) => (state.tokens = tokens),
@@ -210,7 +216,7 @@ export default {
           codes[error.TIMEOUT] = KErrorCode.PositionTimeout
           codes[error.POSITION_UNAVAILABLE] = KErrorCode.PositionUnavailable
           codes[error.PERMISSION_DENIED] = KErrorCode.PositionPermisionDenied
-          const kerror = new KError(codes[error.code], error.message, error)
+          const kerror = new KError(codes[error.code], error.message, undefined, error)
           throw kerror
         }
       }

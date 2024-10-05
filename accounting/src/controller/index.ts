@@ -1,10 +1,10 @@
 
 import { CollectionOptions } from "../server/request"
-import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings } from "../model"
+import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings, CurrencySettings } from "../model"
 export { createController } from "./base-controller"
 import { Context } from "../utils/context"
 import TypedEmitter from "typed-emitter"
-import { InputTrustline, Trustline } from "src/model/trustline"
+import { InputTrustline, Trustline, UpdateTrustline } from "src/model/trustline"
 export { MigrationController } from './migration'
 
 export type ControllerEvents = {
@@ -23,7 +23,7 @@ export interface SharedController {
   getCurrencyController(code: string): Promise<CurrencyController>   
   
   createCurrency(ctx: Context, currency: CreateCurrency): Promise<Currency>
-  getCurrencies(ctx: Context): Promise<Currency[]>
+  getCurrencies(ctx: Context, params: CollectionOptions): Promise<Currency[]>
 
   stop(): Promise<void>
   
@@ -42,9 +42,14 @@ export interface CurrencyController {
   getCurrency(ctx: Context): Promise<Currency>
   updateCurrency(ctx: Context, currency: UpdateCurrency): Promise<Currency>
 
+  // Currency settings
+  getCurrencySettings(ctx: Context): Promise<CurrencySettings>
+  updateCurrencySettings(ctx: Context, settings: CurrencySettings): Promise<CurrencySettings>
+
   // Trustlines
-  createTrustline(ctx: Context, trustline: InputTrustline): Promise<Trustline>
   getTrustline(ctx: Context, id: string): Promise<Trustline>
+  createTrustline(ctx: Context, trustline: InputTrustline): Promise<Trustline>
+  updateTrustline(ctx: Context, trustline: UpdateTrustline): Promise<Trustline>
   getTrustlines(ctx: Context, params: CollectionOptions): Promise<Trustline[]>
 }
 

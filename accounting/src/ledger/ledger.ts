@@ -206,19 +206,26 @@ export interface LedgerCurrency {
   getAccount(publicKey: string): Promise<LedgerAccount>
 
   /**
-   * Create a trust line from this currency to the specified other currency.
+   * Create/update a trust line from this currency to the specified other currency.
    * 
    * A trust line allows the external account to hold this external currency and 
    * hence the users from the external currency can pay to the users of this currency.
    * 
+   * Concretely, this function ensures that:
+   *   - The external account has a trust line the given external currency.
+   *   - The external account sets a passive sell offer from external HOUR to local HOUR.
+   *   - The external account has sufficient local HOUR to satisfy the aforementioned sell offer.
+   * 
    * @param line
    *   - trustedPublicKey: The public key of the external issuer from the other currency.
    *   - limit: The maixmum amount of this foreign currency we're willing to hold, in local 
-   *            currency units. Set to "0" to remove the trust line.
+   *            currency units. Set to "0" to remove the trust line and associated offer.
    * @param keys 
-   *   - externalIssuer: Needed to additionally fund the trader account to satisfy the new selling liabilities.
+   *   - externalTrader: Required. The external trader account key pair.
+   *   - externalIssuer: Needed to additionally fund the trader account to satisfy the new selling liabilities. Not required if decreasing the trustline.
+   *   - sponsor: Not required if updating existing trustline.
    */
-  trustCurrency(line: { trustedPublicKey: string; limit: string }, keys: { sponsor: KeyPair, externalTrader: KeyPair, externalIssuer: KeyPair }): Promise<void>
+  trustCurrency(line: { trustedPublicKey: string; limit: string }, keys: { sponsor: KeyPair, externalTrader: KeyPair, externalIssuer?: KeyPair }): Promise<void>
 
   /**
    * Checks whether there is a path linking two local currencies.
