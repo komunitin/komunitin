@@ -40,14 +40,14 @@
       <router-view />
     </q-page-container>
 
-    <q-footer class="bg-transparent q-py-md text-center text-onoutside-m">
+    <q-footer class="bg-transparent q-py-md text-center text-onoutside-m q-gutter-md">
       <select-lang />
       <q-btn
         flat
         type="a"
-        href="http://komunitin.org#help"
+        href="https://docs.komunitin.org"
         target="__blank"
-        :label="$t('help')"
+        :label="$t('documentation')"
       />
       <q-btn
         flat
