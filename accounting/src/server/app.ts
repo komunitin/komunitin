@@ -8,8 +8,17 @@ import helmet from "helmet"
 import cors from "cors"
 
 export type ExpressExtended = express.Express & { komunitin: { controller: SharedController } }
+
 export async function createApp() : Promise<ExpressExtended> {
-  const app = express() as ExpressExtended
+  const app = express()
+  return setupApp(app)
+}
+
+/*
+ * Take an express app and set it up with the necessary middlewares and routes.
+ */
+export const setupApp = async (expressApp: express.Express) => {
+  const app = expressApp as ExpressExtended
   app.disable('x-powered-by')
   app.set('query parser', (query: string) => {
     return qs.parse(query, {
