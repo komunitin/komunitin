@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@electron/typescript-definitions": "^8.9.6",
-    "@quasar/app-webpack": "^3.12.8",
+    "@quasar/app-webpack": "^3.14.2",
     "@statoscope/webpack-plugin": "^5.28.2",
     "@types/clamp-js": "^0.7.3",
     "@types/faker": "^4.1.12",
