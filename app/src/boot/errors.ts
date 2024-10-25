@@ -54,8 +54,8 @@ function logError(error: KError) {
   if (error.debugInfo) {
     try {
       msg += "\n" + JSON.stringify(error.debugInfo)
-    } catch (error) {
-      msg + "\n" + "Error while serializing debug info."
+    } catch {
+      msg += "\n" + "Error while serializing debug info."
     }
   }
   // eslint-disable-next-line no-console
@@ -122,7 +122,7 @@ if (window !== undefined) {
     try {
       handleError(kerror);
     }
-    catch(error) {
+    catch {
       logErrorHandling(kerror);
     }
   });

@@ -7,7 +7,7 @@ const checkNfcAvailable = () => {
     }
     new NDEFReader()
     return true
-  } catch (error) {
+  } catch {
     return false
   }
 }
