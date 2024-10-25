@@ -1,11 +1,11 @@
 import { mount, VueWrapper } from "@vue/test-utils";
 import SocialNetworkList from "../SocialNetworkList.vue";
-import { Quasar } from "quasar";
 import { Contact } from "src/store/model";
 import { config } from '@vue/test-utils';
+import { quasarPlugin } from "app/test/jest/utils";
 
-// Install quasar by default.
-config.global.plugins.unshift([Quasar, {}]);
+// Install quasar plugin.
+config.global.plugins.unshift(quasarPlugin);
 
 describe("SocialNetworkList", () => {
   let contacts: Partial<Contact>[];
@@ -44,12 +44,12 @@ describe("SocialNetworkList", () => {
       global: {
         mocks: {
           $t: (x: never) => x,
-        }
+        },
       },
       props: {
         contacts,
         type: "contact"
-      },
+      }
     });
 
     share = mount(SocialNetworkList, {

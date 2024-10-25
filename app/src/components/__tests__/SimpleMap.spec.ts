@@ -9,7 +9,7 @@ describe("SimpleMap", () => {
 
   // Mount the component before each test.
   beforeEach(() => {
-    const position = [41.5922793, 1.8342942];
+    const position = [41.5922793, 1.8342942] as [number, number];
     wrapper = shallowMount(SimpleMap, {
       props: {
         center: position,
@@ -20,6 +20,6 @@ describe("SimpleMap", () => {
 
   it("Html generated", async () => {
     await wrapper.vm.$nextTick();
-    expect(wrapper.html()).toContain("l-map-stub");
+    expect(wrapper.html()).toContain("anonymous-stub");
   });
 });

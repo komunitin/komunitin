@@ -3,9 +3,15 @@ import { config, mount, VueWrapper } from "@vue/test-utils";
 import { createStore, Store } from "vuex";
 
 import {
+  QBanner,
   QBtn,
+  QHeader,
+  QIcon,
   QInput,
   QLayout,
+  QScrollObserver,
+  QToolbar,
+  QToolbarTitle,
   Quasar
 } from "quasar";
 import PageHeader from "../PageHeader.vue";
@@ -13,7 +19,11 @@ import { createI18n } from "vue-i18n";
 import { defineComponent } from "vue";
 
 // Install quasar.
-config.global.plugins.unshift([Quasar, {}]);
+config.global.plugins.unshift([Quasar, {
+  components: {
+    QHeader, QBtn, QToolbar, QToolbarTitle, QInput, QIcon, QScrollObserver, QBanner
+  }
+}]);
 // Install i18n.
 const i18n = createI18n({
   legacy: false

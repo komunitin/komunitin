@@ -46,20 +46,10 @@ module.exports = configure(function(ctx) {
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
+      all: "auto",
       iconSet: "material-icons", // Quasar icon set
       lang: "en-US", // Quasar language pack
 
-      // Possible values for "all":
-      // * 'auto' - Auto-import needed Quasar components & directives
-      //            (slightly higher compile time; next to minimum bundle size; most convenient)
-      // * false  - Manually specify what to import
-      //            (fastest compile time; minimum bundle size; most tedious)
-      // * true   - Import everything from Quasar
-      //            (not treeshaking Quasar; biggest bundle size; convenient)
-      importStrategy: "auto",
-
-      components: [],
-      directives: [],
 
       // Quasar plugins
       plugins: ["Notify", "LocalStorage", "Loading"],

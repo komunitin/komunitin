@@ -3,7 +3,7 @@
  */
 import { mount } from '@vue/test-utils'
 import Error404 from '../Error404.vue'
-import {Quasar} from 'quasar'
+import {QBtn, Quasar} from 'quasar'
 
 describe('Error404.vue', () => {
   // Shallow Mount means that the child components are not mounted,
@@ -13,7 +13,11 @@ describe('Error404.vue', () => {
       mocks: {
         $t: () => "Sorry, nothing here...",
       },
-      plugins: [[Quasar, {}]]
+      plugins: [[Quasar, {
+        components: {
+          QBtn
+        }
+      }]]
     },
     shallow: true
   })
