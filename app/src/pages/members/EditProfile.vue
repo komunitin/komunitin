@@ -2,7 +2,7 @@
   <page-header 
     :title="$t('editProfile')" 
     balance 
-    :back="`/groups/${code}/members/${memberCode}`"
+    :back="`/groups/${actualCode}/members/${actualMemberCode}`"
   />
   <q-page-container class="row justify-center">
     <q-page 
@@ -46,15 +46,15 @@ const store = useStore()
 
 const { user, member } = useFullMemberByCode(() => props.code, () => props.memberCode)
 
-const code = computed(() => (member.value as (Member & {group: Group}))?.group.attributes.code)
-const memberCode = computed(() => member.value?.attributes.code)
+const actualCode = computed(() => (member.value as (Member & {group: Group}))?.group.attributes.code)
+const actualMemberCode = computed(() => member.value?.attributes.code)
 
 const changes = ref<typeof SaveChanges>()
 
 const saveMember = async (resource: DeepPartial<Member>) => {
   const fn = () => store.dispatch("members/update", {
     id: member.value?.id,
-    group: code.value,
+    group: actualCode.value,
     resource : {
       attributes: resource.attributes
     }
@@ -66,7 +66,7 @@ const saveContacts = async (resources: DeepPartial<Contact>[]) => {
   if (!member.value) return
   const fn = () => store.dispatch("members/update", {
     id: member.value?.id,
-    group: code.value,
+    group: actualCode.value,
     resource: {
       relationships: {
         contacts: {

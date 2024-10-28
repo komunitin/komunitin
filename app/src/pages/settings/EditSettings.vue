@@ -2,7 +2,7 @@
   <page-header 
     :title="$t('settings')" 
     balance 
-    :back="`/groups/${code}/members/${memberCode}`"
+    :back="`/groups/${actualCode}/members/${actualMemberCode}`"
   />
   <q-page-container class="row justify-center">
     <q-page 
@@ -163,8 +163,8 @@ const {user, member} = useFullMemberByCode(() => props.code, () => props.memberC
 
 const userSettings = computed(() => user.value?.settings)
 
-const code = computed(() => (member.value as (Member & {group: Group}))?.group.attributes.code)
-const memberCode = computed(() => member.value?.attributes.code)
+const actualCode = computed(() => (member.value as (Member & {group: Group}))?.group.attributes.code)
+const actualMemberCode = computed(() => member.value?.attributes.code)
 
 // Load account and settings
 const account = ref<Account & {settings: AccountSettings, currency: Currency & {settings: CurrencySettings}}>()
@@ -175,7 +175,7 @@ watch(member, async (member) => {
   if (member) {
     await store.dispatch("accounts/load", {
       id: member.relationships.account.data.id,
-      group: code.value,
+      group: actualCode.value,
       include: "settings,currency,currency.settings"
     })
     account.value = store.getters["accounts/current"]
@@ -219,7 +219,7 @@ const changes = ref<typeof SaveChanges>()
 const saveAccountSettings = async (resource: DeepPartial<AccountSettings>) => {
   const fn = () => store.dispatch("account-settings/update", {
     id: account.value?.id,
-    group: code.value,
+    group: actualCode.value,
     resource
   })
   await changes.value?.save(fn)
@@ -228,7 +228,7 @@ const saveAccountSettings = async (resource: DeepPartial<AccountSettings>) => {
 const saveUserSettings = async (resource: DeepPartial<UserSettings>) => {
   const fn = () => store.dispatch("user-settings/update", {
     id: user.value?.id,
-    group: code.value,
+    group: actualCode.value,
     resource
   })
   await changes.value?.save(fn)
@@ -282,7 +282,7 @@ const saveAccount = async (resource: DeepPartial<Account>, loading: Ref<boolean>
     loading.value = true
     const fn = () => store.dispatch("accounts/update", {
       id: account.value?.id,
-      group: code.value,
+      group: actualCode.value,
       resource
     })
     await changes.value?.save(fn)
