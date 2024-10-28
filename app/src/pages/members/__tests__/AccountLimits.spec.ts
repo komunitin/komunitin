@@ -1,6 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import AccountLimits from "../AccountLimits.vue";
-import {Quasar} from 'quasar'
+import {QSeparator, Quasar} from 'quasar'
 import { config } from '@vue/test-utils';
 import { createI18n } from "vue-i18n";
 

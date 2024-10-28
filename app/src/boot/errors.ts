@@ -81,7 +81,7 @@ function vueErrorHandler(error: unknown, instance: ComponentPublicInstance | nul
   if (error instanceof KError) {
     handleError(error)
   } else if (error instanceof Error || (('message' in (error as Error))  && ('stack' in (error as Error)))) {
-    handleError(new KError(KErrorCode.UnknownVueError, error.message, error, {info}))
+    handleError(new KError(KErrorCode.UnknownVueError, (error as Error).message, error as Error, {info}))
   } else {
     handleError(new KError(KErrorCode.UnknownVueError, "Unknown error", undefined, {error, info}))
   }
