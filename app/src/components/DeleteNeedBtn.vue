@@ -22,7 +22,7 @@ import { truncate}  from "../plugins/Clamp"
 import DeleteBtn from "./DeleteBtn.vue"
 import { useRouter } from "vue-router"
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const props = defineProps<{
   code: string
   need: DeepPartial<Need>

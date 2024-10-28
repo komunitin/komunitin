@@ -4,7 +4,8 @@ import { flushPromises, mount, MountingOptions, VueWrapper } from "@vue/test-uti
 import store from 'src/store/index';
 import createRouter from 'src/router/index';
 
-import {Quasar, LocalStorage, Notify, Loading} from 'quasar';
+import {Quasar, LocalStorage, Notify, Loading} from "quasar";
+import * as quasar from "quasar"
 
 // Boot files.
 import bootErrors from '../../../src/boot/errors';
@@ -55,14 +56,18 @@ jest.mock("../../../src/plugins/Notifications");
 jest.mock("firebase/messaging");
 
 jest.mock("qrcode", () => ({
-  default: {
-    toCanvas: jest.fn(),
-    toDataURL: jest.fn().mockImplementation(() => Promise.resolve("data:image/png;base64,"))
-  }
+  toCanvas: jest.fn(),
+  toDataURL: jest.fn().mockImplementation(() => Promise.resolve("data:image/png;base64,"))
 }));
 jest.mock("vue-qrcode-reader", () => ({
   QrcodeStream: jest.fn(),
 }))
+jest.mock("@vue-leaflet/vue-leaflet", () => ({
+  LMap: jest.fn(),
+  LTileLayer: jest.fn(),
+  LMarker: jest.fn(),
+}))
+
 
 // Mock Web NFC api
 class MockNDEFReader {
@@ -77,6 +82,32 @@ Object.defineProperty(HTMLDivElement.prototype, "scrollHeight", {configurable: t
 Object.defineProperty(SVGSVGElement.prototype, "pauseAnimations", {value: jest.fn()});
 Object.defineProperty(SVGSVGElement.prototype, "unpauseAnimations", {value: jest.fn()});
 
+// Get an object containing all Quasar Vue components.
+const qComponents = Object.keys(quasar).reduce((object, key) => {
+  const val = quasar[key as keyof typeof quasar] as any;
+  if (val && val.name && val.name.startsWith("Q") && val.setup) {
+    object[key] = val
+  }
+  return object
+}, {} as any);
+
+// Get an object containing all Quasar Vue directives.
+const qDirectives = Object.keys(quasar).reduce((object, key) => {
+  const val = quasar[key as keyof typeof quasar] as any;
+  if (val && val.name && !val.name.startsWith("Q") && 
+    ['created', 'beforeMount', 'mounted', 'beforeUpdate', 'updated', 'beforeUnmount', 'unmounted'].some(m => m in val)) {
+    object[key] = val
+  }
+  return object
+}, {} as any);
+
+
+export const quasarPlugin = [Quasar, {
+  plugins: [LocalStorage, Loading],
+  components: qComponents,
+  directives: qDirectives
+}] as [typeof Quasar, any];
+
 export async function mountComponent(component: ReturnType<typeof defineComponent>, options?: MountingOptions<any, any> & {login?: true}): Promise<VueWrapper> {
   LocalStorage.clear();
 
@@ -89,13 +120,10 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
   // Set the router mode to "history", as we have in our Quasar config file.
   process.env.VUE_ROUTER_MODE = "history";
   const router = createRouter({store});
-  
-  // Install quasar
-  const quasar = [Quasar, {plugins: [LocalStorage, Loading]}];
 
   const mountOptions: any = {
     global: {
-      plugins: [store, router, quasar],
+      plugins: [store, router, quasarPlugin],
       stubs: {
         // stub map components since they throw errors in test environment.
         LMap: true,
@@ -106,6 +134,7 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
       },
     },
     attachTo: document.body,
+    components: qComponents,
     ...options,
   };
 
@@ -142,7 +171,7 @@ export async function mountComponent(component: ReturnType<typeof defineComponen
   return wrapper;
 }
 
-declare module "@vue/runtime-core" {
+declare module "vue" {
   interface ComponentCustomProperties {
     /**
      * Sometimes the Vue.$nextTick() or Vue.$nextTicks() function is not enough for the content to be completely updated.

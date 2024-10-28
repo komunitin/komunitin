@@ -27,7 +27,7 @@ export default boot(({ router, store }) => {
       }
       // Block inactive users to all but settings and profile pages.
       return true
-    } catch (error) {
+    } catch {
       // User is not logged in. If user is trying to access a private node, bring them to login page
       // so they are redirected to the desired path after login.
       

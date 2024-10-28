@@ -54,8 +54,8 @@ function logError(error: KError) {
   if (error.debugInfo) {
     try {
       msg += "\n" + JSON.stringify(error.debugInfo)
-    } catch (error) {
-      msg + "\n" + "Error while serializing debug info."
+    } catch {
+      msg += "\n" + "Error while serializing debug info."
     }
   }
   // eslint-disable-next-line no-console
@@ -80,8 +80,8 @@ export function handleError(error: KError): void {
 function vueErrorHandler(error: unknown, instance: ComponentPublicInstance | null, info: string) {
   if (error instanceof KError) {
     handleError(error)
-  } else if (error instanceof Error){
-    handleError(new KError(KErrorCode.UnknownVueError, error.message, {error: error, info}))
+  } else if (error instanceof Error || (('message' in (error as Error))  && ('stack' in (error as Error)))) {
+    handleError(new KError(KErrorCode.UnknownVueError, (error as Error).message, {error, info}))
   } else {
     handleError(new KError(KErrorCode.UnknownVueError, "Unknown error", {info}))
   }
@@ -122,7 +122,7 @@ if (window !== undefined) {
     try {
       handleError(kerror);
     }
-    catch(error) {
+    catch {
       logErrorHandling(kerror);
     }
   });
@@ -136,7 +136,7 @@ export default boot(({app}) => {
   app.config.errorHandler = vueErrorHandler;
 });
 
-declare module "@vue/runtime-core" {
+declare module "vue" {
   interface ComponentCustomProperties {
     /**
      * Main function for error handling.

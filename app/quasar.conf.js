@@ -46,20 +46,10 @@ module.exports = configure(function(ctx) {
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
+      all: "auto",
       iconSet: "material-icons", // Quasar icon set
       lang: "en-US", // Quasar language pack
 
-      // Possible values for "all":
-      // * 'auto' - Auto-import needed Quasar components & directives
-      //            (slightly higher compile time; next to minimum bundle size; most convenient)
-      // * false  - Manually specify what to import
-      //            (fastest compile time; minimum bundle size; most tedious)
-      // * true   - Import everything from Quasar
-      //            (not treeshaking Quasar; biggest bundle size; convenient)
-      importStrategy: "auto",
-
-      components: [],
-      directives: [],
 
       // Quasar plugins
       plugins: ["Notify", "LocalStorage", "Loading"],
@@ -99,7 +89,9 @@ module.exports = configure(function(ctx) {
       chainWebpack (chain) {
         chain
           .plugin('eslint-webpack-plugin')
-          .use(ESLintPlugin, [{ extensions: ['ts', 'vue'] }])
+          .use(ESLintPlugin, [{
+            extensions: ['ts', 'vue']
+          }])
         // Ignore "leaflet" import since both we and the vue-leaflet module are using the 
         // leaflet.esm.js file, but in one place vue-leaflet conditionally loads "leaflet"
         // and we would end up with duplicated library (hence innecessarily bloating bundle 

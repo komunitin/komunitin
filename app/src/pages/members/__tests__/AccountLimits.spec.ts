@@ -4,8 +4,12 @@ import {Quasar, QSeparator} from 'quasar'
 import { config } from '@vue/test-utils';
 import { createI18n } from "vue-i18n";
 
-// Install quasar.
-config.global.plugins.unshift([Quasar, {}]);
+// Install quasar (only with 1 component).
+config.global.plugins.unshift([Quasar, {
+  components: {
+    QSeparator
+  }
+}]);
 // Install i18n.
 const i18n = createI18n({
   legacy: false
@@ -59,7 +63,7 @@ describe('AccountLimits.vue', () => {
       },
       global: {
         mocks
-      }
+      },
     });
     expect(wrapper.text()).toBe("minAmount %-50");
     expect(wrapper.findComponent(QSeparator).exists()).toBe(false);

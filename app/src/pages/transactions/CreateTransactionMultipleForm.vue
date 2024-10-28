@@ -187,7 +187,7 @@ const columns = computed(() => [
 ])
 
 // Add new empty rows at start
-const rows = ref<(TransferRow|{})[]>(model.value ?? Array.from({length: 5}, () => ({})))
+const rows = ref<(TransferRow|object)[]>(model.value ?? Array.from({length: 5}, () => ({})))
 
 // and when the last row is filled
 watch(() => rows.value[rows.value.length - 1], (lastRow) => {

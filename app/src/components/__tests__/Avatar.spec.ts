@@ -1,8 +1,13 @@
 import { mount } from "@vue/test-utils";
 import Avatar from "../Avatar.vue";
-import {Quasar} from "quasar";
+import {QAvatar, Quasar} from "quasar";
 
 describe("SimpleMap", () => {  
+   
+  const quasarPlugin = [Quasar, {
+    components: { QAvatar }
+  }] as [typeof Quasar, unknown]
+
   it("Renders image", async () => {
     const wrapper = mount(Avatar, {
       props: {
@@ -10,7 +15,7 @@ describe("SimpleMap", () => {
         text: "anything"
       },
       global: {
-        plugins: [[Quasar, {}]]
+        plugins: [quasarPlugin]
       }
     });
     expect(wrapper.html()).toContain("<img src=\"https://path_to_image.com\"");
@@ -22,7 +27,7 @@ describe("SimpleMap", () => {
         text: "anything"
       },
       global: {
-        plugins: [[Quasar, {}]]
+        plugins: [quasarPlugin]
       }
     });
     expect(wrapper.html()).not.toContain("<img");

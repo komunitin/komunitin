@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 /**
  * @jest-environment jsdom
  */
@@ -114,6 +114,5 @@ describe("Needs", () => {
     await buttons[1].trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
-    const text = wrapper.text();
   })
 });

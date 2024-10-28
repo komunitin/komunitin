@@ -49,7 +49,7 @@ export default defineComponent({
       get () {
         return this.$store.state.ui.drawerState
       },
-      set (val) {
+      set (val: boolean) {
         this.$store.commit('drawerState', val)
       }
     }

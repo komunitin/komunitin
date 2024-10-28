@@ -7,7 +7,7 @@
   />
 </template>
 <script setup lang="ts">
-import countries from 'i18n-iso-countries';
+import { registerLocale, getNames, LocaleData } from 'i18n-iso-countries';
 import { useLocale } from '../boot/i18n';
 import { getLocaleDefinition } from '../i18n';
 import { computed, onMounted, ref } from 'vue';
@@ -28,9 +28,9 @@ const country = computed({
 })
 
 onMounted(async () => {
-  const list = await localeDefinition.loadCountries() as countries.LocaleData
-  countries.registerLocale(list)
-  const names = countries.getNames(list.locale)
+  const list = await localeDefinition.loadCountries() as LocaleData
+  registerLocale(list)
+  const names = getNames(list.locale)
   countryList.value = Object.entries(names).map(([value, label]) => ({value, label}))
 })
 
