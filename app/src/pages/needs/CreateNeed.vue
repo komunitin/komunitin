@@ -27,7 +27,7 @@ import { useRouter } from "vue-router"
 import { DeepPartial } from "quasar"
 import { ref } from "vue"
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const props = defineProps<{
   code: string
 }>()

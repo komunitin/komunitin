@@ -2,13 +2,13 @@ import { boot } from "quasar/wrappers";
 import { createI18n } from "vue-i18n";
 import DefaultMessages from "src/i18n/en-us/index.json";
 import langs, {LangName, DEFAULT_LANG, normalizeLocale} from "src/i18n";
-import { useQuasar, Quasar, QSingletonGlobals } from "quasar";
+import { useQuasar, Quasar, QSingletonGlobals, QVueGlobals } from "quasar";
 import LocalStorage from "../plugins/LocalStorage";
 import { formatRelative, Locale } from "date-fns";
 import { ref, watch } from "vue";
 import { useStore } from "vuex";
 
-declare module "@vue/runtime-core" {
+declare module "vue" {
   interface ComponentCustomProperties {
     $formatDate: (date: string) => string;
   }
@@ -68,7 +68,7 @@ export async function setLocale(locale: string, admin=false) {
   await setCurrentLocale(Quasar, lang, admin)
 }
 
-async function setCurrentLocale($q: QSingletonGlobals, locale: string, admin=false) {
+async function setCurrentLocale($q: QSingletonGlobals|QVueGlobals, locale: string, admin=false) {
   globalLocale = locale
   // Set VueI18n lang.
   const setI18nLocale = async (locale: LangName) => {

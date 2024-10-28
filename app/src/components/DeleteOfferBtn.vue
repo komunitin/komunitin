@@ -21,7 +21,7 @@ import { Offer } from "src/store/model"
 import DeleteBtn from "./DeleteBtn.vue"
 import { useRouter } from "vue-router"
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const props = defineProps<{
   code: string
   offer: DeepPartial<Offer>

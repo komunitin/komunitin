@@ -34,6 +34,13 @@ mkdir tmp/certs && cd tmp/certs
 mkcert localhost
 ```
 
+### Configure
+You can configure some properties such as where the backend services are located. The quickest way to run the app is to use the mocked version for all external apis:
+
+```bash
+cp .env.test .env
+```
+
 ### Run
 
 Build and launch the development HTTP server, that will make the app accessible at `https://localhost:2030/`.
@@ -65,12 +72,9 @@ npm run lint
 ```
 
 ### Build
-Alternatively to `npm run dev` you can also use:
 ```bash
 npm run build
-npm run start
 ```
-to build and serve the content. In this case it will be accessible at `http://localhost:4000/`
 
 ### Docker
 
@@ -105,7 +109,7 @@ Colors are defined as variables and standard classes at `src/css/quasar.variable
 
 ### Code
 - All code is written in TypeScript.
-- Components must be created using the `Vue.extend` function. We don't use class components.
+- Components must be created using the `<script setup>` Vue construction.
 - Asynchronous code is written using the `async/await` pattern, and not the Promises API.
 - Error managing is done using the `KError` object, a custom extension of JavaScript `Error` object. When an exception occurs, the code must create a `KError` object with the proper error code from `KErrorCode` enumeration. Then it may just throw it or, if the code knows how to recover, log it using the `$handleError` injected function from `boot/errors.ts` and continue the execution.
 

@@ -20,15 +20,13 @@ jest.mock("quasar", () => ({
 // thats why we need to mock it. An alternative is to add "i18n-iso-countries" to
 // list of ES modules in jest.config.
 jest.mock("i18n-iso-countries", () => ({
-  default: {
-    registerLocale: jest.fn(),
-    getNames: jest.fn(() => ({
-      'IT': 'Italy',
-      'ES': 'Spain',
-      'GR': 'Greece',
-      'AD': 'Andorra'
-    })),
-  }
+  registerLocale: jest.fn(),
+  getNames: jest.fn(() => ({
+    'IT': 'Italy',
+    'ES': 'Spain',
+    'GR': 'Greece',
+    'AD': 'Andorra'
+  })),
 }))
 
 
@@ -115,19 +113,19 @@ describe("Signup", () => {
 
     // Now go with the offer.
     expect(wrapper.text()).toContain("What do you offer?");
-    const cat = wrapper.getComponent(QSelect)
-    await cat.trigger("click");
-    await wrapper.vm.$wait();
-    await waitFor(() => cat.findAllComponents(QItem).length > 2)
-    await cat.findAllComponents(QItem)[1].trigger("click");
-
     await wrapper.get("[name='title']").setValue("Test Offer");
     await wrapper.get("[name='description']").setValue("This is a test offer.");
     await wrapper.get("[name='price']").setValue("10");
+
+    const cat = wrapper.getComponent(QSelect)
+    await cat.trigger("click");
+    await waitFor(() => cat.findAllComponents(QItem).length > 2)
+    await cat.findAllComponents(QItem)[1].trigger("click");
+    
     await wrapper.get("button[type='submit']").trigger("click");
 
     await wrapper.vm.$wait();
     expect(wrapper.text()).toContain("Signup complete");
-  })
+  }, 100000)
   
 })

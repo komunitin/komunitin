@@ -2,8 +2,11 @@ import { before, after } from "node:test"
 import { TestApiClient, client } from "./net.client"
 import { clearEvents, startServer, stopServer } from "./net.mock"
 import { clearDb } from "./db"
-import { createApp, closeApp, ExpressExtended } from "../../src/server/app"
+import { createApp, closeApp, ExpressExtended, setupApp } from "../../src/server/app"
 import { testAccount, testCurrency, testTransfer, userAuth } from "./api.data"
+import express from "express"
+import expressOasGenerator from "express-oas-generator"
+import { expressOasGeneratorOptions } from "./openapi.generator.options"
 
 type UserAuth = ReturnType<typeof userAuth>
 
@@ -53,7 +56,12 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
 
   before(async () => {
     await clearDb()
-    test.app = await createApp()
+    const app = express()
+    
+    expressOasGenerator.handleResponses(app, expressOasGeneratorOptions)    
+    test.app = await setupApp(app)
+    expressOasGenerator.handleRequests()
+
     test.api = client(test.app)
     startServer(test.app)
     clearEvents()
@@ -78,3 +86,4 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
 
   return test
 }
+

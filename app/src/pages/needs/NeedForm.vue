@@ -123,7 +123,7 @@ const onSubmit = async () => {
       },
       relationships: {
         ...props.modelValue?.relationships,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+         
         category: { data: { type: "categories", id: category.value!.id } },
         member: { data: { type: "members", id: store.getters.myMember.id} }
       }

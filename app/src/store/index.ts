@@ -154,7 +154,7 @@ export const setAccountingApiUrl = (url: string) => {
   trustlines.setBaseUrl(url);
 }
 
-declare module '@vue/runtime-core' {
+declare module 'vue' {
   interface State {
     me: UserState
     ui: UIState

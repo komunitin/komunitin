@@ -24,7 +24,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const props = defineProps<{
   code: string,
   offerCode: string

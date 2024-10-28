@@ -27,4 +27,8 @@ Different **state-of-the-art technologies** are used to accomplish the project m
 
 Komunitin is an **open source** project developed without profit and sustented by the user community.
 
+Subscribe to the newsletter here to get accasionally updated:
+
+{% embed url="https://subscribe.komunitin.org" %}
+
 <figure><img src=".gitbook/assets/three-screens.png" alt=""><figcaption><p>Login, transfers and offers screens of the Komunitin app on mobile</p></figcaption></figure>

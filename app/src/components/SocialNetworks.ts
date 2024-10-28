@@ -82,6 +82,7 @@ export function getShareUrl(network: SocialNetwork, url: string, title: string, 
  */
 export function getNetworkIcon(key: string) : string {
   // Leverage webpack assets resolution.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require(`../assets/contacts/${key}.svg`)
 }
 

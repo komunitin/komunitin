@@ -1,0 +1,4548 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Komunitin accounting API",
+    "version": "0.0.1",
+    "license": {
+      "name": "AGPL-3.0-only"
+    },
+    "description": "API for the Komunitin payments system. This documentation is automatically generated from the serivce test suite."
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "/",
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/currencies": {
+      "post": {
+        "summary": "/currencies",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "example": "currencies"
+                      },
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "example": "TES1"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Testy"
+                          },
+                          "namePlural": {
+                            "type": "string",
+                            "example": "Testies"
+                          },
+                          "symbol": {
+                            "type": "string",
+                            "example": "T$"
+                          },
+                          "decimals": {
+                            "type": "number",
+                            "example": 2
+                          },
+                          "scale": {
+                            "type": "number",
+                            "example": 4
+                          },
+                          "rate": {
+                            "type": "object",
+                            "properties": {
+                              "n": {
+                                "type": "number",
+                                "example": 1
+                              },
+                              "d": {
+                                "type": "number",
+                                "example": 10
+                              }
+                            }
+                          },
+                          "settings": {
+                            "type": "object",
+                            "properties": {
+                              "defaultInitialCreditLimit": {
+                                "type": "number",
+                                "example": 1000
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "relationships": {
+                        "type": "object",
+                        "properties": {
+                          "admins": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string"
+                                    },
+                                    "id": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "example": [
+                                  {
+                                    "type": "users",
+                                    "id": "1"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "example": [
+                      {
+                        "type": "users",
+                        "id": "1"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "currencies"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "d10e351f-43a8-415b-8240-230b552b8804"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "TES1"
+                            },
+                            "status": {
+                              "type": "string",
+                              "example": "active"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Testy"
+                            },
+                            "namePlural": {
+                              "type": "string",
+                              "example": "Testies"
+                            },
+                            "symbol": {
+                              "type": "string",
+                              "example": "T$"
+                            },
+                            "decimals": {
+                              "type": "number",
+                              "example": 2
+                            },
+                            "scale": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "rate": {
+                              "type": "object",
+                              "properties": {
+                                "n": {
+                                  "type": "number",
+                                  "example": 1
+                                },
+                                "d": {
+                                  "type": "number",
+                                  "example": 10
+                                }
+                              }
+                            },
+                            "keys": {
+                              "type": "object",
+                              "properties": {
+                                "issuer": {
+                                  "type": "string",
+                                  "example": "GDKSSHKCKOHZOACYN4OQVEU7LA66W7FAKZ24KWDXBAAFWDFOJSEXI33M"
+                                },
+                                "credit": {
+                                  "type": "string",
+                                  "example": "GAHUNNKHZELQYZHKBRIOAX7VKX6ZLAKHKCQNODT2R7QAAJRGM4XTPDUK"
+                                },
+                                "admin": {
+                                  "type": "string",
+                                  "example": "GA636P46N6NZMPJJB2JCOTMCC6F7NABS4P6NUJDVD3TG52DNPC75KBP2"
+                                },
+                                "externalTrader": {
+                                  "type": "string",
+                                  "example": "GDMV4Q3JR5S2WGJC4KIMYQAMIU6WEUXMGYEPHAPQ24SOFZ3LFARTWVBP"
+                                },
+                                "externalIssuer": {
+                                  "type": "string",
+                                  "example": "GC2NFJQ7TF7XA34SEA22DT3SUINZNYN22SYW6JVTYZD44JW5ULAY5CEH"
+                                }
+                              }
+                            },
+                            "settings": {
+                              "type": "object",
+                              "properties": {
+                                "defaultAllowPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "enableExternalPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "defaultAllowTagPayments": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultInitialCreditLimit": {
+                                  "type": "number",
+                                  "example": 1000
+                                },
+                                "externalTraderCreditLimit": {
+                                  "type": "number",
+                                  "example": 1000
+                                },
+                                "defaultAcceptPaymentsAfter": {
+                                  "type": "number",
+                                  "example": 1296000
+                                },
+                                "defaultAllowPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "defaultAllowExternalPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "enableExternalPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptPaymentsWhitelist": {
+                                  "type": "array",
+                                  "items": {},
+                                  "example": [
+                                    null
+                                  ]
+                                },
+                                "defaultAllowTagPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptPaymentsAutomatically": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAllowExternalPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptExternalPaymentsAutomatically": {
+                                  "type": "boolean",
+                                  "example": false
+                                }
+                              }
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:39.329Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:41.231Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TES1/currency"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "admins": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "meta": {
+                                        "type": "object",
+                                        "properties": {
+                                          "external": {
+                                            "type": "boolean"
+                                          },
+                                          "href": {
+                                            "nullable": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "example": [
+                                    {
+                                      "type": "users",
+                                      "id": "1",
+                                      "meta": {
+                                        "external": true,
+                                        "href": null
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "BadRequest",
+                          "title": "Bad Request",
+                          "detail": "Currency with code TES1 already exists"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "Insufficient Scope"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "currencies"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "/currencies",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "attributes": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "namePlural": {
+                                "type": "string"
+                              },
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "decimals": {
+                                "type": "number"
+                              },
+                              "scale": {
+                                "type": "number"
+                              },
+                              "rate": {
+                                "type": "object",
+                                "properties": {
+                                  "n": {
+                                    "type": "number"
+                                  },
+                                  "d": {
+                                    "type": "number"
+                                  }
+                                }
+                              },
+                              "keys": {
+                                "type": "object",
+                                "properties": {
+                                  "issuer": {
+                                    "type": "string"
+                                  },
+                                  "credit": {
+                                    "type": "string"
+                                  },
+                                  "admin": {
+                                    "type": "string"
+                                  },
+                                  "externalTrader": {
+                                    "type": "string"
+                                  },
+                                  "externalIssuer": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "settings": {
+                                "type": "object",
+                                "properties": {
+                                  "defaultAllowPayments": {
+                                    "type": "boolean"
+                                  },
+                                  "enableExternalPayments": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultAllowTagPayments": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultInitialCreditLimit": {
+                                    "type": "number"
+                                  },
+                                  "externalTraderCreditLimit": {
+                                    "type": "number"
+                                  },
+                                  "defaultAcceptPaymentsAfter": {
+                                    "type": "number"
+                                  },
+                                  "defaultAllowPaymentRequests": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultAllowExternalPayments": {
+                                    "type": "boolean"
+                                  },
+                                  "enableExternalPaymentRequests": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultAcceptPaymentsWhitelist": {
+                                    "type": "array",
+                                    "items": {}
+                                  },
+                                  "defaultAllowTagPaymentRequests": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultAcceptPaymentsAutomatically": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultAllowExternalPaymentRequests": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultAcceptExternalPaymentsAutomatically": {
+                                    "type": "boolean"
+                                  },
+                                  "defaultInitialMaximumBalance": {
+                                    "type": "number"
+                                  }
+                                }
+                              },
+                              "created": {
+                                "type": "string"
+                              },
+                              "updated": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "links": {
+                            "type": "object",
+                            "properties": {
+                              "self": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "relationships": {
+                            "type": "object",
+                            "properties": {
+                              "admins": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "type": "string"
+                                        },
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "meta": {
+                                          "type": "object",
+                                          "properties": {
+                                            "external": {
+                                              "type": "boolean"
+                                            },
+                                            "href": {
+                                              "nullable": true
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "id",
+                                        "meta"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id",
+                          "attributes",
+                          "links",
+                          "relationships"
+                        ]
+                      },
+                      "example": [
+                        {
+                          "type": "currencies",
+                          "id": "d10e351f-43a8-415b-8240-230b552b8804",
+                          "attributes": {
+                            "code": "TES1",
+                            "status": "active",
+                            "name": "Testy",
+                            "namePlural": "Testies",
+                            "symbol": "T$",
+                            "decimals": 2,
+                            "scale": 4,
+                            "rate": {
+                              "n": 1,
+                              "d": 10
+                            },
+                            "keys": {
+                              "issuer": "GDKSSHKCKOHZOACYN4OQVEU7LA66W7FAKZ24KWDXBAAFWDFOJSEXI33M",
+                              "credit": "GAHUNNKHZELQYZHKBRIOAX7VKX6ZLAKHKCQNODT2R7QAAJRGM4XTPDUK",
+                              "admin": "GA636P46N6NZMPJJB2JCOTMCC6F7NABS4P6NUJDVD3TG52DNPC75KBP2",
+                              "externalTrader": "GDMV4Q3JR5S2WGJC4KIMYQAMIU6WEUXMGYEPHAPQ24SOFZ3LFARTWVBP",
+                              "externalIssuer": "GC2NFJQ7TF7XA34SEA22DT3SUINZNYN22SYW6JVTYZD44JW5ULAY5CEH"
+                            },
+                            "settings": {
+                              "defaultAllowPayments": true,
+                              "enableExternalPayments": true,
+                              "defaultAllowTagPayments": false,
+                              "defaultInitialCreditLimit": 1000,
+                              "externalTraderCreditLimit": 1000,
+                              "defaultAcceptPaymentsAfter": 1296000,
+                              "defaultAllowPaymentRequests": true,
+                              "defaultAllowExternalPayments": true,
+                              "enableExternalPaymentRequests": false,
+                              "defaultAcceptPaymentsWhitelist": [],
+                              "defaultAllowTagPaymentRequests": false,
+                              "defaultAcceptPaymentsAutomatically": false,
+                              "defaultAllowExternalPaymentRequests": false,
+                              "defaultAcceptExternalPaymentsAutomatically": false
+                            },
+                            "created": "2024-10-17T10:29:39.329Z",
+                            "updated": "2024-10-17T10:29:41.231Z"
+                          },
+                          "links": {
+                            "self": "http://localhost:2025/TES1/currency"
+                          },
+                          "relationships": {
+                            "admins": {
+                              "data": [
+                                {
+                                  "type": "users",
+                                  "id": "1",
+                                  "meta": {
+                                    "external": true,
+                                    "href": null
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "currencies"
+        ]
+      }
+    },
+    "/{code}/currency": {
+      "get": {
+        "summary": "/{code}/currency",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "currencies"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "d10e351f-43a8-415b-8240-230b552b8804"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "TES1"
+                            },
+                            "status": {
+                              "type": "string",
+                              "example": "active"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Testy"
+                            },
+                            "namePlural": {
+                              "type": "string",
+                              "example": "Testies"
+                            },
+                            "symbol": {
+                              "type": "string",
+                              "example": "T$"
+                            },
+                            "decimals": {
+                              "type": "number",
+                              "example": 2
+                            },
+                            "scale": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "rate": {
+                              "type": "object",
+                              "properties": {
+                                "n": {
+                                  "type": "number",
+                                  "example": 1
+                                },
+                                "d": {
+                                  "type": "number",
+                                  "example": 10
+                                }
+                              }
+                            },
+                            "keys": {
+                              "type": "object",
+                              "properties": {
+                                "issuer": {
+                                  "type": "string",
+                                  "example": "GDKSSHKCKOHZOACYN4OQVEU7LA66W7FAKZ24KWDXBAAFWDFOJSEXI33M"
+                                },
+                                "credit": {
+                                  "type": "string",
+                                  "example": "GAHUNNKHZELQYZHKBRIOAX7VKX6ZLAKHKCQNODT2R7QAAJRGM4XTPDUK"
+                                },
+                                "admin": {
+                                  "type": "string",
+                                  "example": "GA636P46N6NZMPJJB2JCOTMCC6F7NABS4P6NUJDVD3TG52DNPC75KBP2"
+                                },
+                                "externalTrader": {
+                                  "type": "string",
+                                  "example": "GDMV4Q3JR5S2WGJC4KIMYQAMIU6WEUXMGYEPHAPQ24SOFZ3LFARTWVBP"
+                                },
+                                "externalIssuer": {
+                                  "type": "string",
+                                  "example": "GC2NFJQ7TF7XA34SEA22DT3SUINZNYN22SYW6JVTYZD44JW5ULAY5CEH"
+                                }
+                              }
+                            },
+                            "settings": {
+                              "type": "object",
+                              "properties": {
+                                "defaultAllowPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "enableExternalPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "defaultAllowTagPayments": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultInitialCreditLimit": {
+                                  "type": "number",
+                                  "example": 1000
+                                },
+                                "externalTraderCreditLimit": {
+                                  "type": "number",
+                                  "example": 1000
+                                },
+                                "defaultAcceptPaymentsAfter": {
+                                  "type": "number",
+                                  "example": 1296000
+                                },
+                                "defaultAllowPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "defaultAllowExternalPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "enableExternalPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptPaymentsWhitelist": {
+                                  "type": "array",
+                                  "items": {},
+                                  "example": [
+                                    null
+                                  ]
+                                },
+                                "defaultAllowTagPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptPaymentsAutomatically": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAllowExternalPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptExternalPaymentsAutomatically": {
+                                  "type": "boolean",
+                                  "example": false
+                                }
+                              }
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:39.329Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:41.231Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TES1/currency"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "admins": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "meta": {
+                                        "type": "object",
+                                        "properties": {
+                                          "external": {
+                                            "type": "boolean"
+                                          },
+                                          "href": {
+                                            "nullable": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "example": [
+                                    {
+                                      "type": "users",
+                                      "id": "1",
+                                      "meta": {
+                                        "external": true,
+                                        "href": null
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "included": {
+                      "type": "array",
+                      "items": {},
+                      "example": [
+                        null
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "404",
+                          "code": "NotFound",
+                          "title": "Not Found",
+                          "detail": "Currency with code ERRO not found"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "currency"
+        ]
+      },
+      "patch": {
+        "summary": "/{code}/currency",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "EXTR",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Testy2"
+                          },
+                          "namePlural": {
+                            "type": "string",
+                            "example": "Testies2"
+                          },
+                          "settings": {
+                            "type": "object",
+                            "properties": {
+                              "defaultInitialCreditLimit": {
+                                "type": "number",
+                                "example": 1000
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "currencies"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "4f8eddc4-3df0-42db-91be-5bddb21a9a9d"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "TES2"
+                            },
+                            "status": {
+                              "type": "string",
+                              "example": "active"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Testy2"
+                            },
+                            "namePlural": {
+                              "type": "string",
+                              "example": "Testies2"
+                            },
+                            "symbol": {
+                              "type": "string",
+                              "example": "T$"
+                            },
+                            "decimals": {
+                              "type": "number",
+                              "example": 2
+                            },
+                            "scale": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "rate": {
+                              "type": "object",
+                              "properties": {
+                                "n": {
+                                  "type": "number",
+                                  "example": 1
+                                },
+                                "d": {
+                                  "type": "number",
+                                  "example": 10
+                                }
+                              }
+                            },
+                            "keys": {
+                              "type": "object",
+                              "properties": {
+                                "issuer": {
+                                  "type": "string",
+                                  "example": "GDYRTHYO6TGPMREVC4TBTW2KBSIMOKAZKHLDUTADBHWLLOWALNJUQ3AM"
+                                },
+                                "credit": {
+                                  "type": "string",
+                                  "example": "GBTEX6CBSFZMHHO5KLBL2CZCSW7PCTBA7KX5TQBGH4LXTNBKK5MFMHXM"
+                                },
+                                "admin": {
+                                  "type": "string",
+                                  "example": "GAU7BHTMQ5QKBWX4HOLU4V6OC6UX3RZPHLW6SQFWDAFV7ZYVF7SKXEBE"
+                                },
+                                "externalTrader": {
+                                  "type": "string",
+                                  "example": "GDGHV5XACQZMDTVTGD5MCFQFIQBMOORBBPGDLJDUMWTI5DSAF7XGSQXZ"
+                                },
+                                "externalIssuer": {
+                                  "type": "string",
+                                  "example": "GACMLNE67VDY6WSTIZOR6UQWJXZNXUPPPXLGTQJUBQBHVBV5TKR2P37R"
+                                }
+                              }
+                            },
+                            "settings": {
+                              "type": "object",
+                              "properties": {
+                                "defaultAllowPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "enableExternalPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "defaultAllowTagPayments": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultInitialCreditLimit": {
+                                  "type": "number",
+                                  "example": 1000
+                                },
+                                "externalTraderCreditLimit": {
+                                  "type": "number",
+                                  "example": 0
+                                },
+                                "defaultAcceptPaymentsAfter": {
+                                  "type": "number",
+                                  "example": 1296000
+                                },
+                                "defaultAllowPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "defaultAllowExternalPayments": {
+                                  "type": "boolean",
+                                  "example": true
+                                },
+                                "defaultInitialMaximumBalance": {
+                                  "type": "number",
+                                  "example": 5000
+                                },
+                                "enableExternalPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptPaymentsWhitelist": {
+                                  "type": "array",
+                                  "items": {},
+                                  "example": [
+                                    null
+                                  ]
+                                },
+                                "defaultAllowTagPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptPaymentsAutomatically": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAllowExternalPaymentRequests": {
+                                  "type": "boolean",
+                                  "example": false
+                                },
+                                "defaultAcceptExternalPaymentsAutomatically": {
+                                  "type": "boolean",
+                                  "example": false
+                                }
+                              }
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:41.324Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:43.681Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TES2/currency"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "admins": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "meta": {
+                                        "type": "object",
+                                        "properties": {
+                                          "external": {
+                                            "type": "boolean"
+                                          },
+                                          "href": {
+                                            "nullable": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "example": [
+                                    {
+                                      "type": "users",
+                                      "id": "2",
+                                      "meta": {
+                                        "external": true,
+                                        "href": null
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "BadRequest",
+                          "title": "Bad Request",
+                          "detail": "Can't change currency code"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User not found in currency TES2"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "currency"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/accounts": {
+      "post": {
+        "summary": "/{code}/accounts",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "relationships": {
+                        "type": "object",
+                        "properties": {
+                          "users": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string"
+                                    },
+                                    "id": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "example": [
+                                  {
+                                    "type": "users",
+                                    "id": "0"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "example": [
+                      {
+                        "type": "users",
+                        "id": "0"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "accounts"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "b504d69f-58b6-4c24-986c-599158eec8ab"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "TEST0000"
+                            },
+                            "balance": {
+                              "type": "number",
+                              "example": 0
+                            },
+                            "creditLimit": {
+                              "type": "number",
+                              "example": 1000
+                            },
+                            "key": {
+                              "type": "string",
+                              "example": "GAZS432QN2JWTUJJEDPQM2ZTT2ZGTCAFJAYPBGIRJF5ZB3VMZPEIFGNH"
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:58.116Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:58.116Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TEST/accounts/b504d69f-58b6-4c24-986c-599158eec8ab"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "fe788e7b-28a8-4e31-84e0-9c41c27c1a4e"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "settings": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "account-settings"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User not found in currency TEST"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "/{code}/accounts",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "properties": {
+              "tag": {
+                "type": "string"
+              }
+            },
+            "name": "filter",
+            "in": "query",
+            "example": {
+              "tag": "tag-1-1234567890"
+            },
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": "string",
+                          "example": "http://localhost:2025/TEST/accounts?filter%5Btag%5D=tag-1-1234567890&page%5Bafter%5D=0"
+                        },
+                        "last": {
+                          "example": null,
+                          "nullable": true
+                        },
+                        "prev": {
+                          "example": null,
+                          "nullable": true
+                        },
+                        "next": {
+                          "example": null,
+                          "nullable": true
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "attributes": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "balance": {
+                                "type": "number"
+                              },
+                              "creditLimit": {
+                                "type": "number"
+                              },
+                              "key": {
+                                "type": "string"
+                              },
+                              "created": {
+                                "type": "string"
+                              },
+                              "updated": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "links": {
+                            "type": "object",
+                            "properties": {
+                              "self": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "relationships": {
+                            "type": "object",
+                            "properties": {
+                              "currency": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "settings": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "type": "accounts",
+                          "id": "86be4ba3-8303-4609-9105-2ac305f65d64",
+                          "attributes": {
+                            "code": "TEST0001",
+                            "balance": 0,
+                            "creditLimit": 1000,
+                            "key": "GAC43NE5IG2ACKONXRCTFXO4H2VWJ3WIRUOGDJGFZ7QSPZT65SV7VGAD",
+                            "created": "2024-10-17T10:29:59.118Z",
+                            "updated": "2024-10-17T10:30:00.195Z"
+                          },
+                          "links": {
+                            "self": "http://localhost:2025/TEST/accounts/86be4ba3-8303-4609-9105-2ac305f65d64"
+                          },
+                          "relationships": {
+                            "currency": {
+                              "data": {
+                                "type": "currencies",
+                                "id": "fe788e7b-28a8-4e31-84e0-9c41c27c1a4e"
+                              }
+                            },
+                            "settings": {
+                              "data": {
+                                "type": "account-settings"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "included": {
+                      "type": "array",
+                      "items": {},
+                      "example": [
+                        null
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User not found in currency TEST"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/accounts/{id}": {
+      "get": {
+        "summary": "/{code}/accounts/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "6c2b269c-c7cf-4f53-9858-c14eddfd60ad",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "example": "currency",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "accounts"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "86be4ba3-8303-4609-9105-2ac305f65d64"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "TEST0001"
+                            },
+                            "balance": {
+                              "type": "number",
+                              "example": -100
+                            },
+                            "creditLimit": {
+                              "type": "number",
+                              "example": 1000
+                            },
+                            "key": {
+                              "type": "string",
+                              "example": "GAC43NE5IG2ACKONXRCTFXO4H2VWJ3WIRUOGDJGFZ7QSPZT65SV7VGAD"
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:29:59.118Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:30:07.130Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TEST/accounts/86be4ba3-8303-4609-9105-2ac305f65d64"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "fe788e7b-28a8-4e31-84e0-9c41c27c1a4e"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "users": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "meta": {
+                                        "type": "object",
+                                        "properties": {
+                                          "external": {
+                                            "type": "boolean"
+                                          },
+                                          "href": {
+                                            "nullable": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "example": [
+                                    {
+                                      "type": "users",
+                                      "id": "1",
+                                      "meta": {
+                                        "external": true,
+                                        "href": null
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "settings": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "account-settings"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "included": {
+                      "type": "array",
+                      "items": {},
+                      "example": [
+                        null
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "/{code}/accounts/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "7dd39861-844e-4992-b4ee-d8bff4e00c50",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "creditLimit": {
+                            "type": "number",
+                            "example": 2000
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "accounts"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "91a8f0d9-93b8-4a81-acc3-e48cfae37ffd"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "TEST0000"
+                            },
+                            "balance": {
+                              "type": "number",
+                              "example": 0
+                            },
+                            "creditLimit": {
+                              "type": "number",
+                              "example": 2000
+                            },
+                            "key": {
+                              "type": "string",
+                              "example": "GAL7IZMF3HNWQXTHI5QU3QIFOT7J5HPRRKZMWEI6PBOBNPFWTJX6LDM2"
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:30:21.125Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:30:28.107Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TEST/accounts/91a8f0d9-93b8-4a81-acc3-e48cfae37ffd"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "809efa06-c1a4-4e1d-a8f4-e0bb37329f61"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "settings": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "account-settings"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "BadRequest",
+                          "title": "Bad Request",
+                          "detail": "Code must start with TEST"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "Only the currency owner can perform this operation"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "500",
+                          "code": "NotImplemented",
+                          "title": "Not Implemented",
+                          "detail": "Updating maximum balance not implemented yet"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "/{code}/accounts/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "e1c8ba1c-d259-4dc2-be3f-c7900475bc74",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "integer",
+                  "example": 0
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User is not allowed to delete this account"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/accounts/{id}/settings": {
+      "get": {
+        "summary": "/{code}/accounts/{id}/settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "55a871eb-2c0c-4536-87e8-87a36a9b7f39",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "account-settings"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "86be4ba3-8303-4609-9105-2ac305f65d64"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "acceptPaymentsAutomatically": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "acceptPaymentsWhitelist": {
+                              "type": "array",
+                              "items": {},
+                              "example": [
+                                null
+                              ]
+                            },
+                            "allowTagPayments": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "tags": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "updated": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "updated"
+                                ]
+                              },
+                              "example": [
+                                {
+                                  "id": "377e9c50-dd48-4cde-aab3-13c1f0b3c0b0",
+                                  "name": "Tag 1",
+                                  "updated": "2024-10-17T10:30:00.288Z"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TEST/accounts/86be4ba3-8303-4609-9105-2ac305f65d64/settings"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User is not allowed to access this account settings"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "/{code}/accounts/{id}/settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "397f0c6a-e251-4f30-baf2-d008085b3f3a",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "allowTagPayments": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "account-settings"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "86be4ba3-8303-4609-9105-2ac305f65d64"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "acceptPaymentsAutomatically": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "acceptPaymentsWhitelist": {
+                              "type": "array",
+                              "items": {},
+                              "example": [
+                                null
+                              ]
+                            },
+                            "allowTagPayments": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "tags": {
+                              "type": "array",
+                              "items": {},
+                              "example": [
+                                null
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User is not allowed to update this account settings"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/transfers": {
+      "post": {
+        "summary": "/{code}/transfers",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "number",
+                            "example": 100
+                          },
+                          "meta": {
+                            "type": "string",
+                            "example": "Transfer preauthorized with tag"
+                          },
+                          "state": {
+                            "type": "string",
+                            "example": "committed"
+                          },
+                          "authorization": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "example": "tag"
+                              },
+                              "value": {
+                                "type": "string",
+                                "example": "tag-1-1234567890"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "relationships": {
+                        "type": "object",
+                        "properties": {
+                          "payer": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "example": "accounts"
+                                  },
+                                  "id": {
+                                    "type": "string",
+                                    "example": "86be4ba3-8303-4609-9105-2ac305f65d64"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "payee": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "example": "accounts"
+                                  },
+                                  "id": {
+                                    "type": "string",
+                                    "example": "534d5a24-a88f-4f23-8ce5-da1330354844"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "transfers"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "1f05dc58-0d3e-4c30-8ebb-4a97452e3eb0"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string",
+                              "example": "committed"
+                            },
+                            "amount": {
+                              "type": "number",
+                              "example": 100
+                            },
+                            "meta": {
+                              "type": "string",
+                              "example": "Transfer preauthorized with tag"
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:30:04.887Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:30:04.887Z"
+                            },
+                            "hash": {
+                              "type": "string",
+                              "example": "97d1fdd294f571a45d04376984427ff6add15c18c471ff8780ab91b8b11a7374"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TEST/transfers/1f05dc58-0d3e-4c30-8ebb-4a97452e3eb0"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "payer": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "accounts"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "86be4ba3-8303-4609-9105-2ac305f65d64"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "payee": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "accounts"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "534d5a24-a88f-4f23-8ce5-da1330354844"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "fe788e7b-28a8-4e31-84e0-9c41c27c1a4e"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "BadRequest",
+                          "title": "Bad Request",
+                          "detail": ""
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "Invalid authorization"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "404",
+                          "code": "NotFound",
+                          "title": "Not Found",
+                          "detail": "Account id 12345678-1234-1234-1234-123456789012 not found in currency TEST"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "transfers"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "/{code}/transfers",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "properties": {
+              "size": {
+                "type": "string"
+              }
+            },
+            "name": "page",
+            "in": "query",
+            "example": {
+              "size": "3"
+            },
+            "schema": {
+              "type": "object"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "example": "-created",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": "string",
+                          "example": "http://localhost:2025/TEST/transfers?page%5Bsize%5D=3&sort=-created&page%5Bafter%5D=0"
+                        },
+                        "last": {
+                          "example": null,
+                          "nullable": true
+                        },
+                        "prev": {
+                          "example": null,
+                          "nullable": true
+                        },
+                        "next": {
+                          "type": "string",
+                          "example": "http://localhost:2025/TEST/transfers?page%5Bsize%5D=3&sort=-created&page%5Bafter%5D=3"
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "attributes": {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "number"
+                              },
+                              "meta": {
+                                "type": "string"
+                              },
+                              "created": {
+                                "type": "string"
+                              },
+                              "updated": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "links": {
+                            "type": "object",
+                            "properties": {
+                              "self": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "relationships": {
+                            "type": "object",
+                            "properties": {
+                              "payer": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "payee": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "currency": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id",
+                          "attributes",
+                          "links",
+                          "relationships"
+                        ]
+                      },
+                      "example": [
+                        {
+                          "type": "transfers",
+                          "id": "e1e094ae-f16f-48be-9f88-ad9f12a93fce",
+                          "attributes": {
+                            "state": "new",
+                            "amount": 100,
+                            "meta": "Get transfer",
+                            "created": "2024-10-17T10:31:01.143Z",
+                            "updated": "2024-10-17T10:31:01.143Z"
+                          },
+                          "links": {
+                            "self": "http://localhost:2025/TEST/transfers/e1e094ae-f16f-48be-9f88-ad9f12a93fce"
+                          },
+                          "relationships": {
+                            "payer": {
+                              "data": {
+                                "type": "accounts",
+                                "id": "7dd39861-844e-4992-b4ee-d8bff4e00c50"
+                              }
+                            },
+                            "payee": {
+                              "data": {
+                                "type": "accounts",
+                                "id": "776edbba-68f0-46ad-bc23-4a739cbe30b8"
+                              }
+                            },
+                            "currency": {
+                              "data": {
+                                "type": "currencies",
+                                "id": "5e6f4711-6dee-479f-b168-e91427c19724"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "included": {
+                      "type": "array",
+                      "items": {},
+                      "example": [
+                        null
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "transfers"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/transfers/{id}": {
+      "patch": {
+        "summary": "/{code}/transfers/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "61a887e5-baad-4a92-8d27-2b577e693187",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "example": "committed"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "transfers"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "baaaedff-bef8-460f-bb73-b041e0bfbd35"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string",
+                              "example": "committed"
+                            },
+                            "amount": {
+                              "type": "number",
+                              "example": 30
+                            },
+                            "meta": {
+                              "type": "string",
+                              "example": "Two-step transfer"
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:30:53.386Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:30:53.665Z"
+                            },
+                            "hash": {
+                              "type": "string",
+                              "example": "97afbdc79ff74847b7b0f4343d949148f37e892315485adb9fbbc3eb6d876446"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TEST/transfers/baaaedff-bef8-460f-bb73-b041e0bfbd35"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "payer": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "accounts"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "7dd39861-844e-4992-b4ee-d8bff4e00c50"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "payee": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "accounts"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "776edbba-68f0-46ad-bc23-4a739cbe30b8"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "5e6f4711-6dee-479f-b168-e91427c19724"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "FieldValidationError",
+                          "title": "Field validation Error",
+                          "detail": "Field data.attributes.amount is invalid in request body."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User is not allowed to change payer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "404",
+                          "code": "NotFound",
+                          "title": "Not Found",
+                          "detail": "Account id 12345678-1234-1234-1234-123456789012 not found in currency TEST"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "transfers"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "/{code}/transfers/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "ad65cad6-5f05-402d-9e13-3861a593f61b",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "integer",
+                  "example": 0
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "BadRequest",
+                          "title": "Bad Request",
+                          "detail": "Invalid state transition from committed to deleted"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User is not allowed to delete this transfer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "transfers"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "/{code}/transfers/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "TEST",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "61a887e5-baad-4a92-8d27-2b577e693187",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "example": "payee",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "transfers"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "e1e094ae-f16f-48be-9f88-ad9f12a93fce"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string",
+                              "example": "new"
+                            },
+                            "amount": {
+                              "type": "number",
+                              "example": 100
+                            },
+                            "meta": {
+                              "type": "string",
+                              "example": "Get transfer"
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:31:01.143Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:31:01.143Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/TEST/transfers/e1e094ae-f16f-48be-9f88-ad9f12a93fce"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "payer": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "accounts"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "7dd39861-844e-4992-b4ee-d8bff4e00c50"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "payee": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "accounts"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "776edbba-68f0-46ad-bc23-4a739cbe30b8"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "5e6f4711-6dee-479f-b168-e91427c19724"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "included": {
+                      "type": "array",
+                      "items": {},
+                      "example": [
+                        null
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User is not allowed to access this transfer"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "transfers"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/trustlines": {
+      "post": {
+        "summary": "/{code}/trustlines",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "EXTR",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "limit": {
+                            "type": "number",
+                            "example": 1000
+                          }
+                        }
+                      },
+                      "relationships": {
+                        "type": "object",
+                        "properties": {
+                          "trusted": {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "example": "currencies"
+                                  },
+                                  "id": {
+                                    "type": "string",
+                                    "example": "585bdb26-6e22-41ce-a677-85d8bf70a889"
+                                  },
+                                  "meta": {
+                                    "type": "object",
+                                    "properties": {
+                                      "external": {
+                                        "type": "boolean",
+                                        "example": true
+                                      },
+                                      "href": {
+                                        "type": "string",
+                                        "example": "http://localhost:2025/TEST/currency"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "trustlines"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "79c07b98-5a60-43ca-91d7-58fda85e15e5"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "number",
+                              "example": 1000
+                            },
+                            "balance": {
+                              "type": "number",
+                              "example": 0
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:32:43.097Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:32:43.097Z"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "476b2111-6778-4e76-b212-400dbdc1945c"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "trusted": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "585bdb26-6e22-41ce-a677-85d8bf70a889"
+                                    },
+                                    "meta": {
+                                      "type": "object",
+                                      "properties": {
+                                        "external": {
+                                          "type": "boolean",
+                                          "example": true
+                                        },
+                                        "href": {
+                                          "type": "string",
+                                          "example": "http://localhost:2025/TEST/currency"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "trustlines"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "/{code}/trustlines",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "EXTR",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "links": {
+                      "type": "object",
+                      "properties": {
+                        "first": {
+                          "type": "string",
+                          "example": "http://localhost:2025/EXTR/trustlines?page%5Bafter%5D=0"
+                        },
+                        "last": {
+                          "example": null,
+                          "nullable": true
+                        },
+                        "prev": {
+                          "example": null,
+                          "nullable": true
+                        },
+                        "next": {
+                          "example": null,
+                          "nullable": true
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "attributes": {
+                            "type": "object",
+                            "properties": {
+                              "limit": {
+                                "type": "number"
+                              },
+                              "balance": {
+                                "type": "number"
+                              },
+                              "created": {
+                                "type": "string"
+                              },
+                              "updated": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "links": {
+                            "type": "object",
+                            "properties": {
+                              "self": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "relationships": {
+                            "type": "object",
+                            "properties": {
+                              "currency": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "trusted": {
+                                "type": "object",
+                                "properties": {
+                                  "data": {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "meta": {
+                                        "type": "object",
+                                        "properties": {
+                                          "external": {
+                                            "type": "boolean"
+                                          },
+                                          "href": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "type": "trustlines",
+                          "id": "79c07b98-5a60-43ca-91d7-58fda85e15e5",
+                          "attributes": {
+                            "limit": 1000,
+                            "balance": 0,
+                            "created": "2024-10-17T10:32:43.097Z",
+                            "updated": "2024-10-17T10:32:43.097Z"
+                          },
+                          "links": {
+                            "self": "http://localhost:2025/EXTR/trustlines/79c07b98-5a60-43ca-91d7-58fda85e15e5"
+                          },
+                          "relationships": {
+                            "currency": {
+                              "data": {
+                                "type": "currencies",
+                                "id": "476b2111-6778-4e76-b212-400dbdc1945c"
+                              }
+                            },
+                            "trusted": {
+                              "data": {
+                                "type": "currencies",
+                                "id": "585bdb26-6e22-41ce-a677-85d8bf70a889",
+                                "meta": {
+                                  "external": true,
+                                  "href": "http://localhost:2025/TEST/currency"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "included": {
+                      "type": "array",
+                      "items": {},
+                      "example": [
+                        null
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "trustlines"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/trustlines/{id}": {
+      "get": {
+        "summary": "/{code}/trustlines/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "EXTR",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "example": "79c07b98-5a60-43ca-91d7-58fda85e15e5",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "trustlines"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "79c07b98-5a60-43ca-91d7-58fda85e15e5"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "number",
+                              "example": 1000
+                            },
+                            "balance": {
+                              "type": "number",
+                              "example": 0
+                            },
+                            "created": {
+                              "type": "string",
+                              "example": "2024-10-17T10:32:43.097Z"
+                            },
+                            "updated": {
+                              "type": "string",
+                              "example": "2024-10-17T10:32:43.097Z"
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "self": {
+                              "type": "string",
+                              "example": "http://localhost:2025/EXTR/trustlines/79c07b98-5a60-43ca-91d7-58fda85e15e5"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "476b2111-6778-4e76-b212-400dbdc1945c"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "trusted": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "currencies"
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "585bdb26-6e22-41ce-a677-85d8bf70a889"
+                                    },
+                                    "meta": {
+                                      "type": "object",
+                                      "properties": {
+                                        "external": {
+                                          "type": "boolean",
+                                          "example": true
+                                        },
+                                        "href": {
+                                          "type": "string",
+                                          "example": "http://localhost:2025/TEST/currency"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "included": {
+                      "type": "array",
+                      "items": {},
+                      "example": [
+                        null
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "trustlines"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/migrations": {
+      "post": {
+        "summary": "/migrations",
+        "responses": {},
+        "tags": [
+          "migrations"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://accounting.komunitin.org",
+      "description": "Production server"
+    },
+    {
+      "url": "https://accounting.demo.komunitin.org",
+      "description": "Demo server"
+    },
+    {
+      "url": "http://localhost:2025",
+      "description": "Local development server"
+    },
+    {
+      "url": "http://127.0.0.1:45881"
+    }
+  ],
+  "tags": [
+    {
+      "name": "currencies"
+    },
+    {
+      "name": "currency"
+    },
+    {
+      "name": "accounts"
+    },
+    {
+      "name": "transfers"
+    },
+    {
+      "name": "trustlines"
+    },
+    {
+      "name": "migrations"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "authorization": {
+        "name": "authorization",
+        "in": "header",
+        "type": "apiKey"
+      }
+    }
+  }
+}

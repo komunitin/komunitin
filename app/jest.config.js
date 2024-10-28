@@ -43,7 +43,7 @@ module.exports = {
     'cjs'
   ],
   moduleNameMapper: {
-    '^quasar$': 'quasar/dist/quasar.esm.prod.js',
+    '^quasar$': 'quasar/dist/quasar.client.js',
     '^~/(.*)$': '<rootDir>/$1',
     '^src/(.*)$': '<rootDir>/src/$1',
     '^app/(.*)$': '<rootDir>/$1',
@@ -57,7 +57,7 @@ module.exports = {
   transform: {
     '.*\\.vue$': '@vue/vue3-jest',
     // See https://jestjs.io/docs/en/configuration.html#transformignorepatterns-array-string
-    [`^(${esModules}).+\\.js$`]: 'babel-jest',
+    '.*\\.js$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
     '^.+\\.tsx?$': ['ts-jest', 
       // Remove if using `const enums`
@@ -71,7 +71,7 @@ module.exports = {
   moduleDirectories: [
     '<rootDir>/node_modules',
   ],
-  preset: 'ts-jest/presets/js-with-babel',
+  //preset: 'ts-jest/presets/js-with-babel',
   testEnvironmentOptions: {
     customExportConditions: ["node", "node-addons"],
   },

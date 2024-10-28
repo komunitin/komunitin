@@ -16,9 +16,9 @@ import { collectionParams, resourceParams } from './request';
 export function getRoutes(controller: SharedController) {
   const router = Router()
 
-  router.get('/', noAuth(), (req, res) => {
-    res.json({ message: 'Welcome to the Komunitin accounting API.' });
-  })
+  router.get('/', noAuth(), asyncHandler(async (req, res) => {
+    res.json({ message: 'Welcome to the Komunitin accounting API.' })
+  }))
 
   // Create currency
   router.post('/currencies', userAuth(Scope.Accounting), checkExact(Validators.isCreateCurrency()), asyncHandler(async (req, res) => {
