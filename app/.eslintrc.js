@@ -1,3 +1,8 @@
+// This config file is to be replaced by eslint.config.mjs which is compatible with
+// newer versions of eslint. However, @quasar-app uses a dependency that still expects
+// this old version of the config file. This config file can be deleted when updating
+// to @quasar/app-webpack v4.
+
 module.exports = {
   root: true,
 
@@ -28,6 +33,7 @@ module.exports = {
   plugins: [
     // Required to apply rules which need type information
     "@typescript-eslint",
+    "@stylistic",
     // Required to lint *.vue files
     // See https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-file
     "vue"
@@ -65,7 +71,7 @@ module.exports = {
   rules: {
     "prefer-promise-reject-errors": "off",
     // quotes: ["warn", "single"],
-    "@typescript-eslint/indent": ["warn", 2],
+    "@stylistic/indent": ["warn", 2],
 
     // allow console.log during development only
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",

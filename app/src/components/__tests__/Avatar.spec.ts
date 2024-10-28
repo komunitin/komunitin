@@ -3,10 +3,10 @@ import Avatar from "../Avatar.vue";
 import {QAvatar, Quasar} from "quasar";
 
 describe("SimpleMap", () => {  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const quasarPlugin: [typeof Quasar, any] = [Quasar, {
+   
+  const quasarPlugin = [Quasar, {
     components: { QAvatar }
-  }]
+  }] as [typeof Quasar, unknown]
 
   it("Renders image", async () => {
     const wrapper = mount(Avatar, {

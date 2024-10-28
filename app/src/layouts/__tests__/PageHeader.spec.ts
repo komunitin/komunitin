@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { config, mount, VueWrapper } from "@vue/test-utils";
 import { createStore, Store } from "vuex";
 
@@ -42,7 +42,7 @@ jest.mock('vue-router', () => ({
 describe("PageHeader", () => {
   let wrapper: VueWrapper;
   let toogleDrawer: () => void;
-  let store : Store<any>;
+  let store : Store<unknown>;
 
   beforeEach(() => {
     toogleDrawer = jest.fn();

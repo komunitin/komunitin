@@ -13,6 +13,8 @@ import firebaseConfig from '../src/plugins/FirebaseConfig'
 import store from "../src/store"
 import { notificationBuilder } from './notifications'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 (self as any).skipWaiting()
 clientsClaim()
 
@@ -58,6 +60,7 @@ onBackgroundMessage(messaging, async (payload) => {
     const {title, options} = await notification(payload)
     return (self as any).registration.showNotification(title, options)
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error)
   }
 })

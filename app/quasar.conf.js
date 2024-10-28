@@ -89,7 +89,9 @@ module.exports = configure(function(ctx) {
       chainWebpack (chain) {
         chain
           .plugin('eslint-webpack-plugin')
-          .use(ESLintPlugin, [{ extensions: ['ts', 'vue'] }])
+          .use(ESLintPlugin, [{
+            extensions: ['ts', 'vue']
+          }])
         // Ignore "leaflet" import since both we and the vue-leaflet module are using the 
         // leaflet.esm.js file, but in one place vue-leaflet conditionally loads "leaflet"
         // and we would end up with duplicated library (hence innecessarily bloating bundle 
