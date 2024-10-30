@@ -29,3 +29,12 @@ export const recordToExternalResource = <T>(record: ExternalResourceRecord): Ext
   href: record.href,
   resource: record.resource as T
 })
+
+export const externalResourceToIdentifier = (resource: ExternalResource<any>): ExternalResourceIdentifier => ({
+  id: resource.id,
+  type: resource.type,
+  meta: {
+    external: true,
+    href: resource.href
+  }
+})

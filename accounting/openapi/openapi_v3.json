@@ -734,6 +734,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "example": "settings",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1018,7 +1026,7 @@
             "name": "code",
             "in": "path",
             "required": true,
-            "example": "EXTR",
+            "example": "TES2",
             "schema": {
               "type": "string"
             }
@@ -1365,6 +1373,331 @@
                           "code": "Forbidden",
                           "title": "Forbidden",
                           "detail": "User not found in currency TES2"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "404",
+                          "code": "NotFound",
+                          "title": "Not Found",
+                          "detail": "Currency with code TES2 not found"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "currency"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/currency/settings": {
+      "get": {
+        "summary": "/{code}/currency/settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "tags": [
+          "currency"
+        ]
+      },
+      "patch": {
+        "summary": "/{code}/currency/settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "example": "EXTR",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "defaultOnPaymentCreditLimit": {
+                            "type": "number",
+                            "example": 1300
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "currency-settings"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "f3eeabe3-2772-49ae-be20-437a066f9a38"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "defaultAllowPayments": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "enableExternalPayments": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "defaultAllowTagPayments": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "defaultInitialCreditLimit": {
+                              "type": "number",
+                              "example": 1000
+                            },
+                            "externalTraderCreditLimit": {
+                              "type": "number",
+                              "example": 1000
+                            },
+                            "defaultAcceptPaymentsAfter": {
+                              "type": "number",
+                              "example": 1209600
+                            },
+                            "defaultAllowPaymentRequests": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "defaultOnPaymentCreditLimit": {
+                              "type": "number",
+                              "example": 1300
+                            },
+                            "defaultAllowExternalPayments": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "enableExternalPaymentRequests": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "defaultAcceptPaymentsWhitelist": {
+                              "type": "array",
+                              "items": {},
+                              "example": [
+                                null
+                              ]
+                            },
+                            "defaultAllowTagPaymentRequests": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "defaultAcceptPaymentsAutomatically": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "defaultAllowExternalPaymentRequests": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "defaultAcceptExternalPaymentsAutomatically": {
+                              "type": "boolean",
+                              "example": false
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "BadRequest",
+                          "title": "Bad Request",
+                          "detail": ""
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "403",
+                          "code": "Forbidden",
+                          "title": "Forbidden",
+                          "detail": "User not found in currency TES2"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "404",
+                          "code": "NotFound",
+                          "title": "Not Found",
+                          "detail": "Currency with code TES2 not found"
                         }
                       ]
                     }
@@ -1868,7 +2201,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "6c2b269c-c7cf-4f53-9858-c14eddfd60ad",
+            "example": "d6faa6d6-21cf-482a-9e31-17b6f94877a9",
             "schema": {
               "type": "string"
             }
@@ -2059,7 +2392,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "7dd39861-844e-4992-b4ee-d8bff4e00c50",
+            "example": "27b6e026-6948-4261-9a02-1267cbbd0ba5",
             "schema": {
               "type": "string"
             }
@@ -2341,7 +2674,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "e1c8ba1c-d259-4dc2-be3f-c7900475bc74",
+            "example": "e28c0a8b-f530-4729-a655-9428c0be1a56",
             "schema": {
               "type": "string"
             }
@@ -2430,7 +2763,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "55a871eb-2c0c-4536-87e8-87a36a9b7f39",
+            "example": "d0f50666-e329-4b71-b4d2-8c651ef1b570",
             "schema": {
               "type": "string"
             }
@@ -2589,7 +2922,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "397f0c6a-e251-4f30-baf2-d008085b3f3a",
+            "example": "f38e4781-0dad-4dc1-b619-25c17f50b16b",
             "schema": {
               "type": "string"
             }
@@ -3332,7 +3665,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "61a887e5-baad-4a92-8d27-2b577e693187",
+            "example": "12556428-5d31-4a91-bbb3-ec4f1167d61a",
             "schema": {
               "type": "string"
             }
@@ -3636,7 +3969,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "ad65cad6-5f05-402d-9e13-3861a593f61b",
+            "example": "54511634-08ba-4c16-ba3d-972be39822d1",
             "schema": {
               "type": "string"
             }
@@ -3763,7 +4096,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "61a887e5-baad-4a92-8d27-2b577e693187",
+            "example": "12556428-5d31-4a91-bbb3-ec4f1167d61a",
             "schema": {
               "type": "string"
             }
@@ -4352,7 +4685,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "79c07b98-5a60-43ca-91d7-58fda85e15e5",
+            "example": "d36f1173-ccfe-46a9-9995-c0c0d32800f6",
             "schema": {
               "type": "string"
             }
@@ -4486,6 +4819,31 @@
           {
             "authorization": []
           }
+        ]
+      },
+      "patch": {
+        "summary": "/{code}/trustlines/{id}",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "tags": [
+          "trustlines"
         ]
       }
     },

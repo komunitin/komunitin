@@ -4,7 +4,7 @@
     v-model="account"
     :options="options"
     use-input
-    :option-disable="accountDisabled"
+    :option-disable="isAccountDisabled"
     :loading="loading"
     :input-debounce="0"
     input-style="position: absolute"
@@ -29,13 +29,13 @@
       />
     </template>
     <template #before-options>
-      <select-group
+      <select-group-expansion
         v-model="group"
         :payer="payer"
       />
     </template>
     <template #no-option>
-      <select-group
+      <select-group-expansion
         v-model="group"
         :payer="payer"
       />
@@ -56,7 +56,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { Account, Currency, Group, Member } from 'src/store/model';
 import AccountHeader from './AccountHeader.vue';
-import SelectGroup from './SelectGroup.vue';
+import SelectGroupExpansion from './SelectGroupExpansion.vue';
 import { useStore } from 'vuex'
 import { QSelect } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
@@ -71,6 +71,7 @@ const props = defineProps<{
   code: string,
   payer: boolean
   lazy?: boolean
+  accountDisabled?: (account: Account) => boolean
 }>()
 
 const emit = defineEmits<{
@@ -191,8 +192,6 @@ const loadNextPage = async () => {
     loading.value = true
     if (store.getters["members/hasNext"]) {
       await store.dispatch("members/loadNext", {
-        group: group.value.attributes.code,
-        include: "account",
         cache: 1000*60*5
       });
     }
@@ -239,8 +238,13 @@ const onScroll = async({to, direction}: {to:number, direction: string}) => {
 
 // Show logged in account as disabled.
 const myAccount = computed(() => store.getters.myAccount)
-const accountDisabled = (account: Account) => {
-  return account.id == myAccount.value?.id
+
+const isAccountDisabled = (account: Account) => {
+  if (props.accountDisabled) {
+    return props.accountDisabled(account)
+  } else {
+    return account.id == myAccount.value?.id
+  }
 }
 
 const { t } = useI18n()

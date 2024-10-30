@@ -210,9 +210,6 @@ export default defineComponent({
     async loadNext(index: number, done: (stop?: boolean) => void) {
       if (this.$store.getters[this.moduleName + "/hasNext"]) {
         await this.$store.dispatch(this.moduleName + "/loadNext", {
-          group: this.code,
-          include: this.include,
-          sort: this.sort,
           cache: this.cache
         });
         this.$emit("page-loaded", this.storeState.currentPage);

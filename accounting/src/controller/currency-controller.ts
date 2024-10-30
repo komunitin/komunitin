@@ -1,14 +1,15 @@
 import { Keypair } from "@stellar/stellar-sdk";
 import Big from "big.js";
 import type { KeyObject } from "node:crypto";
-import { recordToExternalResource } from "src/model/resource";
-import { InputTrustline, Trustline, recordToTrustline } from "src/model/trustline";
+import { externalResourceToIdentifier, recordToExternalResource } from "src/model/resource";
+import { InputTrustline, Trustline, UpdateTrustline, recordToTrustline } from "src/model/trustline";
 import TypedEmitter from "typed-emitter";
 import { ControllerEvents, CurrencyController } from ".";
 import { LedgerCurrency, LedgerCurrencyState, LedgerTransfer } from "../ledger";
 import {
   Account,
   Currency,
+  CurrencySettings,
   UpdateCurrency,
   currencyToRecord,
   recordToCurrency
@@ -18,7 +19,7 @@ import { Context, systemContext } from "../utils/context";
 import { badRequest, notFound, notImplemented } from "../utils/error";
 import { AtLeast } from "../utils/types";
 import { AccountController } from "./account-controller";
-import { ExternalResourceController, fetchExternalResource } from "./external-resource-controller";
+import { ExternalResourceController } from "./external-resource-controller";
 import { KeyController } from "./key-controller";
 import { TenantPrismaClient } from "./multitenant";
 import { whereFilter } from "./query";
@@ -63,6 +64,16 @@ export class LedgerCurrencyController implements CurrencyController {
     this.externalResources = new ExternalResourceController(this)
   }
 
+  /**
+   * Implements {@link CurrencyController.getCurrency}
+   */
+  public async getCurrency(_ctx: Context): Promise<Currency> {
+    return this.model
+  }
+
+  /**
+   * Implements {@link CurrencyController.updateCurrency}
+   */
   async updateCurrency(ctx: Context, currency: UpdateCurrency) {
     await this.users.checkAdmin(ctx)
 
@@ -72,17 +83,14 @@ export class LedgerCurrencyController implements CurrencyController {
     if (currency.id && currency.id !== this.model.id) {
       throw badRequest("Can't change currency id")
     }
+    if (currency.settings) {
+      throw badRequest("Can't change the currency sattettings through currency update")
+    }
+    
     if (currency.rate && (currency.rate.n !== this.model.rate.n || currency.rate.d !== this.model.rate.d)) {
       throw notImplemented("Change the currency rate not implemented yet")
     }
-    
-    // Merge settings with existing settings as otherwise the DB will overwrite the whole settings object.
-    if (currency.settings !== undefined) {
-      currency.settings = {
-        ...this.model.settings,
-        ...(currency.settings)
-      }
-    }
+
     const data = currencyToRecord(currency)
     const record = await this.db.currency.update({
       data,
@@ -100,12 +108,38 @@ export class LedgerCurrencyController implements CurrencyController {
 
     return this.model
   }
-
   /**
-   * Implements {@link CurrencyController.getCurrency}
+   * Implements {@link CurrencyController.getCurrencySettings}
    */
-  public async getCurrency(_ctx: Context): Promise<Currency> {
-    return this.model
+  public async getCurrencySettings(ctx: Context) {
+    // Maybe we could relax that and allow public access to *read* currency settings.
+    await this.users.checkUser(ctx)
+    return this.model.settings
+  }
+  /**
+   * Implements {@link CurrencyController.updateCurrencySettings}
+   */
+  public async updateCurrencySettings(ctx: Context, settings: CurrencySettings) {
+    await this.users.checkAdmin(ctx)
+    const {id, ...settingsFields} = settings
+    // Merge the settings since the DB is a JSON field.
+    const updatedSettings = {
+      ...this.model.settings,
+      ...settingsFields
+    }
+    const record = await this.db.currency.update({
+      data: {
+        settings: updatedSettings
+      },
+      where: {
+        id: this.model.id
+      },
+      include: {
+        externalAccount: true
+      }
+    })
+    this.model = recordToCurrency(record)
+    return this.model.settings
   }
 
   async updateState(state: LedgerCurrencyState) {
@@ -115,8 +149,6 @@ export class LedgerCurrencyController implements CurrencyController {
     })
     this.model.state = state
   }
-  
-  
 
   public amountToLedger(amount: number) {
     return amountToLedger(this.model, amount)
@@ -164,6 +196,37 @@ export class LedgerCurrencyController implements CurrencyController {
     })
     const trustline = recordToTrustline(record, trustedExternalResource, this.model)
     return trustline
+  }
+
+  async updateTrustline(ctx: Context, data: UpdateTrustline): Promise<Trustline> {
+    await this.users.checkAdmin(ctx)
+    // get the trustline object
+    const existing = await this.getTrustline(ctx, data.id)
+    if (!existing) {
+      throw notFound(`Trustline ${data.id} not found`)
+    }
+    const externalIdentifier = externalResourceToIdentifier(existing.trusted)
+    const trustedExternalResource = await this.externalResources.getExternalResource<Currency>(ctx, externalIdentifier)
+    const trustedCurrency = trustedExternalResource.resource
+    // Update the trustline in the ledger
+    await this.ledger.trustCurrency({
+      trustedPublicKey: trustedCurrency.keys?.externalIssuer as string,
+      limit: this.amountToLedger(data.limit)
+    }, {
+      sponsor: await this.keys.sponsorKey(),
+      externalTrader: await this.keys.externalTraderKey(),
+      externalIssuer: await this.keys.externalIssuerKey()
+    })
+    // Update the trustline in the DB
+    const record = await this.db.trustline.update({
+      data: {
+        limit: data.limit
+      },
+      where: {
+        id: data.id
+      }
+    })
+    return recordToTrustline(record, trustedExternalResource, this.model)
   }
 
   async getTrustlines(ctx: Context, params: CollectionOptions): Promise<Trustline[]> {

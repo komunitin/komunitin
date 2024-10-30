@@ -1,5 +1,5 @@
 import { body } from "express-validator"
-
+import { isInt } from "validator/es/lib/isInt"
 
 export namespace Validators {
   
@@ -21,7 +21,7 @@ export namespace Validators {
     ...jsonApiResource("data.*", type),
   ]
 
-  const isUpdateCurrencySettings = (path: string) => [
+  const isUpdateCurrencySettingsAttributes = (path: string) => [
     body(`${path}.defaultInitialCreditLimit`).optional().isInt({min: 0}).default(0),
     body(`${path}.defaultInitialMaximumBalance`).optional().isInt({min: 0}),
     body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),
@@ -50,7 +50,6 @@ export namespace Validators {
     body(`${path}.scale`).optional().isInt({max: 12, min: 0}),
     body(`${path}.rate.n`).optional().isInt({min: 1}).default(1),
     body(`${path}.rate.d`).optional().isInt({min: 1}).default(1),
-    ...isUpdateCurrencySettings(`${path}.settings`),
   ]
 
   const isCreateCurrencyAttributesExist = (path: string) => [
@@ -73,9 +72,16 @@ export namespace Validators {
     body(`${path}.relationships.${name}.data.*.type`).equals(type),
   ]
 
+  const isSingleRelationship = (path: string, name: string, type: string) => [
+    body(`${path}.relationships.${name}`).optional(),
+    body(`${path}.relationships.${name}.data.id`).isString().notEmpty(),
+    body(`${path}.relationships.${name}.data.type`).equals(type),
+  ]
+
   const isIncludedTypes = (types: string[]) => [
     body("included.*.type").isIn(types),
     body("included.*.id").isString().notEmpty(),
+    body("included.*.attributes").optional().isObject(),
   ]
 
   export const isCreateCurrency = () => [
@@ -83,13 +89,35 @@ export namespace Validators {
     ...isCreateCurrencyAttributesExist("data.attributes"),
     ...isUpdateCurrencyAttributes("data.attributes"),
     ...isCollectionRelationship("data", "admins", "users"),
-    ...isIncludedTypes(["users"]),
+    ...isSingleRelationship("data", "settings", "currency-settings"),
+    ...isIncludedTypes(["users", "currency-settings"]),
+
+    // TODO: Add validation for included currency-settings attributes.
+    // It happens that express-validator is not well suited for nested
+    // validation so we should switch to a more flexible library.
+    body("included.*")
+      .if(value => typeof value === 'object' && value.type === "currency-settings")
+      .customSanitizer(value => {
+        return {
+          ...value,
+          attributes: {
+            ...value.attributes,
+            defaultInitialCreditLimit: value.attributes.defaultInitialCreditLimit || 0
+          }
+        }
+      })
   ]
 
   export const isUpdateCurrency = () => [
     ...jsonApiDoc("currencies"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
-    ...isUpdateCurrencyAttributes(`data.attributes`),
+    ...isUpdateCurrencyAttributes("data.attributes"),
+  ]
+
+  export const isUpdateCurrencySettings = () => [
+    ...jsonApiDoc("currency-settings"),
+    body("data.id").optional().isUUID(), // id optional as currency is identified by route.
+    ...isUpdateCurrencySettingsAttributes("data.attributes"),
   ]
 
   const isUpdateAccountAttibutes = (path: string) => [
@@ -220,12 +248,14 @@ export namespace Validators {
     ...isCreateMigrationAttributes("data.attributes"),
   ]
 
-  export const isCreateTrustline = () => [
+  export const isUpdateTrustline = () => [
     ...jsonApiDoc("trustlines"),
     body("data.id").optional().isUUID(),
     body("data.attributes.limit").isInt({min: 0}),
+  ]
+
+  export const isCreateTrustline = () => [
+    ...isUpdateTrustline(),
     ...isExternalResourceId("data.relationships.trusted", "currencies"),
   ]
 }
-
-

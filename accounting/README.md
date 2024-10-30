@@ -15,9 +15,29 @@ $ pnpm dev
 ```
 
 ## Test
-Execute the tests:
+Execute all the tests:
 ```bash
 $ pnpm test
+```
+### Unit tests
+```bash
+$ pnpm test-unit
+```
+
+### Ledger tests
+Tests involving only the Stellar integration but not the server.
+```bash
+$ pnpm test-ledger
+```
+### Server tests
+Tests involving the whole service
+```bash
+$ pnpm test-server
+```
+
+### Run just one test
+```bash
+$ pnpm test-one <test-file>
 ```
 
 ## Stellar

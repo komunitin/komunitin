@@ -99,11 +99,7 @@ watchEffect(() => {
 })
 
 const onFilled = (value: DeepPartial<Transfer>) => {
-  // This operation is not the same as just doing transfer.value = value,
-  // because the store adds some attributes to the transfer (such as transfer.payer, etc).
-  store.dispatch("transfers/setCurrent", value)
-  transfer.value = store.getters["transfers/current"]
-  
+  transfer.value = value
   state.value = "confirm"
 }
 

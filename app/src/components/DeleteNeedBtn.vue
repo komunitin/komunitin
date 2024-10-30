@@ -37,6 +37,7 @@ const router = useRouter()
 const deleteNeed = async () => {
   if (!props.need.attributes?.code) return
   await store.dispatch('needs/delete', {
+    // TODO: Use the need id
     id: props.need.attributes.code,
     group: props.code
   })

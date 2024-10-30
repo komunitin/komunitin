@@ -28,17 +28,17 @@ const mountResource = <D extends Resource>(data: Resource, included?: Resource[]
   let relationships: Resource = {}
   if (data.relationships) {
     Object.entries(data.relationships).forEach(([key, value]: [string, any]) => {
-      if (!value.data) {
-        throw badRequest("Relationships must have a 'data' key")
+      if (value.data) {
+        // If the relationship includes linkage data, try finding the included resource from the included array.
+        const includedResource = (resourceId: RelatedResource) => {
+          const resource = included?.find(resource => resource.id === resourceId.id && resource.type === resourceId.type)
+          return resource ? mountResource(resource, included, depth + 1) : resourceId
+        }
+        const includedResources = (resourceIds: RelatedResource[]) => {
+          return resourceIds.map(resourceId => includedResource(resourceId))
+        }
+        relationships[key] = Array.isArray(value.data) ? includedResources(value.data) : includedResource(value.data)
       }
-      const includedResource = (resourceId: RelatedResource) => {
-        const resource = included?.find(resource => resource.id === resourceId.id && resource.type === resourceId.type)
-        return resource ? mountResource(resource, included, depth + 1) : resourceId
-      }
-      const includedResources = (resourceIds: RelatedResource[]) => {
-        return resourceIds.map(resourceId => includedResource(resourceId))
-      }
-      relationships[key] = Array.isArray(value.data) ? includedResources(value.data) : includedResource(value.data)
     })
   }
 

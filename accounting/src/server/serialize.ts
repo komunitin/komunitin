@@ -1,7 +1,7 @@
 import { ExternalResource } from 'src/model/resource';
 import { Trustline } from 'src/model/trustline';
 import { Linker, Metaizer, Relator, Serializer, SerializerOptions } from 'ts-japi';
-import { Account, AccountSettings, Currency, Transfer, User } from '../model';
+import { Account, AccountSettings, Currency, CurrencySettings, Transfer, User } from '../model';
 import { config } from 'src/config';
 
 const projection = <T>(fields: (keyof T)[]) => {
@@ -20,19 +20,36 @@ const externalResourceSerializer = <T>(type: string) => new Serializer<ExternalR
   }
 })
 
-
-
 export const UserSerializer = externalResourceSerializer("users")
+
+export const CurrencySettingsSerializer = new Serializer<CurrencySettings>("currency-settings", {
+  version: null
+})
 
 // JSON:API resource serializers
 export const CurrencySerializer = new Serializer<Currency>("currencies", {
   version: null,
   projection: projection<Currency>(['code', 'status', 'name', 'namePlural', 
-    'symbol', 'decimals', 'scale', 'rate', 'keys', 'settings', 'created', 'updated']),
+    'symbol', 'decimals', 'scale', 'rate', 'keys', 'created', 'updated']),
   relators: {
     admins: new Relator<Currency,User>(async (currency) => {
       return currency.admin ? [currency.admin] : undefined
-    }, UserSerializer, { relatedName: "admins" })
+    }, UserSerializer, { relatedName: "admins" }),
+    settings: new Relator<Currency,CurrencySettings>(async (currency) => {
+      return currency.settings
+    }, CurrencySettingsSerializer, { relatedName: "settings" }),
+    accounts: new Relator<Currency,Account>(async () => undefined, undefined as any, {
+      relatedName: "accounts",
+      linkers: {
+        related: new Linker((currency: Currency) => `${config.API_BASE_URL}/${currency.code}/accounts`)
+      }
+    }),
+    trustlines: new Relator<Currency,Trustline>(async () => undefined, undefined as any, {
+      relatedName: "trustlines",
+      linkers: {
+        related: new Linker((currency: Currency) => `${config.API_BASE_URL}/${currency.code}/trustlines`)
+      }
+    }),
   },
   linkers: {
     resource: new Linker((currency: Currency) => `${config.API_BASE_URL}/${currency.code}/currency`)

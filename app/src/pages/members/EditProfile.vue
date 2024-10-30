@@ -2,7 +2,7 @@
   <page-header 
     :title="$t('editProfile')" 
     balance 
-    :back="`/groups/${code}/members/${memberCode}`"
+    :back="`/groups/${actualCode}/members/${actualMemberCode}`"
   />
   <q-page-container class="row justify-center">
     <q-page 
@@ -10,7 +10,7 @@
       class="q-py-lg q-px-md col-12 col-sm-8 col-md-6 q-mb-xl"
     >
       <profile-form 
-        v-if="member" 
+        v-if="member && user" 
         :member="member"
         :contacts="member.contacts"
         :user="user"
@@ -34,44 +34,39 @@ import { useStore } from "vuex"
 import { computed, ref } from "vue"
 import { DeepPartial } from "quasar"
 
-import { Contact, Member } from "../../store/model"
+import { Contact, Group, Member } from "../../store/model"
+import { useFullMemberByCode } from "src/composables/fullMember"
+
+const props = defineProps<{
+  code?: string,
+  memberCode?: string
+}>()
 
 const store = useStore()
 
-const myMember = computed(() => store.getters.myMember)
-const code = computed(() => myMember.value.group.attributes.code)
-const memberCode = computed(() => myMember.value.attributes.code)
+const { user, member } = useFullMemberByCode(() => props.code, () => props.memberCode)
 
-const member = ref()
-const user = ref()
-
-const loadMember = async () => {
-  await store.dispatch("members/load", {
-    id: myMember.value.id,
-    group: code.value,
-    include: "contacts,group"
-  })
-  user.value = store.getters.myUser
-  member.value = myMember.value
-}
+const actualCode = computed(() => (member.value as (Member & {group: Group}))?.group.attributes.code)
+const actualMemberCode = computed(() => member.value?.attributes.code)
 
 const changes = ref<typeof SaveChanges>()
 
 const saveMember = async (resource: DeepPartial<Member>) => {
   const fn = () => store.dispatch("members/update", {
-    id: myMember.value.id,
-    group: code.value,
+    id: member.value?.id,
+    group: actualCode.value,
     resource : {
       attributes: resource.attributes
     }
   })
-  changes.value?.save(fn)
+  await changes.value?.save(fn)
 }
 
 const saveContacts = async (resources: DeepPartial<Contact>[]) => {
+  if (!member.value) return
   const fn = () => store.dispatch("members/update", {
-    code: myMember.value.id,
-    id: code.value,
+    id: member.value?.id,
+    group: actualCode.value,
     resource: {
       relationships: {
         contacts: {
@@ -81,9 +76,7 @@ const saveContacts = async (resources: DeepPartial<Contact>[]) => {
     },
     included: resources
   })
-  changes.value?.save(fn)
+  await changes.value?.save(fn)
 }
-
-loadMember()
 
 </script>

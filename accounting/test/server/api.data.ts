@@ -1,24 +1,41 @@
 import { Scope } from "src/server/auth"
 
-export const testCurrency = (props?: any) => ({
-  data: {
-    type: "currencies",
-    attributes: {
-      code: "TEST",
-      name: "Testy",
-      namePlural: "Testies",
-      symbol: "T$",
-      decimals: 2,
-      scale: 4,
-      rate: {n: 1, d: 10},
-      settings: {
-        defaultInitialCreditLimit: 1000,
-        ...(props?.settings)
-      },
-      ...props
-    }
+export const testCurrency = (props?: any) => {
+  props = {
+    ...props,
+    settings: {
+      defaultInitialCreditLimit: 1000,
+      ...props?.settings
+    },
   }
-})
+  const {settings, ...attributes} = props
+
+  return {
+    data: {
+      type: "currencies",
+      attributes: {
+        code: "TEST",
+        name: "Testy",
+        namePlural: "Testies",
+        symbol: "T$",
+        decimals: 2,
+        scale: 4,
+        rate: {n: 1, d: 10},
+        ...attributes
+      },
+      relationships: {
+        settings: {
+          data: { type: "currency-settings", id: "anything-works" }
+        }
+      }
+    },
+    included: [{
+      type: "currency-settings",
+      id: "anything-works",
+      attributes: { ...settings }
+    }]
+  }
+}
 
 export const testAccount = (userId: string) => ({
   data: {

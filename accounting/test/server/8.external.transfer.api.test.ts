@@ -111,7 +111,7 @@ describe("External transfers", async () => {
     assert.equal(trustlines[0].id, eTrustline.id)
   })
   
-  await it('succesful external payment', async () => {
+  await it('successful external payment', async () => {
     // 100 TEST = 10 HOUR = 20 EXTR
     // just wait for the path to be available in the ledger.
     const controller = await t.app.komunitin.controller.getCurrencyController("TEST") as LedgerCurrencyController
@@ -164,17 +164,17 @@ describe("External transfers", async () => {
 
   })
 
-  await it('succesful external payment request (immediate)', async () => {
+  await it('successful external payment request (immediate)', async () => {
     // Enable external payment requests in both currencies
-    await t.api.patch(`/TEST/currency`, { data: { attributes: { settings: { 
+    await t.api.patch(`/TEST/currency/settings`, { data: { attributes: { 
       enableExternalPaymentRequests: true,
       defaultAllowExternalPaymentRequests: true, 
       defaultAcceptExternalPaymentsAutomatically: true 
-    } } } }, t.admin)
-    await t.api.patch(`/EXTR/currency`, { data: { attributes: { settings: { 
+    } } }, t.admin)
+    await t.api.patch(`/EXTR/currency/settings`, { data: { attributes: { 
       enableExternalPaymentRequests: true,
       defaultAllowExternalPaymentRequests: true, 
-    } } } }, eAdmin)
+    } } }, eAdmin)
 
     // EXTR <= TEST
     const transfer = await externalTransfer(eCurrency, t.currency, t.account1, eAccount1, 20, "EXTR <= TEST", "committed", eUser1)

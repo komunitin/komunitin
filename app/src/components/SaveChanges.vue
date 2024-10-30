@@ -6,6 +6,13 @@
       class="q-mr-sm"
       color="icon-dark"
     />
+    <q-icon
+      v-else
+      :name="isError ? 'error' : 'done'"
+      size="24px"
+      class="q-mr-sm"
+      color="icon-dark"
+    />
     <div>
       {{ message }}
       {{ isError ? $t('retryIn', {seconds}) : '' }}

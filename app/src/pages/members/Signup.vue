@@ -78,10 +78,10 @@ const store = useStore()
 
 store.dispatch("groups/load", {
   id: props.code,
-  include: "signup-settings"
+  include: "settings"
 })
 const group = computed(() => store.getters["groups/current"])
-const settings = computed(() => group.value?.['signup-settings']?.attributes)
+const settings = computed(() => group.value?.settings?.attributes)
 
 const page = ref("terms")
 const needsTerms = computed<boolean|undefined>(() => settings.value?.requireAcceptTerms)
@@ -112,6 +112,7 @@ const createUser = async () => {
   loading.value = true
   try {
     // Create a user associated with a member.
+    // TODO: send the member as included resource (instead of nested)
     await store.dispatch("users/create", {
       group: props.code,
       resource: {

@@ -123,15 +123,14 @@ const onSubmit = async () => {
     }, {})
     notifyTransactionStateMultiple(states, t)
 
-    // Not very polite, but the current member code is one of the two default accounts.
-    const memberCode = props.payeeAccount?.member.attributes.code ?? props.payerAccount?.member.attributes.code
-
-    // Go to transactions list
+    // Go to member's transactions list. 
+    // This is not the best if the user is an admin making payments between users, but there is not
+    // a better page to go to where to see all the transactions.
     router.push({
       name: "TransactionList",
       params: {
         code: props.code,
-        memberCode
+        memberCode: store.getters.myMember.attributes.code
       }
     })
   } finally {

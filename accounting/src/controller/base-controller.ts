@@ -11,7 +11,7 @@ import { SharedController as BaseController, ControllerEvents } from "."
 import { config } from "../config"
 import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, createStellarLedger } from "../ledger"
 import { friendbot } from "../ledger/stellar/friendbot"
-import { CreateCurrency, Currency, currencyToRecord, recordToCurrency } from "../model/currency"
+import { CreateCurrency, Currency, CurrencySettings, currencyToRecord, recordToCurrency } from "../model/currency"
 import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
 import { logger } from "../utils/logger"
 import { LedgerCurrencyController, amountToLedger } from "./currency-controller"
@@ -23,6 +23,8 @@ import { storeCurrencyKey } from "./key-controller"
 import { Store } from "./store"
 import { PrismaClientExtends } from "@prisma/client/extension"
 import { sleep } from "src/utils/sleep"
+import { CollectionOptions, relatedCollectionParams } from "src/server/request"
+import { whereFilter } from "./query"
 
 
 const getMasterKey = async () => {
@@ -227,13 +229,13 @@ export class LedgerController implements BaseController {
     const currencyKey = await randomKey()
     const encryptedCurrencyKey = await this.storeKey(currency.code, currencyKey)
     
-    // Add default settings:
-    currency.settings = {
-      // defaultInitialCreditLimit: 0,
+    // Default settings:
+    const defaultSettings: CurrencySettings = {
+      defaultInitialCreditLimit: 0,
       defaultInitialMaximumBalance: undefined,
       defaultAcceptPaymentsAutomatically: false,
       defaultAcceptPaymentsWhitelist: [],
-      defaultAcceptPaymentsAfter: 15*24*60*60, // 15 days,
+      defaultAcceptPaymentsAfter: 14*24*60*60, // 2 weeks,
       defaultOnPaymentCreditLimit: undefined,
       defaultAllowPayments: true,
       defaultAllowPaymentRequests: true,
@@ -245,9 +247,16 @@ export class LedgerController implements BaseController {
       enableExternalPaymentRequests: false,
       defaultAcceptExternalPaymentsAutomatically: false,
       defaultAllowTagPayments: false,
-      defaultAllowTagPaymentRequests: false,
-      ...currency.settings
+      defaultAllowTagPaymentRequests: false
     }
+
+    // Merge default settings with provided settings, while deleting eventual extra fields.
+    const settings = {} as Record<string, any>
+    for (const key in defaultSettings) {
+      const tkey = key as keyof CurrencySettings
+      settings[key] = currency.settings[tkey] ?? defaultSettings[tkey]
+    }
+    currency.settings = settings as CurrencySettings
 
     // Add the currency to the DB
     const inputRecord = currencyToRecord(currency)
@@ -337,8 +346,18 @@ export class LedgerController implements BaseController {
   /**
    * Implements {@link BaseController.getCurrencies}
    */
-  async getCurrencies(ctx: Context): Promise<Currency[]> {
-    const records = await this.privilegedDb().currency.findMany()
+  async getCurrencies(ctx: Context, params: CollectionOptions): Promise<Currency[]> {
+    const filter = whereFilter(params.filters)
+    const records = await this.privilegedDb().currency.findMany({
+      where: {
+        ...filter
+      },
+      orderBy: {
+        [params.sort.field]: params.sort.order
+      },
+      skip: params.pagination.cursor,
+      take: params.pagination.size,
+    })
     const currencies = records.map(r => recordToCurrency(r))
     return currencies
   }
@@ -405,7 +424,7 @@ export class LedgerController implements BaseController {
     // Run cron for each currency.
     try {
       const ctx = systemContext()
-      const currencies = await this.getCurrencies(ctx)
+      const currencies = await this.getCurrencies(ctx, relatedCollectionParams())
       for (const currency of currencies) {
         const currencyController = await this.getCurrencyController(currency.code)
         await currencyController.cron(ctx)
