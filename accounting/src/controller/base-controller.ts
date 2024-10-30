@@ -11,7 +11,7 @@ import { SharedController as BaseController, ControllerEvents } from "."
 import { config } from "../config"
 import { Ledger, LedgerCurrencyConfig, LedgerCurrencyData, createStellarLedger } from "../ledger"
 import { friendbot } from "../ledger/stellar/friendbot"
-import { CreateCurrency, Currency, currencyToRecord, recordToCurrency } from "../model/currency"
+import { CreateCurrency, Currency, CurrencySettings, currencyToRecord, recordToCurrency } from "../model/currency"
 import { decrypt, deriveKey, encrypt, exportKey, importKey, randomKey } from "../utils/crypto"
 import { logger } from "../utils/logger"
 import { LedgerCurrencyController, amountToLedger } from "./currency-controller"
@@ -229,9 +229,9 @@ export class LedgerController implements BaseController {
     const currencyKey = await randomKey()
     const encryptedCurrencyKey = await this.storeKey(currency.code, currencyKey)
     
-    // Add default settings:
-    currency.settings = {
-      // defaultInitialCreditLimit: 0,
+    // Default settings:
+    const defaultSettings: CurrencySettings = {
+      defaultInitialCreditLimit: 0,
       defaultInitialMaximumBalance: undefined,
       defaultAcceptPaymentsAutomatically: false,
       defaultAcceptPaymentsWhitelist: [],
@@ -247,9 +247,16 @@ export class LedgerController implements BaseController {
       enableExternalPaymentRequests: false,
       defaultAcceptExternalPaymentsAutomatically: false,
       defaultAllowTagPayments: false,
-      defaultAllowTagPaymentRequests: false,
-      ...currency.settings
+      defaultAllowTagPaymentRequests: false
     }
+
+    // Merge default settings with provided settings, while deleting eventual extra fields.
+    const settings = {} as Record<string, any>
+    for (const key in defaultSettings) {
+      const tkey = key as keyof CurrencySettings
+      settings[key] = currency.settings[tkey] ?? defaultSettings[tkey]
+    }
+    currency.settings = settings as CurrencySettings
 
     // Add the currency to the DB
     const inputRecord = currencyToRecord(currency)

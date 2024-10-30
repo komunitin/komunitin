@@ -1,5 +1,5 @@
 import { body } from "express-validator"
-
+import { isInt } from "validator/es/lib/isInt"
 
 export namespace Validators {
   
@@ -72,9 +72,16 @@ export namespace Validators {
     body(`${path}.relationships.${name}.data.*.type`).equals(type),
   ]
 
+  const isSingleRelationship = (path: string, name: string, type: string) => [
+    body(`${path}.relationships.${name}`).optional(),
+    body(`${path}.relationships.${name}.data.id`).isString().notEmpty(),
+    body(`${path}.relationships.${name}.data.type`).equals(type),
+  ]
+
   const isIncludedTypes = (types: string[]) => [
     body("included.*.type").isIn(types),
     body("included.*.id").isString().notEmpty(),
+    body("included.*.attributes").optional().isObject(),
   ]
 
   export const isCreateCurrency = () => [
@@ -82,7 +89,23 @@ export namespace Validators {
     ...isCreateCurrencyAttributesExist("data.attributes"),
     ...isUpdateCurrencyAttributes("data.attributes"),
     ...isCollectionRelationship("data", "admins", "users"),
-    ...isIncludedTypes(["users"]),
+    ...isSingleRelationship("data", "settings", "currency-settings"),
+    ...isIncludedTypes(["users", "currency-settings"]),
+
+    // TODO: Add validation for included currency-settings attributes.
+    // It happens that express-validator is not well suited for nested
+    // validation so we should switch to a more flexible library.
+    body("included.*")
+      .if(value => typeof value === 'object' && value.type === "currency-settings")
+      .customSanitizer(value => {
+        return {
+          ...value,
+          attributes: {
+            ...value.attributes,
+            defaultInitialCreditLimit: value.attributes.defaultInitialCreditLimit || 0
+          }
+        }
+      })
   ]
 
   export const isUpdateCurrency = () => [

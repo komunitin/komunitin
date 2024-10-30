@@ -12,26 +12,23 @@ describe("OnPayment credit limit", async () => {
     await t.api.patch(`/TEST/currency`, {
       data: {
         attributes: {
-          settings: {
-            invalid: 123
-          }
+          invalid: 123
         }
       }
     }, t.admin, 400)
   })
 
   await it('admin enable on-payment credit limit', async () => {
-    const response = await t.api.patch('/TEST/currency', {
+    const response = await t.api.patch('/TEST/currency/settings', {
       data: {
         attributes: {
-          settings: {
-            defaultOnPaymentCreditLimit: 1300
-          }
+          defaultOnPaymentCreditLimit: 1300
         }
       }
     }, t.admin)
-    assert.equal(response.body.data.attributes.settings.defaultOnPaymentCreditLimit, 1300)
-    assert.equal(response.body.data.attributes.settings.defaultInitialCreditLimit, 1000)
+    assert.equal(response.body.data.type, "currency-settings")
+    assert.equal(response.body.data.attributes.defaultOnPaymentCreditLimit, 1300)
+    assert.equal(response.body.data.attributes.defaultInitialCreditLimit, 1000)
   })
 
   await it('user increases credit limit after payment', async () => {
@@ -85,16 +82,14 @@ describe("OnPayment credit limit", async () => {
 
 
   await it('set tranfers to be updated after a tiny while', async () => {
-    const res = await t.api.patch(`/TEST/currency`, {	
+    const res = await t.api.patch(`/TEST/currency/settings`, {	
       data: {	
         attributes: {	
-          settings: {	
-            defaultAcceptPaymentsAfter: 1	 // second
-          }	
-        }	
+          defaultAcceptPaymentsAfter: 1	 // seconds
+        }
       }	
     }, t.admin)
-    assert.equal(res.body.data.attributes.settings.defaultAcceptPaymentsAfter, 1)
+    assert.equal(res.body.data.attributes.defaultAcceptPaymentsAfter, 1)
     // payment request
     const transfer = await t.payment(t.account1.id, t.account2.id, 100, "Use credit", "committed", t.user2)
     assert.equal(transfer.attributes.state, "pending")
@@ -107,12 +102,10 @@ describe("OnPayment credit limit", async () => {
   })
 
   await it('cant set arbitrary currency options', async () => {
-    await t.api.patch(`/TEST/currency`, {
+    await t.api.patch(`/TEST/currency/settings`, {
       data: {
         attributes: {
-          settings: {
-            invalid: 123
-          }
+          invalid: 123
         }
       }
     }, t.admin, 400)

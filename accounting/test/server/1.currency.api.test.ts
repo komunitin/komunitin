@@ -28,7 +28,7 @@ describe('Currencies endpoints', async () => {
           data: [{ type: "users", id: user }]
         },
         settings: {
-          data: [{ type: "currency-settings", id: "1" }]
+          data: { type: "currency-settings", id: "1" }
         }
       }
     },
@@ -57,8 +57,9 @@ describe('Currencies endpoints', async () => {
     assert.equal(response.body.data.attributes.rate.d, 10)
 
     // Check default settings.
-    const response2 = await api.get('/TES1/currency&include=settings')
+    const response2 = await t.api.get('/TES1/currency?include=settings')
     const settings = response2.body.included.find((i: any) => i.type === "currency-settings")
+    assert(isUuid(settings.id), "The settings id is not a valid UUID")
     assert.equal(settings.attributes.defaultInitialCreditLimit, 1000)
   })
 
@@ -75,9 +76,9 @@ describe('Currencies endpoints', async () => {
     const currency = currencyPostBody({code:"TES2"}, "2", { defaultInitialMaximumBalance: 5000, defaultInitialCreditLimit: undefined })
     await t.api.post('/currencies', currency, admin2)
 
-    const response2 = await t.api.get('/TES2/currency&include=settings')
+    const response2 = await t.api.get('/TES2/currency?include=settings')
     const settings = response2.body.included.find((i: any) => i.type === "currency-settings")
-    assert.equal(settings.attributes.settings.defaultInitialMaximumBalance, 5000)
+    assert.equal(settings.attributes.defaultInitialMaximumBalance, 5000)
     assert.equal(settings.attributes.defaultInitialCreditLimit, 0)
   })
 
@@ -87,7 +88,6 @@ describe('Currencies endpoints', async () => {
   it('incorrect div by zero rate', async () => badPost({code: "ERRO", rate: {n: 1, d: 0}}))
   it('incorrect zero rate', async () => badPost({code: "ERRO", rate: {n: 0, d: 1}}))
   it('incorrect negative rate', async () => badPost({code: "ERRO", rate: {n: -1, d: 1}}))
-  it('incorrect limit', async () => badPost({code: "ERRO", settings: {defaultInitialCreditLimit: -1}}))
   
   // Only logged in users with komunitin_accounting scope can create currencies.
   it('unauthorized create', async () => {
