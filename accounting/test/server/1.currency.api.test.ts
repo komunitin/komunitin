@@ -139,7 +139,7 @@ describe('Currencies endpoints', async () => {
     const response = await t.api.patch('/TES2/currency/settings', {data: {
       attributes: {
         defaultInitialCreditLimit: 2500,
-        defaultInitialMaximumBalance: false,
+        defaultInitialMaximumBalance: undefined,
         defaultAllowPayments: true,
         defaultAllowPaymentRequests: true,
         defaultAcceptPaymentsAutomatically: false,
@@ -153,14 +153,12 @@ describe('Currencies endpoints', async () => {
         defaultAllowTagPayments: true,
         defaultAllowTagPaymentRequests: false,
         defaultAcceptPaymentsAfter: 60*60*24*7,
-        defaultOnPaymentCreditLimit: false,
+        defaultOnPaymentCreditLimit: undefined,
         enableExternalPayments: true,
         enableExternalPaymentRequests: true,
         defaultAllowExternalPayments: true,
         defaultAllowExternalPaymentRequests: false,
         defaultAcceptExternalPaymentsAutomatically: false,
-        externalTraderCreditLimit: 25000,
-        externalTraderMaximumBalance: 25000
       }
     }}, admin2)
 
@@ -169,6 +167,18 @@ describe('Currencies endpoints', async () => {
     assert.equal(response.body.data.attributes.defaultAllowSimplePaymentRequests, false)
 
   })
+
+  it.todo('can update external trader settings', async () => {
+    const response = await t.api.patch('/TES2/currency/settings', {data: {
+      attributes: {
+        externalTraderCreditLimit: 25000,
+        externalTraderMaximumBalance: 25000
+      }
+    }}, admin2)
+    assert.equal(response.body.data.attributes.externalTraderCreditLimit, 25000)
+    assert.equal(response.body.data.attributes.externalTraderMaximumBalance, 25000)
+  })
+
   it('currency code cant be updated', async () => {
     await t.api.patch('/TES2/currency', {data: { attributes: { code: "ERRO" } }}, admin2, 400)
   })

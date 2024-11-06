@@ -730,7 +730,7 @@
             "name": "code",
             "in": "path",
             "required": true,
-            "example": "TEST",
+            "example": "TES1",
             "schema": {
               "type": "string"
             }
@@ -1457,7 +1457,7 @@
             "name": "code",
             "in": "path",
             "required": true,
-            "example": "EXTR",
+            "example": "TEST",
             "schema": {
               "type": "string"
             }
@@ -1698,6 +1698,46 @@
                           "code": "NotFound",
                           "title": "Not Found",
                           "detail": "Currency with code TES2 not found"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "500",
+                          "code": "NotImplemented",
+                          "title": "Not Implemented",
+                          "detail": "Change the external trader credit limit not implemented yet"
                         }
                       ]
                     }
@@ -2201,7 +2241,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "d6faa6d6-21cf-482a-9e31-17b6f94877a9",
+            "example": "abb54eb8-2b04-4d31-9e8c-8dce6855b6af",
             "schema": {
               "type": "string"
             }
@@ -2392,7 +2432,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "27b6e026-6948-4261-9a02-1267cbbd0ba5",
+            "example": "4e1950d2-4a8f-4ce8-8e9d-6441fce1a601",
             "schema": {
               "type": "string"
             }
@@ -2674,7 +2714,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "e28c0a8b-f530-4729-a655-9428c0be1a56",
+            "example": "1c59fba4-e834-4ff7-9ab4-37610f19e5f8",
             "schema": {
               "type": "string"
             }
@@ -2922,7 +2962,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "f38e4781-0dad-4dc1-b619-25c17f50b16b",
+            "example": "78709fee-6c6c-4935-a7f7-59632d56ec7c",
             "schema": {
               "type": "string"
             }
@@ -3001,6 +3041,46 @@
                           }
                         }
                       }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "FieldValidationError",
+                          "title": "Field validation Error",
+                          "detail": "Field data.attributes.tags is invalid in request body."
+                        }
+                      ]
                     }
                   }
                 }
@@ -4096,7 +4176,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "12556428-5d31-4a91-bbb3-ec4f1167d61a",
+            "example": "22a945c6-0e91-45a3-bae4-fbe4c01d4806",
             "schema": {
               "type": "string"
             }

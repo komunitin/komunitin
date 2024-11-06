@@ -242,7 +242,7 @@ export namespace Validators {
     body(`${path}.allowExternalPayments`).optional().custom(value => isBooleanOrNull(value)),
     body(`${path}.allowExternalPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
     body(`${path}.acceptExternalPaymentsAutomatically`).optional().custom(value => isBooleanOrNull(value)),
-    body(`${path}.tags`).isArray(),
+    body(`${path}.tags`).isArray().optional(),
     body(`${path}.tags.*.name`).notEmpty().optional(),
     body(`${path}.tags.*.value`).isString().notEmpty().optional(),
     body(`${path}.tags.*.id`).isUUID().optional(),

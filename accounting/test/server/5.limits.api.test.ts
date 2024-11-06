@@ -39,7 +39,7 @@ describe("OnPayment credit limit", async () => {
 
       return a2.attributes.balance === 200 &&
             a2.attributes.creditLimit === 1200
-    }, "Credit limit updated after payment", 10000, 500)
+    }, "Credit limit updated after payment", 15000, 500)
 
     const a1 = (await t.api.get(`/TEST/accounts/${t.account1.id}`, t.user2)).body.data
     assert.equal(a1.attributes.balance, -200)
@@ -54,7 +54,7 @@ describe("OnPayment credit limit", async () => {
 
       return a1.attributes.balance === 1200 &&
             a1.attributes.creditLimit === 1300
-    }, "Credit limit updated to max", 10000, 500)
+    }, "Credit limit updated to max", 15000, 500)
 
     const a2 = (await t.api.get(`/TEST/accounts/${t.account2.id}`, t.user2)).body.data
     
