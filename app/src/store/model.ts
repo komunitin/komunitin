@@ -220,6 +220,7 @@ export interface GroupSettings extends ResourceObject {
     terms: string;
     minOffers: number;
     minNeeds: number;
+    allowAnonymousMemberList: boolean;
   },
   relationships: {
     group: RelatedResource;

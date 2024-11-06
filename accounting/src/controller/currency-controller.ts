@@ -84,7 +84,7 @@ export class LedgerCurrencyController implements CurrencyController {
       throw badRequest("Can't change currency id")
     }
     if (currency.settings) {
-      throw badRequest("Can't change the currency sattettings through currency update")
+      throw badRequest("Can't change the currency settings through currency update")
     }
     
     if (currency.rate && (currency.rate.n !== this.model.rate.n || currency.rate.d !== this.model.rate.d)) {
@@ -127,6 +127,15 @@ export class LedgerCurrencyController implements CurrencyController {
       ...this.model.settings,
       ...settingsFields
     }
+    // Check if we need to update the ledger.
+    if (updatedSettings.externalTraderCreditLimit !== this.model.settings.externalTraderCreditLimit) {
+      throw notImplemented("Change the external trader credit limit not implemented yet")
+    }
+
+    if (updatedSettings.externalTraderMaximumBalance !== this.model.settings.externalTraderMaximumBalance) {
+      throw notImplemented("Change the external trader maximum balance not implemented yet")
+    }
+    
     const record = await this.db.currency.update({
       data: {
         settings: updatedSettings

@@ -124,7 +124,15 @@ describe('Accounts endpoints', async () => {
     assert.equal(response.body.included[0].type, 'account-settings')
     assert.equal(response.body.included[0].attributes.acceptPaymentsAutomatically, false)
   })
-
+  
+  it('including settings, currency and currency settings', async () => {
+    const response = await t.api.get(`/TEST/accounts/${account0.id}?include=settings,currency,currency.settings`, user2)
+    assert.equal(response.body.data.attributes.code, 'TEST0000')
+    assert.equal(response.body.included[1].type, 'account-settings')
+    assert.equal(response.body.included[0].type, 'currencies')
+    assert.equal(response.body.included[2].type, 'currency-settings')
+  })
+  
   // Account endpoints are public.
   it('unauthorized get account', async() => {
     await t.api.get(`/TEST/accounts/${account0.id}`, undefined, 200)

@@ -19,7 +19,7 @@
         v-model="value"
         :true-value="trueValue"
         :false-value="falseValue"
-        :toggle-indeterminate="defaultValue !== undefined"
+        :toggle-indeterminate="toggleIndeterminate"
         :indeterminate-value="null"
       />
     </q-item-section>
@@ -36,12 +36,14 @@ const props = withDefaults(defineProps<{
   trueValue?: boolean | string | number
   falseValue?: boolean | string | number
   defaultValue?: boolean | string | number
+  toggleIndeterminate?: boolean
 }>(), {
   trueValue: true,
   falseValue: false,
   modelValue: undefined,
   hint: undefined,
   defaultValue: undefined,
+  toggleIndeterminate: false,
 })
 
 const emit = defineEmits<{
@@ -49,7 +51,7 @@ const emit = defineEmits<{
 }>()
 
 const value = computed({
-  get: () => props.modelValue ?? null,
+  get: () => props.modelValue ?? (props.toggleIndeterminate ? null : props.defaultValue),
   set: (value:  boolean | string | number | null) => emit("update:modelValue", value),
 })
 

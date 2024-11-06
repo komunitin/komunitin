@@ -194,7 +194,7 @@ const currency = computed(() => store.getters['currencies/current'])
 const currencySettings = computed(() => currency.value?.settings)
 const group = computed(() => store.getters['groups/current'])
 
-const formatAmount = (amount: number) => formatCurrency(amount, currency.value)
+const formatAmount = (amount: number) => amount === undefined ? "" : formatCurrency(amount, currency.value)
 
 type ExtendedAccount = Account & {settings: AccountSettings, member: Member}
 const columns = [

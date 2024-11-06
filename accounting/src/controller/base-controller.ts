@@ -233,21 +233,30 @@ export class LedgerController implements BaseController {
     const defaultSettings: CurrencySettings = {
       defaultInitialCreditLimit: 0,
       defaultInitialMaximumBalance: undefined,
-      defaultAcceptPaymentsAutomatically: false,
-      defaultAcceptPaymentsWhitelist: [],
-      defaultAcceptPaymentsAfter: 14*24*60*60, // 2 weeks,
-      defaultOnPaymentCreditLimit: undefined,
       defaultAllowPayments: true,
       defaultAllowPaymentRequests: true,
-      externalTraderCreditLimit: currency.settings.defaultInitialCreditLimit,
-      externalTraderMaximumBalance: undefined,
-      defaultAllowExternalPayments: true,
-      defaultAllowExternalPaymentRequests: false,
+      defaultAcceptPaymentsAutomatically: false,
+      defaultAcceptPaymentsWhitelist: [],
+      defaultAllowSimplePayments: true,
+      defaultAllowSimplePaymentRequests: true,
+      defaultAllowQrPayments: true,
+      defaultAllowQrPaymentRequests: true,
+      defaultAllowMultiplePayments: true,
+      defaultAllowMultiplePaymentRequests: true,
+      defaultAllowTagPayments: true,
+      defaultAllowTagPaymentRequests: false,
+
+      defaultAcceptPaymentsAfter: 14*24*60*60, // 2 weeks,
+      defaultOnPaymentCreditLimit: undefined,
+
       enableExternalPayments: true,
       enableExternalPaymentRequests: false,
+      defaultAllowExternalPayments: true,
+      defaultAllowExternalPaymentRequests: false,
       defaultAcceptExternalPaymentsAutomatically: false,
-      defaultAllowTagPayments: false,
-      defaultAllowTagPaymentRequests: false
+      
+      externalTraderCreditLimit: currency.settings.defaultInitialCreditLimit,
+      externalTraderMaximumBalance: undefined,
     }
 
     // Merge default settings with provided settings, while deleting eventual extra fields.

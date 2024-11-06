@@ -146,4 +146,17 @@ describe("OnPayment credit limit", async () => {
     await t.payment(t.account2.id, t.account1.id, 10, "Cant request", "committed", t.user1, 403)
   })
 
+  await it('set setting to group default', async() => {
+    const s1 = await t.api.patch(`/TEST/accounts/${t.account1.id}/settings`, {
+      data: {
+        attributes: {
+          allowPayments: null,
+          allowPaymentRequests: null
+        }
+      }
+    }, t.admin)
+    assert.equal(s1.body.data.attributes.allowPayments, undefined)
+    assert.equal(s1.body.data.attributes.allowPaymentRequests, undefined)
+  })
+
 })

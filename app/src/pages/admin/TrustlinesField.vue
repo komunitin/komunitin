@@ -120,6 +120,7 @@ import { Currency, Group, Trustline } from 'src/store/model';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
+import { DeepPartial } from 'quasar';
 
 type ExtendedGroup = Group & {
   currency: Currency
@@ -135,8 +136,8 @@ const props = defineProps<{
   trustlines?: ExtendedTrustline[],
 }>()
 const emit = defineEmits<{
-  (e: 'update:trustline', value: ExtendedTrustline): void
-  (e: 'create:trustline', value: ExtendedTrustline): void
+  (e: 'update:trustline', value: DeepPartial<Trustline>): void
+  (e: 'create:trustline', value: DeepPartial<Trustline>): void
 }>()
 
 const store = useStore()
@@ -177,25 +178,39 @@ const saveTrustline = () => {
     return
   }
   if (action.value === "add") {
+    // Send trustline object as expected by the service: with the trusted currency 
+    // as an external relationship. Also, omit the currency relationship as defaults
+    // to the current currency.
     emit("create:trustline", {
       type: "trustlines",
       attributes: {
-        limit: limit.value,
-        balance: 0,
+        limit: limit.value
       },
       relationships: {
-        trusted: { data: { type: "currencies", id: group.value.currency.id } },
-        currency: { data: { type: "currencies", id: myCurrency.value.id } },
-      },
-      trusted: group.value.currency,
-      currency: myCurrency.value,
-    } as ExtendedTrustline)
+        trusted: { 
+          data: { 
+            type: "currencies", 
+            id: group.value.currency.id,
+            meta: {
+              external: true,
+              href: group.value.currency.links.self
+            }
+          } 
+        },
+      }
+    } as DeepPartial<Trustline>)
   } else if (action.value === "edit") {
     if (!editingTrustline.value) {
       return
     }
     editingTrustline.value.attributes.limit = limit.value
-    emit("update:trustline", editingTrustline.value)
+    emit("update:trustline", {
+      type: "trustlines",
+      id: editingTrustline.value.id,
+      attributes: {
+        limit: limit.value
+      },
+    })
   }
   
   showDialog.value = false

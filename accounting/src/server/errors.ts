@@ -35,8 +35,10 @@ const getKError = (error: any): KError => {
     const first = error.errors[0]
     if (first.type === "field") {
       return fieldValidationError(`Field ${first.path} is invalid in request ${first.location}.`, { details: error.errors, cause: error })
+    } else if (first.type === "unknown_fields") {
+      return badRequest(`Unknown field(s): ${first.fields.map((f: {path: string}) => f.path).join(", ")}`, { details: error.errors, cause: error })
     } else {
-      return badRequest(error.msg, { details: error.errors, cause: error })
+      return badRequest(first.msg, { details: error.errors, cause: error })
     }
   // authorization errors
   } else if (error instanceof UnauthorizedError) {

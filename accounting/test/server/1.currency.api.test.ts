@@ -134,6 +134,41 @@ describe('Currencies endpoints', async () => {
     }}, admin2)
     assert.equal(response.body.data.attributes.defaultInitialCreditLimit, 2000)
   })
+  
+  it('can update all currency settings', async () => {
+    const response = await t.api.patch('/TES2/currency/settings', {data: {
+      attributes: {
+        defaultInitialCreditLimit: 2500,
+        defaultInitialMaximumBalance: false,
+        defaultAllowPayments: true,
+        defaultAllowPaymentRequests: true,
+        defaultAcceptPaymentsAutomatically: false,
+        defaultAcceptPaymentsWhitelist: [],
+        defaultAllowSimplePayments: true,
+        defaultAllowSimplePaymentRequests: false,
+        defaultAllowQrPayments: true,
+        defaultAllowQrPaymentRequests: true,
+        defaultAllowMultiplePayments: true,
+        defaultAllowMultiplePaymentRequests: false,
+        defaultAllowTagPayments: true,
+        defaultAllowTagPaymentRequests: false,
+        defaultAcceptPaymentsAfter: 60*60*24*7,
+        defaultOnPaymentCreditLimit: false,
+        enableExternalPayments: true,
+        enableExternalPaymentRequests: true,
+        defaultAllowExternalPayments: true,
+        defaultAllowExternalPaymentRequests: false,
+        defaultAcceptExternalPaymentsAutomatically: false,
+        externalTraderCreditLimit: 25000,
+        externalTraderMaximumBalance: 25000
+      }
+    }}, admin2)
+
+    assert.equal(response.body.data.attributes.defaultInitialCreditLimit, 2500)
+    assert.equal(response.body.data.attributes.defaultAllowSimplePayments, true)
+    assert.equal(response.body.data.attributes.defaultAllowSimplePaymentRequests, false)
+
+  })
   it('currency code cant be updated', async () => {
     await t.api.patch('/TES2/currency', {data: { attributes: { code: "ERRO" } }}, admin2, 400)
   })

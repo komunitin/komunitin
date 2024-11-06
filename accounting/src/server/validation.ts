@@ -24,21 +24,27 @@ export namespace Validators {
   const isUpdateCurrencySettingsAttributes = (path: string) => [
     body(`${path}.defaultInitialCreditLimit`).optional().isInt({min: 0}).default(0),
     body(`${path}.defaultInitialMaximumBalance`).optional().isInt({min: 0}),
-    body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),
-    body(`${path}.defaultAcceptPaymentsWhitelist`).optional().isArray(),
-    body(`${path}.defaultAcceptPaymentsAfter`).optional().isInt({min: 0}),
-    body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
     body(`${path}.defaultAllowPayments`).optional().isBoolean(),
     body(`${path}.defaultAllowPaymentRequests`).optional().isBoolean(),
-    body(`${path}.externalTraderCreditLimit`).optional().isInt({min: 0}),
-    body(`${path}.externalTraderMaximumBalance`).optional().isInt({min: 0}),
-    body(`${path}.defaultAllowExternalPayments`).optional().isBoolean(),
-    body(`${path}.defaultAllowExternalPaymentRequests`).optional().isBoolean(),
-    body(`${path}.enableExternalPayments`).optional().isBoolean(),
-    body(`${path}.enableExternalPaymentRequests`).optional().isBoolean(),
-    body(`${path}.defaultAcceptExternalPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.defaultAcceptPaymentsWhitelist`).optional().isArray(),
+    body(`${path}.defaultAllowSimplePayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowSimplePaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAllowQrPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowQrPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAllowMultiplePayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowMultiplePaymentRequests`).optional().isBoolean(),
     body(`${path}.defaultAllowTagPayments`).optional().isBoolean(),
     body(`${path}.defaultAllowTagPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAcceptPaymentsAfter`).optional().isInt({min: 0}),
+    body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.enableExternalPayments`).optional().isBoolean(),
+    body(`${path}.enableExternalPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAllowExternalPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowExternalPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAcceptExternalPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.externalTraderCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.externalTraderMaximumBalance`).optional().isInt({min: 0})
   ]
 
   const isUpdateCurrencyAttributes = (path: string) => [
@@ -213,22 +219,33 @@ export namespace Validators {
     ...isUpdateTransferRelationships("data.relationships")
   ]
 
+  const isBooleanOrNull = (value: any) => {
+    return value === null || value === true || value === false
+  }
   const isUpdateAccountSettingsAttributes = (path: string) => [
-    body(`${path}.acceptPaymentsAutomatically`).optional().isBoolean(),
-    body(`${path}.acceptPaymentsWhitelist`).optional().isArray(),
-    body(`${path}.acceptPaymentsAfter`).optional().isInt({min: 0}),
-    body(`${path}.onPaymentCreditLimit`).optional().isInt({min: 0}),
-    body(`${path}.allowPayments`).optional().isBoolean(),
-    body(`${path}.allowPaymentRequests`).optional().isBoolean(),
-    body(`${path}.allowExternalPayments`).optional().isBoolean(),
-    body(`${path}.allowExternalPaymentRequests`).optional().isBoolean(),
-    body(`${path}.acceptExternalPaymentsAutomatically`).optional().isBoolean(),
-    body(`${path}.allowTagPayments`).optional().isBoolean(),
-    body(`${path}.allowTagPaymentRequests`).optional().isBoolean(),
-    body(`${path}.tags`).optional().isArray(),
-    body(`${path}.tags.*.name`).isString().notEmpty(),
-    body(`${path}.tags.*.value`).optional().isString().notEmpty(),
-    body(`${path}.tags.*.id`).optional().isUUID(),
+    body(`${path}.allowPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowSimplePayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowSimplePaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowQrPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowQrPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowMultiplePayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowMultiplePaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowTagPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowTagPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    
+    body(`${path}.acceptPaymentsAutomatically`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.acceptPaymentsAfter`).isInt({min: 0}).optional(),
+    body(`${path}.acceptPaymentsWhitelist`).isArray().optional(),
+    body(`${path}.onPaymentCreditLimit`).isInt({min: 0}).optional(),
+    
+    body(`${path}.allowExternalPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowExternalPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.acceptExternalPaymentsAutomatically`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.tags`).isArray(),
+    body(`${path}.tags.*.name`).notEmpty().optional(),
+    body(`${path}.tags.*.value`).isString().notEmpty().optional(),
+    body(`${path}.tags.*.id`).isUUID().optional(),
   ]
 
   export const isUpdateAccountSettings = () => [

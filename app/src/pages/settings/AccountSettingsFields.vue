@@ -1,6 +1,9 @@
 <template>
   <div class="q-gutter-y-md">
-    <div class="text-overline text-uppercase text-onsurface-m">
+    <div 
+      v-if="['allowPayments', 'allowPaymentRequests', 'allowExternalPayments', 'allowExternalPaymentRequests'].some(show)"
+      class="text-overline text-uppercase text-onsurface-m"
+    >
       {{ $t('transferDirections') }}
     </div>
     <toggle-item 
@@ -9,6 +12,7 @@
       :label="$t('allowPayments')"
       :hint="$t('allowPaymentsHint')"
       :default-value="def?.allowPayments"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowPayments = $event"
     />
     <toggle-item 
@@ -17,6 +21,7 @@
       :label="$t('allowPaymentRequests')"
       :hint="$t('allowPaymentRequestsHint')"
       :default-value="def?.allowPaymentRequests"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowPaymentRequests = $event"
     />
     <toggle-item
@@ -25,6 +30,7 @@
       :label="$t('allowExternalPayments')"
       :hint="$t('allowExternalPaymentsHint')"
       :default-value="def?.allowExternalPayments"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowExternalPayments = $event"
     />
     <toggle-item
@@ -33,9 +39,13 @@
       :label="$t('allowExternalPaymentRequests')"
       :hint="$t('allowExternalPaymentRequestsHint')"
       :default-value="def?.allowExternalPaymentRequests"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowExternalPaymentRequests = $event"
     />
-    <div class="text-overline text-uppercase text-onsurface-m">
+    <div 
+      v-if="['allowSimplePayments', 'allowSimplePaymentRequests', 'allowQrPayments', 'allowQrPaymentRequests', 'allowTagPayments', 'allowTagPaymentRequests', 'allowMultiplePayments', 'allowMultiplePaymentRequests'].some(show)"
+      class="text-overline text-uppercase text-onsurface-m"
+    >
       {{ $t('transferMethods') }}
     </div>
     <toggle-item
@@ -44,6 +54,7 @@
       :label="$t('allowSimplePayments')"
       :hint="$t('allowSimplePaymentsHint')"
       :default-value="def?.allowSimplePayments"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowSimplePayments = $event"
     />
     <toggle-item
@@ -52,6 +63,7 @@
       :label="$t('allowSimplePaymentRequests')"
       :hint="$t('allowSimplePaymentRequestsHint')"
       :default-value="def?.allowSimplePaymentRequests"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowSimplePaymentRequests = $event"
     />
     <toggle-item
@@ -60,6 +72,7 @@
       :label="$t('allowQrPayments')"
       :hint="$t('allowQrPaymentsHint')"
       :default-value="def?.allowQrPayments"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowQrPayments = $event"
     />
     <toggle-item
@@ -68,6 +81,7 @@
       :label="$t('allowQrPaymentRequests')"
       :hint="$t('allowQrPaymentRequestsHint')"
       :default-value="def?.allowQrPaymentRequests"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowQrPaymentRequests = $event"
     />
     <toggle-item
@@ -76,6 +90,7 @@
       :label="$t('allowTagPayments')"
       :hint="$t('allowTagPaymentsHint')"
       :default-value="def?.allowTagPayments"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowTagPayments = $event"
     />
     <toggle-item
@@ -84,6 +99,7 @@
       :label="$t('allowTagPaymentRequests')"
       :hint="$t('allowTagPaymentRequestsHint')"
       :default-value="def?.allowTagPaymentRequests"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowTagPaymentRequests = $event"
     />
     <toggle-item
@@ -92,6 +108,7 @@
       :label="$t('allowMultiplePayments')"
       :hint="$t('allowMultiplePaymentsHint')"
       :default-value="def?.allowMultiplePayments"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowMultiplePayments = $event"
     />
     <toggle-item
@@ -100,9 +117,13 @@
       :label="$t('allowMultiplePaymentRequests')"
       :hint="$t('allowMultiplePaymentRequestsHint')"
       :default-value="def?.allowMultiplePaymentRequests"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.allowMultiplePaymentRequests = $event"
     />
-    <div class="text-overline text-uppercase text-onsurface-m">
+    <div 
+      v-if="['acceptPaymentsAutomatically', 'acceptPaymentsAfter', 'acceptExternalPaymentsAutomatically'].some(show)"
+      class="text-overline text-uppercase text-onsurface-m"
+    >
       {{ $t('paymentRequests') }}
     </div>
     <toggle-item 
@@ -110,7 +131,8 @@
       :model-value="settings.acceptPaymentsAutomatically"
       :label="$t('acceptPaymentsAutomatically')"
       :hint="$t('acceptPaymentsHint')"
-      :default-value="def?.acceptPaymentsAutomatically"      
+      :default-value="def?.acceptPaymentsAutomatically"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.acceptPaymentsAutomatically = $event"
     />
     <toggle-item
@@ -119,6 +141,7 @@
       :label="$t('enableAcceptPaymentsAfter2w')"
       :hint="$t('enableAcceptPaymentsAfter2wHint')"
       :default-value="def?.acceptPaymentsAfter !== undefined"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="enableAcceptPaymentsAfter = $event"
     />
     <toggle-item
@@ -127,9 +150,13 @@
       :label="$t('acceptExternalPaymentsAutomatically')"
       :hint="$t('acceptExternalPaymentsAutomaticallyHint')"
       :default-value="def?.acceptExternalPaymentsAutomatically"
+      :toggle-indeterminate="props.indeterminateStates"
       @update:model-value="settings.acceptExternalPaymentsAutomatically = $event"
     />
-    <div class="text-overline text-uppercase text-onsurface-m">
+    <div 
+      v-if="['creditLimit', 'maximumBalance', 'onPaymentCreditLimit'].some(show)"
+      class="text-overline text-uppercase text-onsurface-m"
+    >
       {{ $t('limits') }}
     </div>
     <input-update
@@ -162,6 +189,7 @@
           :hint="$t('maximumBalanceHint')"
           hide-bottom-space
           outlined
+          disable
           @update:model-value="updateModelValue"
         />
       </template>
@@ -171,6 +199,7 @@
       v-model="enableOnPaymentCreditLimit"
       :label="$t('enableOnPaymentCreditLimit')"
       :hint="$t('enableOnPaymentCreditLimitHint')"
+      :toggle-indeterminate="props.indeterminateStates"
       :default-value="(def === undefined) ? undefined : (def.onPaymentCreditLimit !== undefined)"
     />
     <amount-input
@@ -209,6 +238,8 @@ const props = defineProps<{
 
   settings: AccountSettings,
   defaults?: AccountSettings,
+
+  indeterminateStates?: boolean,
 
   limits?: boolean,
 }>()

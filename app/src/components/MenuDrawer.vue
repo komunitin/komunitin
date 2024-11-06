@@ -34,7 +34,6 @@
                 to="/settings"
               />
               <menu-item
-                ref="logout"
                 icon="logout"
                 :title="$t('logout')"
                 @click="logout"

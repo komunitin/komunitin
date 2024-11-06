@@ -22,6 +22,7 @@
       :label="$t('termsOfUse')"
       outlined
       autogrow
+      :debounce="1000"
       input-style="min-height: 100px;"
     />
     <div class="text-overline text-uppercase text-onsurface-m">
@@ -119,6 +120,11 @@
       :label="$t('enableExternalPaymentRequests')"
       :hint="$t('enableExternalPaymentRequestsHint')"
     />
+    <toggle-item
+      v-model="allowAnonymousMemberList"
+      :label="$t('allowAnonymousMemberList')"
+      :hint="$t('allowAnonymousMemberListHint')"
+    />
     <input-update
       v-model="currencyValue"
       type="text"
@@ -129,6 +135,7 @@
       :rules="[(val: string) => val.match(/^\d+(\/\d+)?$/) || $t('invalidCurrencyValue')]"
       hide-bottom-space
       :loading="currencyValueLoading"
+      disable
     />
     <input-update
       v-model="externalTraderCreditLimit"
@@ -141,6 +148,7 @@
           :label="$t('externalTraderCreditLimit')"
           :hint="$t('externalTraderCreditLimitHint')"
           outlined
+          disable
           @update:model-value="updateModelValue"
         />
       </template>
@@ -156,6 +164,7 @@
           :label="$t('externalTraderMaximumBalance')"
           :hint="$t('externalTraderMaximumBalanceHint')"
           outlined
+          disable
           @update:model-value="updateModelValue"
         />
       </template>
@@ -229,15 +238,17 @@ const requireAcceptTerms = ref(groupSettings.value.attributes.requireAcceptTerms
 const terms = ref(groupSettings.value.attributes.terms ?? "")
 const minOffers = ref(groupSettings.value.attributes.minOffers ?? 0)
 const minNeeds = ref(groupSettings.value.attributes.minNeeds ?? 0)
+const allowAnonymousMemberList = ref(groupSettings.value.attributes.allowAnonymousMemberList ?? false)
 
-watchDebounced([requireAcceptTerms, terms, minOffers, minNeeds], () => {
+watchDebounced([requireAcceptTerms, terms, minOffers, minNeeds, allowAnonymousMemberList], () => {
   emit('update:group-settings', {
     ...groupSettings.value,
     attributes: {
       requireAcceptTerms: requireAcceptTerms.value,
       terms: terms.value,
       minOffers: minOffers.value,
-      minNeeds: minNeeds.value
+      minNeeds: minNeeds.value,
+      allowAnonymousMemberList: allowAnonymousMemberList.value
     }
   } as DeepPartial<GroupSettings>)
 })

@@ -39,6 +39,7 @@
         class="q-pt-md"
         :currency="currency"
         :defaults="defaultSettings"
+        :indeterminate-states="isAdmin"
         limits
       />
       <div 
@@ -148,6 +149,7 @@ import { watchDebounced } from "@vueuse/shared";
 import { useI18n } from 'vue-i18n';
 import { currencySettingsToAccountSettingsAttributes, useEffectiveSettings } from 'src/composables/accountSettings';
 import { useFullMemberByCode } from 'src/composables/fullMember';
+import { isEqual } from 'lodash-es';
 
 const props = defineProps<{
   code?: string,
@@ -251,9 +253,11 @@ const tagsEqual = (a: AccountTag[], b?: AccountTag[] | null) => {
 }
 
 const settingsEqual = (a: AccountSettings, b: AccountSettings) => {
-  const keys = Array.from(new Set([...Object.keys(a.attributes), ...Object.keys(b.attributes)]))
-    .filter(key => key !== "tags") as (keyof AccountSettings["attributes"])[]
-  return !keys.some((key) => a.attributes[key] !== b.attributes[key])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {tags: tagsA, ...restA} = a.attributes
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {tags: tagsB, ...restB} = b.attributes
+  return isEqual(restA, restB)
 }
 
 watch([accountSettings, tags], async () => {
@@ -291,18 +295,8 @@ const saveAccount = async (resource: DeepPartial<Account>, loading: Ref<boolean>
   }
 }
 
-const creditLimit = ref<number>()
-const creditLimitLoading = ref<boolean>(false)
 
-watch(creditLimit, async () => {
-  if (creditLimit.value !== account.value?.attributes.creditLimit) {
-    await saveAccount({attributes: {creditLimit: creditLimit.value}}, creditLimitLoading)
-  }
-})
-
-const maximumBalance = ref<number>()
-const maximumBalanceLoading = ref<boolean>(false)
-
+// Credit limit & maximum balance
 watch(account, () => {
   if (account.value) {
     creditLimit.value = account.value.attributes.creditLimit
@@ -310,8 +304,20 @@ watch(account, () => {
   }
 })
 
+const creditLimit = ref<number>()
+const creditLimitLoading = ref<boolean>(false)
+
+watch(creditLimit, async () => {
+  if (account.value && creditLimit.value !== account.value.attributes.creditLimit) {
+    await saveAccount({attributes: {creditLimit: creditLimit.value}}, creditLimitLoading)
+  }
+})
+
+const maximumBalance = ref<number>()
+const maximumBalanceLoading = ref<boolean>(false)
+
 watch(maximumBalance, async () => {
-  if (maximumBalance.value !== account.value?.attributes.maximumBalance) {
+  if (account.value && maximumBalance.value !== (account.value.attributes.maximumBalance ?? 0)) {
     await saveAccount({
       attributes: {
         maximumBalance: maximumBalance.value == 0 ? false : maximumBalance.value
@@ -375,8 +381,11 @@ watchDebounced([language, notiMyAccount, notiNeeds, notiOffers, notiMembers, ema
         }
       }
     })
-    // This triggers a language app update.
-    locale.value = language.value.value
+    // This triggers a language app update if this is the current user.
+    if (store.getters.myUser.id === user.value?.id) {
+      locale.value = language.value.value
+    }
+    
   }
 }, {debounce: 1000})
 

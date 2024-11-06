@@ -95,10 +95,11 @@
       :label="$t('currencySymbol')"
       outlined
       required
+      hide-bottom-space
       :rules="[(val: string) => val.length > 0 && val.length <= 3 || $t('invalidValue')]"
     />
     <q-input
-      v-model="decimals"
+      v-model.number="decimals"
       type="number"
       :label="$t('decimals')"
       outlined
@@ -146,12 +147,21 @@ const currencyNamePlural = ref(props.currency.attributes.namePlural ?? "")
 const currencySymbol = ref(props.currency.attributes.symbol ?? "")
 const decimals = ref(props.currency.attributes.decimals ?? 2)
 
-watchDebounced([image, name, code, description, location, city, region, country], () => {
+// Consider image and others differently since the image value is changed in the update endpoint.
+watch(image, () => {
   emit('update:group', {
     ...props.group,
     attributes: {
       ...props.group.attributes,
-      image: image.value,
+      image: image.value
+    }
+  } as Group)
+})
+watchDebounced([name, code, description, location, city, region, country], () => {
+  emit('update:group', {
+    ...props.group,
+    attributes: {
+      ...props.group.attributes,
       name: name.value,
       code: code.value,
       description: description.value,
@@ -174,9 +184,9 @@ watch([contacts], () => {
 
 watchDebounced([currencyName, currencyNamePlural, currencySymbol, decimals], () => {
   emit('update:currency', {
-    ...props.currency,
+    id: props.currency.id,
+    type: "currencies",
     attributes: {
-      ...props.currency.attributes,
       name: currencyName.value,
       namePlural: currencyNamePlural.value,
       symbol: currencySymbol.value,

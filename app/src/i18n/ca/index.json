@@ -289,6 +289,11 @@
   "enterTransactionDataNfc": "Entra la descripció i la quantitat a transferir abans d'escanejar l'etiqueta NFC.",
   "scanNfc": "Escaneja NFC",
   "bringNfcTag": "Acosta l'etiqueta NFC al lector.",
+  
+  "paymentRequests": "Sol·licituds de pagament",
+  "acceptExternalPaymentsAutomatically": "Accepta pagaments externs automàticament",
+  "acceptExternalPaymentsAutomaticallyHint": "Accepta automàticament les sol·licituds de pagament provinents d'usuaris d'altres grups.",
+
 
   "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
   "ErrorInvalidPassword": "Contrasenya incorrecta",

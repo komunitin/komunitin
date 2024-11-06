@@ -299,6 +299,10 @@
   "deleteAccountConfirmation": "Are you sure you want to delete your account? This action will delete all your data forever in the platform forever and you won't be able to log again in after that. If you account has positive balance, it will be moved to the selected account.",
   "moveBalanceTo": "Balance recipient",
   "moveBalanceToHint": "Select the account where your balance will be moved before deleting your account",
+  "paymentRequests": "Payment Requests",
+  "acceptExternalPaymentsAutomatically": "Accept External Payments Automatically",
+  "acceptExternalPaymentsAutomaticallyHint": "Automatically accept all external payment requests.",
+  
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

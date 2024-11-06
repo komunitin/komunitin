@@ -96,6 +96,12 @@ export type AccountSettings = {
   * */
   acceptPaymentsWhitelist?: string[]
 
+  /** If defined, the credit limit for this account is increased every
+  * time this account receives a payment by the same amount until the
+  * limit is reached.
+  * */
+  onPaymentCreditLimit?: number
+
   // 4. External Payments
 
   /** This account can make external payments. */ 
@@ -110,12 +116,6 @@ export type AccountSettings = {
   acceptExternalPaymentsAutomatically?: boolean
 
   // 5. Others
-
-  /** If defined, the credit limit for this account is increased every
-  * time this account receives a payment by the same amount until the
-  * limit is reached.
-  * */
-  onPaymentCreditLimit?: number
   
   /**  Tags that can be used to pre-authorize payments. */
   tags?: Tag[]

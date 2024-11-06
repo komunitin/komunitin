@@ -8,7 +8,7 @@ import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currency
 import { input } from './parse';
 import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, CurrencySettingsSerializer, TransferSerializer, TrustlineSerializer } from './serialize';
 import { Validators } from './validation';
-import { InputTrustline, Trustline } from 'src/model/trustline';
+import { InputTrustline, Trustline, UpdateTrustline } from 'src/model/trustline';
 import { badRequest } from 'src/utils/error';
 import { CreateMigration } from 'src/controller/migration/migration';
 import { collectionParams, resourceParams } from './request';
@@ -98,7 +98,7 @@ export function getRoutes(controller: SharedController) {
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.accounts.getAccount(ctx, id)
     }, AccountSerializer, {
-      include: ["currency", "settings"]
+      include: ["currency", "settings", "currency.settings"]
     })
   )
 
@@ -185,7 +185,7 @@ export function getRoutes(controller: SharedController) {
   )
 
   router.patch('/:code/trustlines/:id', userAuth(Scope.Accounting), checkExact(Validators.isUpdateTrustline()),
-    currencyInputHandler(controller, async (currencyController, ctx, data: InputTrustline) => {
+    currencyInputHandler(controller, async (currencyController, ctx, data: UpdateTrustline) => {
       return await currencyController.updateTrustline(ctx, data)
     }, TrustlineSerializer)
   )
