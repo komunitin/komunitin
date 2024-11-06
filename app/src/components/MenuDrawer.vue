@@ -28,12 +28,13 @@
                 :title="$t('editProfile')"
                 to="/profile"
               />
-              <menu-item
+              <menu-item  
                 icon="settings"
                 :title="$t('settings')"
                 to="/settings"
               />
               <menu-item
+                id="user-menu-logout"
                 icon="logout"
                 :title="$t('logout')"
                 @click="logout"
