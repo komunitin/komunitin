@@ -7,10 +7,21 @@ This service uses the [Stellar](https://stellar.org) blockchain to define the cu
 $ pnpm install
 ```
 
-## Run dev server locally
-Start the dependecy services (database and local Stellar Network) and the Komunitin Accounting service at http://localhost:2025.
+## Run dev server standalone (with DB and local Stellar)
+This is the right environment to develop the service and execute tests. Start the dependecy services (database and local Stellar Network) and the Komunitin Accounting service at http://localhost:2025.
 ```bash
+$ cp .env.test .env
 $ docker compose up -d
+$ pnpm dev
+```
+
+## Run dev server with local services (with testnet Stellar)
+This is the right environment to develop the integration of this service with the app and other services. 
+- Start the Komunitin services following the instructions in the [main README](../README.md).
+- Stop the `accounting` container
+- Run the accounting service with the local services:
+```bash
+$ cp .env.local .env
 $ pnpm dev
 ```
 
