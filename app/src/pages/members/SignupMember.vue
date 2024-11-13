@@ -118,13 +118,13 @@ const loadingSaveMember = ref(false)
 
 const updateMember = (resource: DeepPartial<Member>) => {
   member.value = {
-    ...(myMember.value),
+    ...(member.value),
     attributes: resource.attributes
   }
 }
 const updateContacts = (contacts: DeepPartial<Contact>[]) => {
   member.value = {
-    ...(myMember.value),
+    ...(member.value),
     contacts,
     relationships: {
       contacts: {
@@ -139,7 +139,12 @@ const saveMember = async () => {
     await store.dispatch("members/update", {
       id: member.value.id,
       group: props.code,
-      resource: member.value,
+      resource: {
+        id: member.value.id,
+        type: "members",
+        attributes: member.value.attributes,
+        relationships: member.value.relationships
+      },
       included: member.value.contacts
     })
     nextPage()

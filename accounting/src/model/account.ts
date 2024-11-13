@@ -3,7 +3,7 @@ import { Currency } from './currency'
 import { Account as AccountRecord, User as UserRecord, AccountTag as AccountTagRecord, Prisma } from '@prisma/client'
 import { User } from './user'
 
-export { AccountRecord}
+export { AccountRecord }
 
 export enum AccountStatus {
   Active = "active",

@@ -120,6 +120,7 @@
             v-if="member"
             class="q-ml-auto"
             :member="member"
+            @delete="() => router.back()"
           />  
         </div>
       </div>
@@ -133,6 +134,7 @@
 <script setup lang="ts">
 import { computed, Ref, ref, watch, watchEffect } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import PageHeader from '../../layouts/PageHeader.vue';
 import ToggleItem from '../../components/ToggleItem.vue';
 import SaveChanges from '../../components/SaveChanges.vue';
@@ -157,6 +159,7 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
+const router = useRouter()
 
 const isAdmin = computed(() => store.getters.isAdmin)
 
@@ -174,7 +177,7 @@ const account = ref<Account & {settings: AccountSettings, currency: Currency & {
 const accountSettings = ref<AccountSettings>()
 
 watch(member, async (member) => {
-  if (member) {
+  if (member && member.relationships.account.data !== null) {
     await store.dispatch("accounts/load", {
       id: member.relationships.account.data.id,
       group: actualCode.value,

@@ -10,20 +10,70 @@
       <div class="text-onsurface-m">
         {{ $t('manageAccountsText') }}
       </div>
+
+      <div class="text-overline text-uppercase text-onsurface-m q-pt-lg q-pb-sm">
+        {{ $t('accountRequests') }}
+      </div>
+      <div v-if="!loadingPending && pending.length === 0" class="text-onsurface-m q-mt-md">
+        {{ $t('noAccountRequests') }}
+      </div>
+      <q-list
+        v-if="!loadingPending && pending.length > 0"
+      >
+        <member-header
+          v-for="member in pending"
+          :key="member.id"
+          :member="member"
+          clickable
+          @click="memberClick(member)"
+        >
+          <template #extra>
+            <q-item-section class="text-onsurface-m">
+              {{ $formatDate(member.attributes.created) }}
+            </q-item-section>
+          </template>
+          <template #side>
+            <div 
+              class="row q-gutter-md"
+              @click.stop
+            >
+              <q-btn
+                color="primary"
+                flat
+                icon="how_to_reg"
+                :label="$t('accept')"
+                @click.stop="acceptMember(member)"
+              />
+              <delete-member-btn
+                flat
+                :label="$t('delete')"
+                :member="member"
+                @delete="loadPending"
+              />
+            </div>
+          </template>
+        </member-header>
+      </q-list>
+
+
+
+      <div class="text-overline text-uppercase text-onsurface-m q-pt-lg q-pb-sm">
+        {{ $t('accounts') }}
+      </div>
       <q-table
         ref="tableRef"
         v-model:pagination="pagination"
         :filter="filter"
-        class="full-width text-onsurface q-pt-lg"
+        class="full-width text-onsurface"
         :columns="columns"
-        :rows="accounts"
+        :rows="members"
         :visible-columns="visibleColumns"
         :rows-per-page-options="[10,25,50,100,200]"
         :loading="loading"
         :fullscreen="isFullscreen"
         flat
         @request="load"
-        @row-click="(_, row) => accountClick(row)"
+        @row-click="(_, row) => memberClick(row)"
       >
         <template #top>
           <div class="full-width row justify-between items-center">
@@ -107,8 +157,8 @@
             style="padding-right: 0;"
           >
             <avatar
-              :img-src="scope.row.member.attributes.image"
-              :text="scope.row.member.attributes.name"
+              :img-src="scope.row.attributes.image"
+              :text="scope.row.attributes.name"
               size="40px"
             />
           </q-td>
@@ -125,7 +175,7 @@
               round
               color="icon-dark"
               icon="edit"
-              :to="`/groups/${scope.row.member.group.attributes.code}/admin/members/${scope.row.member.attributes.code}/profile`" 
+              :to="`/groups/${scope.row.group.attributes.code}/admin/members/${scope.row.attributes.code}/profile`" 
             />
             <q-btn
               flat
@@ -133,7 +183,7 @@
               round
               color="icon-dark"
               icon="settings"
-              :to="`/groups/${scope.row.member.group.attributes.code}/admin/members/${scope.row.member.attributes.code}/settings`"
+              :to="`/groups/${scope.row.group.attributes.code}/admin/members/${scope.row.attributes.code}/settings`"
             />
           </q-td>
         </template>
@@ -145,6 +195,8 @@
 import { QTable } from 'quasar';
 import PageHeader from 'src/layouts/PageHeader.vue';
 import Avatar from 'src/components/Avatar.vue';
+import MemberHeader from 'src/components/MemberHeader.vue';
+import DeleteMemberBtn from 'src/pages/settings/DeleteMemberBtn.vue';
 import { Account, AccountSettings, CurrencySettings, Group, Member } from 'src/store/model';
 import { LoadListPayload } from 'src/store/resources';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -153,13 +205,46 @@ import { useStore } from 'vuex';
 import formatCurrency from 'src/plugins/FormatCurrency';
 import { useRouter } from 'vue-router';
 
-
 const props = defineProps<{
   code: string
 }>()
 
 const { t } = useI18n()
 const store = useStore()
+
+// Load group and currency.
+store.dispatch('currencies/load', {
+  id: props.code,
+  include: 'settings'
+})
+store.dispatch('groups/load', {
+  id: props.code,
+  include: 'settings'
+})
+
+const currency = computed(() => store.getters['currencies/current'])
+const currencySettings = computed(() => currency.value?.settings)
+const group = computed(() => store.getters['groups/current'])
+
+const formatAmount = (amount: number) => amount === undefined ? "" : formatCurrency(amount, currency.value)
+
+// Load account requests.
+const pending = ref<(Member & {group: Group})[]>([])
+const loadingPending = ref(true)
+const loadPending = async () => {
+  await store.dispatch('members/loadList', {
+    group: props.code,
+    filter: {
+      state: "pending"
+    }
+  })
+  pending.value = store.getters['members/currentList']
+  loadingPending.value = false
+}
+const loadPendingPromise = loadPending()
+
+// Load accounts.
+type ExtendedMember = Member & { account: Account & { settings: AccountSettings }}
 
 const settingsKeys = [
   'allowPayments',
@@ -181,41 +266,25 @@ const settingsKeys = [
   'nfcTags'
 ]
 
-store.dispatch('currencies/load', {
-  id: props.code,
-  include: 'settings'
-})
-store.dispatch('groups/load', {
-  id: props.code,
-  include: 'settings'
-})
-
-const currency = computed(() => store.getters['currencies/current'])
-const currencySettings = computed(() => currency.value?.settings)
-const group = computed(() => store.getters['groups/current'])
-
-const formatAmount = (amount: number) => amount === undefined ? "" : formatCurrency(amount, currency.value)
-
-type ExtendedAccount = Account & {settings: AccountSettings, member: Member}
 const columns = [
-  {name: 'image', field: (a: ExtendedAccount) => a.member.attributes.image, label: '', align: 'center', required: true},
-  {name: 'code', field: (a: ExtendedAccount) => a.attributes.code, label: t('account'), align: 'left', required: true, sortable: true},  
-  {name: 'name', field: (a: ExtendedAccount) => a.member.attributes.name, label: t('name'), align: 'left', required: true, sortable: true},
-  {name: 'state', field: (a: ExtendedAccount) => a.member.attributes.state, label: t('state'), align: 'left'},
-  {name: 'balance', field: (a: ExtendedAccount) => a.attributes.balance, label: t('balance'), align: 'right', sortable: true, format: formatAmount},
+  {name: 'image', field: (m: ExtendedMember) => m.attributes.image, label: '', align: 'center', required: true},
+  {name: 'code', field: (m: ExtendedMember) => m.account.attributes.code, label: t('account'), align: 'left', required: true, sortable: true},  
+  {name: 'name', field: (m: ExtendedMember) => m.attributes.name, label: t('name'), align: 'left', required: true, sortable: true},
+  {name: 'state', field: (m: ExtendedMember) => m.attributes.state, label: t('state'), align: 'left'},
+  {name: 'balance', field: (m: ExtendedMember) => m.account.attributes.balance, label: t('balance'), align: 'right', sortable: true, format: formatAmount},
   // Account limits
-  {name: 'creditLimit', field: (a: ExtendedAccount) => a.attributes.creditLimit, label: t('creditLimit'), align: 'right', sortable: true, format: formatAmount},
-  {name: 'maximumBalance', field: (a: ExtendedAccount) => a.attributes.maximumBalance, label: t('maximumBalance'), align: 'right', sortable: true, format: formatAmount},
+  {name: 'creditLimit', field: (m: ExtendedMember) => m.account.attributes.creditLimit, label: t('creditLimit'), align: 'right', sortable: true, format: formatAmount},
+  {name: 'maximumBalance', field: (m: ExtendedMember) => m.account.attributes.maximumBalance, label: t('maximumBalance'), align: 'right', sortable: true, format: formatAmount},
   // Account settings
   ...settingsKeys.map(key => {
     const settingsField = (key: string) => {
       if (key === 'enableAcceptPaymentsAfter2w') {
-        return (a: ExtendedAccount) => a.settings.attributes.acceptPaymentsAfter !== undefined 
-          ? (!!a.settings.attributes.acceptPaymentsAfter) : undefined
+        return (m: ExtendedMember) => m.account.settings.attributes.acceptPaymentsAfter !== undefined 
+          ? (!!m.account.settings.attributes.acceptPaymentsAfter) : undefined
       } else if (key === 'nfcTags') {
-        return (a: ExtendedAccount) => a.settings.attributes.tags?.length
+        return (m: ExtendedMember) => m.account.settings.attributes.tags?.length
       } else {
-        return (a: ExtendedAccount) => a.settings.attributes[key as keyof AccountSettings["attributes"]]
+        return (m: ExtendedMember) => m.account.settings.attributes[key as keyof AccountSettings["attributes"]]
       }
     }
     const settingsValue = (key: string, value: number|boolean|undefined, currencySettings: CurrencySettings) => {
@@ -238,8 +307,8 @@ const columns = [
     }
     const settingsClasses = (key: string) => {
       if (!["nfcTags"].includes(key)) {
-        return (account: ExtendedAccount) =>  {
-          const setting = account.settings.attributes[key as keyof AccountSettings["attributes"]]
+        return (m: ExtendedMember) =>  {
+          const setting = m.account.settings.attributes[key as keyof AccountSettings["attributes"]]
           if (setting === undefined) {
             return 'text-onsurface-d'
           } else if (typeof setting === 'boolean') {
@@ -293,10 +362,15 @@ watch(group, () => {
 const filter = ref('')
 
 const loading = ref(true)
-const accounts = ref([])
+//const accounts = ref([])
+const members = ref([])
 
 const load = async (scope: {pagination: Pagination, filter?: string}) => {  
   loading.value = true
+  // Wait for the pending requests to be loaded, since otherwise the store
+  // could mess up the two concurrent requests.
+  await loadPendingPromise
+
   const { rowsPerPage, sortBy, descending, page } = scope.pagination
   const sortField = sortBy ?? "code"
   // If the sortBy is null, don't explicitly sort (we'll implicitly sort by code)
@@ -311,6 +385,9 @@ const load = async (scope: {pagination: Pagination, filter?: string}) => {
       if (page === 1) {
         await store.dispatch('members/loadList', {
           group,
+          filter: {
+            state: ["active", "suspended"]
+          },
           sort,
           search: scope.filter ? scope.filter : undefined,
           pageSize
@@ -334,7 +411,8 @@ const load = async (scope: {pagination: Pagination, filter?: string}) => {
         pageSize,
         include: 'settings',
       })
-      accounts.value = loadedMembers.map((member: {account: Account}) => member.account)
+      members.value = loadedMembers
+      
     } else {
       if (page === 1) {
         await store.dispatch('accounts/loadList', {
@@ -357,11 +435,12 @@ const load = async (scope: {pagination: Pagination, filter?: string}) => {
       await store.dispatch("members/loadList", {
         group: props.code,
         filter: {
-          account: loadedAccounts.map((account: Account) => account.id)
+          account: loadedAccounts.map((account: Account) => account.id),
+          state: ["active", "suspended"]
         },
         pageSize,
       })
-      accounts.value = loadedAccounts
+      members.value = store.getters['members/currentList']
     }
     // Update the pagination object
     pagination.value = {
@@ -383,11 +462,26 @@ onMounted(() => {
 })
 
 const router = useRouter()
-const accountClick = (account: ExtendedAccount) => {
+const memberClick = (member: Member) => {
   router.push({name: 'Member', params: {
-    code: (account.member as Member & {group: Group}).group.attributes.code,
-    memberCode: account.member.attributes.code
+    code: (member as Member & {group: Group}).group.attributes.code,
+    memberCode: member.attributes.code
   }})
+}
+
+const acceptMember = async (member: Member & {group: Group}) => {
+  await store.dispatch('members/update', {
+    id: member.id,
+    group: member.group.attributes.code,
+    resource: {
+      type: "members",
+      attributes: {
+        state: "active"
+      }
+    }
+  })
+  await loadPending()
+  await tableRef.value?.requestServerInteraction()
 }
 
 

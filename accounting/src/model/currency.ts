@@ -1,6 +1,6 @@
 
 import { LedgerCurrencyState } from "../ledger";
-import { Rate } from "../utils/types";
+import { Optional, Rate } from "../utils/types";
 import { Currency as CurrencyRecord, Prisma } from "@prisma/client"
 import { User } from "./user";
 import { Account, AccountRecord, recordToAccount } from "./account";
@@ -135,14 +135,14 @@ export interface Currency {
   admin?: User
 }
 
-export type CreateCurrency = Omit<Currency, "id" | "status" | "created" | "updated" | "encryptionKey" | "keys">
-export type UpdateCurrency = Partial<CreateCurrency & {id: string}>
+export type CreateCurrency = Omit<Optional<Currency, "id">, "status" | "created" | "updated" | "encryptionKey" | "keys">
+export type UpdateCurrency = Partial<CreateCurrency>
 
 export function currencyToRecord(currency: CreateCurrency): Prisma.CurrencyCreateInput
 export function currencyToRecord(currency: UpdateCurrency): Prisma.CurrencyUpdateInput
 export function currencyToRecord(currency: CreateCurrency | UpdateCurrency): Prisma.CurrencyCreateInput | Prisma.CurrencyUpdateInput {
   return {
-    id: (currency as UpdateCurrency).id,
+    id: currency.id,
     code: currency.code,
 
     name: currency.name,

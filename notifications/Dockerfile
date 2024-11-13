@@ -1,4 +1,4 @@
-FROM golang:1.22 as notifications-build
+FROM golang:1.22 AS notifications-build
 
 RUN mkdir /opt/notifications
 WORKDIR /opt/notifications
@@ -13,7 +13,7 @@ COPY . .
 RUN go build -o main .
 
 # Start golang debugger
-FROM notifications-build as notifications-dev
+FROM notifications-build AS notifications-dev
 
 # Install file watcher
 RUN apt-get update && apt-get install -y inotify-tools psmisc
@@ -30,7 +30,7 @@ EXPOSE 2028
 CMD ./watch.sh
 
 # Build minimal production image
-FROM notifications-build as notifications
+FROM notifications-build AS notifications
 
 RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 

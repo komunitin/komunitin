@@ -469,7 +469,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
             Object.defineProperty(main, name, {
               get: function() {
                 const resourceId = value.data as ResourceIdentifierObject;
-                return rootGetters[resourceId.type + "/one"](resourceId.id);
+                return resourceId === null ? null : rootGetters[resourceId.type + "/one"](resourceId.id);
               }
             });
           }

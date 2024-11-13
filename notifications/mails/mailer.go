@@ -77,6 +77,10 @@ func handleEvent(ctx context.Context, event *events.Event) error {
 		return handleTransferRejected(ctx, event)
 	case events.TransferPending:
 		return handleTransferPending(ctx, event)
+	case events.MemberJoined:
+		return handleMemberJoined(ctx, event)
+	case events.MemberRequested:
+		return handleMemberRequested(ctx, event)
 	}
 	return nil
 }
@@ -275,4 +279,32 @@ func sendTransferEmail(ctx context.Context, user *api.User, payer *api.Member, p
 func FormatCurrency(amount int, currency *api.Currency, t *i18n.Translator) string {
 	scaled := float64(amount) / math.Pow10(currency.Scale)
 	return t.C(scaled, currency.Symbol, number.Scale(currency.Decimals))
+}
+
+func handleMemberJoined(ctx context.Context, event *events.Event) error {
+	member, err := api.GetMember(ctx, event.Code, event.Data["member"])
+	if err != nil {
+		return err
+	}
+	users, err := api.GetMemberUsers(ctx, member.Id)
+	if err != nil {
+		return err
+	}
+	for _, user := range users {
+		if userWantAccountEmails(user) {
+			if errMail := sendMemberJoinedEmail(ctx, user, member); errMail != nil {
+				err = errMail
+			}
+		}
+	}
+	return err
+}
+
+func handleMemberRequested(ctx context.Context, event *events.Event) error {
+	member, err := api.GetMember(ctx, event.Code, event.Data["member"])
+	if err != nil {
+		return err
+	}
+	
+	return err
 }

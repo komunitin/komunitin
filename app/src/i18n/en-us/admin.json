@@ -106,5 +106,7 @@
   "maximumBalanceHint": "The maximum positive balance that this account can have. Leave to 0 for unlimited.",
   "move": "Move",
   "allowAnonymousMemberList": "Allow external users to list group members",
-  "allowAnonymousMemberListHint": "Allow users from any other group to see the list of names, avatars and account numbers of the members of this group. No emails or other personal information is shared."
+  "allowAnonymousMemberListHint": "Allow users from any other group to see the list of names, avatars and account numbers of the members of this group. No emails or other personal information is shared.",
+  "accountRequests": "Account Requests",
+  "noAccountRequests": "No pending account requests."
 }

@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, ref, watch } from "vue";
 
 import cardClickTo from "../plugins/CardClickTo";
 import clamp from "../plugins/Clamp";
@@ -107,8 +107,12 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore()
+    const group = computed(() => props.offer.member.group)
 
-    const price = computed(() => formatPrice(props.offer.attributes.price, props.offer.member.group.currency))
+    const currency = ref(group.value.currency)
+    watch(() => group.value.currency, (value) => currency.value = value)
+
+    const price = computed(() => currency.value ? formatPrice(props.offer.attributes.price, currency.value) : '')
     const isMine = computed(() => props.offer.member.id === store.getters.myMember.id)
     const hidden = computed(() => props.offer.attributes.state === "hidden")
     const expired = computed(() => new Date(props.offer.attributes.expires) < new Date())

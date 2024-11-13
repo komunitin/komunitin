@@ -1,5 +1,4 @@
 import { body } from "express-validator"
-import { isInt } from "validator/es/lib/isInt"
 
 export namespace Validators {
   

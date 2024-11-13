@@ -31,7 +31,7 @@
           :code="props.member.group.attributes.code"
           :label="$t('moveBalanceTo')"
           :hint="$t('moveBalanceToHint')"
-          :account-disabled="(account: Account) => account.id === props.member.account.id"
+          :account-disabled="(account: Account) => account.id === props.member.account?.id"
           :rules="[() => !!recipientAccount || $t('fieldRequired')]"
           outlined
         />
@@ -64,7 +64,11 @@ import { useRouter } from "vue-router";
 
 
 const props = defineProps<{
-  member: Member & {account: Account & {currency: Currency}, group: Group}
+  member: Member & {account?: Account & {currency: Currency}, group: Group}
+}>()
+
+const emit = defineEmits<{
+  (e: "delete"): void
 }>()
 
 const store = useStore()
@@ -73,8 +77,11 @@ const isAdmin = computed(() => store.getters.isAdmin)
 const password = ref("")
 const recipientAccount = ref<Account>()
 
-const zeroBalance = computed(() => props.member.account.attributes.balance === 0)
-const canDelete = computed(() => isAdmin.value || props.member.account.attributes.balance >= 0)
+const hasAccount = computed(() => props.member.relationships.account.data !== null)
+const balance = computed(() => props.member.account?.attributes.balance ?? 0)
+
+const zeroBalance = computed(() => balance.value === 0)
+const canDelete = computed(() => isAdmin.value || !hasAccount.value || balance.value >= 0)
 
 const quasar = useQuasar()
 const { t } = useI18n()
@@ -88,7 +95,7 @@ const deleteMember = async () => {
   try {
     quasar.loading.show()
     // 1. Move balance
-    if (!zeroBalance.value) {
+    if (props.member.account && !zeroBalance.value) {
       const currency = props.member.account.currency
       const balance = props.member.account.attributes.balance
       const payment = balance >= 0
@@ -130,7 +137,7 @@ const deleteMember = async () => {
       await store.dispatch("logout")
       await router.push("/")
     } else {
-      await router.back()
+      emit("delete")
     }
 
   } finally {

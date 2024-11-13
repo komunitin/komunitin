@@ -28,16 +28,13 @@ const category = computed({
 })
 const store = useStore()
 
-watch([props], () => {
-  if (props.code) {
-    store.dispatch("groups/load", {
-      id: props.code,
-      include: "contacts,categories"
-    })
-  }
-}, { immediate: true })
+watch(() => props.code, async () => {
+  await store.dispatch('categories/loadList', {
+    group: props.code
+  })
+}, {immediate: true})
 
-const categories = computed(() => store.getters["groups/current"]?.categories)
+const categories = computed(() => store.getters['categories/currentList'])
 const options = computed(() => categories.value?.map((c: Category) => ({label: c.attributes.name, value: c.id})))
 
 </script>
