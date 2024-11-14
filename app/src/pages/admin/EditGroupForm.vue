@@ -1,13 +1,5 @@
 <template>
   <div class="q-gutter-y-lg">
-    <div>
-      <div class="text-subtitle1">
-        {{ $t('group') }}
-      </div>
-      <div class="text-onsurface-m">
-        {{ $t('editGroupText') }}
-      </div>
-    </div>
     <avatar-field
       v-model="image"
       :text="name"

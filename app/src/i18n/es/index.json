@@ -313,6 +313,8 @@
   "currencyNamePlural": "Nombre de la moneda (plural)",
   "currencySymbol": "Símbolo de la moneda",
   "decimals": "Decimales",
+  "createGroup": "Crear red de intercambio",
+  "requestNewGroup": "Solicitar nueva red de intercambio",
 
   "ErrorAuthNoCredentials": "Email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta",

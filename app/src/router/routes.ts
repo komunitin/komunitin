@@ -57,6 +57,14 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
+        path: '/groups/new',
+        name: 'CreateGroup',
+        component: () => import('../pages/groups/CreateGroup.vue'),
+        meta: {
+          public: true
+        }
+      },
+      {
         path: '/groups/:code',
         props: true,
         name: 'Group',

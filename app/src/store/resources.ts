@@ -71,6 +71,11 @@ export interface CreateListPayload<T extends ResourceObject> {
    * The resources
    */
   resources: DeepPartial<T>[];
+
+  /**
+   * Array of resources to be updated alongside the main resource.
+   */
+  included?: (DeepPartial<ResourceObject> & ResourceIdentifierObject)[]
 }
 
 type DeepPartial<T> = T extends object ? {

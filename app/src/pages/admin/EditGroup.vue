@@ -6,7 +6,15 @@
     <q-page 
       padding 
       class="q-py-lg q-px-md col-12 col-sm-8 col-md-6 q-mb-xl"
-    > 
+    >
+      <div class="q-pb-lg">
+        <div class="text-subtitle1">
+          {{ $t('group') }}
+        </div>
+        <div class="text-onsurface-m">
+          {{ $t('editGroupText') }}
+        </div>
+      </div>
       <edit-group-form 
         v-if="group"
         op="edit"

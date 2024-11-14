@@ -313,7 +313,8 @@
   "currencyNamePlural": "Currency Name (plural)",
   "currencySymbol": "Currency Symbol",
   "decimals": "Decimals",
-  
+  "createGroup": "Create group",
+  "requestNewGroup": "Request new group",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

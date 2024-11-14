@@ -56,6 +56,13 @@
         target="__blank"
         :label="$t('contribute')"
       />
+      <q-btn
+        flat
+        type="a"
+        href="https://docs.komunitin.org/project/new-currency"
+        target="__blank"
+        :label="$t('newCurrency')"
+      />
     </q-footer>
   </q-layout>
 </template>
