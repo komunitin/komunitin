@@ -327,13 +327,6 @@ export interface Currency extends ResourceObject {
       n: number,
       d: number
     }
-    settings: {
-      defaultAllowPayments?: boolean
-      defaultAllowPaymentRequests?: boolean
-
-      enableExternalPayments?: boolean
-      enableExternalPaymentRequests?: boolean
-    }
   };
 }
 
