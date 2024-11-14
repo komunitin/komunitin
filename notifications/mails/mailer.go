@@ -8,13 +8,11 @@ package mails
 import (
 	"context"
 	"log"
-	"math"
 
 	"github.com/komunitin/komunitin/notifications/api"
 	"github.com/komunitin/komunitin/notifications/config"
 	"github.com/komunitin/komunitin/notifications/events"
 	"github.com/komunitin/komunitin/notifications/i18n"
-	"golang.org/x/text/number"
 )
 
 // These are the possible email types that can be sent.
@@ -196,66 +194,61 @@ func fetchTransferResources(ctx context.Context, event *events.Event, which fetc
 	return
 }
 
-// Creates the EmailTransferData object with the generic data required for the template,
-// that is not specific to the payer, payee or exact type of event.
-func buildCommonTransferTemplateData(t *i18n.Translator, payer *api.Member, payee *api.Member, transfer *api.Transfer) EmailTransferData {
-	templateData := EmailTransferData{
-		TemplateMainData: TemplateMainData{
-			LogoUrl:  config.KomunitinAppUrl + "/logos/logo-200.png",
-			SiteName: "Komunitin",
-			Footer:   t.T("footer"),
-		},
-		TemplateTransferData: TemplateTransferData{
-			PayerAvatarUrl: payer.Image,
-			PayerName:      payer.Name,
-			PayerAccount:   transfer.Payer.Code,
-			PayeeAvatarUrl: payee.Image,
-			PayeeName:      payee.Name,
-			PayeeAccount:   transfer.Payee.Code,
-			Amount:         FormatCurrency(transfer.Amount, transfer.Currency, t),
-			State:          t.T(transfer.State),
-			Group:          transfer.Currency.Code,
-			Time:           t.Dt(transfer.Created),
-			Description:    transfer.Meta,
-		},
-		TemplateActionData: TemplateActionData{
-			ActionUrl:  config.KomunitinAppUrl + "/groups/" + transfer.Currency.Code + "/transactions/" + transfer.Id,
-			ActionText: t.T("viewTransaction"),
-		},
+func handleMemberRequested(ctx context.Context, event *events.Event) error {
+	// Fetch member
+	member, err := api.GetMember(ctx, event.Code, event.Data["member"])
+	if err != nil {
+		return err
 	}
-	return templateData
+	// Fetch group admins
+	group, err := api.GetGroup(ctx, event.Code)
+	if err != nil {
+		return err
+	}
+	// Send email to admins
+	for _, admin := range group.Admins {
+		errMail := sendMemberRequestedEmail(ctx, admin, member, group)
+		if errMail != nil {
+			err = errMail
+		}
+	}
+
+	return err
 }
 
-func buildTransferTemplateData(t *i18n.Translator, payer *api.Member, payee *api.Member, transfer *api.Transfer, emailType EmailType) EmailTransferData {
-	templateData := buildCommonTransferTemplateData(t, payer, payee, transfer)
-	switch emailType {
-	case paymentSent:
-		templateData.Payment = true
-		templateData.Text = t.Td("paymentSentText", map[string]string{"Amount": templateData.Amount, "PayeeName": payee.Name})
-		templateData.Subject = t.T("paymentSentSubject")
-	case paymentReceived:
-		templateData.Payment = false
-		templateData.Text = t.Td("paymentReceivedText", map[string]string{"Amount": templateData.Amount, "PayerName": payer.Name})
-		templateData.Subject = t.T("paymentReceivedSubject")
-	case paymentRejected:
-		templateData.Payment = false
-		templateData.Text = t.Td("paymentRejectedText", map[string]string{"Amount": templateData.Amount, "PayerName": payer.Name})
-		templateData.Subtext = t.T("paymentRejectedSubtext")
-		templateData.Subject = t.T("paymentRejectedSubject")
-	case paymentPending:
-		templateData.Payment = true
-		templateData.Text = t.Td("paymentPendingText", map[string]string{"Amount": templateData.Amount, "PayeeName": payee.Name})
-		templateData.Subtext = t.T("paymentPendingSubtext")
-		templateData.Subject = t.T("paymentPendingSubject")
+func handleMemberJoined(ctx context.Context, event *events.Event) error {
+	member, err := api.GetMember(ctx, event.Code, event.Data["member"])
+	if err != nil {
+		return err
 	}
+	account, err := api.GetAccount(ctx, event.Code, member.Account.Id)
+	if err != nil {
+		return err
+	}
+	group, err := api.GetGroup(ctx, event.Code)
+	if err != nil {
+		return err
+	}
+	users, err := api.GetMemberUsers(ctx, member.Id)
+	if err != nil {
+		return err
+	}
+	for _, user := range users {
+		if userWantAccountEmails(user) {
+			if errMail := sendMemberJoinedEmail(ctx, user, member, account, group); errMail != nil {
+				err = errMail
+			}
+		}
+	}
+	return err
+}
 
-	if templateData.Payment {
-		templateData.Name = payer.Name
-	} else {
-		templateData.Name = payee.Name
-	}
-	templateData.Greeting = t.Td("hello", map[string]string{"Name": templateData.Name})
-	return templateData
+func sendEmail(ctx context.Context, message *Email, name string, email string) error {
+	message.From.Name = "Komunitin"
+	message.From.Email = "noreply@komunitin.org"
+
+	message.AddRecipient(name, email)
+	return mailSender.SendMail(ctx, *message)
 }
 
 func sendTransferEmail(ctx context.Context, user *api.User, payer *api.Member, payee *api.Member, transfer *api.Transfer, emailType EmailType) error {
@@ -269,42 +262,34 @@ func sendTransferEmail(ctx context.Context, user *api.User, payer *api.Member, p
 		return err
 	}
 
-	message.From.Name = "Komunitin"
-	message.From.Email = "noreply@komunitin.org"
-
-	message.AddRecipient(templateData.Name, user.Email)
-	return mailSender.SendMail(ctx, *message)
+	return sendEmail(ctx, message, templateData.Name, user.Email)
 }
 
-func FormatCurrency(amount int, currency *api.Currency, t *i18n.Translator) string {
-	scaled := float64(amount) / math.Pow10(currency.Scale)
-	return t.C(scaled, currency.Symbol, number.Scale(currency.Decimals))
-}
-
-func handleMemberJoined(ctx context.Context, event *events.Event) error {
-	member, err := api.GetMember(ctx, event.Code, event.Data["member"])
+func sendMemberRequestedEmail(ctx context.Context, admin *api.User, member *api.Member, group *api.Group) error {
+	t, err := i18n.NewTranslator(admin.Settings.Language)
 	if err != nil {
 		return err
 	}
-	users, err := api.GetMemberUsers(ctx, member.Id)
+	templateData := buildMemberRequestedTemplateData(t, member, group)
+	message, err := buildTextMessage(t, templateData)
 	if err != nil {
 		return err
 	}
-	for _, user := range users {
-		if userWantAccountEmails(user) {
-			if errMail := sendMemberJoinedEmail(ctx, user, member); errMail != nil {
-				err = errMail
-			}
-		}
-	}
-	return err
+
+	return sendEmail(ctx, message, "", admin.Email)
+
 }
 
-func handleMemberRequested(ctx context.Context, event *events.Event) error {
-	member, err := api.GetMember(ctx, event.Code, event.Data["member"])
+func sendMemberJoinedEmail(ctx context.Context, user *api.User, member *api.Member, account *api.Account, group *api.Group) error {
+	t, err := i18n.NewTranslator(user.Settings.Language)
 	if err != nil {
 		return err
 	}
-	
-	return err
+	templateData := buildMemberJoinedTemplateData(t, member, account, group)
+	message, err := buildTextMessage(t, templateData)
+	if err != nil {
+		return err
+	}
+
+	return sendEmail(ctx, message, "", user.Email)
 }

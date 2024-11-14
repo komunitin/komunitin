@@ -46,6 +46,12 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Build notifications service
+      run: docker build --target notifications-build --tag komunitin-notifications-build .
+
+    - name: Run the tests
+      run: docker run --rm komunitin-notifications-build go test ./...
+    
+    - name: Build production
       run: docker build --tag komunitin/komunitin-notifications .
 
     - name: Publish to Docker Hub

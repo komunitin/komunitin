@@ -22,5 +22,14 @@
   "accepted": "Acceptada",
   "committed": "Confirmada",
   "rejected": "Rebutjada",
-  "deleted": "Eliminada"
+  "deleted": "Eliminada",
+  "helloAdmin": "Hola administrador/a,",
+  "memberRequestedSubject": "Nova sol·licitud de membre",
+  "memberRequestedText": "{{.MemberName}} ha sol·licitat unir-se a {{.GroupName}}.",
+  "memberRequestedSubtext": "Sisplau revisa la sol·licitud i accepta-la o elimina-la el més aviat possible. Aquest missatge s'ha enviat a tots els administradors del grup.",
+  "reviewRequests": "Revisar sol·licituds",
+  "memberJoinedSubject": "Benvingut/da a {{.GroupName}}",
+  "memberJoinedText": "Has estat acceptat/da com a membre de {{.GroupName}}. El teu número de compte és {{.AccountCode}}.",
+  "memberJoinedSubtext": "Pots iniciar sessió a l'aplicació i veure als altres membres i les seves ofertes i necessitats. També pots completar el teu perfil afegint tots els mitjans de contacte rellevants i altra informació. Recomanem completar les teves ofertes amb descripcions detallades i imatges i ja pots començar a fer transaccions.",
+  "signIn": "Iniciar sessió"
 }

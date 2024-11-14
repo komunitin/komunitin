@@ -22,5 +22,14 @@
   "accepted": "Accepted",
   "committed": "Committed",
   "rejected": "Rejected",
-  "deleted": "Deleted"
+  "deleted": "Deleted",
+  "helloAdmin": "Hello admin,",
+  "memberRequestedSubject": "New member request",
+  "memberRequestedText": "{{.MemberName}} has just requested to join {{.GroupName}}.",
+  "memberRequestedSubtext": "Please review the request and accept or delete it as soon as possible. This message was sent to all administrators of the group.",
+  "reviewRequests": "Review requests",
+  "memberJoinedSubject": "Welcome to {{.GroupName}}",
+  "memberJoinedText": "You have been accepted as a member of {{.GroupName}}. Your account number is {{.AccountCode}}.",
+  "memberJoinedSubtext": "You can sign in to the app and see the other members and their offers and needs. You can also complete your profile by adding all relevant means of contact and other information. Please complete your offers with detailed descriptions and images, and you can start making transactions.",
+  "signIn": "Sign in"
 }

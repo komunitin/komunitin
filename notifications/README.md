@@ -25,3 +25,9 @@ $ docker compose --profile run up --build
 $ docker compose --profile dev up --build
 ```
 4. Open Visual Code and run the Go debugger to start the service.
+
+## Run unit tests
+Currently the i18n and the mails packages are tested. To run all the tests execute:
+```
+go test ./...
+```

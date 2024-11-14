@@ -1,0 +1,19 @@
+{{define "content"}}
+{{.Text}}
+{{if .Subtext}}{{.Subtext}}
+{{end}}
+{{"transactionDetails" | t}}:
+
+{{template "transfer" .}}
+
+{{end}}
+
+{{define "transfer"}}
+  {{"payer" | t}}: {{.PayerName}} | {{.PayerAccount}}
+  {{"payee" | t}}: {{.PayeeName}} | {{.PayeeAccount}}
+  {{.Amount}}
+  {{.Time}}
+  {{.Description}}
+  {{"state" | t}}: {{.State}}
+  {{"group" | t}}: {{.Group}}
+{{end}}

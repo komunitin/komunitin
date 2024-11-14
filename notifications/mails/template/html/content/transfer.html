@@ -1,3 +1,10 @@
+{{define "content"}}
+<p style="font-weight: bold;">{{.Text}}</p>
+{{if .Subtext}}<p>{{.Subtext}}</p>{{end}}
+<p style="padding-top: 32px; color: #6e6e6e;">{{"transactionDetails" | t}}</p>
+{{template "transfer" .}}
+{{end}}
+
 {{define "transfer"}}
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-radius: 4px; border: solid 1px #e0e0e0; font-size: 12px;">
   <tr>

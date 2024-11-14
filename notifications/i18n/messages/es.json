@@ -22,5 +22,14 @@
   "accepted": "Aceptada",
   "committed": "Confirmada",
   "rejected": "Rechazada",
-  "deleted": "Eliminada"
+  "deleted": "Eliminada",
+  "helloAdmin": "Hola administrador/a,",
+  "memberRequestedSubject": "Nueva solicitud de miembro",
+  "memberRequestedText": "{{.MemberName}} ha solicitado unirse a {{.GroupName}}.",
+  "memberRequestedSubtext": "Por favor revisa la solicitud y acéptala o elimínala lo antes posible. Este mensaje se ha enviado a todos los administradores del grupo.",
+  "reviewRequests": "Revisar solicitudes",
+  "memberJoinedSubject": "Bienvenido/a a {{.GroupName}}",
+  "memberJoinedText": "Has sido aceptado/a como miembro de {{.GroupName}}. Tu número de cuenta es {{.AccountCode}}.",
+  "memberJoinedSubtext": "Puedes iniciar sesión en la aplicación y ver a los demás miembros y sus ofertas y necesidades. También puedes completar tu perfil añadiendo todos los medios de contacto relevantes y otra información. Recomendamos completar tus ofertas con descripciones detalladas e imágenes y ya puedes empezar a hacer transacciones.",
+  "signIn": "Iniciar sesión"
 }

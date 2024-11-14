@@ -9,9 +9,33 @@ import (
 	"github.com/komunitin/komunitin/notifications/api"
 )
 
+var user1 = &api.User{
+	Id:    "1",
+	Email: "user@example.com",
+	Settings: &api.UserSettings{
+		Language: "en",
+	},
+}
+var member1 = &api.Member{
+	Id:    "1",
+	Name:  "John Doe",
+	Image: "https://example.com/member.jpg",
+	Account: &api.ExternalAccount{
+		Id: "1",
+	},
+}
+var account1 = &api.Account{
+	Id:   "1",
+	Code: "GRPX0001",
+}
+var group1 = &api.Group{
+	Id:   "1",
+	Name: "Group X",
+	Code: "GRPX",
+}
+
 func TestTransferMessage(t *testing.T) {
 	mailSender = NewMockMailSender()
-
 	user := &api.User{
 		Id:    "1",
 		Email: "user@example.com",
@@ -50,7 +74,7 @@ func TestTransferMessage(t *testing.T) {
 		Image: "https://example.com/payee.jpg",
 	}
 
-	err := sendTransferEmail(context.Background(), user, payer, payee, transfer, paymentSent)
+	err := sendTransferEmail(context.Background(), user1, payer, payee, transfer, paymentSent)
 	if err != nil {
 		t.Error(err)
 	}
@@ -101,5 +125,28 @@ func TestTransferMessage(t *testing.T) {
 	}
 	if !strings.Contains(msg.BodyText, "Has pagado 1,00# a Payee.") {
 		t.Errorf("Expected 'Has pagado 1,00# a Payee.', got '%s'", msg.BodyText)
+	}
+}
+
+func TestMemberJoinedMessage(t *testing.T) {
+	mailSender = NewMockMailSender()
+
+	err := sendMemberJoinedEmail(context.Background(), user1, member1, account1, group1)
+	if err != nil {
+		t.Error(err)
+	}
+	msg := (mailSender.(*MailSenderMock)).SentEmails[0]
+
+	expectedSubject := "Welcome to " + group1.Name
+	if msg.Subject != expectedSubject {
+		t.Errorf("Expected 'Welcome to "+group1.Name+"', got '%s'", msg.Subject)
+	}
+	expectedText := "Hello John Doe"
+	if !strings.Contains(msg.BodyHtml, expectedText) {
+		t.Errorf("Expected '%s', got '%s'", expectedText, msg.BodyHtml)
+	}
+	expectedText = "You have been accepted as a member of Group X. Your account number is GRPX0001."
+	if !strings.Contains(msg.BodyHtml, expectedText) {
+		t.Errorf("Expected '%s', got '%s'", expectedText, msg.BodyHtml)
 	}
 }
