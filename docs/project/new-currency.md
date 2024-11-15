@@ -23,7 +23,15 @@ To register a new group in the system, you need to fill out a form. Pay special 
 After the group is approved you'll access the administrative interface and you'll be able to tune the settings.
 
 Go to the following link to apply for a new currency:\
-[<mark style="color:green;">**https://komunitin.org/groups/new**</mark>](https://komunitin.org/groups/new)
+
+
+{% embed url="https://komunitin.org/signup-group" %}
+
+
+
+
+
+
 
 
 
