@@ -676,19 +676,23 @@ export default {
 
     // Create user.
     server.post(urlSocial + "/users", (schema: any, request: any) => {
-      const body = JSON.parse(request.requestBody);
-      const memberData = body.data.relationships.members.data[0];
+      const body = JSON.parse(request.requestBody)
+      const memberId = body.data.relationships.members.data[0].id
+      const memberData = body.included.find((record: any) => record.type == "members" && record.id == memberId)
       
-      const group = schema.groups.find(memberData.relationships.group.data.id);
-      const member = schema.members.create({...memberData.attributes, group});
-      const user = schema.users.create({...body.data.attributes, members: [member], settings: schema.userSettings.create()});
+      const group = schema.groups.find(memberData.relationships.group.data.id)
+      const member = schema.members.create({...memberData.attributes, group})
+
+      const userSettingsData = body.included.find((record: any) => record.type == "user-settings")
+      const userSettings = schema.userSettings.create(userSettingsData.attributes)
+      const user = schema.users.create({...body.data.attributes, members: [member], settings: userSettings})
       
       // eslint-disable-next-line no-console
       console.info("New user created! Follow this URL to contine the signup process:")
       // eslint-disable-next-line no-console
-      console.info(`https://localhost:2030/groups/${group.code}/signup-member?token=empty_user`);
+      console.info(`https://localhost:2030/groups/${group.code}/signup-member?token=empty_user`)
 
-      return user;
+      return user
     });
 
   }
