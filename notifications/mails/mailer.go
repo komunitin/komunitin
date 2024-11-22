@@ -15,11 +15,11 @@ import (
 	"github.com/komunitin/komunitin/notifications/i18n"
 )
 
-// These are the possible email types that can be sent.
-type EmailType int
+// These are the possible email types for transfers that can be sent.
+type TransferEmailType int
 
 const (
-	undefinedEmailType EmailType = iota
+	undefinedEmailType TransferEmailType = iota
 	paymentSent
 	paymentReceived
 	paymentRejected
@@ -79,6 +79,8 @@ func handleEvent(ctx context.Context, event *events.Event) error {
 		return handleMemberJoined(ctx, event)
 	case events.MemberRequested:
 		return handleMemberRequested(ctx, event)
+	case events.GroupActivated:
+		return handleGroupActivated(ctx, event)
 	}
 	return nil
 }
@@ -243,6 +245,20 @@ func handleMemberJoined(ctx context.Context, event *events.Event) error {
 	return err
 }
 
+func handleGroupActivated(ctx context.Context, event *events.Event) error {
+	group, err := api.GetGroup(ctx, event.Code)
+	if err != nil {
+		return err
+	}
+	for _, admin := range group.Admins {
+		errMail := sendGroupActivatedEmail(ctx, admin, group)
+		if errMail != nil {
+			err = errMail
+		}
+	}
+	return err
+}
+
 func sendEmail(ctx context.Context, message *Email, name string, email string) error {
 	message.From.Name = "Komunitin"
 	message.From.Email = "noreply@komunitin.org"
@@ -251,7 +267,7 @@ func sendEmail(ctx context.Context, message *Email, name string, email string) e
 	return mailSender.SendMail(ctx, *message)
 }
 
-func sendTransferEmail(ctx context.Context, user *api.User, payer *api.Member, payee *api.Member, transfer *api.Transfer, emailType EmailType) error {
+func sendTransferEmail(ctx context.Context, user *api.User, payer *api.Member, payee *api.Member, transfer *api.Transfer, emailType TransferEmailType) error {
 	t, err := i18n.NewTranslator(user.Settings.Language)
 	if err != nil {
 		return err
@@ -292,4 +308,18 @@ func sendMemberJoinedEmail(ctx context.Context, user *api.User, member *api.Memb
 	}
 
 	return sendEmail(ctx, message, "", user.Email)
+}
+
+func sendGroupActivatedEmail(ctx context.Context, admin *api.User, group *api.Group) error {
+	t, err := i18n.NewTranslator(admin.Settings.Language)
+	if err != nil {
+		return err
+	}
+	templateData := buildGroupActivatedTemplateData(t, group)
+	message, err := buildTextMessage(t, templateData)
+	if err != nil {
+		return err
+	}
+
+	return sendEmail(ctx, message, "", admin.Email)
 }

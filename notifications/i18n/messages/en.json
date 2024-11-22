@@ -30,6 +30,9 @@
   "reviewRequests": "Review requests",
   "memberJoinedSubject": "Welcome to {{.GroupName}}",
   "memberJoinedText": "You have been accepted as a member of {{.GroupName}}. Your account number is {{.AccountCode}}.",
-  "memberJoinedSubtext": "You can sign in to the app and see the other members and their offers and needs. You can also complete your profile by adding all relevant means of contact and other information. Please complete your offers with detailed descriptions and images, and you can start making transactions.",
-  "signIn": "Sign in"
+  "memberJoinedSubtext": "You can sign in to the app and see the other members and their offers and needs. You can also complete your profile by adding all relevant means of contact and other information. Please complete your offers with detailed descriptions and images, and you can start making transactions. Happy trading!",
+  "signIn": "Sign in",
+  "groupActivatedSubject": "Your group {{.GroupName}} has been activated",
+  "groupActivatedText": "Congratulations! Your group {{.GroupName}} has been activated.",
+  "groupActivatedSubtext": "You can now sign in and configure the group and currency settings, including allowed payment methods, credit limits, categories for offers and needs, and more. After that you can invite members and start trading. Your administrator user comes with the first account. We recommend to keep this acount for administrative tasks and not for real trading. If you have any questions, please contact the team. Good luck making your community grow!",
 }

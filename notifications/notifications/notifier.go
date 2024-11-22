@@ -91,7 +91,8 @@ func handleEvent(ctx context.Context, event *events.Event, store *store.Store) e
 	case events.OfferExpired:
 		return handleMemberEvent(ctx, event, store)
 	default:
-		return fmt.Errorf("unkown event type %v", event.Name)
+		log.Printf("No notification for event type %v\n", event.Name)
+		return nil
 	}
 }
 

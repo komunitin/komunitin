@@ -30,6 +30,9 @@
   "reviewRequests": "Revisar sol·licituds",
   "memberJoinedSubject": "Benvingut/da a {{.GroupName}}",
   "memberJoinedText": "Has estat acceptat/da com a membre de {{.GroupName}}. El teu número de compte és {{.AccountCode}}.",
-  "memberJoinedSubtext": "Pots iniciar sessió a l'aplicació i veure als altres membres i les seves ofertes i necessitats. També pots completar el teu perfil afegint tots els mitjans de contacte rellevants i altra informació. Recomanem completar les teves ofertes amb descripcions detallades i imatges i ja pots començar a fer transaccions.",
-  "signIn": "Iniciar sessió"
+  "memberJoinedSubtext": "Pots iniciar sessió a l'aplicació i veure als altres membres i les seves ofertes i necessitats. També pots completar el teu perfil afegint tots els mitjans de contacte rellevants i altra informació. Recomanem completar les teves ofertes amb descripcions detallades i imatges i ja pots començar a fer transaccions. Bon intercanvi!",
+  "signIn": "Iniciar sessió",
+  "groupActivatedSubject": "El teu grup {{.GroupName}} ha estat activat",
+  "groupActivatedText": "Felicitats! El teu grup {{.GroupName}} ha estat activat.",
+  "groupActivatedSubtext": "Ara pots iniciar sessió i configurar els ajustos del grup i de la moneda: mètodes de pagament permesos, límits de crèdit, categories per a ofertes i necessitats, i més. Després pots convidar a altres membres i començar a intercanviar. El teu usuari administrador ve amb un compte que recomanem mantenir per a tasques administratives i no per a intercanvis reals. Si tens alguna pregunta, sisplau contacta amb l'equip. Molta sort fent créixer la teva comunitat!"
 }

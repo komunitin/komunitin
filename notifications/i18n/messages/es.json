@@ -30,6 +30,9 @@
   "reviewRequests": "Revisar solicitudes",
   "memberJoinedSubject": "Bienvenido/a a {{.GroupName}}",
   "memberJoinedText": "Has sido aceptado/a como miembro de {{.GroupName}}. Tu número de cuenta es {{.AccountCode}}.",
-  "memberJoinedSubtext": "Puedes iniciar sesión en la aplicación y ver a los demás miembros y sus ofertas y necesidades. También puedes completar tu perfil añadiendo todos los medios de contacto relevantes y otra información. Recomendamos completar tus ofertas con descripciones detalladas e imágenes y ya puedes empezar a hacer transacciones.",
-  "signIn": "Iniciar sesión"
+  "memberJoinedSubtext": "Puedes iniciar sesión en la aplicación y ver a los demás miembros y sus ofertas y necesidades. También puedes completar tu perfil añadiendo todos los medios de contacto relevantes y otra información. Recomendamos completar tus ofertas con descripciones detalladas e imágenes y ya puedes empezar a hacer transacciones. ¡Feliz intercambio!",
+  "signIn": "Iniciar sesión",
+  "groupActivatedSubject": "Tu grupo {{.GroupName}} ha sido activado",
+  "groupActivatedText": "¡Felicidades! Tu grupo {{.GroupName}} ha sido activado.",
+  "groupActivatedSubtext": "Ahora puedes iniciar sesión y configurar los ajustes del grupo y de la moneda, incluyendo los métodos de pago permitidos, límites de crédito, categorías para ofertas y necesidades, y más. Después puedes invitar a otros miembros y empezar a intercambiar. Tu usuario administrador viene con una cuenta que recomendamos mantener para tareas administrativas y no para intercambios reales. Si tienes alguna pregunta, por favor contacta con el equipo. ¡Buena suerte haciendo crecer tu comunidad!"
 }

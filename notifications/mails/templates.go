@@ -158,7 +158,7 @@ func buildCommonTransferTemplateData(t *i18n.Translator, payer *api.Member, paye
 	return templateData
 }
 
-func buildTransferTemplateData(t *i18n.Translator, payer *api.Member, payee *api.Member, transfer *api.Transfer, emailType EmailType) EmailTransferData {
+func buildTransferTemplateData(t *i18n.Translator, payer *api.Member, payee *api.Member, transfer *api.Transfer, emailType TransferEmailType) EmailTransferData {
 	templateData := buildCommonTransferTemplateData(t, payer, payee, transfer)
 	switch emailType {
 	case paymentSent:
@@ -223,6 +223,24 @@ func buildMemberJoinedTemplateData(t *i18n.Translator, member *api.Member, accou
 	templateData.Name = member.Name
 	templateData.Subject = t.Td("memberJoinedSubject", map[string]string{"GroupName": group.Name})
 	templateData.Greeting = t.Td("hello", map[string]string{"Name": member.Name})
+
+	return templateData
+}
+
+func buildGroupActivatedTemplateData(t *i18n.Translator, group *api.Group) EmailTextData {
+	templateData := EmailTextData{
+		TemplateMainData: buildTemplateMainData(t),
+		TemplateTextData: TemplateTextData{
+			Text:    t.Td("groupActivatedText", map[string]string{"GroupName": group.Name}),
+			Subtext: t.T("groupActivatedSubtext"),
+		},
+		TemplateActionData: TemplateActionData{
+			ActionUrl:  config.KomunitinAppUrl + "login-mail?redirect=/groups/" + group.Code,
+			ActionText: t.T("signIn"),
+		},
+	}
+	templateData.Subject = t.Td("groupActivatedSubject", map[string]string{"GroupName": group.Name})
+	templateData.Greeting = t.T("helloAdmin")
 
 	return templateData
 }

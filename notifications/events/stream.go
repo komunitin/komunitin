@@ -43,6 +43,7 @@ const (
 	OfferExpired      = "OfferExpired"
 	MemberJoined      = "MemberJoined"
 	MemberRequested   = "MemberRequested"
+	GroupActivated    = "GroupActivated"
 )
 
 // Abstracts the events stream.
