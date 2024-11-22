@@ -143,7 +143,11 @@ export default {
     ,
     isAdmin: (state, getters) => {
       return state.myUserId !== undefined 
-        && getters.myCurrency?.relationships.admins.data.some((r: { id: string }) => r.id === state.myUserId)
+        // This next check implies that the group is using the new accounting API, 
+        // since the old api don't have the admins relationship. Otherwise the admin
+        // interface is disabled.
+        && getters.myCurrency?.relationships.admins
+        && getters.myCurrency.relationships.admins.data.some((r: { id: string }) => r.id === state.myUserId)
     }
   },
   mutations: {
