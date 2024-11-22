@@ -45,7 +45,7 @@ describe('AccountLimits.vue', () => {
         mocks
       }
     });
-    expect(wrapper.text()).toBe("maxAmount %50");
+    expect(wrapper.text()).toBe("minAmount %-50");
   });
 
   it("renders debit limit", () => {
@@ -64,7 +64,7 @@ describe('AccountLimits.vue', () => {
         mocks
       },
     });
-    expect(wrapper.text()).toBe("minAmount %-50");
+    expect(wrapper.text()).toBe("maxAmount %50");
   });
 
   it("renders both limits", () => {
@@ -83,8 +83,8 @@ describe('AccountLimits.vue', () => {
         mocks
       }
     });
-    expect(wrapper.text()).toContain("minAmount %-50");
-    expect(wrapper.text()).toContain("maxAmount %60");
+    expect(wrapper.text()).toContain("minAmount %-60");
+    expect(wrapper.text()).toContain("maxAmount %50");
   });
 
 })

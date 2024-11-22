@@ -33,8 +33,8 @@ describe("Member", () => {
     expect(text).toContain("GRP0000");
     expect(text).toContain("Public account");
     expect(text).toContain("$734.69");
-    expect(text).toContain("Min $-500");
-    expect(text).toContain("Max $100");
+    expect(text).toContain("Min $-100");
+    expect(text).toContain("Max $500");
     // Tabs
     expect(text).toContain("Profile");
     expect(text).toContain("1 Need");
