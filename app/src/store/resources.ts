@@ -60,6 +60,11 @@ export interface CreatePayload<T extends ResourceObject> {
    * The resource
    */
   resource: DeepPartial<T>;
+
+  /**
+   * Array of resources to be updated alongside the main resource.
+   */
+  included?: (DeepPartial<ResourceObject> & ResourceIdentifierObject)[]
 }
 export interface CreateListPayload<T extends ResourceObject> {
   /**
@@ -71,11 +76,6 @@ export interface CreateListPayload<T extends ResourceObject> {
    * The resources
    */
   resources: DeepPartial<T>[];
-
-  /**
-   * Array of resources to be updated alongside the main resource.
-   */
-  included?: (DeepPartial<ResourceObject> & ResourceIdentifierObject)[]
 }
 
 type DeepPartial<T> = T extends object ? {
@@ -1054,8 +1054,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: CreatePayload<T>
   ) {
     const url = this.collectionEndpoint(payload.group)
-    const resource = payload.resource;
-    const body = {data: resource};
+    const body = {data: payload.resource, ...{included: payload.included}};
     try {
       const data = await this.request(context, url, "post", body)
       const resource = data.data
@@ -1098,8 +1097,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     payload: UpdatePayload<T>
   ) {
     const url = this.resourceEndpoint(payload.id, payload.group);
-    const resource = payload.resource;
-    const body = {data: resource, ...{included: payload.included}};
+    const body = {data: payload.resource, ...{included: payload.included}};
     try {
       const data = await this.request(context, url, "patch", body) 
       const resource = data.data

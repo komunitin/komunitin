@@ -17,7 +17,7 @@ export class UserController extends AbstractCurrencyController {
    */
   async checkUser(ctx: Context): Promise<User> {
     if (ctx.type === "system") {
-      return this.currency().admin as User
+      return this.currency().admin
     }
     if (!ctx.userId) {
       throw forbidden("User not set")
@@ -26,16 +26,18 @@ export class UserController extends AbstractCurrencyController {
     
 
     if (/^\d+$/.test(ctx.userId)) {
+      const hex = parseInt(ctx.userId).toString(16) // integer to hex.
+
       // The id is a number. This can be a user id provided by IntegralCES
       // auth provider, where the id in the token is the Drupal user id, while
       // the user id's from the api are derived UUID-like id's.
       // We have a mapping from the id to the UUID-like id in the database:
-      // 75736572-2020-[4 random digits]-[4 random digits]-[zero padded user id]
+      // 75736572-2020-[4 random digits]-[4 random digits]-[zero padded user id in hex]
       where = {
         OR: [{
           id: {
             startsWith: "75736572-2020-",
-            endsWith: "-" + ctx.userId.padStart(12, "0")
+            endsWith: "-" + hex.padStart(12, "0")
           }
         }, {
           id: ctx.userId
@@ -59,7 +61,7 @@ export class UserController extends AbstractCurrencyController {
    * @returns 
    */
   isAdmin(user: User) {
-    return user.id === this.currency().admin?.id
+    return user.id === this.currency().admin.id
   }
 
   /**

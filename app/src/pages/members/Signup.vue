@@ -24,33 +24,11 @@
         @submit="createUser"        
         @back="toPage('terms')"
       />
-      <div v-else-if="page == 'verify'">
-        <div class="text-h6">
-          {{ $t('signupVerifyEmail') }}
-        </div>
-        <div>
-          <div class="float-left q-pr-md">
-            <q-icon 
-              name="forward_to_inbox" 
-              size="100px" 
-              color="icon-dark"
-            />
-          </div>
-          <div class="text-body1 text-onsurface-m q-pt-md">
-            {{ $t('signupVerifyEmailText') }}
-          </div>
-        </div>
-        <div>
-          <q-btn
-            class="q-my-lg full-width"
-            color="primary"
-            flat
-            :label="$t('resendEmail')"
-            :loading="loading"
-            @click="resendEmail"
-          />
-        </div>
-      </div>
+      <signup-verify-form
+        v-else-if="page == 'verify'"
+        :loading="loading"
+        @resend="resendEmail"
+      />      
     </q-page>
   </q-page-container>
 </template>
@@ -58,6 +36,7 @@
 import PageHeader from "../../layouts/PageHeader.vue"
 import SignupAcceptTermsForm from "./SignupAcceptTermsForm.vue"
 import SignupCredentialsForm from "./SignupCredentialsForm.vue"
+import SignupVerifyForm from "./SignupVerifyForm.vue"
 
 import { useStore } from "vuex";
 import { computed, ref, watchEffect } from "vue";
@@ -67,6 +46,7 @@ import { Auth } from "../../plugins/Auth"
 import KError, { KErrorCode } from "src/KError";
 import { Notify } from "quasar";
 import { useI18n } from "vue-i18n";
+import { v4 as uuid } from "uuid"
 
 const { getScrollTarget } = scroll
 
@@ -112,7 +92,11 @@ const createUser = async () => {
   loading.value = true
   try {
     // Create a user associated with a member.
-    // TODO: send the member as included resource (instead of nested)
+
+    // Possibly ephemeral IDs for the included resources.
+    const memberId = uuid()
+    const settingsId = uuid()
+
     await store.dispatch("users/create", {
       group: props.code,
       resource: {
@@ -123,31 +107,31 @@ const createUser = async () => {
         },
         relationships: {
           members: {
-            data: [{
-              type: "members",
-              attributes: {
-                name: credentials.value.name
-              },
-              relationships: {
-                group: {
-                  data: {
-                    type: "groups",
-                    id: group.value.id
-                  }
-                }
-              }
-            }]
+            data: [{ type: "members", id: memberId }]
           },
           settings: {
-            data: {
-              type: "user-settings",
-              attributes: {
-                language: locale.value
-              }
-            }
+            data: { type: "user-settings", id: settingsId }
           }
         }
-      }
+      },
+      included: [{
+        type: "members",
+        id: memberId,
+        attributes: {
+          name: credentials.value.name
+        },
+        relationships: {
+          group: {
+            data: { type: "groups", id: group.value.id }
+          }
+        }
+      }, {
+        type: "user-settings",
+        id: settingsId,
+        attributes: {
+          language: locale.value
+        }
+      }]
     })
     page.value = 'verify'
   } catch (error) {
@@ -156,8 +140,8 @@ const createUser = async () => {
       Notify.create({
         message: t('emailInUse'),
         color: "negative",
-        closeBtn: true,
-        timeout: 0
+        timeout: 0,
+        actions: [{ label: t('close'), color: "white" }]
       })
     } else {
       throw error

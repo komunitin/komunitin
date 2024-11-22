@@ -3,7 +3,14 @@ import { Trustline } from 'src/model/trustline';
 import { Linker, Metaizer, Relator, Serializer, SerializerOptions } from 'ts-japi';
 import { Account, AccountSettings, Currency, CurrencySettings, Transfer, User } from '../model';
 import { config } from 'src/config';
+/*
+// Patch BigInt prototype so it correclty serializes to JSON as a number.
+// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON#using_json_numbers
+(BigInt.prototype as any).toJSON = function() {
+  return (JSON as any).rawJSON(this.toString())
+}
 
+*/
 const projection = <T>(fields: (keyof T)[]) => {
   return Object.fromEntries(fields.map(field => [field, 1]))
 }
@@ -33,7 +40,7 @@ export const CurrencySerializer = new Serializer<Currency>("currencies", {
     'symbol', 'decimals', 'scale', 'rate', 'keys', 'created', 'updated']),
   relators: {
     admins: new Relator<Currency,User>(async (currency) => {
-      return currency.admin ? [currency.admin] : undefined
+      return [currency.admin]
     }, UserSerializer, { relatedName: "admins" }),
     settings: new Relator<Currency,CurrencySettings>(async (currency) => {
       return currency.settings

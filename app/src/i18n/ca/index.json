@@ -315,6 +315,9 @@
   "decimals": "Decimals",
   "createGroup": "Crear xarxa d'intercanvi",
   "requestNewGroup": "Sol·licitar nova xarxa d'intercanvi",
+  "codeTaken": "Aquest codi ja està en ús. Prova'n un altre.",
+  "invalidValue": "Valor no vàlid",
+  "newGroupRequestedText": "La teva sol·licitud per a la nova xarxa d'intercanvi {name} ha estat enviada i serà revisada manualment. Rebràs un correu electrònic quan estigui activat i puguis començar a configurar-lo. Si no rebeu cap resposta en uns dies, si us plau, contacteu l'equip.",
 
   "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
   "ErrorInvalidPassword": "Contrasenya incorrecta",

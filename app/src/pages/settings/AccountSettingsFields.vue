@@ -287,6 +287,7 @@ const maximumBalance = computed<number>({
 })
 
 const settings = ref(props.settings.attributes)
+const def = computed(() => props.defaults?.attributes)
 
 const enableAcceptPaymentsAfter = computed({
   get: () => (settings.value.acceptPaymentsAfter === undefined || settings.value.acceptPaymentsAfter === null) ? null : settings.value.acceptPaymentsAfter !== false,
@@ -299,8 +300,8 @@ const enableAcceptPaymentsAfter = computed({
   }
 })
 
-const enableOnPaymentCreditLimit = ref(settings.value.onPaymentCreditLimit !== undefined)
-const onPaymentCreditLimitValue = ref(settings.value.onPaymentCreditLimit ?? 0)
+const enableOnPaymentCreditLimit = ref(settings.value.onPaymentCreditLimit === undefined || settings.value.onPaymentCreditLimit == null ? null : settings.value.onPaymentCreditLimit !== false)
+const onPaymentCreditLimitValue = ref(settings.value.onPaymentCreditLimit ?? def.value?.onPaymentCreditLimit ?? 0)
 watch([enableOnPaymentCreditLimit, onPaymentCreditLimitValue], ([enable, value]) => {
   settings.value.onPaymentCreditLimit = enable ? value : undefined
 })
@@ -313,7 +314,5 @@ watch(settings, (value) => {
     }
   })
 }, {deep: true})
-
-const def = computed(() => props.defaults?.attributes)
 
 </script>

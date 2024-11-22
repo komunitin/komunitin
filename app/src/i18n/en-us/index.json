@@ -315,6 +315,9 @@
   "decimals": "Decimals",
   "createGroup": "Create group",
   "requestNewGroup": "Request new group",
+  "codeTaken": "This code is already in use",
+  "invalidValue": "Invalid value",
+  "newGroupRequestedText": "Your request for the new group {name} has been sent and it will be manually reviewed. You will receive an email when it is activated and you can start configuring it. If you don't receive any response in a few days, please contact the team.",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",
@@ -333,6 +336,7 @@
   "ErrorIncorrectCredentials": "Error: Incorrect email or password",
   "ErrorNotImplemented": "Error: Not Implemented",
   "ErrorInvalidTransferState": "Error: Invalid Transfer State",
+  "ErrorBadRequest": "Error: Data validation failed in server",
   
   "ErrorAuthNoCredentials": "Incorrect email or password",
   "ErrorInvalidPassword": "The password is not correct",

@@ -51,9 +51,6 @@ sleep 10
   
 fi
 
-# Install Accounting service
-docker compose exec accounting pnpm prisma migrate reset --force
-
 # Install IntegralCES
 
 if [ "$ices" = true ]; then
@@ -63,24 +60,29 @@ if [ "$ices" = true ]; then
   else
     . ../ices/install.sh
   fi
+  docker compose exec integralces drush vset ces_komunitin_app_url $KOMUNITIN_APP_URL
+  docker compose exec integralces drush vset ces_komunitin_accounting_url $KOMUNITIN_ACCOUNTING_URL
+  docker compose exec integralces drush vset ces_komunitin_accounting_url_internal http://accounting:2025
+  docker compose exec integralces drush vset ces_komunitin_notifications_url_internal http://notifications:2028
 fi
 
 # Migrate NET1 and NET2 to the accounting service
 
 if [ "$demo" = true ]; then
+
+# Install Accounting service
+docker compose exec accounting pnpm prisma migrate reset --force
+
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0
-
-
 
 # Migrate NET1 and NET2 to the accounting service
 ./accounting/cli/migrate.sh "riemann@komunitin.org" "komunitin" "NET1"
 ./accounting/cli/migrate.sh "fermat@komunitin.org" "komunitin" "NET2"
 
 # Configure NET1 and NET2 in integralces to use the accounting service
-docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL --komunitin_allow_anonymous_member_list=1
-docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0 --komunitin_accounting_api_url=$KOMUNITIN_ACCOUNTING_URL --komunitin_app_url=$KOMUNITIN_APP_URL --komunitin_allow_anonymous_member_list=1
-docker compose exec integralces drush vset ces_komunitin_app_url $KOMUNITIN_APP_URL
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0 --komunitin_accounting=1 --komunitin_redirect=1 --komunitin_allow_anonymous_member_list=1
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0 --komunitin_accounting=1 --komunitin_redirect=1 --komunitin_allow_anonymous_member_list=1
 
 # Configure mutual trust between NET1 and NET2
 ./accounting/cli/trust.sh "riemann@komunitin.org" "komunitin" "NET1" "NET2" 1000

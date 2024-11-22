@@ -13,6 +13,7 @@ export enum KErrorCode {
   // Social service error codes.
   InvalidPassword = "InvalidPassword", 
   DuplicatedEmail = "DuplicatedEmail",
+  BadRequest = "BadRequest",
 
   // There are more server errors but we're not identifying them and
   // they are all piped to UnknownServer.

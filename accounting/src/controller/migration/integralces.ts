@@ -175,7 +175,7 @@ async function migrateTransfers(ctx: Context, controller: CurrencyController, mi
       payer: transfer.relationships.payer.data,
       payee: transfer.relationships.payee.data,
       // TODO (or not): migrate user
-      user: currency.admin as User,
+      user: currency.admin,
       // TODO: migrate created/updated transfers.
       //created: new Date(transfer.attributes.created),
       //updated: new Date(transfer.attributes.updated)

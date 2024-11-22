@@ -132,10 +132,10 @@ export interface Currency {
   created: Date
   updated: Date
 
-  admin?: User
+  admin: User
 }
 
-export type CreateCurrency = Omit<Optional<Currency, "id">, "status" | "created" | "updated" | "encryptionKey" | "keys">
+export type CreateCurrency = Omit<Optional<Currency & {admins?: User[]}, "id">, "status" | "created" | "updated" | "encryptionKey" | "keys" | "admin">
 export type UpdateCurrency = Partial<CreateCurrency>
 
 export function currencyToRecord(currency: CreateCurrency): Prisma.CurrencyCreateInput

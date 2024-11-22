@@ -51,45 +51,49 @@ async function loadUser(
   });
   const user = rootGetters["users/current"];
 
-  // This is the currency URL from the Accounting API.
-  const currencyUrl = user.members[0].group.relationships.currency.links.related;
-  // https://.../accounting/<GROUP>/currency
-  
-  // Get the accounting API URL from the currency URL and update it in the store. This is
-  // a way we have to be able to have multiple different accounting APIs for different
-  // currencies. That may not be necessary in the future when we finish the migration to
-  // the new API.
-  const accountingApiUrl = currencyUrl.split('/').slice(0, -2).join('/');
-  // https://.../accounting
-  setAccountingApiUrl(accountingApiUrl)
-  
-  // We here compute the currency code and account code from their URLS so we can fetch 
-  // them using the store methods. This is kind of a perversion of HATEOAS since we could 
-  // more coherently fetch them directly from the provided link. But we have all the store 
-  // infrastructure like this, so this is a little hack that I hope won't make problems.
-  const currencyCode = currencyUrl.split('/').slice(-2)[0];
+  // If the user is a member of a group, we get the currency and account data. 
+  // This is not the case only when registering a new Group.
+  if (user.members && user.members.length > 0) {
+    // This is the currency URL from the Accounting API.
+    const currencyUrl = user.members[0].group.relationships.currency.links.related;
+    // https://.../accounting/<GROUP>/currency
+    
+    // Get the accounting API URL from the currency URL and update it in the store. This is
+    // a way we have to be able to have multiple different accounting APIs for different
+    // currencies. That may not be necessary in the future when we finish the migration to
+    // the new API.
+    const accountingApiUrl = currencyUrl.split('/').slice(0, -2).join('/');
+    // https://.../accounting
+    setAccountingApiUrl(accountingApiUrl)
+    
+    // We here compute the currency code and account code from their URLS so we can fetch 
+    // them using the store methods. This is kind of a perversion of HATEOAS since we could 
+    // more coherently fetch them directly from the provided link. But we have all the store 
+    // infrastructure like this, so this is a little hack that I hope won't make problems.
+    const currencyCode = currencyUrl.split('/').slice(-2)[0];
 
-  // pending or deleted members don't have related account.
-  if (["active", "suspended"].includes(user.members[0].attributes.state)) {
-    const accountId = user.members[0].relationships.account.data.id
-    await dispatch("accounts/load", {
-      id: accountId, 
-      group: currencyCode, 
-      include: "settings,currency,currency.settings"
-    });
-  } else {
-  // otherwise get currency at least.
-    await dispatch("currencies/load", {
-      id: currencyCode,
-      include: "settings"
-    });
+    // pending or deleted members don't have related account.
+    if (["active", "suspended"].includes(user.members[0].attributes.state)) {
+      const accountId = user.members[0].relationships.account.data.id
+      await dispatch("accounts/load", {
+        id: accountId, 
+        group: currencyCode, 
+        include: "settings,currency,currency.settings"
+      });
+    } else {
+    // otherwise get currency at least.
+      await dispatch("currencies/load", {
+        id: currencyCode,
+        include: "settings"
+      });
+    }
   }
 
   commit("myUserId", user.id);
   
   // If we don't have the user location yet, initialize to the member configured location.
-  if (state.location == undefined) {
-    const member = getters["myMember"] as Member
+  if (state.location == undefined && getters.myMember) {
+    const member = getters.myMember as Member
     commit("location", member.attributes.location?.coordinates)
   }
 }
@@ -119,7 +123,7 @@ export default {
     },
     myMember: (state, getters) => {
       const user = getters.myUser;
-      if (user?.members.length > 0) {
+      if (user?.members?.length > 0) {
         return user.members[0];
       }
       return undefined;

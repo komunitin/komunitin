@@ -5,7 +5,7 @@
     :label="$t('amountIn', {currency: currency.attributes.namePlural})"
     outlined
     required
-    :rules="[(value: string) => amountValid(value) || $t('invalidAmount')]"
+    :rules="[v => !!v || $t('fieldRequired'), (value: string) => amountValid(value) || $t('invalidAmount')]"
     @blur="format"
   >
     <template #append>

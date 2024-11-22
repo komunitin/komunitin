@@ -315,6 +315,9 @@
   "decimals": "Decimales",
   "createGroup": "Crear red de intercambio",
   "requestNewGroup": "Solicitar nueva red de intercambio",
+  "codeTaken": "Este código ya está en uso. Por favor, elige otro.",
+  "invalidValue": "Valor no válido",
+  "newGroupRequestedText": "Tu solicitud de la nueva red de intercambio {name} ha sido enviada y será revisada manualmente. Recibirás un correo electrónico cuando esté activada y podrás empezar a configurarla. Si no recibes respuesta en unos días, por favor contacta con el equipo.",
 
   "ErrorAuthNoCredentials": "Email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta",

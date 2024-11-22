@@ -100,9 +100,8 @@ const submit = async () => {
     // bring them to where they tried to go. 
     const redirect = (typeof route.query.redirect == "string") 
       ? route.query.redirect 
-    // I'd prefer redirecting to "/" and let the general router guard to redirect the user
-    // where it needs to, but it seems that the Vue Router doesn't allow that.
-      : `/groups/${store.getters.myMember.group.attributes.code}/needs`;
+      : "/"
+    // The boot handler will redirect logged in users from "/" to their group home.
     router.push(redirect);
   }
 }

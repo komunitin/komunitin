@@ -180,7 +180,7 @@ export function getRoutes(controller: SharedController) {
     currencyResourceHandler(controller, async (currencyController, ctx, id) => {
       return await currencyController.getTrustline(ctx, id)
     }, TrustlineSerializer, {
-      include: ["currency"]
+      include: ["currency", "trusted"]
     })
   )
 
@@ -195,7 +195,7 @@ export function getRoutes(controller: SharedController) {
       return await currencyController.getTrustlines(ctx, params)
     }, TrustlineSerializer, {
       sort: ["created", "updated"],
-      include: ["currency"]
+      include: ["currency", "trusted"]
     })
   )
 

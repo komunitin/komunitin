@@ -126,9 +126,9 @@ model Account {
   settings Json?
 
   // These three fields are just a cache from the Stellar network.
-  balance        Int
-  creditLimit    Int
-  maximumBalance Int?
+  balance        BigInt
+  creditLimit    BigInt
+  maximumBalance BigInt?
 
   created DateTime @default(now())
   updated DateTime @updatedAt
@@ -165,7 +165,7 @@ model Transfer {
   id       String @default(uuid())
 
   state  String @default("new") @db.VarChar(31)
-  amount Int
+  amount BigInt
   meta   String @db.Text
 
   hash String? @db.VarChar(255)
@@ -215,9 +215,9 @@ model Trustline {
   id       String @id @default(uuid())
 
   // This is the trustline limit from the local external account to the remote external account.
-  limit   Int
+  limit   BigInt
   // This is the balance of the local external account minus the balance of the remote external account.
-  balance Int
+  balance BigInt
 
   created DateTime @default(now())
   updated DateTime @updatedAt

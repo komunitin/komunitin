@@ -5,7 +5,7 @@ import { KeyObject } from "node:crypto"
 import { EventEmitter } from "node:events"
 import { initUpdateExternalOffers } from "src/ledger/update-external-offers"
 import { Context, systemContext } from "src/utils/context"
-import { badConfig, badRequest, internalError, notFound } from "src/utils/error"
+import { badConfig, badRequest, internalError, notFound, notImplemented } from "src/utils/error"
 import TypedEmitter from "typed-emitter"
 import { SharedController as BaseController, ControllerEvents } from "."
 import { config } from "../config"
@@ -21,7 +21,6 @@ import { initLedgerListener } from "./ledger-listener"
 import { PrivilegedPrismaClient, TenantPrismaClient, globalTenantDb, privilegedDb, tenantDb } from "./multitenant"
 import { storeCurrencyKey } from "./key-controller"
 import { Store } from "./store"
-import { PrismaClientExtends } from "@prisma/client/extension"
 import { sleep } from "src/utils/sleep"
 import { CollectionOptions, relatedCollectionParams } from "src/server/request"
 import { whereFilter } from "./query"
@@ -272,7 +271,14 @@ export class LedgerController implements BaseController {
     const db = this.tenantDb(currency.code)
 
     // Use logged in user as admin if not provided.
-    const admin = currency.admin?.id ?? ctx.userId
+    const admin = currency.admins && currency.admins.length > 0 
+      ? currency.admins[0].id 
+      : ctx.userId
+    
+    if (currency.admins && currency.admins.length > 1) {
+      throw notImplemented("Multiple admins not supported")
+    }
+
     // Check that the user is not already being used in other tenant.
     const user = await this.privilegedDb().user.findFirst({where: { id: admin }})
     if (user) {

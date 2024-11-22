@@ -10,6 +10,7 @@
       :label="$t('groupName')"
       outlined
       required
+      :rules = "[v => !!v || $t('fieldRequired')]"
     />
     <q-input
       v-model="code"
@@ -20,6 +21,8 @@
       outlined
       required
       :disable="props.op === 'edit'"
+      :debounce="500"
+      :rules="[async (code: string) => await checkFreeCode(code) || $t('codeTaken'), (code: string) => code.length === 4 || $t('invalidValue')]"
     />
     <q-input 
       v-model="description"
@@ -29,6 +32,7 @@
       outlined 
       autogrow 
       input-style="min-height: 100px;"
+      :rules = "[v => !!v || $t('fieldRequired')]"
     />
     <div>
       <location-picker 
@@ -43,6 +47,7 @@
       :label="$t('city')"
       outlined
       required
+      :rules = "[v => !!v || $t('fieldRequired')]"
     />
     <q-input
       v-model="region"
@@ -51,6 +56,7 @@
       :label="$t('region')"
       outlined
       required
+      :rules = "[v => !!v || $t('fieldRequired')]"
     />
     <country-chooser
       v-model="country"
@@ -73,6 +79,7 @@
       :label="$t('currencyName')"
       outlined
       required
+      :rules = "[v => !!v || $t('fieldRequired')]"
     />
     <q-input
       v-model="currencyNamePlural"
@@ -80,6 +87,7 @@
       :label="$t('currencyNamePlural')"
       outlined
       required
+      :rules = "[v => !!v || $t('fieldRequired')]"
     />
     <q-input
       v-model="currencySymbol"
@@ -108,6 +116,7 @@ import CountryChooser from "src/components/CountryChooser.vue"
 import MemberContactsField, { PartialContact } from "src/components/MemberContactsField.vue"
 import { Currency, Group } from "src/store/model"
 import { watchDebounced } from "@vueuse/shared"
+import { useStore } from "vuex"
 
 const props = defineProps<{
   op: "edit" | "create"
@@ -176,9 +185,9 @@ watch([contacts], () => {
 
 watchDebounced([currencyName, currencyNamePlural, currencySymbol, decimals], () => {
   emit('update:currency', {
-    id: props.currency.id,
-    type: "currencies",
+    ...props.currency,
     attributes: {
+      ...props.currency.attributes,
       name: currencyName.value,
       namePlural: currencyNamePlural.value,
       symbol: currencySymbol.value,
@@ -187,5 +196,14 @@ watchDebounced([currencyName, currencyNamePlural, currencySymbol, decimals], () 
   } as Currency)
 })
 
+const store = useStore()
 
+const checkFreeCode = async (code: string)  => {
+  await store.dispatch("groups/loadList", { 
+    filter: { code }, 
+    onlyResources: true 
+  })
+  const existing = store.getters["groups/find"]({code})
+  return !existing
+}
 </script>

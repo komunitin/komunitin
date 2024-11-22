@@ -156,9 +156,9 @@ export const recordToAccount = (record: AccountRecordComplete, currency: Currenc
     code: record.code,
     key: record.keyId,
     // Ledger cache
-    balance: record.balance,
-    creditLimit: record.creditLimit,
-    maximumBalance: record.maximumBalance ?? undefined,
+    balance: Number(record.balance),
+    creditLimit: Number(record.creditLimit),
+    maximumBalance: record.maximumBalance ? Number(record.maximumBalance) : undefined,
     // Created and updated
     created: record.created,
     updated: record.updated,

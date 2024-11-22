@@ -57,12 +57,17 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
-        path: '/groups/new',
-        name: 'CreateGroup',
-        component: () => import('../pages/groups/CreateGroup.vue'),
+        path: '/signup-group',
+        name: 'SignupGroup',
+        component: () => import('../pages/groups/SignupGroup.vue'),
         meta: {
           public: true
         }
+      },
+      {
+        path: '/groups/new',
+        name: 'CreateGroup',
+        component: () => import('../pages/groups/CreateGroup.vue'),
       },
       {
         path: '/groups/:code',

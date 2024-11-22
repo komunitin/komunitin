@@ -24,6 +24,11 @@ This is the right environment to develop the integration of this service with th
 $ cp .env.local .env
 $ pnpm dev
 ```
+- Change the internal accounting url in integralces service:
+```bash
+$ cd ..
+$ docker compose exec integralces drush vset ces_komunitin_accounting_url_internal http://host.docker.internal:2025 
+```
 
 Note for devs on WSL (Windows): when runnning the accounting service from WSL2 and wanting to access it from a docker container (eg from integralces or notifications), the host.docker.internal must point to the WSL2 IP instead of the Windows host IP, so the `host.docker.internal: host-gateway` entry in the `docker-compose.yml` file must be replaced by the WSL2 IP.
 
