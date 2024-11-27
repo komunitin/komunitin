@@ -25,15 +25,15 @@
           v-slot="slotProps"
           code=""
           module-name="groups"
-          include="currency"
           :cache="1000*60*5"
         >
           <q-list
             v-if="slotProps.resources"
+            @vue:mounted="checkShowGroups(slotProps.resources)"
           >
             <template v-for="option in slotProps.resources">
               <group-header
-                v-if="showGroup(option)"
+                v-if="showGroup(option.id)"
                 :key="option.id"
                 :group="option"
                 clickable
@@ -49,18 +49,20 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useStore } from "vuex";
+import { handleError } from "src/boot/errors";
+import KError from "src/KError";
 export default defineComponent({
   inheritAttrs: false,
 })
 </script>
 <script setup lang="ts">
-import { Currency, Group } from "src/store/model";
+import { Currency, CurrencySettings, Group } from "src/store/model";
 import ResourceCards from "../pages/ResourceCards.vue";
 import GroupHeader from "./GroupHeader.vue";
-import { computed, ref, ComputedRef } from "vue";
+import { computed, ref, Ref } from "vue";
 
 const props = defineProps<{
-  modelValue?: Group,
+  modelValue: Group,
   payer?: boolean
 }>()
 
@@ -70,9 +72,7 @@ const emit = defineEmits<{
 
 const dialog = ref(false)
 
-const onClick = () => {
-  dialog.value = !dialog.value
-}
+
 
 const group = computed({
   get: () => props.modelValue,
@@ -88,25 +88,50 @@ const select = (value: Group) => {
 
 const myGroup = computed<Group>(() => store.getters.myMember.group)
 
-const showGroups : Record<string, ComputedRef<boolean>> = {}
+const showGroups : Record<string, Ref<boolean>> = {}
 
-const showGroup = (group: Group & {currency: Currency}) => {
+const showGroup = (id: string) => showGroups[id]?.value ?? false
+
+const onClick = () => {
+  dialog.value = !dialog.value
+}
+
+const checkShowGroup = (group: Group) => {
   if (!(group.id in showGroups)) {
-    showGroups[group.id] = computed(() => {
-      // Always show selected group
-      if (group.id === props.modelValue?.id || group.id === myGroup.value.id) {
-        return true
+    // Always show selected group and own group. Otherwise check the currency settings to 
+    // see if they allow external payments.
+    const isSelected = group.id === props.modelValue?.id || group.id === myGroup.value.id
+    showGroups[group.id] = ref(isSelected)
+    if (!isSelected) {
+      // Load currency and settings. We don't do it using the include prop
+      // of resource-cards because we need to check also the related settings 
+      // object and it is not possible to fetch related of external related objects.
+      const checkSetting = async () => {
+        const url = (group.relationships.currency.data.meta && group.relationships.currency.data.meta.external) 
+          ? group.relationships.currency.data.meta.href
+          : group.relationships.currency.links.related
+        
+        await store.dispatch("currencies/load", {
+          url,
+          include: "settings"
+        })
+        
+        const settings = (group as Group & {currency: Currency & {settings: CurrencySettings}}).currency.settings
+        showGroups[group.id].value = props.payer
+          ? settings.attributes.enableExternalPaymentRequests
+          : settings.attributes.enableExternalPayments
       }
-      const currency = store.getters["currency/one"](group.relationships.currency.data.id)
-      // Only show groups that allow external payments / requests.
-      if (props.payer) {
-        return currency?.attributes.settings.enableExternalPaymentRequests ?? false
-      } else {
-        return currency?.attributes.settings.enableExternalPayments ?? false
-      }
-    })
+      checkSetting().catch((e) => {
+        // Avoid unhandled promise rejection.
+        handleError(KError.getKError(e))
+      })
+    }
   }
   return showGroups[group.id]
+}
+
+const checkShowGroups = (groups: Group[]) => {
+  groups.forEach(group => checkShowGroup(group))
 }
 
 </script>

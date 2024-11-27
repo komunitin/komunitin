@@ -206,6 +206,8 @@ export interface LoadByUrlPayload {
    * The resource URL.
    */
   url: string;
+
+  include?: string
 }
 
 /**
@@ -759,7 +761,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       params.set(
         "geo-position",
         payload.location[0] + "," + payload.location[1]
-      );
+      )
       if (!payload.sort) {
         payload.sort = "location";
       }
@@ -993,24 +995,31 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
 
   protected resourceUrl(payload: LoadPayload) {
     let url: string
+    let params: URLSearchParams;
+
     if ("url" in payload) {
-      url = payload.url
+      const urlObj = new URL(payload.url)
+      params = urlObj.searchParams
+      url = urlObj.origin + urlObj.pathname
     } else {
-      const params = new URLSearchParams();
+      params = new URLSearchParams()
       if ("code" in payload) {
         url = this.collectionEndpoint(payload.group)
         params.set("filter[code]", payload.code)
       } else {
         url = this.resourceEndpoint(payload.id, payload.group)
       }
-      if (payload.include) {
-        params.set("include", payload.include);
-      }
-      const query = params.toString()
-      if (query.length > 0) {
-        url += "?" + query;
-      }
     }
+    
+    if (payload.include) {
+      params.set("include", payload.include);
+    }
+    
+    const query = params.toString()
+    if (query.length > 0) {
+      url += "?" + query;
+    }
+    
     return url
   }
   /**

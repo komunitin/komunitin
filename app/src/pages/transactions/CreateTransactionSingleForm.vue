@@ -15,6 +15,7 @@
         name="payer"
         :code="code"
         :payer="true"
+        :change-group="myCurrency.settings.attributes.enableExternalPaymentRequests"
         :label="$t('selectPayer')"
         :hint="$t('transactionPayerHint')"
         :rules="[() => !v$.payerAccount?.$error || $t('payerRequired')]"
@@ -23,10 +24,11 @@
       />
       <select-account
         v-if="selectPayee"
-        v-model="payeeAccountValue"  
+        v-model="payeeAccountValue"
         name="payee"
         :code="code"
         :payer="false"
+        :change-group="myCurrency.settings.attributes.enableExternalPayments"
         :label="$t('selectPayee')"
         :hint="$t('transactionPayeeHint')"
         :rules="[() => !v$.payeeAccount?.$error || $t('payeeRequired')]"
@@ -92,7 +94,7 @@ import KError, { KErrorCode } from "src/KError"
 import SelectAccount from "src/components/SelectAccount.vue"
 import { transferAccountRelationships } from "src/composables/fullAccount"
 import formatCurrency, { convertCurrency } from "src/plugins/FormatCurrency"
-import { Account, Currency, Member, Transfer } from "src/store/model"
+import { Account, Currency, CurrencySettings, Member, Transfer } from "src/store/model"
 import { v4 as uuid } from "uuid"
 import { computed, ref } from "vue"
 import { useStore } from "vuex"
@@ -113,7 +115,7 @@ const emit = defineEmits<{
 }>()
 
 const store = useStore()
-const myCurrency = computed(() => store.getters.myAccount.currency)
+const myCurrency = computed<Currency & {settings: CurrencySettings}>(() => store.getters.myAccount.currency)
 
 const transfer = computed({
   get: () => props.modelValue,

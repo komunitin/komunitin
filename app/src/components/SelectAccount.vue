@@ -30,12 +30,14 @@
     </template>
     <template #before-options>
       <select-group-expansion
+        v-if="changeGroup"
         v-model="group"
         :payer="payer"
       />
     </template>
     <template #no-option>
       <select-group-expansion
+        v-if="changeGroup"
         v-model="group"
         :payer="payer"
       />
@@ -65,6 +67,7 @@ import { normalizeAccountCode } from 'src/plugins/FormatCurrency';
 
 type ExtendedAccount = Account & {member?: ExtendedMember & {group: Group}, currency?: Currency}
 type ExtendedMember = Member & {account?: ExtendedAccount }
+type ExtendedGroup = Group & {currency: Currency}
 
 const props = defineProps<{
   modelValue?: ExtendedAccount|undefined,
@@ -72,6 +75,7 @@ const props = defineProps<{
   payer: boolean
   lazy?: boolean
   accountDisabled?: (account: Account) => boolean
+  changeGroup?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -88,8 +92,9 @@ const account = computed<ExtendedAccount|undefined>({
 })
 const store = useStore()
 
-const myGroup = computed(() => store.getters.myMember?.group)
-const group = ref<Group & {currency: Currency}>(props.modelValue?.member?.group ?? myGroup.value)
+
+const myGroup = computed<ExtendedGroup>(() => store.getters.myMember?.group)
+const group = ref<ExtendedGroup>(props.modelValue?.member?.group as ExtendedGroup ?? myGroup.value)
 
 const searchText = ref("")
 
