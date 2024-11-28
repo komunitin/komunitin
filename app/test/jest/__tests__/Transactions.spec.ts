@@ -152,6 +152,9 @@ describe("Transactions", () => {
     const groups = dialog.getComponent(SelectGroupExpansion)
     await groups.trigger("click")
     // Choose group 1
+    await waitFor(() => {
+      return groups.getComponent(QList).findAllComponents(GroupHeader).length
+    }, 7)
     await groups.getComponent(QList).findAllComponents(GroupHeader)[1].trigger("click")
     await flushPromises()
     await wrapper.vm.$wait()
@@ -193,6 +196,7 @@ describe("Transactions", () => {
     const dialog = wrapper.getComponent(SelectAccount).getComponent(QMenu)
     const groups = dialog.getComponent(SelectGroupExpansion)
     await groups.trigger("click")
+    
     // Choose group 2
     const group2 = groups.getComponent(QList).findAllComponents(GroupHeader)[2]
     expect(group2.text()).toContain("Group 2")

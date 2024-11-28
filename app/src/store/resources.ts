@@ -177,6 +177,14 @@ export interface LoadByCodePayload {
    * Optional comma-separated list of included relationship resources.
    */
   include?: string;
+  /**
+   * Cache time in milliseconds. If the resource is already in cache and the cache time
+   * has not expired, the resource is returned from cache. If the cache time has expired,
+   * the resource is revalidated from the server.
+   * 
+   * By default, always revalidate from server.
+   */
+  cache?: number,
 }
 
 /**
@@ -196,6 +204,14 @@ export interface LoadByIdPayload {
    * Optional comma-separated list of included relationship resources.
    */
   include?: string;
+  /**
+   * Cache time in milliseconds. If the resource is already in cache and the cache time
+   * has not expired, the resource is returned from cache. If the cache time has expired,
+   * the resource is revalidated from the server.
+   * 
+   * By default, always revalidate from server.
+   */
+  cache?: number,
 }
 
 /**
@@ -206,8 +222,18 @@ export interface LoadByUrlPayload {
    * The resource URL.
    */
   url: string;
-
+  /**
+   * Optional comma-separated list of included relationship resources.
+   */
   include?: string
+  /**
+   * Cache time in milliseconds. If the resource is already in cache and the cache time
+   * has not expired, the resource is returned from cache. If the cache time has expired,
+   * the resource is revalidated from the server.
+   * 
+   * By default, always revalidate from server.
+   */
+  cache?: number,
 }
 
 /**
@@ -628,6 +654,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
      */
     addResource: (state: ResourcesState<T>, resource: T) => {
       state.resources[resource.id] = resource
+      state.timestamps["resources/" + resource.id] = Date.now()
     },
     /**
      * Add the given resources to the resource list, without modifying current resource pointers.
@@ -857,54 +884,7 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       throw KError.getKError(error);
     }
   }
-  /*protected async loadNext(
-    context: ActionContext<ResourcesState<T>, S>,
-    payload: LoadNextPayload
-  ) {
-    try {
-      if (context.state.next === undefined || context.state.currentPage === null || context.state.currentQueryKey == null) {
-        throw new KError(
-          KErrorCode.ScriptError,
-          "Unexpected call to 'loadNext' resource action before calling to loadList."
-        );
-      }
-      // Increase current page number.
-      const page = context.state.currentPage + 1;
-      const queryKey = context.state.currentQueryKey
-
-      context.commit("currentPage", page)
-
-      // At this point the data may be already cached and available for the UI.
-
-      // If the endpoint is null it means that there's no next page.
-      if (context.state.next === null) {
-        context.commit("setPageIds", {key: queryKey, page, ids:[]});
-        return;
-      }
-      
-      if (payload.cache) {
-        const timestamp = context.state.timestamps["pages/" + queryKey + "/" + page]
-        if (timestamp && timestamp + payload.cache > Date.now()) {
-          // We have the value in cache and it's not expired, so we're done. Note that having the timestamps
-          // entry already means that we have the value entry. We need to compute the next page link.
-          const next = this.buildNextUrl(context, context.state.next)
-          context.commit("next", next)
-          return
-        }
-      }
-      
-      // Perform the request.
-      const data = await this.request(context, context.state.next);
-      await this.handleCollectionResponse(
-        data,
-        context,
-        queryKey,
-        page,
-      );
-    } catch (error) {
-      throw KError.getKError(error);
-    }
-  }*/
+  
   protected async loadNext(
     context: ActionContext<ResourcesState<T>, S>,
     payload: LoadNextPayload
@@ -974,9 +954,18 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     if ("url" in payload) {
       // Try to get the ID from the URL. That may work for accounts and other resources 
       // if the /accounts/:id, but there are other valid URLs that don't have the id.
-      const lastUrlParam = payload.url.split("/").pop()
+      const path = payload.url.split("/")
+      const lastUrlParam = path.pop()
       if (lastUrlParam && context.state.resources[lastUrlParam]) {
         id = lastUrlParam
+      }
+      // For "/:group/currency" urls we can get the code from the URL.
+      if (lastUrlParam === "currency") {
+        const code = path.pop()
+        const cached = context.getters['find']({ code })
+        if (cached) {
+          id = cached.id
+        }
       }
     } else if ("id" in payload && context.state.resources[payload.id]) {
       // payload sometimes contains the id
@@ -1032,6 +1021,47 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     // First, try to find the required resource in cache so we can render
     // some content before hitting the API.
     this.loadCached(context, payload)
+
+    if (payload.cache && context.state.currentId !== null) {
+      // Check if the resource (and all required included relationships) is already in cache and valid.
+      const checkCachedResourceWithRelationships = (id: string, cache: number, context: ActionContext<ResourcesState<T>, S>, include?: string) => {
+        const checkCachedResource = <U extends ResourceObject>(id: string, cache: number, state: ResourcesState<U>) => {
+          const timestamp = state.timestamps["resources/" + id]
+          return timestamp && timestamp + cache > Date.now()
+        }
+
+        if (!checkCachedResource(id, cache, context.state)) {
+          return false
+        }        
+        if (include) {
+          const resource = context.getters.one(id)
+          const included = include.split(",")
+          for (const key of included) {
+            const chain = key.split(".")
+            let related = resource
+            for (const relationship of chain) {
+              if (relationship in related && typeof related[relationship] === "object") {
+                related = related[relationship]
+              } else {
+                return false
+              }
+            }
+            // Check if related resource is sufficiently updated
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const relatedState = (context.rootState as any)[related.type]
+            if (!checkCachedResource(related.id, cache, relatedState)) {
+              return false
+            }
+          }
+        }
+        return true
+      }
+      
+      if (checkCachedResourceWithRelationships(context.state.currentId, payload.cache, context, payload.include)) {
+        return
+      }
+      
+    }
     
     // Fetch (or revalidate) the content.
     const url = this.resourceUrl(payload);

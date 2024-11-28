@@ -1,6 +1,5 @@
 <template>
   <group-header
-    v-if="modelValue"  
     id="select-group-header"
     class="bg-light"
     :group="modelValue"
@@ -26,14 +25,14 @@
           code=""
           module-name="groups"
           :cache="1000*60*5"
+          @page-loaded="onPageLoaded"
         >
           <q-list
             v-if="slotProps.resources"
-            @vue:mounted="checkShowGroups(slotProps.resources)"
           >
-            <template v-for="option in slotProps.resources">
+            <template v-for="option of slotProps.resources">
               <group-header
-                v-if="showGroup(option.id)"
+                v-if="showGroups[option.id]"
                 :key="option.id"
                 :group="option"
                 clickable
@@ -72,8 +71,6 @@ const emit = defineEmits<{
 
 const dialog = ref(false)
 
-
-
 const group = computed({
   get: () => props.modelValue,
   set: (value) => emit("update:modelValue", value)
@@ -88,20 +85,23 @@ const select = (value: Group) => {
 
 const myGroup = computed<Group>(() => store.getters.myMember.group)
 
-const showGroups : Record<string, Ref<boolean>> = {}
-
-const showGroup = (id: string) => showGroups[id]?.value ?? false
-
 const onClick = () => {
   dialog.value = !dialog.value
 }
 
+const showGroups : Ref<Record<string, boolean>> = ref({})
+
+const onPageLoaded = (page: number) => {
+  const resources = store.getters["groups/page"](page)
+  resources.forEach(checkShowGroup)
+}
+
 const checkShowGroup = (group: Group) => {
-  if (!(group.id in showGroups)) {
+  if (!(group.id in showGroups.value)) {
     // Always show selected group and own group. Otherwise check the currency settings to 
     // see if they allow external payments.
     const isSelected = group.id === props.modelValue?.id || group.id === myGroup.value.id
-    showGroups[group.id] = ref(isSelected)
+    showGroups.value[group.id] = isSelected
     if (!isSelected) {
       // Load currency and settings. We don't do it using the include prop
       // of resource-cards because we need to check also the related settings 
@@ -110,14 +110,15 @@ const checkShowGroup = (group: Group) => {
         const url = (group.relationships.currency.data.meta && group.relationships.currency.data.meta.external) 
           ? group.relationships.currency.data.meta.href
           : group.relationships.currency.links.related
-        
+
         await store.dispatch("currencies/load", {
           url,
-          include: "settings"
+          include: "settings",
+          cache: 1000*60*5
         })
-        
+
         const settings = (group as Group & {currency: Currency & {settings: CurrencySettings}}).currency.settings
-        showGroups[group.id].value = props.payer
+        showGroups.value[group.id] = props.payer
           ? settings.attributes.enableExternalPaymentRequests
           : settings.attributes.enableExternalPayments
       }
@@ -127,11 +128,6 @@ const checkShowGroup = (group: Group) => {
       })
     }
   }
-  return showGroups[group.id]
-}
-
-const checkShowGroups = (groups: Group[]) => {
-  groups.forEach(group => checkShowGroup(group))
 }
 
 </script>
