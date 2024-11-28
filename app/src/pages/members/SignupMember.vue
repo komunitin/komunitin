@@ -98,7 +98,7 @@ const myUser = computed(() => store.getters.myUser)
 // Fetch group
 store.dispatch("groups/load", {
   id: props.code,
-  include: "signup-settings"
+  include: "settings"
 })
 // Load member
 const member = ref(myMember.value)
@@ -112,19 +112,19 @@ store.dispatch("members/load", {
 })
 
 const group = computed(() => store.getters["groups/current"])
-const settings = computed(() => group.value?.['signup-settings']?.attributes)
+const settings = computed(() => group.value?.settings?.attributes)
 
 const loadingSaveMember = ref(false)
 
 const updateMember = (resource: DeepPartial<Member>) => {
   member.value = {
-    ...(myMember.value),
+    ...(member.value),
     attributes: resource.attributes
   }
 }
 const updateContacts = (contacts: DeepPartial<Contact>[]) => {
   member.value = {
-    ...(myMember.value),
+    ...(member.value),
     contacts,
     relationships: {
       contacts: {
@@ -139,7 +139,12 @@ const saveMember = async () => {
     await store.dispatch("members/update", {
       id: member.value.id,
       group: props.code,
-      resource: member.value,
+      resource: {
+        id: member.value.id,
+        type: "members",
+        attributes: member.value.attributes,
+        relationships: member.value.relationships
+      },
       included: member.value.contacts
     })
     nextPage()

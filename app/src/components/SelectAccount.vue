@@ -4,7 +4,7 @@
     v-model="account"
     :options="options"
     use-input
-    :option-disable="accountDisabled"
+    :option-disable="isAccountDisabled"
     :loading="loading"
     :input-debounce="0"
     input-style="position: absolute"
@@ -29,13 +29,15 @@
       />
     </template>
     <template #before-options>
-      <select-group
+      <select-group-expansion
+        v-if="changeGroup"
         v-model="group"
         :payer="payer"
       />
     </template>
     <template #no-option>
-      <select-group
+      <select-group-expansion
+        v-if="changeGroup"
         v-model="group"
         :payer="payer"
       />
@@ -56,7 +58,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { Account, Currency, Group, Member } from 'src/store/model';
 import AccountHeader from './AccountHeader.vue';
-import SelectGroup from './SelectGroup.vue';
+import SelectGroupExpansion from './SelectGroupExpansion.vue';
 import { useStore } from 'vuex'
 import { QSelect } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
@@ -65,12 +67,15 @@ import { normalizeAccountCode } from 'src/plugins/FormatCurrency';
 
 type ExtendedAccount = Account & {member?: ExtendedMember & {group: Group}, currency?: Currency}
 type ExtendedMember = Member & {account?: ExtendedAccount }
+type ExtendedGroup = Group & {currency: Currency}
 
 const props = defineProps<{
   modelValue?: ExtendedAccount|undefined,
   code: string,
   payer: boolean
   lazy?: boolean
+  accountDisabled?: (account: Account) => boolean
+  changeGroup?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -87,8 +92,9 @@ const account = computed<ExtendedAccount|undefined>({
 })
 const store = useStore()
 
-const myGroup = computed(() => store.getters.myMember?.group)
-const group = ref<Group & {currency: Currency}>(props.modelValue?.member?.group ?? myGroup.value)
+
+const myGroup = computed<ExtendedGroup>(() => store.getters.myMember?.group)
+const group = ref<ExtendedGroup>(props.modelValue?.member?.group as ExtendedGroup ?? myGroup.value)
 
 const searchText = ref("")
 
@@ -191,8 +197,6 @@ const loadNextPage = async () => {
     loading.value = true
     if (store.getters["members/hasNext"]) {
       await store.dispatch("members/loadNext", {
-        group: group.value.attributes.code,
-        include: "account",
         cache: 1000*60*5
       });
     }
@@ -223,12 +227,14 @@ watchDebounced(searchText, async (search) => {
 }, { debounce: 300 })
 
 // Immediate watch for group change
-watch(group, async () => {
-  field.value?.setOptionIndex(-1)
-  account.value = undefined
-  options.value = []
-  field.value?.focus()
-  await fetchResources(searchText.value !== "" ? searchText.value : undefined)
+watch(group, async (newGroup, oldGroup) => {
+  if (newGroup.id !== oldGroup.id) {
+    field.value?.setOptionIndex(-1)
+    account.value = undefined
+    options.value = []
+    field.value?.focus()
+    await fetchResources(searchText.value !== "" ? searchText.value : undefined) 
+  }
 })
 
 const onScroll = async({to, direction}: {to:number, direction: string}) => {
@@ -239,8 +245,13 @@ const onScroll = async({to, direction}: {to:number, direction: string}) => {
 
 // Show logged in account as disabled.
 const myAccount = computed(() => store.getters.myAccount)
-const accountDisabled = (account: Account) => {
-  return account.id == myAccount.value?.id
+
+const isAccountDisabled = (account: Account) => {
+  if (props.accountDisabled) {
+    return props.accountDisabled(account)
+  } else {
+    return account.id == myAccount.value?.id
+  }
 }
 
 const { t } = useI18n()

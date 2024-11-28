@@ -53,3 +53,33 @@ function forTenant(tenantId: string) {
     })
   );
 }
+
+/** 
+ * Convert bigints to numbers in values of this map. Not recursive.
+ * */
+/*function bigIntsToNumbers(obj: Record<string, any>) {
+  for (const key in obj) {
+    if (typeof obj[key] === "bigint") {
+      obj[key] = Number(obj[key]);
+    } 
+  }
+  return obj;
+}*/
+/*
+// Workaround for the issue https://github.com/prisma/prisma/issues/7570.
+// Concretely, Prisma's schema "Int" data type is not sufficient for amount fields 
+// (MAX = 2^31): balance, credit limit, etc, but JS "Number" is (MAX = 2^53).
+// We could use JS BigInt, but at this point we are using the workaround of 
+// converting bigints to numbers which should be fine except for the performance penalty.
+function fixBigInts() {
+  return Prisma.defineExtension((prisma) =>
+    prisma.$extends({
+      query: {
+        $allOperations: async ({ args, query }) => {
+          const result = await query(args);
+          return bigIntsToNumbers(result);
+        }
+      }
+    })
+  );
+}*/

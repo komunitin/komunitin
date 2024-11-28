@@ -97,7 +97,15 @@
           @click="searchActive = true"
         />
         <!-- slot for right buttons -->
-        <slot name="buttons" />
+        <slot name="buttons" >
+          <q-btn
+            v-if="!isActive"
+            icon="logout"
+            flat
+            round
+            @click="logout"
+          />
+        </slot>
         <q-scroll-observer
           v-if="balance"
           @scroll="scrollHandler"
@@ -206,6 +214,12 @@ const goUp = () => {
   } else {
     router.push(props.back)
   }
+}
+
+const isActive = computed(() => store.getters.isActive)
+const logout = async () => {
+  await store.dispatch("logout")
+  await router.push("/")
 }
 </script>
 <style lang="scss" scoped>

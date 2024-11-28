@@ -35,6 +35,7 @@ const router = useRouter()
 
 const deleteOffer = async () => {
   await store.dispatch('offers/delete', {
+    // TODO: Use the offer id
     id: props.offer.attributes?.code,
     group: props.code
   })

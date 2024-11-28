@@ -6,7 +6,7 @@
 # Build stage
 
 
-FROM node:20 as komunitin-app-build
+FROM node:20 AS komunitin-app-build
 WORKDIR /app
 
 # Install mkcert
@@ -43,7 +43,7 @@ RUN quasar build -m pwa --debug
 # Production image komunitin-app
 
 # Use the latest stable Nginx HTTP server over Alpine Linux.
-FROM nginx:stable-alpine as komunitin-app
+FROM nginx:stable-alpine AS komunitin-app
 
 # Copy the built application from Build stage to nginx HTML folder.
 COPY --from=komunitin-app-build /app/dist/pwa /usr/share/nginx/html

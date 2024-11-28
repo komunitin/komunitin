@@ -6,6 +6,8 @@ import App from "../../../src/App.vue";
 import { mountComponent } from "../utils";
 import MenuDrawer from "../../../src/components/MenuDrawer.vue";
 import { seeds } from "src/server";
+import MemberHeader from "src/components/MemberHeader.vue";
+import { QList } from "quasar";
 
 describe("Front page and login", () => {
   let wrapper: VueWrapper;
@@ -55,32 +57,35 @@ describe("Front page and login", () => {
     wrapper.vm.$router.push("/login-mail");
     await flushPromises()
     // Button is disabled since form is empty.
-    expect(wrapper.find("button[type='submit']").attributes("disabled"))
+    expect(wrapper.get("button[type='submit']").attributes("disabled"))
       .toBeDefined();
-    await wrapper.find("input[type='email']").setValue("example@example.com");
-    await wrapper.find("input[type='password']").setValue("password");
+    await wrapper.get("input[type='email']").setValue("example@example.com");
+    await wrapper.get("input[type='password']").setValue("password");
     await wrapper.vm.$nextTick();
     // Button is enabled now.
     expect(
-      wrapper.find("button[type='submit']").attributes("disabled")
+      wrapper.get("button[type='submit']").attributes("disabled")
     ).toBeUndefined();
-    wrapper.find("button[type='submit']").trigger("click");
+    wrapper.get("button[type='submit']").trigger("click");
     await wrapper.vm.$wait()
     expect(wrapper.vm.$store.getters.isLoggedIn).toBe(true);
     expect(wrapper.vm.$route.path).toBe("/groups/GRP0/needs");
     // Click the account switcher
     wrapper
-      .find("#my-member")
-      .find("button")
+      .get("#my-member")
+      .get("button")
       .trigger("click");
     await wrapper.vm.$nextTick();
-    // Click logout
+    // Click logout (be careful with teleports when finding the element)
     wrapper
-      .findComponent(MenuDrawer)
-      .findComponent({ ref: "logout" })
+      .getComponent(MenuDrawer)
+      .getComponent(MemberHeader)
+      .getComponent(QList)
+      .get("#user-menu-logout")
       .trigger("click");
     await wrapper.vm.$wait();
     expect(wrapper.vm.$store.getters.isLoggedIn).toBe(false);
     expect(wrapper.vm.$route.path).toBe("/");
   });
+  
 });

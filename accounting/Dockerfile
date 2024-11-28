@@ -1,5 +1,5 @@
 # Build image
-FROM node:22 as komunitin-accounting
+FROM node:22 AS komunitin-accounting
 
 WORKDIR /app
 

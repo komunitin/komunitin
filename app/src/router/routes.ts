@@ -57,6 +57,19 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
+        path: '/signup-group',
+        name: 'SignupGroup',
+        component: () => import('../pages/groups/SignupGroup.vue'),
+        meta: {
+          public: true
+        }
+      },
+      {
+        path: '/groups/new',
+        name: 'CreateGroup',
+        component: () => import('../pages/groups/CreateGroup.vue'),
+      },
+      {
         path: '/groups/:code',
         props: true,
         name: 'Group',
@@ -150,13 +163,13 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'qr',
-            props: true,
+            props: route => ({direction: 'receive', ...route.params}),
             name: 'CreateTransactionReceiveQR',
             component: () => import('../pages/transactions/CreateTransactionReceiveQR.vue'),
           },
           {
             path: 'nfc',
-            props: true,
+            props: route => ({direction: 'receive', ...route.params}),
             name: 'CreateTransactionReceiveNFC',
             component: () => import('../pages/transactions/CreateTransactionReceiveNFC.vue')
           },
@@ -164,6 +177,38 @@ const routes: RouteRecordRaw[] = [
             path: 'multiple',
             props: route => ({direction: 'receive', ...route.params}),
             name: 'CreateTransactionReceiveMultiple',
+            component: () => import('../pages/transactions/CreateTransactionMultiple.vue'),
+          },   
+        ]
+      },
+      {
+        path: '/groups/:code/members/:memberCode/transactions/transfer',
+        props: route => ({code: route.params.code, direction: "transfer"}),
+        name: 'CreateTransactionTransfer',
+        component: () => import('../pages/transactions/CreateTransaction.vue'),
+        children: [
+          {
+            path: '',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferSingle',
+            component: () => import('../pages/transactions/CreateTransactionSingle.vue'),
+          },
+          {
+            path: 'qr',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferQR',
+            component: () => import('../pages/transactions/CreateTransactionReceiveQR.vue'),
+          },
+          {
+            path: 'nfc',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferNFC',
+            component: () => import('../pages/transactions/CreateTransactionReceiveNFC.vue')
+          },
+          {
+            path: 'multiple',
+            props: route => ({direction: 'transfer', ...route.params}),
+            name: 'CreateTransactionTransferMultiple',
             component: () => import('../pages/transactions/CreateTransactionMultiple.vue'),
           },   
         ]
@@ -229,6 +274,35 @@ const routes: RouteRecordRaw[] = [
         props: true,
         name: 'Transaction',
         component: () => import("../pages/transactions/Transaction.vue")
+      },
+      {
+        path: '/groups/:code/admin',
+        children: [{
+          path: 'edit',
+          props: true,
+          name: 'EditGroup',
+          component: () => import('../pages/admin/EditGroup.vue'),
+        }, {
+          path: 'settings',
+          props: true,
+          name: 'EditGroupSettings',
+          component: () => import('../pages/admin/EditGroupSettings.vue'),
+        }, {
+          path: 'accounts',
+          props: true,
+          name: 'ManageAccounts',
+          component: () => import('../pages/admin/ManageAccounts.vue'),
+        }, {
+          path: 'members/:memberCode/profile',
+          props: true,
+          name: 'AdminEditProfile',
+          component: () => import('../pages/members/EditProfile.vue')
+        }, {
+          path: 'members/:memberCode/settings',
+          props: true,
+          name: 'AdminEditSettings',
+          component: () => import('../pages/settings/EditSettings.vue')
+        }]
       }
     ]
   },

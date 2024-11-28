@@ -60,6 +60,7 @@
                 :name="`payer[${slot.rowIndex}]`"
                 :code="code"
                 :payer="true"
+                :change-group="myCurrency.settings.attributes.enableExternalPaymentRequests"
                 borderless
                 :lazy="slot.rowIndex > 0"
                 :rules="[() => emptyRow(slot.row) || checkPayer(slot.row) || $t('payerRequired')]"
@@ -76,6 +77,7 @@
                 :name="`payee[${slot.rowIndex}]`"
                 :code="code"
                 :payer="false"
+                :change-group="myCurrency.settings.attributes.enableExternalPayments"
                 borderless
                 :lazy="slot.rowIndex > 0"
                 :rules="[() => emptyRow(slot.row) || checkPayee(slot.row) || $t('payeeRequired')]"
@@ -138,7 +140,7 @@ import SelectAccount from 'src/components/SelectAccount.vue'
 import CreateTransactionLoadFileBtn from "./CreateTransactionLoadFileBtn.vue"
 import { TransferRow } from './CreateTransactionMultiple.vue'
 import { useI18n } from 'vue-i18n'
-import { Currency, ExtendedAccount } from 'src/store/model'
+import { Currency, CurrencySettings, ExtendedAccount } from 'src/store/model'
 import { useStore } from 'vuex'
 
 const props = defineProps<{
@@ -161,7 +163,7 @@ const model = computed({
 })
 
 const store = useStore()
-const myCurrency = computed<Currency>(() => store.getters.myAccount.currency)
+const myCurrency = computed<Currency & {settings: CurrencySettings}>(() => store.getters.myAccount.currency)
 
 const copyDescription = ref(false)
 const description = ref("")

@@ -22,7 +22,12 @@ export default boot(({ router, store }) => {
         } else {
           // Redirect inactive users to their own profile page.
           const myMember = store.getters.myMember;
-          return `/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}`
+          if (myMember) {
+            return `/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}`
+          } else {
+            // This is the case for users who have requested a new group and are pending acceptance.
+            return "/groups";
+          }
         }
       }
       // Block inactive users to all but settings and profile pages.

@@ -6,6 +6,7 @@ import { useQuasar, Quasar, QSingletonGlobals, QVueGlobals } from "quasar";
 import LocalStorage from "../plugins/LocalStorage";
 import { formatRelative, Locale } from "date-fns";
 import { ref, watch } from "vue";
+import { useStore } from "vuex";
 
 declare module "vue" {
   interface ComponentCustomProperties {
@@ -62,22 +63,24 @@ async function getCurrentLocale($q: QSingletonGlobals) {
  * 
  * Note that this function does not update the user.settings.language attribute.
  */
-export async function setLocale(locale: string) {
+export async function setLocale(locale: string, admin=false) {
   const lang = normalizeLocale(locale);
-  await setCurrentLocale(Quasar, lang)
+  await setCurrentLocale(Quasar, lang, admin)
 }
 
-// QSingletonGlobals is the type of import { Quasar } and QVueGlobals is the type of useQuasar(),
-// both of them have the method lang.set(messages).
-async function setCurrentLocale($q: QSingletonGlobals|QVueGlobals, locale: string) {
+async function setCurrentLocale($q: QSingletonGlobals|QVueGlobals, locale: string, admin=false) {
   globalLocale = locale
   // Set VueI18n lang.
   const setI18nLocale = async (locale: LangName) => {
+    const definition = langs[locale]
     if (i18n.global.locale.value !== locale) {
-      const definition = langs[locale]
       const messages = await definition.loadMessages();
       i18n.global.setLocaleMessage(locale, messages);
       i18n.global.locale.value = locale;
+    }
+    if (admin) {
+      const adminMessages = await definition.loadAdminMessages();
+      i18n.global.mergeLocaleMessage(locale, adminMessages);
     }
   }
 
@@ -107,9 +110,10 @@ async function setCurrentLocale($q: QSingletonGlobals|QVueGlobals, locale: strin
  */
 export function useLocale() {
   const locale = ref(globalLocale)
-  const $q = useQuasar();    
+  const $q = useQuasar()   
+  const store = useStore()
   watch(locale, async (locale) => {
-    await setCurrentLocale($q, locale)
+    await setCurrentLocale($q, locale, store.getters.isAdmin)
   })
   return locale;
 }
@@ -126,17 +130,19 @@ export default boot(async ({ app, store }) => {
 
   // Initially set the current locale.ç
   const lang = await getCurrentLocale(Quasar)
-  await setCurrentLocale(Quasar, lang)
+  await setCurrentLocale(Quasar, lang, store.getters.isAdmin)
 
   // Change the current locale to the user defined settings. Note that we do it that way so the
   // store does not depend on the i18n infrastructure and therefore it can be used in the service
   // worker.
   store.watch((_, getters) => {
-    return getters["myUser"]?.settings?.attributes.language
-  }, (language) => {
-    if (language && language !== globalLocale) {
-      setLocale(language)
+    return [getters.myUser?.settings?.attributes.language, getters.isAdmin]
+  }, ([language, isAdmin]) => {
+    if (language && (isAdmin || language !== globalLocale)) {
+      setLocale(language, isAdmin)
     }
   })
+
+
 });
 

@@ -70,7 +70,7 @@ export const recordToTransfer = (record: TransferRecord, accounts: {
 }): Transfer => ({
   id: record.id,
   state: record.state as TransferState,
-  amount: record.amount,
+  amount: Number(record.amount),
   meta: record.meta,
   hash: record.hash ?? undefined,
   authorization: record.authorization as TransferAuthorization ?? undefined,

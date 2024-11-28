@@ -1,6 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import AccountLimits from "../AccountLimits.vue";
-import {Quasar, QSeparator} from 'quasar'
+import {QSeparator, Quasar} from 'quasar'
 import { config } from '@vue/test-utils';
 import { createI18n } from "vue-i18n";
 
@@ -33,7 +33,7 @@ describe('AccountLimits.vue', () => {
     const account = {
       attributes: {
         creditLimit: 5000,
-        debitLimit: -1
+        maximumBalance: -1
       },
       currency
     };
@@ -45,14 +45,13 @@ describe('AccountLimits.vue', () => {
         mocks
       }
     });
-    expect(wrapper.text()).toBe("maxAmount %50");
-    expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
+    expect(wrapper.text()).toBe("minAmount %-50");
   });
 
   it("renders debit limit", () => {
     const account = {
       attributes: {
-        debitLimit: 5000,
+        maximumBalance: 5000,
         creditLimit: -1
       },
       currency
@@ -65,14 +64,13 @@ describe('AccountLimits.vue', () => {
         mocks
       },
     });
-    expect(wrapper.text()).toBe("minAmount %-50");
-    expect(wrapper.findComponent(QSeparator).exists()).toBe(false);
+    expect(wrapper.text()).toBe("maxAmount %50");
   });
 
   it("renders both limits", () => {
     const account = {
       attributes: {
-        debitLimit: 5000,
+        maximumBalance: 5000,
         creditLimit: 6000
       },
       currency
@@ -85,9 +83,8 @@ describe('AccountLimits.vue', () => {
         mocks
       }
     });
-    expect(wrapper.text()).toContain("minAmount %-50");
-    expect(wrapper.text()).toContain("maxAmount %60");
-    expect(wrapper.findComponent(QSeparator).exists()).toBe(true);
+    expect(wrapper.text()).toContain("minAmount %-60");
+    expect(wrapper.text()).toContain("maxAmount %50");
   });
 
 })

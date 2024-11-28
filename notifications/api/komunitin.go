@@ -71,6 +71,16 @@ func GetGroupMembers(ctx context.Context, code string) ([]*Member, error) {
 	return members, nil
 }
 
+// Get group with admin users.
+func GetGroup(ctx context.Context, code string) (*Group, error) {
+	group := new(Group)
+	err := getResource(ctx, config.KomunitinSocialUrl, code, "", "", group, []string{"admins"}, nil)
+	if err != nil {
+		return nil, err
+	}
+	return group, nil
+}
+
 func GetAccountMembers(ctx context.Context, code string, accountIds []string) ([]*Member, error) {
 	members := make([]*Member, 0)
 	accountsParam := strings.Join(accountIds, ",")
@@ -119,6 +129,16 @@ func GetMember(ctx context.Context, code string, memberId string) (*Member, erro
 	return member, nil
 }
 
+// Get an account object
+func GetAccount(ctx context.Context, code string, accountId string) (*Account, error) {
+	account := new(Account)
+	err := getResource(ctx, config.KomunitinAccountingUrl, code, "accounts", accountId, account, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	return account, nil
+}
+
 func addFields(query []string, fields map[string][]string) []string {
 	for key, value := range fields {
 		query = append(query, "fields["+url.QueryEscape(key)+"]="+url.QueryEscape(strings.Join(value, ",")))
@@ -138,11 +158,13 @@ func addFilter(query []string, filter map[string][]string) []string {
 	return query
 }
 func buildUrl(baseUrl string, code string, resourceType string, id string) string {
-	url := baseUrl + "/"
+	url := baseUrl
 	if code != "" {
-		url += code + "/"
+		url += "/" + code
 	}
-	url += resourceType
+	if resourceType != "" {
+		url += "/" + resourceType
+	}
 	if id != "" {
 		url += "/" + id
 	}

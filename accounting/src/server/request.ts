@@ -1,10 +1,9 @@
 import {Request} from "express"
 import { internalError } from "src/utils/error"
 
-// Pagination. We use the https://jsonapi.org/profiles/ethanresnick/cursor-pagination/ spec for pagination.
-// However, we actually use the offset as a cursor. For performance reasons we may change
-// the cursor definition to something that allows us random access since the client uses it
-// as an opaque string.
+// We use the the classic limit-offset pagination. This is the strategy that 
+// offers more flexibility since we can order the dataset by any field. The
+// parameters are page[size] and page[after].
 
 const DEFAULT_PAGE_SIZE = 20
 const MAX_PAGE_SIZE = 200
@@ -128,6 +127,15 @@ export const collectionParams = (req: Request, options: CollectionParamsOptions)
     filters: filters(req, options?.filter ?? []),
     sort: sort(req, options.sort),
     include: include(req, options?.include ?? [])
+  }
+}
+
+export const relatedCollectionParams = (): CollectionOptions => {
+  return {
+    pagination: {cursor: 0, size: MAX_PAGE_SIZE},
+    filters: {},
+    sort: {field: "id", order: "asc"},
+    include: []
   }
 }
 export type ResourceParamsOptions = { include?: string[] }

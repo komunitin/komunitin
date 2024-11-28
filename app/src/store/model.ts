@@ -198,6 +198,7 @@ export interface Group extends ResourceObject {
     website: string;
     access: Access;
     location: Location;
+    address: Address;
     created: string;
     updated: string;
   };
@@ -209,17 +210,17 @@ export interface Group extends ResourceObject {
     needs: RelatedCollection;
     posts: RelatedCollection;
     currency: RelatedResource;
-    signupSettings: RelatedResource;
+    settings: RelatedResource;
   };
 }
 
-export interface GroupSignupSettings extends ResourceObject {
+export interface GroupSettings extends ResourceObject {
   attributes: {
-    requireAdminApproval: boolean;
     requireAcceptTerms: boolean;
     terms: string;
     minOffers: number;
     minNeeds: number;
+    allowAnonymousMemberList: boolean;
   },
   relationships: {
     group: RelatedResource;
@@ -326,13 +327,6 @@ export interface Currency extends ResourceObject {
       n: number,
       d: number
     }
-    settings: {
-      defaultAllowPayments?: boolean
-      defaultAllowPaymentRequests?: boolean
-
-      enableExternalPayments?: boolean
-      enableExternalPaymentRequests?: boolean
-    }
   };
 }
 
@@ -347,7 +341,7 @@ export interface Account extends ResourceObject {
     balance: number;
     //locked: 0,
     creditLimit: number;
-    debitLimit: number;
+    maximumBalance: number | false;
     //capabilities: ["pay", "charge"],
   };
   relationships: {
@@ -365,20 +359,37 @@ export interface AccountTag {
 }
 
 export interface AccountSettings extends ResourceObject {
+  // null or undefined means default by currency settings
   attributes: {
-    acceptPaymentsAutomatically: boolean,
+    // Payment directions
+    allowPayments?: boolean | null,
+    allowPaymentRequests?: boolean | null,
+
+    // Payment workflows
+    allowSimplePayments?: boolean | null,
+    allowSimplePaymentRequests?: boolean | null,
+    allowQrPayments?: boolean | null,
+    allowQrPaymentRequests?: boolean | null,
+    allowMultiplePayments?: boolean | null,
+    allowMultiplePaymentRequests?: boolean | null
+    allowTagPayments?: boolean | null
+    allowTagPaymentRequests?: boolean | null
+
+    // PR acceptance
+    acceptPaymentsAutomatically: boolean | null,
+    acceptPaymentsWhitelist?: string[] | null,
+    acceptPaymentsAfter?: number | false | null
     
-    allowPayments?: boolean,
-    allowPaymentRequests?: boolean,
+    // External payments
+    allowExternalPayments?: boolean | null,
+    allowExternalPaymentRequests?: boolean | null,
+    acceptExternalPaymentsAutomatically?: boolean | null,
 
-    allowExternalPayments?: boolean,
-    allowExternalPaymentRequests?: boolean,
-
-    allowTagPayments?: boolean
-    allowTagPaymentRequests?: boolean
+    // Other features
+    onPaymentCreditLimit?: number | false | null
     
-    tags?: AccountTag[]
-
+    // Tags
+    tags?: AccountTag[] | null
   }
   relationships: {
     account: RelatedResource
@@ -474,3 +485,43 @@ export interface NotificationsSubscription extends ResourceObject {
   }
 }
 
+export interface Trustline extends ResourceObject {
+  attributes: {
+    limit: number,
+    balance: number,
+    created: string,
+    updated: string
+  };
+  relationships: {
+    trusted: RelatedResource,
+    currency: RelatedResource
+  }
+}
+
+export interface CurrencySettings extends ResourceObject {
+  attributes: {
+    defaultInitialCreditLimit: number
+    defaultInitialMaximumBalance: number | false
+    defaultAllowPayments: boolean
+    defaultAllowPaymentRequests: boolean
+    defaultAcceptPaymentsAutomatically: boolean
+    defaultAcceptPaymentsWhitelist: string[]
+    defaultAllowSimplePayments: boolean
+    defaultAllowSimplePaymentRequests: boolean
+    defaultAllowQrPayments: boolean
+    defaultAllowQrPaymentRequests: boolean
+    defaultAllowMultiplePayments: boolean
+    defaultAllowMultiplePaymentRequests: boolean
+    defaultAllowTagPayments: boolean;
+    defaultAllowTagPaymentRequests: boolean;
+    defaultAcceptPaymentsAfter: number | false
+    defaultOnPaymentCreditLimit: number | false
+    enableExternalPayments: boolean
+    enableExternalPaymentRequests: boolean
+    defaultAllowExternalPayments: boolean
+    defaultAllowExternalPaymentRequests: boolean
+    defaultAcceptExternalPaymentsAutomatically: boolean
+    externalTraderCreditLimit: number
+    externalTraderMaximumBalance: number | false
+  }
+}

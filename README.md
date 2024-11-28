@@ -22,7 +22,7 @@ The Komunitin system is made of several microservices:
  - IntegralCES: The current backend for the social APIs based on the legacy project built on Drupal. See the [ices project](https://drupal.org/project/ices). This will be rewritten to a new service.
  - Social service: [TODO] The new decentralized backend for the social API.
 
-## Run with Docker
+## Development run with Docker
 In order to run the whole system with docker compose, you need the peer dependency IntegralCES. Clone it in the same parent folder as Komunitin.
 
 ```bash

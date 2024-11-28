@@ -10,11 +10,12 @@
       <q-card class="q-pa-md">
         <q-card-section class="row items-center">
           <q-avatar
+            class="q-mr-md"
             icon="delete"
             color="negative"
             text-color="white"
           />
-          <div class="column q-ml-md">
+          <div class="column">
             <div>
               <slot />
             </div>

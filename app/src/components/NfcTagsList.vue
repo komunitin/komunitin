@@ -100,7 +100,7 @@ import { useI18n } from "vue-i18n"
 import { AccountTag } from "src/store/model"
 
 const props = defineProps<{
-  modelValue: AccountTag[] | undefined
+  modelValue?: AccountTag[]
 }>()
 
 const emit = defineEmits<{

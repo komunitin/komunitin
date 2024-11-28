@@ -458,7 +458,7 @@ export class TransferController  extends AbstractCurrencyController {
       }
       if (data.payer !== undefined && data.payer.id !== transfer.payer.id) {
         // Only admin can change transfer payer.
-        if (user.id !== this.currency().admin?.id) {
+        if (user.id !== this.currency().admin.id) {
           throw forbidden("User is not allowed to change payer")
         }
         // Throw if not found
@@ -520,7 +520,7 @@ export class TransferController  extends AbstractCurrencyController {
       const immediate = await this.submitPaymentRequestImmediately(transfer)
       if (expired || immediate) {
         // Submit this transfer as admin.
-        await this.updateTransferState(transfer, "committed", this.currency().admin as User)
+        await this.updateTransferState(transfer, "committed", this.currency().admin)
       }
     }
   }

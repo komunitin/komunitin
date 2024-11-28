@@ -299,10 +299,6 @@ export class AccountController extends AbstractCurrencyController{
       "tags"
     ]
 
-    if (!this.users().isAdmin(user) && Object.keys(settings).some(k => !["id", "type"].includes(k) && !userSettings.includes(k))) {
-      throw forbidden("User is not allowed to update this account setting")
-    }
-
     const deleteUndefined = (obj: any) => {
       for (const key in obj) {
         if (obj[key] === undefined) {
@@ -314,6 +310,7 @@ export class AccountController extends AbstractCurrencyController{
     const {tags, id, ...updateSettings} = settings
     deleteUndefined(updateSettings)
 
+    // User can update tags.
     if (tags) {
       await this.updateAccountTags(account, tags)
     }
@@ -321,10 +318,30 @@ export class AccountController extends AbstractCurrencyController{
       // Since settings is a single Json value in table, we need to provide the full object.
       // And we need to remove the tags entry too, since they are saved in separate DB table.
       const {tags, ...oldSettings} = account.settings
+      // Check permission to update each setting.
+      if (!this.users().isAdmin(user)) {
+        for (const key in updateSettings) {
+          if (!userSettings.includes(key) && oldSettings[key as keyof typeof oldSettings] !== updateSettings[key as keyof typeof updateSettings]) {
+            throw forbidden(`User is not allowed to update setting ${key}`)
+          }
+        }
+      }
+
       const fullSettings = {
         ...oldSettings,
         ...updateSettings
       }
+
+      // Delete the entries set to null.
+      const deleteNull = (obj: any) => {
+        for (const key in obj) {
+          if (obj[key] === null) {
+            delete obj[key]
+          }
+        }
+      }
+      deleteNull(fullSettings)
+      
       await this.db().account.update({
         data: { settings: fullSettings },
         where: { id: account.id }

@@ -3,12 +3,18 @@
     :expand="true"
     position="bottom"
     :offset="[0, 24]"
+    class="row justify-center"
   >
-    <div class="full-width row q-col-gutter-md">
-      <div class="col-6 text-right">
+    <div 
+      class="row items-stretch q-col-gutter-md justify-center"
+    >
+      <div
+        v-if="showRequestPayment"
+        class="btn-col"
+      >
         <q-btn
-          v-if="settings.allowPaymentRequests"
           id="request-payment"
+          class="full-width"
           fab
           icon="arrow_downward"
           color="primary"
@@ -16,15 +22,32 @@
           :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}/transactions/receive`"
         />
       </div>
-      <div class="col-6">
+      <div
+        v-if="showMakePayment"
+        class="btn-col"
+      >
         <q-btn
-          v-if="settings.allowPayments"
           id="make-payment"
+          class="full-width"
           fab
           icon="arrow_upward"
           color="primary"
           :label="$t('send')"
           :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}/transactions/send`"
+        />
+      </div>
+      <div
+        v-if="showTransfer"
+        class="btn-col"
+      >
+        <q-btn
+          id="make-transfer"
+          class="full-width"
+          fab
+          icon="arrow_forward"
+          color="primary"
+          :label="$t('move')"
+          :to="`/groups/${myMember.group.attributes.code}/members/${myMember.attributes.code}/transactions/transfer`"
         />
       </div>
     </div>
@@ -40,4 +63,30 @@ const store = useStore()
 const myMember = computed(() => store.getters.myMember)
 const settings = useMyAccountSettings()
 
+const showMakePayment = computed(
+  // Note that having the tag payments setting enabled (only) does not make this button to show, any other does.
+  () => settings.value?.allowPayments && (settings.value?.allowSimplePayments || settings.value?.allowQrPayments || settings.value?.allowMultiplePayments)
+)
+const showRequestPayment = computed(
+  // Note that QR payments don't need the allowPaymentRequests setting since they are actually always performed by the payer.
+  () => settings.value?.allowPaymentRequests && (settings.value?.allowSimplePaymentRequests || settings.value.allowMultiplePaymentRequests || settings.value.allowTagPaymentRequests)
+        || settings.value?.allowQrPaymentRequests
+)
+const showTransfer = computed(
+  () => store.getters.isAdmin
+)
+
 </script>
+<style lang="scss">
+.btn-col {
+  min-width: 150px;
+}
+</style>
+<style lang="scss">
+/* Fix issue with quasar default CSS*/
+.q-btn--fab i.q-icon {
+  margin: 0;
+  margin-right: 12px;
+}
+</style>
+

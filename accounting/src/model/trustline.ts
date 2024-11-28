@@ -31,12 +31,13 @@ export interface Trustline {
 }
 
 export type InputTrustline = Pick<Trustline, "limit"> & {trusted: ExternalResourceIdentifier}
+export type UpdateTrustline = Pick<Trustline, "limit"|"id">
 
 export const recordToTrustline = (record: TrustlineRecord, trusted: ExternalResource<Currency>, currency: Currency): Trustline => ({
   id: record.id,
   
-  limit: record.limit,
-  balance: record.balance,
+  limit: Number(record.limit),
+  balance: Number(record.balance),
   created: record.created,
   updated: record.updated,
 

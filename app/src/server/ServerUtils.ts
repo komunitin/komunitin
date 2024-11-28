@@ -36,10 +36,13 @@ export function filter(records: any, request: any) {
         if (record.associations[name]) {
           name = record.associations[name].identifier;
         }
-        return values.includes(record[name])
+        const recordValue = record[name];
+        return Array.isArray(recordValue) 
+          ? recordValue.some((v: any) => values.includes(v)) 
+          : values.includes(recordValue);
       })
     });
-    
+  records = sort(records, request);
   return records;
 }
 
@@ -48,9 +51,12 @@ export function filter(records: any, request: any) {
  */
 export function sort(records: any, request: any) {
   let field: string = request.queryParams["sort"];
+  if (!field) {
+    return records;
+  }
   let ascending = true;
   if (field.startsWith("-")) {
-    field = field.substr(1);
+    field = field.substring(1);
     ascending = false;
   }
   records = records.sort((a:any, b:any) => {

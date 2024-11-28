@@ -15,6 +15,15 @@ type User struct {
 	Settings *UserSettings `jsonapi:"relation,settings"`
 }
 
+type Group struct {
+	Id    string `jsonapi:"primary,groups"`
+	Code  string `jsonapi:"attr,code"`
+	Name  string `jsonapi:"attr,name"`
+	Image string `jsonapi:"attr,image"`
+
+	Admins []*User `jsonapi:"relation,admins"`
+}
+
 type Member struct {
 	Id    string `jsonapi:"primary,members"`
 	Code  string `jsonapi:"attr,code"`

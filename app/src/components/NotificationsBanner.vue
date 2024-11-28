@@ -42,6 +42,7 @@ const ready = ref(false);
 const store = useStore()
 const dismissed = computed(() => store.state.ui.notificationsBannerDismissed)
 const isLoggedIn = computed(() => store.getters.isLoggedIn)
+const hasMember = computed(() => !!store.getters.myMember)
 const isCompatible = computed(() => (window && 'Notification' in window))
 const permission = ref(isCompatible.value && Notification.permission)
 const isAuthorized = computed(() => permission.value == 'granted')
@@ -54,7 +55,9 @@ const text = computed(() => {
   }
 })
 
-const show = computed(() => ready.value && isLoggedIn.value && !isAuthorized.value && !dismissed.value)
+const router = useRouter()
+
+const show = computed(() => ready.value && isLoggedIn.value && hasMember.value && !isAuthorized.value && !dismissed.value)
 
 const dismiss = () => store.commit("notificationsBannerDismissed", true)
 const subscribe = async () => {
@@ -63,11 +66,11 @@ const subscribe = async () => {
     await store.dispatch("subscribe");
   }
 }
-const router = useRouter()
+
 
 // Initialization.
 onBeforeMount(async () => {
-  if (isLoggedIn.value && isAuthorized.value) {
+  if (isLoggedIn.value && hasMember.value && isAuthorized.value) {
     await store.dispatch("subscribe");
   }
   ready.value = true

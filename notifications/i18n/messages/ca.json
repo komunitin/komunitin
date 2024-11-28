@@ -22,5 +22,17 @@
   "accepted": "Acceptada",
   "committed": "Confirmada",
   "rejected": "Rebutjada",
-  "deleted": "Eliminada"
+  "deleted": "Eliminada",
+  "helloAdmin": "Hola administrador/a,",
+  "memberRequestedSubject": "Nova sol·licitud de membre",
+  "memberRequestedText": "{{.MemberName}} ha sol·licitat unir-se a {{.GroupName}}.",
+  "memberRequestedSubtext": "Sisplau revisa la sol·licitud i accepta-la o elimina-la el més aviat possible. Aquest missatge s'ha enviat a tots els administradors del grup.",
+  "reviewRequests": "Revisar sol·licituds",
+  "memberJoinedSubject": "Benvingut/da a {{.GroupName}}",
+  "memberJoinedText": "Has estat acceptat/da com a membre de {{.GroupName}}. El teu número de compte és {{.AccountCode}}.",
+  "memberJoinedSubtext": "Pots iniciar sessió a l'aplicació i veure als altres membres i les seves ofertes i necessitats. També pots completar el teu perfil afegint tots els mitjans de contacte rellevants i altra informació. Recomanem completar les teves ofertes amb descripcions detallades i imatges i ja pots començar a fer transaccions. Bon intercanvi!",
+  "signIn": "Iniciar sessió",
+  "groupActivatedSubject": "El teu grup {{.GroupName}} ha estat activat",
+  "groupActivatedText": "Felicitats! El teu grup {{.GroupName}} ha estat activat.",
+  "groupActivatedSubtext": "Ara pots iniciar sessió i configurar els ajustos del grup i de la moneda: mètodes de pagament permesos, límits de crèdit, categories per a ofertes i necessitats, i més. Després pots convidar a altres membres i començar a intercanviar. El teu usuari administrador ve amb un compte que recomanem mantenir per a tasques administratives i no per a intercanvis reals. Si tens alguna pregunta, sisplau contacta amb l'equip. Molta sort fent créixer la teva comunitat!"
 }

@@ -13,6 +13,7 @@ export enum KErrorCode {
   // Social service error codes.
   InvalidPassword = "InvalidPassword", 
   DuplicatedEmail = "DuplicatedEmail",
+  BadRequest = "BadRequest",
 
   // There are more server errors but we're not identifying them and
   // they are all piped to UnknownServer.
@@ -58,8 +59,10 @@ export default class KError extends Error {
   debugInfo: any;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(code = KErrorCode.Unknown, message = "", debugInfo?: any) {
-    super(message);
+  constructor(code = KErrorCode.Unknown, message = "", cause?: Error, debugInfo?: any) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore-next-line
+    super(message, { cause });
     this.code = code;
     this.debugInfo = debugInfo !== undefined ? debugInfo : null;
   }
@@ -78,8 +81,10 @@ export default class KError extends Error {
   public static getKError(error: any): KError {
     if (error instanceof KError) {
       return error;
+    } else if (error instanceof Error) {
+      return new KError(KErrorCode.UnknownScript, error.message, error);
     } else {
-      return new KError(KErrorCode.UnknownScript, "Unexpected error", error);
+      return new KError(KErrorCode.UnknownScript, "Unexpected error", undefined, error);
     }
   }
 }

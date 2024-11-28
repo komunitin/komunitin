@@ -191,22 +191,25 @@ export class Auth {
         throw new KError(
           KErrorCode.AuthNoCredentials,
           "Missing or invalid credentials",
+          undefined,
           response
         );
       } else if (response.status == 403) {
         throw new KError(
           KErrorCode.IncorrectCredentials,
           "Access forbidden with given credentials",
+          undefined,
           response
         );
       } else if (400 <= response.status && response.status < 500) {
         throw new KError(
           KErrorCode.IncorrectRequest,
           "Invalid request",
+          undefined,
           response
         );
       } else {
-        throw new KError(KErrorCode.ServerBadResponse, `Server error ${response.status}`, {error: response.statusText});
+        throw new KError(KErrorCode.ServerBadResponse, `Server error ${response.status}`, undefined, {error: response.statusText});
       }
     }
   }

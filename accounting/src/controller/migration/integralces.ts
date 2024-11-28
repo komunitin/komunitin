@@ -68,6 +68,12 @@ const accountingUrl = (source: string) => {
 
 
 async function migrateCurrency(ctx: Context, controller: SharedController, migration: CreateMigration) {
+  // Get the user Id. We get the full UUID from the API, where the ctx.userId is the Drupal user id.
+  const socialBase = socialUrl(migration.source.url)
+  const adminUrl = `${socialBase}/users/me`
+  const adminDoc = await get(adminUrl, migration.source.access_token)
+  const adminId = adminDoc.data.id
+  
   // Get the currency
   const base = accountingUrl(migration.source.url)
   const url = `${base}/${migration.code}/currency`
@@ -93,6 +99,9 @@ async function migrateCurrency(ctx: Context, controller: SharedController, migra
       // Allow tag payments (useful in demo)
       defaultAllowTagPaymentRequests: true,
       defaultAllowTagPayments: true,
+    },
+    admin: {
+      id: adminId
     }
   } as Currency
 
@@ -166,7 +175,7 @@ async function migrateTransfers(ctx: Context, controller: CurrencyController, mi
       payer: transfer.relationships.payer.data,
       payee: transfer.relationships.payee.data,
       // TODO (or not): migrate user
-      user: currency.admin as User,
+      user: currency.admin,
       // TODO: migrate created/updated transfers.
       //created: new Date(transfer.attributes.created),
       //updated: new Date(transfer.attributes.updated)

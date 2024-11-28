@@ -22,7 +22,7 @@ type Event struct {
 	Time time.Time
 	// Arbitrary key-value data. Available values depend on the event type.
 	// For TransferCommitted, TransferPending, TransferRejected: "payer", "payee", "transfer".
-	// For MemberJoined: "member".
+	// For MemberJoined, MemberRequested: "member".
 	// For OfferPublished: "offer".
 	// For OfferExpired: "offer", "member".
 	// For NeedPublished: "need".
@@ -42,6 +42,8 @@ const (
 	OfferPublished    = "OfferPublished"
 	OfferExpired      = "OfferExpired"
 	MemberJoined      = "MemberJoined"
+	MemberRequested   = "MemberRequested"
+	GroupActivated    = "GroupActivated"
 )
 
 // Abstracts the events stream.

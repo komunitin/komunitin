@@ -7,17 +7,55 @@ This service uses the [Stellar](https://stellar.org) blockchain to define the cu
 $ pnpm install
 ```
 
-## Run dev server locally
-Start the dependecy services (database and local Stellar Network) and the Komunitin Accounting service at http://localhost:2025.
+## Run dev server standalone (with DB and local Stellar)
+This is the right environment to develop the service and execute tests. Start the dependecy services (database and local Stellar Network) and the Komunitin Accounting service at http://localhost:2025.
 ```bash
+$ cp .env.test .env
 $ docker compose up -d
 $ pnpm dev
 ```
 
+## Run dev server with local services (with testnet Stellar)
+This is the right environment to develop the integration of this service with the app and other services. 
+- Start the Komunitin services following the instructions in the [main README](../README.md).
+- Stop the `accounting` container
+- Run the accounting service with the local services:
+```bash
+$ cp .env.local .env
+$ pnpm dev
+```
+- Change the internal accounting url in integralces service:
+```bash
+$ cd ..
+$ docker compose exec integralces drush vset ces_komunitin_accounting_url_internal http://host.docker.internal:2025 
+```
+
+Note for devs on WSL (Windows): when runnning the accounting service from WSL2 and wanting to access it from a docker container (eg from integralces or notifications), the host.docker.internal must point to the WSL2 IP instead of the Windows host IP, so the `host.docker.internal: host-gateway` entry in the `docker-compose.yml` file must be replaced by the WSL2 IP.
+
 ## Test
-Execute the tests:
+Execute all the tests:
 ```bash
 $ pnpm test
+```
+### Unit tests
+```bash
+$ pnpm test-unit
+```
+
+### Ledger tests
+Tests involving only the Stellar integration but not the server.
+```bash
+$ pnpm test-ledger
+```
+### Server tests
+Tests involving the whole service
+```bash
+$ pnpm test-server
+```
+
+### Run just one test
+```bash
+$ pnpm test-one <test-file>
 ```
 
 ## Stellar

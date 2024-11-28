@@ -34,18 +34,21 @@ mkdir tmp/certs && cd tmp/certs
 mkcert localhost
 ```
 
-### Configure
+### Run standalone
 You can configure some properties such as where the backend services are located. The quickest way to run the app is to use the mocked version for all external apis:
+Build and launch the development HTTP server, that will make the app accessible at `https://localhost:2030/`. The app uses a mocked api for the backend services.
 
 ```bash
 cp .env.test .env
+npm run dev
 ```
 
-### Run
-
-Build and launch the development HTTP server, that will make the app accessible at `https://localhost:2030/`.
-
+### Run with local services
+- Launch the docker compose for Komunitin following the instructions in the [main README](../README.md).
+- Stop the `app` container
+- Run the app with the local services:
 ```bash
+cp .env.local .env
 npm run dev
 ```
 

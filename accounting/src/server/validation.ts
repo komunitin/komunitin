@@ -1,6 +1,5 @@
 import { body } from "express-validator"
 
-
 export namespace Validators {
   
   const jsonApiAnyResource = (path: string) => [
@@ -21,24 +20,30 @@ export namespace Validators {
     ...jsonApiResource("data.*", type),
   ]
 
-  const isUpdateCurrencySettings = (path: string) => [
+  const isUpdateCurrencySettingsAttributes = (path: string) => [
     body(`${path}.defaultInitialCreditLimit`).optional().isInt({min: 0}).default(0),
     body(`${path}.defaultInitialMaximumBalance`).optional().isInt({min: 0}),
-    body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),
-    body(`${path}.defaultAcceptPaymentsWhitelist`).optional().isArray(),
-    body(`${path}.defaultAcceptPaymentsAfter`).optional().isInt({min: 0}),
-    body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
     body(`${path}.defaultAllowPayments`).optional().isBoolean(),
     body(`${path}.defaultAllowPaymentRequests`).optional().isBoolean(),
-    body(`${path}.externalTraderCreditLimit`).optional().isInt({min: 0}),
-    body(`${path}.externalTraderMaximumBalance`).optional().isInt({min: 0}),
-    body(`${path}.defaultAllowExternalPayments`).optional().isBoolean(),
-    body(`${path}.defaultAllowExternalPaymentRequests`).optional().isBoolean(),
-    body(`${path}.enableExternalPayments`).optional().isBoolean(),
-    body(`${path}.enableExternalPaymentRequests`).optional().isBoolean(),
-    body(`${path}.defaultAcceptExternalPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.defaultAcceptPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.defaultAcceptPaymentsWhitelist`).optional().isArray(),
+    body(`${path}.defaultAllowSimplePayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowSimplePaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAllowQrPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowQrPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAllowMultiplePayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowMultiplePaymentRequests`).optional().isBoolean(),
     body(`${path}.defaultAllowTagPayments`).optional().isBoolean(),
     body(`${path}.defaultAllowTagPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAcceptPaymentsAfter`).optional().isInt({min: 0}),
+    body(`${path}.defaultOnPaymentCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.enableExternalPayments`).optional().isBoolean(),
+    body(`${path}.enableExternalPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAllowExternalPayments`).optional().isBoolean(),
+    body(`${path}.defaultAllowExternalPaymentRequests`).optional().isBoolean(),
+    body(`${path}.defaultAcceptExternalPaymentsAutomatically`).optional().isBoolean(),
+    body(`${path}.externalTraderCreditLimit`).optional().isInt({min: 0}),
+    body(`${path}.externalTraderMaximumBalance`).optional().isInt({min: 0})
   ]
 
   const isUpdateCurrencyAttributes = (path: string) => [
@@ -50,7 +55,6 @@ export namespace Validators {
     body(`${path}.scale`).optional().isInt({max: 12, min: 0}),
     body(`${path}.rate.n`).optional().isInt({min: 1}).default(1),
     body(`${path}.rate.d`).optional().isInt({min: 1}).default(1),
-    ...isUpdateCurrencySettings(`${path}.settings`),
   ]
 
   const isCreateCurrencyAttributesExist = (path: string) => [
@@ -73,9 +77,16 @@ export namespace Validators {
     body(`${path}.relationships.${name}.data.*.type`).equals(type),
   ]
 
+  const isSingleRelationship = (path: string, name: string, type: string) => [
+    body(`${path}.relationships.${name}`).optional(),
+    body(`${path}.relationships.${name}.data.id`).isString().notEmpty(),
+    body(`${path}.relationships.${name}.data.type`).equals(type),
+  ]
+
   const isIncludedTypes = (types: string[]) => [
     body("included.*.type").isIn(types),
     body("included.*.id").isString().notEmpty(),
+    body("included.*.attributes").optional().isObject(),
   ]
 
   export const isCreateCurrency = () => [
@@ -83,13 +94,35 @@ export namespace Validators {
     ...isCreateCurrencyAttributesExist("data.attributes"),
     ...isUpdateCurrencyAttributes("data.attributes"),
     ...isCollectionRelationship("data", "admins", "users"),
-    ...isIncludedTypes(["users"]),
+    ...isSingleRelationship("data", "settings", "currency-settings"),
+    ...isIncludedTypes(["users", "currency-settings"]),
+
+    // TODO: Add validation for included currency-settings attributes.
+    // It happens that express-validator is not well suited for nested
+    // validation so we should switch to a more flexible library.
+    body("included.*")
+      .if(value => typeof value === 'object' && value.type === "currency-settings")
+      .customSanitizer(value => {
+        return {
+          ...value,
+          attributes: {
+            ...value.attributes,
+            defaultInitialCreditLimit: value.attributes.defaultInitialCreditLimit || 0
+          }
+        }
+      })
   ]
 
   export const isUpdateCurrency = () => [
     ...jsonApiDoc("currencies"),
     body("data.id").optional().isUUID(), // id optional as currency is identified by route.
-    ...isUpdateCurrencyAttributes(`data.attributes`),
+    ...isUpdateCurrencyAttributes("data.attributes"),
+  ]
+
+  export const isUpdateCurrencySettings = () => [
+    ...jsonApiDoc("currency-settings"),
+    body("data.id").optional().isUUID(), // id optional as currency is identified by route.
+    ...isUpdateCurrencySettingsAttributes("data.attributes"),
   ]
 
   const isUpdateAccountAttibutes = (path: string) => [
@@ -185,22 +218,33 @@ export namespace Validators {
     ...isUpdateTransferRelationships("data.relationships")
   ]
 
+  const isBooleanOrNull = (value: any) => {
+    return value === null || value === true || value === false
+  }
   const isUpdateAccountSettingsAttributes = (path: string) => [
-    body(`${path}.acceptPaymentsAutomatically`).optional().isBoolean(),
-    body(`${path}.acceptPaymentsWhitelist`).optional().isArray(),
-    body(`${path}.acceptPaymentsAfter`).optional().isInt({min: 0}),
-    body(`${path}.onPaymentCreditLimit`).optional().isInt({min: 0}),
-    body(`${path}.allowPayments`).optional().isBoolean(),
-    body(`${path}.allowPaymentRequests`).optional().isBoolean(),
-    body(`${path}.allowExternalPayments`).optional().isBoolean(),
-    body(`${path}.allowExternalPaymentRequests`).optional().isBoolean(),
-    body(`${path}.acceptExternalPaymentsAutomatically`).optional().isBoolean(),
-    body(`${path}.allowTagPayments`).optional().isBoolean(),
-    body(`${path}.allowTagPaymentRequests`).optional().isBoolean(),
-    body(`${path}.tags`).optional().isArray(),
-    body(`${path}.tags.*.name`).isString().notEmpty(),
-    body(`${path}.tags.*.value`).optional().isString().notEmpty(),
-    body(`${path}.tags.*.id`).optional().isUUID(),
+    body(`${path}.allowPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowSimplePayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowSimplePaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowQrPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowQrPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowMultiplePayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowMultiplePaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowTagPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowTagPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    
+    body(`${path}.acceptPaymentsAutomatically`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.acceptPaymentsAfter`).isInt({min: 0}).optional(),
+    body(`${path}.acceptPaymentsWhitelist`).isArray().optional(),
+    body(`${path}.onPaymentCreditLimit`).isInt({min: 0}).optional(),
+    
+    body(`${path}.allowExternalPayments`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.allowExternalPaymentRequests`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.acceptExternalPaymentsAutomatically`).optional().custom(value => isBooleanOrNull(value)),
+    body(`${path}.tags`).isArray().optional(),
+    body(`${path}.tags.*.name`).notEmpty().optional(),
+    body(`${path}.tags.*.value`).isString().notEmpty().optional(),
+    body(`${path}.tags.*.id`).isUUID().optional(),
   ]
 
   export const isUpdateAccountSettings = () => [
@@ -220,12 +264,14 @@ export namespace Validators {
     ...isCreateMigrationAttributes("data.attributes"),
   ]
 
-  export const isCreateTrustline = () => [
+  export const isUpdateTrustline = () => [
     ...jsonApiDoc("trustlines"),
     body("data.id").optional().isUUID(),
     body("data.attributes.limit").isInt({min: 0}),
+  ]
+
+  export const isCreateTrustline = () => [
+    ...isUpdateTrustline(),
     ...isExternalResourceId("data.relationships.trusted", "currencies"),
   ]
 }
-
-

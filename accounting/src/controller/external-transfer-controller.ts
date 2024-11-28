@@ -116,7 +116,7 @@ export class ExternalTransferController extends AbstractCurrencyController {
       throw forbidden(`The logged in external user key ${ctx.accountKey} does not match the payee key ${externalPayee.resource.key}`)
     }
     // Create the transfer record with new state.
-    const transfer = await this.transfers().createTransferRecord(data, payer, this.currency().externalAccount, this.currency().admin as User)
+    const transfer = await this.transfers().createTransferRecord(data, payer, this.currency().externalAccount, this.currency().admin)
     transfer.externalPayee = externalPayee
     
     await this.db().externalTransfer.create({ 
@@ -127,7 +127,7 @@ export class ExternalTransferController extends AbstractCurrencyController {
     })
 
     // Submit the transfer.
-    await this.updateTransferStateExternalPayee(ctx, transfer as ExternalPayeeTransfer, data.state, this.currency().admin as User, false)
+    await this.updateTransferStateExternalPayee(ctx, transfer as ExternalPayeeTransfer, data.state, this.currency().admin, false)
 
     // Return the response.
     return transfer
@@ -227,7 +227,7 @@ export class ExternalTransferController extends AbstractCurrencyController {
     data.amount = this.currencyController.amountFromLedger(ledgerTransfer.amount)
 
     // All checks ok, so create the transfer record (in "new" state).
-    const transfer = await this.transfers().createTransferRecord(data, this.currency().externalAccount, payee, this.currency().admin as User)
+    const transfer = await this.transfers().createTransferRecord(data, this.currency().externalAccount, payee, this.currency().admin)
     transfer.externalPayer = externalPayer
     // and the external transfer record.
     await this.db().externalTransfer.create({

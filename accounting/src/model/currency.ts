@@ -1,6 +1,6 @@
 
 import { LedgerCurrencyState } from "../ledger";
-import { Rate } from "../utils/types";
+import { Optional, Rate } from "../utils/types";
 import { Currency as CurrencyRecord, Prisma } from "@prisma/client"
 import { User } from "./user";
 import { Account, AccountRecord, recordToAccount } from "./account";
@@ -9,6 +9,10 @@ import { Account, AccountRecord, recordToAccount } from "./account";
 export { CurrencyRecord }
 
 export type CurrencySettings = {
+  /**
+   * Same id as Currency.
+   */
+  id?: string
   /**
    * The credit limit that will have new accounts by default.
    */
@@ -19,6 +23,14 @@ export type CurrencySettings = {
    */
   defaultInitialMaximumBalance?: number
   /**
+   * Users can make payments by default.
+   */
+  defaultAllowPayments?: boolean
+  /**
+   * Users can make payment requests by default.
+   */
+  defaultAllowPaymentRequests?: boolean
+  /**
    * Users need to accept payments by default (false) or they are charged automatically (true)
    */
   defaultAcceptPaymentsAutomatically?: boolean
@@ -26,6 +38,25 @@ export type CurrencySettings = {
    * List of payee account id's that can get payments without manual acceptance
    */
   defaultAcceptPaymentsWhitelist?: string[]
+  
+  /**
+   * These are user interface settings without effect in this service.
+   */
+  defaultAllowSimplePayments?: boolean
+  defaultAllowSimplePaymentRequests?: boolean
+  defaultAllowQrPayments?: boolean
+  defaultAllowQrPaymentRequests?: boolean
+  defaultAllowMultiplePayments?: boolean
+  defaultAllowMultiplePaymentRequests?: boolean
+  
+  /**
+   * Default allow accounts to have authorization tags.
+   */
+  defaultAllowTagPayments?: boolean;
+   /**
+    * Default allow accounts to make payment request authorized with tags.
+    */
+  defaultAllowTagPaymentRequests?: boolean;
   /**
    * Number of seconds after which payments are accepted automatically
    */
@@ -36,21 +67,13 @@ export type CurrencySettings = {
    */
   defaultOnPaymentCreditLimit?: number
   /**
-   * Users can make payments by default.
+   * Whether this currency supports external payments.
    */
-  defaultAllowPayments?: boolean
+  enableExternalPayments?: boolean
   /**
-   * Users can make payment requests by default.
+   * Whether this currency supports external payment requests.
    */
-  defaultAllowPaymentRequests?: boolean
-  /**
-   * The credit limit in local currency that the external trader account will have.
-   */
-  externalTraderCreditLimit?: number
-  /**
-   * The maximum balance in local currency that the external trader account may have.
-   */
-  externalTraderMaximumBalance?: number
+  enableExternalPaymentRequests?: boolean
   /**
    * Users can make external payments by default.
    */
@@ -60,25 +83,17 @@ export type CurrencySettings = {
    */
   defaultAllowExternalPaymentRequests?: boolean
   /**
-   * Whether this currency supports external payments.
-   */
-  enableExternalPayments?: boolean
-  /**
-   * Whether this currency supports external payment requests.
-   */
-  enableExternalPaymentRequests?: boolean
-  /**
    * Default accept external payments automatically
    */
   defaultAcceptExternalPaymentsAutomatically?: boolean
   /**
-   * Default allow accounts to have authorization tags.
+   * The credit limit in local currency that the external trader account will have.
    */
-  defaultAllowTagPayments?: boolean;
+  externalTraderCreditLimit?: number
   /**
-   * Default allow accounts to make payment request authorized with tags.
+   * The maximum balance in local currency that the external trader account may have.
    */
-  defaultAllowTagPaymentRequests?: boolean;
+  externalTraderMaximumBalance?: number
 }
 
 export type CurrencyStatus = "new" | "active"
@@ -117,17 +132,17 @@ export interface Currency {
   created: Date
   updated: Date
 
-  admin?: User
+  admin: User
 }
 
-export type CreateCurrency = Omit<Currency, "id" | "status" | "created" | "updated" | "encryptionKey" | "keys">
-export type UpdateCurrency = Partial<CreateCurrency & {id: string}>
+export type CreateCurrency = Omit<Optional<Currency & {admins?: User[]}, "id">, "status" | "created" | "updated" | "encryptionKey" | "keys" | "admin">
+export type UpdateCurrency = Partial<CreateCurrency>
 
 export function currencyToRecord(currency: CreateCurrency): Prisma.CurrencyCreateInput
 export function currencyToRecord(currency: UpdateCurrency): Prisma.CurrencyUpdateInput
 export function currencyToRecord(currency: CreateCurrency | UpdateCurrency): Prisma.CurrencyCreateInput | Prisma.CurrencyUpdateInput {
   return {
-    id: (currency as UpdateCurrency).id,
+    id: currency.id,
     code: currency.code,
 
     name: currency.name,
@@ -165,7 +180,10 @@ export const recordToCurrency = (record: CurrencyRecord & {externalAccount?: Acc
       externalIssuer: record.externalIssuerKeyId as string
     },
     
-    settings: record.settings as CurrencySettings,
+    settings: {
+      id: record.id,
+      ...record.settings as CurrencySettings,
+    },
     state: record.state as LedgerCurrencyState,
     
     created: record.created,

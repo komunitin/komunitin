@@ -34,11 +34,11 @@
             {{ member.account.attributes.code }}
           </div>
         </div>
-        <div>
+        <div v-if="member.account">
           <div class="text-overline text-uppercase text-onsurface-d q-mt-md">
             {{ $t("balance") }}
           </div>
-          <div v-if="member.account">
+          <div>
             <span
               class="text-h6 q-mr-md"
               :class="

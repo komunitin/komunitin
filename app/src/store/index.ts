@@ -14,7 +14,9 @@ import {
   AccountSettings,
   Member,
   Transfer,
-  GroupSignupSettings
+  GroupSettings,
+  CurrencySettings,
+  Trustline
 } from "src/store/model";
 // Import logged-in user module
 import me, { UserState } from "./me";
@@ -29,7 +31,11 @@ const groups = new (class extends Resources<Group, unknown> {
   collectionEndpoint = () => "/groups";
   resourceEndpoint = (code: string) => `/${code}`;
 })("groups", socialUrl);
-const signupSettings = new Resources<GroupSignupSettings, unknown>("signup-settings", socialUrl);
+
+const groupSettings = new (class extends Resources<GroupSettings, unknown> {
+  collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "Group settings cannot be listed");};
+  resourceEndpoint = (code: string) => `/${code}/settings`;
+})("group-settings", socialUrl)
 
 const contacts = new Resources<Contact, unknown>("contacts", socialUrl);
 const members = new Resources<Member, unknown>("members", socialUrl);
@@ -44,7 +50,7 @@ const users = new (class extends Resources<User, unknown> {
 
 const userSettings = new (class extends Resources<UserSettings, unknown> {
   collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "User settings cannot be listed");};
-  resourceEndpoint = () => "/users/me/settings";
+  resourceEndpoint = (id: string) => `/users/${id}/settings`;
 })("user-settings", socialUrl);
 
 // Build modules for Accounting API:
@@ -66,6 +72,11 @@ const currencies = new (class extends Resources<Currency, unknown> {
   })
 })("currencies", accountingUrl);
 
+const currencySettings = new (class extends Resources<CurrencySettings, unknown> {
+  collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "Currency settings cannot be listed");};
+  resourceEndpoint = (code: string) => `/${code}/currency/settings`;
+})("currency-settings", accountingUrl)
+
 const accounts = new (class extends Resources<Account, unknown> {
   /**
    * Defines the inverse of the external relation member -> account, so 
@@ -81,10 +92,12 @@ const accounts = new (class extends Resources<Account, unknown> {
 
 const accountSettings = new (class extends Resources<AccountSettings, unknown> {
   collectionEndpoint = () => {throw new KError(KErrorCode.ScriptError, "Account settings cannot be listed");};
-  resourceEndpoint = (code: string, groupCode: string) => `/${groupCode}/accounts/${code}/settings`;
+  resourceEndpoint = (id: string, groupCode: string) => `/${groupCode}/accounts/${id}/settings`;
 })("account-settings", accountingUrl)
 
 const transfers = new Resources<Transfer, unknown>("transfers", accountingUrl);
+
+const trustlines = new Resources<Trustline, unknown>("trustlines", accountingUrl);
 
 /*
  * If not building with SSR mode, you can
@@ -117,12 +130,15 @@ export default createStore({
     offers,
     needs,
     categories,
-    "signup-settings": signupSettings,
+    "group-settings": groupSettings,
+
     // Accounting API resource modules.
     currencies,
+    "currency-settings": currencySettings,
     accounts,
     "account-settings": accountSettings,
     transfers,
+    trustlines
   },
   // enable strict mode (adds overhead!) for dev mode only
   strict: process.env.DEV === "true",
@@ -130,10 +146,12 @@ export default createStore({
 });
 
 export const setAccountingApiUrl = (url: string) => {
-  accounts.setBaseUrl(url);
   currencies.setBaseUrl(url);
+  currencySettings.setBaseUrl(url);
+  accounts.setBaseUrl(url);
   accountSettings.setBaseUrl(url);
   transfers.setBaseUrl(url);
+  trustlines.setBaseUrl(url);
 }
 
 declare module 'vue' {
@@ -141,15 +159,20 @@ declare module 'vue' {
     me: UserState
     ui: UIState
     users: ResourcesState<User>
+    userSettings: ResourcesState<UserSettings>
     groups: ResourcesState<Group>
+    groupSettings: ResourcesState<GroupSettings>
     contacts: ResourcesState<Contact>
     members: ResourcesState<Member>
     offers: ResourcesState<Offer>
     needs: ResourcesState<Need>
     categories: ResourcesState<Category>
     currencies: ResourcesState<Currency>
+    currencySettings: ResourcesState<CurrencySettings>
     accounts: ResourcesState<Account>
+    accountSettings: ResourcesState<AccountSettings>
     transfers: ResourcesState<Transfer>
+    trustlines: ResourcesState<Trustline>
   }
   interface ComponentCustomProperties {
     $store: Store<State>

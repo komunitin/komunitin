@@ -736,7 +736,13 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "TEST"
+            "example": "TES1"
+          },
+          {
+            "type": "string",
+            "name": "include",
+            "in": "query",
+            "example": "settings"
           }
         ],
         "responses": {
@@ -1020,7 +1026,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "EXTR"
+            "example": "TES2"
           },
           {
             "in": "body",
@@ -1352,6 +1358,349 @@
                       "code": "Forbidden",
                       "title": "Forbidden",
                       "detail": "User not found in currency TES2"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "404",
+                      "code": "NotFound",
+                      "title": "Not Found",
+                      "detail": "Currency with code TES2 not found"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "currency"
+        ],
+        "produces": [
+          "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/currency/settings": {
+      "get": {
+        "summary": "/{code}/currency/settings",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": [
+          "currency"
+        ]
+      },
+      "patch": {
+        "summary": "/{code}/currency/settings",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "example": "TEST"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "defaultOnPaymentCreditLimit": {
+                          "type": "number",
+                          "example": 1300
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "currency-settings"
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "f3eeabe3-2772-49ae-be20-437a066f9a38"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "defaultAllowPayments": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "enableExternalPayments": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "defaultAllowTagPayments": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "defaultInitialCreditLimit": {
+                          "type": "number",
+                          "example": 1000
+                        },
+                        "externalTraderCreditLimit": {
+                          "type": "number",
+                          "example": 1000
+                        },
+                        "defaultAcceptPaymentsAfter": {
+                          "type": "number",
+                          "example": 1209600
+                        },
+                        "defaultAllowPaymentRequests": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "defaultOnPaymentCreditLimit": {
+                          "type": "number",
+                          "example": 1300
+                        },
+                        "defaultAllowExternalPayments": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "enableExternalPaymentRequests": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "defaultAcceptPaymentsWhitelist": {
+                          "type": "array",
+                          "items": {},
+                          "example": [
+                            null
+                          ]
+                        },
+                        "defaultAllowTagPaymentRequests": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "defaultAcceptPaymentsAutomatically": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "defaultAllowExternalPaymentRequests": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "defaultAcceptExternalPaymentsAutomatically": {
+                          "type": "boolean",
+                          "example": false
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "400",
+                      "code": "BadRequest",
+                      "title": "Bad Request",
+                      "detail": ""
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "403",
+                      "code": "Forbidden",
+                      "title": "Forbidden",
+                      "detail": "User not found in currency TES2"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "404",
+                      "code": "NotFound",
+                      "title": "Not Found",
+                      "detail": "Currency with code TES2 not found"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "500",
+                      "code": "NotImplemented",
+                      "title": "Not Implemented",
+                      "detail": "Change the external trader credit limit not implemented yet"
                     }
                   ]
                 }
@@ -1846,7 +2195,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "6c2b269c-c7cf-4f53-9858-c14eddfd60ad"
+            "example": "abb54eb8-2b04-4d31-9e8c-8dce6855b6af"
           },
           {
             "type": "string",
@@ -2033,7 +2382,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "7dd39861-844e-4992-b4ee-d8bff4e00c50"
+            "example": "4e1950d2-4a8f-4ce8-8e9d-6441fce1a601"
           },
           {
             "in": "body",
@@ -2299,7 +2648,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "e1c8ba1c-d259-4dc2-be3f-c7900475bc74"
+            "example": "1c59fba4-e834-4ff7-9ab4-37610f19e5f8"
           }
         ],
         "responses": {
@@ -2382,7 +2731,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "55a871eb-2c0c-4536-87e8-87a36a9b7f39"
+            "example": "d0f50666-e329-4b71-b4d2-8c651ef1b570"
           }
         ],
         "responses": {
@@ -2535,7 +2884,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "397f0c6a-e251-4f30-baf2-d008085b3f3a"
+            "example": "78709fee-6c6c-4935-a7f7-59632d56ec7c"
           },
           {
             "in": "body",
@@ -2607,6 +2956,42 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "400",
+                      "code": "FieldValidationError",
+                      "title": "Field validation Error",
+                      "detail": "Field data.attributes.tags is invalid in request body."
+                    }
+                  ]
                 }
               }
             }
@@ -3252,7 +3637,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "61a887e5-baad-4a92-8d27-2b577e693187"
+            "example": "12556428-5d31-4a91-bbb3-ec4f1167d61a"
           },
           {
             "in": "body",
@@ -3540,7 +3925,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "ad65cad6-5f05-402d-9e13-3861a593f61b"
+            "example": "54511634-08ba-4c16-ba3d-972be39822d1"
           }
         ],
         "responses": {
@@ -3657,7 +4042,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "61a887e5-baad-4a92-8d27-2b577e693187"
+            "example": "22a945c6-0e91-45a3-bae4-fbe4c01d4806"
           },
           {
             "type": "string",
@@ -4236,7 +4621,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "79c07b98-5a60-43ca-91d7-58fda85e15e5"
+            "example": "d36f1173-ccfe-46a9-9995-c0c0d32800f6"
           }
         ],
         "responses": {
@@ -4366,6 +4751,28 @@
           {
             "authorization": []
           }
+        ]
+      },
+      "patch": {
+        "summary": "/{code}/trustlines/{id}",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": [
+          "trustlines"
         ]
       }
     },
