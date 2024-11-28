@@ -227,12 +227,14 @@ watchDebounced(searchText, async (search) => {
 }, { debounce: 300 })
 
 // Immediate watch for group change
-watch(group, async () => {
-  field.value?.setOptionIndex(-1)
-  account.value = undefined
-  options.value = []
-  field.value?.focus()
-  await fetchResources(searchText.value !== "" ? searchText.value : undefined)
+watch(group, async (newGroup, oldGroup) => {
+  if (newGroup.id !== oldGroup.id) {
+    field.value?.setOptionIndex(-1)
+    account.value = undefined
+    options.value = []
+    field.value?.focus()
+    await fetchResources(searchText.value !== "" ? searchText.value : undefined) 
+  }
 })
 
 const onScroll = async({to, direction}: {to:number, direction: string}) => {
