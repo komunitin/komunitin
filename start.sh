@@ -48,7 +48,13 @@ fi
 
 echo "Waiting for the services to start..."
 sleep 10
-  
+
+fi
+
+if [ "$demo" = true ]; then
+  # Install Accounting service
+  docker compose exec accounting pnpm prisma migrate reset --force
+  sleep 2
 fi
 
 # Install IntegralCES
@@ -69,9 +75,6 @@ fi
 # Migrate NET1 and NET2 to the accounting service
 
 if [ "$demo" = true ]; then
-
-# Install Accounting service
-docker compose exec accounting pnpm prisma migrate reset --force
 
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0
