@@ -2,7 +2,7 @@
 import { Context } from "src/utils/context";
 import { CurrencyController, SharedController } from "..";
 import { CreateMigration, Migration } from "./migration";
-import { Account, Currency, InputTransfer, Transfer, User } from "src/model";
+import { Account, CreateCurrency, Currency, InputTransfer, Transfer, User } from "src/model";
 import { logger } from "src/utils/logger";
 import { fixUrl } from "src/utils/net";
 
@@ -80,7 +80,7 @@ async function migrateCurrency(ctx: Context, controller: SharedController, migra
   const doc = await get(url, migration.source.access_token)
   const resource = doc.data
   const d = gcd(resource.attributes.value, 10**6)
-  const model = {
+  const model: CreateCurrency = {
     id: resource.id,
     ...resource.attributes,
     // in integralces we have the rate as a single number.
@@ -100,10 +100,8 @@ async function migrateCurrency(ctx: Context, controller: SharedController, migra
       defaultAllowTagPaymentRequests: true,
       defaultAllowTagPayments: true,
     },
-    admin: {
-      id: adminId
-    }
-  } as Currency
+    admins: [ {id: adminId} ]
+  }
 
   const currency = await controller.createCurrency(ctx, model)
   return currency
