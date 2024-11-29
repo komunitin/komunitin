@@ -22,13 +22,15 @@ RESPONSE=$(curl -s -X GET $KOMUNITIN_ACCOUNTING_URL/$4/currency)
 TRUSTED_ID=$(echo $RESPONSE | grep -o '"id":"[^"]*' | head -1 | sed 's/"id":"//')
 echo "Trusted currency id: $TRUSTED_ID"
 
-echo "Trusting $4 for a total amount of $5..."
+AMOUNT=$(($5*1000000))
+echo "Trusting $4 for a total amount of $AMOUNT..."
+
 JSON_DATA=$(cat <<EOF
 {
   "data": {
     "type": "trustlines",
     "attributes": {
-      "limit": $5
+      "limit": $AMOUNT
     },
     "relationships": {
       "trusted": {
