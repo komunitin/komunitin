@@ -525,3 +525,9 @@ export interface CurrencySettings extends ResourceObject {
     externalTraderMaximumBalance: number | false
   }
 }
+
+export interface CurrencyStatsData extends ResourceObject {
+  attributes: {
+    values: number[]
+  }
+}

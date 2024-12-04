@@ -87,6 +87,12 @@
       :title="$t('members')"
       :to="`/groups/${groupCode}/members`"
     />
+    <menu-item
+      id="menu-stats"
+      icon="insert_chart"
+      :title="$t('statistics')"
+      :to="`/groups/${groupCode}/stats`"
+    />
 
     <template v-if="isAdmin">
       <q-separator />
