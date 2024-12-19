@@ -17,10 +17,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
+
 import type { PointExpression, LatLngExpression} from "leaflet";
-import { useLeafletSettings } from "../composables/leaflet";
 import "leaflet/dist/leaflet.css";
+import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
+import { useLeafletSettings } from "../composables/leaflet";
 
 const props = withDefaults(defineProps<{
   center: [number, number],

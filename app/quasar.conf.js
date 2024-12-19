@@ -1,10 +1,10 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
-const fs = require('fs')
-const { configure } = require('quasar/wrappers')
-const ESLintPlugin = require('eslint-webpack-plugin')
-const IgnorePlugin = require("webpack").IgnorePlugin
-const {config} = require('dotenv')
+const { configure } = require("quasar/wrappers")
+const fs = require("fs")
+const ESLintPlugin = require("eslint-webpack-plugin")
+const { IgnorePlugin } = require("webpack")
+const { config } = require("dotenv")
 
 // This is for development purposes only. It will load the .env file and make it available
 // so the process.env.ENV_VAR will be replaced at build time. For production, the environment
@@ -30,6 +30,10 @@ module.exports = configure(function(ctx) {
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: ["app.sass"],
+
+    vendor: {
+      remove: ['@quasar/quasar-ui-qiconpicker']
+    },
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
@@ -77,12 +81,20 @@ module.exports = configure(function(ctx) {
       showProgress: true,
       gzip: false,
       analyze: false,
+      sourceMap: true,
       // Options below are automatically set depending on the env, set them if you want to override
       // preloadChunks: false,
       // extractCSS: false,
 
+
       // https://quasar.dev/quasar-cli/cli-documentation/handling-webpack
-      extendWebpack(cfg) {},
+      extendWebpack(cfg) {
+         /*cfg.resolve.alias = {
+          ...cfg.resolve.alias, // This adds the existing alias
+          // Add your own alias like this
+          'lodash': 'lodash-es'
+         }*/
+      },
       // Create complete source maps to enable debugging from VSCode.
       // https://quasar.dev/start/vs-code-configuration#Debugging-a-Quasar-project-in-VS-Code
       devtool: "source-map",
@@ -100,10 +112,22 @@ module.exports = configure(function(ctx) {
           .plugin('webpack-ignore-plugin')
           .use(IgnorePlugin, [{ resourceRegExp: /^leaflet$/}])
         
+        // Ignore order warnings from mini-css-extract-plugin. We got lots of css order warnings
+        // since the splitting of the vendor bundle. The CSS order should not be a problem since
+        // we are using scoped modules for CSS.
+        // See https://stackoverflow.com/questions/51971857/mini-css-extract-plugin-warning-in-chunk-chunkname-mini-css-extract-plugin-con
+        if (ctx.prod) {
+          chain
+            .plugin('mini-css-extract')
+            .tap(args => [{...args[0], ignoreOrder: true}])
+        }
+        
         
         chain
           .plugin('statoscope-webpack-plugin')
           .use(StatoscopeWebpackPlugin, [{saveReportTo: "statoscope-report-[name]-[hash].html"}])
+
+        
         
 
       },
