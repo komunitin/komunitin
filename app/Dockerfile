@@ -38,7 +38,7 @@ RUN npm rebuild node-sass
 COPY . .
 
 # Build App using the quasar CLI app.
-RUN quasar build -m pwa --debug
+RUN quasar build -m pwa
 
 # Production image komunitin-app
 
