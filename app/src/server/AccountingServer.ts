@@ -6,6 +6,7 @@ import { KOptions } from "../boot/koptions";
 import ApiSerializer from "./ApiSerializer";
 import { filter, sort, search } from "./ServerUtils";
 import { inflections } from "inflected"
+import { v4 as uuid } from "uuid";
 
 const urlAccounting = KOptions.url.accounting;
 inflections("en", function (inflect) {
@@ -382,6 +383,19 @@ export default {
       const body = JSON.parse(request.requestBody);
       trustline.update(body.data.attributes);
       return new Response(200, undefined, trustline);
+    })
+
+    // Stats
+    server.get(`${urlAccounting}/:currency/stats/volume`, (schema: any, request: any) => {
+      const query = request.queryParams
+      const values = query.interval ? [120510000, 132150000, 140560000, 135120000, 148230000] : [120880000]
+      return {data: {
+        type: "currency-stats",
+        id: uuid(),
+        attributes: {
+          values
+        }
+      }}
     })
   }
 };
