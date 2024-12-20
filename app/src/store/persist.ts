@@ -5,6 +5,39 @@ import { cloneDeep, merge } from "lodash-es"
 import { toRaw } from "vue"
 
 /**
+ * Time in milliseconds for the expiration of the cached values.
+ */
+const EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30 // 30 days.
+
+/**
+ * Iterate over all values in the storage and call the async callback function for each one. This
+ * function does not wait for each iteration step to complete before starting the next one.
+ * 
+ * You can't directly call the storage.iterate method with an async callback because it will
+ * stop the iteration since the async callback returns a promise which is a non-undefined value.
+ */
+const iterateAsync = async (storage: LocalForage, callback: (value: unknown, key: string) => Promise<void>) => {
+  return new Promise<void>((resolve, reject) => {
+    let n = 0
+    const checkEnd = () => {
+      if (--n == 0) {
+        // n == 0 means that there is no value being processed and the iteration is finished.
+        resolve()
+      }
+    }
+    n++ // Start iteration
+    storage.iterate((value, key) => {
+      n++ // Start process value
+      callback(value, key)
+        .catch(reject)
+        .finally(checkEnd) // End process value
+    })
+      .then(checkEnd) // End iteration
+      .catch(reject)
+  })
+}
+
+/**
  * Automatically update the state into persistent storage in every commit and restore the
  * state when executing this function at init.
  * 
@@ -16,7 +49,10 @@ import { toRaw } from "vue"
  */
 export default function createPersistPlugin<T>(name: string) {
   
+  // Storage for actual values.
   const storage = localForage.createInstance({name})
+  // Storage for timestamps of update time for values with the same key.
+  const timestamps = localForage.createInstance({name: name + "_timestamps"})
 
   // Is this key a page ids value? /pages/key/index
   const isPage = (index: string[]) => index.length >= 3 && index[index.length-3] == 'pages'
@@ -40,17 +76,30 @@ export default function createPersistPlugin<T>(name: string) {
     // Restore state
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const state: any = {}
-    storage.iterate((value, key) => {
-      const index = key.split('/');
-      if (isPage(index)) {
-        const current = buildState(state, index, [], index.length - 1)
-        current[parseInt(index[index.length - 1])] = value
+    const now = Date.now()
+
+    iterateAsync(storage, async (value, key) => {
+      const timestamp = await timestamps.getItem<number>(key)
+      if (timestamp === null || timestamp + EXPIRATION_TIME < now) {
+        if (timestamp !== null) {
+          await timestamps.removeItem(key)
+        }
+        await storage.removeItem(key)
       } else {
-        buildState(state, index, value)
+        // Set the value in the state.
+        const index = key.split('/');
+        if (isPage(index)) {
+          const current = buildState(state, index, [], index.length - 1)
+          current[parseInt(index[index.length - 1])] = value
+        } else {
+          buildState(state, index, value)
+        }
       }
     }).then(() => {
-      store.replaceState(merge(state, store.state))
+      store.replaceState(merge(store.state, state))
     })
+    
+
 
     // Subscribe to mutations
     store.subscribe(({type, payload}) => {
@@ -61,8 +110,16 @@ export default function createPersistPlugin<T>(name: string) {
       const parts = type.split("/")
       const index = parts.slice(0, parts.length - 1)
       const op = parts[parts.length - 1]
+      
       // storage methods are asynchronous but we don't wait for the result (or error).
-      const save = (i: string[], item: unknown) => storage.setItem(i.join('/'), item)
+      const save = (i: string[], item: unknown) => {
+        const key = i.join('/')
+        storage.setItem(key, item).then(() => {
+          // We set the timestamp after the value is saved so we never have an orphan timestamp.
+          timestamps.setItem(key, Date.now())
+        })
+      }
+
       const remove = (i: string[]) => storage.removeItem(i.join('/'))
       if (op == 'addResources') {
         const resources = value as ResourceObject[]

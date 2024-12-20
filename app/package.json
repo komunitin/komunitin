@@ -23,7 +23,7 @@
     "@vueuse/shared": "^10.7.1",
     "clamp-js": "^0.7.0",
     "core-js": "^3.8.3",
-    "date-fns": "^2.16.1",
+    "date-fns": "^4.1.0",
     "firebase": "^10.12.2",
     "i18n-iso-countries": "^7.7.0",
     "leaflet": "^1.9.3",
@@ -37,7 +37,7 @@
     "uuid": "^9.0.0",
     "vue": "^3.5.12",
     "vue-gtag": "^2.0.1",
-    "vue-i18n": "^9.2.2",
+    "vue-i18n": "^9.14.2",
     "vue-qrcode-reader": "^5.5.7",
     "vue-router": "^4.1.5",
     "vuex": "^4.0.2"

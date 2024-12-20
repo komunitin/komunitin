@@ -35,12 +35,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
-import type { LeafletMouseEvent, LocationEvent, PointExpression } from 'leaflet'
-import { useLeafletSettings } from '../composables/leaflet'
-import { useStore } from 'vuex'
 import { computed, onBeforeUnmount, ref } from 'vue'
+import { useStore } from 'vuex'
+
+import type { LeafletMouseEvent, LocationEvent, PointExpression } from 'leaflet'
 import "leaflet/dist/leaflet.css";
+import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
+import { useLeafletSettings } from '../composables/leaflet'
+
+
+
 
 /**
  * Location Selector compoenent based on Leaflet maps.

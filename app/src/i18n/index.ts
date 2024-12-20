@@ -23,7 +23,7 @@ const langs = {
     loadMessages: async () => (await import("src/i18n/ca/index.json")).default,
     loadAdminMessages: async () => (await import("src/i18n/ca/admin.json")).default,
     loadQuasar: async () => (await import("quasar/lang/ca")).default,
-    loadDateFNS: async () => (await import("date-fns/locale/ca/index.js")).default,
+    loadDateFNS: async () => (await import("date-fns/locale/ca")).ca,
     loadCountries: async () => (await import("i18n-iso-countries/langs/ca.json")).default
   } as LocaleDefinition,
   "en-us": {
@@ -31,7 +31,7 @@ const langs = {
     loadMessages: async () => (await import("src/i18n/en-us/index.json")).default,
     loadAdminMessages: async () => (await import("src/i18n/en-us/admin.json")).default,
     loadQuasar: async () => (await import("quasar/lang/en-US")).default,
-    loadDateFNS: async () => (await import("date-fns/locale/en-US/index.js")).default,
+    loadDateFNS: async () => (await import("date-fns/locale/en-US")).enUS,
     loadCountries: async () => (await import("i18n-iso-countries/langs/en.json")).default
   } as LocaleDefinition,
   "es": {
@@ -39,7 +39,7 @@ const langs = {
     loadMessages: async () => (await import("src/i18n/es/index.json")).default,
     loadAdminMessages: async () => (await import("src/i18n/es/admin.json")).default,
     loadQuasar: async () => (await import("quasar/lang/es")).default,
-    loadDateFNS: async () => (await import("date-fns/locale/es/index.js")).default,
+    loadDateFNS: async () => (await import("date-fns/locale/es")).es,
     loadCountries: async () => (await import("i18n-iso-countries/langs/es.json")).default
   } as LocaleDefinition
 }

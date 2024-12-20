@@ -72,19 +72,18 @@ if [ "$ices" = true ]; then
   docker compose exec integralces drush vset ces_komunitin_notifications_url_internal http://notifications:2028
 fi
 
-# Migrate NET1 and NET2 to the accounting service
+# Migrate ICES demo data to the accounting service
 
 if [ "$demo" = true ]; then
 
+# Migrate NET1
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0
-docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0
-
-# Migrate NET1 and NET2 to the accounting service
 ./accounting/cli/migrate.sh "riemann@komunitin.org" "komunitin" "NET1"
-./accounting/cli/migrate.sh "fermat@komunitin.org" "komunitin" "NET2"
-
-# Configure NET1 and NET2 in integralces to use the accounting service
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET1 --registration_offers=1 --registration_wants=0 --komunitin_accounting=1 --komunitin_redirect=1 --komunitin_allow_anonymous_member_list=1
+
+# Migrate NET2
+docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0
+./accounting/cli/migrate.sh "fermat@komunitin.org" "komunitin" "NET2"
 docker compose exec integralces drush scr sites/all/modules/ices/ces_develop/drush_set_exchange_data.php --code=NET2 --registration_offers=0 --registration_wants=0 --komunitin_accounting=1 --komunitin_redirect=1 --komunitin_allow_anonymous_member_list=1
 
 # Configure mutual trust between NET1 and NET2

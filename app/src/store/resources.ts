@@ -44,8 +44,9 @@ export interface ResourcesState<T extends ResourceObject> {
   /**
    * Timestamps for each resource id and pages, so we can know when they were last updated.
    * 
-   * The keys are the strings "resources/:id" or "pages/:query/:page". Currently this is not
-   * persisted, but could be used to implement cache invalidation in browser storage.
+   * Note that the persist plugin has its own timestamps and cache invalidation mechanism.
+   * 
+   * The keys are the strings "resources/:id" or "pages/:query/:page".
    */
   timestamps: Record<string, number>
 }
