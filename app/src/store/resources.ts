@@ -610,12 +610,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           ([field, value]) => {
             if (resource.attributes?.[field]) {
               return resource.attributes[field] == value;
+            } else {
+              // Check that the relationship is defined and is to-one.
+              const rel = resource.relationships?.[field]?.data
+              // Note that rel can only be null, an array or an object (ResourceIdentifier).
+              return rel && !Array.isArray(rel) && rel.id == value;
             }
-            // Check that the relationship is defined and is to-one.
-            else if (typeof resource.relationships?.[field]?.data == "object") {
-              return (resource.relationships[field].data as ResourceIdentifierObject).id == value
-            }
-            return false;
           }
         )
       );
