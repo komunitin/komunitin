@@ -60,10 +60,12 @@ services:
       - proxy
 
   db-integralces:
+    ports: !reset []
     networks:
       - proxy
   
   db-accounting:
+    ports: !reset []
     networks:
       - proxy
 

@@ -1,5 +1,5 @@
 import KError, { checkFetchResponse, KErrorCode } from "src/KError";
-import { Module, ActionContext, Commit, Dispatch } from "vuex";
+import { Module, ActionContext } from "vuex";
 import { cloneDeep } from "lodash-es";
 
 import {
@@ -392,32 +392,74 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
    * @param included Included resources
    * @param commit Commit function
    */
-  protected static async handleIncluded(
+  protected async handleIncluded(
     included: ResourceObject[],
-    commit: Commit,
-    dispatch: Dispatch
+    context: ActionContext<ResourcesState<T>, S>
   ) {
     // Here we commit all included resources and accumulate all external resources for later fetch.
     const external: ExternalResourceObject[] = []
     included.forEach(resource => {
       if (!(resource as ExternalResourceObject).meta?.external) {
         // Standard included resource. Commit change!
-        commit(resource.type + "/addResource", resource, { root: true });
+        context.commit(resource.type + "/addResource", resource, { root: true });
       } else {
         // External included resource.
         external.push(resource as ExternalResourceObject)
       }
     })
-    // Fetch external resources
-    const promises = external.map(external => {
-      return dispatch(`${external.type}/load`, {
-        url: external.meta.href,
-      } as LoadByUrlPayload, {
-        root: true
-      })
-    })
-    await Promise.all(promises);
+
+    await this.fetchExternalResources(external, context)
     
+  }
+
+  /**
+   * Fetches external resources.
+   *
+   * @param external External resources
+   * @param dispatch Dispatch function
+   */
+  protected async fetchExternalResources(
+    external: ExternalResourceObject[],
+    context: ActionContext<ResourcesState<T>, S>): Promise<void> {
+    // We group all external resources by their type so we can fetch them all at once. This not only makes the
+    // code more efficient, but also prevents concurrency errors in the server.
+    const grouped: Record<string, ExternalResourceObject[]> = {}
+    const single: Record<string, ExternalResourceObject> = {}
+
+    for (const resource of external) {
+      if (resource.meta.href.endsWith(`${resource.type}/${resource.id}`)) {
+        // This call can be grouped.
+        const prefix = resource.meta.href.slice(0, -(resource.id.length + 1))
+        if (grouped[prefix] === undefined) {
+          grouped[prefix] = []
+        }
+        grouped[prefix].push(resource)
+      } else {
+        single[resource.meta.href] = resource
+      }
+    }
+
+    // Fetch single resources
+    for (const [url, resource] of Object.entries(single)) {
+      await context.dispatch(`${resource.type}/load`, { url }, { root: true })
+    }
+
+    // Fetch grouped resources
+    for (const [prefix, resources] of Object.entries(grouped)) {
+      const type = resources[0].type
+      if (resources.length == 1) {
+        await context.dispatch(`${type}/load`, { url: resources[0].meta.href }, { root: true })
+      } else {
+        // Actually more than just 1 recource.
+        // We fetch them all at once by getting /type?filter[id]=id1,id2,...
+        const ids = resources.map(resource => resource.id).join(",")
+        const query = new URLSearchParams()
+        query.set("filter[id]", ids)
+        const url = prefix + "?" + query.toString()
+        const data = await this.request(context, url)
+        context.commit(`${type}/addResources`, data.data, { root: true })
+      }
+    }
   }
 
 
@@ -432,11 +474,11 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
     page: number,
     onlyResources?: boolean
   ) {
-    const {commit, dispatch} = context;
+    const { commit } = context;
     
     // Commit included resources.
     if (data.included) {
-      await Resources.handleIncluded(data.included, commit, dispatch);
+      await this.handleIncluded(data.included, context);
     }
 
     // Commit mutation(s) after commiting included and eventualy fetched external resources.
@@ -550,12 +592,12 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
           ([field, value]) => {
             if (resource.attributes?.[field]) {
               return resource.attributes[field] == value;
+            } else {
+              // Check that the relationship is defined and is to-one.
+              const rel = resource.relationships?.[field]?.data
+              // Note that rel can only be null, an array or an object (ResourceIdentifier).
+              return rel && !Array.isArray(rel) && rel.id == value;
             }
-            // Check that the relationship is defined and is to-one.
-            else if (typeof resource.relationships?.[field]?.data == "object") {
-              return (resource.relationships[field].data as ResourceIdentifierObject).id == value
-            }
-            return false;
           }
         )
       );
@@ -1057,10 +1099,9 @@ export class Resources<T extends ResourceObject, S> implements Module<ResourcesS
       // Commit mutation(s).
       this.setCurrent(context, resource)
       if (data.included) {
-        await Resources.handleIncluded(
+        await this.handleIncluded(
           data.included,
-          context.commit,
-          context.dispatch
+          context
         );
       }
     } catch (error) {
