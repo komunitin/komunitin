@@ -244,3 +244,21 @@ func buildGroupActivatedTemplateData(t *i18n.Translator, group *api.Group) Email
 
 	return templateData
 }
+
+func buildGroupRequestedConfirmationTemplateData(t *i18n.Translator, group *api.Group) EmailTextData {
+	templateData := EmailTextData{
+		TemplateMainData: buildTemplateMainData(t),
+		TemplateTextData: TemplateTextData{
+			Text:    t.Td("groupRequestedConfirmationText", map[string]string{"GroupName": group.Name}),
+			Subtext: t.T("groupRequestedConfirmationSubtext"),
+		},
+		TemplateActionData: TemplateActionData{
+			ActionUrl:  config.KomunitinAppUrl + "login-mail?redirect=/groups/" + group.Code,
+			ActionText: t.T("signIn"),
+		},
+	}
+	templateData.Subject = t.Td("groupRequestedConfirmationSubject", map[string]string{"GroupName": group.Name})
+	templateData.Greeting = t.T("helloAdmin")
+
+	return templateData
+}

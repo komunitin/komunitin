@@ -44,6 +44,7 @@ const (
 	MemberJoined      = "MemberJoined"
 	MemberRequested   = "MemberRequested"
 	GroupActivated    = "GroupActivated"
+	GroupRequested    = "GroupRequested"
 )
 
 // Abstracts the events stream.

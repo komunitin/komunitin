@@ -34,5 +34,8 @@
   "signIn": "Iniciar sesión",
   "groupActivatedSubject": "Tu grupo {{.GroupName}} ha sido activado",
   "groupActivatedText": "¡Felicidades! Tu grupo {{.GroupName}} ha sido activado.",
-  "groupActivatedSubtext": "Ahora puedes iniciar sesión y configurar los ajustes del grupo y de la moneda, incluyendo los métodos de pago permitidos, límites de crédito, categorías para ofertas y necesidades, y más. Después puedes invitar a otros miembros y empezar a intercambiar. Tu usuario administrador viene con una cuenta que recomendamos mantener para tareas administrativas y no para intercambios reales. Si tienes alguna pregunta, por favor contacta con el equipo. ¡Buena suerte haciendo crecer tu comunidad!"
+  "groupActivatedSubtext": "Ahora puedes iniciar sesión y configurar los ajustes del grupo y de la moneda, incluyendo los métodos de pago permitidos, límites de crédito, categorías para ofertas y necesidades, y más. Después puedes invitar a otros miembros y empezar a intercambiar. Tu usuario administrador viene con una cuenta que recomendamos mantener para tareas administrativas y no para intercambios reales. Si tienes alguna pregunta, por favor contacta con el equipo. ¡Buena suerte haciendo crecer tu comunidad!",
+  "groupRequestedConfirmationSubject": "Solicitud de grupo recibida",
+  "groupRequestedConfirmationText": "¡Tu nuevo grupo {{.GroupName}} está en camino!",
+  "groupRequestedConfirmationSubtext": "Tu solicitud para un nuevo grupo ha sido recibida con éxito. El equipo revisará manualmente la solicitud y activará el grupo lo antes posible. Pueden contactarte para más información."
 }

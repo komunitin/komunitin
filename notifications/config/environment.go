@@ -14,4 +14,5 @@ var (
 	NotificationsEventsPassword = os.Getenv("NOTIFICATIONS_EVENTS_PASSWORD")
 	MailersendApiKey            = os.Getenv("MAILERSEND_API_KEY")
 	SendMails                   = os.Getenv("SEND_MAILS")
+	AdminEmail                  = os.Getenv("KOMUNITIN_ADMIN_EMAIL")
 )

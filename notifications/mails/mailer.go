@@ -79,6 +79,8 @@ func handleEvent(ctx context.Context, event *events.Event) error {
 		return handleMemberJoined(ctx, event)
 	case events.MemberRequested:
 		return handleMemberRequested(ctx, event)
+	case events.GroupRequested:
+		return handleGroupRequested(ctx, event)
 	case events.GroupActivated:
 		return handleGroupActivated(ctx, event)
 	}
@@ -245,6 +247,28 @@ func handleMemberJoined(ctx context.Context, event *events.Event) error {
 	return err
 }
 
+func handleGroupRequested(ctx context.Context, event *events.Event) error {
+	group, err := api.GetGroup(ctx, event.Code)
+	if err != nil {
+		return err
+	}
+
+	// Send group request to site admin.
+	err = sendGroupRequestedEmail(ctx, group)
+	if err != nil {
+		return err
+	}
+
+	// Send confirmation email to group admin
+	for _, admin := range group.Admins {
+		errMail := sendGroupRequestedConfirmationEmail(ctx, admin, group)
+		if errMail != nil {
+			err = errMail
+		}
+	}
+	return err
+}
+
 func handleGroupActivated(ctx context.Context, event *events.Event) error {
 	group, err := api.GetGroup(ctx, event.Code)
 	if err != nil {
@@ -322,4 +346,32 @@ func sendGroupActivatedEmail(ctx context.Context, admin *api.User, group *api.Gr
 	}
 
 	return sendEmail(ctx, message, "", admin.Email)
+}
+
+func sendGroupRequestedConfirmationEmail(ctx context.Context, admin *api.User, group *api.Group) error {
+	t, err := i18n.NewTranslator(admin.Settings.Language)
+	if err != nil {
+		return err
+	}
+	templateData := buildGroupRequestedConfirmationTemplateData(t, group)
+	message, err := buildTextMessage(t, templateData)
+	if err != nil {
+		return err
+	}
+
+	return sendEmail(ctx, message, "", admin.Email)
+}
+
+func sendGroupRequestedEmail(ctx context.Context, group *api.Group) error {
+	message := &Email{
+		Subject: "New group request" + group.Code,
+		BodyText: "A new group has been requested. Please accept or reject it as soon as possible. \n\n" +
+			"Details: \n" +
+			"  Code: " + group.Code + "\n" +
+			"  Name: " + group.Name + "\n" +
+			"  Mail:" + group.Admins[0].Email + "\n" +
+			"\n" +
+			"With love from Komunitin <3\n",
+	}
+	return sendEmail(ctx, message, "Komunitin admin", config.AdminEmail)
 }
