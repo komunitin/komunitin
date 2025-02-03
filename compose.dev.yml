@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      target: komunitin-app-build
+    command: npm run dev  
+    ports:
+      - "2030:2030"
+    volumes:
+      - ./app:/app
+  notifications:
+    build: 
+      target: notifications-dev
+    ports:
+      - "2028:2028"
+      - "40000:40000"
+    volumes:
+      - ./notifications:/opt/notifications
+  accounting:
+    command: pnpm dev
+    ports:
+      - "2025:2025"
+      - "9229:9229"
+    volumes:
+      - ./accounting:/app
+  phpmyadmin:
+    image: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db-integralces
+    environment:
+      PMA_HOSTS: "db-integralces,db-accounting"
+      PMA_PORTS: "3306,5432"
+    ports:
+      - "2026:80"
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: unless-stopped
+    environment:
+     - REDIS_HOSTS=local:redis:6379
+    ports:
+     - "2027:8081" 
+  

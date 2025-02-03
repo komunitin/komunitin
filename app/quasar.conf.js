@@ -10,7 +10,10 @@ const { config } = require("dotenv")
 // so the process.env.ENV_VAR will be replaced at build time. For production, the environment
 // variables should be set in the server environment and are replaced via a bash script at
 // /docker/replace_env_vars.sh at application start time.
-const environment = config().parsed
+const environment = {
+  ...config().parsed,
+  ...process.env
+}
 console.info("Environment:", environment)
 
 const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
@@ -140,7 +143,7 @@ module.exports = configure(function(ctx) {
     // Only define the dev server when on dev mode, since otherwise we don't need to configure 
     // local certificates.
     devServer: ctx.dev ? {
-      host: "localhost",
+      host: "0.0.0.0",
       port: 2030,
       open: true,
       https: {

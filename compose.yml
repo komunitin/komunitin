@@ -2,8 +2,6 @@ services:
   app:
     build:
       context: ./app
-    ports:
-      - "2030:80"
     restart: unless-stopped
     environment:
       OAUTH_CLIENTID: komunitin-app
@@ -23,8 +21,6 @@ services:
   notifications:
     build:
       context: ./notifications
-    ports:
-      - "2028:2028"
     depends_on:
       - redis
     restart: unless-stopped
@@ -48,8 +44,6 @@ services:
     build:
       context: ./accounting/docker/db
     restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
