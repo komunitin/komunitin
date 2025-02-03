@@ -60,7 +60,7 @@ func Mailer(ctx context.Context) error {
 		err = handleEvent(ctx, event)
 		if err != nil {
 			// Error handling event. Just print and ignore event.
-			log.Printf("Error handling event: %v\n", err)
+			log.Printf("error handling event from mailer: %v\n", err)
 		}
 		// Acknowledge event handled
 		stream.Ack(ctx, event.Id)
@@ -68,6 +68,16 @@ func Mailer(ctx context.Context) error {
 }
 
 func handleEvent(ctx context.Context, event *events.Event) error {
+
+	// Create a new context with the baseUrl value from the Source field of the event.
+	// api methids GetTransfer and GetAccount will take the accounting base URL from
+	// this context.
+	ctx, err := api.NewContext(ctx, event.Source)
+	if err != nil {
+		return err
+	}
+
+	// Handle event depending on its type
 	switch event.Name {
 	case events.TransferCommitted:
 		return handleTransferCommitted(ctx, event)

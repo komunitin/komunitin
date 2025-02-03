@@ -14,7 +14,6 @@ services:
     ports:
      - 2028:2028 
     environment:
-      - KOMUNITIN_ACCOUNTING_URL=https://integralces.net/ces/api/accounting
       - KOMUNITIN_SOCIAL_URL=https://integralces.net/ces/api/social
       - KOMUNITIN_AUTH_URL=https://integralces.net/oauth2
       - KOMUNITIN_APP_URL=https://komunitin.org
@@ -40,7 +39,6 @@ services:
     volumes:
       - .:/opt/notifications
     environment:
-      - KOMUNITIN_ACCOUNTING_URL=http://localhost:2025/
       - KOMUNITIN_SOCIAL_URL=http://localhost:2029/ces/api/social
       - KOMUNITIN_AUTH_URL=http://localhost:2029/oauth2
       - KOMUNITIN_APP_URL=https://localhost:2030

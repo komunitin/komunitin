@@ -14,8 +14,6 @@ import (
 	"github.com/komunitin/komunitin/notifications/config"
 )
 
-// These configuration parameters are set docker-compose.xml file.
-
 func fixUrl(url string) string {
 	// This is for development purposes only.
 	url = strings.Replace(url, "localhost", "host.docker.internal", 1)
@@ -41,6 +39,10 @@ func fetchResource(ctx context.Context, url string, token string) (*http.Respons
 	return ctxhttp.Do(ctx, http.DefaultClient, req)
 }
 
+// Fetch the user object from the social API using the provided token.
+// ctx can be any context, it doesn't need to be created by NewContext.
+// token is the user Authorization token.
+// Uses the social API url as defined in the configuration.
 func GetUserByToken(ctx context.Context, token string) (*User, error) {
 	url := config.KomunitinSocialUrl + "/users/me"
 	res, err := fetchResource(ctx, url, token)
@@ -58,6 +60,7 @@ func GetUserByToken(ctx context.Context, token string) (*User, error) {
 	return user, nil
 }
 
+// Get all members of a group.
 func GetGroupMembers(ctx context.Context, code string) ([]*Member, error) {
 	members := make([]*Member, 0)
 	result, err := getResources(ctx, config.KomunitinSocialUrl, code, "members", reflect.TypeOf((*Member)(nil)), nil, nil, nil)
@@ -109,16 +112,6 @@ func GetMemberUsers(ctx context.Context, memberId string) ([]*User, error) {
 	return users, nil
 }
 
-// Get a transfer object with loaded payer and payee accounts and currency.
-func GetTransfer(ctx context.Context, code string, transferId string) (*Transfer, error) {
-	transfer := new(Transfer)
-	err := getResource(ctx, config.KomunitinAccountingUrl, code, "transfers", transferId, transfer, []string{"payer", "payee", "currency"}, nil)
-	if err != nil {
-		return nil, err
-	}
-	return transfer, nil
-}
-
 // Get a member object
 func GetMember(ctx context.Context, code string, memberId string) (*Member, error) {
 	member := new(Member)
@@ -130,13 +123,33 @@ func GetMember(ctx context.Context, code string, memberId string) (*Member, erro
 }
 
 // Get an account object
+// ctx needs to be created with NewContext with accounting API as baseUrl.
 func GetAccount(ctx context.Context, code string, accountId string) (*Account, error) {
+	accountingUrl, err := GetBaseUrlFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	account := new(Account)
-	err := getResource(ctx, config.KomunitinAccountingUrl, code, "accounts", accountId, account, nil, nil)
+	err = getResource(ctx, accountingUrl, code, "accounts", accountId, account, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 	return account, nil
+}
+
+// Get a transfer object with loaded payer and payee accounts and currency.
+// ctx needs to be created with NewContext with accounting API as baseUrl.
+func GetTransfer(ctx context.Context, code string, transferId string) (*Transfer, error) {
+	accountingUrl, err := GetBaseUrlFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	transfer := new(Transfer)
+	err = getResource(ctx, accountingUrl, code, "transfers", transferId, transfer, []string{"payer", "payee", "currency"}, nil)
+	if err != nil {
+		return nil, err
+	}
+	return transfer, nil
 }
 
 func addFields(query []string, fields map[string][]string) []string {
@@ -185,15 +198,21 @@ func getResource(ctx context.Context, baseUrl string, code string, resourceType 
 	if len(query) > 0 {
 		url += "?" + strings.Join(query, "&")
 	}
-	// Fetch resource
-	res, err := fetchUrl(ctx, url)
+	return GetResourceUrl(ctx, url, model)
+}
+
+// The model parameter must be a pointer to the struct that will hold the resource data.
+//
+//	user := new(User)
+//	err := GetResourceUrl(ctx, "https://social.komunitin.org/users/1", user)
+func GetResourceUrl(ctx context.Context, url string, model any) error {
+	res, err := fetchResource(ctx, url, "")
 	if err != nil {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error fetching resource of type %s: %s.\nURL: %s", resourceType, res.Status, url)
+		return fmt.Errorf("error fetching resource: %s %s", res.Status, url)
 	}
-
 	return jsonapi.UnmarshalPayload(res.Body, model)
 }
 

@@ -160,7 +160,14 @@ export class StellarLedger implements Ledger {
    * Implements {@link Ledger.addListener}
    */
   public addListener(event: keyof LedgerEvents, handler: any) {
-    return this.emitter.addListener(event, handler)
+    const safeHandler = async (...args: any[]) => {
+      try {
+        await handler(...args)
+      } catch (error) {
+        this.emitter.emit("error", error as Error)
+      }
+    }
+    return this.emitter.addListener(event, safeHandler)
   }
 
   /**
