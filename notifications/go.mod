@@ -12,7 +12,7 @@ require (
 	github.com/mailersend/mailersend-go v1.5.1
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/rs/xid v1.5.0
-	golang.org/x/net v0.24.0
+	golang.org/x/net v0.33.0
 	golang.org/x/text v0.21.0
 )
 
