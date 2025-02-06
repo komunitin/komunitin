@@ -8,7 +8,6 @@ var (
 	NotificationsClientSecret   = os.Getenv("NOTIFICATIONS_CLIENT_SECRET")
 	KomunitinAuthUrl            = os.Getenv("KOMUNITIN_AUTH_URL")
 	KomunitinSocialUrl          = os.Getenv("KOMUNITIN_SOCIAL_URL")
-	KomunitinAccountingUrl      = os.Getenv("KOMUNITIN_ACCOUNTING_URL")
 	KomunitinAppUrl             = os.Getenv("KOMUNITIN_APP_URL")
 	NotificationsEventsUsername = os.Getenv("NOTIFICATIONS_EVENTS_USERNAME")
 	NotificationsEventsPassword = os.Getenv("NOTIFICATIONS_EVENTS_PASSWORD")

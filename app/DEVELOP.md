@@ -30,7 +30,7 @@ export LOCAL_CA_ROOT="$(mkcert -CAROOT)/rootCA.pem"
 ```
  - Create certificates for localhost
 ```bash
-mkdir tmp/certs && cd tmp/certs
+mkdir -p tmp/certs && cd tmp/certs
 mkcert localhost
 ```
 
