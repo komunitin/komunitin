@@ -10,7 +10,7 @@
       type="email"
       placeholder="example@example.com"
       :label="$t('email')"
-      maxlength="30"
+      maxlength="255"
       :rules="[val => !v$.email.$invalid || $t('invalidEmail')]"
       lazy-rules
       autocomplete="username"
