@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug notifications main",
+      "name": "Notifications service",
       "type": "go",
       "request": "attach",
       "mode": "remote",
@@ -13,6 +13,24 @@
       "host": "localhost",
       "remotePath": "/opt/notifications",
       "cwd": "${workspaceRoot}/notifications",
+      "dlvLoadConfig": {
+        "followPointers": true,
+        "maxStringLen": 256,
+        "maxArrayValues": 64,
+        "maxStructFields": -1
+      }
     },
+    {
+      "name": "Accounting service",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}/accounting",
+      "remoteRoot": "/app",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
   ]
 }

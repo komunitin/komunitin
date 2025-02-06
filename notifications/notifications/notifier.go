@@ -112,6 +112,7 @@ func handleTransferEvent(ctx context.Context, event *events.Event, store *store.
 	if dest == Both || dest == Payee {
 		accounts = append(accounts, event.Data["payee"])
 	}
+
 	// Get members from account ids
 	members, err := api.GetAccountMembers(ctx, event.Code, accounts)
 	if err != nil {

@@ -23,6 +23,9 @@ const buildJwt = () => {
       // in express-oauth2-jwt-bearer does not allow null values for 
       // the sub claim.
       sub: (sub) => typeof sub === "string" || sub === null,
+      // IntegralCES may append the language code to the issuer claim (!),
+      // so we need to allow for that instead of strict equality.
+      iss: (iss) => typeof iss === "string" && iss.startsWith(config.AUTH_JWT_ISSUER), 
     },
   })
 }

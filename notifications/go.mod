@@ -8,11 +8,11 @@ require (
 	github.com/goodsign/monday v1.0.2
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
-	github.com/komunitin/jsonapi v1.0.2
+	github.com/komunitin/jsonapi v1.0.4-0.20250203092134-cc470520194e
 	github.com/mailersend/mailersend-go v1.5.1
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/rs/xid v1.5.0
-	golang.org/x/net v0.24.0
+	golang.org/x/net v0.33.0
 	golang.org/x/text v0.21.0
 )
 

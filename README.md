@@ -30,22 +30,22 @@ git clone https://github.com/komunitin/komunitin.git
 git clone https://git.drupalcode.org/project/ices.git
 ```
 
-Before running the system you need to setup some environment variables. You may use the `.env.template` file as a reference and create a new `.env` file with the correct values. Also, create the file `komunitin-project-firebase-adminsdk.json` in the `notifications` folder with the firebase admin sdk credentials.
+Before running the system you need to setup some environment variables. You may use the `.env.template` file as a reference and create a new `.env` file with the correct values. Also, copy the file `komunitin-project-firebase-adminsdk.json` in the `notifications` folder with the firebase admin sdk credentials.
 
 Then you can run the start script with the options `--up` to start the containers, `--ices` to install the IntegralCES site and `--demo` to seed the system with demo data.
 
 ```bash
-$ ./start.sh --up --ices --demo
+./start.sh --up --ices --dev --demo
 ```
 
 If you want just to start the containers you can run:
   
 ```bash
-$ docker compose up -d
+docker compose -f compose.yml -f compose.dev.yml up -d
 ```
 
 The published services are:
- - Komunitin app: [http://localhost:2030](http://localhost:2030)
+ - Komunitin app: [https://localhost:2030](https://localhost:2030)
  - IntegralCES: [http://localhost:2029](http://localhost:2029)
  - Notifications service: [http://localhost:2028](http://localhost:2028)
  - Accounting service: [http://localhost:2025](http://localhost:2025)

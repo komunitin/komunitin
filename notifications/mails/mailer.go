@@ -60,7 +60,7 @@ func Mailer(ctx context.Context) error {
 		err = handleEvent(ctx, event)
 		if err != nil {
 			// Error handling event. Just print and ignore event.
-			log.Printf("Error handling event: %v\n", err)
+			log.Printf("error handling event from mailer: %v\n", err)
 		}
 		// Acknowledge event handled
 		stream.Ack(ctx, event.Id)
@@ -68,6 +68,16 @@ func Mailer(ctx context.Context) error {
 }
 
 func handleEvent(ctx context.Context, event *events.Event) error {
+
+	// Create a new context with the baseUrl value from the Source field of the event.
+	// api methids GetTransfer and GetAccount will take the accounting base URL from
+	// this context.
+	ctx, err := api.NewContext(ctx, event.Source)
+	if err != nil {
+		return err
+	}
+
+	// Handle event depending on its type
 	switch event.Name {
 	case events.TransferCommitted:
 		return handleTransferCommitted(ctx, event)
@@ -164,8 +174,8 @@ func userWantAccountEmails(user *api.User) bool {
 }
 
 func fetchTransferResources(ctx context.Context, event *events.Event, which fetchWichUsers) (payer *api.Member, payerUsers []*api.User, payee *api.Member, payeeUsers []*api.User, transfer *api.Transfer, err error) {
-	payerMemberId := event.Data["payer"]
-	payeeMemberId := event.Data["payee"]
+
+	accountIds := []string{event.Data["payer"], event.Data["payee"]}
 	transferId := event.Data["transfer"]
 
 	// Fetch transfer details, payer and payee details and related user emails.
@@ -173,22 +183,22 @@ func fetchTransferResources(ctx context.Context, event *events.Event, which fetc
 	if err != nil {
 		return
 	}
-	payer, err = api.GetMember(ctx, event.Code, payerMemberId)
+
+	members, err := api.GetAccountMembers(ctx, event.Code, accountIds)
 	if err != nil {
 		return
 	}
+	payer = members[0]
+	payee = members[1]
+
 	if which == fetchPayerUsers || which == fetchBothUsers {
-		payerUsers, err = api.GetMemberUsers(ctx, payerMemberId)
+		payerUsers, err = api.GetMemberUsers(ctx, payer.Id)
 		if err != nil {
 			return
 		}
 	}
-	payee, err = api.GetMember(ctx, event.Code, payeeMemberId)
-	if err != nil {
-		return
-	}
 	if which == fetchPayeeUsers || which == fetchBothUsers {
-		payeeUsers, err = api.GetMemberUsers(ctx, payeeMemberId)
+		payeeUsers, err = api.GetMemberUsers(ctx, payee.Id)
 		if err != nil {
 			return
 		}

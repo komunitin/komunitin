@@ -25,10 +25,11 @@ type Group struct {
 }
 
 type Member struct {
-	Id    string `jsonapi:"primary,members"`
-	Code  string `jsonapi:"attr,code"`
-	Name  string `jsonapi:"attr,name"`
-	Image string `jsonapi:"attr,image"`
+	SelfLink string `jsonapi:"link,self"`
+	Id       string `jsonapi:"primary,members"`
+	Code     string `jsonapi:"attr,code"`
+	Name     string `jsonapi:"attr,name"`
+	Image    string `jsonapi:"attr,image"`
 	// Ommitted other fields.
 	Account *ExternalAccount `jsonapi:"relation,account"`
 	// Ommitted other relations.
@@ -82,11 +83,13 @@ type Currency struct {
 // implement the meta part so far.
 
 type ExternalMember struct {
-	Id string `jsonapi:"primary,members" json:"id"`
+	Id   string `jsonapi:"primary,members" json:"id"`
+	Href string `jsonapi:"meta,href" json:"href"`
 }
 
 type ExternalAccount struct {
-	Id string `jsonapi:"primary,accounts" json:"id"`
+	Id   string `jsonapi:"primary,accounts" json:"id"`
+	Href string `jsonapi:"meta,href" json:"href"`
 }
 
 // External User.

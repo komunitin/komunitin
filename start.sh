@@ -1,7 +1,7 @@
 # parse args
 # Function to display usage
 usage() {
-    echo "Usage: $0 [--up] [--ices] [--demo] [--public]"
+    echo "Usage: $0 [--up] [--ices] [--demo] [--dev] [--public]"
     exit
 }
 
@@ -10,6 +10,7 @@ ices=false
 demo=false
 public=false
 up=false
+dev=false
 
 while [[ "$1" != "" ]]; do
     case "$1" in
@@ -24,6 +25,9 @@ while [[ "$1" != "" ]]; do
             ;;
         --public)
             public=true
+            ;;
+        --dev)
+            dev=true
             ;;
         *)
             usage
@@ -42,6 +46,8 @@ if [ "$up" = true ]; then
 
 if [ "$public" = true ]; then
   docker compose -f compose.yml -f compose.public.yml up -d --build
+elif [ "$dev" = true ]; then
+  docker compose -f compose.yml -f compose.dev.yml up -d --build
 else
   docker compose up -d --build
 fi
@@ -51,7 +57,7 @@ sleep 10
 
 fi
 
-if [ "$demo" = true ]; then
+if [ "$demo" = true  ]; then
   # Install Accounting service
   docker compose exec accounting pnpm prisma migrate reset --force
   sleep 2
@@ -61,11 +67,11 @@ fi
 
 if [ "$ices" = true ]; then
   export BASE_URL=$ICES_URL
-  if [ "$demo" = true ]; then
-    . ../ices/install.sh --demo
-  else
-    . ../ices/install.sh
-  fi
+  ices_args=()
+  [ "$dev" = true ] && ices_args+=("--dev")
+  [ "$demo" = true ] && ices_args+=("--demo")
+  . ../ices/install.sh "${ices_args[@]}"
+
   docker compose exec integralces drush vset ces_komunitin_app_url $KOMUNITIN_APP_URL
   docker compose exec integralces drush vset ces_komunitin_accounting_url $KOMUNITIN_ACCOUNTING_URL
   docker compose exec integralces drush vset ces_komunitin_accounting_url_internal http://accounting:2025

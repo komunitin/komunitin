@@ -5,34 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "chrome",
-      "request": "launch",
-      "name": "Chrome",
-      "url": "https://localhost:2030",
-      "webRoot": "${workspaceFolder}/src",
-      "breakOnLoad": true,
-      "sourceMapPathOverrides": {
-        "webpack:///./src/*": "${webRoot}/*"
-      }
-    },
-    {
-      "type": "firefox",
-      "request": "launch",
-      "name": "Firefox",
-      "url": "https://localhost:2030",
-      "webRoot": "${workspaceFolder}/src",
-      "breakOnLoad": true,
-      "sourceMapPathOverrides": {
-        "webpack:///./src/*": "${webRoot}/*"
-      },
-      "pathMappings": [
-        {
-          "url": "webpack:///src/pages",
-          "path": "${workspaceFolder}/src/pages"
-        }
-      ]
-    },
-    {
       "type": "node",
       "name": "vscode-jest-tests",
       "request": "launch",
