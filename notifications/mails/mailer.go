@@ -174,8 +174,8 @@ func userWantAccountEmails(user *api.User) bool {
 }
 
 func fetchTransferResources(ctx context.Context, event *events.Event, which fetchWichUsers) (payer *api.Member, payerUsers []*api.User, payee *api.Member, payeeUsers []*api.User, transfer *api.Transfer, err error) {
-	payerMemberId := event.Data["payer"]
-	payeeMemberId := event.Data["payee"]
+
+	accountIds := []string{event.Data["payer"], event.Data["payee"]}
 	transferId := event.Data["transfer"]
 
 	// Fetch transfer details, payer and payee details and related user emails.
@@ -183,22 +183,22 @@ func fetchTransferResources(ctx context.Context, event *events.Event, which fetc
 	if err != nil {
 		return
 	}
-	payer, err = api.GetMember(ctx, event.Code, payerMemberId)
+
+	members, err := api.GetAccountMembers(ctx, event.Code, accountIds)
 	if err != nil {
 		return
 	}
+	payer = members[0]
+	payee = members[1]
+
 	if which == fetchPayerUsers || which == fetchBothUsers {
-		payerUsers, err = api.GetMemberUsers(ctx, payerMemberId)
+		payerUsers, err = api.GetMemberUsers(ctx, payer.Id)
 		if err != nil {
 			return
 		}
 	}
-	payee, err = api.GetMember(ctx, event.Code, payeeMemberId)
-	if err != nil {
-		return
-	}
 	if which == fetchPayeeUsers || which == fetchBothUsers {
-		payeeUsers, err = api.GetMemberUsers(ctx, payeeMemberId)
+		payeeUsers, err = api.GetMemberUsers(ctx, payee.Id)
 		if err != nil {
 			return
 		}

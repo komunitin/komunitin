@@ -206,7 +206,7 @@ func getResource(ctx context.Context, baseUrl string, code string, resourceType 
 //	user := new(User)
 //	err := GetResourceUrl(ctx, "https://social.komunitin.org/users/1", user)
 func GetResourceUrl(ctx context.Context, url string, model any) error {
-	res, err := fetchResource(ctx, url, "")
+	res, err := fetchUrl(ctx, url)
 	if err != nil {
 		return err
 	}
