@@ -7,6 +7,7 @@ package mails
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/komunitin/komunitin/notifications/api"
@@ -188,8 +189,23 @@ func fetchTransferResources(ctx context.Context, event *events.Event, which fetc
 	if err != nil {
 		return
 	}
-	payer = members[0]
-	payee = members[1]
+
+	// Find the payer and payee members since the return order from the api is not guaranteed.
+	for _, member := range members {
+		if member.Account.Id == event.Data["payer"] {
+			payer = member
+		} else if member.Account.Id == event.Data["payee"] {
+			payee = member
+		}
+	}
+
+	if payer == nil {
+		err = fmt.Errorf("payer member for account %s not found", event.Data["payer"])
+		return
+	} else if payee == nil {
+		err = fmt.Errorf("payee member for account %s not found", event.Data["payee"])
+		return
+	}
 
 	if which == fetchPayerUsers || which == fetchBothUsers {
 		payerUsers, err = api.GetMemberUsers(ctx, payer.Id)
