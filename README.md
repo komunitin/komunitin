@@ -38,7 +38,7 @@ Then you can run the start script with the options `--up` to start the container
 ./start.sh --up --ices --dev --demo
 ```
 
-If you want just to start the containers you can run:
+If you want just to start the containers in `dev` mode you can run:
   
 ```bash
 docker compose -f compose.yml -f compose.dev.yml up -d
