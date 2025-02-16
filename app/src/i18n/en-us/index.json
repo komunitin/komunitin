@@ -318,6 +318,10 @@
   "codeTaken": "This code is already in use",
   "invalidValue": "Invalid value",
   "newGroupRequestedText": "Your request for the new group {name} has been sent and it will be manually reviewed. You will receive an email when it is activated and you can start configuring it. If you don't receive any response in a few days, please contact the team.",
+  "dailyVolume": "Daily volume",
+  "dailyVolumeText": "Sum of all transactions in the last 24 hours",
+  "monthlyVolume": "Monthly volume",
+  "monthlyVolumeText": "Sum of all transactions in the last 30 days",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

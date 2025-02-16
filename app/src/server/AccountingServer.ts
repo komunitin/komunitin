@@ -388,7 +388,7 @@ export default {
     // Stats
     server.get(`${urlAccounting}/:currency/stats/volume`, (schema: any, request: any) => {
       const query = request.queryParams
-      const values = query.interval ? [120510000, 132150000, 140560000, 135120000, 148230000] : [120880000]
+      const values = query.interval ? [120510000, 132150000, 140560000, 135120000, 148230000] : [query.to ? 102340000 : 120880000]
       return {data: {
         type: "currency-stats",
         id: uuid(),

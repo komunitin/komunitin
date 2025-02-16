@@ -14,11 +14,12 @@
       </div>
     </q-card-section>
     <q-card-section class="q-pt-none">
-      <h4 class="q-mt-none q-mb-md">
+      <h3 class="q-mt-none q-mb-xs">
         {{ value }}
-      </h4>
+      </h3>
       <div 
         v-if="change"
+        class="text-h6"
         :class="change > 0 ? 'positive-amount' : 'negative-amount'"
       >
         <q-icon
