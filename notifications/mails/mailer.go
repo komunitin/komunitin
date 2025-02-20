@@ -249,18 +249,25 @@ func handleMemberJoined(ctx context.Context, event *events.Event) error {
 	if err != nil {
 		return err
 	}
-	account, err := api.GetAccount(ctx, event.Code, member.Account.Id)
+
+	// Using GetResourceUrl instead of GetAccount so that it uses the correct
+	// linked accounting service baseURL and we don't need to guess it here.
+	account := new(api.Account)
+	err = api.GetResourceUrl(ctx, member.Account.Href, account)
 	if err != nil {
 		return err
 	}
+
 	group, err := api.GetGroup(ctx, event.Code)
 	if err != nil {
 		return err
 	}
+
 	users, err := api.GetMemberUsers(ctx, member.Id)
 	if err != nil {
 		return err
 	}
+
 	for _, user := range users {
 		if userWantAccountEmails(user) {
 			if errMail := sendMemberJoinedEmail(ctx, user, member, account, group); errMail != nil {
