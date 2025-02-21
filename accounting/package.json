@@ -40,7 +40,7 @@
 		"@types/qs": "^6.9.15",
 		"@types/supertest": "^6.0.2",
 		"@types/uuid": "^9.0.8",
-		"esbuild": "^0.20.2",
+		"esbuild": "^0.25.0",
 		"express-oas-generator": "^1.0.46",
 		"msw": "^2.3.0",
 		"pino-pretty": "^11.0.0",

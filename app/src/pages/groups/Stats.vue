@@ -5,20 +5,30 @@
     >
     </page-header>
     <q-page-container>
-      <q-page class="q-pa-md q-gutter-md">
-        <group-header :group="group" />
-        <div class="text-overline">
+      <q-page class="q-pa-md">
+        <group-header :group="group" class="q-pl-none" />
+        <div class="text-overline text-uppercase text-onsurface-m">
           {{ $t('volume') }}
         </div>
-        <div class="row">
-          <stats-card
-            class="col-12 col-sm-6 col-md-3"
-            icon="show_chart"
-            :title="$t('dailyVolume')"
-            :text="$t('dailyVolumeText')"
-            :value="formatCurrency(last24hValue, currency, {decimals: false})"
-            :change="0"
-          />
+        <div class="row q-col-gutter-md">
+          <div class="col-12 col-sm-6 col-md-3">
+            <stats-card
+              icon="today"
+              :title="$t('dailyVolume')"
+              :text="$t('dailyVolumeText')"
+              :value="formatCurrency(last24hValue, currency, {decimals: false})"
+              :change="last24hChange"
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <stats-card
+              icon="calendar_month"
+              :title="$t('monthlyVolume')"
+              :text="$t('monthlyVolumeText')"
+              :value="formatCurrency(last30dValue, currency, {decimals: false})"
+              :change="last30dChange"
+            />
+          </div>
         </div>
       </q-page>
     </q-page-container>
@@ -58,8 +68,24 @@ const last24h = useCurrencyStats({
   currency: currency.value,
   value: "volume",
   from: new Date(Date.now() - 24*60*60*1000),
-  change: false
+  previous: true
 })
 const last24hValue = computed(() => last24h.value?.values?.[0] || 0)
+const last24hChange = computed(() => {
+  const previous = last24h.value?.previous?.[0]
+  return previous ? (last24hValue.value - previous) / previous * 100 : 0
+})
+
+const last30d = useCurrencyStats({
+  currency: currency.value,
+  value: "volume",
+  from: new Date(Date.now() - 30*24*60*60*1000),
+  previous: true
+})
+const last30dValue = computed(() => last30d.value?.values?.[0] || 0)
+const last30dChange = computed(() => {
+  const previous = last30d.value?.previous?.[0]
+  return previous ? (last30dValue.value - previous) / previous * 100 : 0
+})
 
 </script>
