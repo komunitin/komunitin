@@ -322,6 +322,10 @@
   "dailyVolumeText": "Sum of all transactions in the last 24 hours",
   "monthlyVolume": "Monthly volume",
   "monthlyVolumeText": "Sum of all transactions in the last 30 days",
+  "yearlyVolume": "Yearly volume",
+  "yearlyVolumeText": "Sum of all transactions in the last 365 days",
+  "allTimeVolume": "Total volume",
+  "allTimeVolumeText": "Sum of all transactions since the group was created",
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

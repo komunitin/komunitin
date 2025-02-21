@@ -1,6 +1,6 @@
 import { checkFetchResponse } from "src/KError";
 import { Currency } from "src/store/model";
-import { MaybeRefOrGetter, ref, toRef, toValue, watch } from "vue";
+import { computed, MaybeRefOrGetter, ref, toRef, toValue, watch } from "vue";
 import { useStore } from "vuex";
 
 export interface CurrencyStatsOptions {
@@ -77,4 +77,25 @@ export function useCurrencyStats(options: MaybeRefOrGetter<CurrencyStatsOptions>
   }, {immediate: true})
 
   return result
+}
+
+/**
+ * 
+ * @param period The period for which the stats are computed, until now (in seconds).
+ * @returns The value and the change in percentage of the currency volume for the given period.
+ */
+export function useCurrencyStatsSingleValueAndChange(currency: MaybeRefOrGetter<Currency>, period: MaybeRefOrGetter<number>) {
+  const options = computed(() => ({
+    currency: toValue(currency),
+    value: "volume" as const,
+    from: new Date(Date.now() - toValue(period)*1000),
+    previous: true
+  }))
+  const stats = useCurrencyStats(options)
+  const value = computed(() => stats.value?.values?.[0] || 0)
+  const change = computed(() => {
+    const previous = stats.value?.previous?.[0]
+    return previous ? (value.value - previous) / previous * 100 : 0
+  })
+  return {value, change}
 }
