@@ -74,10 +74,10 @@ func GetGroupMembers(ctx context.Context, code string) ([]*Member, error) {
 	return members, nil
 }
 
-// Get group with admin users.
+// Get group with admin users and their settings.
 func GetGroup(ctx context.Context, code string) (*Group, error) {
 	group := new(Group)
-	err := getResource(ctx, config.KomunitinSocialUrl, code, "", "", group, []string{"admins"}, nil)
+	err := getResource(ctx, config.KomunitinSocialUrl, code, "", "", group, []string{"admins", "admins.settings"}, nil)
 	if err != nil {
 		return nil, err
 	}
