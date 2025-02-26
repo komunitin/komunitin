@@ -51,7 +51,13 @@
             />
           </div>
         </div>
-        <div>
+        <div class="q-mt-md">
+          <stats-chart 
+            icon="show_chart"
+            :title="$t('volumeChart')"
+            :text="$t('volumeChart')"
+            :currency="currency"  
+          />
         </div>
       </q-page>
     </q-page-container>
