@@ -296,23 +296,40 @@ export class StellarCurrency implements LedgerCurrency {
     return this.getAccount(this.data.externalIssuerPublicKey)
   }
 
+  /**
+   * Create the necessary accounts and trustlines for the currency in the Stellar network, including
+   * the infrastructure for external trading.
+   * @param keys 
+   */
+  async install(keys: {
+    sponsor: Keypair // For paying the fee, for sponsoring reserves and as sourcve account for the transaction.
+    issuer: Keypair,  // 
+    credit: Keypair,
+    admin: Keypair,
+    externalIssuer: Keypair,
+    externalTrader: Keypair
+  }) {
+    const builder = this.ledger.sponsorTransactionBuilder()
+    this.installLocalTransaction(builder)
+    this.installExternalTransaction(builder)
+
+    const signers = Object.values(keys)
+
+    return await this.ledger.submitTransaction(builder, signers, keys.sponsor)
+  }
+
 
   /**
    * Create the necessary accounts and trustlines for the currency in the Stellar network.
    * Only the local model is created.
    * @param keys 
    */
-  async install(keys: {
-    sponsor: Keypair
-    issuer: Keypair,
-    credit: Keypair,
-    admin: Keypair
-  }): Promise<void> {
-    
-    const builder = this.ledger.sponsorTransactionBuilder()
+  private installLocalTransaction(builder: TransactionBuilder) {
+    const sponsorPublicKey = this.ledger.sponsorPublicKey.publicKey()
     builder
       // 1. Issuer.
       .addOperation(Operation.beginSponsoringFutureReserves({
+        source: sponsorPublicKey,
         sponsoredId: this.data.issuerPublicKey
       }))
       // 1.1 Create account
@@ -353,8 +370,6 @@ export class StellarCurrency implements LedgerCurrency {
       initialCredit: "0",
       maximumBalance: undefined
     })
-
-    await this.ledger.submitTransaction(builder, [keys.sponsor, keys.issuer, keys.credit, keys.admin], keys.sponsor)
     
   }
 
@@ -365,19 +380,13 @@ export class StellarCurrency implements LedgerCurrency {
    * Give the credit key only if this.config.externalTraderInitialCredit is not zero.
    * @param keys 
    */
-  async installGateway(keys: {
-    sponsor: Keypair
-    issuer: Keypair,
-    externalIssuer: Keypair,
-    externalTrader: Keypair,
-    credit?: Keypair,
-  }) {
-    const issuerAccount = await this.issuerAccount()
-    const builder = this.ledger.transactionBuilder(issuerAccount)
+  async installExternalTransaction(builder: TransactionBuilder) {
+    const sponsorPublicKey = this.ledger.sponsorPublicKey.publicKey()
+    
     // 1. Create external issuer.
     // Not using the createAccountTransaction because this account does not have local currency.
-    .addOperation(Operation.beginSponsoringFutureReserves({
-      source: keys.sponsor.publicKey(),
+    builder.addOperation(Operation.beginSponsoringFutureReserves({
+      source: sponsorPublicKey,
       sponsoredId: this.data.externalIssuerPublicKey
     }))
     // 1.1 Create account
@@ -402,7 +411,7 @@ export class StellarCurrency implements LedgerCurrency {
     })
     // Add additional properties to external trader.
     builder.addOperation(Operation.beginSponsoringFutureReserves({
-      source: keys.sponsor.publicKey(),
+      source: sponsorPublicKey,
       sponsoredId: this.data.externalTraderPublicKey
     }))
     // 2.1 Create unlimited trustline to hours.
@@ -444,11 +453,6 @@ export class StellarCurrency implements LedgerCurrency {
       source: this.data.externalTraderPublicKey
     }))
 
-    const signers = [keys.sponsor, keys.issuer, keys.externalIssuer, keys.externalTrader]
-    if (keys.credit) {
-      signers.push(keys.credit)
-    }
-    return await this.ledger.submitTransaction(builder, signers, keys.sponsor)
   }
 
   /**
