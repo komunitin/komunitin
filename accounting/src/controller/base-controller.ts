@@ -284,7 +284,14 @@ export class LedgerController implements BaseController {
     if (user) {
       throw badRequest(`User ${admin} is already being used in another tenant`)
     }
-    
+
+    // Create the currency on the ledger.
+    const keys = await this.ledger.createCurrency(
+      currencyConfig(currency), 
+      await this.sponsorKey()
+    )
+
+    // Create the currency record in the DB
     let record = await db.currency.create({
       data: {
         ...inputRecord,
@@ -307,12 +314,6 @@ export class LedgerController implements BaseController {
         }
       },
     })
-
-    // Create the currency on the ledger.
-    const keys = await this.ledger.createCurrency(
-      currencyConfig(currency), 
-      await this.sponsorKey()
-    )
     
     // Store the keys into the DB, encrypted using the currency key.
     const storeKey = (key: Keypair) => storeCurrencyKey(key, db, async () => currencyKey)
