@@ -200,11 +200,11 @@ export default defineComponent({
     isLoggedIn(): boolean {
       return this.$store.getters.isLoggedIn
     },
-    group(): Group & { contacts: Contact[]; categories: Category[] } {
+    group(): Group & { contacts: Contact[]; categories: Category[]; currency: Currency } {
       return this.$store.getters["groups/current"];
     },
     currency(): Currency {
-      return this.$store.getters["currencies/current"];
+      return this.group.currency;
     },
     own(): boolean {
       return this.group && this.$store.getters["myMember"] && this.group.id == this.$store.getters["myMember"].group.id
@@ -241,24 +241,14 @@ export default defineComponent({
   },
   methods: {
     async fetchData(code: string) {
-      // We are using the fact that a group and its related currency
-      // share the same unique code. This way we can make the two calls 
-      // in parallel. Another option, formally more robust but less 
-      // efficient would be to get the currency url from the group data.
-      await Promise.all([this.fetchGroup(code), this.fetchCurrency(code)]);
+      await this.fetchGroup(code);
       this.ready = true
     },
     // Group info.
     async fetchGroup(code: string) {
       return this.$store.dispatch("groups/load", {
         id: code,
-        include: "contacts,categories"
-      });
-    },
-    // Currency info.
-    async fetchCurrency(code: string) {
-      return this.$store.dispatch("currencies/load", { 
-        id: code 
+        include: "currency,contacts,categories"
       });
     },
     // Categories info.
