@@ -71,6 +71,7 @@ import { Currency, Group } from 'src/store/model'
 import GroupHeader from 'src/components/GroupHeader.vue';
 import PageHeader from 'src/layouts/PageHeader.vue';
 import StatsCard from 'src/components/StatsCard.vue';
+import StatsChart from 'src/components/StatsChart.vue';
 
 const props = defineProps<{
   code: string

@@ -20,12 +20,12 @@
       <div 
         v-if="change"
         class="text-h6"
-        :class="changeSign > 0 ? 'positive-amount' : 'negative-amount'"
+        :class="sign > 0 ? 'positive-amount' : 'negative-amount'"
       >
         <q-icon
-          :name="changeSign > 0 ? 'trending_up' : 'trending_down'"
+          :name="sign > 0 ? 'trending_up' : 'trending_down'"
         />
-        {{ change }}%
+        {{ change }}
       </div>
       <div class="text-caption">
         {{ text }}
@@ -34,8 +34,7 @@
   </q-card>
 </template>
 <script setup lang="ts">
-import { useCurrencyStats } from 'src/composables/currencyStats';
-import formatCurrency from 'src/plugins/FormatCurrency';
+import { useCurrencyStatsFormattedValue } from 'src/composables/currencyStats';
 import { Currency } from 'src/store/model';
 import { computed } from 'vue';
 
@@ -55,25 +54,9 @@ const options = computed(() => ({
   currency: props.currency,
   value: "volume" as const,
   from: props.period ? new Date(Date.now() - (props.period)*1000) : undefined,
-  previous: !!(props.period)
+  change: !!(props.period)
 }))
 
-const stats = useCurrencyStats(options)
-const value = computed(() => {
-  const data = stats.value?.values?.[0]
-  return data ? formatCurrency(data , props.currency, {decimals: false}) : ""
-})
-
-const changeVal = computed(() => {
-  const data = stats.value?.values?.[0]
-  const previous = stats.value?.previous?.[0]
-  if (data && previous) {
-    return (data - previous) / previous * 100
-  }
-  return undefined
-})
-
-const change = computed(() => changeVal.value ? changeVal.value.toFixed(2) : "")
-const changeSign = computed(() => changeVal.value ? Math.sign(changeVal.value) : 0)
+const {value, change, sign} = useCurrencyStatsFormattedValue(options)
 
 </script>
