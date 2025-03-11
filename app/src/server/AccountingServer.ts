@@ -397,5 +397,19 @@ export default {
         }
       }}
     })
+
+    server.get(`${urlAccounting}/:currency/stats/accounts`, (schema: any, request: any) => {
+      const query = request.queryParams
+      const minTransfers = query.minTransfers ? parseInt(query.minTransfers) : 1
+      const data = [120, 110, 115, 60, 82, 132, 128, 139].map(value => Math.ceil(value/(minTransfers + 1)))
+      const values = query.interval ? data : [query.to ? 123 : 121]
+      return {data: {
+        type: "currency-stats",
+        id: uuid(),
+        attributes: {
+          values
+        }
+      }}
+    })
   }
 };

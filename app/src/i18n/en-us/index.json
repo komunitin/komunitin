@@ -344,7 +344,10 @@
   "day": "Day",
   "week": "Week",
   "month": "Month",
-  
+  "volume": "Volume",
+  "activeAccountsChart": "Active accounts",
+  "activeAccountsChartText": "Number of accounts that have made at least one transaction over the selected period",
+
 
   "ErrorUnknown": "Error: Unknown",
   "ErrorIncorrectRequest": "Error: Incorrect request",

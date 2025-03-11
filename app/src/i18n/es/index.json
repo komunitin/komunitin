@@ -344,6 +344,9 @@
   "day": "Día",
   "week": "Semana",
   "month": "Mes",
+  "volume": "Volume",
+  "activeAccountsChart": "Cuentas activas",
+  "activeAccountsChartText": "Número de cuentas con almenos una transacción durante el período seleccionado",
 
   "ErrorAuthNoCredentials": "Email o password incorrectos",
   "ErrorInvalidPassword": "Contraseña incorrecta",

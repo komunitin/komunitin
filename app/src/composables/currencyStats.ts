@@ -4,9 +4,12 @@ import { Currency } from "src/store/model";
 import { computed, MaybeRefOrGetter, ref, toRef, toValue, watch, watchEffect } from "vue";
 import { useStore } from "vuex";
 
+export type StatsValue = "volume" | "accounts"
+export type StatsInterval = "PT1H" | "P1D" | "P1W" | "P1M" | "P1Y"
+
 export interface CurrencyStatsOptions {
   currency: Currency
-  value: "volume"
+  value: StatsValue
   /**
    * The start date of the stats. Default to all time.
    */
@@ -22,11 +25,15 @@ export interface CurrencyStatsOptions {
   /**
    * The interval of the stats. Default to all time so a single value is returned.
    */
-  interval?: "PT1H" | "P1D" | "P1W" | "P1M" | "P1Y" 
+  interval?: StatsInterval 
+  /**
+   * Extra parameters to add to the query string.
+   */
+  parameters?: Record<string, string|number>
 }
 
 async function getCurrencyStats(options: Omit<CurrencyStatsOptions, "change">, accessToken: string) {
-  const {currency, value, from, to, interval} = options
+  const {currency, value, from, to, interval, parameters} = options
 
   // Get the accounting api url
   const baseUrl = currency.links.self.replace(/\/currency$/, "")
@@ -36,6 +43,12 @@ async function getCurrencyStats(options: Omit<CurrencyStatsOptions, "change">, a
   if (from) query.set("from", from.toISOString())
   if (to) query.set("to", to.toISOString())
   if (interval) query.set("interval", interval)
+
+  if (parameters) {
+    Object.entries(parameters).forEach(([key, value]) => {
+      query.set(key, String(value))
+    })
+  }
 
   if (query.toString()) {
     url += "?" + query.toString()
@@ -62,17 +75,22 @@ export function useCurrencyStats(options: MaybeRefOrGetter<CurrencyStatsOptions>
   const store = useStore()
 
   watch(toRef(options), async () => {
-    const {value, currency, from, to, previous, interval} = toValue(options)
+    const {previous, ...statsOptions} = toValue(options)
     
     const accessToken = store.getters.accessToken
     // Get base interval
-    result.value.values = await getCurrencyStats({value, currency, from, to, interval}, accessToken)
+    result.value.values = await getCurrencyStats(statsOptions, accessToken)
     if (previous) {
+      const {from, to} = statsOptions
       if (!from) {
         throw new Error("Cannot compute previous data without a start date")
       }
       const newFrom = new Date(from.getTime() - ((to?.getTime() ?? Date.now()) - from.getTime()))
-      result.value.previous = await getCurrencyStats({value, currency, from: newFrom, to: from, interval}, accessToken)
+      result.value.previous = await getCurrencyStats({
+        ...statsOptions,
+        from: newFrom,
+        to: from
+      }, accessToken)
     }
 
   }, {immediate: true})
@@ -90,7 +108,7 @@ export function useCurrencyStatsFormattedValue(
     currency: Currency,
     from?: Date
     to?: Date
-    value: "volume"
+    value: StatsValue
     change?: boolean
   }>) {
 
@@ -112,7 +130,11 @@ export function useCurrencyStatsFormattedValue(
     const data = stats.value?.values?.[0]
     const opt = toValue(options)
     if (data) {
-      value.value = formatCurrency(data, opt.currency, {decimals: false})
+      if (opt.value === "volume") {
+        value.value = formatCurrency(data, opt.currency, {decimals: false})
+      } else {
+        value.value = data.toString()
+      }
       if (opt.change && stats.value?.previous) {
         const previous = stats.value.previous[0]
         if (previous) {

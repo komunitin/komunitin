@@ -16,7 +16,7 @@
         <div class="q-pt-md">
           <div>
             <h3 class="q-mt-none q-mb-xs">
-              {{ value }}
+              {{ amount }}
             </h3>    
             <div 
               v-if="change"
@@ -29,7 +29,7 @@
               {{ change }}
             </div>
           </div>
-          <div class="text-caption">
+          <div class="text-caption text-onsurface-m">
             {{ text }}
           </div>
         </div>
@@ -48,6 +48,7 @@
     <q-card-section>
       <time-series-chart 
         :currency="currency"
+        :is-currency="value == 'volume'"
         :data="data.values ?? []"
         :previous="data.previous"
         :interval="interval.value"
@@ -57,17 +58,20 @@
   </q-card>
 </template>
 <script setup lang="ts">
-import { roundDate, useCurrencyStats, useCurrencyStatsFormattedValue } from 'src/composables/currencyStats'
+import { roundDate, StatsValue, useCurrencyStats, useCurrencyStatsFormattedValue } from 'src/composables/currencyStats'
 import { Currency } from 'src/store/model'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TimeSeriesChart from './TimeSeriesChart.vue'
 
 const props = defineProps<{
+  value: StatsValue
   title: string
   icon: string
   currency: Currency
   text: string
+  // Extra parameters to pass to the stats composable
+  parameters?: Record<string, string|number>
 }>()
 
 // Define the periods and make them start at round times so the
@@ -126,13 +130,13 @@ const period = ref(periodOptions[5]) // 12 months
 // Get stats data for the single value
 const valueOptions = computed(() => ({
   currency: props.currency,
-  value: "volume" as const,
+  value: props.value,
   from: period.value.value.from,
   to: period.value.value.to,
   change: true
 }))
 
-const {value, change, sign} = useCurrencyStatsFormattedValue(valueOptions)
+const {value: amount, change, sign} = useCurrencyStatsFormattedValue(valueOptions)
 
 // period duration in seconds or Infinity if all time
 const duration = computed(() => period.value.value.from ? ((period.value.value.to?.getTime() ?? new Date().getTime()) - period.value.value.from.getTime())/1000 : +Infinity)
@@ -156,11 +160,12 @@ const options = computed(() => {
 
   return ({
     currency: props.currency,
-    value: "volume" as const,
+    value: props.value,
     from: from,
     to: period.value.value.to,
     interval: interval.value.value,
-    previous: true
+    previous: false,
+    parameters: props.parameters
   })
 })
 

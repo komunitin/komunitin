@@ -27,7 +27,7 @@
         />
         {{ change }}
       </div>
-      <div class="text-caption">
+      <div class="text-caption text-onsurface-m">
         {{ text }}
       </div>
     </q-card-section>

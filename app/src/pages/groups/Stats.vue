@@ -54,9 +54,23 @@
         <div class="q-mt-md">
           <stats-chart 
             icon="show_chart"
+            value="volume"
             :title="$t('volumeChart')"
             :text="$t('volumeChartText')"
             :currency="currency"  
+          />
+        </div>
+        <div class="text-overline text-uppercase text-onsurface-m q-mt-lg q-mb-sm">
+          {{ $t('accounts') }}
+        </div>
+        <div class="q-mt-md">
+          <stats-chart 
+            icon="show_chart"
+            value="accounts"
+            :title="$t('activeAccountsChart')"
+            :text="$t('activeAccountsChartText')"
+            :parameters="{minTransactions: 1}"
+            :currency="currency"
           />
         </div>
       </q-page>
