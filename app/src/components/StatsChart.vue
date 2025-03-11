@@ -13,7 +13,7 @@
           />
             {{ title }}
         </div>
-        <div class="q-pt-none">
+        <div class="q-pt-md">
           <div>
             <h3 class="q-mt-none q-mb-xs">
               {{ value }}

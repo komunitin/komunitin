@@ -55,7 +55,7 @@
           <stats-chart 
             icon="show_chart"
             :title="$t('volumeChart')"
-            :text="$t('volumeChart')"
+            :text="$t('volumeChartText')"
             :currency="currency"  
           />
         </div>
