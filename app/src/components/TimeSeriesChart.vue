@@ -2,6 +2,7 @@
   <line-chart 
     :options="options"
     :data="datasets"
+    style="height: 300px"
   />
 </template>
 <script setup lang="ts">
@@ -15,6 +16,7 @@ import "chartjs-adapter-date-fns" //overrides default date adapter as a side eff
 import { CurrencyStatsOptions, previousDate, roundDate } from 'src/composables/currencyStats'
 import { Currency } from 'src/store/model'
 import { getDateLocale } from "../boot/i18n"
+import formatCurrency from 'src/plugins/FormatCurrency'
 
 Chart.register(Tooltip, Filler, LinearScale, TimeScale, PointElement, LineElement)
 
@@ -56,6 +58,29 @@ const unit = computed(() => {
   return undefined
 })
 
+
+// Didn't find how to really coordinate x-axis and tooltip date formats
+// in Chart.js, so we have to manually set the tooltip format here. This
+// may not be 100% accurate depending on the locale.
+const timeFormat = computed(() => {
+  
+  switch (props.interval) {  
+    case 'PT1H':
+      // 14 apr 3PM
+      return 'MMM d, ha'
+    case 'P1D':
+      // Mar 3
+      return 'MMM d'
+    case 'P1W':
+      return 'MMM d, yyyy'
+    case 'P1M':
+      return 'MMM yyyy'
+    case 'P1Y':
+      return 'yyyy'
+  }
+  return undefined
+})
+
 const options = computed<ChartOptions<"line">>(() => ({
   responsive: true,
   maintainAspectRatio: false,
@@ -63,18 +88,50 @@ const options = computed<ChartOptions<"line">>(() => ({
     x: {
       type: 'time',
       time: {
-        unit: unit.value
+        unit: unit.value,
+        tooltipFormat: timeFormat.value,
       },
       adapters: {
         date: {
           locale: getDateLocale()
         }
+      },
+      grid: {
+        drawTicks: false
+      },
+      ticks: {
+        padding: 10
       }
     },
     y: {
-      beginAtZero: true
+      beginAtZero: true,
+      ticks: {
+        callback: (value: number) => {
+          return formatCurrency(value, props.currency, {decimals: false})
+        },
+        padding: 10
+      },
+      grid: {
+        drawTicks: false
+      }
     },
   },
+  elements: {
+    point: {
+      backgroundColor: '#FFFFFF',
+      borderWidth: 2,
+      hoverBorderWidth: 2,
+    }
+  },
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: (context) => {
+          return formatCurrency(context.parsed.y, props.currency)
+        },
+      }
+    }
+  }
   
 }))
 type TimePoint = {x: Date, y: number}
