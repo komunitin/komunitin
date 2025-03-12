@@ -346,7 +346,7 @@
   "month": "Month",
   "volume": "Volume",
   "activeAccountsChart": "Active accounts",
-  "activeAccountsChartText": "Number of accounts that have made at least one transaction over the selected period",
+  "activeAccountsChartText": "Accounts with at least one transaction over the selected period",
 
 
   "ErrorUnknown": "Error: Unknown",

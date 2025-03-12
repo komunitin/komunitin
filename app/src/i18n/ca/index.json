@@ -345,7 +345,7 @@
   "week": "Setmana",
   "month": "Mes",
   "activeAccountsChart": "Comptes actius",
-  "activeAccountsChartText": "Número de comptes amb almenys una transacció durant el període seleccionat",
+  "activeAccountsChartText": "Comptes amb almenys una transacció durant el període seleccionat",
   
 
   "ErrorAuthNoCredentials": "Email o contrasenya incorrectes",
