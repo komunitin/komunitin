@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { CurrencyController, SharedController } from "src/controller"
-import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, collectionParams, resourceParams } from "./request"
+import { CollectionOptions, CollectionParamsOptions, ResourceOptions, ResourceParamsOptions, StatsOptions, collectionParams, resourceParams, statsParams } from "./request"
 import { Context, context } from "src/utils/context"
 import { DataDocument, Dictionary, Linker, Paginator, Serializer } from "ts-japi"
 import { input, Resource } from "./parse"
@@ -118,6 +118,14 @@ export function currencyInputHandlerMultiple<T extends Dictionary<any>, D extend
   return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
     const data = input<D>(req)
     const resource = await fn(currencyController, ctx, data)
+    return serializer.serialize(resource)
+  }, status)
+}
+
+export function currencyStatsHandler<T extends Dictionary<any>>(controller: SharedController, fn: (currencyController: CurrencyController, context: Context, params: StatsOptions) => Promise<T>, serializer: Serializer<T>, status = 200) {
+  return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
+    const params = statsParams(req)
+    const resource = await fn(currencyController, ctx, params)
     return serializer.serialize(resource)
   }, status)
 }

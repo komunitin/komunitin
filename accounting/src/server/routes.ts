@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { check, checkExact, oneOf } from 'express-validator';
+import { checkExact, oneOf } from 'express-validator';
 import { AccountSettings, CreateCurrency, CurrencySettings, InputAccount, InputTransfer, UpdateAccount, UpdateCurrency, UpdateTransfer } from 'src/model';
 import { context } from 'src/utils/context';
 import { SharedController, MigrationController } from '../controller';
 import { Scope, userAuth, noAuth, anyAuth, externalAuth } from './auth';
-import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyInputHandlerMultiple, currencyResourceHandler } from './handlers';
+import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyInputHandlerMultiple, currencyResourceHandler, currencyStatsHandler } from './handlers';
 import { input } from './parse';
-import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, CurrencySettingsSerializer, TransferSerializer, TrustlineSerializer } from './serialize';
+import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, CurrencySettingsSerializer, StatsSerializer, TransferSerializer, TrustlineSerializer } from './serialize';
 import { Validators } from './validation';
 import { InputTrustline, Trustline, UpdateTrustline } from 'src/model/trustline';
 import { badRequest } from 'src/utils/error';
@@ -198,6 +198,11 @@ export function getRoutes(controller: SharedController) {
       include: ["currency", "trusted"]
     })
   )
+
+  router.get('/:code/stats/volume', userAuth([Scope.Accounting, Scope.AccountingReadAll]), currencyStatsHandler(controller, async (currencyController, ctx, options) => {
+    return await currencyController.stats.getVolume(ctx, options)
+  }, StatsSerializer))
+
 
   // Migrations (WIP)
   router.post('/migrations', userAuth(Scope.Accounting), checkExact(Validators.isCreateMigration()), asyncHandler(async (req, res) => {
