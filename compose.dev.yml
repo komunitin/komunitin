@@ -38,8 +38,8 @@ services:
   cc:
     build:
       context: ./cc
-      ports:
-        - "8080:80"
+    ports:
+      - "8080:80"
 
   accounting:
     command: pnpm dev
@@ -74,4 +74,4 @@ services:
      - REDIS_HOSTS=local:redis:6379
     ports:
      - "2027:8081" 
-  cc:
+  
