@@ -33,6 +33,14 @@ services:
       - "40000:40000"
     volumes:
       - ./notifications:/opt/notifications
+
+
+  cc:
+    build:
+      context: ./cc
+      ports:
+        - "8080:80"
+
   accounting:
     command: pnpm dev
     ports:
@@ -66,4 +74,4 @@ services:
      - REDIS_HOSTS=local:redis:6379
     ports:
      - "2027:8081" 
-  
+  cc:
