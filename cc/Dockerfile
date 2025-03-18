@@ -52,7 +52,10 @@ WORKDIR /workspaces/cc-server
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
 RUN git clone https://github.com/michielbdejong/automerge-basic
 WORKDIR /workspaces/cc-server/automerge-basic
-# RUN /bin/bash nvm install 22
-# RUN /bin/bash npm install
-# RUN /bin/bash npm run build
+RUN git checkout cc-server-experiment
+RUN /bin/bash -c 'source ~/.bashrc ; nvm install 22'
+RUN /bin/bash -c 'source ~/.bashrc ; npm install'
+RUN /bin/bash -c 'source ~/.bashrc ; npm run build'
+WORKDIR /workspaces/cc-server
+
 EXPOSE 80

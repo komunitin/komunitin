@@ -63,3 +63,28 @@ Then you should to add the flag `--public` to the start script. For example:
 ```bash
 ./start.sh --up --ices --public
 ```
+
+## CC integration
+To test the CC integration, either use the `start.sh` script (better, but will take a bit longer due to the ICES installation process), or `docker compose build ; docker compose up -d`, and then:
+```sh
+docker exec -it komunitin-cc-1 /bin/bash
+service mariadb start
+vendor/bin/phpunit tests/SingleNodeTest.php 
+```
+
+The following error will be displayed only the first time, you can ignore it:
+```
+ERROR 1396 (HY000) at line 1: Operation DROP USER failed for 'twig'@'localhost'
+```
+
+To run the MultiNodeTest, you need to activate the automerge-basic proxy first, inside the container:
+```
+cd automerge-basic
+npm start
+```
+And then in a separate window, call `docker exec -it komunitin-cc-1 /bin/bash` again, and then:
+```
+vendor/bin/phpunit tests/MultiNodeTest.php
+curl http://komunitin-accounting-1:2025
+```
+Next step: let my proxy act as branch2.cc-server, and make a http request from it to komunitin-accounting-1 to complete the remote payment!
