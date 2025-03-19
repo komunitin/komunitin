@@ -84,4 +84,34 @@ In order to feature trade between communities, the following model is proposed:
   - The currency andministration may choose to trust another currency up to a limit. This means that the currency will accept the HOUR asset from the other currency as payment. This is reflected by creating a trustline to the external HOUR asset and a sell offer to convert the currency HOUR asset to the external HOUR asset.
   - Whenever an incoming external payment is received, the trader account creates or updates the sell offer to convert the current balance of external HOUR assets to local HOUR assets.
 
+## CC integration
+To test the CC integration, make sure you don't have postgres running on your host system, and then from this folder do the following:
+```sh
+cp .env.test .env
+docker compose up -d
+./node_modules/.bin/prisma migrate reset --force
+pnpm test-one test/server/20.federation.cc.test.ts
+docker exec -it komunitin-cc-1 /bin/bash
+```
+and then:
+```
+service mariadb start
+vendor/bin/phpunit tests/SingleNodeTest.php
+```
 
+The following error will be displayed only the first time, you can ignore it:
+```
+ERROR 1396 (HY000) at line 1: Operation DROP USER failed for 'twig'@'localhost'
+```
+
+To run the MultiNodeTest, you need to activate the automerge-basic proxy first, inside the container:
+```
+cd automerge-basic
+npm start
+```
+And then in a separate window, call `docker exec -it komunitin-cc-1 /bin/bash` again, and then:
+```
+vendor/bin/phpunit tests/MultiNodeTest.php
+curl http://komunitin-accounting-1:2025
+```
+Next step: let my proxy act as branch2.cc-server, and make a http request from it to komunitin-accounting-1 to complete the remote payment!

@@ -20,3 +20,15 @@ services:
       - "8000:8000"
     environment:
       NETWORK: local
+  cc:
+    build:
+      context: ./docker/cc
+    container_name: cc
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    extra_hosts:
+      - "twig.cc-server:127.0.0.1"
+      - "branch.cc-server:127.0.0.1"
+      - "trunk.cc-server:127.0.0.1"
+      - "branch2.cc-server:127.0.0.1"
