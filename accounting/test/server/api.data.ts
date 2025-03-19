@@ -60,6 +60,25 @@ export const testTransfer = (payerId: string, payeeId: string, amount: number, m
   }
 })
 
+export const testCreditCommonsNeighbour = (ccNodeName: string, lastHash: string) => ({
+  data: {
+    attributes: {
+      ccNodeName,
+      lastHash
+    }
+  }
+})
+
+export const testCreditCommonsTransaction = (payer: string, payee: string, quant: number) => ({
+  data: {
+    attributes: {
+      payer,
+      payee,
+      quant,
+    }
+  }
+})
+
 export const userAuth = (userId: string) => ({
   user: userId,
   scopes: [Scope.Accounting]

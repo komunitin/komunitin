@@ -92,4 +92,14 @@ describe('Input validation', async () => {
     }
     await testValidation(Validators.isCreateTransfer(), testTransfer)
   })
+  await it('CreditCommons graft', async () => {
+    await testValidation(Validators.isCreditCommonsGraft(), {
+      data: {
+        attributes: {
+          ccNodeName: 'trunk',
+          lastHash: 'asdf',
+        }
+      }
+    })
+  })
 })

@@ -11,7 +11,7 @@ import { config } from 'src/config';
 }
 
 */
-const projection = <T>(fields: (keyof T)[]) => {
+export const projection = <T>(fields: (keyof T)[]) => {
   return Object.fromEntries(fields.map(field => [field, 1]))
 }
 
@@ -181,6 +181,3 @@ export const TrustlineSerializer = new Serializer<Trustline>("trustlines", {
     , ExternalCurrencySerializer, { relatedName: "trusted" })
   }
 })
-
-
-
