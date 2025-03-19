@@ -91,7 +91,7 @@ cp .env.test .env
 docker compose up -d
 ./node_modules/.bin/prisma migrate reset --force
 pnpm test-one test/server/20.federation.cc.test.ts
-docker exec -it komunitin-cc-1 /bin/bash
+docker exec -it cc /bin/bash
 ```
 and then:
 ```
@@ -109,9 +109,9 @@ To run the MultiNodeTest, you need to activate the automerge-basic proxy first, 
 cd automerge-basic
 npm start
 ```
-And then in a separate window, call `docker exec -it komunitin-cc-1 /bin/bash` again, and then:
+And then in a separate window, call `docker exec -it cc /bin/bash` again, and then:
 ```
 vendor/bin/phpunit tests/MultiNodeTest.php
-curl http://komunitin-accounting-1:2025
+curl http://localhost:2025 -> note: this doesn't work because in this setup, accounting is on the host system!
 ```
 Next step: let my proxy act as branch2.cc-server, and make a http request from it to komunitin-accounting-1 to complete the remote payment!
