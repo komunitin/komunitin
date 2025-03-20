@@ -86,10 +86,34 @@ export const anyAuth = (auth1: Middleware, auth2: Middleware) => {
 /**
  * Middleware that allows any request without authentication. 
  * 
- * It does nothig but it helps flag the routes that do not require authentication.
+ * It does nothing but it helps flag the routes that do not require authentication.
  * */
 export const noAuth = () => (req: Request, res: Response, next: NextFunction) => {
   next()
+}
+
+/**
+ * Check the cc-node and last-hash headers against the database, following
+ * https://credit-commons.gitlab.io/credit-commons-documentation/#core-concepts
+ * */
+export const lastHashAuth = () => (req: Request, res: Response, next: NextFunction) => {
+  const ccNode = req.header("cc-node")
+  if (!ccNode) {
+    return next(unauthorized("cc-node header is required."))
+  }
+  const lastHash = req.header("last-hash")
+  if (!lastHash) {
+    return next(unauthorized("last-hash header is required."))
+  }
+  // TODO: query the db here
+  const expectedLastHashRow = (ccNode == 'trunk' ? ['asdf'] : []); // db.get('SELECT hash FROM cc WHERE node = %1', ccNode);
+  if (expectedLastHashRow.length === 0) {
+    return next(unauthorized("cc-node is not our trunkward node."))
+  }
+  if (expectedLastHashRow[0] === lastHash) {
+    return next()
+  }
+  return next(unauthorized("value of last-hash header does not match our records."))
 }
 
 const handleAuthRequest = (scopes: Scope|Scope[]|undefined, req: Request, res: Response, next: NextFunction) => {

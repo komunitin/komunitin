@@ -64,6 +64,10 @@ export class LedgerCurrencyController implements CurrencyController {
     this.externalResources = new ExternalResourceController(this)
   }
 
+  public getDb(): TenantPrismaClient {
+    return this.db
+  }
+
   /**
    * Implements {@link CurrencyController.getCurrency}
    */

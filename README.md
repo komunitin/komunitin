@@ -63,3 +63,22 @@ Then you should to add the flag `--public` to the start script. For example:
 ```bash
 ./start.sh --up --ices --public
 ```
+
+## CC integration [WIP! needs to be updated before merging]
+To test the CC integration, run:
+```sh
+docker compose up -d
+docker exec -it komunitin-accounting-1 /bin/bash -c "./node_modules/.bin/prisma migrate reset --force"
+docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"
+docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/SingleNodeTest.php"
+docker exec -d komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
+docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
+docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -X POST http://komunitin-accounting-1:2025/cc/transaction"
+```
+
+Some errors like this will be displayed only the first time you execute the CC tests, you can ignore them:
+```
+ERROR 1396 (HY000) at line 1: Operation DROP USER failed for 'twig'@'localhost'
+```
+
+Next step: let the accounting server act as branch2.cc-server, and complete the remote payment!

@@ -5,7 +5,9 @@ export { createController } from "./base-controller"
 import { Context } from "../utils/context"
 import TypedEmitter from "typed-emitter"
 import { InputTrustline, Trustline, UpdateTrustline } from "src/model/trustline"
+import { TenantPrismaClient } from "./multitenant"
 export { MigrationController } from './migration'
+
 
 export type ControllerEvents = {
   /**
@@ -38,6 +40,8 @@ export interface CurrencyController {
   accounts: AccountController
   transfers: TransferController
   
+  // direct access
+  getDb(): TenantPrismaClient
   // Currency
   getCurrency(ctx: Context): Promise<Currency>
   updateCurrency(ctx: Context, currency: UpdateCurrency): Promise<Currency>

@@ -83,5 +83,3 @@ In order to feature trade between communities, the following model is proposed:
   - If the trader is configured to hold and initial balance of local asset, then it also sets an offer to convert HOUR to the local asset.
   - The currency andministration may choose to trust another currency up to a limit. This means that the currency will accept the HOUR asset from the other currency as payment. This is reflected by creating a trustline to the external HOUR asset and a sell offer to convert the currency HOUR asset to the external HOUR asset.
   - Whenever an incoming external payment is received, the trader account creates or updates the sell offer to convert the current balance of external HOUR assets to local HOUR assets.
-
-

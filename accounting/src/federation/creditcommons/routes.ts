@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { SharedController } from "src/controller";
-import { noAuth } from "src/server/auth";
+import { noAuth, lastHashAuth } from "src/server/auth";
 import { asyncHandler } from "src/server/handlers";
 
 /**
@@ -15,8 +15,18 @@ export function getRoutes(controller: SharedController) {
   /**
    * Propose transaction.
    */
-  router.post('/transaction', noAuth(), asyncHandler(async (req, res) => {
-    // TODO
+  router.post('/transaction', lastHashAuth(), asyncHandler(async (req, res) => {
+    const currencyController = await controller.getCurrencyController('TEST')
+    const record = await currencyController.getDb().creditCommonsTrunkwardNode.findFirst({
+      // where: {
+      //   ccNodeName: req.header('cc-node'),
+      //   lastHash: req.header('last-hash')
+      // }
+    })
+    console.log('record from db', record)
+    if (!record) {
+      throw new Error('Credit Commons Auth failed')
+    }
     res.status(200).json({ message: 'Welcome to the Credit Commons federation protocol.' })
   }))
 
