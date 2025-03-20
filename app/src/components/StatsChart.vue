@@ -133,7 +133,8 @@ const valueOptions = computed(() => ({
   value: props.value,
   from: period.value.value.from,
   to: period.value.value.to,
-  change: true
+  change: true,
+  parameters: props.parameters
 }))
 
 const {value: amount, change, sign} = useCurrencyStatsFormattedValue(valueOptions)

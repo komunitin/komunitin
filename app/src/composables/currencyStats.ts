@@ -110,6 +110,7 @@ export function useCurrencyStatsFormattedValue(
     to?: Date
     value: StatsValue
     change?: boolean
+    parameters?: Record<string, string|number>
   }>) {
 
   // The main composable use "previous" instead of "change" so we need to adapt the options
