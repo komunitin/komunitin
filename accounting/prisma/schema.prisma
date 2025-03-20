@@ -280,7 +280,8 @@ model Value {
 }
 
 model CreditCommonsTrunkwardNode {
+  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   ccNodeName String @db.VarChar(255)
   lastHash   String @db.VarChar(255)
-  @@id([ccNodeName])
+  @@id([tenantId, ccNodeName])
 }

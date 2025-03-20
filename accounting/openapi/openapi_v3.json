@@ -4958,6 +4958,46 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "500",
+                          "code": "InternalError",
+                          "title": "Internal Error",
+                          "detail": "Credit Commons Auth failed"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [],
