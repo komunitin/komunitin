@@ -64,7 +64,7 @@ Then you should to add the flag `--public` to the start script. For example:
 ./start.sh --up --ices --public
 ```
 
-## CC integration
+## CC integration [WIP! needs to be updated before merging]
 To test the CC integration, run:
 ```sh
 docker compose up -d
