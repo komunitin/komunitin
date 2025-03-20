@@ -1,11 +1,26 @@
 import { Context } from "src/utils/context";
 import { AbstractCurrencyController } from "./abstract-currency-controller"
-import { CollectionOptions, StatsOptions } from "src/server/request";
+import { AccountStatsOptions, CollectionOptions, StatsOptions } from "src/server/request";
 import { Stats, StatsInterval } from "src/model/stats";
+import { StatsController as IStatsController } from "src/controller";
+import { Prisma } from "@prisma/client";
 
-export class StatsController extends AbstractCurrencyController {
 
-  private async getVolumeSingleValue(from: Date|undefined, to: Date) {
+/**
+ * Provides statistics about the transactions and accounts in the system.
+ * 
+ * The statistics are provided in the form of a series of values, each value
+ * corresponding to a period of time. The period of time is defined by the
+ * "from" and "to" parameters.
+ * 
+ * The implementation makes use of heavy SQL queries to compute the statistics
+ * which may be slow for large datasets. In this case we would need to:
+ *  - use more efficient SQL queries if possible
+ *  - use caching
+ */
+export class StatsController extends AbstractCurrencyController implements IStatsController {
+
+  private async getVolumeSingleValue(from: Date|undefined, to: Date|undefined) {
     const value = await this.db().transfer.aggregate({
       _sum: {
         amount: true
@@ -14,17 +29,36 @@ export class StatsController extends AbstractCurrencyController {
         updated: {
           gte: from,
           lt: to
-        }
+        },
+        state: "committed"
       }
     })
     return Number(value._sum.amount) ?? 0
   }
 
-  private async getVolumeValues(from: Date, to: Date, interval: StatsInterval): Promise<number[]> {
-    const sqlInterval = this.getSqlInterval(interval)
-    const sqlDatePart = this.getSqlDatePart(interval)
+  /**
+   * Provides a template for SQL query that generates a series of intervals
+   * between the "from" and "to" dates, with the specified "interval".
+   * 
+   * Usage:
+   * `
+   * const sqlIntervals = this.intervalsSqlTemplate(from, to, interval)
+   * const query = await this.db().$queryRaw`
+   *   ${sqlIntervals}
+   *   SELECT i."interval"
+   *   FROM "Intervals" i
+   * `
+   * 
+   * @param from 
+   * @param to 
+   * @param interval 
+   * @returns 
+   */
+  private intervalsSqlTemplate(from: Date, to: Date, interval: StatsInterval) {
+    const sqlInterval = this.sqlInterval(interval)
+    const sqlDatePart = this.sqlDatePart(interval)
 
-    const query = await this.db().$queryRaw`
+    return Prisma.sql`
       WITH "Intervals" AS (
         SELECT generate_series(
           date_trunc(${sqlDatePart}, ${from}::timestamp),
@@ -32,9 +66,46 @@ export class StatsController extends AbstractCurrencyController {
           ${sqlInterval}::interval
         ) AS "interval" 
       )
+    `
+  }
+
+  private truncateDate(date: Date, interval: StatsInterval) {
+    const newDate = new Date(date)
+    switch (interval) {
+      case 'PT1H':
+        newDate.setUTCMinutes(0, 0, 0)
+        break
+      case 'P1D':
+        newDate.setUTCHours(0, 0, 0, 0)
+        break
+      case 'P1W':
+        newDate.setUTCHours(0, 0, 0, 0)
+        const weekDay = (newDate.getUTCDay() -1 + 7) % 7 // Starting Monday
+        newDate.setUTCDate(newDate.getUTCDate() - weekDay)
+        break
+      case 'P1M':
+        newDate.setUTCHours(0, 0, 0, 0)
+        newDate.setUTCDate(1)
+        break
+      case 'P1Y':
+        newDate.setUTCHours(0, 0, 0, 0)
+        newDate.setUTCMonth(0, 1)
+        break
+    }
+    return newDate
+  }
+
+  private async getVolumeValues(from: Date, to: Date, interval: StatsInterval): Promise<number[]> {
+    
+    const sqlInterval = this.sqlInterval(interval)
+    const sqlIntervals = this.intervalsSqlTemplate(from, to, interval)
+    const query = await this.db().$queryRaw`
+      ${sqlIntervals}
       SELECT i."interval" AS "interval", COALESCE(SUM(t."amount"), 0) AS "amount"
       FROM "Intervals" i
-      LEFT JOIN "Transfer" t ON t."updated" >= i."interval" AND t."updated" < LEAST(i."interval" + ${sqlInterval}::interval, ${to}::timestamp)
+      LEFT JOIN "Transfer" t ON t."updated" >= i."interval" 
+        AND t."updated" < LEAST(i."interval" + ${sqlInterval}::interval, ${to}::timestamp) 
+        AND t."state" = 'committed'
       GROUP BY i."interval"
       ORDER BY i."interval"
       ` as Array<{ interval: Date, amount: number }>;
@@ -42,7 +113,7 @@ export class StatsController extends AbstractCurrencyController {
     return query.map(r => r.amount)
   }
 
-  private async getFirstDate() {
+  private async getFirstTransferDate() {
     const value = await this.db().transfer.aggregate({
       _min: {
         updated: true
@@ -51,7 +122,16 @@ export class StatsController extends AbstractCurrencyController {
     return value._min.updated ?? new Date()
   }
 
-  private getSqlInterval(interval: StatsInterval) {
+  private async getFirstAccountDate() {
+    const value = await this.db().account.aggregate({
+      _min: {
+        created: true
+      }
+    })
+    return value._min.created ?? new Date()
+  }
+
+  private sqlInterval(interval: StatsInterval) {
     switch (interval) {
       case 'PT1H':
         return "1 hour"
@@ -66,7 +146,7 @@ export class StatsController extends AbstractCurrencyController {
     }
   }
 
-  private getSqlDatePart(interval: StatsInterval) {
+  private sqlDatePart(interval: StatsInterval) {
     switch (interval) {
       case 'PT1H':
         return "hour"
@@ -106,7 +186,7 @@ export class StatsController extends AbstractCurrencyController {
       }
     } else {
       // If interval is provided, we need to have an explicit "from" date.
-      const fromDate = from ?? await this.getFirstDate()
+      const fromDate = from ?? this.truncateDate(await this.getFirstTransferDate(), interval)
       const values = await this.getVolumeValues(fromDate, toDate, interval)
       
       return ({
@@ -117,4 +197,117 @@ export class StatsController extends AbstractCurrencyController {
       })
     }
   }
+
+  /**
+   * Return the number of accounts that have a number of transactions within the range
+   * provided by the minTransactions and maxTransactions parameters.
+   * @param ctx 
+   * @param params 
+   */
+  public async getAccounts(ctx: Context, params: AccountStatsOptions): Promise<Stats> {
+    const { from, to, interval, minTransactions, maxTransactions } = params
+
+    const toDate = to ?? new Date()
+    const fromDate = from ?? this.truncateDate(await this.getFirstAccountDate(), interval ?? 'P1D')
+    
+    const min = minTransactions ?? 0
+    const max = maxTransactions ?? Number.MAX_SAFE_INTEGER
+
+
+    const sqlInterval = interval ? this.sqlInterval(interval) : undefined
+
+    let values: number[]
+
+    // In accouts table we have created and updated timestamps and a status field
+    // that may take either "active" or "deleted" values.
+
+    // The number of existing accounts in a given period can be computed as the number
+    // of accounts created before the end of the period (regardless of current status)
+    // and that have not been deleted before the start of the period (so status
+    // is "deleted" and we check the updated field).
+
+    let result;
+    if (!interval) {
+      /*
+      const debug = await this.db().$queryRaw`
+        SELECT a."id", COUNT(t."id") as "count"
+          FROM "Account" a
+          LEFT JOIN "Transfer" t ON (t."payerId" = a."id" OR t."payeeId" = a."id") 
+            AND t."updated" >= ${fromDate} AND t."updated" < ${toDate} 
+            AND t."state" = 'committed'
+          WHERE a."created" < ${toDate} AND NOT (a."status" = 'deleted' AND a."updated" < ${fromDate})
+          GROUP BY a."id"
+        `
+      console.log(debug)
+      */
+
+      result = await this.db().$queryRaw`
+        SELECT COUNT(*) as "count" FROM 
+        (
+          SELECT a."id"
+          FROM "Account" a
+          LEFT JOIN "Transfer" t ON (t."payerId" = a."id" OR t."payeeId" = a."id") 
+            AND t."updated" >= ${fromDate} AND t."updated" < ${toDate} 
+            AND t."state" = 'committed'
+          WHERE a."created" < ${toDate} AND NOT (a."status" = 'deleted' AND a."updated" < ${fromDate})
+          GROUP BY a."id"
+          HAVING COUNT(t."id") >= ${min} AND COUNT(t."id") <= ${max}
+        )
+        ` as Array<{ count: number }>;
+
+    } else {
+      const sqlIntervals = this.intervalsSqlTemplate(fromDate, toDate, interval)
+      /*
+      const debug = await this.db().$queryRaw`
+        ${sqlIntervals}
+        SELECT i."interval" AS "interval", a."id" AS "account", COUNT(t."id") as "count"
+          FROM "Intervals" i
+          LEFT JOIN "Account" a ON
+            a."created" < LEAST(i."interval" + ${sqlInterval}::interval, ${toDate}) AND
+            NOT (a."status" = 'deleted' AND a."updated" < i."interval")
+          LEFT JOIN "Transfer" t ON (t."payerId" = a."id" OR t."payeeId" = a."id")
+            AND t."updated" >= i."interval" AND t."updated" < LEAST(i."interval" + ${sqlInterval}::interval, ${toDate})
+            AND t."state" = 'committed'
+          GROUP BY i."interval", a."id"
+          ORDER BY i."interval"
+        `
+      console.log(debug)
+      */
+
+      result = await this.db().$queryRaw`
+        ${sqlIntervals}
+        SELECT j."interval" AS "interval", COUNT(c."account") AS "count" FROM 
+        "Intervals" j
+        LEFT JOIN
+        (
+          SELECT i."interval" AS "interval", a."id" AS "account"
+          FROM "Intervals" i
+          LEFT JOIN "Account" a ON
+            a."created" < LEAST(i."interval" + ${sqlInterval}::interval, ${toDate}) AND
+            NOT (a."status" = 'deleted' AND a."updated" < i."interval")
+          LEFT JOIN "Transfer" t ON (t."payerId" = a."id" OR t."payeeId" = a."id")
+            AND t."updated" >= i."interval" AND t."updated" < LEAST(i."interval" + ${sqlInterval}::interval, ${toDate})
+            AND t."state" = 'committed'
+          GROUP BY i."interval", a."id"
+          HAVING COUNT(t."id") >= ${min} AND COUNT(t."id") <= ${max}
+        ) as c
+        ON j."interval" = c."interval"
+        GROUP BY j."interval"
+        ORDER BY j."interval"
+        ` as Array<{ interval: Date, count: number }>;
+    }
+
+    // Prisma returns bigint for COUNT, so we need to convert it to number.
+    values = result.map(r => Number(r.count))
+
+    return {
+      from: fromDate,
+      to: toDate,
+      interval: interval,
+      values
+    }
+
+  }
+
+  
 }

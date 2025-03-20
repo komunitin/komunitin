@@ -8,8 +8,9 @@ import { logger } from "src/utils/logger";
 import { LedgerCurrencyController } from "./currency-controller";
 import { ExternalTransferController } from "./external-transfer-controller";
 import { includeRelations, whereFilter } from "./query";
+import { TransferController as ITransferController } from "src/controller";
 
-export class TransferController  extends AbstractCurrencyController {
+export class TransferController  extends AbstractCurrencyController implements ITransferController {
   private externalTransfers: ExternalTransferController
 
   constructor(currencyController: LedgerCurrencyController) {

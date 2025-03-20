@@ -8,8 +8,9 @@ import { WithRequired } from "src/utils/types";
 import { CollectionOptions } from "src/server/request";
 import { whereFilter } from "./query";
 import { deriveKey, exportKey } from "src/utils/crypto";
+import { AccountController as IAccountController } from "src/controller";
 
-export class AccountController extends AbstractCurrencyController{
+export class AccountController extends AbstractCurrencyController implements IAccountController{
   constructor (readonly currencyController: LedgerCurrencyController) {
     super(currencyController)
   }

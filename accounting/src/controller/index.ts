@@ -1,5 +1,5 @@
 
-import { CollectionOptions, StatsOptions } from "../server/request"
+import { AccountStatsOptions, CollectionOptions, StatsOptions } from "../server/request"
 import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings, CurrencySettings } from "../model"
 export { createController } from "./base-controller"
 import { Context } from "../utils/context"
@@ -81,4 +81,5 @@ export interface TransferController {
 
 export interface StatsController {
   getVolume(ctx: Context, params: StatsOptions): Promise<Stats>
+  getAccounts(ctx: Context, params: AccountStatsOptions): Promise<Stats>
 }

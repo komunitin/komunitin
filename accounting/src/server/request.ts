@@ -109,6 +109,10 @@ export type StatsOptions = {
   to: Date|undefined
   interval: "PT1H" | "P1D" | "P1W" | "P1M" | "P1Y" | undefined
 }
+export type AccountStatsOptions = StatsOptions & {
+  minTransactions: number|undefined
+  maxTransactions: number|undefined
+}
 /**
  * Return the request pagination, filtering and sort parameters. 
  * 
@@ -149,23 +153,52 @@ export const resourceParams = (req: Request, options: ResourceParamsOptions): Re
     include: include(req, options?.include ?? [])
   }
 }
+const checkDateParam = (req: Request, paramName: string) => {
+  const param = req.query[paramName]
+  if (param === undefined) {
+    return undefined
+  } else if (typeof param === "string") {
+    const date = new Date(param)
+    if (!isNaN(date.getTime())) {
+      return date
+    }
+  }
+  throw badRequest(`Invalid ${paramName} parameter`)
+}
+
+const checkIntParam = (req: Request, paramName: string) => {
+  const param = req.query[paramName]
+  if (param === undefined) {
+    return undefined
+  } else if (typeof param === "string") {
+    const value = parseInt(param)
+    if (!isNaN(value) && value >= 0) {
+      return value
+    }
+  }
+  throw badRequest(`Invalid ${paramName} parameter`)
+}
 
 export const statsParams = (req: Request): StatsOptions => {
-  if (req.query.from !== undefined && typeof req.query.from !== "string") {
-    throw badRequest("Invalid from parameter")
-  }
-  if (req.query.to !== undefined && typeof req.query.to !== "string") {
-    throw badRequest("Invalid to parameter")
-  }
+  const from = checkDateParam(req, "from")
+  const to = checkDateParam(req, "to")
+
   if (req.query.interval !== undefined && (typeof req.query.interval !== "string"
     || !["PT1H", "P1D", "P1W", "P1M", "P1Y"].includes(req.query.interval)
   )) {
     throw badRequest("Invalid interval parameter")
   }
-
-  const from = req.query.from ? new Date(req.query.from) : undefined
-  const to = req.query.to ? new Date(req.query.to) : undefined
   const interval = req.query.interval as "PT1H" | "P1D" | "P1W" | "P1M" | "P1Y" | undefined
   return {from, to, interval}
+}
+
+export const accountStatsParams = (req: Request): AccountStatsOptions => {
+  const params = statsParams(req)
+
+  const minTransactions = checkIntParam(req, "minTransactions")
+  const maxTransactions = checkIntParam(req, "maxTransactions")
+  
+  return {...params, minTransactions, maxTransactions}
+
 }
 

@@ -4,14 +4,14 @@ import { AccountSettings, CreateCurrency, CurrencySettings, InputAccount, InputT
 import { context } from 'src/utils/context';
 import { SharedController, MigrationController } from '../controller';
 import { Scope, userAuth, noAuth, anyAuth, externalAuth } from './auth';
-import { asyncHandler, currencyCollectionHandler, currencyInputHandler, currencyInputHandlerMultiple, currencyResourceHandler, currencyStatsHandler } from './handlers';
+import { asyncHandler, currencyCollectionHandler, currencyHandler, currencyInputHandler, currencyInputHandlerMultiple, currencyResourceHandler } from './handlers';
 import { input } from './parse';
 import { AccountSerializer, AccountSettingsSerializer, CurrencySerializer, CurrencySettingsSerializer, StatsSerializer, TransferSerializer, TrustlineSerializer } from './serialize';
 import { Validators } from './validation';
 import { InputTrustline, Trustline, UpdateTrustline } from 'src/model/trustline';
 import { badRequest } from 'src/utils/error';
 import { CreateMigration } from 'src/controller/migration/migration';
-import { collectionParams, resourceParams } from './request';
+import { accountStatsParams, collectionParams, statsParams } from './request';
 
 export function getRoutes(controller: SharedController) {
   const router = Router()
@@ -199,9 +199,21 @@ export function getRoutes(controller: SharedController) {
     })
   )
 
-  router.get('/:code/stats/volume', userAuth([Scope.Accounting, Scope.AccountingReadAll]), currencyStatsHandler(controller, async (currencyController, ctx, options) => {
-    return await currencyController.stats.getVolume(ctx, options)
-  }, StatsSerializer))
+  router.get('/:code/stats/volume', userAuth([Scope.Accounting, Scope.AccountingReadAll]), 
+    currencyHandler(controller, async (currencyController, ctx, req) => {
+      const params = statsParams(req)
+      const stats = await currencyController.stats.getVolume(ctx, params)
+      return StatsSerializer.serialize(stats)
+    })
+  )
+
+  router.get('/:code/stats/accounts', userAuth([Scope.Accounting, Scope.AccountingReadAll]),
+    currencyHandler(controller, async (currencyController, ctx, req) => {
+      const params = accountStatsParams(req)
+      const stats = await currencyController.stats.getAccounts(ctx, params)
+      return StatsSerializer.serialize(stats)
+    }
+  ))
 
 
   // Migrations (WIP)
