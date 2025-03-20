@@ -235,11 +235,12 @@ export class StatsController extends AbstractCurrencyController implements IStat
           LEFT JOIN "Transfer" t ON (t."payerId" = a."id" OR t."payeeId" = a."id") 
             AND t."updated" >= ${fromDate} AND t."updated" < ${toDate} 
             AND t."state" = 'committed'
-          WHERE a."created" < ${toDate} AND NOT (a."status" = 'deleted' AND a."updated" < ${fromDate})
+          WHERE a."type" <> 'virtual'
+            AND a."created" < ${toDate} AND NOT (a."status" = 'deleted' AND a."updated" < ${fromDate})
           GROUP BY a."id"
         `
-      console.log(debug)
-      */
+      console.log(debug)*/
+      
 
       result = await this.db().$queryRaw`
         SELECT COUNT(*) as "count" FROM 
@@ -249,7 +250,8 @@ export class StatsController extends AbstractCurrencyController implements IStat
           LEFT JOIN "Transfer" t ON (t."payerId" = a."id" OR t."payeeId" = a."id") 
             AND t."updated" >= ${fromDate} AND t."updated" < ${toDate} 
             AND t."state" = 'committed'
-          WHERE a."created" < ${toDate} AND NOT (a."status" = 'deleted' AND a."updated" < ${fromDate})
+          WHERE a."type" <> 'virtual' 
+            AND a."created" < ${toDate} AND NOT (a."status" = 'deleted' AND a."updated" < ${fromDate})
           GROUP BY a."id"
           HAVING COUNT(t."id") >= ${min} AND COUNT(t."id") <= ${max}
         )
@@ -283,6 +285,7 @@ export class StatsController extends AbstractCurrencyController implements IStat
           SELECT i."interval" AS "interval", a."id" AS "account"
           FROM "Intervals" i
           LEFT JOIN "Account" a ON
+            a."type" <> 'virtual' AND
             a."created" < LEAST(i."interval" + ${sqlInterval}::interval, ${toDate}) AND
             NOT (a."status" = 'deleted' AND a."updated" < i."interval")
           LEFT JOIN "Transfer" t ON (t."payerId" = a."id" OR t."payeeId" = a."id")
