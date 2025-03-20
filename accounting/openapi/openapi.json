@@ -4808,11 +4808,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "tags": [],
         "produces": [
           "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
         ]
       }
     }

@@ -4955,9 +4955,17 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
-        "tags": []
+        "tags": [],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
       }
     }
   },
