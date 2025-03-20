@@ -278,3 +278,9 @@ model Value {
 
   @@id([tenantId, key])
 }
+
+model CreditCommonsTrunkwardNode {
+  ccNodeName String @db.VarChar(255)
+  lastHash   String @db.VarChar(255)
+  @@id([ccNodeName])
+}
