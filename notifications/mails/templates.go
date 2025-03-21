@@ -194,7 +194,7 @@ func buildMemberRequestedTemplateData(t *i18n.Translator, member *api.Member, gr
 	templateData := EmailTextData{
 		TemplateMainData: buildTemplateMainData(t),
 		TemplateTextData: TemplateTextData{
-			Text:    t.Td("memberRequestedText", map[string]string{"Name": member.Name, "Group": group.Name}),
+			Text:    t.Td("memberRequestedText", map[string]string{"MemberName": member.Name, "GroupName": group.Name}),
 			Subtext: t.T("memberRequestedSubtext"),
 		},
 		TemplateActionData: TemplateActionData{
