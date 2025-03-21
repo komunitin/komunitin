@@ -1,10 +1,11 @@
 
-import { CollectionOptions } from "../server/request"
+import { AccountStatsOptions, CollectionOptions, StatsOptions } from "../server/request"
 import { CreateCurrency, Currency, UpdateCurrency, Transfer, Account, InputAccount, UpdateAccount, InputTransfer, UpdateTransfer, AccountSettings, CurrencySettings } from "../model"
 export { createController } from "./base-controller"
 import { Context } from "../utils/context"
 import TypedEmitter from "typed-emitter"
 import { InputTrustline, Trustline, UpdateTrustline } from "src/model/trustline"
+import { Stats } from "src/model/stats"
 export { MigrationController } from './migration'
 
 export type ControllerEvents = {
@@ -37,6 +38,7 @@ export interface CurrencyController {
   // Child controllers
   accounts: AccountController
   transfers: TransferController
+  stats: StatsController
   
   // Currency
   getCurrency(ctx: Context): Promise<Currency>
@@ -75,4 +77,9 @@ export interface TransferController {
   getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]>
   updateTransfer(ctx: Context, transfer: UpdateTransfer): Promise<Transfer>
   deleteTransfer(ctx: Context, id: string): Promise<void>
+}
+
+export interface StatsController {
+  getVolume(ctx: Context, params: StatsOptions): Promise<Stats>
+  getAccounts(ctx: Context, params: AccountStatsOptions): Promise<Stats>
 }

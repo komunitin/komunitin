@@ -3,6 +3,7 @@ import { Trustline } from 'src/model/trustline';
 import { Linker, Metaizer, Relator, Serializer, SerializerOptions } from 'ts-japi';
 import { Account, AccountSettings, Currency, CurrencySettings, Transfer, User } from '../model';
 import { config } from 'src/config';
+import { Stats } from 'src/model/stats';
 /*
 // Patch BigInt prototype so it correclty serializes to JSON as a number.
 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON#using_json_numbers
@@ -181,6 +182,12 @@ export const TrustlineSerializer = new Serializer<Trustline>("trustlines", {
     , ExternalCurrencySerializer, { relatedName: "trusted" })
   }
 })
+
+export const StatsSerializer = new Serializer<Stats>("stats", {
+  version: null,
+  projection: projection<Stats>(['values', 'from', 'to', 'interval']),
+})
+
 
 
 

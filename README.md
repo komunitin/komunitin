@@ -32,7 +32,7 @@ git clone https://git.drupalcode.org/project/ices.git
 
 Before running the system you need to setup some environment variables. You may use the `.env.template` file as a reference and create a new `.env` file with the correct values. Also, copy the file `komunitin-project-firebase-adminsdk.json` in the `notifications` folder with the firebase admin sdk credentials.
 
-Then you can run the start script with the options `--up` to start the containers, `--ices` to install the IntegralCES site and `--demo` to seed the system with demo data.
+Then you can run the start script with the options `--up` to start the containers, `--ices` to install the IntegralCES site, `--dev` to start the debuggers and other development utils and `--demo` to seed the system with demo data.
 
 ```bash
 ./start.sh --up --ices --dev --demo

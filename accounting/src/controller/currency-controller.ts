@@ -25,6 +25,7 @@ import { TenantPrismaClient } from "./multitenant";
 import { whereFilter } from "./query";
 import { TransferController } from "./transfer-controller";
 import { UserController } from "./user-controller";
+import { StatsController } from "./stats-controller";
 
 export function amountToLedger(currency: AtLeast<Currency, "scale">, amount: number) {
   return Big(amount).div(Big(10).pow(currency.scale)).toString()
@@ -50,6 +51,7 @@ export class LedgerCurrencyController implements CurrencyController {
   accounts: AccountController
   transfers: TransferController
   externalResources: ExternalResourceController
+  stats: StatsController
 
   constructor(model: Currency, ledger: LedgerCurrency, db: TenantPrismaClient, encryptionKey: () => Promise<KeyObject>, sponsorKey: () => Promise<Keypair>, emitter: TypedEmitter<ControllerEvents>) {
     this.db = db
@@ -62,6 +64,7 @@ export class LedgerCurrencyController implements CurrencyController {
     this.accounts = new AccountController(this)
     this.transfers = new TransferController(this)
     this.externalResources = new ExternalResourceController(this)
+    this.stats = new StatsController(this)
   }
 
   /**
