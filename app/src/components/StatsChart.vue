@@ -37,7 +37,7 @@
       <div class="col-12 col-sm-4">
         <div class="column q-gutter-y-md">
           <div>
-            <q-select v-model="period" outlined name="period" :options="periodOptions" :label="$t('period')" />
+            <q-select :model-value="period" outlined name="period" :options="periodOptions" :label="$t('period')" @update:model-value="updatePeriod" />
           </div>
           <div>
             <q-select v-model="interval" outlined name="interval" :options="intervalOptions" :label="$t('interval')" />
@@ -58,7 +58,7 @@
   </q-card>
 </template>
 <script setup lang="ts">
-import { roundDate, StatsValue, useCurrencyStats, useCurrencyStatsFormattedValue } from 'src/composables/currencyStats'
+import { roundDate, StatsInterval, StatsValue, useCurrencyStats, useCurrencyStatsFormattedValue } from 'src/composables/currencyStats'
 import { Currency } from 'src/store/model'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -127,6 +127,66 @@ const periodOptions = [
 
 const period = ref(periodOptions[5]) // 12 months
 
+// Note that intervals are always the natural ones. For example hour
+// always starts at XX:00:00 and ends at XX:59:59. First and last 
+// values may have less width depending on period.
+
+
+// Returns -1 if the interval is disabled because it is too short for the period,
+// 0 if it is enabled, and 1 if it is disabled because it is too long for the period.
+const isIntervalDisabled = (intervalValue: StatsInterval, period: typeof periodOptions[number]) => {
+  const periodSeconds = period.value.from ? 
+    ((period.value.to?.getTime() ?? new Date().getTime()) - period.value.from.getTime()) / 1000
+    : undefined
+  const intervalsSeconds = {
+    'PT1H': 60*60,
+    'P1D': 24*60*60,
+    'P1W': 7*24*60*60,
+    'P1M': 30*24*60*60,
+    'P1Y': 365*24*60*60
+  }
+  const intervalSeconds = intervalsSeconds[intervalValue]
+  if (periodSeconds === undefined) {
+    // If no "from" defined, allow monthly intervals or more.
+    return intervalSeconds < intervalsSeconds['P1M'] ? -1 : 0
+  } else {
+    // Allow intervals that are less than half of the period or more than 500 times the period.
+    if (periodSeconds > intervalSeconds * 500) {
+      return -1
+    } else if (periodSeconds < intervalSeconds * 2) {
+      return 1
+    } else {
+      return 0
+    }
+  }
+}
+
+const intervalOptions = computed(() => [
+  {label: t('hour'), value: 'PT1H' as const, disable: !!isIntervalDisabled('PT1H', period.value)},
+  {label: t('day'), value: 'P1D' as const, disable: !!isIntervalDisabled('P1D', period.value)},
+  {label: t('week'), value: 'P1W' as const, disable: !!isIntervalDisabled('P1W', period.value)},
+  {label: t('month'), value: 'P1M' as const, disable: !!isIntervalDisabled('P1M', period.value)},
+  {label: t('year'), value: 'P1Y' as const, disable: !!isIntervalDisabled('P1Y', period.value)},
+])
+
+const interval = ref(intervalOptions.value[3]) // Month
+
+const updatePeriod = (value: typeof periodOptions[number]) => {
+  const disabled = isIntervalDisabled(interval.value.value, value)
+  if (disabled === -1) {
+    // interval is too short. Take the first enabled.
+    const newInterval = intervalOptions.value.find(i => isIntervalDisabled(i.value, value) === 0)
+    interval.value = newInterval ?? intervalOptions.value[intervalOptions.value.length - 1]
+  } else if (disabled === 1) {
+    // interval is too long. Take the last enabled.
+    const newInterval = intervalOptions.value.slice().reverse().find(i => isIntervalDisabled(i.value, value) === 0)
+    interval.value = newInterval ?? intervalOptions.value[0]
+  }
+  period.value = value
+}
+
+
+
 // Get stats data for the single value
 const valueOptions = computed(() => ({
   currency: props.currency,
@@ -139,21 +199,7 @@ const valueOptions = computed(() => ({
 
 const {value: amount, change, sign} = useCurrencyStatsFormattedValue(valueOptions)
 
-// period duration in seconds or Infinity if all time
-const duration = computed(() => period.value.value.from ? ((period.value.value.to?.getTime() ?? new Date().getTime()) - period.value.value.from.getTime())/1000 : +Infinity)
 
-// Note that intervals are always the natural ones. For example hour
-// always starts at XX:00:00 and ends at XX:59:59. First and last 
-// values may have less width depending on period.
-const intervalOptions = computed(() => [
-  {label: t('hour'), value: 'PT1H' as const, disable: duration.value > 365*24*60*60},
-  {label: t('day'), value: 'P1D' as const, disable: duration.value < 2*24*60*60},
-  {label: t('week'), value: 'P1W' as const, disable: duration.value < 2*7*24*60*60},
-  {label: t('month'), value: 'P1M' as const, disable: duration.value < 2*30*24*60*60},
-  {label: t('year'), value: 'P1Y' as const, disable: duration.value < 2*365*24*60*60},
-])
-
-const interval = ref(intervalOptions.value[3]) // Month
 const options = computed(() => {
   // Rounding the from date to the nearest interval break so the first
   // value has the same width as the others.

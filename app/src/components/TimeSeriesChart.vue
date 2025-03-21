@@ -32,14 +32,14 @@ const props = defineProps<{
 
 const mainData = computed(() => {
   // Computing dates backwards from "to".
-  const date = roundDate(props.to || new Date(), props.interval)
+  let date = roundDate(props.to || new Date(), props.interval)
   const data = []
   for (let i = props.data.length - 1; i >= 0; i--) {
     data.unshift({
-      x: new Date(date.getTime()),
+      x: date,
       y: props.data[i]
     })
-    previousDate(date, props.interval)
+    date = previousDate(date, props.interval)
   }
   return data
 })

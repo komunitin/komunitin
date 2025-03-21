@@ -150,7 +150,8 @@ export function useCurrencyStatsFormattedValue(
   return {value, change, sign}
 }
 
-export const roundDate = (date: Date, interval: CurrencyStatsOptions['interval']) => {
+export const roundDate = (input: Date, interval: CurrencyStatsOptions['interval']) => {
+  const date = new Date(input)
   switch (interval) {
     case 'PT1H':
       date.setMinutes(0, 0, 0)
@@ -173,7 +174,8 @@ export const roundDate = (date: Date, interval: CurrencyStatsOptions['interval']
   }
   return date
 }
-export const previousDate = (date: Date, interval: CurrencyStatsOptions['interval']) => {
+export const previousDate = (input: Date, interval: CurrencyStatsOptions['interval']) => {
+  const date = new Date(input)
   switch (interval) {
     case 'PT1H':
       date.setHours(date.getHours() - 1)
