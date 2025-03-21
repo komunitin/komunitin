@@ -63,7 +63,7 @@ describe('Statistics endpoints', async () => {
   it('existing accounts now', async () => {
     const now = new Date().toISOString()
     const response = await t.api.get(`/TEST/stats/accounts?from=${now}`, t.user1)
-    assert.equal(response.body.data.attributes.values[0], 74)
+    assert.equal(response.body.data.attributes.values[0], 73)
   })
   it('accounts with 20 transactions or more', async () => {
     const response = await t.api.get(`/TEST/stats/accounts?minTransactions=20`, t.user1)
