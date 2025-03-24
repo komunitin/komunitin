@@ -274,4 +274,9 @@ export namespace Validators {
     ...isUpdateTrustline(),
     ...isExternalResourceId("data.relationships.trusted", "currencies"),
   ]
+
+  export const isCreditCommonsGraft = () => [
+    body("data.attributes.ccNodeName").isString(),
+    body("data.attributes.lastHash").isString(),
+  ]
 }
