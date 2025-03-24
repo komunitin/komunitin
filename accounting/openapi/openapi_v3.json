@@ -5065,6 +5065,30 @@
           "migrations"
         ]
       }
+    },
+    "/cc/transaction": {
+      "post": {
+        "summary": "/cc/transaction",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Welcome to the Credit Commons federation protocol."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": []
+      }
     }
   },
   "servers": [
