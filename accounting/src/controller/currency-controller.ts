@@ -65,10 +65,10 @@ export class LedgerCurrencyController implements CurrencyController {
     this.accounts = new AccountController(this)
     this.transfers = new TransferController(this)
     this.externalResources = new ExternalResourceController(this)
-    this.creditCommons = new CreditCommonsControllerImpl(this)
+    this.creditCommons = new CreditCommonsControllerImpl(this, this)
   }
 
-  public getDb(): TenantPrismaClient {
+  publico(): TenantPrismaClient {
     return this.db
   }
 

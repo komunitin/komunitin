@@ -17,8 +17,32 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {},
-        "tags": []
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Welcome to the Credit Commons federation protocol."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
       }
     },
     "/currencies": {
@@ -4789,6 +4813,23 @@
         ]
       }
     },
+    "/cc/{code}/": {
+      "get": {
+        "summary": "/cc/{code}/",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    },
     "/cc/{code}/graft": {
       "post": {
         "summary": "/cc/{code}/graft",
@@ -4905,6 +4946,42 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "500",
+                      "code": "InternalError",
+                      "title": "Internal Error",
+                      "detail": "\nInvalid `this.db().creditCommonsTrunkwardNode.create()` invocation in\n/Users/michiel/gh/komunitin/komunitin/accounting/src/controller/credit-commons-controller.ts:10:48\n\n   7 async createTrunkwardNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsTrunkwardNode> {\n   8   // Only admins are allowed to set the trunkward node:\n   9   await this.users().checkAdmin(ctx)\n→ 10   await this.db().creditCommonsTrunkwardNode.create(\nNull constraint violation on the fields: (`tenantId`)"
+                    }
+                  ]
+                }
+              }
+            }
           }
         },
         "tags": [],

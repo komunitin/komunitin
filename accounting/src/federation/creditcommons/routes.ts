@@ -17,6 +17,10 @@ import { CreditCommonsTrunkwardNodeSerializer, CreditCommonsTransactionSerialize
 export function getRoutes(controller: SharedController) {
   const router = Router()
 
+  router.get('/:code/', lastHashAuth(), asyncHandler(async (req, res) => {
+    res.status(200).json({ message: 'Welcome to the Credit Commons federation protocol.' });
+  }))
+
   /**
    * Configure the trunkward CC node. Requires admin.
    */
