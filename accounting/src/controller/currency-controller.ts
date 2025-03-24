@@ -65,11 +65,15 @@ export class LedgerCurrencyController implements CurrencyController {
     this.accounts = new AccountController(this)
     this.transfers = new TransferController(this)
     this.externalResources = new ExternalResourceController(this)
-    this.creditCommons = new CreditCommonsControllerImpl(this, this)
+    this.creditCommons = new CreditCommonsControllerImpl(this)
   }
 
-  publico(): TenantPrismaClient {
+  public getDb(): TenantPrismaClient {
     return this.db
+  }
+
+  async checkLastHash(ctx: Context) {
+    console.log(ctx);
   }
 
   /**

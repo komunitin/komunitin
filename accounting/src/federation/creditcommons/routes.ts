@@ -3,8 +3,7 @@ import { checkExact } from 'express-validator';
 import { CreditCommonsTrunkwardNode, CreditCommonsTransaction } from 'src/model';
 import { SharedController } from 'src/controller';
 import { Scope, userAuth, lastHashAuth } from 'src/server/auth';
-import { currencyInputHandler } from 'src/server/handlers';
-import { asyncHandler } from 'src/server/handlers';
+import { currencyInputHandler, asyncHandler } from 'src/server/handlers';
 import { CreditCommonsValidators } from './validation';
 import { CreditCommonsTrunkwardNodeSerializer, CreditCommonsTransactionSerializer } from './serialize';
 
@@ -18,7 +17,21 @@ export function getRoutes(controller: SharedController) {
   const router = Router()
 
   router.get('/:code/', lastHashAuth(), asyncHandler(async (req, res) => {
-    res.status(200).json({ message: 'Welcome to the Credit Commons federation protocol.' });
+    const currencyController = await controller.getCurrencyController('TEST')
+    const record = await currencyController.getDb().creditCommonsTrunkwardNode.findFirst({
+      where: {
+        ccNodeName: req.header('cc-node'),
+        lastHash: req.header('last-hash')
+      // },
+      // include: {
+      //   lastHash: true
+      }
+    })
+    console.log('record from db', record)
+    if (!record) {
+      throw new Error('Credit Commons Auth failed')
+    }
+    res.status(200).json({ message: 'Welcome to the Credit Commons federation protocol.' })
   }))
 
   /**

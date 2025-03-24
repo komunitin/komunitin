@@ -1,7 +1,7 @@
 
 import { InvalidTokenError, auth as authJwt, scopeIncludesAny } from "express-oauth2-jwt-bearer"
 import { config } from "../config"
-import { NextFunction,Request, Response } from "express"
+import { NextFunction, Request, Response } from "express"
 import { fixUrl } from "src/utils/net"
 import { logger } from "src/utils/logger"
 import { unauthorized } from "src/utils/error"
@@ -97,23 +97,24 @@ export const noAuth = () => (req: Request, res: Response, next: NextFunction) =>
  * https://credit-commons.gitlab.io/credit-commons-documentation/#core-concepts
  * */
 export const lastHashAuth = () => (req: Request, res: Response, next: NextFunction) => {
-  const ccNode = req.header("cc-node")
-  if (!ccNode) {
+  const ccNodeName = req.header("cc-node")
+  if (!ccNodeName) {
     return next(unauthorized("cc-node header is required."))
   }
   const lastHash = req.header("last-hash")
   if (!lastHash) {
     return next(unauthorized("last-hash header is required."))
   }
-  // TODO: query the db here
-  const expectedLastHashRow = (ccNode == 'trunk' ? ['asdf'] : []); // db.get('SELECT hash FROM cc WHERE node = %1', ccNode);
-  if (expectedLastHashRow.length === 0) {
-    return next(unauthorized(`cc-node ${JSON.stringify(ccNode)} is not our trunkward node.`))
+  req.auth = {
+    header: undefined as any,
+    token: undefined as any,
+    payload: {
+      type: 'last-hash',
+      ccNodeName,
+      lastHash,
+    }
   }
-  if (expectedLastHashRow[0] === lastHash) {
-    return next()
-  }
-  return next(unauthorized(`value of last-hash header ${JSON.stringify(lastHash)} does not match our records.`))
+  return next()
 }
 
 const handleAuthRequest = (scopes: Scope|Scope[]|undefined, req: Request, res: Response, next: NextFunction) => {
