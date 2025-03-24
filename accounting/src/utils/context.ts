@@ -37,9 +37,13 @@ export const context = (req: Request): Context => {
       type: "user"
     }
   } else if ("type" in payload && payload.type === "last-hash") {
+    console.log('last-hash context');
     return {
       type: payload.type,
-      ...payload
+      lastHashAuth: {
+        ccNodeName: payload.ccNodeName as string,
+        lastHash: payload.lastHash as string,
+      },
     }
   // This case happens when the notifications service uses the service.
   } else if (payload.sub === null) {

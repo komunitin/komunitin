@@ -114,6 +114,7 @@ export const lastHashAuth = () => (req: Request, res: Response, next: NextFuncti
       lastHash,
     }
   }
+  console.log('req.auth', req.auth)
   return next()
 }
 

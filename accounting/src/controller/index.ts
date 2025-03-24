@@ -84,6 +84,7 @@ export interface TransferController {
 }
 
 export interface CreditCommonsController {
+  getWelcome(ctx: Context): Promise<{ message: string }>
   createTrunkwardNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsTrunkwardNode>;
   createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<CreditCommonsTransaction>;
 }
