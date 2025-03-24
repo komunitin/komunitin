@@ -4928,10 +4928,59 @@
           {
             "name": "code",
             "in": "path",
-            "required": true
+            "required": true,
+            "type": "string",
+            "example": "TEST"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "payer": {
+                  "type": "string",
+                  "example": "alice"
+                },
+                "payee": {
+                  "type": "string",
+                  "example": "trunk/bob"
+                },
+                "quant": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
           }
         ],
         "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "creditCommonsTransactions"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "schema": {
@@ -4969,45 +5018,17 @@
             }
           },
           "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "errors": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "string"
-                      },
-                      "code": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "status": "401",
-                      "code": "Unauthorized",
-                      "title": "Unauthorized",
-                      "detail": "cc-node header is required."
-                    }
-                  ]
-                }
-              }
-            }
+            "description": "Unauthorized"
           }
         },
         "tags": [],
         "produces": [
           "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
         ]
       }
     },

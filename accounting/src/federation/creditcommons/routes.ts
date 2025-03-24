@@ -29,8 +29,9 @@ export function getRoutes(controller: SharedController) {
   /**
    * Propose transaction.
    */
-  router.post('/:code/transaction', lastHashAuth(), checkExact(CreditCommonsValidators.isTransaction()),
+  router.post('/:code/transaction', lastHashAuth(), //checkExact(CreditCommonsValidators.isTransaction()),
     currencyInputHandler(controller, async (currencyController, ctx, transaction: CreditCommonsTransaction) => {
+      console.log('creating transaction', transaction);
       return await currencyController.creditCommons.createTransaction(ctx, transaction)
     }, CreditCommonsTransactionSerializer, 201)
   )

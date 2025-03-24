@@ -8,6 +8,6 @@ export namespace CreditCommonsValidators {
   export const isTransaction = () => [
     body("data.attributes.payer").isString(),
     body("data.attributes.payee").isString(),
-    body("data.attributes.quant").isNumeric(),
+    // body("data.attributes.quant").isNumeric(),
   ]
 }

@@ -1,6 +1,7 @@
 import {describe, it} from "node:test"
 import assert from "node:assert"
 import { setupServerTest } from "./setup"
+import { testCreditCommonsTransaction } from "./api.data"
 
 describe('Transaction endpoint', async () => {
   // Creates a currency and a few accounts.
@@ -27,8 +28,12 @@ describe('Transaction endpoint', async () => {
   })
 
   it('Receives CC transactions', async () => { 
-    const response = await t.api.post("/cc/TEST/transaction", { payer: 'alice', payee: 'trunk/bob', quant: 1.0 }, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' }, 200)
-    assert.equal(response.body.message, 'Welcome to the Credit Commons federation protocol.')
+    const response = await t.api.post(
+      "/cc/TEST/transaction",
+      testCreditCommonsTransaction('alice', 'trunk/bob', 1.0),
+      { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
+      201)
+    assert.equal(response.body.message, undefined) // 'Welcome to the Credit Commons federation protocol.')
   })
   
 
