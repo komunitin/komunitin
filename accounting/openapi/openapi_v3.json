@@ -4944,12 +4944,81 @@
             "name": "code",
             "in": "path",
             "required": true,
+            "example": "TEST",
             "schema": {
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "attributes": {
+                        "type": "object",
+                        "properties": {
+                          "ccNodeName": {
+                            "type": "string",
+                            "example": "trunk"
+                          },
+                          "lastHash": {
+                            "type": "string",
+                            "example": "asdf"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "creditCommonsTrunkwardNodes"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {
+                            "ccNodeName": {
+                              "type": "string",
+                              "example": "trunk"
+                            },
+                            "lastHash": {
+                              "type": "string",
+                              "example": "asdf"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "properties": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -4989,9 +5058,17 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
-        "tags": []
+        "tags": [],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
       }
     },
     "/cc/transaction": {

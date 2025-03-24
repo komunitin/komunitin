@@ -4799,10 +4799,74 @@
           {
             "name": "code",
             "in": "path",
-            "required": true
+            "required": true,
+            "type": "string",
+            "example": "TEST"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "ccNodeName": {
+                          "type": "string",
+                          "example": "trunk"
+                        },
+                        "lastHash": {
+                          "type": "string",
+                          "example": "asdf"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "creditCommonsTrunkwardNodes"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "ccNodeName": {
+                          "type": "string",
+                          "example": "trunk"
+                        },
+                        "lastHash": {
+                          "type": "string",
+                          "example": "asdf"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "schema": {
@@ -4838,11 +4902,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "tags": [],
         "produces": [
           "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
         ]
       }
     },
