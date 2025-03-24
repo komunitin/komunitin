@@ -24,7 +24,8 @@ import { KeyController } from "./key-controller";
 import { TenantPrismaClient } from "./multitenant";
 import { whereFilter } from "./query";
 import { TransferController } from "./transfer-controller";
-import { CreditCommonsController } from "./credit-commons-controller";
+import { CreditCommonsController } from ".";
+import { CreditCommonsControllerImpl } from "./credit-commons-controller";
 import { UserController } from "./user-controller";
 
 export function amountToLedger(currency: AtLeast<Currency, "scale">, amount: number) {
@@ -64,7 +65,7 @@ export class LedgerCurrencyController implements CurrencyController {
     this.accounts = new AccountController(this)
     this.transfers = new TransferController(this)
     this.externalResources = new ExternalResourceController(this)
-    this.creditCommons = new CreditCommonsController(this)
+    this.creditCommons = new CreditCommonsControllerImpl(this)
   }
 
   public getDb(): TenantPrismaClient {

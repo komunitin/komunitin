@@ -108,12 +108,12 @@ export const lastHashAuth = () => (req: Request, res: Response, next: NextFuncti
   // TODO: query the db here
   const expectedLastHashRow = (ccNode == 'trunk' ? ['asdf'] : []); // db.get('SELECT hash FROM cc WHERE node = %1', ccNode);
   if (expectedLastHashRow.length === 0) {
-    return next(unauthorized("cc-node is not our trunkward node."))
+    return next(unauthorized(`cc-node ${JSON.stringify(ccNode)} is not our trunkward node.`))
   }
   if (expectedLastHashRow[0] === lastHash) {
     return next()
   }
-  return next(unauthorized("value of last-hash header does not match our records."))
+  return next(unauthorized(`value of last-hash header ${JSON.stringify(lastHash)} does not match our records.`))
 }
 
 const handleAuthRequest = (scopes: Scope|Scope[]|undefined, req: Request, res: Response, next: NextFunction) => {

@@ -18,16 +18,16 @@ describe('Transaction endpoint', async () => {
 
   it('Checks the last-hash header [TODO: against the db]', async () => {
     const response = await t.api.post("/cc/TEST/transaction", {}, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'qwer' }, 401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"value of last-hash header does not match our records."}]}')
+    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"value of last-hash header \\"qwer\\" does not match our records."}]}')
   })
 
   it('Checks the cc-node header [TODO: against the db]', async () => {
     const response = await t.api.post("/cc/TEST/transaction", {}, { user: null, scopes: [], ccNode: 'bla', lastHash: 'asdf' }, 401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"cc-node is not our trunkward node."}]}')
+    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"cc-node \\"bla\\" is not our trunkward node."}]}')
   })
 
-  it('Receives CC transactions', async () => {
-    const response = await t.api.post("/cc/TEST/transaction", {}, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' }, 200)
+  it('Receives CC transactions', async () => { 
+    const response = await t.api.post("/cc/TEST/transaction", { payer: 'alice', payee: 'trunk/bob', quant: 1.0 }, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' }, 200)
     assert.equal(response.body.message, 'Welcome to the Credit Commons federation protocol.')
   })
   

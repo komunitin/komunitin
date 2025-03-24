@@ -1,9 +1,10 @@
 import { AbstractCurrencyController } from "./abstract-currency-controller";
 import { Context } from "../utils/context";
 import { CreditCommonsTrunkwardNode, CreditCommonsTransaction } from "../model/creditCommons";
+import { CreditCommonsController } from '.';
 
 // FIXME: extension of TransferController is a stopgap
-export class CreditCommonsController extends AbstractCurrencyController {
+export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   async createTrunkwardNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsTrunkwardNode> {
 
   // router.post('/graft', lastHashAuth(), asyncHandler(async (req, res) => {

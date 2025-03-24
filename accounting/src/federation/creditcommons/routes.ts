@@ -5,7 +5,7 @@ import { SharedController } from 'src/controller';
 import { Scope, userAuth, lastHashAuth } from 'src/server/auth';
 import { currencyInputHandler } from 'src/server/handlers';
 import { asyncHandler } from 'src/server/handlers';
-import { Validators } from '../../server/validation';
+import { CreditCommonsValidators } from './validation';
 import { CreditCommonsTrunkwardNodeSerializer, CreditCommonsTransactionSerializer } from './serialize';
 
 /**
@@ -20,7 +20,7 @@ export function getRoutes(controller: SharedController) {
   /**
    * Configure the trunkward CC node. Requires admin.
    */
-  router.post('/:code/graft', userAuth(Scope.Accounting), checkExact(Validators.isCreditCommonsGraft()),
+  router.post('/:code/graft', userAuth(Scope.Accounting), checkExact(CreditCommonsValidators.isGraft()),
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsTrunkwardNode) => {
       return await currencyController.creditCommons.createTrunkwardNode(ctx, data.ccNodeName, data.lastHash)
     }, CreditCommonsTrunkwardNodeSerializer, 201)
@@ -29,7 +29,7 @@ export function getRoutes(controller: SharedController) {
   /**
    * Propose transaction.
    */
-  router.post('/:code/transaction', lastHashAuth(), checkExact(Validators.isCreditCommonsGraft()),
+  router.post('/:code/transaction', lastHashAuth(), checkExact(CreditCommonsValidators.isTransaction()),
     currencyInputHandler(controller, async (currencyController, ctx, transaction: CreditCommonsTransaction) => {
       return await currencyController.creditCommons.createTransaction(ctx, transaction)
     }, CreditCommonsTransactionSerializer, 201)

@@ -5071,6 +5071,104 @@
         ]
       }
     },
+    "/cc/{code}/transaction": {
+      "post": {
+        "summary": "/cc/{code}/transaction",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "400",
+                          "code": "FieldValidationError",
+                          "title": "Field validation Error",
+                          "detail": "Field data.attributes.ccNodeName is invalid in request body."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "example": [
+                        {
+                          "status": "401",
+                          "code": "Unauthorized",
+                          "title": "Unauthorized",
+                          "detail": "cc-node header is required."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": []
+      }
+    },
     "/cc/transaction": {
       "post": {
         "summary": "/cc/transaction",
