@@ -1,5 +1,6 @@
 import { ExternalResource } from 'src/model/resource';
 import { Trustline } from 'src/model/trustline';
+import { CreditCommonsTrunkwardNode } from 'src/model/creditCommonsTrunkwardNode';
 import { Linker, Metaizer, Relator, Serializer, SerializerOptions } from 'ts-japi';
 import { Account, AccountSettings, Currency, CurrencySettings, Transfer, User } from '../model';
 import { config } from 'src/config';
@@ -182,5 +183,12 @@ export const TrustlineSerializer = new Serializer<Trustline>("trustlines", {
   }
 })
 
+
+export const CreditCommonsTrunkwardNodeSerializer = new Serializer<CreditCommonsTrunkwardNode>("creditCommonsTrunkwardNodes", {
+  version: null,
+  projection: projection<CreditCommonsTrunkwardNode>(['ccNodeName', 'lastHash']),
+  relators: {
+  }
+})
 
 

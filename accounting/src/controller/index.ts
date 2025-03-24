@@ -39,7 +39,8 @@ export interface CurrencyController {
   // Child controllers
   accounts: AccountController
   transfers: TransferController
-  
+  creditCommons: CreditCommonsController
+
   // direct access
   getDb(): TenantPrismaClient
   // Currency

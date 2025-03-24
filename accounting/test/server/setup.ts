@@ -3,7 +3,7 @@ import { TestApiClient, client } from "./net.client"
 import { clearEvents, startServer, stopServer } from "./net.mock"
 import { clearDb } from "./db"
 import { createApp, closeApp, ExpressExtended, setupApp } from "../../src/server/app"
-import { testAccount, testCurrency, testTransfer, userAuth } from "./api.data"
+import { testAccount, testCurrency, testTransfer, testCreditCommonsNeighbour, userAuth } from "./api.data"
 import express from "express"
 import expressOasGenerator from "express-oas-generator"
 import { expressOasGeneratorOptions } from "./openapi.generator.options"
@@ -42,6 +42,7 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
     account0: undefined as any,
     account1: undefined as any,
     account2: undefined as any,
+    ccNeighbour: { ccNodeName: 'trunk', lastHash: 'asdf' },
 
     createAccount: async (user: string, code = "TEST", admin = userAuth("0")) => {
       const response = await test.api?.post(`/${code}/accounts`, testAccount(user), admin)
@@ -51,6 +52,10 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
     payment: async (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus = 201) => {
       const response = await test.api?.post('/TEST/transfers', testTransfer(payer, payee, amount, meta, state), auth, httpStatus)
       return response.body.data
+    },
+
+    createCreditCommonsNeighbour: async (ccNodeName: string, lastHash: string, admin = userAuth("0")) => {
+      await test.api?.post('/cc/TEST/graft', testCreditCommonsNeighbour(ccNodeName, lastHash), admin)
     }
   }
 
@@ -74,6 +79,8 @@ export function setupServerTest(createData: boolean = true): TestSetupWithCurren
       test.account0 = await test.createAccount(test.admin.user)
       test.account1 = await test.createAccount(test.user1.user)
       test.account2 = await test.createAccount(test.user2.user)
+      // Create CC trunkward
+      await test.createCreditCommonsNeighbour(test.ccNeighbour.ccNodeName, test.ccNeighbour.lastHash)
     }
   })
 
