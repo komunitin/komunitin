@@ -1,7 +1,7 @@
-import { AbstractCurrencyController } from "./abstract-currency-controller"
+import { AbstractCurrencyController } from "../controller/abstract-currency-controller"
 import { Context } from "../utils/context"
 import { CreditCommonsTrunkwardNode, CreditCommonsTransaction } from "../model/creditCommons"
-import { CreditCommonsController } from '.'
+import { CreditCommonsController } from '../controller'
 import { unauthorized } from "src/utils/error"
 
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {

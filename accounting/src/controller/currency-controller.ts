@@ -25,7 +25,7 @@ import { TenantPrismaClient } from "./multitenant";
 import { whereFilter } from "./query";
 import { TransferController } from "./transfer-controller";
 import { CreditCommonsController } from ".";
-import { CreditCommonsControllerImpl } from "./credit-commons-controller";
+import { CreditCommonsControllerImpl } from "../creditcommons/credit-commons-controller";
 import { UserController } from "./user-controller";
 
 export function amountToLedger(currency: AtLeast<Currency, "scale">, amount: number) {
