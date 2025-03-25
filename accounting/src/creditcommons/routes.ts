@@ -22,14 +22,14 @@ export function getRoutes(controller: SharedController) {
   /**
    * Retrieve a welcome message. Requires last-hash auth.
    */
-  router.get('/:code/', lastHashAuth(), currencyResourceHandler(controller, async (currencyController, ctx) => {
+  router.get('/:code/cc/', lastHashAuth(), currencyResourceHandler(controller, async (currencyController, ctx) => {
     return await currencyController.creditCommons.getWelcome(ctx);
   }, CreditCommonsMessageSerializer, {}))
 
   /**
    * Configure the trunkward CC node. Requires admin.
    */
-  router.post('/:code/graft', userAuth(Scope.Accounting), checkExact(CreditCommonsValidators.isGraft()),
+  router.post('/:code/cc/graft', userAuth(Scope.Accounting), checkExact(CreditCommonsValidators.isGraft()),
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
       return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash)
     }, CreditCommonsNodeSerializer, 201)

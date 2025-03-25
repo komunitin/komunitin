@@ -9,14 +9,14 @@ describe('grafting', async () => {
 
   it('is required', async () => {
     const response = await t.api.get(
-      "/cc/TEST/",
+      "/TEST/cc/",
       { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
       401)
     assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"This currency has not (yet) been grafted onto any CreditCommons tree."}]}')
   })
   it('requires authn', async () => {
     const response = await t.api.post(
-      "/cc/TEST/graft",
+      "/TEST/cc/graft",
       testCreditCommonsNeighbour( 'trunk', 'asdf'),
       { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
       403)
@@ -24,7 +24,7 @@ describe('grafting', async () => {
   })
   it('requires admin', async () => {
     const response = await t.api.post(
-      "/cc/TEST/graft",
+      "/TEST/cc/graft",
       testCreditCommonsNeighbour( 'trunk', 'asdf'),
       userAuth("1"),
       403)
@@ -32,7 +32,7 @@ describe('grafting', async () => {
   })
   it('can be done', async () => {
     const response = await t.api.post(
-      "/cc/TEST/graft",
+      "/TEST/cc/graft",
       testCreditCommonsNeighbour( 'trunk', 'asdf'),
       userAuth("0"),
       201)
