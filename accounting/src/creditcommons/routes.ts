@@ -6,8 +6,9 @@ import { Scope, userAuth, lastHashAuth } from 'src/server/auth';
 import { currencyInputHandler, currencyResourceHandler } from 'src/server/handlers';
 import { CreditCommonsValidators } from './validation';
 import {
-  CreditCommonsNodeSerializer as CreditCommonsNodeSerializer,
-  CreditCommonsMessageSerializer
+  CreditCommonsNodeSerializer,
+  CreditCommonsMessageSerializer,
+  CreditCommonsTransactionSerializer,
 } from './serialize';
 
 /**
@@ -33,6 +34,16 @@ export function getRoutes(controller: SharedController) {
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
       return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash)
     }, CreditCommonsNodeSerializer, 201)
+  )
+
+  /**
+   * CC API endpoint to create a transaction. Requires last-hash auth.
+   * FIXME: should not be using serializer.
+   */
+  router.post('/:code/cc/transaction', lastHashAuth(), checkExact(CreditCommonsValidators.isTransaction()),
+    currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsTransaction) => {
+      return await currencyController.creditCommons.createTransaction(ctx, data)
+    }, CreditCommonsTransactionSerializer, 201)
   )
 
   return router

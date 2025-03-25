@@ -3,15 +3,18 @@ export interface CreditCommonsNode {
   lastHash: string,
 }
 
-export interface CreditCommonsTransaction {
+export interface CreditCommonsEntry {
   payer: string,
   payee: string,
   quant: number,
   description: string,
+  metadata: { [key: string]: string }
+}
+
+export interface CreditCommonsTransaction {
+  cheat: string, // to tell the controller which admin account was created during the test setup
+  uuid: string,
+  state: string,
   workflow: string,
-  metadata: {
-    payer_name?: string,
-    inside_leg?: number,
-    category?: string,
-  }
+  entries: CreditCommonsEntry[]
 }

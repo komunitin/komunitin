@@ -29,7 +29,7 @@ describe('last-hash auth', async () => {
   it('Allows access with the right grafted creds', async () => {
     const response = await t.api.get(
       "/TEST/cc/",
-      { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
+      { user: null, scopes: [], ccNode: 'trunk', lastHash: 'trunk' },
       200)
     assert.equal(response.body.data.attributes.message, 'Welcome to the Credit Commons federation protocol.')
   })

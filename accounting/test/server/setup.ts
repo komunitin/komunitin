@@ -17,7 +17,7 @@ interface TestSetup {
   payment: (payer: string, payee: string, amount: number, meta: string, state: string, auth: any, httpStatus?: number) => Promise<any>,
 }
 
-interface TestSetupWithCurrency extends TestSetup {
+export interface TestSetupWithCurrency extends TestSetup {
   admin: UserAuth,
   user1: UserAuth,
   user2: UserAuth,
@@ -38,11 +38,12 @@ export function setupServerTest(createData: boolean = true, graftCreditCommons: 
     admin: userAuth("0"),
     user1: userAuth("1"),
     user2: userAuth("2"),
+    user3: userAuth("bob"),
     currency: undefined as any,
     account0: undefined as any,
     account1: undefined as any,
     account2: undefined as any,
-    ccNeighbour: { ccNodeName: 'trunk', lastHash: 'asdf' },
+    ccNeighbour: { ccNodeName: 'trunk', lastHash: 'trunk' },
 
     createAccount: async (user: string, code = "TEST", admin = userAuth("0")) => {
       const response = await test.api?.post(`/${code}/accounts`, testAccount(user), admin)
