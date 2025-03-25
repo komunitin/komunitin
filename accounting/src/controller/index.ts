@@ -5,7 +5,10 @@ export { createController } from "./base-controller"
 import { Context } from "../utils/context"
 import TypedEmitter from "typed-emitter"
 import { InputTrustline, Trustline, UpdateTrustline } from "src/model/trustline"
+import { TenantPrismaClient } from "./multitenant"
 export { MigrationController } from './migration'
+import { CreditCommonsNode, CreditCommonsTransaction } from "src/model/creditCommons";
+
 
 export type ControllerEvents = {
   /**
@@ -37,7 +40,8 @@ export interface CurrencyController {
   // Child controllers
   accounts: AccountController
   transfers: TransferController
-  
+  creditCommons: CreditCommonsController
+
   // Currency
   getCurrency(ctx: Context): Promise<Currency>
   updateCurrency(ctx: Context, currency: UpdateCurrency): Promise<Currency>
@@ -75,4 +79,9 @@ export interface TransferController {
   getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]>
   updateTransfer(ctx: Context, transfer: UpdateTransfer): Promise<Transfer>
   deleteTransfer(ctx: Context, id: string): Promise<void>
+}
+
+export interface CreditCommonsController {
+  getWelcome(ctx: Context): Promise<{ message: string }>
+  createNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsNode>
 }

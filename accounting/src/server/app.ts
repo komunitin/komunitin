@@ -1,6 +1,6 @@
 import express from "express"
 import { getRoutes } from "./routes"
-import { getRoutes as getCCRoutes } from "src/federation/creditcommons/routes"
+import { getRoutes as getCCRoutes } from "src/creditcommons/routes"
 import { SharedController, createController } from "../controller"
 import { errorHandler } from "./errors"
 import { httpLogger } from "../utils/logger"
@@ -54,7 +54,7 @@ export const setupApp = async (expressApp: express.Express) => {
   const controller = await createController()
   app.komunitin = { controller }
   app.use("/", getRoutes(controller))
-  app.use("/cc", getCCRoutes(controller))
+  app.use("/", getCCRoutes(controller))
   
 
   // Error handlers
