@@ -17,68 +17,8 @@
           "application/json"
         ],
         "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Welcome to the Credit Commons federation protocol."
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "errors": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "string"
-                      },
-                      "code": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "status": "500",
-                      "code": "InternalError",
-                      "title": "Internal Error",
-                      "detail": "Credit Commons Auth failed"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "tags": [],
-        "produces": [
-          "application/vnd.api+json"
-        ],
-        "security": [
-          {
-            "authorization": []
-          }
-        ]
+        "responses": {},
+        "tags": []
       }
     },
     "/currencies": {
@@ -4836,6 +4776,126 @@
         ]
       }
     },
+    "/{code}/stats/volume": {
+      "get": {
+        "summary": "/{code}/stats/volume",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "example": "TEST"
+          },
+          {
+            "type": "string",
+            "name": "from",
+            "in": "query",
+            "example": "2024-06-01"
+          },
+          {
+            "type": "string",
+            "name": "to",
+            "in": "query",
+            "example": "2024-06-30"
+          },
+          {
+            "type": "string",
+            "name": "interval",
+            "in": "query",
+            "example": "P1M"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "stats"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "values": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "example": [
+                            48970300
+                          ]
+                        },
+                        "to": {
+                          "type": "string",
+                          "example": "2025-03-18T11:16:47.347Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "status": "500",
+                      "code": "InternalError",
+                      "title": "Internal Error",
+                      "detail": "\nInvalid `prisma.$queryRaw()` invocation:\n\n\nRaw query failed. Code: `42883`. Message: `ERROR: function min(timestamp without time zone, timestamp without time zone) does not exist\nHINT: No function matches the given name and argument types. You might need to add explicit type casts.`"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
     "/migrations": {
       "post": {
         "summary": "/migrations",
@@ -4846,409 +4906,6 @@
         "responses": {},
         "tags": [
           "migrations"
-        ]
-      }
-    },
-    "/cc/{code}/": {
-      "get": {
-        "summary": "/cc/{code}/",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "code",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {},
-        "tags": []
-      }
-    },
-    "/cc/{code}/graft": {
-      "post": {
-        "summary": "/cc/{code}/graft",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "code",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "example": "TEST"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "attributes": {
-                      "type": "object",
-                      "properties": {
-                        "ccNodeName": {
-                          "type": "string",
-                          "example": "trunk"
-                        },
-                        "lastHash": {
-                          "type": "string",
-                          "example": "asdf"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "creditCommonsNodes"
-                    },
-                    "attributes": {
-                      "type": "object",
-                      "properties": {
-                        "ccNodeName": {
-                          "type": "string",
-                          "example": "trunk"
-                        },
-                        "lastHash": {
-                          "type": "string",
-                          "example": "asdf"
-                        }
-                      }
-                    },
-                    "relationships": {
-                      "type": "object",
-                      "properties": {}
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "errors": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "string"
-                      },
-                      "code": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "status": "400",
-                      "code": "BadRequest",
-                      "title": "Bad Request",
-                      "detail": "Unknown field(s): data.attributes.ccNodeName, data.attributes.lastHash"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "errors": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "string"
-                      },
-                      "code": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "status": "403",
-                      "code": "Forbidden",
-                      "title": "Forbidden",
-                      "detail": "Insufficient Scope"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "errors": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "string"
-                      },
-                      "code": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "status": "500",
-                      "code": "InternalError",
-                      "title": "Internal Error",
-                      "detail": "\nInvalid `this.db().creditCommonsNode.create()` invocation in\n/Users/michiel/gh/komunitin/komunitin/accounting/src/controller/credit-commons-controller.ts:10:48\n\n   7 async createNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsNode> {\n   8   // Only admins are allowed to set the trunkward node:\n   9   await this.users().checkAdmin(ctx)\n→ 10   await this.db().creditCommonsNode.create(\nNull constraint violation on the fields: (`tenantId`)"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "tags": [],
-        "produces": [
-          "application/vnd.api+json"
-        ],
-        "security": [
-          {
-            "authorization": []
-          }
-        ]
-      }
-    },
-    "/cc/{code}/transaction": {
-      "post": {
-        "summary": "/cc/{code}/transaction",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "code",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "example": "TEST"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "payer": {
-                  "type": "string",
-                  "example": "alice"
-                },
-                "payee": {
-                  "type": "string",
-                  "example": "trunk/bob"
-                },
-                "quant": {
-                  "type": "number",
-                  "example": 1
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "example": "creditCommonsTransactions"
-                    },
-                    "attributes": {
-                      "type": "object",
-                      "properties": {}
-                    },
-                    "relationships": {
-                      "type": "object",
-                      "properties": {}
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "errors": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "string"
-                      },
-                      "code": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "status": "400",
-                      "code": "FieldValidationError",
-                      "title": "Field validation Error",
-                      "detail": "Field data.attributes.ccNodeName is invalid in request body."
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "tags": [],
-        "produces": [
-          "application/vnd.api+json"
-        ],
-        "security": [
-          {
-            "authorization": []
-          }
-        ]
-      }
-    },
-    "/cc/transaction": {
-      "post": {
-        "summary": "/cc/transaction",
-        "consumes": [
-          "application/json"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Welcome to the Credit Commons federation protocol."
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "errors": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "string"
-                      },
-                      "code": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "status": "500",
-                      "code": "InternalError",
-                      "title": "Internal Error",
-                      "detail": "Credit Commons Auth failed"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "tags": [],
-        "produces": [
-          "application/vnd.api+json"
-        ],
-        "security": [
-          {
-            "authorization": []
-          }
         ]
       }
     }
