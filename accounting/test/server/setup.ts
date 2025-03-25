@@ -55,7 +55,7 @@ export function setupServerTest(createData: boolean = true, graftCreditCommons: 
     },
 
     createCreditCommonsNeighbour: async (ccNodeName: string, lastHash: string, admin = userAuth("0")) => {
-      await test.api?.post('/TEST/cc/graft', testCreditCommonsNeighbour(ccNodeName, lastHash), admin)
+      await test.api?.post('/TEST/creditCommonsNodes', testCreditCommonsNeighbour(ccNodeName, lastHash), admin)
     }
   }
 

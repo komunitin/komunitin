@@ -16,7 +16,7 @@ describe('grafting', async () => {
   })
   it('requires authn', async () => {
     const response = await t.api.post(
-      "/TEST/cc/graft",
+      "/TEST/creditCommonsNodes",
       testCreditCommonsNeighbour( 'trunk', 'asdf'),
       { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
       403)
@@ -24,7 +24,7 @@ describe('grafting', async () => {
   })
   it('requires admin', async () => {
     const response = await t.api.post(
-      "/TEST/cc/graft",
+      "/TEST/creditCommonsNodes",
       testCreditCommonsNeighbour( 'trunk', 'asdf'),
       userAuth("1"),
       403)
@@ -32,7 +32,7 @@ describe('grafting', async () => {
   })
   it('can be done', async () => {
     const response = await t.api.post(
-      "/TEST/cc/graft",
+      "/TEST/creditCommonsNodes",
       testCreditCommonsNeighbour( 'trunk', 'asdf'),
       userAuth("0"),
       201)

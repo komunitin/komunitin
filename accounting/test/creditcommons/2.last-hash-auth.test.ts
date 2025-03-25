@@ -3,7 +3,7 @@ import assert from "node:assert"
 import { setupServerTest } from "../server/setup"
 
 describe('last-hash auth', async () => {
-  // This calls /TEST/cc/graft and adds a trunkward neighbour 'trunk' with last-hash 'asdf':
+  // This calls /TEST/creditCommonsNodes and adds a trunkward neighbour 'trunk' with last-hash 'asdf':
   const t = setupServerTest(true, true)
 
   it('Requires the cc-node header', async () => {
