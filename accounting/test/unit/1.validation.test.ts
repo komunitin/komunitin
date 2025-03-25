@@ -2,6 +2,7 @@ import { checkExact, matchedData, ValidationChain, validationResult } from "expr
 import { describe, it } from "node:test"
 import assert from "node:assert"
 import { Validators } from "src/server/validation"
+import { CreditCommonsValidators } from "src/federation/creditcommons/validation"
 import { validateInput } from "src/server/parse"
 
 describe('Input validation', async () => {
@@ -93,7 +94,7 @@ describe('Input validation', async () => {
     await testValidation(Validators.isCreateTransfer(), testTransfer)
   })
   await it('CreditCommons graft', async () => {
-    await testValidation(Validators.isCreditCommonsGraft(), {
+    await testValidation(CreditCommonsValidators.isGraft(), {
       data: {
         attributes: {
           ccNodeName: 'trunk',
