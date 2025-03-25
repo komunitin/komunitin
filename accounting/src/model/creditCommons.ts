@@ -1,4 +1,4 @@
-export interface CreditCommonsTrunkwardNode {
+export interface CreditCommonsNode {
   ccNodeName: string,
   lastHash: string,
 }

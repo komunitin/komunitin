@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { checkExact } from 'express-validator';
-import { CreditCommonsTrunkwardNode, CreditCommonsTransaction } from 'src/model';
+import { CreditCommonsNode, CreditCommonsTransaction } from 'src/model';
 import { SharedController } from 'src/controller';
 import { Scope, userAuth, lastHashAuth } from 'src/server/auth';
 import { currencyInputHandler, currencyResourceHandler } from 'src/server/handlers';
 import { CreditCommonsValidators } from './validation';
 import {
-  CreditCommonsTrunkwardNodeSerializer,
+  CreditCommonsNodeSerializer as CreditCommonsNodeSerializer,
   CreditCommonsMessageSerializer
 } from './serialize';
 
@@ -30,9 +30,9 @@ export function getRoutes(controller: SharedController) {
    * Configure the trunkward CC node. Requires admin.
    */
   router.post('/:code/graft', userAuth(Scope.Accounting), checkExact(CreditCommonsValidators.isGraft()),
-    currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsTrunkwardNode) => {
-      return await currencyController.creditCommons.createTrunkwardNode(ctx, data.ccNodeName, data.lastHash)
-    }, CreditCommonsTrunkwardNodeSerializer, 201)
+    currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
+      return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash)
+    }, CreditCommonsNodeSerializer, 201)
   )
 
   return router

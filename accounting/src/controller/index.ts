@@ -7,7 +7,7 @@ import TypedEmitter from "typed-emitter"
 import { InputTrustline, Trustline, UpdateTrustline } from "src/model/trustline"
 import { TenantPrismaClient } from "./multitenant"
 export { MigrationController } from './migration'
-import { CreditCommonsTrunkwardNode, CreditCommonsTransaction } from "src/model/creditCommons";
+import { CreditCommonsNode, CreditCommonsTransaction } from "src/model/creditCommons";
 
 
 export type ControllerEvents = {
@@ -85,5 +85,5 @@ export interface TransferController {
 
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
-  createTrunkwardNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsTrunkwardNode>
+  createNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsNode>
 }

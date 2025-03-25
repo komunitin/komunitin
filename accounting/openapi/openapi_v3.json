@@ -5075,7 +5075,7 @@
                       "properties": {
                         "type": {
                           "type": "string",
-                          "example": "creditCommonsTrunkwardNodes"
+                          "example": "creditCommonsNodes"
                         },
                         "attributes": {
                           "type": "object",
@@ -5215,7 +5215,7 @@
                           "status": "500",
                           "code": "InternalError",
                           "title": "Internal Error",
-                          "detail": "\nInvalid `this.db().creditCommonsTrunkwardNode.create()` invocation in\n/Users/michiel/gh/komunitin/komunitin/accounting/src/controller/credit-commons-controller.ts:10:48\n\n   7 async createTrunkwardNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsTrunkwardNode> {\n   8   // Only admins are allowed to set the trunkward node:\n   9   await this.users().checkAdmin(ctx)\n→ 10   await this.db().creditCommonsTrunkwardNode.create(\nNull constraint violation on the fields: (`tenantId`)"
+                          "detail": "\nInvalid `this.db().creditCommonsNode.create()` invocation in\n/Users/michiel/gh/komunitin/komunitin/accounting/src/controller/credit-commons-controller.ts:10:48\n\n   7 async createNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsNode> {\n   8   // Only admins are allowed to set the trunkward node:\n   9   await this.users().checkAdmin(ctx)\n→ 10   await this.db().creditCommonsNode.create(\nNull constraint violation on the fields: (`tenantId`)"
                         }
                       ]
                     }

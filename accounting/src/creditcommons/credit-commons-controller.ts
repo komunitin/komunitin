@@ -1,14 +1,14 @@
 import { AbstractCurrencyController } from "../controller/abstract-currency-controller"
 import { Context } from "../utils/context"
-import { CreditCommonsTrunkwardNode, CreditCommonsTransaction } from "../model/creditCommons"
+import { CreditCommonsNode, CreditCommonsTransaction } from "../model/creditCommons"
 import { CreditCommonsController } from '../controller'
 import { unauthorized } from "src/utils/error"
 
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
-  async createTrunkwardNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsTrunkwardNode> {
+  async createNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsNode> {
     // Only admins are allowed to set the trunkward node:
     await this.users().checkAdmin(ctx)
-    await this.db().creditCommonsTrunkwardNode.create({
+    await this.db().creditCommonsNode.create({
       data: {
         tenantId: this.db().tenantId,
         ccNodeName,
@@ -19,13 +19,13 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     return {
       ccNodeName,
       lastHash
-    } as CreditCommonsTrunkwardNode;
+    } as CreditCommonsNode;
   }
   async checkLastHashAuth(ctx: Context) {
     if (ctx.type !== 'last-hash') {
       throw new Error('no last-hash auth found in context')
     }
-    const record = await this.db().creditCommonsTrunkwardNode.findFirst({})
+    const record = await this.db().creditCommonsNode.findFirst({})
     if (!record) {
       throw unauthorized('This Komunitin has not (yet) been grafted onto any CreditCommons tree.')
     }
