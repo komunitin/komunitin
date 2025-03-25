@@ -4,7 +4,7 @@ import { setupServerTest } from "../../server/setup"
 import { userAuth, testCreditCommonsNeighbour } from "../../server/api.data"
 
 describe('grafting', async () => {
-  // This calls /cc/TEST/graft but doesn't add a trunkward neighbour:
+  // This sets up the server with the TEST currency but doesn't add a trunkward neighbour:
   const t = setupServerTest(true, false)
 
   it('is required', async () => {
