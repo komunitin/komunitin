@@ -105,6 +105,7 @@ export const lastHashAuth = () => (req: Request, res: Response, next: NextFuncti
   if (!lastHash) {
     return next(unauthorized("last-hash header is required."))
   }
+  // Using this auth object so the result is compatible with the other (JWT-based) authentication methods
   req.auth = {
     header: undefined as any,
     token: undefined as any,
