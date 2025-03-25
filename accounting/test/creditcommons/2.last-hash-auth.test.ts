@@ -1,6 +1,6 @@
 import {describe, it} from "node:test"
 import assert from "node:assert"
-import { setupServerTest } from "../../server/setup"
+import { setupServerTest } from "../server/setup"
 
 describe('last-hash auth', async () => {
   // This calls /cc/TEST/graft and adds a trunkward neighbour 'trunk' with last-hash 'asdf':
