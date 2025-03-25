@@ -1,6 +1,6 @@
 import express from "express"
 import { getRoutes } from "./routes"
-import { getRoutes as getCCRoutes } from "src/federation/creditcommons/routes"
+import { getRoutes as getCCRoutes } from "src/creditcommons/routes"
 import { SharedController, createController } from "../controller"
 import { errorHandler } from "./errors"
 import { httpLogger } from "../utils/logger"

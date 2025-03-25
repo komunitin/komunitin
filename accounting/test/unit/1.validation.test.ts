@@ -2,7 +2,7 @@ import { checkExact, matchedData, ValidationChain, validationResult } from "expr
 import { describe, it } from "node:test"
 import assert from "node:assert"
 import { Validators } from "src/server/validation"
-import { CreditCommonsValidators } from "src/federation/creditcommons/validation"
+import { CreditCommonsValidators } from "src/creditcommons/validation"
 import { validateInput } from "src/server/parse"
 
 describe('Input validation', async () => {
