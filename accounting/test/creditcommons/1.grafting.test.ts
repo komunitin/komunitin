@@ -12,7 +12,7 @@ describe('grafting', async () => {
       "/cc/TEST/",
       { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
       401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"This Komunitin has not (yet) been grafted onto any CreditCommons tree."}]}')
+    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"This currency has not (yet) been grafted onto any CreditCommons tree."}]}')
   })
   it('requires authn', async () => {
     const response = await t.api.post(

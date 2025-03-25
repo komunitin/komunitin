@@ -27,7 +27,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     }
     const record = await this.db().creditCommonsNode.findFirst({})
     if (!record) {
-      throw unauthorized('This Komunitin has not (yet) been grafted onto any CreditCommons tree.')
+      throw unauthorized('This currency has not (yet) been grafted onto any CreditCommons tree.')
     }
     if (record.ccNodeName !== ctx.lastHashAuth?.ccNodeName) {
       throw unauthorized(`cc-node ${JSON.stringify(ctx.lastHashAuth?.ccNodeName)} is not our trunkward node.`)
