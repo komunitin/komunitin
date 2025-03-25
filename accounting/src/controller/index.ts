@@ -42,8 +42,6 @@ export interface CurrencyController {
   transfers: TransferController
   creditCommons: CreditCommonsController
 
-  // direct access
-  getDb(): TenantPrismaClient
   // Currency
   getCurrency(ctx: Context): Promise<Currency>
   updateCurrency(ctx: Context, currency: UpdateCurrency): Promise<Currency>

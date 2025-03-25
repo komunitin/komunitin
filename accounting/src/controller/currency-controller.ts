@@ -68,14 +68,6 @@ export class LedgerCurrencyController implements CurrencyController {
     this.creditCommons = new CreditCommonsControllerImpl(this)
   }
 
-  public getDb(): TenantPrismaClient {
-    return this.db
-  }
-
-  async checkLastHash(ctx: Context) {
-    console.log(ctx);
-  }
-
   /**
    * Implements {@link CurrencyController.getCurrency}
    */
