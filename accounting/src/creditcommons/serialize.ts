@@ -14,5 +14,5 @@ export const CreditCommonsMessageSerializer = new Serializer<{ message: string }
 
 export const CreditCommonsTransactionSerializer = new Serializer<CreditCommonsTransaction>("creditCommonsTransactions", {
   version: null,
-  projection: projection<CreditCommonsTransaction>(['cheat', 'uuid', 'state', 'workflow', 'entries']),
+  projection: projection<CreditCommonsTransaction>(['uuid', 'state', 'workflow', 'entries']),
 })

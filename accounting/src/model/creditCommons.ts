@@ -12,7 +12,6 @@ export interface CreditCommonsEntry {
 }
 
 export interface CreditCommonsTransaction {
-  cheat: string, // to tell the controller which admin account was created during the test setup
   uuid: string,
   state: string,
   workflow: string,

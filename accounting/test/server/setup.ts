@@ -55,8 +55,8 @@ export function setupServerTest(createData: boolean = true, graftCreditCommons: 
       return response.body.data
     },
 
-    createCreditCommonsNeighbour: async (ccNodeName: string, lastHash: string, admin = userAuth("0")) => {
-      await test.api?.post('/TEST/creditCommonsNodes', testCreditCommonsNeighbour(ccNodeName, lastHash), admin)
+    createCreditCommonsNeighbour: async (ccNodeName: string, lastHash: string, vostroId: string, admin = userAuth("0")) => {
+      await test.api?.post('/TEST/creditCommonsNodes', testCreditCommonsNeighbour(ccNodeName, lastHash, vostroId), admin)
     }
   }
 
@@ -82,7 +82,7 @@ export function setupServerTest(createData: boolean = true, graftCreditCommons: 
       test.account2 = await test.createAccount(test.user2.user)
       // Create CC trunkward
       if (graftCreditCommons) {
-        await test.createCreditCommonsNeighbour(test.ccNeighbour.ccNodeName, test.ccNeighbour.lastHash)
+        await test.createCreditCommonsNeighbour(test.ccNeighbour.ccNodeName, test.ccNeighbour.lastHash, test.account0.id)
       }
     }
   })

@@ -61,11 +61,12 @@ export const testTransfer = (payerId: string, payeeId: string, amount: number, m
   }
 })
 
-export const testCreditCommonsNeighbour = (ccNodeName: string, lastHash: string) => ({
+export const testCreditCommonsNeighbour = (ccNodeName: string, lastHash: string, vostroId: string) => ({
   data: {
     attributes: {
       ccNodeName,
-      lastHash
+      lastHash,
+      vostroId
     }
   }
 })

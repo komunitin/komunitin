@@ -33,7 +33,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       lastHash
     } as CreditCommonsNode;
   }
-  async checkLastHashAuth(ctx: Context) {
+  async checkLastHashAuth(ctx: Context): Promise<string> {
     if (ctx.type !== 'last-hash') {
       throw new Error('no last-hash auth found in context')
     }
@@ -47,14 +47,15 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     if (record.lastHash !== ctx.lastHashAuth?.lastHash) {
       throw unauthorized(`value of last-hash header ${JSON.stringify(ctx.lastHashAuth?.lastHash)} does not match our records.`)
     }
+    return record.vostroId
   }
   async getWelcome(ctx: Context) {
     await this.checkLastHashAuth(ctx)
     return { message: 'Welcome to the Credit Commons federation protocol.' }
   }
   async createTransaction(ctx: Context, transaction: CreditCommonsTransaction) {
-    this.gatewayAccountId = transaction.cheat; // FIXME!
-    await this.checkLastHashAuth(ctx)
+    this.gatewayAccountId = await this.checkLastHashAuth(ctx)
+    
     let localTransfers: InputTransfer[] = []
     let netGain = 0;
     let recipient = null;

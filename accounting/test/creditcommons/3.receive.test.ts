@@ -6,7 +6,6 @@ import { setConfig } from "src/config"
 import { sleep } from "src/utils/sleep"
 
 const generateCcTransaction = (t: TestSetupWithCurrency) => testCreditCommonsTransaction({
-  cheat: t.account0.id,
   uuid: '3d8ebb9f-6a29-42cb-9d39-9ee0a6bf7f1c',
   state: 'V',
   workflow: '|P-PC+CX+',
