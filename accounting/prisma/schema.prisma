@@ -22,11 +22,13 @@ model User {
   updated DateTime @updatedAt
 
   // Account users
-  accounts  AccountUser[] @relation()
+  accounts          AccountUser[]       @relation()
   // Currency admins
-  currency  Currency[]    @relation()
+  currency          Currency[]          @relation()
   // Transfer users
-  transfers Transfer[]    @relation()
+  transfers         Transfer[]          @relation()
+  // Vostro accounts
+  CreditCommonsNode CreditCommonsNode[] @relation()
 
   // Same user could log in to different tenants.
   @@id([tenantId, id])
@@ -280,9 +282,13 @@ model Value {
 }
 
 model CreditCommonsNode {
-  tenantId String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
+  tenantId   String @default(dbgenerated("(current_setting('app.current_tenant_id'))::text")) @db.VarChar(31)
   ccNodeName String @db.VarChar(255)
   lastHash   String @db.VarChar(255)
+
+  // Vostro account acts as a proxy representing this Credit Commons Node on our ledger
+  vostroId String
+  vostro   User   @relation(fields: [vostroId, tenantId], references: [id, tenantId])
+
   @@id([tenantId, ccNodeName])
 }
-
