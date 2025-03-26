@@ -97,7 +97,7 @@ docker exec -it cc /bin/bash -c "curl -i http://accounting:2025/"
 docker exec -it accounting /bin/bash -c "pnpm test-one test/creditcommons/3.receive.test.ts"
 docker exec -it db psql postgresql://accounting:accounting@db:5432/accounting
 docker exec -it accounting pnpm build-cli
-docker exec -it accounting node build/cli.js
+docker exec -it accounting node bundle/cli.js
 ```
 
 Some errors like this will be displayed only the first time you execute the CC tests, you can ignore them:
