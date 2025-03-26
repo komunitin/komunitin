@@ -6,6 +6,7 @@
 	"scripts": {
 		"compile": "tsc",
 		"build": "esbuild src/index.ts --bundle --sourcemap --platform=node --outdir=bundle",
+		"build-cli": "esbuild src/cli.ts --bundle --sourcemap --platform=node --outdir=bundle",
 		"start": "node --enable-source-maps bundle/index.js",
 		"dev": "tsx --inspect=0.0.0.0:9229 --watch src/index.ts | pino-pretty",
 		"test-ledger": "tsx --test test/ledger/*.ts",

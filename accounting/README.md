@@ -88,13 +88,16 @@ In order to feature trade between communities, the following model is proposed:
 To test the CC integration, run:
 ```sh
 docker compose -f compose.cc.yml up -d
-docker exec -it accounting-accounting-1 /bin/bash -c "./node_modules/.bin/prisma migrate reset --force"
-docker exec -it accounting-cc-1 /bin/bash -c "service mariadb start"
-docker exec -it accounting-cc-1 /bin/bash -c "vendor/bin/phpunit tests/SingleNodeTest.php"
-docker exec -d accounting-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
-docker exec -it accounting-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
-docker exec -it accounting-cc-1 /bin/bash -c "curl -i http://accounting-accounting-1:2025/"
-docker exec -it accounting-accounting-1 /bin/bash -c "pnpm test-one test/creditcommons/3.receive.test.ts"
+docker exec -it accounting /bin/bash -c "./node_modules/.bin/prisma migrate reset --force"
+docker exec -it cc /bin/bash -c "service mariadb start"
+docker exec -it cc /bin/bash -c "vendor/bin/phpunit tests/SingleNodeTest.php"
+docker exec -d cc /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
+docker exec -it cc /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
+docker exec -it cc /bin/bash -c "curl -i http://accounting:2025/"
+docker exec -it accounting /bin/bash -c "pnpm test-one test/creditcommons/3.receive.test.ts"
+docker exec -it db psql postgresql://accounting:accounting@db:5432/accounting
+docker exec -it accounting pnpm build-cli
+docker exec -it accounting node build/cli.js
 ```
 
 Some errors like this will be displayed only the first time you execute the CC tests, you can ignore them:
