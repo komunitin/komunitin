@@ -2,6 +2,8 @@ import {describe, it} from "node:test"
 import assert from "node:assert"
 import { setupServerTest, TestSetupWithCurrency } from "../server/setup"
 import { testCreditCommonsTransaction } from "../server/api.data"
+import { setConfig } from "src/config"
+import { sleep } from "src/utils/sleep"
 
 const generateCcTransaction = (t: TestSetupWithCurrency) => testCreditCommonsTransaction({
   cheat: t.account0.id,
@@ -41,6 +43,13 @@ const generateCcTransaction = (t: TestSetupWithCurrency) => testCreditCommonsTra
 })
 
 describe('receive', async () => {
+  // copied from https://github.com/komunitin/komunitin/blob/273b3a136d9bc4a7f36ced9343a989eb6d15630e/accounting/test/server/9.multiple.transfer.api.test.ts#L13-L17
+  // Wait for other tests/requests to stop counting in Horizon rate limit.
+  const wait5secPromise = sleep(6000)
+  setConfig({
+    STELLAR_CHANNEL_ACCOUNTS_ENABLED: true
+  })
+  
   // This calls /TEST/creditCommonsNodes and adds a trunkward neighbour 'trunk' with last-hash 'trunk':
   const t = setupServerTest(true, true)
 

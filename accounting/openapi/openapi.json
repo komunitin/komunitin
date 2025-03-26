@@ -2195,7 +2195,7 @@
             "in": "path",
             "required": true,
             "type": "string",
-            "example": "abb54eb8-2b04-4d31-9e8c-8dce6855b6af"
+            "example": "167802fc-2467-43e2-840d-40755bf83763"
           },
           {
             "type": "string",
@@ -4786,6 +4786,309 @@
         "responses": {},
         "tags": [
           "migrations"
+        ]
+      }
+    },
+    "/{code}/cc/": {
+      "get": {
+        "summary": "/{code}/cc/",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {},
+        "tags": []
+      }
+    },
+    "/{code}/creditCommonsNodes": {
+      "post": {
+        "summary": "/{code}/creditCommonsNodes",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "example": "TEST"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "ccNodeName": {
+                          "type": "string",
+                          "example": "trunk"
+                        },
+                        "lastHash": {
+                          "type": "string",
+                          "example": "trunk"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "creditCommonsNodes"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "ccNodeName": {
+                          "type": "string",
+                          "example": "trunk"
+                        },
+                        "lastHash": {
+                          "type": "string",
+                          "example": "trunk"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ]
+      }
+    },
+    "/{code}/cc/transaction": {
+      "post": {
+        "summary": "/{code}/cc/transaction",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "example": "TEST"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "cheat": {
+                          "type": "string",
+                          "example": "7f985266-753c-40b6-8adf-5567dd0c325a"
+                        },
+                        "uuid": {
+                          "type": "string",
+                          "example": "3d8ebb9f-6a29-42cb-9d39-9ee0a6bf7f1c"
+                        },
+                        "state": {
+                          "type": "string",
+                          "example": "V"
+                        },
+                        "workflow": {
+                          "type": "string",
+                          "example": "|P-PC+CX+"
+                        },
+                        "entries": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "payee": {
+                                "type": "string"
+                              },
+                              "payer": {
+                                "type": "string"
+                              },
+                              "quant": {
+                                "type": "number"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "metadata": {
+                                "type": "object",
+                                "properties": {
+                                  "foo": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "required": [
+                              "payee",
+                              "payer",
+                              "quant",
+                              "description",
+                              "metadata"
+                            ]
+                          },
+                          "example": [
+                            {
+                              "payee": "trunk/branch2/567c00a8-278a-48a1-9579-9c8eae9c6be7",
+                              "payer": "trunk/branch/twig/alice",
+                              "quant": 432,
+                              "description": "test long distance for 3 from leaf",
+                              "metadata": {
+                                "foo": "bar"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "creditCommonsTransactions"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "cheat": {
+                          "type": "string",
+                          "example": "7f985266-753c-40b6-8adf-5567dd0c325a"
+                        },
+                        "uuid": {
+                          "type": "string",
+                          "example": "3d8ebb9f-6a29-42cb-9d39-9ee0a6bf7f1c"
+                        },
+                        "state": {
+                          "type": "string",
+                          "example": "V"
+                        },
+                        "workflow": {
+                          "type": "string",
+                          "example": "|P-PC+CX+"
+                        },
+                        "entries": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "payee": {
+                                "type": "string"
+                              },
+                              "payer": {
+                                "type": "string"
+                              },
+                              "quant": {
+                                "type": "number"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "metadata": {
+                                "type": "object",
+                                "properties": {
+                                  "foo": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "required": [
+                              "payee",
+                              "payer",
+                              "quant",
+                              "description",
+                              "metadata"
+                            ]
+                          },
+                          "example": [
+                            {
+                              "payee": "trunk/branch2/567c00a8-278a-48a1-9579-9c8eae9c6be7",
+                              "payer": "trunk/branch/twig/alice",
+                              "quant": 432,
+                              "description": "test long distance for 3 from leaf",
+                              "metadata": {
+                                "foo": "bar"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [],
+        "produces": [
+          "application/vnd.api+json"
+        ],
+        "security": [
+          {
+            "authorization": []
+          }
         ]
       }
     },
