@@ -82,6 +82,7 @@ export function setupServerTest(createData: boolean = true, graftCreditCommons: 
       test.account2 = await test.createAccount(test.user2.user)
       // Create CC trunkward
       if (graftCreditCommons) {
+        console.log("Setting up neighbour", test.ccNeighbour.ccNodeName, test.ccNeighbour.lastHash, test.account0.id)
         await test.createCreditCommonsNeighbour(test.ccNeighbour.ccNodeName, test.ccNeighbour.lastHash, test.account0.id)
       }
     }

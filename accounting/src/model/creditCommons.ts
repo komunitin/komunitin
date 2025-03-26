@@ -1,6 +1,9 @@
+import { Account } from "./account";
+
 export interface CreditCommonsNode {
   ccNodeName: string,
   lastHash: string,
+  vostroId: string,
 }
 
 export interface CreditCommonsEntry {

@@ -4,6 +4,9 @@ export namespace CreditCommonsValidators {
   export const isGraft = () => [
     body("data.attributes.ccNodeName").isString(),
     body("data.attributes.lastHash").isString(),
+    body("data.attributes.vostroId").isString(),
+    body("data.relationships.vostro.data.type").isString(),
+    body("data.relationships.vostro.data.id").isString(),
   ]
   export const isTransaction = () => [
     body("data.attributes.uuid").isString(),

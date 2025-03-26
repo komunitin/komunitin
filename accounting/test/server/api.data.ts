@@ -67,6 +67,9 @@ export const testCreditCommonsNeighbour = (ccNodeName: string, lastHash: string,
       ccNodeName,
       lastHash,
       vostroId
+    },
+    relationships: {
+      vostro: { data: { type: "accounts", id: vostroId }}
     }
   }
 })

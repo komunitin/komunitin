@@ -17,7 +17,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     this.transferController = new TransferController(currencyController)
   }
 
-  async createNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsNode> {
+  async createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode> {
     // Only admins are allowed to set the trunkward node:
     await this.users().checkAdmin(ctx)
     await this.db().creditCommonsNode.create({
@@ -25,6 +25,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
         tenantId: this.db().tenantId,
         ccNodeName,
         lastHash,
+        vostroId,
       }
     });
 

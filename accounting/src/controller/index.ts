@@ -83,6 +83,6 @@ export interface TransferController {
 
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
-  createNode(ctx: Context, ccNodeName: string, lastHash: string): Promise<CreditCommonsNode>
+  createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode>
   createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<CreditCommonsTransaction>
 }

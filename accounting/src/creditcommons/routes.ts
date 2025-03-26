@@ -32,7 +32,8 @@ export function getRoutes(controller: SharedController) {
    */
   router.post('/:code/creditCommonsNodes', userAuth(Scope.Accounting), checkExact(CreditCommonsValidators.isGraft()),
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
-      return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash)
+      console.log(data)
+      return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash, data.vostroId)
     }, CreditCommonsNodeSerializer, 201)
   )
 
