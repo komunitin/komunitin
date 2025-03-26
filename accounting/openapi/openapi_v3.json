@@ -2241,7 +2241,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "example": "167802fc-2467-43e2-840d-40755bf83763",
+            "example": "bbbc06a0-0218-44ec-9754-c866c69c538e",
             "schema": {
               "type": "string"
             }
