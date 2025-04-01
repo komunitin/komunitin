@@ -17,6 +17,7 @@ export interface CreditCommonsController {
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   transferController: TransferController;
   gatewayAccountId: string = '0';
+  ledgerScale: number  = 1000 * 1000;
   ledgerBase: string = 'trunk/branch2/'
   constructor(readonly currencyController: LedgerCurrencyController) {
     super(currencyController)
@@ -110,8 +111,8 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       localTransfers.push({
         id: `${transaction.uuid}-${i}`,
         state: 'committed',
-        amount: transaction.entries[i].quant,
-        meta: 'CreditCommons transaction',
+        amount: transaction.entries[i].quant * this.ledgerScale,
+        meta: transaction.entries[i].description,
         payer: { id: payer!, type: 'account' },
         payee: { id: payee!, type: 'account' },
       })
