@@ -106,3 +106,16 @@ ERROR 1396 (HY000) at line 1: Operation DROP USER failed for 'twig'@'localhost'
 ```
 
 Next step: let the accounting server act as branch2.cc-server, and complete the remote payment!
+
+Alternatively, you can go to the repo root and do:
+```sh
+cd ..
+cp cmopose.cc.yml compose.yml
+./start.sh --up --ices --dev --demo
+docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"
+docker exec -d komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
+docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
+docker exec -it komunitin-cc-1 /bin/bash -c "curl -i http://komunitin-accounting-1:2025/"
+docker exec -it komunitin-db-accounting-1 psql postgresql://accounting:accounting@localhost:5432/accounting
+```
+Visit http://localhost:2030/ and ... ? 

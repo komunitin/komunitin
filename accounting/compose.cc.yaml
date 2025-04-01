@@ -22,7 +22,7 @@ services:
       NETWORK: local
   cc:
     build:
-      context: ./cc
+      context: ./accounting/cc
     container_name: cc
     restart: unless-stopped
     ports:
