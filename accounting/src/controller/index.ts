@@ -8,6 +8,7 @@ import { InputTrustline, Trustline, UpdateTrustline } from "src/model/trustline"
 import { TenantPrismaClient } from "./multitenant"
 export { MigrationController } from './migration'
 import { CreditCommonsNode, CreditCommonsTransaction } from "src/model/creditCommons";
+import { CreditCommonsController } from "src/creditcommons/credit-commons-controller";
 
 
 export type ControllerEvents = {
@@ -79,10 +80,4 @@ export interface TransferController {
   getTransfers(ctx: Context, params: CollectionOptions): Promise<Transfer[]>
   updateTransfer(ctx: Context, transfer: UpdateTransfer): Promise<Transfer>
   deleteTransfer(ctx: Context, id: string): Promise<void>
-}
-
-export interface CreditCommonsController {
-  getWelcome(ctx: Context): Promise<{ message: string }>
-  createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode>
-  createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<CreditCommonsTransaction>
 }

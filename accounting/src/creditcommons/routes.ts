@@ -3,7 +3,8 @@ import { checkExact } from 'express-validator';
 import { CreditCommonsNode, CreditCommonsTransaction } from 'src/model';
 import { SharedController } from 'src/controller';
 import { Scope, userAuth, lastHashAuth } from 'src/server/auth';
-import { currencyInputHandler, currencyResourceHandler } from 'src/server/handlers';
+import { currencyInputHandler, currencyResourceHandler, asyncHandler } from 'src/server/handlers';
+import { context } from 'src/utils/context';
 import { CreditCommonsValidators } from './validation';
 import {
   CreditCommonsNodeSerializer,
@@ -26,6 +27,18 @@ export function getRoutes(controller: SharedController) {
   router.get('/:code/cc/', lastHashAuth(), currencyResourceHandler(controller, async (currencyController, ctx) => {
     return await currencyController.creditCommons.getWelcome(ctx);
   }, CreditCommonsMessageSerializer, {}))
+
+  /**
+   * Retrieve a welcome message. Requires last-hash auth.
+   */
+  router.get('/:code/cc/account/history', lastHashAuth(), asyncHandler(async (req, res) => {
+    const ctx = context(req)
+    const currencyController = await controller.getCurrencyController(req.params.code)
+    const response = await currencyController.creditCommons.getAccountHistory(ctx)
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
+    res.status(200).json(response)
+  }))
 
   /**
    * Configure the trunkward CC node. Requires admin.

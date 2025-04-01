@@ -1,13 +1,19 @@
 import { AbstractCurrencyController } from "../controller/abstract-currency-controller"
 import { Context } from "../utils/context"
 import { CreditCommonsNode, CreditCommonsTransaction } from "../model/creditCommons"
-import { CreditCommonsController } from '../controller'
 import { LedgerCurrencyController } from '../controller/currency-controller'
 import { unauthorized } from "src/utils/error"
 import { TransferController } from "../controller/transfer-controller"
 import { InputTransfer } from "src/model/transfer"
 import { systemContext } from "src/utils/context"
 
+
+export interface CreditCommonsController {
+  getWelcome(ctx: Context): Promise<{ message: string }>
+  getAccountHistory(ctx: Context): Promise<{ data: object, meta: object }>
+  createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode>
+  createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<CreditCommonsTransaction>
+}
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   transferController: TransferController;
   gatewayAccountId: string = '0';
@@ -53,6 +59,23 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
   async getWelcome(ctx: Context) {
     await this.checkLastHashAuth(ctx)
     return { message: 'Welcome to the Credit Commons federation protocol.' }
+  }
+  async getAccountHistory(ctx: Context) {
+    await this.checkLastHashAuth(ctx)
+    return {
+      data: {
+        '2025-04-01 09:22:37': 0,
+        '2025-04-01 09:22:41': 0,
+        '2025-04-01 09:22:42': -60
+      },
+      meta: {
+        min: -60,
+        max: 0,
+        points: 3,
+        start: '2025-04-01 09:22:37',
+        end: '2025-04-01 09:22:42'
+      }
+    };
   }
   async createTransaction(ctx: Context, transaction: CreditCommonsTransaction) {
     this.gatewayAccountId = await this.checkLastHashAuth(ctx)
