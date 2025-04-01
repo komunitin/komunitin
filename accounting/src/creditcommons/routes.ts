@@ -18,16 +18,16 @@ import {
 } from './serialize';
 
 
-function ccInputHandler<T extends Dictionary<any>, D extends Resource>(controller: SharedController, fn: CurrencyInputHandler<T,D>, status = 200) {
-  return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
-    const data = input<D>(req)
-    if (Array.isArray(data)) {
-      throw badRequest("Expected a single resource")
-    }
-    const resource = await fn(currencyController, ctx, data)
-    return resource
-  }, status)
-}
+// function ccInputHandler<T extends Dictionary<any>, D extends Resource>(controller: SharedController, fn: CurrencyInputHandler<T,D>, status = 200) {
+//   return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
+//     const data = input<D>(req)
+//     if (Array.isArray(data)) {
+//       throw badRequest("Expected a single resource")
+//     }
+//     const resource = await fn(currencyController, ctx, data)
+//     return resource
+//   }, status)
+// }
 
 /**
  * Implements the routes for the credit commons federation protocol
@@ -58,16 +58,20 @@ export function getRoutes(controller: SharedController) {
   /**
    * CC API endpoint to create a transaction. Requires last-hash auth.
    */
-    router.post('/:code/cc/transaction/relay', lastHashAuth(), checkExact(CreditCommonsValidators.isTransaction()),
-    ccInputHandler(controller, async (currencyController, ctx, data: CreditCommonsTransaction) => {
-      return await currencyController.creditCommons.createTransaction(ctx, data)
-    }, 201)
+    router.post('/:code/cc/transaction/relay', lastHashAuth(), asyncHandler(async (req, res) => {
+      const ctx = context(req)
+      
+      console.log('body', req.body)
+      const currencyController = await controller.getCurrencyController(req.params.code)
+      const response = await currencyController.creditCommons.createTransaction(ctx, req.body)
+      res.status(200).json(response)
+    })
   )
 
   /**
    * Update transaction status. Requires last-hash auth.
    */
-  router.patch('/:code/cc/transaction/:transId/P', lastHashAuth(), asyncHandler(async (req, res) => {
+  router.patch('/:code/cc/transaction/:transId/:newState', lastHashAuth(), asyncHandler(async (req, res) => {
     const ctx = context(req)
     const response = 'Created'
     res.setHeader('Content-Type', 'text/html')
