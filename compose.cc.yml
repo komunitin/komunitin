@@ -55,7 +55,7 @@ services:
 
   cc:
     build:
-      context: ./cc
+      context: ./accounting/cc
     ports:
       - "8080:80"
     extra_hosts:

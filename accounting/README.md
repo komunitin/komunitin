@@ -110,7 +110,7 @@ Next step: let the accounting server act as branch2.cc-server, and complete the 
 Alternatively, you can go to the repo root and do:
 ```sh
 cd ..
-cp cmopose.cc.yml compose.yml
+cp compose.cc.yml compose.yml
 ./start.sh --up --ices --dev --demo
 docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"
 docker exec -d komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
@@ -118,4 +118,10 @@ docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeT
 docker exec -it komunitin-cc-1 /bin/bash -c "curl -i http://komunitin-accounting-1:2025/"
 docker exec -it komunitin-db-accounting-1 psql postgresql://accounting:accounting@localhost:5432/accounting
 ```
-Visit http://localhost:2030/ and ... ? 
+
+In psql, execute `SELECT set_config('app.bypass_rls', 'on', false);` to bypass Row Level Security, then `\d+` to see a list of tables, and e.g. `select * from "Transfer";` to see the contents of the Transfers table. Run `update "Currency" set "adminId"='75736572-2020-4716-a669-000000000007' where "tenantId"='NET2';` to make Noether the currency admin of NET2, harvest Noether's bearer token from your browser dev tools while visiting http://localhost:2030/ (log in with `noether@komunitin.org` / `komunitin`), and then you can graft the Komunitin node onto the CC tree and access its CC API:
+
+```sh
+docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6ImUwM2Q2ZmQ5OTE4ZGU3NjUyOTcyODQ4YTViNDVlOWNlMjE4YzY0ZjMiLCJqdGkiOiJlMDNkNmZkOTkxOGRlNzY1Mjk3Mjg0OGE1YjQ1ZTljZTIxOGM2NGYzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjIwMjlcLyIsImF1ZCI6ImtvbXVuaXRpbi1hcHAiLCJzdWIiOiI3IiwiZXhwIjoxNzQzNTAwNTIyLCJpYXQiOjE3NDM0OTY5MjIsInRva2VuX3R5cGUiOiJiZWFyZXIiLCJzY29wZSI6ImtvbXVuaXRpbl9zb2NpYWwga29tdW5pdGluX2FjY291bnRpbmcgZW1haWwgb2ZmbGluZV9hY2Nlc3Mgb3BlbmlkIHByb2ZpbGUifQ.RKahmd_Pc-8NVkwb6Xcio9uRQtCIhebWz97Mf0fKrv0BFuFSmK-AEGFsyGp7_HXJiDo8GBmWgI30-KX1XV4Mav73CX2T4clWp5tHJlx9360Jk-u92MzI7H7R1aEq809IGfRRXZF5r42SIGCTfpgzOK1n9Dyx88_9GTY_khWKsnUJjWXb8q1Z17djV3QqW9ardtnoq_qhAHZIfTHCm_HsDFKL8M5g4C8qhD6zDAr_j-1rYFcT4zKMeVakXh2blZFcj9USWwKhHu7A7kbnb21ddsirsX-dcCcgqJByfxmpy2niZk4B02CXgSWh6nTWOrh4CO1-MeuGHYfH-7KlDLikPg' -X POST -d'{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"4d41c0cb-9457-464b-97d0-402db8e6e912\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"account\",\"id\":\"4d41c0cb-9457-464b-97d0-402db8e6e912\"}}}}}' http://komunitin-accounting-1:2025/NET2/creditCommonsNodes"
+docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'cc-node: trunk' -H 'last-hash: trunk' http://komunitin-accounting-1:2025/NET2/cc/"
+```
