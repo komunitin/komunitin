@@ -53,17 +53,6 @@ services:
     volumes:
       - db-accounting:/var/lib/postgresql/data
 
-  cc:
-    build:
-      context: ./cc
-    ports:
-      - "8080:80"
-    extra_hosts:
-      - "twig.cc-server:127.0.0.1"
-      - "branch.cc-server:127.0.0.1"
-      - "trunk.cc-server:127.0.0.1"
-      - "branch2.cc-server:127.0.0.1"
-
   accounting:
     build:
       context: ./accounting
