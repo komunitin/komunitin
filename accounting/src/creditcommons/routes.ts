@@ -39,6 +39,16 @@ export function getRoutes(controller: SharedController) {
   const router = Router()
 
   /**
+   * Configure the trunkward CC node. Requires admin.
+   */
+  router.post('/:code/creditCommonsNodes', userAuth(Scope.Accounting), checkExact(CreditCommonsValidators.isGraft()),
+    currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
+      console.log(data)
+      return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash, data.vostroId)
+    }, CreditCommonsNodeSerializer, 201)
+  )
+
+  /**
    * Retrieve a welcome message. Requires last-hash auth.
    */
   router.get('/:code/cc/', lastHashAuth(), currencyResourceHandler(controller, async (currencyController, ctx) => {
@@ -46,15 +56,23 @@ export function getRoutes(controller: SharedController) {
   }, CreditCommonsMessageSerializer, {}))
 
   /**
-   * Retrieve account history. Requires last-hash auth.
+   * CC API endpoint to create a transaction. Requires last-hash auth.
    */
-  router.get('/:code/cc/account/history', lastHashAuth(), asyncHandler(async (req, res) => {
+    router.post('/:code/cc/transaction/relay', lastHashAuth(), checkExact(CreditCommonsValidators.isTransaction()),
+    ccInputHandler(controller, async (currencyController, ctx, data: CreditCommonsTransaction) => {
+      return await currencyController.creditCommons.createTransaction(ctx, data)
+    }, 201)
+  )
+
+  /**
+   * Update transaction status. Requires last-hash auth.
+   */
+  router.patch('/:code/cc/transaction/:transId/P', lastHashAuth(), asyncHandler(async (req, res) => {
     const ctx = context(req)
-    const currencyController = await controller.getCurrencyController(req.params.code)
-    const response = await currencyController.creditCommons.getAccountHistory(ctx)
-    res.setHeader('Content-Type', 'application/json')
+    const response = 'Created'
+    res.setHeader('Content-Type', 'text/html')
     res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
-    res.status(200).json(response)
+    res.status(201).json(response)
   }))
 
   /**
@@ -79,69 +97,16 @@ export function getRoutes(controller: SharedController) {
   }))
 
   /**
-   * Update transaction status. Requires last-hash auth.
+   * Retrieve account history. Requires last-hash auth.
    */
-  router.patch('/:code/cc/transaction/:transId/P', lastHashAuth(), asyncHandler(async (req, res) => {
+  router.get('/:code/cc/account/history', lastHashAuth(), asyncHandler(async (req, res) => {
     const ctx = context(req)
-    const response = 'Created'
-    res.setHeader('Content-Type', 'text/html')
+    const currencyController = await controller.getCurrencyController(req.params.code)
+    const response = await currencyController.creditCommons.getAccountHistory(ctx)
+    res.setHeader('Content-Type', 'application/json')
     res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
-    res.status(201).json(response)
+    res.status(200).json(response)
   }))
-
-  /**
-   * Update transaction status. Requires last-hash auth.
-   */
-  router.patch('/:code/cc/transaction/relaty', lastHashAuth(), asyncHandler(async (req, res) => {
-    const ctx = context(req)
-    const response = 'Created'
-    res.setHeader('Content-Type', 'text/html')
-    res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
-    res.status(201).json(response)
-  }))
-
-  /**
-   * Configure the trunkward CC node. Requires admin.
-   */
-  router.post('/:code/creditCommonsNodes', userAuth(Scope.Accounting), checkExact(CreditCommonsValidators.isGraft()),
-    currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
-      console.log(data)
-      return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash, data.vostroId)
-    }, CreditCommonsNodeSerializer, 201)
-  )
-
-  /**
-   * CC API endpoint to create a transaction. Requires last-hash auth.
-   * FIXME: should not be using serializer.
-   */
-  // router.post('/:code/cc/transaction/relay', lastHashAuth(), checkExact(CreditCommonsValidators.isTransaction()),
-  //   asyncHandler(async (req, res) => {
-  //     const ctx = context(req)
-  //     await currencyController.creditCommons.createTransaction(ctx, data)
-  //     const response = {
-  //       data: [
-  //         {
-  //           payee: 'trunk\/branch2\/admin',
-  //           payer: 'trunk\/branch\/twig\/alice',
-  //           quant: 60,
-  //           description: 'Payer fee of 1 to branch2\/admin',
-  //           metadata: {}
-  //         }
-  //       ],
-  //       meta: {
-  //         secs_valid_left: 0
-  //       }
-  //     }
-  //     res.setHeader('Content-Type', 'application/json')
-  //     res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
-  //     res.status(200).json(response)
-  //   })
-  // )
-  router.post('/:code/cc/transaction/relay', lastHashAuth(), checkExact(CreditCommonsValidators.isTransaction()),
-    ccInputHandler(controller, async (currencyController, ctx, data: CreditCommonsTransaction) => {
-      return await currencyController.creditCommons.createTransaction(ctx, data)
-    }, 201)
-  )
 
   return router
 }
