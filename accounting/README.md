@@ -85,9 +85,10 @@ In order to feature trade between communities, the following model is proposed:
   - Whenever an incoming external payment is received, the trader account creates or updates the sell offer to convert the current balance of external HOUR assets to local HOUR assets.
 
 ## CC integration
-To test the CC integration, you can go to the repo root and do:
+To test the CC integration, you can go to the repo root, make sure you have https://github.com/michielbdejong/ices checked out next to it, and do:
 ```sh
 cp compose.cc.yml compose.yml
+cp .env.template .env
 ./start.sh --up --ices --dev --demo
 docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"
 docker exec -d komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
