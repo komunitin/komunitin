@@ -1,18 +1,24 @@
 import { AbstractCurrencyController } from "../controller/abstract-currency-controller"
 import { Context } from "../utils/context"
-import { CreditCommonsNode, CreditCommonsTransaction } from "../model/creditCommons"
+import { CreditCommonsNode, CreditCommonsTransaction, CreditCommonsEntry } from "../model/creditCommons"
 import { LedgerCurrencyController } from '../controller/currency-controller'
 import { unauthorized } from "src/utils/error"
 import { TransferController } from "../controller/transfer-controller"
 import { InputTransfer } from "src/model/transfer"
 import { systemContext } from "src/utils/context"
+import { AccountRecord } from "src/model/account"
 
 
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
   getAccountHistory(ctx: Context): Promise<{ data: object, meta: object }>
   createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode>
-  createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<CreditCommonsTransaction>
+  createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<{
+    data: CreditCommonsEntry[],
+    meta: {
+      secs_valid_left: number,
+    }
+  }>
 }
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   transferController: TransferController;
@@ -78,28 +84,38 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       }
     };
   }
+  async codeToAccountId(code: string): Promise<string | undefined> {
+    const record: AccountRecord | null = await this.db().account.findUnique({
+      where: { 
+        code,
+        status: "active",
+      },
+      include: {
+      }
+    })
+    return record?.id
+  }
   async createTransaction(ctx: Context, transaction: CreditCommonsTransaction) {
     this.gatewayAccountId = await this.checkLastHashAuth(ctx)
-    
-    let localTransfers: InputTransfer[] = []
-    let netGain = 0;
-    let recipient = null;
+    let netGain = 0
+    let recipient = null
+    let metas: string[] = []
+    let froms: string[] = []
     for (let i=0; i < transaction.entries.length; i++) {
       let payer, payee, thisRecipient;
       if (transaction.entries[i].payer.startsWith(this.ledgerBase)) {
-        payer = transaction.entries[i].payer.slice(this.ledgerBase.length)
-        payee = this.gatewayAccountId
-        thisRecipient = payer
+        thisRecipient = transaction.entries[i].payer.slice(this.ledgerBase.length)
         netGain -= transaction.entries[i].quant
+        metas.push(`-${transaction.entries[i].quant} (${transaction.entries[i].description})`)
       }
       if (transaction.entries[i].payee.startsWith(this.ledgerBase)) {
-        payee = transaction.entries[i].payee.slice(this.ledgerBase.length)
-        payer = this.gatewayAccountId
         if (thisRecipient) {
           throw new Error('Payer and Payee cannot both be local')
         }
-        thisRecipient = payee
+        thisRecipient = transaction.entries[i].payee.slice(this.ledgerBase.length)
         netGain += transaction.entries[i].quant
+        metas.push(`+${transaction.entries[i].quant} (${transaction.entries[i].description})`)
+        froms.push(transaction.entries[i].payer)
       }
       if (!thisRecipient) {
         throw new Error('Payer and Payee cannot both be remote')
@@ -108,22 +124,34 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
         throw new Error('All entries must be to or from the same local account')
       }
       recipient = thisRecipient
-      localTransfers.push({
-        id: `${transaction.uuid}-${i}`,
-        state: 'committed',
-        amount: transaction.entries[i].quant * this.ledgerScale,
-        meta: transaction.entries[i].description,
-        payer: { id: payer!, type: 'account' },
-        payee: { id: payee!, type: 'account' },
-      })
     }
     if (netGain <= 0) {
       throw new Error('Net gain must be positive')
     }
-    await this.transferController.createMultipleTransfers(systemContext(), localTransfers)
+    // if recipientId is a code like NET20002
+    // then payeeId is a stellar account ID like
+    // 2791faf5-4566-4da0-99f6-24c41041c50a
+    let payeeId
+    if (recipient) {
+       payeeId = await this.codeToAccountId(recipient);
+    }
+    console.log('found payeeId for recipient', payeeId, recipient)
+    if (payeeId) {
+      let localTransfer: InputTransfer = {
+        id: transaction.uuid,
+        state: 'committed',
+        amount: netGain * this.ledgerScale,
+        meta: `From Credit Commons [${froms.join(', ')}]:` + metas.join(' '),
+        payer: { id: this.gatewayAccountId, type: 'account' },
+        payee: { id: payeeId, type: 'account' },
+      }
+      await this.transferController.createTransfer(systemContext(), localTransfer)
+    }
     return {
       data: transaction.entries,
-      meta: {},
+      meta: {
+        secs_valid_left: 0,
+      },
     }
   }
 }
