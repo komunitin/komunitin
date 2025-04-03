@@ -145,6 +145,8 @@ model Account {
 
   // Each CreditCommonsNode has a "vostro" Account
   CreditCommonsNode CreditCommonsNode[]
+
+  @@unique([id, tenantId]) 
 }
 
 model AccountTag {
