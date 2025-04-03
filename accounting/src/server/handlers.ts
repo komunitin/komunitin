@@ -22,7 +22,7 @@ export const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>)
   }
 }
 
-function currencyHandlerHelper<T extends Dictionary<any>>(controller: SharedController, fn: (currencyController: CurrencyController, context: Context, req: Request) => Promise<Partial<DataDocument<T>>>, status = 200) {
+export function currencyHandlerHelper<T extends Dictionary<any>>(controller: SharedController, fn: (currencyController: CurrencyController, context: Context, req: Request) => Promise<Partial<DataDocument<T>>>, status = 200) {
   return asyncHandler(async (req, res) => {
     const ctx = context(req)
     const currencyController = await controller.getCurrencyController(req.params.code)
@@ -98,7 +98,7 @@ export function currencyCollectionHandler<T extends Dictionary<any>>(controller:
   }, status)
 }
 
-type CurrencyInputHandler<T,D> = ((controller: CurrencyController, context: Context, data: D) => Promise<T>)
+export type CurrencyInputHandler<T,D> = ((controller: CurrencyController, context: Context, data: D) => Promise<T>)
 type CurrencyInputHandlerMultiple<T,D> = ((controller: CurrencyController, context: Context, data: D|D[]) => Promise<T|T[]>)
 /**
  * Helper for route handlers that require input data.
