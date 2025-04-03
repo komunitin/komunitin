@@ -85,6 +85,8 @@ In order to feature trade between communities, the following model is proposed:
   - Whenever an incoming external payment is received, the trader account creates or updates the sell offer to convert the current balance of external HOUR assets to local HOUR assets.
 
 ## CC integration
+The only [CC workflow](https://gitlab.com/credit-commons/cc-node/-/blob/0.9.x/doc/developers.md?ref_type=heads#workflow) that is currently supported is `|P-PC+CX+`, and currently only receiving is implemented.
+
 ### Main setup
 To test the CC integration, you can go to the repo root, make sure you have https://github.com/michielbdejong/ices checked out next to it, and do:
 ```sh
@@ -114,7 +116,12 @@ SELECT "id" FROM "Account" WHERE "code"='NET20004';
 \q
 ```
 
-2. Harvest Fermat's bearer token from your browser dev tools while visiting http://localhost:2030/ (log in with `fermat@komunitin.org` / `komunitin`).
+2. Get Fermat's bearer token. There are two ways to do that; method 1:
+```sh
+npm install -g json
+curl -s 'http://localhost:2029/oauth2/token' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=fermat%40komunitin.org&password=komunitin&grant_type=password&scope=komunitin_social+komunitin_accounting+email+offline_access+openid+profile&client_id=komunitin-app' | json access_token
+```
+Method 2: harvest it from your browser dev tools while visiting http://localhost:2030/ (log in with `fermat@komunitin.org` / `komunitin`).
 
 3. Using the results from 1. (`54c97d55-397d-49e1-9f54-47d1127323a7` in this example) and 2. (`Authorization: Bearer ...` in this example) you can graft the Komunitin node onto the CC tree:
 ```sh
