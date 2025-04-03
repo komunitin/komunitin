@@ -2,12 +2,14 @@ import { describe, it } from "node:test"
 import assert from "node:assert"
 import { setupServerTest } from "./setup"
 import { testTransfer } from "./api.data"
+import { logger } from "src/utils/logger"
 
 /**
  * This test checks that concurrent transfers still work without channel accounts.
  */
 describe('Multiple parallel transfers without channel accounts', async () => {
   const t = setupServerTest()
+  logger.level = "debug"
 
   it('should properly execute multiple transfers in parallel', async () => {
     const data = Array.from({length: 10}, (_, i) => {

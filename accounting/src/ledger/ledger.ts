@@ -304,13 +304,6 @@ export interface LedgerAccount {
   balance(): string
 
   /**
-   * Update the account data from the ledger.
-   * 
-   * Call this method after performing a transaction to get the updated balance.
-   */
-  update(): Promise<this>
-
-  /**
    * Return the current amount of credit.
    */
   credit(): Promise<string>

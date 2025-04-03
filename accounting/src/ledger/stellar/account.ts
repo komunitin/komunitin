@@ -8,12 +8,35 @@ import { internalError, insufficientBalance } from "../../utils/error"
 export class StellarAccount implements LedgerAccount {
   public currency: StellarCurrency
 
+  // account address = public key.
+  private accountId: string
+
   // Use getStellarAccount() instead.
   private account: Horizon.AccountResponse | undefined
 
-  constructor(account: Horizon.AccountResponse, currency: StellarCurrency) {
+  private loadPromise: Promise<Horizon.AccountResponse> | undefined
+
+  constructor(accountId: string, currency: StellarCurrency) {
+    this.accountId = accountId
     this.currency = currency
-    this.account = account
+  }
+
+  public async load() {
+    // We use the loadPromise to avoid multiple parallel calls to loadAccount().
+    // Indeed, if we call load() before the previous call to loadAccount() is finished,
+    // it will just wait for the previous promise and use the same result.
+    if (this.loadPromise === undefined) {
+      this.loadPromise = this.currency.ledger.loadAccount(this.accountId)
+    }
+    const loaded = await this.loadPromise
+    this.loadPromise = undefined
+    // If we already have a loaded account, we update the sequence number of the new one
+    // just in case the current account increased the sequence number while we were loading
+    // the new one.
+    if (this.account !== undefined && this.account.sequenceNumber() > loaded.sequenceNumber()) {
+      loaded.sequence = this.account.sequenceNumber()
+    }
+    this.account = loaded
   }
 
   private stellarAccount() {
@@ -21,11 +44,6 @@ export class StellarAccount implements LedgerAccount {
       throw internalError("Account not found")
     }
     return this.account
-  }
-
-  async update() {
-    this.account = await this.currency.ledger.loadAccount(this.stellarAccount().accountId())
-    return this
   }
   
   /**
@@ -202,6 +220,7 @@ export class StellarAccount implements LedgerAccount {
       asset: this.currency.asset(),
       amount: payment.amount
     }))
+    logger.debug(`Submitting payment of ${payment.amount} with sequence ${this.account?.sequenceNumber()}`)
     const transaction = await this.currency.ledger.submitTransaction(builder, [keys.account], keys.sponsor)
     
     const transfer = {

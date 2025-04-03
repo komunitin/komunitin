@@ -97,9 +97,9 @@ describe('Creates stellar elements', async () => {
     account2Key = (await currency.createAccount({
       initialCredit: "1000"
     }, {sponsor, issuer: currencyKeys.issuer, credit: currencyKeys.credit})).key
-    const account = await currency.getAccount(accountKey.publicKey())
+    let account = await currency.getAccount(accountKey.publicKey())
     await account.pay({payeePublicKey: account2Key.publicKey(), amount: "100"}, {account: accountKey, sponsor})
-    await account.update()
+    account = await currency.getAccount(accountKey.publicKey()) // update
     assert.equal(account.balance(),"900.0000000")
     const account2 = await currency.getAccount(account2Key.publicKey())
     assert.equal(account2.balance(),"1100.0000000")
@@ -176,7 +176,7 @@ describe('Creates stellar elements', async () => {
     assert.equal(path.path[0].issuer, currencyKeys.externalIssuer.publicKey())
     assert.equal(path.path[1].code, "HOUR")
     assert.equal(path.path[1].issuer, currency2Keys.externalIssuer.publicKey())
-    const account1 = await currency.getAccount(key1.publicKey())
+    let account1 = await currency.getAccount(key1.publicKey())
     await assert.doesNotReject(account1.externalPay({
       payeePublicKey: key2.publicKey(),
       amount: "5", // in TES2 currency. This is 2.5 hours.
@@ -185,9 +185,9 @@ describe('Creates stellar elements', async () => {
       account: key1,
       sponsor
     }))
-    await account1.update()
+    account1 = await currency.getAccount(key1.publicKey()) // update
     assert.equal(account1.balance(),"975.0000000")
-    const account2 = await currency2.getAccount(key2.publicKey())
+    let account2 = await currency2.getAccount(key2.publicKey())
     assert.equal(account2.balance(),"1005.0000000")
 
     // Now the currency 2 has a surplus of 1.5 hours, so they can buy to currency 
@@ -214,9 +214,9 @@ describe('Creates stellar elements', async () => {
             account: key2,
             sponsor
           }))
-          await account1.update()
+          account1 = await currency.getAccount(key1.publicKey()) // update
           assert.equal(account1.balance(),"980.0000000")
-          await account2.update()
+          account2 = await currency2.getAccount(key2.publicKey()) // update
           assert.equal(account2.balance(),"1004.0000000")
           resolve()
         } catch (error) {
