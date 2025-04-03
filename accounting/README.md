@@ -104,3 +104,5 @@ docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: applicati
 docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
 ```
 This will make the Komunitin node act as `trunk/branch2` in the CreditCommons test tree. You should see 8/8 tests passing.
+
+To  restart from scratch, do `docker compose down -v`. Make sure with `docker ps -a` and `docker volume ls` that all relevant containers are stopped and removed, and repeat if necessary. There might also be an unnamed volume that you need to remove. If see `DUPLICATE ENTRY` errors on the next run then you know it wasn't removed completely.
