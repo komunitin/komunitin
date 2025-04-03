@@ -90,7 +90,6 @@ The only [CC workflow](https://gitlab.com/credit-commons/cc-node/-/blob/0.9.x/do
 ### Main setup
 To test the CC integration, you can go to the repo root, make sure you have https://github.com/michielbdejong/ices checked out next to it, and do:
 ```sh
-cp compose.cc.yml compose.yml
 cp .env.template .env
 ./start.sh --up --ices --dev --demo
 docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"

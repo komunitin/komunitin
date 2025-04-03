@@ -21,14 +21,9 @@ export interface CreditCommonsController {
   }>
 }
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
-  transferController: TransferController;
   gatewayAccountId: string = '0';
   ledgerBase: string = 'trunk/branch2/'
-  constructor(readonly currencyController: LedgerCurrencyController) {
-    super(currencyController)
-    this.transferController = new TransferController(currencyController)
-  }
-
+  
   async createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode> {
     // Only admins are allowed to set the trunkward node:
     await this.users().checkAdmin(ctx)
@@ -144,7 +139,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
         payer: { id: this.gatewayAccountId, type: 'account' },
         payee: { id: payeeId, type: 'account' },
       }
-      await this.transferController.createTransfer(systemContext(), localTransfer)
+      await this.transfers().createTransfer(systemContext(), localTransfer)
     }
     return {
       data: transaction.entries,
