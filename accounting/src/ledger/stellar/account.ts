@@ -21,7 +21,7 @@ export class StellarAccount implements LedgerAccount {
     this.currency = currency
   }
 
-  public async load() {
+  public async update() {
     // We use the loadPromise to avoid multiple parallel calls to loadAccount().
     // Indeed, if we call load() before the previous call to loadAccount() is finished,
     // it will just wait for the previous promise and use the same result.

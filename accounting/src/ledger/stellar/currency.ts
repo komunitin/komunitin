@@ -662,7 +662,7 @@ export class StellarCurrency implements LedgerCurrency {
       this.accounts[publicKey] = new StellarAccount(publicKey, this)
     }
 
-    await this.accounts[publicKey].load()
+    await this.accounts[publicKey].update()
 
     return this.accounts[publicKey]
   }
