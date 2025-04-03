@@ -94,6 +94,7 @@ docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"
 docker exec -d komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
 docker exec -it komunitin-cc-1 /bin/bash -c "curl -i http://komunitin-accounting-1:2025/"
 docker exec -it komunitin-db-accounting-1 psql postgresql://accounting:accounting@localhost:5432/accounting
+docker exec -it komunitin-integralces-1 mysql -u integralces -pintegralces -h komunitin-db-integralces-1 integralces
 ```
 
 In psql, execute `SELECT set_config('app.bypass_rls', 'on', false);` to bypass Row Level Security, then `\d+` to see a list of tables, and e.g. `select * from "Transfer";` to see the contents of the Transfers table. Run `update "Currency" set "adminId"='75736572-2020-4716-a669-000000000007' where "tenantId"='NET2';` to make Noether the currency admin of NET2, harvest Noether's bearer token from your browser dev tools while visiting http://localhost:2030/ (log in with `noether@komunitin.org` / `komunitin`), and then you can graft the Komunitin node onto the CC tree and access its CC API (FIXME: create a dedicated gateway account first instead of using `4d41c0cb-9457-464b-97d0-402db8e6e912 / NET20003 / Fermat` as the gateway/vostro account):
