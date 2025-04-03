@@ -85,6 +85,7 @@ In order to feature trade between communities, the following model is proposed:
   - Whenever an incoming external payment is received, the trader account creates or updates the sell offer to convert the current balance of external HOUR assets to local HOUR assets.
 
 ## CC integration
+### Main setup
 To test the CC integration, you can go to the repo root, make sure you have https://github.com/michielbdejong/ices checked out next to it, and do:
 ```sh
 cp compose.cc.yml compose.yml
@@ -92,18 +93,37 @@ cp .env.template .env
 ./start.sh --up --ices --dev --demo
 docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"
 docker exec -d komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
+```
+There will be a lot of `WD ces_komunitin: Event sent:` 401 errors and some `Could not connect to debugging client` errors which you can ignore, but if you see `DUPLICATE ENTRY` errors, checkout the [Reset](#reset) section below.
+
+### Connecting with docker exec
+```sh
 docker exec -it komunitin-cc-1 /bin/bash -c "curl -i http://komunitin-accounting-1:2025/"
-docker exec -it komunitin-db-accounting-1 psql postgresql://accounting:accounting@localhost:5432/accounting
 docker exec -it komunitin-integralces-1 mysql -u integralces -pintegralces -h komunitin-db-integralces-1 integralces
+docker exec -it komunitin-db-accounting-1 psql postgresql://accounting:accounting@localhost:5432/accounting
+```
+In psql, execute `SELECT set_config('app.bypass_rls', 'on', false);` to bypass Row Level Security, then `\d+` to see a list of tables, and e.g. `select * from "Transfer";` to see the contents of the Transfers table.
+
+### Making NET2 a Credit Commons node
+1. Open `psql` on `komunitin-db-accounting-1` (see [above](#connecting-with-docker-exec)) and find out the account Id of the ClearingCentralVostro account using the following query:
+```sql
+SELECT set_config('app.bypass_rls', 'on', false);
+SELECT "id" FROM "Account" WHERE "code"='NET20004';
+\q
 ```
 
-In psql, execute `SELECT set_config('app.bypass_rls', 'on', false);` to bypass Row Level Security, then `\d+` to see a list of tables, and e.g. `select * from "Transfer";` to see the contents of the Transfers table. Run `update "Currency" set "adminId"='75736572-2020-4716-a669-000000000007' where "tenantId"='NET2';` to make Noether the currency admin of NET2, harvest Noether's bearer token from your browser dev tools while visiting http://localhost:2030/ (log in with `noether@komunitin.org` / `komunitin`), and then you can graft the Komunitin node onto the CC tree and access its CC API (FIXME: create a dedicated gateway account first instead of using `4d41c0cb-9457-464b-97d0-402db8e6e912 / NET20003 / Fermat` as the gateway/vostro account):
+2. Harvest Fermat's bearer token from your browser dev tools while visiting http://localhost:2030/ (log in with `fermat@komunitin.org` / `komunitin`).
 
+3. Using the results from 1. (`82e260ec-6deb-40ce-9746-ddd6c0f06056` in this example) and 2. (`Authorization: Bearer eyJ0e...zJ5cg` in this example) you can graft the Komunitin node onto the CC tree:
 ```sh
-docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6ImUwM2Q2ZmQ5OTE4ZGU3NjUyOTcyODQ4YTViNDVlOWNlMjE4YzY0ZjMiLCJqdGkiOiJlMDNkNmZkOTkxOGRlNzY1Mjk3Mjg0OGE1YjQ1ZTljZTIxOGM2NGYzIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjIwMjlcLyIsImF1ZCI6ImtvbXVuaXRpbi1hcHAiLCJzdWIiOiI3IiwiZXhwIjoxNzQzNTAwNTIyLCJpYXQiOjE3NDM0OTY5MjIsInRva2VuX3R5cGUiOiJiZWFyZXIiLCJzY29wZSI6ImtvbXVuaXRpbl9zb2NpYWwga29tdW5pdGluX2FjY291bnRpbmcgZW1haWwgb2ZmbGluZV9hY2Nlc3Mgb3BlbmlkIHByb2ZpbGUifQ.RKahmd_Pc-8NVkwb6Xcio9uRQtCIhebWz97Mf0fKrv0BFuFSmK-AEGFsyGp7_HXJiDo8GBmWgI30-KX1XV4Mav73CX2T4clWp5tHJlx9360Jk-u92MzI7H7R1aEq809IGfRRXZF5r42SIGCTfpgzOK1n9Dyx88_9GTY_khWKsnUJjWXb8q1Z17djV3QqW9ardtnoq_qhAHZIfTHCm_HsDFKL8M5g4C8qhD6zDAr_j-1rYFcT4zKMeVakXh2blZFcj9USWwKhHu7A7kbnb21ddsirsX-dcCcgqJByfxmpy2niZk4B02CXgSWh6nTWOrh4CO1-MeuGHYfH-7KlDLikPg' -X POST -d'{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"4d41c0cb-9457-464b-97d0-402db8e6e912\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"account\",\"id\":\"4d41c0cb-9457-464b-97d0-402db8e6e912\"}}}}}' http://komunitin-accounting-1:2025/NET2/creditCommonsNodes"
+docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjQzMzdkMzUyZjlmOTJkODE4YTRlYWYyOGUwMDE5MzA5NGEwZTkyMzkiLCJqdGkiOiI0MzM3ZDM1MmY5ZjkyZDgxOGE0ZWFmMjhlMDAxOTMwOTRhMGU5MjM5IiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjIwMjlcLyIsImF1ZCI6ImtvbXVuaXRpbi1hcHAiLCJzdWIiOiI4IiwiZXhwIjoxNzQzNjcyNDUzLCJpYXQiOjE3NDM2Njg4NTMsInRva2VuX3R5cGUiOiJiZWFyZXIiLCJzY29wZSI6ImtvbXVuaXRpbl9zb2NpYWwga29tdW5pdGluX2FjY291bnRpbmcgZW1haWwgb2ZmbGluZV9hY2Nlc3Mgb3BlbmlkIHByb2ZpbGUifQ.kATdD6OenvjRkzCBKcFRC69T_Z_E-wfazrfeDVaDl8vNFnR9G-HdEoaBNKMc-ftFWflgiLEIcOkU3GikoDbnznFjCaLBkH48h4y_8kT4GxuJs3UtQGucjH2At4Iiijvk9wf_I1cxh7PoX30fhDnOPWxhmEgQoOPP-ZvpQX4qcqixAqgvIHBSzKsCLSvNxYLaT0SNNFcRHEv2Bq6ko_wtQfbFnLK_xufPSAKx4eOkShQENblTqSQI6tdRc6B3neIOw5ZT9nJUKjkSVDZEGlnpDuV7uAnqxX8Fmy3ZRERZJriTfC28PsgMd2tGtdPeAGgkukZyUAr88-Jy2IDDTzJ5cg' -X POST -d'{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"82e260ec-6deb-40ce-9746-ddd6c0f06056\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"account\",\"id\":\"82e260ec-6deb-40ce-9746-ddd6c0f06056\"}}}}}' http://komunitin-accounting-1:2025/NET2/creditCommonsNodes"
+```
+4. To test it, run:
+```sh
 docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'cc-node: trunk' -H 'last-hash: trunk' http://komunitin-accounting-1:2025/NET2/cc/"
 docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
 ```
-This will make the Komunitin node act as `trunk/branch2` in the CreditCommons test tree. You should see 8/8 tests passing.
+This will make the Komunitin node act as `trunk/branch2` in the CreditCommons test tree. You should see some 'DROP USER failed' errors which you can ignore, followed by a phpunit text report with 8/8 tests passing.
 
+### Reset
 To  restart from scratch, do `docker compose down -v`. Make sure with `docker ps -a` and `docker volume ls` that all relevant containers are stopped and removed, and repeat if necessary. There might also be an unnamed volume that you need to remove. If see `DUPLICATE ENTRY` errors on the next run then you know it wasn't removed completely.
