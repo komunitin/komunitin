@@ -5,9 +5,7 @@ export { createController } from "./base-controller"
 import { Context } from "../utils/context"
 import TypedEmitter from "typed-emitter"
 import { InputTrustline, Trustline, UpdateTrustline } from "src/model/trustline"
-import { TenantPrismaClient } from "./multitenant"
 export { MigrationController } from './migration'
-import { CreditCommonsNode, CreditCommonsTransaction } from "src/model/creditCommons";
 import { CreditCommonsController } from "src/creditcommons/credit-commons-controller";
 
 
