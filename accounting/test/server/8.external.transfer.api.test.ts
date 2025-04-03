@@ -1,4 +1,4 @@
-import { describe, before, it } from "node:test"
+import { describe, before, it, after } from "node:test"
 import { setupServerTest } from './setup'
 import assert from "node:assert"
 import { testCurrency, testTransfer, userAuth } from "./api.data"
@@ -11,7 +11,13 @@ import { EventName } from "src/controller/features/notificatons"
 
 describe("External transfers", async () => {
   const t = setupServerTest()
-  logger.level = "debug"
+  before(() => {
+    logger.level = "debug"
+  })
+  after(() => {
+    logger.level = "info"
+  })
+  
   const eAdmin = userAuth("10")
   const eUser1 = userAuth("11")
   

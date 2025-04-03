@@ -46,7 +46,10 @@ export class StellarCurrency implements LedgerCurrency {
 
   // Registry of currency accounts. This way we are sure we are not instantiating
   // the same account twice and hence we won't have seq number issues.
-  private accounts: Record<string, Promise<StellarAccount>>
+  // NOTE: We could use a map of WeakRef's and FinalizationRegistry to optimize the
+  // memory usage:
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Memory_management#weakrefs_and_finalizationregistry
+  private accounts: Record<string, StellarAccount>
 
   // Stream handlers. It has been architectured so it allows for a set of different
   // streams but currently only the externalTrades stream is implemented. This is
@@ -648,21 +651,20 @@ export class StellarCurrency implements LedgerCurrency {
     return {key: account}
   }
   /**
-   * Implements {@link LedgerCurrency.getAccount()}
+   * Implements {@link LedgerCurrency.getAccount}. 
+   * 
+   * This function always makes a call to the ledger to get the latest information about the account.
+   * 
    */
-  async getAccount(publicKey: string, update = true): Promise<StellarAccount> {
+  async getAccount(publicKey: string): Promise<StellarAccount> {
+    
     if (!this.accounts[publicKey]) {
-      this.accounts[publicKey] = this.ledger.loadAccount(publicKey).then((account) => {
-        return new StellarAccount(account, this)
-      })
-      return await this.accounts[publicKey]
-    } else {
-      const account = await this.accounts[publicKey]
-      if (update) {
-        await account.update()
-      }
-      return account
+      this.accounts[publicKey] = new StellarAccount(publicKey, this)
     }
+
+    await this.accounts[publicKey].update()
+
+    return this.accounts[publicKey]
   }
 
   /**
