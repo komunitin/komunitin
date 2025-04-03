@@ -92,8 +92,10 @@ cp compose.cc.yml compose.yml
 cp .env.template .env
 ./start.sh --up --ices --dev --demo
 docker exec -it komunitin-cc-1 /bin/bash -c "service mariadb start"
-docker exec -d komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; npm start"
+docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/SingleNodeTest.php"
+docker exec -it komunitin-cc-1 /bin/bash -c "cd automerge-basic; source ~/.bashrc; git pull; npm run build; npm start"
 ```
+You can also run that last one `-d` instead of `-it` if you don't want to keep it open.
 There will be a lot of `WD ces_komunitin: Event sent:` 401 errors and some `Could not connect to debugging client` errors which you can ignore, but if you see `DUPLICATE ENTRY` errors, checkout the [Reset](#reset) section below.
 
 ### Connecting with docker exec
@@ -121,9 +123,22 @@ docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: applicati
 4. To test it, run:
 ```sh
 docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'cc-node: trunk' -H 'last-hash: trunk' http://komunitin-accounting-1:2025/NET2/cc/"
+docker exec -it komunitin-cc-1 /bin/bash -c "sed -i -e 's/bob/NET20002/g' tests/MultiNodeTest.php"
 docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
 ```
 This will make the Komunitin node act as `trunk/branch2` in the CreditCommons test tree. You should see some 'DROP USER failed' errors which you can ignore, followed by a phpunit text report with 8/8 tests passing.
+
+To get this working, depending on the state of https://gitlab.com/credit-commons/cc-php-lib/-/merge_requests/7, on komunitin-cc-1 you may need to:
+```sh
+cd vendor/credit-commons/cc-php-lib/
+git remote add me https://gitlab.com/michielbdejong/cc-php-lib
+git fetch me
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+git merge me/patch-1
+cd ../../..
+```
+
 
 ### Reset
 To  restart from scratch, do `docker compose down -v`. Make sure with `docker ps -a` and `docker volume ls` that all relevant containers are stopped and removed, and repeat if necessary. There might also be an unnamed volume that you need to remove. If see `DUPLICATE ENTRY` errors on the next run then you know it wasn't removed completely.

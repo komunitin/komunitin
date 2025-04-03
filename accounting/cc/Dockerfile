@@ -38,8 +38,7 @@ RUN composer install
 
 WORKDIR /workspaces/cc-server/vendor/credit-commons
 RUN rm -rf cc-node
-RUN git clone https://gitlab.com/michielbdejong/cc-node
-RUN # git clone https://gitlab.com/credit-commons/cc-node
+RUN git clone https://gitlab.com/credit-commons/cc-node
 WORKDIR /workspaces/cc-server/vendor/credit-commons/cc-node
 RUN git checkout 0.9.x
 RUN composer install
@@ -57,5 +56,6 @@ RUN /bin/bash -c 'source ~/.bashrc ; nvm install 22'
 RUN /bin/bash -c 'source ~/.bashrc ; npm install'
 RUN /bin/bash -c 'source ~/.bashrc ; npm run build'
 WORKDIR /workspaces/cc-server
+RUN sed -i '3 a require_once __DIR__ . "/../vendor/autoload.php";' vendor/credit-commons/cc-node/src/functions.php
 
 EXPOSE 80
