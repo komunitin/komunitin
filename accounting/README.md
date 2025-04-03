@@ -114,19 +114,30 @@ SELECT set_config('app.bypass_rls', 'on', false);
 SELECT "id" FROM "Account" WHERE "code"='NET20004';
 \q
 ```
+And then with the value you found:
+```sh
+export VOSTRO=54c97d55-397d-49e1-9f54-47d1127323a7
+echo $VOSTRO
+```
 
 2. Get Fermat's bearer token. There are two ways to do that; method 1:
 ```sh
 npm install -g json
-curl -s 'http://localhost:2029/oauth2/token' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=fermat%40komunitin.org&password=komunitin&grant_type=password&scope=komunitin_social+komunitin_accounting+email+offline_access+openid+profile&client_id=komunitin-app' | json access_token
+export TOKEN=`curl -s 'http://localhost:2029/oauth2/token' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=fermat%40komunitin.org&password=komunitin&grant_type=password&scope=komunitin_social+komunitin_accounting+email+offline_access+openid+profile&client_id=komunitin-app' | json access_token`
+echo $TOKEN
 ```
 Method 2: harvest it from your browser dev tools while visiting http://localhost:2030/ (log in with `fermat@komunitin.org` / `komunitin`).
 
-3. Using the results from 1. (`54c97d55-397d-49e1-9f54-47d1127323a7` in this example) and 2. (`Authorization: Bearer ...` in this example) you can graft the Komunitin node onto the CC tree:
+3. Using the `$VOSTRO` and `$TOKEN` env vars, you can graft the Komunitin node onto the CC tree:
 ```sh
-docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6ImUzODFlOGM4NzQwYjgzMWVmYjA4ZGQ2MTU5YzlmZTBhYmU0ZWM3OTIiLCJqdGkiOiJlMzgxZThjODc0MGI4MzFlZmIwOGRkNjE1OWM5ZmUwYWJlNGVjNzkyIiwiaXNzIjoiaHR0cDpcL1wvbG9jYWxob3N0OjIwMjlcLyIsImF1ZCI6ImtvbXVuaXRpbi1hcHAiLCJzdWIiOiI4IiwiZXhwIjoxNzQzNjgxNjAzLCJpYXQiOjE3NDM2NzgwMDMsInRva2VuX3R5cGUiOiJiZWFyZXIiLCJzY29wZSI6ImtvbXVuaXRpbl9zb2NpYWwga29tdW5pdGluX2FjY291bnRpbmcgZW1haWwgb2ZmbGluZV9hY2Nlc3Mgb3BlbmlkIHByb2ZpbGUifQ.ZEo1pB7225M1J22bTn9iDNHqY2DSchh5oGB8_lUuhqK4kEbwTNUTv1TKWeAHFsgFEs4Tkwn1rRey4y2uRpuHaYlG6_x0whzC-lX4aVUyJRUBOtYDoKW5dJlZpLgy4DV7uPeqivNBlHtFMbjFTan5mHqnoHi0pv91oh00N_zjPu4DQwBeWs-2Jk8vr7-guCaBhdx4son2Au68kDQfUTI6f57RBZAG8wWsURUXfLWi-0UljbpUSLtbfxc02kPB-ZsIcMTunMrhsHniQYoRVV__2OeFL0dgc8UunWA6nGG1CqtyAtL4YiNhcJUMG_CkiX-ZR6bz9mWZ_Gcxr_5Krjic6Q' -X POST -d'{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"54c97d55-397d-49e1-9f54-47d1127323a7\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"account\",\"id\":\"54c97d55-397d-49e1-9f54-47d1127323a7\"}}}}}' http://komunitin-accounting-1:2025/NET2/creditCommonsNodes"
+curl -i -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -X POST -d"{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"$VOSTRO\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"account\",\"id\":\"$VOSTRO\"}}}}}" http://localhost:2025/NET2/creditCommonsNodes
 ```
-4. To test it, run:
+4. Give the Credit Commons Vostro account a healthy credit limit:
+```sh
+curl -i -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -X PATCH -d'{"data":{"attributes":{"creditLimit":1000000000}}}' http://localhost:2025/NET2/accounts/$VOSTRO
+```
+
+5. To test it, run:
 ```sh
 docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'cc-node: trunk' -H 'last-hash: trunk' http://komunitin-accounting-1:2025/NET2/cc/"
 docker exec -it komunitin-cc-1 /bin/bash -c "sed -i -e 's/bob/NET20002/g' tests/MultiNodeTest.php"

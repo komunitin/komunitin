@@ -134,7 +134,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       let localTransfer: InputTransfer = {
         id: transaction.uuid,
         state: 'committed',
-        amount: this.currencyController.amountFromLedger(netGain.toString()),
+        amount: this.currencyController.amountFromLedger(netGain.toString()) / 10, // CC works with a test transfer of 2800 but in Komunitin dev setup, accounts cannot have a credit limit above 1000
         meta: `From Credit Commons [${froms.join(', ')}]:` + metas.join(' '),
         payer: { id: this.gatewayAccountId, type: 'account' },
         payee: { id: payeeId, type: 'account' },
