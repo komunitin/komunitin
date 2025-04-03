@@ -121,6 +121,9 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       throw new Error('Net gain must be positive')
     }
     await this.transferController.createMultipleTransfers(systemContext(), localTransfers)
-    return transaction
+    return {
+      data: transaction.entries,
+      meta: {},
+    }
   }
 }
