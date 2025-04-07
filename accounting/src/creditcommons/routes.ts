@@ -96,7 +96,7 @@ export function getRoutes(controller: SharedController) {
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       try {
-        await currencyController.creditCommons.createTransaction(ctx, req.body)
+        await currencyController.creditCommons.updateTransaction(ctx, req.params.transId, req.params.newState)
         const response = 'Created'
         res.setHeader('Content-Type', 'text/html')
         res.setHeader('cc-node-trace', req.get('cc-node-trace') + ', <branch2')

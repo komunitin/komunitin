@@ -148,4 +148,9 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       },
     }
   }
+  async updateTransaction(ctx: Context, transId: string, newState: string) {
+    this.gatewayAccountId = await this.checkLastHashAuth(ctx)
+    const transfer = await this.transfers().getTransfer(ctx, transId)
+    console.log('updating transfer', transId, newState, transfer)
+  }
 }

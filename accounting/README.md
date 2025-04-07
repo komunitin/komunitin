@@ -132,15 +132,15 @@ Method 2: harvest it from your browser dev tools while visiting http://localhost
 ```sh
 curl -i -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -X POST -d"{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"$VOSTRO\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"account\",\"id\":\"$VOSTRO\"}}}}}" http://localhost:2025/NET2/creditCommonsNodes
 ```
-4. Give the Credit Commons Vostro account a healthy credit limit:
+4. Give the Credit Commons Vostro account a healthy credit limit of 9,000 ECO:
 ```sh
-curl -i -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -X PATCH -d'{"data":{"attributes":{"creditLimit":1000000000}}}' http://localhost:2025/NET2/accounts/$VOSTRO
+curl -i -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -X PATCH -d'{"data":{"attributes":{"creditLimit":9000000000}}}' http://localhost:2025/NET2/accounts/$VOSTRO
 ```
 
 5. To test it, run:
 ```sh
 docker exec -it komunitin-cc-1 /bin/bash -c "curl -i -H 'Content-Type: application/json' -H 'cc-node: trunk' -H 'last-hash: trunk' http://komunitin-accounting-1:2025/NET2/cc/"
-docker exec -it komunitin-cc-1 /bin/bash -c "sed -i -e 's/bob/NET20002/g' tests/MultiNodeTest.php"
+docker exec -it komunitin-cc-1 /bin/bash -c "sed -i -e 's/branch2\/bob/branch2\/NET20002/g' tests/MultiNodeTest.php"
 docker exec -it komunitin-cc-1 /bin/bash -c "vendor/bin/phpunit tests/MultiNodeTest.php"
 ```
 This will make the Komunitin node act as `trunk/branch2` in the CreditCommons test tree. You should see some 'DROP USER failed' errors which you can ignore, followed by a phpunit text report with 8/8 tests passing.
@@ -156,6 +156,7 @@ git merge me/patch-1
 cd ../../..
 ```
 
+You may also need to make sure you use the latest commit from [insert-my-node](https://gitlab.com/michielbdejong/cc-server/-/tree/insert-my-node?ref_type=heads) branch on Michiel's fork of cc-server, which puts the proxy into the path of the CC relays, and makes sure the Komunitin node plays the role of `trunk/branch2`, and which also includes the [increased timeouts](https://gitlab.com/michielbdejong/cc-server/-/commit/d5c3f53d6e97a523ce64b688d1961feca9e29611) since the default timeout of 2 seconds is very tight.
 
 ### Reset
 To  restart from scratch, do `docker compose down -v`. Make sure with `docker ps -a` and `docker volume ls` that all relevant containers are stopped and removed, and repeat if necessary. There might also be an unnamed volume that you need to remove. If see `DUPLICATE ENTRY` errors on the next run then you know it wasn't removed completely.
