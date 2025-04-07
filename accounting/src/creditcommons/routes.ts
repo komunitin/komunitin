@@ -137,7 +137,7 @@ export function getRoutes(controller: SharedController) {
       setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
-      const response = await currencyController.creditCommons.getAccountHistory(ctx)
+      const response = await currencyController.creditCommons.getAccountHistory(ctx, (req.query as { acc_path: string }).acc_path)
       res.setHeader('Content-Type', 'application/json')
       res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
       res.status(200).json(response)

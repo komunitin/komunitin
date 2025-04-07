@@ -9,10 +9,19 @@ import { systemContext } from "src/utils/context"
 import { AccountRecord } from "src/model/account"
 import { logger } from "src/utils/logger"
 import { Transfer } from "src/model"
- 
+
+function formatDateTime(d: Date) {
+  const year = d.getFullYear()
+  const month = ('00'+(d.getMonth()+1)).slice(-2)
+  const day = ('00'+(d.getDay())).slice(-2)
+  const hour = ('00'+(d.getHours())).slice(-2)
+  const minutes = ('00'+(d.getMinutes())).slice(-2)
+  const seconds = ('00'+(d.getSeconds())).slice(-2)
+  return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`
+}
+
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
-  getAccountHistory(ctx: Context): Promise<{ data: object, meta: object }>
   createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode>
   createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<{
     data: CreditCommonsEntry[],
@@ -30,30 +39,37 @@ export interface CreditCommonsController {
     pending: number,
     balance: number
   }>
+  getAccountHistory(ctx: Context, accountId: string): Promise<{ data: object, meta: object }>
 }
 
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   gatewayAccountId: string = '0';
   ledgerBase: string = 'trunk/branch2/'
+  private async getTransactions(accountId: string): Promise<{ transfersIn: Transfer[], transfersOut: Transfer[] }> {
+    return {
+      transfersIn: (await this.transfers().getTransfers(systemContext(), {
+        filters: {
+          state: 'committed',
+          // payee: { users: { some: { code: accountId } } }
+        },
+        include: [],
+        sort: {field: "updated", order: "asc"},
+        pagination: {cursor: 0, size: 100}
+      } as unknown as any)).filter(t => t.payee.code === accountId),
+      transfersOut: (await this.transfers().getTransfers(systemContext(), {
+        filters: {
+          // payer.code === accountId
+        },
+        include: [],
+        sort: {field: "updated", order: "asc"},
+        pagination: {cursor: 0, size: 100}
+      })).filter(t => t.payee.code === accountId)
+  
+    }
+  }
   async getAccount(ctx: Context, accountId: string) {
     // const userId = await this.users().getUser()
-    const transfersIn: Transfer[] = (await this.transfers().getTransfers(systemContext(), {
-      filters: {
-        state: 'committed',
-        // payee: { users: { some: { code: accountId } } }
-      },
-      include: [],
-      sort: {field: "updated", order: "asc"},
-      pagination: {cursor: 0, size: 100}
-    } as unknown as any)).filter(t => t.payee.code === accountId)
-    const transfersOut: Transfer[] = (await this.transfers().getTransfers(systemContext(), {
-      filters: {
-        // payer.code === accountId
-      },
-      include: [],
-      sort: {field: "updated", order: "asc"},
-      pagination: {cursor: 0, size: 100}
-    })).filter(t => t.payee.code === accountId)
+    const { transfersIn, transfersOut } = await this.getTransactions(accountId)
 
     let grossIn = 0
     let grossOut = 0
@@ -115,20 +131,34 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     await this.checkLastHashAuth(ctx)
     return { message: 'Welcome to the Credit Commons federation protocol.' }
   }
-  async getAccountHistory(ctx: Context) {
+  async getAccountHistory(ctx: Context, accountId: string) {
     await this.checkLastHashAuth(ctx)
+    const { transfersIn, transfersOut } = await this.getTransactions(accountId)
+    const transfers = transfersIn.concat(transfersOut.map(t => { t.amount = -t.amount; return t }))
+    let data: {
+      [created: string]: number
+    } = {}
+    let min = 0
+    let max = 0
+    let start = new Date('9999')
+    let end = new Date('0000')
+
+    transfers.forEach((t: Transfer) => {
+      const amount = parseFloat(this.currencyController.amountToLedger(t.amount))
+      data[formatDateTime(t.created)] = amount
+      if (amount < min) { min = amount }
+      if (amount > max) { max = amount }
+      if (t.created < start) { start = t.created }
+      if (t.created > end) { end = t.created }
+    })
     return {
-      data: {
-        '2025-04-01 09:22:37': 0,
-        '2025-04-01 09:22:41': 0,
-        '2025-04-01 09:22:42': -60
-      },
+      data,
       meta: {
-        min: -60,
-        max: 0,
+        min,
+        max,
         points: 3,
-        start: '2025-04-01 09:22:37',
-        end: '2025-04-01 09:22:42'
+        start: formatDateTime(start),
+        end: formatDateTime(end)
       }
     };
   }
