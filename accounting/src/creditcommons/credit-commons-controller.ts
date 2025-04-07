@@ -7,8 +7,9 @@ import { TransferController } from "../controller/transfer-controller"
 import { InputTransfer } from "src/model/transfer"
 import { systemContext } from "src/utils/context"
 import { AccountRecord } from "src/model/account"
-import { logger} from "src/utils/logger"
-
+import { logger } from "src/utils/logger"
+import { Transfer } from "src/model"
+ 
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
   getAccountHistory(ctx: Context): Promise<{ data: object, meta: object }>
@@ -35,14 +36,45 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
   gatewayAccountId: string = '0';
   ledgerBase: string = 'trunk/branch2/'
   async getAccount(ctx: Context, accountId: string) {
-   return {
-      trades:4,
-      entries:5,
-      gross_in:4320,
-      gross_out:1562,
-      partners:1,
-      pending:0,
-      balance:45.983
+    // const userId = await this.users().getUser()
+    const transfersIn: Transfer[] = (await this.transfers().getTransfers(systemContext(), {
+      filters: {
+        state: 'committed',
+        // payee: { users: { some: { code: accountId } } }
+      },
+      include: [],
+      sort: {field: "updated", order: "asc"},
+      pagination: {cursor: 0, size: 100}
+    } as unknown as any)).filter(t => t.payee.code === accountId)
+    const transfersOut: Transfer[] = (await this.transfers().getTransfers(systemContext(), {
+      filters: {
+        // payer.code === accountId
+      },
+      include: [],
+      sort: {field: "updated", order: "asc"},
+      pagination: {cursor: 0, size: 100}
+    })).filter(t => t.payee.code === accountId)
+
+    let grossIn = 0
+    let grossOut = 0
+    let balance = 0
+    transfersIn.map(t => {
+      grossIn += t.amount
+      balance += t.amount
+    })
+    transfersOut.map(t => {
+      grossOut += t.amount
+      balance -= t.amount
+    })
+    console.log(transfersIn, grossIn, grossOut)
+    return {
+      trades: transfersIn.length, // FIXME: Can we remember this?
+      entries: transfersIn.length,
+      gross_in: parseFloat(this.currencyController.amountToLedger(grossIn)),
+      gross_out: parseFloat(this.currencyController.amountToLedger(grossOut)),
+      partners: 1, // ?
+      pending: 0,
+      balance: parseFloat(this.currencyController.amountToLedger(balance))
     }
   }
   

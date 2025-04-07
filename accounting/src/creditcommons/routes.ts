@@ -122,7 +122,7 @@ export function getRoutes(controller: SharedController) {
       setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
-      const response = await currencyController.creditCommons.getAccount(ctx, req.params.acc_path)
+      const response = await currencyController.creditCommons.getAccount(ctx, (req.query as { acc_path: string }).acc_path)
       res.setHeader('Content-Type', 'application/json')
       res.status(200).json(response)
     }),
