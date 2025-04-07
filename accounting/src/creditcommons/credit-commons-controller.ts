@@ -65,7 +65,6 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     }
   }
   async getAccount(ctx: Context, accountId: string) {
-    // const userId = await this.users().getUser()
     const { transfersIn, transfersOut } = await this.getTransactions(accountId)
 
     let grossIn = 0
@@ -79,7 +78,6 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       grossOut += t.amount
       balance -= t.amount
     })
-    console.log(transfersIn, grossIn, grossOut)
     return {
       trades: transfersIn.length, // FIXME: Can we remember this?
       entries: transfersIn.length,
@@ -215,7 +213,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       let localTransfer: InputTransfer = {
         id: transaction.uuid,
         state: 'committed',
-        amount: this.currencyController.amountFromLedger(netGain.toString()) / 10, // CC works with a test transfer of 2800 but in Komunitin dev setup, accounts cannot have a credit limit above 1000
+        amount: this.currencyController.amountFromLedger(netGain.toString()),
         meta: `From Credit Commons [${froms.join(', ')}]:` + metas.join(' '),
         payer: { id: this.gatewayAccountId, type: 'account' },
         payee: { id: payeeId, type: 'account' },
@@ -230,9 +228,6 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     }
   }
   async updateTransaction(ctx: Context, transId: string, newState: string) {
-    this.gatewayAccountId = await this.checkLastHashAuth(ctx)
-    // console.log('looking up transfer', transId, newState)
-    const transfer = await this.transfers().getTransfer(systemContext(), transId)
-    console.log('TODO: update transfer', transId, newState, transfer)
+    throw new Error('not implemented yet')
   }
 }
