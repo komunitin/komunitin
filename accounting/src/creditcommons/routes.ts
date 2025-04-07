@@ -53,11 +53,11 @@ export function getRoutes(controller: SharedController) {
   router.post('/:code/creditCommonsNodes',
     userAuth(Scope.Accounting),
     checkExact(CreditCommonsValidators.isGraft()),
+    setResponseTrace,
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
       console.log(data)
       return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash, data.vostroId)
     }, CreditCommonsNodeSerializer, 201),
-    setResponseTrace
   )
 
   /**
@@ -65,10 +65,10 @@ export function getRoutes(controller: SharedController) {
    */
   router.get('/:code/cc/',
     lastHashAuth(),
+    setResponseTrace,
     currencyResourceHandler(controller, async (currencyController, ctx) => {
       return await currencyController.creditCommons.getWelcome(ctx);
     }, CreditCommonsMessageSerializer, {}),
-    setResponseTrace
   )
 
   /**
@@ -76,6 +76,7 @@ export function getRoutes(controller: SharedController) {
    */
     router.post('/:code/cc/transaction/relay',
       lastHashAuth(),
+      setResponseTrace,
       asyncHandler(async (req, res) => {
       const ctx = context(req)
       
@@ -84,7 +85,6 @@ export function getRoutes(controller: SharedController) {
       const response = await currencyController.creditCommons.createTransaction(ctx, req.body)
       res.status(200).json(response)
     }),
-    setResponseTrace
   )
 
   /**
@@ -92,6 +92,7 @@ export function getRoutes(controller: SharedController) {
    */
   router.patch('/:code/cc/transaction/:transId/:newState',
     lastHashAuth(),
+    setResponseTrace,
     asyncHandler(async (req, res) => {
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
@@ -107,7 +108,6 @@ export function getRoutes(controller: SharedController) {
         res.status(400).json(response)
       }
     }),
-    setResponseTrace
   )
 
   /**
@@ -115,6 +115,7 @@ export function getRoutes(controller: SharedController) {
    */
   router.get('/:code/cc/account',
     lastHashAuth(),
+    setResponseTrace,
     asyncHandler(async (req, res) => {
       const ctx = context(req)
       const response = {
@@ -131,7 +132,6 @@ export function getRoutes(controller: SharedController) {
       res.setHeader('Content-Type', 'application/json')
       res.status(200).json(response)
     }),
-    setResponseTrace
   )
 
   /**
@@ -139,6 +139,7 @@ export function getRoutes(controller: SharedController) {
    */
   router.get('/:code/cc/account/history',
     lastHashAuth(),
+    setResponseTrace,
     asyncHandler(async (req, res) => {
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
@@ -147,7 +148,6 @@ export function getRoutes(controller: SharedController) {
       res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
       res.status(200).json(response)
     }),
-    setResponseTrace
   )
 
   return router
