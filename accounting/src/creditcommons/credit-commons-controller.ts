@@ -7,7 +7,7 @@ import { TransferController } from "../controller/transfer-controller"
 import { InputTransfer } from "src/model/transfer"
 import { systemContext } from "src/utils/context"
 import { AccountRecord } from "src/model/account"
-
+import { logger} from "src/utils/logger"
 
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
@@ -19,6 +19,7 @@ export interface CreditCommonsController {
       secs_valid_left: number,
     }
   }>
+  updateTransaction(ctx: Context, transId: string, newState: string): Promise<void>
 }
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   gatewayAccountId: string = '0';
@@ -151,6 +152,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
   async updateTransaction(ctx: Context, transId: string, newState: string) {
     this.gatewayAccountId = await this.checkLastHashAuth(ctx)
     const transfer = await this.transfers().getTransfer(ctx, transId)
-    console.log('updating transfer', transId, newState, transfer)
+    logger.level = 'debug'
+    logger.debug('updating transfer', transId, newState, transfer)
   }
 }
