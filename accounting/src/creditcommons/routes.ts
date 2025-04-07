@@ -10,6 +10,7 @@ import { Dictionary } from "ts-japi"
 import { input, Resource } from "../server/parse"
 import { badRequest } from "src/utils/error"
 import { getCcNodeTrace } from "../utils/context"
+import { KError } from "../utils/error"
 
 import {
   CreditCommonsNodeSerializer,
@@ -53,8 +54,8 @@ export function getRoutes(controller: SharedController) {
   router.post('/:code/creditCommonsNodes',
     userAuth(Scope.Accounting),
     checkExact(CreditCommonsValidators.isGraft()),
-    setResponseTrace,
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
+      // setResponseTrace(req, res)
       console.log(data)
       return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash, data.vostroId)
     }, CreditCommonsNodeSerializer, 201),
@@ -65,8 +66,8 @@ export function getRoutes(controller: SharedController) {
    */
   router.get('/:code/cc/',
     lastHashAuth(),
-    setResponseTrace,
     currencyResourceHandler(controller, async (currencyController, ctx) => {
+      // seResponseTrace(req, res)
       return await currencyController.creditCommons.getWelcome(ctx);
     }, CreditCommonsMessageSerializer, {}),
   )
@@ -74,10 +75,10 @@ export function getRoutes(controller: SharedController) {
   /**
    * CC API endpoint to create a transaction. Requires last-hash auth.
    */
-    router.post('/:code/cc/transaction/relay',
-      lastHashAuth(),
-      setResponseTrace,
-      asyncHandler(async (req, res) => {
+  router.post('/:code/cc/transaction/relay',
+    lastHashAuth(),
+    asyncHandler(async (req, res) => {
+      setResponseTrace(req, res)
       const ctx = context(req)
       
       console.log('body', req.body)
@@ -92,19 +93,21 @@ export function getRoutes(controller: SharedController) {
    */
   router.patch('/:code/cc/transaction/:transId/:newState',
     lastHashAuth(),
-    setResponseTrace,
     asyncHandler(async (req, res) => {
+      setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       try {
+        // console.log('updating transaction')
         await currencyController.creditCommons.updateTransaction(ctx, req.params.transId, req.params.newState)
-        const response = 'Created'
-        res.setHeader('Content-Type', 'text/html')
+        res.setHeader('Content-Type', 'text/html') // sic
         res.setHeader('cc-node-trace', req.get('cc-node-trace') + ', <branch2')
-        res.status(201).json(response)
-      } catch {
-        const response = 'Transaction Does Not Exist'
-        res.setHeader('Content-Type', 'text/html')
+        res.status(201).end()
+      } catch (e) {
+        const response = {
+          errors: [ (e as KError).message ]
+        }
+        res.setHeader('Content-Type', 'application/json')
         res.status(400).json(response)
       }
     }),
@@ -115,20 +118,11 @@ export function getRoutes(controller: SharedController) {
    */
   router.get('/:code/cc/account',
     lastHashAuth(),
-    setResponseTrace,
     asyncHandler(async (req, res) => {
+      setResponseTrace(req, res)
       const ctx = context(req)
-      const response = {
-        data: {
-          trades:4,
-          entries:5,
-          gross_in:4320,
-          gross_out:1562,
-          partners:1,
-          pending:0,
-          balance:45.983
-        }
-      }
+      const currencyController = await controller.getCurrencyController(req.params.code)
+      const response = await currencyController.creditCommons.getAccount(ctx, req.params.acc_path)
       res.setHeader('Content-Type', 'application/json')
       res.status(200).json(response)
     }),
@@ -139,8 +133,8 @@ export function getRoutes(controller: SharedController) {
    */
   router.get('/:code/cc/account/history',
     lastHashAuth(),
-    setResponseTrace,
     asyncHandler(async (req, res) => {
+      setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       const response = await currencyController.creditCommons.getAccountHistory(ctx)

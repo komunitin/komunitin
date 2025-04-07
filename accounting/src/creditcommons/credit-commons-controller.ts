@@ -20,10 +20,31 @@ export interface CreditCommonsController {
     }
   }>
   updateTransaction(ctx: Context, transId: string, newState: string): Promise<void>
+  getAccount(ctx: Context, accountId: string): Promise<{
+    trades: number,
+    entries: number,
+    gross_in: number,
+    gross_out: number,
+    partners: number,
+    pending: number,
+    balance: number
+  }>
 }
+
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   gatewayAccountId: string = '0';
   ledgerBase: string = 'trunk/branch2/'
+  async getAccount(ctx: Context, accountId: string) {
+   return {
+      trades:4,
+      entries:5,
+      gross_in:4320,
+      gross_out:1562,
+      partners:1,
+      pending:0,
+      balance:45.983
+    }
+  }
   
   async createNode(ctx: Context, ccNodeName: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode> {
     // Only admins are allowed to set the trunkward node:
@@ -151,8 +172,8 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
   }
   async updateTransaction(ctx: Context, transId: string, newState: string) {
     this.gatewayAccountId = await this.checkLastHashAuth(ctx)
-    const transfer = await this.transfers().getTransfer(ctx, transId)
-    logger.level = 'debug'
-    logger.debug('updating transfer', transId, newState, transfer)
+    // console.log('looking up transfer', transId, newState)
+    const transfer = await this.transfers().getTransfer(systemContext(), transId)
+    console.log('TODO: update transfer', transId, newState, transfer)
   }
 }
