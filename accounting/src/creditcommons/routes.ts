@@ -1,33 +1,18 @@
 import { Router, Request, Response } from 'express';
 import { checkExact } from 'express-validator';
-import { CreditCommonsNode, CreditCommonsTransaction } from 'src/model';
+import { CreditCommonsNode } from 'src/model';
 import { SharedController } from 'src/controller';
 import { Scope, userAuth, lastHashAuth } from 'src/server/auth';
-import { currencyInputHandler, currencyResourceHandler, asyncHandler, CurrencyInputHandler, currencyHandlerHelper } from 'src/server/handlers';
+import { currencyInputHandler, currencyResourceHandler, asyncHandler} from 'src/server/handlers';
 import { context } from 'src/utils/context';
 import { CreditCommonsValidators } from './validation';
-import { Dictionary } from "ts-japi"
-import { input, Resource } from "../server/parse"
-import { badRequest } from "src/utils/error"
 import { getCcNodeTrace } from "../utils/context"
 import { KError } from "../utils/error"
 
 import {
   CreditCommonsNodeSerializer,
   CreditCommonsMessageSerializer,
-  CreditCommonsTransactionSerializer,
 } from './serialize';
-
-// function ccInputHandler<T extends Dictionary<any>, D extends Resource>(controller: SharedController, fn: CurrencyInputHandler<T,D>, status = 200) {
-//   return currencyHandlerHelper(controller, async (currencyController, ctx, req) => {
-//     const data = input<D>(req)
-//     if (Array.isArray(data)) {
-//       throw badRequest("Expected a single resource")
-//     }
-//     const resource = await fn(currencyController, ctx, data)
-//     return resource
-//   }, status)
-// }
 
 function generateCcNodeTrace(reqTrace: string): string {
   return reqTrace + ', <branch2'

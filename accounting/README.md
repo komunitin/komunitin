@@ -85,7 +85,7 @@ In order to feature trade between communities, the following model is proposed:
   - Whenever an incoming external payment is received, the trader account creates or updates the sell offer to convert the current balance of external HOUR assets to local HOUR assets.
 
 ## CC integration
-The only [CC workflow](https://gitlab.com/credit-commons/cc-node/-/blob/0.9.x/doc/developers.md?ref_type=heads#workflow) that is currently supported is `|P-PC+CX+`, and currently only receiving is implemented.
+The only [CC workflow](https://gitlab.com/credit-commons/cc-node/-/blob/0.9.x/doc/developers.md?ref_type=heads#workflow) that is currently supported is `_C-`, meaning the payer sends money and it completes immediately (just a POST, no PATCH). In the future we also want to implement `_P+PC-` meaning the payee sends a payment request over Credit Commons with a POST, and the payer approves it with a PATCH.
 
 ### Main setup
 To test the CC integration, you can go to the repo root, make sure you have https://github.com/michielbdejong/ices checked out next to it, and do:
@@ -157,6 +157,9 @@ cd ../../..
 ```
 
 You may also need to make sure you use the latest commit from [insert-my-node](https://gitlab.com/michielbdejong/cc-server/-/tree/insert-my-node?ref_type=heads) branch on Michiel's fork of cc-server, which puts the proxy into the path of the CC relays, and makes sure the Komunitin node plays the role of `trunk/branch2`, and which also includes the [increased timeouts](https://gitlab.com/michielbdejong/cc-server/-/commit/d5c3f53d6e97a523ce64b688d1961feca9e29611) since the default timeout of 2 seconds is very tight.
+
+You will see some errors scrolling by, and [this assertion](https://gitlab.com/credit-commons/cc-server/-/blob/5a680dfbe4b7aa7e3282ea0096cf48a49572503e/tests/MultiNodeTest.php#L188) will fail because the workflow that it tests is not supported in Komunitin.
+
 
 ### Reset
 To  restart from scratch, do `docker compose down -v`. Make sure with `docker ps -a` and `docker volume ls` that all relevant containers are stopped and removed, and repeat if necessary. There might also be an unnamed volume that you need to remove. If see `DUPLICATE ENTRY` errors on the next run then you know it wasn't removed completely.
