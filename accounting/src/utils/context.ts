@@ -59,3 +59,7 @@ export const systemContext = (): Context => {
     type: "system",
   }
 }
+
+export function getCcNodeTrace(req: Request): string {
+  return req.get('cc-node-trace') + ', <branch2'
+}
