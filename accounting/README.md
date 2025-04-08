@@ -130,7 +130,7 @@ Method 2: harvest it from your browser dev tools while visiting http://localhost
 
 3. Using the `$VOSTRO` and `$TOKEN` env vars, you can graft the Komunitin node onto the CC tree:
 ```sh
-curl -i -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -X POST -d"{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"$VOSTRO\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"account\",\"id\":\"$VOSTRO\"}}}}}" http://localhost:2025/NET2/creditCommonsNodes
+curl -i -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" -X POST -d"{\"data\":{\"attributes\":{\"ccNodeName\":\"trunk\",\"lastHash\":\"trunk\",\"vostroId\":\"$VOSTRO\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"accounts\",\"id\":\"$VOSTRO\"}}}}}" http://localhost:2025/NET2/creditCommonsNodes
 ```
 4. Give the Credit Commons Vostro account a healthy credit limit of 9,000 ECO:
 ```sh
