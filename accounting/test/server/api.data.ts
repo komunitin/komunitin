@@ -5,7 +5,7 @@ export const testCurrency = (props?: any) => {
   props = {
     ...props,
     settings: {
-      defaultInitialCreditLimit: 1000,
+      defaultInitialCreditLimit: 100000,
       ...props?.settings
     },
   }

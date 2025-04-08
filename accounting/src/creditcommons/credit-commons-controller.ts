@@ -89,7 +89,37 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       balance: parseFloat(this.currencyController.amountToLedger(balance))
     }
   }
-  
+  async getAccountHistory(ctx: Context, accountCode: string) {
+    await this.checkLastHashAuth(ctx)
+    const { transfersIn, transfersOut } = await this.getTransactions(accountCode)
+    const transfers = transfersIn.concat(transfersOut.map(t => { t.amount = -t.amount; return t }))
+    let data: {
+      [created: string]: number
+    } = {}
+    let min = Infinity
+    let max = 0
+    let start = new Date('9999')
+    let end = new Date('0000')
+
+    transfers.forEach((t: Transfer) => {
+      const amount = parseFloat(this.currencyController.amountToLedger(t.amount))
+      data[formatDateTime(t.created)] = amount
+      if (amount < min) { min = amount }
+      if (amount > max) { max = amount }
+      if (t.created < start) { start = t.created }
+      if (t.created > end) { end = t.created }
+    })
+    return {
+      data,
+      meta: {
+        min,
+        max,
+        points: 0, // ?
+        start: formatDateTime(start),
+        end: formatDateTime(end)
+      }
+    };
+  }
   async createNode(ctx: Context, peerNodePath: string, ourNodePath: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode> {
     // Only admins are allowed to set the trunkward node:
     await this.users().checkAdmin(ctx)
@@ -132,37 +162,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     await this.checkLastHashAuth(ctx)
     return { message: 'Welcome to the Credit Commons federation protocol.' }
   }
-  async getAccountHistory(ctx: Context, accountCode: string) {
-    await this.checkLastHashAuth(ctx)
-    const { transfersIn, transfersOut } = await this.getTransactions(accountCode)
-    const transfers = transfersIn.concat(transfersOut.map(t => { t.amount = -t.amount; return t }))
-    let data: {
-      [created: string]: number
-    } = {}
-    let min = 0
-    let max = 0
-    let start = new Date('9999')
-    let end = new Date('0000')
 
-    transfers.forEach((t: Transfer) => {
-      const amount = parseFloat(this.currencyController.amountToLedger(t.amount))
-      data[formatDateTime(t.created)] = amount
-      if (amount < min) { min = amount }
-      if (amount > max) { max = amount }
-      if (t.created < start) { start = t.created }
-      if (t.created > end) { end = t.created }
-    })
-    return {
-      data,
-      meta: {
-        min,
-        max,
-        points: 3,
-        start: formatDateTime(start),
-        end: formatDateTime(end)
-      }
-    };
-  }
   async createTransaction(ctx: Context, transaction: CreditCommonsTransaction) {
     const { vostroId, ourNodePath } = await this.checkLastHashAuth(ctx)
     const ledgerBase = `${ourNodePath}/`
