@@ -4,7 +4,7 @@ import { projection } from 'src/server/serialize';
 
 export const CreditCommonsNodeSerializer = new Serializer<CreditCommonsNode>("creditCommonsNodes", {
   version: null,
-  projection: projection<CreditCommonsNode>(['ccNodeName', 'lastHash', 'vostroId']),
+  projection: projection<CreditCommonsNode>(['peerNodePath', 'lastHash', 'vostroId']),
 })
 
 export const CreditCommonsMessageSerializer = new Serializer<{ message: string }>("message", {

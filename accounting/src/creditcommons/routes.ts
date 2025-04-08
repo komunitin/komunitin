@@ -41,7 +41,7 @@ export function getRoutes(controller: SharedController) {
     checkExact(CreditCommonsValidators.isGraft()),
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
       // setResponseTrace(req, res)
-      return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash, data.vostroId)
+      return await currencyController.creditCommons.createNode(ctx, data.peerNodePath, data.ourNodePath, data.lastHash, data.vostroId)
     }, CreditCommonsNodeSerializer, 201),
   )
 

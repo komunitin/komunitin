@@ -17,7 +17,7 @@ describe('grafting', async () => {
   it('requires authn', async () => {
     const response = await t.api.post(
       "/TEST/creditCommonsNodes",
-      testCreditCommonsNeighbour( 'trunk', 'asdf', t.account0.id),
+      testCreditCommonsNeighbour( 'trunk', 'trunk/branch2', 'asdf', t.account0.id),
       { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
       403)
     assert.equal(response.text, '{"errors":[{"status":"403","code":"Forbidden","title":"Forbidden","detail":"Insufficient Scope"}]}')
@@ -25,7 +25,7 @@ describe('grafting', async () => {
   it('requires admin', async () => {
     const response = await t.api.post(
       "/TEST/creditCommonsNodes",
-      testCreditCommonsNeighbour( 'trunk', 'asdf', t.account0.id),
+      testCreditCommonsNeighbour( 'trunk', 'trunk/branch2', 'asdf', t.account0.id),
       userAuth("1"),
       403)
     assert.equal(response.text, '{"errors":[{"status":"403","code":"Forbidden","title":"Forbidden","detail":"Only the currency owner can perform this operation"}]}')
@@ -33,10 +33,10 @@ describe('grafting', async () => {
   it('can be done', async () => {
     const response = await t.api.post(
       "/TEST/creditCommonsNodes",
-      testCreditCommonsNeighbour( 'trunk', 'asdf', t.account0.id),
+      testCreditCommonsNeighbour( 'trunk', 'trunk/branch2', 'asdf', t.account0.id),
       userAuth("0"),
       201)
-    assert.equal(response.text, '{"data":{"type":"creditCommonsNodes","attributes":{"ccNodeName":"trunk","lastHash":"asdf"}}}')
+    assert.equal(response.text, '{"data":{"type":"creditCommonsNodes","attributes":{"peerNodePath":"trunk","lastHash":"asdf"}}}')
   })
 
 })

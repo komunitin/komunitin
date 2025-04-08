@@ -14,7 +14,7 @@ export interface Context {
    */
   accountKey?: string
   lastHashAuth?: {
-    ccNodeName: string
+    peerNodePath: string
     lastHash: string
   }
 }
@@ -40,7 +40,7 @@ export const context = (req: Request): Context => {
     return {
       type: payload.type,
       lastHashAuth: {
-        ccNodeName: payload.ccNodeName as string,
+        peerNodePath: payload.peerNodePath as string,
         lastHash: payload.lastHash as string,
       },
     }
