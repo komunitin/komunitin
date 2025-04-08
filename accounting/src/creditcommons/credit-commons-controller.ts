@@ -198,7 +198,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       throw new Error('Net gain must be positive')
     }
     // if recipientId is a code like NET20002
-    // then payeeId is a stellar account ID like
+    // then payeeId is an account ID like
     // 2791faf5-4566-4da0-99f6-24c41041c50a
     let payeeId
     if (recipient) {
