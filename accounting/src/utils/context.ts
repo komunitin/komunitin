@@ -16,6 +16,7 @@ export interface Context {
   lastHashAuth?: {
     peerNodePath: string
     lastHash: string
+    requestTrace: string
   }
 }
 
@@ -42,6 +43,7 @@ export const context = (req: Request): Context => {
       lastHashAuth: {
         peerNodePath: payload.peerNodePath as string,
         lastHash: payload.lastHash as string,
+        requestTrace: payload.requestTrace as string
       },
     }
   // This case happens when the notifications service uses the service.
@@ -58,8 +60,4 @@ export const systemContext = (): Context => {
   return {
     type: "system",
   }
-}
-
-export function getCcNodeTrace(req: Request): string {
-  return req.get('cc-node-trace') + ', <branch2'
 }

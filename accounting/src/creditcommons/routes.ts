@@ -1,12 +1,11 @@
-import { Router, Request, Response } from 'express';
-import { checkExact } from 'express-validator';
-import { CreditCommonsNode } from 'src/model';
-import { SharedController } from 'src/controller';
-import { Scope, userAuth, lastHashAuth } from 'src/server/auth';
-import { currencyInputHandler, currencyResourceHandler, asyncHandler} from 'src/server/handlers';
-import { context } from 'src/utils/context';
-import { CreditCommonsValidators } from './validation';
-import { getCcNodeTrace } from "../utils/context"
+import { Router, Request, Response } from 'express'
+import { checkExact } from 'express-validator'
+import { CreditCommonsNode } from 'src/model'
+import { SharedController } from 'src/controller'
+import { Scope, userAuth, lastHashAuth } from 'src/server/auth'
+import { currencyInputHandler, currencyResourceHandler, asyncHandler} from 'src/server/handlers'
+import { context } from 'src/utils/context'
+import { CreditCommonsValidators } from './validation'
 import { CCAccountSummary, CCAccountHistory } from "./credit-commons-controller"
 import { KError } from "../utils/error"
 
@@ -14,16 +13,6 @@ import {
   CreditCommonsNodeSerializer,
   CreditCommonsMessageSerializer,
 } from './serialize';
-
-function generateCcNodeTrace(reqTrace: string): string {
-  return reqTrace + ', <branch2'
-}
-
-function setResponseTrace(req: Request, res: Response) {
-    const requestTrace = getCcNodeTrace(req)
-    const responseTrace = generateCcNodeTrace(requestTrace)
-    res.setHeader('cc-node-trace', responseTrace)
-}
 
 /**
  * Implements the routes for the credit commons federation protocol
@@ -63,11 +52,11 @@ export function getRoutes(controller: SharedController) {
   router.post('/:code/cc/transaction/relay',
     lastHashAuth(),
     asyncHandler(async (req, res) => {
-      setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       const response = await currencyController.creditCommons.createTransaction(ctx, req.body)
-      res.status(201).json(response)
+      res.setHeader('cc-node-trace', response.trace)
+      res.status(201).json(response.body)
     }),
   )
 
@@ -77,20 +66,17 @@ export function getRoutes(controller: SharedController) {
   router.patch('/:code/cc/transaction/:transId/:newState',
     lastHashAuth(),
     asyncHandler(async (req, res) => {
-      setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       try {
         await currencyController.creditCommons.updateTransaction(ctx, req.params.transId, req.params.newState)
-        res.setHeader('cc-node-trace', req.get('cc-node-trace') + ', <branch2')
-        // TODO: return the patched transaction
+        // TODO: return the patched transaction and set the response trace
         res.status(201).end()
       } catch (e) {
-        const response = {
-          errors: [ (e as KError).message ]
-        }
         res.setHeader('Content-Type', 'application/json')
-        res.status(400).json(response)
+        res.status(400).json({
+          errors: [ (e as KError).message ]
+        })
       }
     }),
   )
@@ -101,12 +87,12 @@ export function getRoutes(controller: SharedController) {
   router.get('/:code/cc/account',
     lastHashAuth(),
     asyncHandler(async (req, res) => {
-      setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
-      const response: CCAccountSummary = await currencyController.creditCommons.getAccount(ctx, (req.query as { acc_path: string }).acc_path)
+      const response = await currencyController.creditCommons.getAccount(ctx, (req.query as { acc_path: string }).acc_path)
       res.setHeader('Content-Type', 'application/vnd.api+json')
-      res.status(200).json(response)
+      res.setHeader('cc-node-trace', response.trace)
+      res.status(200).json(response.body)
     }),
   )
 
@@ -116,13 +102,12 @@ export function getRoutes(controller: SharedController) {
   router.get('/:code/cc/account/history',
     lastHashAuth(),
     asyncHandler(async (req, res) => {
-      setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
-      const response: CCAccountHistory = await currencyController.creditCommons.getAccountHistory(ctx, (req.query as { acc_path: string }).acc_path)
+      const response = await currencyController.creditCommons.getAccountHistory(ctx, (req.query as { acc_path: string }).acc_path)
       res.setHeader('Content-Type', 'application/vnd.api+json')
-      res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
-      res.status(200).json(response)
+      res.setHeader('cc-node-trace', response.trace)
+      res.status(200).json(response.body)
     }),
   )
 
