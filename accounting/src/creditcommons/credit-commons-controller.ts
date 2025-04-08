@@ -71,11 +71,11 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     let grossIn = 0
     let grossOut = 0
     let balance = 0
-    transfersIn.map(t => {
+    transfersIn.forEach(t => {
       grossIn += t.amount
       balance += t.amount
     })
-    transfersOut.map(t => {
+    transfersOut.forEach(t => {
       grossOut += t.amount
       balance -= t.amount
     })
