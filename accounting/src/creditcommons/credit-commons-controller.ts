@@ -208,7 +208,6 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     if (recipient) {
        payeeId = await this.codeToAccountId(recipient);
     }
-    console.log('found payeeId for recipient', payeeId, recipient)
     if (payeeId) {
       let localTransfer: InputTransfer = {
         id: transaction.uuid,

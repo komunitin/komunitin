@@ -41,7 +41,6 @@ export function getRoutes(controller: SharedController) {
     checkExact(CreditCommonsValidators.isGraft()),
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
       // setResponseTrace(req, res)
-      console.log(data)
       return await currencyController.creditCommons.createNode(ctx, data.ccNodeName, data.lastHash, data.vostroId)
     }, CreditCommonsNodeSerializer, 201),
   )
@@ -65,11 +64,9 @@ export function getRoutes(controller: SharedController) {
     asyncHandler(async (req, res) => {
       setResponseTrace(req, res)
       const ctx = context(req)
-      
-      console.log('body', req.body)
       const currencyController = await controller.getCurrencyController(req.params.code)
       const response = await currencyController.creditCommons.createTransaction(ctx, req.body)
-      res.status(200).json(response)
+      res.status(201).json(response)
     }),
   )
 
@@ -83,7 +80,6 @@ export function getRoutes(controller: SharedController) {
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       try {
-        // console.log('updating transaction')
         await currencyController.creditCommons.updateTransaction(ctx, req.params.transId, req.params.newState)
         res.setHeader('Content-Type', 'text/html') // sic
         res.setHeader('cc-node-trace', req.get('cc-node-trace') + ', <branch2')
