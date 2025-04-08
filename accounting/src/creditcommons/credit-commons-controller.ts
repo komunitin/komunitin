@@ -8,9 +8,9 @@ import { AccountRecord } from "src/model/account"
 import { Transfer } from "src/model"
 
 function formatDateTime(d: Date) {
-  const year = ('0000'+(d.getFullYear())).slice(-4)
-  const month = ('00'+(d.getMonth()+1)).slice(-2)
-  const day = ('00'+(d.getDate())).slice(-2)
+  const year = ('0000'+(d.getUTCFullYear())).slice(-4)
+  const month = ('00'+(d.getUTCMonth()+1)).slice(-2)
+  const day = ('00'+(d.getUTCDate())).slice(-2)
   const hour = ('00'+(d.getUTCHours())).slice(-2)
   const minutes = ('00'+(d.getUTCMinutes())).slice(-2)
   const seconds = ('00'+(d.getUTCSeconds())).slice(-2)
