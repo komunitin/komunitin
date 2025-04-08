@@ -64,6 +64,27 @@ describe('receive', async () => {
     assert.equal(t.account0.attributes.balance, 0)
     t.account2 = (await t.api.get(`/TEST/accounts/${t.account2.id}`, t.user2)).body.data
     assert.equal(t.account2.attributes.balance, 0)
+    const accountStatusBefore = await t.api.get(`/TEST/cc/account?acc_path=TEST0002`, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'trunk' }, 200)
+    assert.deepEqual(accountStatusBefore.body, {
+      balance: 0,
+      entries: 0,
+      gross_in: 0,
+      gross_out: 0,
+      partners: 0,
+      pending: 0,
+      trades: 0
+    })
+    const accountHistoryBefore = await t.api.get(`/TEST/cc/account/history?acc_path=TEST0002`, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'trunk' }, 200)
+    assert.deepEqual(accountHistoryBefore.body, {
+      data: {},
+      meta: {
+        end: '0000-01-01 00:00:00',
+        max: 0,
+        min: 0,
+        points: 3,
+        start: '9999-01-01 00:00:00'
+      }
+    })
     const response = await t.api.post(
       "/TEST/cc/transaction/relay",
       ccTransaction,
@@ -76,5 +97,27 @@ describe('receive', async () => {
     assert.equal(t.account0.attributes.balance, -expectedNetGain)
     t.account2 = (await t.api.get(`/TEST/accounts/${t.account2.id}`, t.user2)).body.data
     assert.equal(t.account2.attributes.balance, expectedNetGain)
+    const accountStatusAfter = await t.api.get(`/TEST/cc/account?acc_path=TEST0002`, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'trunk' }, 200)
+    assert.deepEqual(accountStatusAfter.body, {
+      balance: 0,
+      entries: 0,
+      gross_in: 0,
+      gross_out: 0,
+      partners: 0,
+      pending: 0,
+      trades: 0
+    })
+    const accountHistoryAfter = await t.api.get(`/TEST/cc/account/history?acc_path=TEST0002`, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'trunk' }, 200)
+    assert.deepEqual(accountHistoryAfter.body, {
+      data: {},
+      meta: {
+        end: '0000-01-01 00:00:00',
+        max: 0,
+        min: 0,
+        points: 3,
+        start: '9999-01-01 00:00:00'
+      }
+    })
+
   })
 })

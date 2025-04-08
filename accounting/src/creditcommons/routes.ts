@@ -104,7 +104,7 @@ export function getRoutes(controller: SharedController) {
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       const response = await currencyController.creditCommons.getAccount(ctx, (req.query as { acc_path: string }).acc_path)
-      res.setHeader('Content-Type', 'application/json')
+      res.setHeader('Content-Type', 'application/vnd.api+json')
       res.status(200).json(response)
     }),
   )
@@ -119,7 +119,7 @@ export function getRoutes(controller: SharedController) {
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
       const response = await currencyController.creditCommons.getAccountHistory(ctx, (req.query as { acc_path: string }).acc_path)
-      res.setHeader('Content-Type', 'application/json')
+      res.setHeader('Content-Type', 'application/vnd.api+json')
       res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
       res.status(200).json(response)
     }),

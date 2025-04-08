@@ -8,12 +8,12 @@ import { AccountRecord } from "src/model/account"
 import { Transfer } from "src/model"
 
 function formatDateTime(d: Date) {
-  const year = d.getFullYear()
+  const year = ('0000'+(d.getFullYear())).slice(-4)
   const month = ('00'+(d.getMonth()+1)).slice(-2)
-  const day = ('00'+(d.getDay())).slice(-2)
-  const hour = ('00'+(d.getHours())).slice(-2)
-  const minutes = ('00'+(d.getMinutes())).slice(-2)
-  const seconds = ('00'+(d.getSeconds())).slice(-2)
+  const day = ('00'+(d.getDate())).slice(-2)
+  const hour = ('00'+(d.getUTCHours())).slice(-2)
+  const minutes = ('00'+(d.getUTCMinutes())).slice(-2)
+  const seconds = ('00'+(d.getUTCSeconds())).slice(-2)
   return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`
 }
 
@@ -65,6 +65,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     }
   }
   async getAccount(ctx: Context, accountId: string) {
+    await this.checkLastHashAuth(ctx)
     const { transfersIn, transfersOut } = await this.getTransactions(accountId)
 
     let grossIn = 0
@@ -83,7 +84,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       entries: transfersIn.length,
       gross_in: parseFloat(this.currencyController.amountToLedger(grossIn)),
       gross_out: parseFloat(this.currencyController.amountToLedger(grossOut)),
-      partners: 1, // ?
+      partners: 0, // ?
       pending: 0,
       balance: parseFloat(this.currencyController.amountToLedger(balance))
     }
