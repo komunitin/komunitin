@@ -36,7 +36,7 @@ export function getRoutes(controller: SharedController) {
   /**
    * Configure the trunkward CC node. Requires admin.
    */
-  router.post('/:code/creditCommonsNodes',
+  router.post('/:code/cc/nodes',
     userAuth(Scope.Accounting),
     checkExact(CreditCommonsValidators.isGraft()),
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
