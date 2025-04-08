@@ -17,6 +17,27 @@ function formatDateTime(d: Date) {
   return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`
 }
 
+export interface CCAccountSummary {
+  trades: number,
+  entries: number,
+  gross_in: number,
+  gross_out: number,
+  partners: number,
+  pending: number,
+  balance: number
+}
+
+export interface CCAccountHistory {
+  data: Record<string, number>,
+  meta: {
+    min: number,
+    max: number,
+    points: number,
+    start: string,
+    end: string
+  }
+}
+
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
   createNode(ctx: Context, peerNodePath: string, ourNodePath: string, lastHash: string, vostroId: string): Promise<CreditCommonsNode>
@@ -27,16 +48,8 @@ export interface CreditCommonsController {
     }
   }>
   updateTransaction(ctx: Context, transId: string, newState: string): Promise<void>
-  getAccount(ctx: Context, accountCode: string): Promise<{
-    trades: number,
-    entries: number,
-    gross_in: number,
-    gross_out: number,
-    partners: number,
-    pending: number,
-    balance: number
-  }>
-  getAccountHistory(ctx: Context, accountCode: string): Promise<{ data: object, meta: object }>
+  getAccount(ctx: Context, accountCode: string): Promise<CCAccountSummary>
+  getAccountHistory(ctx: Context, accountCode: string): Promise<CCAccountHistory>
 }
 
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
@@ -64,7 +77,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       transfersOut: (transfers).filter(t => t.payer.id === accountId)
     }
   }
-  async getAccount(ctx: Context, accountId: string) {
+  async getAccount(ctx: Context, accountId: string): Promise<CCAccountSummary> {
     await this.checkLastHashAuth(ctx)
     const { transfersIn, transfersOut } = await this.getTransactions(accountId)
 
@@ -89,13 +102,11 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       balance: parseFloat(this.currencyController.amountToLedger(balance))
     }
   }
-  async getAccountHistory(ctx: Context, accountCode: string) {
+  async getAccountHistory(ctx: Context, accountCode: string): Promise<CCAccountHistory> {
     await this.checkLastHashAuth(ctx)
     const { transfersIn, transfersOut } = await this.getTransactions(accountCode)
     const transfers = transfersIn.concat(transfersOut.map(t => { t.amount = -t.amount; return t }))
-    let data: {
-      [created: string]: number
-    } = {}
+    let data: Record<string, number> = {}
     let min = Infinity
     let max = 0
     let start = new Date('9999')

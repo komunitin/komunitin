@@ -7,6 +7,7 @@ import { currencyInputHandler, currencyResourceHandler, asyncHandler} from 'src/
 import { context } from 'src/utils/context';
 import { CreditCommonsValidators } from './validation';
 import { getCcNodeTrace } from "../utils/context"
+import { CCAccountSummary, CCAccountHistory } from "./credit-commons-controller"
 import { KError } from "../utils/error"
 
 import {
@@ -103,7 +104,7 @@ export function getRoutes(controller: SharedController) {
       setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
-      const response = await currencyController.creditCommons.getAccount(ctx, (req.query as { acc_path: string }).acc_path)
+      const response: CCAccountSummary = await currencyController.creditCommons.getAccount(ctx, (req.query as { acc_path: string }).acc_path)
       res.setHeader('Content-Type', 'application/vnd.api+json')
       res.status(200).json(response)
     }),
@@ -118,7 +119,7 @@ export function getRoutes(controller: SharedController) {
       setResponseTrace(req, res)
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
-      const response = await currencyController.creditCommons.getAccountHistory(ctx, (req.query as { acc_path: string }).acc_path)
+      const response: CCAccountHistory = await currencyController.creditCommons.getAccountHistory(ctx, (req.query as { acc_path: string }).acc_path)
       res.setHeader('Content-Type', 'application/vnd.api+json')
       res.setHeader('cc-node-trace', 'twig>, branch>, trunk>, branch2>, <branch2')
       res.status(200).json(response)
