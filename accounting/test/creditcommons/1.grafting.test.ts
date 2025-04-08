@@ -5,7 +5,7 @@ import { userAuth, testCreditCommonsNeighbour } from "../server/api.data"
 
 describe('grafting', async () => {
   // This sets up the server with the TEST currency but doesn't add a trunkward neighbour:
-  const t = setupServerTest(true, false)
+  const t = setupServerTest(true)
 
   it('is required', async () => {
     const response = await t.api.get(

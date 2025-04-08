@@ -28,10 +28,12 @@ export interface TestSetupWithCurrency extends TestSetup {
 }
 
 export function setupServerTest(createData: false): TestSetup;
+export function setupServerTest(createData: true): TestSetupWithCurrency;
 export function setupServerTest(createData: true, graftCreditCommons: boolean): TestSetupWithCurrency;
+export function setupServerTest(createData: true, graftCreditCommons: boolean, defaultInitialCreditLimit: number): TestSetupWithCurrency;
 export function setupServerTest(): TestSetupWithCurrency;
 
-export function setupServerTest(createData: boolean = true, graftCreditCommons: boolean = false): TestSetupWithCurrency {
+export function setupServerTest(createData: boolean = true, graftCreditCommons: boolean = false, defaultInitialCreditLimit: number = 1000): TestSetupWithCurrency {
   const test = {
     app: undefined as any as ExpressExtended,
     api: undefined as any as TestApiClient,
@@ -74,7 +76,7 @@ export function setupServerTest(createData: boolean = true, graftCreditCommons: 
 
     if (createData) {
       // Create currency TEST
-      const currency = await test.api.post('/currencies', testCurrency(), test.admin)
+      const currency = await test.api.post('/currencies', testCurrency({ settings: { defaultInitialCreditLimit } }), test.admin)
       test.currency = currency.body.data
       // Create 3 accounts
       test.account0 = await test.createAccount(test.admin.user)

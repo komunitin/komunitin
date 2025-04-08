@@ -49,7 +49,7 @@ describe('receive', async () => {
   })
   
   // This calls /TEST/creditCommonsNodes and adds a trunkward neighbour 'trunk' with last-hash 'trunk':
-  const t = setupServerTest(true, true)
+  const t = setupServerTest(true, true, 100000)
 
   it('Checks the last-hash header', async () => {
     const ccTransaction = generateCcTransaction(t)
