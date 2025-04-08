@@ -27,7 +27,7 @@ export interface CreditCommonsController {
     }
   }>
   updateTransaction(ctx: Context, transId: string, newState: string): Promise<void>
-  getAccount(ctx: Context, accountId: string): Promise<{
+  getAccount(ctx: Context, accountCode: string): Promise<{
     trades: number,
     entries: number,
     gross_in: number,
@@ -36,30 +36,32 @@ export interface CreditCommonsController {
     pending: number,
     balance: number
   }>
-  getAccountHistory(ctx: Context, accountId: string): Promise<{ data: object, meta: object }>
+  getAccountHistory(ctx: Context, accountCode: string): Promise<{ data: object, meta: object }>
 }
 
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
-  private async getTransactions(accountId: string): Promise<{ transfersIn: Transfer[], transfersOut: Transfer[] }> {
+  private async accountCodeToAccountId(accountCode: string): Promise<string | undefined> {
+    const account = await this.accounts().getAccountBy(systemContext(), "code", accountCode)
+    return account?.id
+  }
+
+  private async getTransactions(accountCode: string): Promise<{ transfersIn: Transfer[], transfersOut: Transfer[] }> {
+    const accountId = await this.accountCodeToAccountId(accountCode)
+    if (!accountId) {
+      return { transfersIn: [], transfersOut: [] }
+    }
+    const transfers = await this.transfers().getTransfers(systemContext(), {
+      filters: {
+        state: 'committed',
+        account: accountId
+      },
+      include: [],
+      sort: {field: "updated", order: "asc"},
+      pagination: {cursor: 0, size: 100}
+    } as unknown as any)
     return {
-      transfersIn: (await this.transfers().getTransfers(systemContext(), {
-        filters: {
-          state: 'committed',
-          // payee: { users: { some: { code: accountId } } }
-        },
-        include: [],
-        sort: {field: "updated", order: "asc"},
-        pagination: {cursor: 0, size: 100}
-      } as unknown as any)).filter(t => t.payee.code === accountId),
-      transfersOut: (await this.transfers().getTransfers(systemContext(), {
-        filters: {
-          // payer.code === accountId
-        },
-        include: [],
-        sort: {field: "updated", order: "asc"},
-        pagination: {cursor: 0, size: 100}
-      })).filter(t => t.payee.code === accountId)
-  
+      transfersIn: (transfers).filter(t => t.payee.id === accountId),
+      transfersOut: (transfers).filter(t => t.payer.id === accountId)
     }
   }
   async getAccount(ctx: Context, accountId: string) {
@@ -129,9 +131,9 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     await this.checkLastHashAuth(ctx)
     return { message: 'Welcome to the Credit Commons federation protocol.' }
   }
-  async getAccountHistory(ctx: Context, accountId: string) {
+  async getAccountHistory(ctx: Context, accountCode: string) {
     await this.checkLastHashAuth(ctx)
-    const { transfersIn, transfersOut } = await this.getTransactions(accountId)
+    const { transfersIn, transfersOut } = await this.getTransactions(accountCode)
     const transfers = transfersIn.concat(transfersOut.map(t => { t.amount = -t.amount; return t }))
     let data: {
       [created: string]: number
@@ -159,20 +161,6 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
         end: formatDateTime(end)
       }
     };
-  }
-  async codeToAccountId(code: string): Promise<string | undefined> {
-    const record: AccountRecord | null = await this.db().account.findUnique({
-      where: { 
-        code,
-        status: "active",
-      },
-      include: {
-      }
-    })
-    return record?.id
-  }
-  private async getOurNodePath(peerNodePath: string) {
-
   }
   async createTransaction(ctx: Context, transaction: CreditCommonsTransaction) {
     const { vostroId, ourNodePath } = await this.checkLastHashAuth(ctx)
@@ -213,7 +201,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     // 2791faf5-4566-4da0-99f6-24c41041c50a
     let payeeId
     if (recipient) {
-       payeeId = await this.codeToAccountId(recipient);
+       payeeId = await this.accountCodeToAccountId(recipient);
     }
     if (payeeId) {
       let localTransfer: InputTransfer = {
