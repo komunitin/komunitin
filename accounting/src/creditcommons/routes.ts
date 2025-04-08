@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express'
+import { Router, ErrorRequestHandler } from 'express'
 import { checkExact } from 'express-validator'
 import { CreditCommonsNode } from 'src/model'
 import { SharedController } from 'src/controller'
@@ -6,14 +6,21 @@ import { Scope, userAuth, lastHashAuth } from 'src/server/auth'
 import { currencyInputHandler, currencyResourceHandler, asyncHandler} from 'src/server/handlers'
 import { context } from 'src/utils/context'
 import { CreditCommonsValidators } from './validation'
-import { CCAccountSummary, CCAccountHistory } from "./credit-commons-controller"
-import { KError } from "../utils/error"
+import { logger } from '../utils/logger'
+import { KError } from '../utils/error'
+import { getKError } from '../server/errors'
 
 import {
   CreditCommonsNodeSerializer,
   CreditCommonsMessageSerializer,
 } from './serialize';
 
+export const ccErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  logger.error(err)
+  const kerror = getKError(err) // from errors.ts
+  const errorObj = { errors: [ kerror.message ] }
+  res.status(kerror.getStatus()).json(errorObj)
+}
 /**
  * Implements the routes for the credit commons federation protocol
  * https://gitlab.com/credit-commons/cc-php-lib/-/blob/master/docs/credit-commons-openapi3.yml
@@ -22,6 +29,7 @@ import {
  */
 export function getRoutes(controller: SharedController) {
   const router = Router()
+  router.use(ccErrorHandler)
 
   /**
    * Configure the trunkward CC node. Requires admin.

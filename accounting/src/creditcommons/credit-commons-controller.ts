@@ -1,7 +1,7 @@
 import { AbstractCurrencyController } from "../controller/abstract-currency-controller"
 import { Context } from "../utils/context"
 import { CreditCommonsNode, CreditCommonsTransaction, CreditCommonsEntry } from "../model/creditCommons"
-import { unauthorized } from "src/utils/error"
+import { badRequest, notImplemented, unauthorized } from "src/utils/error"
 import { InputTransfer } from "src/model/transfer"
 import { systemContext } from "src/utils/context"
 import { AccountRecord } from "src/model/account"
@@ -66,7 +66,7 @@ export interface CreditCommonsController {
 export class CreditCommonsControllerImpl extends AbstractCurrencyController implements CreditCommonsController {
   private async checkLastHashAuth(ctx: Context): Promise<{ vostroId: string, ourNodePath: string, responseTrace: string }> {
     if (ctx.type !== 'last-hash') {
-      throw new Error('no last-hash auth found in context')
+      throw unauthorized('no last-hash auth found in context')
     }
     const record = await this.db().creditCommonsNode.findFirst({})
     console.log('checkLastAuth', record)
@@ -214,7 +214,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       }
       if (transaction.entries[i].payee.startsWith(ledgerBase)) {
         if (thisRecipient) {
-          throw new Error('Payer and Payee cannot both be local')
+          throw badRequest('Payer and Payee cannot both be local')
         }
         thisRecipient = transaction.entries[i].payee.slice(ledgerBase.length)
         netGain += transaction.entries[i].quant
@@ -222,15 +222,15 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
         froms.push(transaction.entries[i].payer)
       }
       if (!thisRecipient) {
-        throw new Error('Payer and Payee cannot both be remote')
+        throw badRequest('Payer and Payee cannot both be remote')
       }
       if (recipient && recipient !== thisRecipient) {
-        throw new Error('All entries must be to or from the same local account')
+        throw badRequest('All entries must be to or from the same local account')
       }
       recipient = thisRecipient
     }
     if (netGain <= 0) {
-      throw new Error('Net gain must be positive')
+      throw badRequest('Net gain must be positive')
     }
     // if recipientId is a code like NET20002
     // then payeeId is an account ID like
@@ -261,6 +261,6 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     }
   }
   async updateTransaction(ctx: Context, transId: string, newState: string) {
-    throw new Error('not implemented yet')
+    throw notImplemented('not implemented yet')
   }
 }
