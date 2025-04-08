@@ -83,6 +83,7 @@ export function getRoutes(controller: SharedController) {
       try {
         await currencyController.creditCommons.updateTransaction(ctx, req.params.transId, req.params.newState)
         res.setHeader('cc-node-trace', req.get('cc-node-trace') + ', <branch2')
+        // TODO: return the patched transaction
         res.status(201).end()
       } catch (e) {
         const response = {
