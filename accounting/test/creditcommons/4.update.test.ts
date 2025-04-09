@@ -12,7 +12,7 @@ describe('receive', async () => {
   setConfig({
     STELLAR_CHANNEL_ACCOUNTS_ENABLED: true
   })
-  
+
   // This calls /TEST/creditCommonsNodes and adds a trunkward neighbour 'trunk' with last-hash 'trunk':
   const t = setupServerTest(true, true, 100000)
 
