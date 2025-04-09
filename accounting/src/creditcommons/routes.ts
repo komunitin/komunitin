@@ -29,7 +29,6 @@ export const ccErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
  */
 export function getRoutes(controller: SharedController) {
   const router = Router()
-  router.use(ccErrorHandler)
 
   /**
    * Configure the trunkward CC node. Requires admin.
@@ -76,16 +75,9 @@ export function getRoutes(controller: SharedController) {
     asyncHandler(async (req, res) => {
       const ctx = context(req)
       const currencyController = await controller.getCurrencyController(req.params.code)
-      try {
-        await currencyController.creditCommons.updateTransaction(ctx, req.params.transId, req.params.newState)
-        // TODO: return the patched transaction and set the response trace
-        res.status(201).end()
-      } catch (e) {
-        res.setHeader('Content-Type', 'application/json')
-        res.status(400).json({
-          errors: [ (e as KError).message ]
-        })
-      }
+      await currencyController.creditCommons.updateTransaction(ctx, req.params.transId, req.params.newState)
+      // TODO: return the patched transaction and set the response trace
+      res.status(201).end()
     }),
   )
 
@@ -119,5 +111,6 @@ export function getRoutes(controller: SharedController) {
     }),
   )
 
+  router.use(ccErrorHandler)
   return router
 }

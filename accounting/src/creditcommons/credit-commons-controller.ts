@@ -261,6 +261,9 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     }
   }
   async updateTransaction(ctx: Context, transId: string, newState: string) {
+    await this.checkLastHashAuth(ctx)
+    // Check if the transaction exists
+    await this.transfers().getTransfer(systemContext(), transId)
     throw notImplemented('not implemented yet')
   }
 }

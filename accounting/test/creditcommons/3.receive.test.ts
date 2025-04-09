@@ -3,42 +3,7 @@ import assert from "node:assert"
 import { setupServerTest, TestSetupWithCurrency } from "../server/setup"
 import { setConfig } from "src/config"
 import { sleep } from "src/utils/sleep"
-
-const generateCcTransaction = (t: TestSetupWithCurrency) => ({
-  uuid: '3d8ebb9f-6a29-42cb-9d39-9ee0a6bf7f1c',
-  state: 'V',
-  workflow: '|P-PC+CX+',
-  entries: [
-      {
-      payee: `trunk/branch2/TEST0002`,
-      payer: 'trunk/branch/twig/alice',
-      quant: 14,
-      description: 'test long distance for 3 from leaf',
-      metadata: { foo: 'bar' }
-      },
-      {
-      payee: 'trunk/branch/twig/admin',
-      payer: `trunk/branch2/TEST0002`,
-      quant: 2,
-      description: 'Payee fee of 1 to twig/admin',
-      metadata: {}
-      },
-      {
-      payee: 'trunk/branch/admin',
-      payer: `trunk/branch2/TEST0002`,
-      quant: 3,
-      description: 'Payee fee of 1 to branch/admin',
-      metadata: {}
-      },
-      {
-      payee: 'trunk/admin',
-      payer: `trunk/branch2/TEST0002`,
-      quant: 1,
-      description: 'Payee fee of 1 to trunk/admin',
-      metadata: {}
-      }
-  ]
-})
+import { generateCcTransaction } from "./api.data"
 
 describe('receive', async () => {
   // copied from https://github.com/komunitin/komunitin/blob/273b3a136d9bc4a7f36ced9343a989eb6d15630e/accounting/test/server/9.multiple.transfer.api.test.ts#L13-L17
@@ -52,13 +17,13 @@ describe('receive', async () => {
   const t = setupServerTest(true, true, 100000)
 
   it('Checks the last-hash header', async () => {
-    const ccTransaction = generateCcTransaction(t)
+    const ccTransaction = generateCcTransaction()
     const response = await t.api.post("/TEST/cc/transaction/relay", ccTransaction, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'qwer' }, 401)
     assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"value of last-hash header \\"qwer\\" does not match our records."}]}')
   })
 
   it('Updates the balances', async () => {
-    const ccTransaction = generateCcTransaction(t)
+    const ccTransaction = generateCcTransaction()
     // Check balances before
     t.account0 = (await t.api.get(`/TEST/accounts/${t.account0.id}`, t.admin)).body.data
     assert.equal(t.account0.attributes.balance, 0)
