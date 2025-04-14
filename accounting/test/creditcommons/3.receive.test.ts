@@ -19,7 +19,7 @@ describe('receive', async () => {
   it('Checks the last-hash header', async () => {
     const ccTransaction = generateCcTransaction()
     const response = await t.api.post("/TEST/cc/transaction/relay", ccTransaction, { user: null, scopes: [], ccNode: 'trunk', lastHash: 'qwer' }, 401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"value of last-hash header \\"qwer\\" does not match our records."}]}')
+    assert.equal(response.text, '{"errors":["value of last-hash header \\"qwer\\" does not match our records."]}')
   })
 
   it('Updates the balances', async () => {

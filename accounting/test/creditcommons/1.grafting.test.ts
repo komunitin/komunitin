@@ -12,7 +12,8 @@ describe('grafting', async () => {
       "/TEST/cc/",
       { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
       401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"This currency has not (yet) been grafted onto any CreditCommons tree."}]}')
+    // note that this error will come from a CC API route:
+    assert.equal(response.text, '{"errors":["This currency has not (yet) been grafted onto any CreditCommons tree."]}')
   })
   it('requires authn', async () => {
     const response = await t.api.post(
@@ -20,6 +21,7 @@ describe('grafting', async () => {
       testCreditCommonsNeighbour( 'trunk', 'trunk/branch2', 'asdf', t.account0.id),
       { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
       403)
+    // note that this error will come from a CC admin route:
     assert.equal(response.text, '{"errors":[{"status":"403","code":"Forbidden","title":"Forbidden","detail":"Insufficient Scope"}]}')
   })
   it('requires admin', async () => {

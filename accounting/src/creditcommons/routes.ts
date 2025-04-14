@@ -7,7 +7,6 @@ import { currencyInputHandler, currencyResourceHandler, asyncHandler} from 'src/
 import { context } from 'src/utils/context'
 import { CreditCommonsValidators } from './validation'
 import { logger } from '../utils/logger'
-import { KError } from '../utils/error'
 import { getKError } from '../server/errors'
 
 import {
@@ -52,8 +51,8 @@ export function getRoutes(controller: SharedController) {
       // seResponseTrace(req, res)
       return await currencyController.creditCommons.getWelcome(ctx);
     }, CreditCommonsMessageSerializer, {}),
+    ccErrorHandler
   )
-  ccErrorHandler
 
   /**
    * CC API endpoint to create a transaction. Requires last-hash auth.

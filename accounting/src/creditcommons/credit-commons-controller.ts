@@ -69,7 +69,6 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       throw unauthorized('no last-hash auth found in context')
     }
     const record = await this.db().creditCommonsNode.findFirst({})
-    console.log('checkLastAuth', record)
     if (!record) {
       throw unauthorized('This currency has not (yet) been grafted onto any CreditCommons tree.')
     }
