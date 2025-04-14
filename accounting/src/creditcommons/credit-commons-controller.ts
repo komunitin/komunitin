@@ -1,10 +1,10 @@
+import { createHash } from 'crypto'
 import { AbstractCurrencyController } from "../controller/abstract-currency-controller"
 import { Context } from "../utils/context"
 import { CreditCommonsNode, CreditCommonsTransaction, CreditCommonsEntry } from "../model/creditCommons"
 import { badRequest, notImplemented, unauthorized } from "src/utils/error"
 import { InputTransfer } from "src/model/transfer"
 import { systemContext } from "src/utils/context"
-import { AccountRecord } from "src/model/account"
 import { Transfer } from "src/model"
 
 function formatDateTime(d: Date) {
@@ -15,6 +15,17 @@ function formatDateTime(d: Date) {
   const minutes = ('00'+(d.getUTCMinutes())).slice(-2)
   const seconds = ('00'+(d.getUTCSeconds())).slice(-2)
   return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`
+}
+
+function makeHash(transaction: CreditCommonsTransaction, lastHash: string): string {
+  const str = [
+    lastHash,
+    transaction.uuid,
+    transaction.state,
+    transaction.entries.join('|'), // ?
+    transaction.version,
+  ].join('|');
+  return createHash('md5').update(str).digest('hex');
 }
 
 export interface CCAccountSummary {
@@ -192,6 +203,17 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       lastHash
     } as CreditCommonsNode;
   }
+  async updateNodeHash(peerNodePath: string, lastHash: string, vostroId: string): Promise<void> {
+    await this.db().creditCommonsNode.update({
+      where: {
+        tenantId: this.db().tenantId,
+        peerNodePath
+      },
+      data: {
+        lastHash
+      }
+    });
+  }
   async getWelcome(ctx: Context) {
     await this.checkLastHashAuth(ctx)
     return { message: 'Welcome to the Credit Commons federation protocol.' }
@@ -248,6 +270,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
         payee: { id: payeeId, type: 'account' },
       }
       await this.transfers().createTransfer(systemContext(), localTransfer)
+      const newHash = makeHash(transaction, ctx.lastHashAuth!.lastHash)
     }
     return {
       body: {
