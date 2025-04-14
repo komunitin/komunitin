@@ -8,28 +8,28 @@ describe('last-hash auth', async () => {
 
   it('Requires the cc-node header', async () => {
     const response = await t.api.get("/TEST/cc/", undefined, 401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"cc-node header is required."}]}')
+    assert.equal(response.text, '{"errors":["cc-node header is required."]}')
   })
 
   it('Requires the last-hash header', async () => {
     const response = await t.api.get("/TEST/cc/", { user: null, scopes: [], ccNode: 'trunk' }, 401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"last-hash header is required."}]}')
+    assert.equal(response.text, '{"errors":["last-hash header is required."]}')
   })
 
   it('Checks the last-hash header', async () => {
     const response = await t.api.get("/TEST/cc/", { user: null, scopes: [], ccNode: 'trunk', lastHash: 'qwer' }, 401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"value of last-hash header \\"qwer\\" does not match our records."}]}')
+    assert.equal(response.text, '{"errors":["value of last-hash header \\"qwer\\" does not match our records."]}')
   })
 
   it('Checks the cc-node header', async () => {
     const response = await t.api.get("/TEST/cc/", { user: null, scopes: [], ccNode: 'bla', lastHash: 'asdf' }, 401)
-    assert.equal(response.text, '{"errors":[{"status":"401","code":"Unauthorized","title":"Unauthorized","detail":"cc-node \\"bla\\" is not our trunkward node."}]}')
+    assert.equal(response.text, '{"errors":["cc-node \\"bla\\" is not our trunkward node."]}')
   })
 
   it('Allows access with the right grafted creds', async () => {
     const response = await t.api.get(
       "/TEST/cc/",
-      { user: null, scopes: [], ccNode: 'trunk', lastHash: 'asdf' },
+      { user: null, scopes: [], ccNode: 'trunk', lastHash: 'trunk' },
       200)
     assert.equal(response.body.data.attributes.message, 'Welcome to the Credit Commons federation protocol.')
   })

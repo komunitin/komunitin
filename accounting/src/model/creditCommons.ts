@@ -1,17 +1,23 @@
+import { Account } from "./account";
+
 export interface CreditCommonsNode {
-  ccNodeName: string,
+  peerNodePath: string,
+  ourNodePath: string,
   lastHash: string,
+  vostroId: string,
 }
 
-export interface CreditCommonsTransaction {
+export interface CreditCommonsEntry {
   payer: string,
   payee: string,
   quant: number,
   description: string,
+  metadata: { [key: string]: string }
+}
+
+export interface CreditCommonsTransaction {
+  uuid: string,
+  state: string,
   workflow: string,
-  metadata: {
-    payer_name?: string,
-    inside_leg?: number,
-    category?: string,
-  }
+  entries: CreditCommonsEntry[]
 }

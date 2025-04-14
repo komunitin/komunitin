@@ -97,8 +97,14 @@ describe('Input validation', async () => {
     await testValidation(CreditCommonsValidators.isGraft(), {
       data: {
         attributes: {
-          ccNodeName: 'trunk',
+          peerNodePath: 'trunk',
           lastHash: 'asdf',
+          ourNodePath: 'trunk/branch2',
+          vostroId: '3bc8e447-32cb-4dc7-b7ec-6a6f33c6c99'
+          // \"$VOSTRO\"},\"relationships\":{\"vostro\":{\"data\":{\"type\":\"accounts\",\"id\":\"$VOSTRO\"}}}}
+        },
+        relationships: {
+          vostro: { data: { id: '3bc8e447-32cb-4dc7-b7ec-6a6f33c6c99', type: 'accounts' } }
         }
       }
     })

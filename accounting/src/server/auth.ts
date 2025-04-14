@@ -97,8 +97,8 @@ export const noAuth = () => (req: Request, res: Response, next: NextFunction) =>
  * https://credit-commons.gitlab.io/credit-commons-documentation/#core-concepts
  * */
 export const lastHashAuth = () => (req: Request, res: Response, next: NextFunction) => {
-  const ccNodeName = req.header("cc-node")
-  if (!ccNodeName) {
+  const peerNodePath = req.header("cc-node")
+  if (!peerNodePath) {
     return next(unauthorized("cc-node header is required."))
   }
   const lastHash = req.header("last-hash")
@@ -111,7 +111,7 @@ export const lastHashAuth = () => (req: Request, res: Response, next: NextFuncti
     token: undefined as any,
     payload: {
       type: 'last-hash',
-      ccNodeName,
+      peerNodePath,
       lastHash,
     }
   }
