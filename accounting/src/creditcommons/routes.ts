@@ -32,6 +32,7 @@ export function getRoutes(controller: SharedController) {
 
   /**
    * Configure the trunkward CC node. Requires admin.
+   * This route is not part of the CC API, so it uses Komunitin's standard auth and error handling
    */
   router.post('/:code/cc/nodes',
     userAuth(Scope.Accounting),
@@ -39,7 +40,7 @@ export function getRoutes(controller: SharedController) {
     currencyInputHandler(controller, async (currencyController, ctx, data: CreditCommonsNode) => {
       // setResponseTrace(req, res)
       return await currencyController.creditCommons.createNode(ctx, data.peerNodePath, data.ourNodePath, data.lastHash, data.vostroId)
-    }, CreditCommonsNodeSerializer, 201),
+    }, CreditCommonsNodeSerializer, 201)
   )
 
   /**
@@ -52,6 +53,7 @@ export function getRoutes(controller: SharedController) {
       return await currencyController.creditCommons.getWelcome(ctx);
     }, CreditCommonsMessageSerializer, {}),
   )
+  ccErrorHandler
 
   /**
    * CC API endpoint to create a transaction. Requires last-hash auth.
@@ -65,6 +67,7 @@ export function getRoutes(controller: SharedController) {
       res.setHeader('cc-node-trace', response.trace)
       res.status(201).json(response.body)
     }),
+    ccErrorHandler
   )
 
   /**
@@ -79,6 +82,7 @@ export function getRoutes(controller: SharedController) {
       // TODO: return the patched transaction and set the response trace
       res.status(201).end()
     }),
+    ccErrorHandler
   )
 
   /**
@@ -94,6 +98,7 @@ export function getRoutes(controller: SharedController) {
       res.setHeader('cc-node-trace', response.trace)
       res.status(200).json(response.body)
     }),
+    ccErrorHandler
   )
 
   /**
@@ -109,8 +114,8 @@ export function getRoutes(controller: SharedController) {
       res.setHeader('cc-node-trace', response.trace)
       res.status(200).json(response.body)
     }),
+    ccErrorHandler
   )
 
-  router.use(ccErrorHandler)
   return router
 }
