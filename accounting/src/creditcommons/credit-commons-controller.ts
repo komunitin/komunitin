@@ -204,6 +204,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     } as CreditCommonsNode;
   }
   async updateNodeHash(peerNodePath: string, lastHash: string): Promise<void> {
+    console.log('updateNodeHash', peerNodePath, lastHash)
     await this.db().creditCommonsNode.update({
       where: {
         tenantId_peerNodePath: {
