@@ -203,7 +203,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       lastHash
     } as CreditCommonsNode;
   }
-  async updateNodeHash(peerNodePath: string, lastHash: string, vostroId: string): Promise<void> {
+  async updateNodeHash(peerNodePath: string, lastHash: string): Promise<void> {
     await this.db().creditCommonsNode.update({
       where: {
         tenantId_peerNodePath: {
@@ -273,6 +273,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       }
       await this.transfers().createTransfer(systemContext(), localTransfer)
       const newHash = makeHash(transaction, ctx.lastHashAuth!.lastHash)
+      await this.updateNodeHash(ctx.lastHashAuth!.peerNodePath, newHash)
     }
     return {
       body: {
