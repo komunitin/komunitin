@@ -19,5 +19,6 @@ export interface CreditCommonsTransaction {
   uuid: string,
   state: string,
   workflow: string,
-  entries: CreditCommonsEntry[]
+  entries: CreditCommonsEntry[],
+  version: number
 }
