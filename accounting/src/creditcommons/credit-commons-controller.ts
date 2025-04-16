@@ -65,7 +65,7 @@ export interface CCTransactionResponse {
 
 export interface CreditCommonsController {
   getWelcome(ctx: Context): Promise<{ message: string }>
-  createNode(ctx: Context, peerNodePath: string, ourNodePath: string, lastHash: string, url: string, vostroId: string): Promise<CreditCommonsNode>
+  createNode(ctx: Context, data: CreditCommonsNode): Promise<CreditCommonsNode>
   sendTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<CreditCommonsTransaction>
   createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<{
     body: CCTransactionResponse,
@@ -106,24 +106,21 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       responseTrace: `${ctx.lastHashAuth.requestTrace}, <${ourNodeName}`
     }
   }
-  async createNode(ctx: Context, peerNodePath: string, ourNodePath: string, lastHash: string, url: string, vostroId: string): Promise<CreditCommonsNode> {
+  async createNode(ctx: Context, data: CreditCommonsNode): Promise<CreditCommonsNode> {
     // Only admins are allowed to set the trunkward node:
     await this.users().checkAdmin(ctx)
     await this.db().creditCommonsNode.create({
       data: {
         tenantId: this.db().tenantId,
-        peerNodePath,
-        ourNodePath,
-        lastHash,
-        url,
-        vostroId,
+        peerNodePath: data.peerNodePath,
+        ourNodePath: data.ourNodePath,
+        lastHash: data.lastHash,
+        url: data.url,
+        vostroId: data.vostroId
       }
     });
 
-    return {
-      peerNodePath,
-      lastHash
-    } as CreditCommonsNode;
+    return data as CreditCommonsNode;
   }
   async updateNodeHash(peerNodePath: string, lastHash: string): Promise<void> {
     logger.info(`Updating hash for CreditCommons node ${peerNodePath} to '${lastHash}'`)
