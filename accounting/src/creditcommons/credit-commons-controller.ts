@@ -248,7 +248,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     return await this.db().creditCommonsNode.findFirst({})
   }
   private async makeRemoteCall(transaction: CreditCommonsTransaction, remoteNode: CreditCommonsNode): Promise<void> {
-    const response = await fetch(remoteNode.url, {
+    const response = await fetch(`${remoteNode.url}transaction/relay`, {
       method: 'POST',
       body: JSON.stringify(transaction, null, 2),
       headers: {
