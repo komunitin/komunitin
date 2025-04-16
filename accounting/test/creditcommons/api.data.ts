@@ -5,7 +5,7 @@ export const generateCcTransaction = (uuid: string = '3d8ebb9f-6a29-42cb-9d39-9e
     {
     payee: `trunk/branch2/TEST0002`,
     payer: sender,
-    quant: 1,
+    quant: 0.01,
     description: 'test long distance for 3 from leaf',
     metadata: { foo: 'bar' }
     }

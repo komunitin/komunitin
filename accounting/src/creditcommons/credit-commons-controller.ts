@@ -195,13 +195,20 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     if (!payeeId) {
       throw notFound(`local party ${localParty} not found on ${ourNodePath}`)
     }
+    let payer = { id: vostroId, type: 'account' }
+    let payee = { id: payeeId, type: 'account' }
+    if (outgoing) {
+      netGain = -netGain
+      payer = { id: payeeId, type: 'account' }
+      payee = { id: vostroId, type: 'account' }
+    }
     return {
       id: transaction.uuid,
       state: 'committed',
       amount: this.currencyController.amountFromLedger(netGain.toString()),
       meta: `From Credit Commons [${froms.join(', ')}]:` + metas.join(' '),
-      payer: { id: vostroId, type: 'account' },
-      payee: { id: payeeId, type: 'account' },
+      payer,
+      payee,
     }
   }
   async createTransaction(ctx: Context, transaction: CreditCommonsTransaction): Promise<{ body:  CCTransactionResponse, trace: string }>{
