@@ -31,8 +31,16 @@ function makeHash(transaction: CreditCommonsTransaction, lastHash: string): stri
 
 function ledgerOf(ccAddress: string): string {
   const parts = ccAddress.split('/')
+  if (parts.length === 1) {
+    return ''
+  }
   const ledgerParts = parts.slice(0, parts.length - 1)
   return ledgerParts.join('/') + '/'
+}
+
+function accountOf(ccAddress: string): string {
+  const ledger = ledgerOf(ccAddress)
+  return ccAddress.substring(ledger.length)
 }
 
 export interface CCAccountSummary {
@@ -252,7 +260,9 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
       method: 'POST',
       body: JSON.stringify(transaction, null, 2),
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'cc-node': accountOf(remoteNode.ourNodePath),
+        'last-hash': remoteNode.lastHash
       }
     })
     if (response.status !== 201) {
