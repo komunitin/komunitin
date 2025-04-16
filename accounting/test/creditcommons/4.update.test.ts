@@ -29,7 +29,7 @@ describe('receive', async () => {
 
   it('Is not implemented yet if the transaction exists', async () => {
     const hashBefore = 'trunk'
-    const hashAfter = '819c4c08a4234e10ac2a560594c5d96d'
+    const hashAfter = '3ced727f8f2df10189520c0dd78e0fad'
     const ccTransaction = generateCcTransaction('existing')
     await t.api.post(
       "/TEST/cc/transaction/relay",

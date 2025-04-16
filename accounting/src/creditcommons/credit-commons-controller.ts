@@ -6,6 +6,7 @@ import { badRequest, notImplemented, unauthorized } from "src/utils/error"
 import { InputTransfer } from "src/model/transfer"
 import { systemContext } from "src/utils/context"
 import { Transfer } from "src/model"
+import { logger } from "../utils/logger"
 
 function formatDateTime(d: Date) {
   const year = ('0000'+(d.getUTCFullYear())).slice(-4)
@@ -22,7 +23,7 @@ function makeHash(transaction: CreditCommonsTransaction, lastHash: string): stri
     lastHash,
     transaction.uuid,
     transaction.state,
-    transaction.entries.join('|'), // ?
+    transaction.entries.map(e => `${e.quant}|${e.description}`).join('|'),
     transaction.version,
   ].join('|');
   return createHash('md5').update(str).digest('hex');
@@ -204,7 +205,7 @@ export class CreditCommonsControllerImpl extends AbstractCurrencyController impl
     } as CreditCommonsNode;
   }
   async updateNodeHash(peerNodePath: string, lastHash: string): Promise<void> {
-    console.log('updateNodeHash', peerNodePath, lastHash)
+    logger.info(`Updating hash for CreditCommons node ${peerNodePath} to '${lastHash}'`)
     await this.db().creditCommonsNode.update({
       where: {
         tenantId_peerNodePath: {

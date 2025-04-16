@@ -24,7 +24,7 @@ describe('receive', async () => {
 
   it('Updates the balances and last-hash', async () => {
     const hashBefore = 'trunk'
-    const hashAfter = 'dc52e796a1c1562bfd696d6f1abe96fc'
+    const hashAfter = '15bfc7d0cff9160fe34cf541b7da56c3'
     const ccTransaction = generateCcTransaction()
     // Check balances before
     t.account0 = (await t.api.get(`/TEST/accounts/${t.account0.id}`, t.admin)).body.data
