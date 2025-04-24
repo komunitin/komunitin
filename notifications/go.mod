@@ -1,7 +1,6 @@
 module github.com/komunitin/komunitin/notifications
 
-go 1.22
-toolchain go1.24.1
+go 1.24
 
 require (
 	firebase.google.com/go/v4 v4.15.0
