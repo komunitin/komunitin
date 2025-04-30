@@ -1,0 +1,44 @@
+name: Test Backup with WAL-G
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *' # Runs daily at 3 AM UTC
+
+jobs:
+  test-backup:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Pull the accounting-db image from Docker Hub
+    - name: Pull accounting-db image
+      run: |
+        docker pull komunitin/komunitin-accounting-db:latest
+
+    # Step 2: Start the restore process
+    - name: Start restore process
+      run: |
+        echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /tmp/service-account-key.json
+        docker run --name accounting-db -d \
+        -e POSTGRES_USER=postgres \
+        -e POSTGRES_PASSWORD=postgres \
+        -e WALG_GS_PREFIX=gs://komunitin-backup/db-accounting \
+        -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account-key.json \
+        -v /tmp/service-account-key.json:/tmp/service-account-key.json:ro \
+        komunitin/komunitin-accounting-db:latest \
+        bash -c "wal-g backup-fetch /var/lib/postgresql/data LATEST \
+        && touch /var/lib/postgresql/data/recovery.signal \
+        && postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+
+    # Step 3: Run the container
+    - name: Wait for the DB to start
+      run: |
+        sleep 10
+
+    # Step 4: Check that it got restored
+    - name: Verify database restoration
+      run: |
+        docker exec accounting-db psql -U accounting -c "\l"
