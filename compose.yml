@@ -50,8 +50,13 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_APP_USER: accounting
       POSTGRES_APP_PASSWORD: accounting
+      WALG_GS_PREFIX: ${GOOGLE_CLOUD_STORAGE_BUCKET}/db-accounting
+      WALG_COMPRESSION_METHOD: zstd
+      GOOGLE_APPLICATION_CREDENTIALS: "/opt/komunitin-project-backup-credentials.json"
+
     volumes:
       - db-accounting:/var/lib/postgresql/data
+      - "./accounting/komunitin-project-backup-credentials.json:/opt/komunitin-project-backup-credentials.json"
 
   accounting:
     build:
