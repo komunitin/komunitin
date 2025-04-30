@@ -34,9 +34,9 @@ jobs:
         && postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
     # Step 3: Run the container
-    - name: Wait for the DB to start
+    - name: Wait for the DB to start and restore.
       run: |
-        sleep 10
+        sleep 20
 
     # Step 4: Check that it got restored
     - name: Verify database restoration
