@@ -46,7 +46,10 @@ const routes: RouteRecordRaw[] = [
       {
         path: '/set-password',
         name: 'SetPassword',
-        component: () => import('../pages/members/SetPassword.vue')
+        component: () => import('../pages/members/SetPassword.vue'),
+        meta: {
+          back: false
+        }
       },
       {
         path: '/groups',
